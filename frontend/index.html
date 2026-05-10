@@ -1,0 +1,2210 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="線上有位"/>
+<meta name="theme-color" content="#1D9E75"/>
+<link rel="manifest" href="manifest.json"/>
+<title>線上有位 — 台股技術分析</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f2f1ec;--bg3:#e6e5df;
+  --text:#1a1a18;--text2:#4a4948;--text3:#888780;
+  --border:rgba(0,0,0,.1);--border2:rgba(0,0,0,.2);
+  --up:#D63B3B;--up-l:rgba(214,59,59,.1);--up-d:#9B1A1A;
+  --dn:#1A8F5E;--dn-l:rgba(26,143,94,.1);--dn-d:#0D6040;
+  --amber:#B07010;--amber-l:rgba(176,112,16,.1);
+  --green:#1D9E75;--radius:10px;--radius-lg:14px;
+  --mono:'SF Mono','Fira Code',monospace;
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+:root[data-theme="dark"]{
+  --bg:#141412;--bg2:#1e1e1b;--bg3:#282824;
+  --text:#eae9e3;--text2:#a0a099;--text3:#666560;
+  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.16);
+  --up:#F06060;--up-l:rgba(240,96,96,.12);
+  --dn:#2DC88A;--dn-l:rgba(45,200,138,.12);
+}
+:root[data-theme="light"]{
+  --bg:#ffffff;--bg2:#f2f1ec;--bg3:#e6e5df;
+  --text:#1a1a18;--text2:#4a4948;--text3:#888780;
+  --border:rgba(0,0,0,.1);--border2:rgba(0,0,0,.2);
+  --up:#D63B3B;--up-l:rgba(214,59,59,.1);
+  --dn:#1A8F5E;--dn-l:rgba(26,143,94,.1);
+  --amber:#B07010;--amber-l:rgba(176,112,16,.1);
+}
+.theme-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:.5px solid var(--border);margin-top:10px}
+.theme-row span{font-size:13px;color:var(--text2)}
+.theme-seg{display:flex;border:.5px solid var(--border2);border-radius:20px;overflow:hidden}
+.theme-seg button{padding:0 12px;height:32px;border:none;background:transparent;color:var(--text2);font-size:12px;cursor:pointer}
+.theme-seg button.active{background:var(--green);color:#fff}
+.chip-filter-btn{padding:0 12px;height:30px;border:none;background:transparent;color:var(--text2);font-size:11px;cursor:pointer;transition:all .15s}
+.chip-filter-btn.active{background:var(--green);color:#fff}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme]){
+    --bg:#141412;--bg2:#1e1e1b;--bg3:#282824;
+    --text:#eae9e3;--text2:#a0a099;--text3:#666560;
+    --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.16);
+    --up:#F06060;--up-l:rgba(240,96,96,.12);
+    --dn:#2DC88A;--dn-l:rgba(45,200,138,.12);
+  }
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.app{max-width:600px;margin:0 auto;padding:0 0 calc(70px + var(--safe-bottom)) 0}
+
+/* ── 頂部導航 ── */
+.topbar{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:.5px solid var(--border);padding:10px 16px 8px;display:flex;align-items:center;gap:10px}
+.logo{font-size:18px;font-weight:700;letter-spacing:-.5px;flex-shrink:0}
+.logo em{color:var(--green);font-style:normal}
+.search-wrap{flex:1;display:flex;gap:6px;align-items:center}
+.search-box{flex:1;position:relative;min-width:0}
+.search-box input{width:100%;height:36px;border:.5px solid var(--border2);border-radius:20px;padding:0 14px;font-size:14px;background:var(--bg2);color:var(--text);outline:none;box-sizing:border-box}
+.search-wrap input:focus{border-color:var(--green);background:var(--bg)}
+.search-dropdown{position:absolute;top:40px;left:0;right:0;background:var(--bg);border:.5px solid var(--border2);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.15);z-index:200;overflow:hidden;display:none}
+.search-dropdown.open{display:block}
+.search-item{padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:13px}
+.search-item:hover,.search-item.active{background:var(--bg2)}
+.search-item .sid{font-weight:600;color:var(--green);font-family:var(--mono);min-width:44px}
+.search-item .sname{color:var(--text);flex:1}
+.search-item .stype{font-size:11px;color:var(--text3)}
+.seg{display:flex;border:.5px solid var(--border2);border-radius:20px;overflow:hidden;flex-shrink:0}
+.seg-btn{padding:0 10px;height:36px;border:none;background:transparent;color:var(--text2);font-size:12px;cursor:pointer;white-space:nowrap}
+.seg-btn.active{background:var(--green);color:#fff}
+.btn-analyze{height:36px;padding:0 14px;border-radius:20px;border:none;background:var(--green);color:#fff;font-size:13px;font-weight:500;cursor:pointer;flex-shrink:0}
+
+/* ── 快捷股票 ── */
+.hotkeys{display:flex;gap:6px;padding:8px 16px;overflow-x:auto;scrollbar-width:none}
+.hotkeys::-webkit-scrollbar{display:none}
+.hk{padding:5px 12px;border-radius:20px;border:.5px solid var(--border);font-size:12px;color:var(--text2);cursor:pointer;background:var(--bg2);white-space:nowrap;flex-shrink:0}
+.hk:active{background:var(--green);color:#fff;border-color:var(--green)}
+
+/* ── 狀態列 ── */
+.status{font-size:11px;color:var(--text3);padding:4px 16px;min-height:20px}
+.status.err{color:var(--up)}
+.spin{display:inline-block;width:9px;height:9px;border:1.5px solid var(--green);border-top-color:transparent;border-radius:50%;animation:sp .6s linear infinite;margin-right:4px;vertical-align:middle}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ── 結果 ── */
+.result{display:none;padding:0 16px}.result.show{display:block}
+
+/* ── 風險大卡 ── */
+.risk-card{border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:12px;border-left:4px solid var(--green)}
+.risk-card.risk-high{border-left-color:var(--up);background:var(--up-l)}
+.risk-card.risk-medium{border-left-color:var(--amber);background:var(--amber-l)}
+.risk-card.risk-low{border-left-color:var(--dn);background:var(--dn-l)}
+.risk-card.risk-watch{border-left-color:var(--text3);background:var(--bg2)}
+.risk-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.risk-stock{font-size:17px;font-weight:700}
+.risk-badge{font-size:12px;font-weight:600;padding:4px 11px;border-radius:20px;color:#fff}
+.risk-high .risk-badge{background:var(--up)}
+.risk-medium .risk-badge{background:var(--amber)}
+.risk-low .risk-badge{background:var(--dn)}
+.risk-watch .risk-badge{background:var(--text3)}
+
+/* ── 條列摘要 ── */
+.summary-list{list-style:none;display:flex;flex-direction:column;gap:5px}
+.summary-list li{font-size:12px;color:var(--text2);line-height:1.6;display:flex;gap:6px;align-items:flex-start}
+.summary-list li .dot{width:4px;height:4px;border-radius:50%;background:var(--text3);margin-top:7px;flex-shrink:0}
+.summary-list li.hi .dot{background:var(--up)}
+.summary-list li.md .dot{background:var(--amber)}
+.summary-list li.action{font-size:13px;font-weight:500;color:var(--text);padding-top:2px}
+.summary-list li.action .dot{display:none}
+/* K棒方向色 */
+.summary-list li.kbar-bull .dot{background:#00b96b}
+.summary-list li.kbar-bull{color:#009957}
+.summary-list li.kbar-bear .dot{background:var(--up)}
+.summary-list li.kbar-bear{color:var(--up)}
+.summary-list li.kbar-neu .dot{background:var(--amber)}
+/* K棒操作說明（比型態名稱小一點，縮排） */
+.summary-list li.kbar-bull-op,.summary-list li.kbar-bear-op{font-size:11.5px;padding-left:10px;opacity:.92}
+.summary-list li.kbar-bull-op .dot{background:#00b96b;opacity:.6}
+.summary-list li.kbar-bull-op{color:#009957}
+.summary-list li.kbar-bear-op .dot{background:var(--up);opacity:.6}
+.summary-list li.kbar-bear-op{color:var(--up)}
+/* 軌道趨勢矛盾警告 */
+.summary-list li.conflict{background:rgba(220,60,40,.07);border-radius:6px;padding:5px 8px;font-weight:600}
+.summary-list li.conflict .dot{background:var(--up)}
+.summary-list li.conflict{color:var(--up)}
+/* 整合結論（最後操作指引） */
+.summary-list li.conclusion{border-top:1px solid var(--border);margin-top:4px;padding-top:6px;font-size:13px;font-weight:600;color:var(--text)}
+.summary-list li.conclusion .dot{display:none}
+
+/* ── 指標卡 ── */
+.metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.metric{background:var(--bg2);border-radius:var(--radius);padding:10px 12px}
+.metric.span2{grid-column:span 2}
+.m-lbl{font-size:10px;color:var(--text3);margin-bottom:2px;letter-spacing:.2px}
+.m-val{font-size:15px;font-weight:600;font-family:var(--mono)}
+.m-val.lg{font-size:22px}
+.m-sub{font-size:9px;color:var(--text3);margin-top:1px;line-height:1.3}
+.tw-up{color:var(--up)}.tw-dn{color:var(--dn)}.wa{color:var(--amber)}
+
+/* ── 損益比直覺卡 ── */
+.rr-card{background:var(--bg2);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.rr-left .lbl{font-size:11px;color:var(--text3);margin-bottom:3px}
+.rr-left .val{font-size:24px;font-weight:700;font-family:var(--mono)}
+.rr-right{text-align:right}
+.rr-tag{font-size:12px;font-weight:600;padding:5px 13px;border-radius:20px;color:#fff}
+.rr-tag.good{background:var(--dn)}
+.rr-tag.mid{background:var(--amber)}
+.rr-tag.bad{background:var(--up)}
+.rr-desc{font-size:10px;color:var(--text3);margin-top:4px}
+
+/* ── 圖表 ── */
+.chart-box{border:.5px solid var(--border);border-radius:var(--radius-lg);margin-bottom:12px;background:var(--bg);overflow:hidden}
+.chart-top{display:flex;justify-content:space-between;align-items:center;padding:10px 12px 6px;flex-wrap:wrap;gap:6px}
+.chart-name{font-size:11px;font-weight:500;color:var(--text2)}
+.chart-ctrl{display:flex;align-items:center;gap:6px}
+.range-btns{display:flex;border:.5px solid var(--border2);border-radius:8px;overflow:hidden}
+.rb{padding:0 8px;height:26px;border:none;background:transparent;color:var(--text2);font-size:11px;cursor:pointer}
+.rb.active{background:var(--green);color:#fff}
+.count-wrap{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text3)}
+.count-wrap input{width:46px;height:26px;border:.5px solid var(--border2);border-radius:6px;padding:0 5px;font-size:11px;font-family:var(--mono);background:var(--bg);color:var(--text);outline:none;text-align:center}
+.legend{display:flex;gap:8px;flex-wrap:wrap;padding:0 12px 4px}
+.leg{display:flex;align-items:center;gap:3px;font-size:10px;color:var(--text3);cursor:pointer}
+.leg.off{opacity:.3}
+.leg-sw{width:12px;height:2px;border-radius:1px;flex-shrink:0}
+.xhair{height:16px;padding:0 12px;font-size:10px;font-family:var(--mono);color:var(--text2);display:flex;gap:8px;flex-wrap:wrap;align-items:center;overflow:hidden}
+canvas.kc{display:block;width:100%;cursor:crosshair;touch-action:pan-y}
+/* ── 指標副圖 ── */
+.ind-panel{background:var(--bg2);border-radius:var(--radius);margin-bottom:4px;overflow:hidden;display:none}
+.ind-panel.show{display:block}
+.ind-hdr{display:flex;justify-content:space-between;align-items:center;padding:4px 10px;font-size:10px;color:var(--text3);cursor:pointer;background:var(--bg3)}
+.ind-canvas{display:block;width:100%}
+/* ── 指標開關列 ── */
+.ind-toggle-bar{display:flex;gap:5px;padding:4px 12px;flex-wrap:wrap}
+.ind-btn{padding:3px 10px;border-radius:12px;border:.5px solid var(--border2);background:transparent;color:var(--text2);font-size:11px;cursor:pointer;transition:all .15s}
+.ind-btn.active{background:var(--green);color:#fff;border-color:var(--green)}
+/* ── 手繪工具列 ── */
+.draw-bar{display:none;gap:5px;padding:4px 12px;flex-wrap:wrap;align-items:center;background:var(--bg3);border-radius:var(--radius);margin-bottom:4px}
+.draw-bar.show{display:flex}
+.draw-btn{padding:4px 10px;border-radius:10px;border:.5px solid var(--border2);background:transparent;color:var(--text2);font-size:11px;cursor:pointer}
+.draw-btn.active{background:var(--amber);color:#fff;border-color:var(--amber)}
+.draw-btn.danger{background:var(--up);color:#fff;border-color:var(--up)}
+canvas.draw-layer{position:absolute;top:0;left:0;width:100%;pointer-events:none;touch-action:pan-y}
+canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
+.chart-wrap{position:relative}
+
+/* ── 均線設定（折疊）── */
+.ma-cfg{background:var(--bg2);border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
+.ma-hdr{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer}
+.ma-hdr span{font-size:12px;font-weight:500;color:var(--text2)}
+.ma-hdr .arr{font-size:10px;color:var(--text3)}
+.ma-body{padding:6px 14px 12px;display:none}
+.ma-row{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.ma-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.ma-row label{font-size:12px;color:var(--text2);min-width:38px}
+.ma-row input[type=number]{width:54px;height:26px;border:.5px solid var(--border2);border-radius:6px;padding:0 6px;font-size:12px;background:var(--bg);color:var(--text);outline:none}
+.ma-row input[type=checkbox]{accent-color:var(--green);width:15px;height:15px}
+
+/* ── 底部導航 ── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:calc(56px + var(--safe-bottom));background:var(--bg);border-top:.5px solid var(--border);display:flex;align-items:flex-start;padding-top:6px;z-index:100}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;cursor:pointer;color:var(--text3);font-size:9px;border:none;background:none}
+.nav-btn.active{color:var(--green)}
+.nav-icon{font-size:20px;line-height:1}
+
+/* ── API 設定（底部抽屜）── */
+.drawer{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:.5px solid var(--border);border-radius:16px 16px 0 0;padding:16px 16px calc(16px + var(--safe-bottom));z-index:200;transform:translateY(100%);transition:transform .3s ease}
+.drawer.open{transform:translateY(0)}
+.drawer-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 14px}
+.drawer h3{font-size:14px;font-weight:600;margin-bottom:12px}
+.drawer input{width:100%;height:40px;border:.5px solid var(--border2);border-radius:var(--radius);padding:0 12px;font-size:13px;font-family:var(--mono);background:var(--bg2);color:var(--text);outline:none;margin-bottom:10px}
+.drawer-btn{width:100%;height:40px;border-radius:var(--radius);border:none;background:var(--green);color:#fff;font-size:14px;font-weight:500;cursor:pointer}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:150;display:none}
+.overlay.show{display:block}
+
+.disc{font-size:9px;color:var(--text3);line-height:1.6;padding:10px 16px calc(10px + var(--safe-bottom));border-top:.5px solid var(--border)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 頂部搜尋 -->
+  <div class="topbar">
+    <div class="logo">線上<em>有位</em></div>
+    <div class="search-wrap">
+      <div class="search-box">
+        <input type="text" id="stockInput" placeholder="代號或股名 例：2330 台積電" inputmode="text" autocomplete="off"/>
+        <div class="search-dropdown" id="searchDropdown"></div>
+      </div>
+      <div class="seg" id="tfSeg">
+        <button class="seg-btn active" data-tf="D">日</button>
+        <button class="seg-btn" data-tf="W">週</button>
+        <button class="seg-btn" data-tf="M">月</button>
+      </div>
+      <button class="btn-analyze" onclick="analyzeStock()">分析</button>
+    </div>
+  </div>
+
+  <!-- 強勢股快捷列 -->
+  <div class="hotkeys" id="hotkeysEl">
+    <div class="hk" style="color:var(--text3);pointer-events:none">載入強勢股...</div>
+  </div>
+
+  <div class="status" id="statusBar"></div>
+
+  <div class="result" id="resultEl">
+
+    <!-- 風險大卡 + 條列摘要 -->
+    <div class="risk-card" id="riskCard">
+      <div class="risk-top">
+        <div class="risk-stock" id="riskStock">—</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button id="watchBtn" onclick="toggleWatch(C._currentId,C._currentName)"
+            style="padding:4px 11px;border-radius:20px;border:.5px solid var(--border2);
+            background:var(--bg2);color:var(--text2);font-size:11px;cursor:pointer">
+            ☆ 加入自選
+          </button>
+          <div class="risk-badge" id="riskBadge">—</div>
+        </div>
+      </div>
+      <ul class="summary-list" id="summaryList"></ul>
+    </div>
+
+    <!-- 指標卡 -->
+    <div class="metrics">
+      <div class="metric">
+        <div class="m-lbl">現價</div>
+        <div class="m-val lg" id="m-price">—</div>
+      </div>
+      <div class="metric">
+        <div class="m-lbl">趨勢</div>
+        <div class="m-val" id="m-trend">—</div>
+      </div>
+      <div class="metric">
+        <div class="m-lbl">型態</div>
+        <div class="m-val" style="font-size:13px" id="m-pat">—</div>
+      </div>
+      <div class="metric">
+        <div class="m-lbl">支撐區</div>
+        <div class="m-val tw-dn" id="m-sup">—</div>
+        <div class="m-sub" id="m-sup-desc"></div>
+      </div>
+      <div class="metric">
+        <div class="m-lbl">壓力區</div>
+        <div class="m-val tw-up" id="m-res">—</div>
+        <div class="m-sub" id="m-res-desc"></div>
+      </div>
+      <div class="metric">
+        <div class="m-lbl">防守位</div>
+        <div class="m-val" id="m-stop">—</div>
+        <div class="m-sub tw-up" id="m-stop-d"></div>
+      </div>
+    </div>
+
+    <!-- 損益比直覺卡 -->
+    <div class="rr-card">
+      <div class="rr-left">
+        <div class="lbl">風險報酬</div>
+        <div class="val" id="rr-val">—</div>
+      </div>
+      <div class="rr-right">
+        <div class="rr-tag" id="rr-tag">—</div>
+        <div class="rr-desc" id="rr-desc">—</div>
+      </div>
+    </div>
+
+    <!-- 圖表 -->
+    <div class="chart-box">
+      <div class="chart-top">
+        <span class="chart-name" id="chartName">—</span>
+        <div class="chart-ctrl">
+          <div class="range-btns" id="rangeBtns">
+            <button class="rb" data-days="60">1月</button>
+            <button class="rb" data-days="130">3月</button>
+            <button class="rb active" data-days="260">6月</button>
+            <button class="rb" data-days="520">1年</button>
+            <button class="rb" data-days="0">全</button>
+          </div>
+          <div class="count-wrap"><input type="number" id="countInput" value="260" min="20" max="9999" step="10"/></div>
+        </div>
+      </div>
+      <div class="legend" id="legendEl"></div>
+    <div id="maQuickBtns" style="display:flex;gap:5px;padding:0 12px 6px;flex-wrap:wrap"></div>
+
+      <!-- 指標開關列 -->
+      <div class="ind-toggle-bar">
+        <button class="ind-btn" data-ind="bb"   onclick="toggleInd('bb')">布林</button>
+        <button class="ind-btn" data-ind="rsi"  onclick="toggleInd('rsi')">RSI</button>
+        <button class="ind-btn" data-ind="macd" onclick="toggleInd('macd')">MACD</button>
+        <button class="ind-btn" data-ind="kd"   onclick="toggleInd('kd')">KD</button>
+        <button class="ind-btn" data-ind="obv"  onclick="toggleInd('obv')">OBV</button>
+        <button class="ind-btn" data-ind="draw" onclick="toggleDrawBar()" style="margin-left:auto">✏️ 畫線</button>
+      </div>
+
+      <!-- 手繪工具列 -->
+      <div class="draw-bar" id="drawBar">
+        <button class="draw-btn" data-tool="select"   onclick="setDrawTool('select')">選取</button>
+        <button class="draw-btn active" data-tool="trend" onclick="setDrawTool('trend')">射線</button>
+        <button class="draw-btn" data-tool="segment"  onclick="setDrawTool('segment')">線段</button>
+        <button class="draw-btn" data-tool="hline"    onclick="setDrawTool('hline')">水平線</button>
+        <button class="draw-btn" data-tool="parallel" onclick="setDrawTool('parallel')">平行線</button>
+        <button class="draw-btn" data-tool="rect"     onclick="setDrawTool('rect')">矩形</button>
+        <button class="draw-btn" data-tool="text"     onclick="setDrawTool('text')">文字</button>
+        <button class="draw-btn" data-tool="pattern"  onclick="setDrawTool('pattern')">型態</button>
+        <button class="draw-btn" data-tool="eraser"   onclick="setDrawTool('eraser')">橡皮擦</button>
+        <button class="draw-btn danger" onclick="clearDrawings()">清除</button>
+        <!-- 顏色選擇 -->
+        <div style="display:flex;gap:4px;align-items:center;margin-left:4px">
+          <span style="font-size:10px;color:var(--text3)">色：</span>
+          <div id="colorPicker" style="display:flex;gap:3px">
+            <div onclick="setDrawColor('#FFD700')" style="width:16px;height:16px;border-radius:50%;background:#FFD700;cursor:pointer;border:2px solid #FFD700"></div>
+            <div onclick="setDrawColor('#FF4444')" style="width:16px;height:16px;border-radius:50%;background:#FF4444;cursor:pointer;border:2px solid transparent"></div>
+            <div onclick="setDrawColor('#44BB44')" style="width:16px;height:16px;border-radius:50%;background:#44BB44;cursor:pointer;border:2px solid transparent"></div>
+            <div onclick="setDrawColor('#4488FF')" style="width:16px;height:16px;border-radius:50%;background:#4488FF;cursor:pointer;border:2px solid transparent"></div>
+            <div onclick="setDrawColor('#FF88AA')" style="width:16px;height:16px;border-radius:50%;background:#FF88AA;cursor:pointer;border:2px solid transparent"></div>
+            <div onclick="setDrawColor('#AAAAAA')" style="width:16px;height:16px;border-radius:50%;background:#AAAAAA;cursor:pointer;border:2px solid transparent"></div>
+          </div>
+        </div>
+        <!-- 型態選擇 -->
+        <select id="patternSelect" style="display:none;padding:3px 6px;border-radius:8px;border:.5px solid var(--border2);background:var(--bg2);color:var(--text);font-size:11px">
+          <option value="W底">W底</option>
+          <option value="M頭">M頭</option>
+          <option value="頭肩底">頭肩底</option>
+          <option value="頭肩頂">頭肩頂</option>
+          <option value="收斂三角">收斂三角</option>
+          <option value="上升三角">上升三角</option>
+          <option value="下降三角">下降三角</option>
+          <option value="突破">突破↑</option>
+          <option value="跌破">跌破↓</option>
+        </select>
+      </div>
+
+      <div class="xhair" id="xhairBar"><span style="color:var(--text3)">滑動查看K棒</span></div>
+      <div class="chart-wrap">
+        <canvas class="kc" id="kChart" height="260" aria-label="K線圖"></canvas>
+        <canvas class="draw-layer" id="drawLayer" height="260"></canvas>
+      </div>
+      <canvas class="kc" id="volChart" height="60" style="margin-top:2px" aria-label="量圖"></canvas>
+
+      <!-- 指標副圖 -->
+      <div class="ind-panel" id="ind-bb-panel" style="display:none"></div>
+      <div class="ind-panel" id="ind-rsi-panel">
+        <div class="ind-hdr" onclick="toggleIndPanel('rsi')">RSI(14) <span id="ind-rsi-val"></span></div>
+        <canvas class="ind-canvas" id="ind-rsi-canvas" height="80"></canvas>
+      </div>
+      <div class="ind-panel" id="ind-macd-panel">
+        <div class="ind-hdr" onclick="toggleIndPanel('macd')">MACD(12,26,9) <span id="ind-macd-val"></span></div>
+        <canvas class="ind-canvas" id="ind-macd-canvas" height="80"></canvas>
+      </div>
+      <div class="ind-panel" id="ind-kd-panel">
+        <div class="ind-hdr" onclick="toggleIndPanel('kd')">KD(9,3) <span id="ind-kd-val"></span></div>
+        <canvas class="ind-canvas" id="ind-kd-canvas" height="80"></canvas>
+      </div>
+      <div class="ind-panel" id="ind-obv-panel">
+        <div class="ind-hdr" onclick="toggleIndPanel('obv')">OBV <span id="ind-obv-val"></span></div>
+        <canvas class="ind-canvas" id="ind-obv-canvas" height="80"></canvas>
+      </div>
+    </div>
+
+    <!-- 均線設定（折疊）-->
+    <div class="ma-cfg">
+      <div class="ma-hdr" onclick="toggleMA()">
+        <span>均線設定</span>
+        <span class="arr" id="maArr">▼ 展開</span>
+      </div>
+      <div class="ma-body" id="maBody"></div>
+    </div>
+
+    <div class="disc">本系統僅提供技術分析輔助，不構成任何投資建議或獲利保證。投資有風險，請自行判斷。資料來源：Yahoo Finance，盤後更新。</div>
+
+    <!-- 籌碼面（摺疊） -->
+    <div id="chipsSection" style="display:none;margin-top:4px">
+      <div class="ma-cfg">
+        <div class="ma-hdr" onclick="toggleSection('chipsBody','chipsArr')">
+          <span>籌碼面</span>
+          <span class="arr" id="chipsArr">▼ 展開</span>
+        </div>
+        <div id="chipsBody" style="display:none;padding:10px 0">
+          <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+            <div style="display:flex;border:.5px solid var(--border2);border-radius:20px;overflow:hidden">
+              <button class="chip-filter-btn active" data-days="5"  onclick="setChipsDays(5)">近5日</button>
+              <button class="chip-filter-btn"        data-days="10" onclick="setChipsDays(10)">近10日</button>
+              <button class="chip-filter-btn"        data-days="20" onclick="setChipsDays(20)">近20日</button>
+            </div>
+            <div style="display:flex;border:.5px solid var(--border2);border-radius:20px;overflow:hidden">
+              <button class="chip-filter-btn active" data-inst="all"     onclick="setChipsInst('all')">全部</button>
+              <button class="chip-filter-btn"        data-inst="foreign" onclick="setChipsInst('foreign')">外資</button>
+              <button class="chip-filter-btn"        data-inst="invest"  onclick="setChipsInst('invest')">投信</button>
+              <button class="chip-filter-btn"        data-inst="dealer"  onclick="setChipsInst('dealer')">自營</button>
+            </div>
+          </div>
+          <div id="instSummary" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px"></div>
+          <div style="background:var(--bg2);border-radius:var(--radius);padding:12px;margin-bottom:6px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:8px" id="instChartLabel">三大法人買賣超（張）</div>
+            <canvas id="instChart" height="120" style="width:100%"></canvas>
+          </div>
+          <div id="marginSummary" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px"></div>
+          <div style="background:var(--bg2);border-radius:var(--radius);padding:12px;margin-bottom:6px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:8px">融資融券餘額（張）</div>
+            <canvas id="marginChart" height="100" style="width:100%"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 同族群 / 概念股（摺疊） -->
+    <div id="peerSection" style="display:none;margin-top:4px">
+      <div class="ma-cfg">
+        <div class="ma-hdr" onclick="toggleSection('peerBody','peerArr')">
+          <span>同族群 / 概念股</span>
+          <span class="arr" id="peerArr">▼ 展開</span>
+        </div>
+        <div id="peerBody" style="display:none;padding:10px 0">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:0 0 8px">
+            <div style="display:flex;gap:6px">
+              <button id="tabPeer" onclick="switchPeerTab('peer')" style="padding:4px 14px;border-radius:20px;border:none;background:var(--green);color:#fff;font-size:12px;cursor:pointer">同族群</button>
+              <button id="tabConcept" onclick="switchPeerTab('concept')" style="padding:4px 14px;border-radius:20px;border:.5px solid var(--border2);background:transparent;color:var(--text2);font-size:12px;cursor:pointer">概念股</button>
+            </div>
+            <span id="peerIndustry" style="font-size:11px;color:var(--text3)"></span>
+          </div>
+          <div id="peerList" style="display:flex;flex-direction:column;gap:6px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- 底部導航 -->
+<div class="bottom-nav">
+  <button class="nav-btn active" onclick="showPage('home')">
+    <div class="nav-icon">📊</div>分析
+  </button>
+  <button class="nav-btn" onclick="showPage('watch')">
+    <div class="nav-icon">⭐</div>自選
+  </button>
+  <button class="nav-btn" onclick="showPage('history')">
+    <div class="nav-icon">🕐</div>紀錄
+  </button>
+  <button class="nav-btn" onclick="openDrawer()">
+    <div class="nav-icon">⚙️</div>設定
+  </button>
+</div>
+
+<!-- 自選 / 紀錄 獨立頁面（不覆蓋分析結果）-->
+<div id="pageOverlay" style="display:none;position:fixed;inset:0 0 calc(56px + var(--safe-bottom)) 0;background:var(--bg);overflow-y:auto;z-index:90">
+  <div style="max-width:600px;margin:0 auto;padding:12px 16px">
+    <div id="pageContent"></div>
+  </div>
+</div>
+
+<!-- 設定抽屜 -->
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-handle"></div>
+  <h3>設定</h3>
+  <div style="font-size:12px;color:var(--text3);margin-bottom:6px">後端 API 位址</div>
+  <input type="text" id="apiBase" value="http://localhost:8000" placeholder="http://localhost:8000"/>
+  <button class="drawer-btn" onclick="testAndClose()">測試連線並儲存</button>
+  <div class="theme-row">
+    <span>顯示主題</span>
+    <div class="theme-seg" id="themeSeg">
+      <button data-th="auto" onclick="setTheme('auto')">跟隨系統</button>
+      <button data-th="light" onclick="setTheme('light')">亮色</button>
+      <button data-th="dark" onclick="setTheme('dark')">暗色</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// 狀態
+// ══════════════════════════════════════
+const MA_DEFS=[
+  {n:5,  color:'#F0A500',enabled:true},
+  {n:10, color:'#378ADD',enabled:true},
+  {n:20, color:'#9B7FE8',enabled:true},
+  {n:60, color:'#E8885A',enabled:true},
+  {n:120,color:'#A8B0B8',enabled:false},
+];
+let maSettings=MA_DEFS.map(m=>({...m}));
+let currentTF='D';
+const C={bars:[],maArrays:[],support:0,resistance:0,buyIdx:[],sellIdx:[],
+         buyStops:[],channel:null,breakoutIdx:null,breakdownIdx:null,
+         _currentId:'',_currentName:'',
+         viewEnd:0,viewCount:260,
+         isDragging:false,dragStartX:0,dragStartEnd:0,lastTouchX:0};
+const VIS={};
+const isVis=k=>VIS[k]!==false;
+
+// 自選股 & 歷史紀錄
+let watchList = JSON.parse(localStorage.getItem('watchList')||'[]');
+let historyList = JSON.parse(localStorage.getItem('historyList')||'[]');
+
+// ══════════════════════════════════════
+// 均線設定
+// ══════════════════════════════════════
+function buildMABody(){
+  const body=document.getElementById('maBody');body.innerHTML='';
+  maSettings.forEach((m,i)=>{
+    const row=document.createElement('div');row.className='ma-row';
+    row.innerHTML=`<input type="checkbox" ${m.enabled?'checked':''} data-i="${i}" class="ma-chk">
+      <div class="ma-dot" style="background:${m.color}"></div>
+      <label>MA<span class="mn">${m.n}</span></label>
+      <input type="number" class="ma-num" data-i="${i}" value="${m.n}" min="1" max="500">日`;
+    body.appendChild(row);
+  });
+  body.querySelectorAll('.ma-chk').forEach(el=>el.addEventListener('change',e=>{
+    maSettings[+e.target.dataset.i].enabled=e.target.checked;drawChart();
+  }));
+  body.querySelectorAll('.ma-num').forEach(el=>el.addEventListener('change',e=>{
+    const v=Math.max(1,Math.min(500,+e.target.value||1));e.target.value=v;
+    const i=+e.target.dataset.i;maSettings[i].n=v;
+    e.target.closest('.ma-row').querySelector('.mn').textContent=v;
+    recalcMA();drawChart();
+  }));
+}
+function toggleMA(){
+  const body=document.getElementById('maBody'),arr=document.getElementById('maArr');
+  if(body.style.display==='none'||!body.style.display){body.style.display='flex';body.style.flexDirection='column';arr.textContent='▲ 收合';}
+  else{body.style.display='none';arr.textContent='▼ 展開';}
+}
+
+// ══════════════════════════════════════
+// 時間框架
+// ══════════════════════════════════════
+document.querySelectorAll('#tfSeg .seg-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#tfSeg .seg-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');currentTF=btn.dataset.tf;
+    if(C.bars.length)analyzeStock();
+  });
+});
+document.getElementById('stockInput').addEventListener('keydown',e=>{
+  const dd=document.getElementById('searchDropdown');
+  const items=dd.querySelectorAll('.search-item');
+  const activeItem=dd.querySelector('.search-item.active');
+  if(e.key==='Enter'){
+    if(activeItem){activeItem.click();return;}
+    e.target.blur();closeDropdown();analyzeStock();
+  }else if(e.key==='ArrowDown'){
+    e.preventDefault();
+    if(!activeItem&&items.length){items[0].classList.add('active');}
+    else if(activeItem){
+      activeItem.classList.remove('active');
+      const next=activeItem.nextElementSibling;
+      if(next)next.classList.add('active');
+    }
+  }else if(e.key==='ArrowUp'){
+    e.preventDefault();
+    if(activeItem){
+      activeItem.classList.remove('active');
+      const prev=activeItem.previousElementSibling;
+      if(prev)prev.classList.add('active');
+    }
+  }else if(e.key==='Escape'){closeDropdown();}
+});
+
+// ── 搜尋自動補全 ──
+let _searchTimer=null;
+function closeDropdown(){
+  const dd=document.getElementById('searchDropdown');
+  dd.classList.remove('open');dd.innerHTML='';
+}
+document.getElementById('stockInput').addEventListener('input',e=>{
+  clearTimeout(_searchTimer);
+  const q=e.target.value.trim();
+  if(!q){closeDropdown();return;}
+  // 純數字直接不搜（等 Enter 送出）
+  if(/^\d+$/.test(q)&&q.length>=4){closeDropdown();return;}
+  _searchTimer=setTimeout(async()=>{
+    try{
+      const r=await fetch(`${getAPI()}/api/search?q=${encodeURIComponent(q)}&limit=8`);
+      const d=await r.json();
+      const dd=document.getElementById('searchDropdown');
+      if(!d.results||!d.results.length){closeDropdown();return;}
+      dd.innerHTML=d.results.map(s=>`
+        <div class="search-item" data-id="${s.stock_id}">
+          <span class="sid">${s.stock_id}</span>
+          <span class="sname">${s.stock_name}</span>
+          <span class="stype">${s.type||''}</span>
+        </div>`).join('');
+      dd.querySelectorAll('.search-item').forEach(item=>{
+        item.addEventListener('click',()=>{
+          document.getElementById('stockInput').value=item.dataset.id;
+          closeDropdown();analyzeStock();
+        });
+      });
+      dd.classList.add('open');
+    }catch(err){closeDropdown();}
+  },280);
+});
+// 點外面關閉
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.search-box'))closeDropdown();
+});
+document.querySelectorAll('#rangeBtns .rb').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#rangeBtns .rb').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const days=+btn.dataset.days;
+    C.viewCount=days===0?C.bars.length:Math.min(days,C.bars.length);
+    C.viewEnd=0;document.getElementById('countInput').value=C.viewCount;drawChart();
+  });
+});
+document.getElementById('countInput').addEventListener('change',e=>{
+  const v=Math.max(20,Math.min(C.bars.length||9999,+e.target.value||260));
+  e.target.value=v;C.viewCount=v;C.viewEnd=Math.min(C.viewEnd,Math.max(0,C.bars.length-v));drawChart();
+});
+
+// ══════════════════════════════════════
+// 底部導航
+// ══════════════════════════════════════
+function showPage(page){
+  document.querySelectorAll('.nav-btn').forEach((b,i)=>b.classList.toggle('active',['home','watch','history','settings'][i]===page));
+  const overlay=document.getElementById('pageOverlay');
+  if(page==='home'){
+    overlay.style.display='none';
+  }else if(page==='watch'){
+    overlay.style.display='block';
+    showWatchList();
+  }else if(page==='history'){
+    overlay.style.display='block';
+    showHistory();
+  }
+}
+function openDrawer(){
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+}
+function closeDrawer(){
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+async function testAndClose(){
+  const base=document.getElementById('apiBase').value.trim().replace(/\/$/,'');
+  localStorage.setItem('apiBase',base);
+  try{
+    const r=await fetch(`${base}/`,{signal:AbortSignal.timeout(4000)});
+    if(r.ok){setSt('✓ 連線成功',false);}
+    else setSt('✗ 回應異常',true);
+  }catch{setSt('✗ 無法連線',true);}
+  closeDrawer();
+}
+
+// ══════════════════════════════════════
+// 自選股
+// ══════════════════════════════════════
+function showWatchList(){
+  const el=document.getElementById('pageContent');
+  if(!watchList.length){
+    el.innerHTML='<div style="padding:40px 0;text-align:center;color:var(--text3);font-size:14px">尚無自選股<br><small>分析股票後按「加入自選」</small></div>';
+    return;
+  }
+  el.innerHTML=`<div style="padding:8px 0">
+    <div style="font-size:13px;font-weight:600;color:var(--text2);padding:8px 0 12px">⭐ 自選股（${watchList.length}）</div>
+    ${watchList.map(s=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:.5px solid var(--border)">
+      <div onclick="qpAndHome('${s.id}')" style="flex:1;cursor:pointer">
+        <div style="font-weight:500">${s.id} ${s.name}</div>
+        <div style="font-size:11px;color:var(--text3)">加入時間 ${s.date}</div>
+      </div>
+      <button onclick="removeWatch('${s.id}')" style="border:none;background:none;color:var(--up);font-size:12px;cursor:pointer;padding:4px 8px">移除</button>
+    </div>`).join('')}
+  </div>`;
+}
+function addWatch(id,name){
+  if(!watchList.find(s=>s.id===id)){
+    watchList.unshift({id,name,date:new Date().toLocaleDateString('zh-TW')});
+    if(watchList.length>30)watchList=watchList.slice(0,30);
+    localStorage.setItem('watchList',JSON.stringify(watchList));
+  }
+}
+function removeWatch(id){
+  watchList=watchList.filter(s=>s.id!==id);
+  localStorage.setItem('watchList',JSON.stringify(watchList));
+  // 更新自選按鈕狀態
+  updateWatchBtn(id,false);
+  showWatchList();
+}
+function toggleWatch(id,name){
+  if(watchList.find(s=>s.id===id)){
+    removeWatch(id);
+  }else{
+    addWatch(id,name);
+    updateWatchBtn(id,true);
+  }
+}
+function updateWatchBtn(id,inWatch){
+  const btn=document.getElementById('watchBtn');
+  if(!btn)return;
+  btn.textContent=inWatch?'★ 已加入自選':'☆ 加入自選';
+  btn.style.background=inWatch?'var(--dn-l)':'var(--bg2)';
+  btn.style.color=inWatch?'var(--dn)':'var(--text2)';
+  btn.style.border=inWatch?'.5px solid var(--dn)':'.5px solid var(--border2)';
+}
+function qpAndHome(id){
+  showPage('home');
+  document.getElementById('stockInput').value=id;
+  analyzeStock();
+}
+
+// ══════════════════════════════════════
+// 歷史紀錄
+// ══════════════════════════════════════
+function showHistory(){
+  const el=document.getElementById('pageContent');
+  if(!historyList.length){
+    el.innerHTML='<div style="padding:40px 0;text-align:center;color:var(--text3);font-size:14px">尚無分析紀錄</div>';
+    return;
+  }
+  el.innerHTML=`<div style="padding:8px 0">
+    <div style="font-size:13px;font-weight:600;color:var(--text2);padding:8px 0 12px">🕐 最近紀錄（${historyList.length}）</div>
+    ${historyList.map(s=>`
+    <div onclick="qpAndHome('${s.id}')" style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:.5px solid var(--border);cursor:pointer">
+      <div>
+        <div style="font-weight:500">${s.id} ${s.name}</div>
+        <div style="font-size:11px;color:var(--text3)">${s.date} · ${s.price}</div>
+      </div>
+      <div style="font-size:12px;color:${s.risk==='high'?'var(--up)':s.risk==='low'?'var(--dn)':'var(--amber)'}">${s.riskLabel}</div>
+    </div>`).join('')}
+  </div>`;
+}
+function addHistory(id,name,price,risk,riskLabel){
+  historyList=historyList.filter(s=>s.id!==id);
+  historyList.unshift({id,name,price,risk,riskLabel,date:new Date().toLocaleDateString('zh-TW')});
+  if(historyList.length>20)historyList=historyList.slice(0,20);
+  localStorage.setItem('historyList',JSON.stringify(historyList));
+}
+
+// ══════════════════════════════════════
+// API
+// ══════════════════════════════════════
+function getAPI(){
+  const saved = localStorage.getItem('apiBase');
+  if(saved) return saved.replace(/\/$/,'');
+  // 上線後前後端同 domain，自動用相對路徑；本機開發用 localhost:8000
+  const isLocal = location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.hostname.startsWith('192.168');
+  return isLocal ? 'http://localhost:8000' : '';
+}
+function setSt(msg,err){const el=document.getElementById('statusBar');el.innerHTML=msg;el.className='status'+(err?' err':'');}
+
+async function analyzeStock(){
+  const raw=document.getElementById('stockInput').value.trim();
+  if(!raw)return;
+  const id=raw.replace(/\.(TW|TWO)$/i,'');
+  const enabled=maSettings.filter(m=>m.enabled&&m.n>0);
+  const maParts=enabled.map((m,i)=>`ma${i+1}=${m.n}`).join('&');
+  const url=`${getAPI()}/api/analyze/${id}?tf=${currentTF}&${maParts}`;
+  setSt('<span class="spin"></span>分析中...',false);
+  document.getElementById('resultEl').classList.remove('show');
+  let data;
+  try{
+    const r=await fetch(url,{signal:AbortSignal.timeout(30000)});
+    if(!r.ok){const e=await r.json().catch(()=>({detail:'錯誤'}));throw new Error(e.detail||`HTTP ${r.status}`);}
+    data=await r.json();
+  }catch(e){setSt(`❌ ${e.message}`,true);return;}
+  setSt(`✓ ${data.symbol}${data.stock_name?' '+data.stock_name:''} · ${data.bars.length}根 · 盤後資料`,false);
+  addHistory(id,data.stock_name||'',data.price,data.risk_level,data.risk_label);
+  renderHotkeys();
+  renderResult(data,enabled);
+}
+
+// ══════════════════════════════════════
+// 渲染
+// ══════════════════════════════════════
+const pct=(a,b)=>((a-b)/b*100).toFixed(1);
+const fmt=n=>(+n).toFixed(2);
+
+function renderResult(d,enabledMA){
+  const{price,support,support_desc,resistance,resistance_desc,
+        trend,pattern,pattern_sub,stop_loss,target1,target2,risk_reward,
+        risk_level,risk_label,summary,channel,
+        buy_signals,sell_signals,buy_stops,bars,symbol,stock_name,stock_id,tf,
+        breakout_idx,breakdown_idx,breakout_stale,breakdown_stale,
+        kbar_pattern,kbar_warning,kbar_dir,kbar_action,conflict_note,rr_basis,
+        indicators}=d;
+  _indicators = indicators||null;
+
+  // 風險卡
+  document.getElementById('riskCard').className=`risk-card risk-${risk_level}`;
+  const stockLabel=stock_name?`${stock_id} ${stock_name}`:stock_id;
+  document.getElementById('riskStock').textContent=stockLabel;
+  document.getElementById('riskBadge').textContent=risk_label;
+
+  // 條列摘要 — 精簡到核心5條 + K棒型態 + 結論
+  const rr = d.risk_reward || 0;
+  const supPct = pct(price, d.support||support);
+  const resPct = pct(d.resistance||resistance, price);
+
+  const coreLines = [];
+
+  // 0. 軌道趨勢矛盾警告（最優先，醒目顯示）
+  if(conflict_note){
+    coreLines.push({text: conflict_note, cls:'conflict'});
+  }
+
+  // 1. 軌道+位置
+  if(channel) coreLines.push({
+    text:`軌道：${channel.desc}，${channel.position_desc}`,
+    cls: channel.position==='near_support'?'md':channel.position==='near_resist'?'hi':''
+  });
+  // 2. 趨勢
+  const trendMap={'上升趨勢':'均線多頭排列，趨勢偏多，回測支撐是買點','下降趨勢':'均線空頭排列，趨勢偏空，反彈壓力是賣點','盤整':'均線糾結，多空拉鋸，等待突破方向再跟進'};
+  const trendCls = trend==='下降趨勢'?'hi':'';
+  coreLines.push({text:`趨勢：${trendMap[trend]||trend}`, cls: trendCls});
+  // 3. 支撐壓力
+  coreLines.push({text:`支撐 ${support}（${support_desc}），壓力 ${resistance}（${resistance_desc}）`, cls:''});
+  // 4. 防守位 + 損益比
+  const basisLabel = rr_basis ? `（以${rr_basis}為停損）` : '';
+  coreLines.push({text:`防守位 ${stop_loss}（距現價 ${pct(stop_loss,price)}%），損益比 ${rr}${basisLabel}`, cls: rr>=1.5?'md':rr<1?'hi':''});
+
+  // 5. K棒型態（拆兩行：型態名稱 + 操作說明）
+  if(kbar_pattern){
+    const kDir = kbar_dir||'neutral';
+    const kCls = kDir==='bullish'?'kbar-bull': kDir==='bearish'?'kbar-bear':'kbar-neu';
+    coreLines.push({text:`K棒型態：${kbar_pattern}`, cls: kCls});
+    const opText = kbar_action || kbar_warning;
+    if(opText){
+      const opCls = kDir==='bullish'?'kbar-bull-op': kDir==='bearish'?'kbar-bear-op':'action';
+      coreLines.push({text:`操作：${opText}`, cls: opCls});
+    }
+  }
+
+  // 6. 整合結論（含具體操作的最終一句，最醒目）
+  if(d.warning) coreLines.push({text:`→ ${d.warning}`, cls:'conclusion'});
+
+  document.getElementById('summaryList').innerHTML=coreLines.map(({text,cls})=>{
+    const isConclusion = cls==='conclusion';
+    const isConflict   = cls==='conflict';
+    return `<li class="${cls||''}"><div class="dot"></div><span>${text}</span></li>`;
+  }).join('');
+
+  // 指標卡
+  document.getElementById('m-price').textContent=fmt(price);
+  const tEl=document.getElementById('m-trend');
+  tEl.textContent=trend;tEl.className='m-val'+(trend==='上升趨勢'?' tw-dn':trend==='下降趨勢'?' tw-up':'');
+  document.getElementById('m-pat').textContent=pattern;
+  document.getElementById('m-sup').textContent=fmt(support);
+  document.getElementById('m-sup-desc').textContent=support_desc||'';
+  document.getElementById('m-res').textContent=fmt(resistance);
+  document.getElementById('m-res-desc').textContent=resistance_desc||'';
+  document.getElementById('m-stop').textContent=fmt(stop_loss);
+  document.getElementById('m-stop-d').textContent=pct(stop_loss,price)+'%';
+
+  // 損益比直覺卡
+  const rrEl=document.getElementById('rr-val');
+  const rrTag=document.getElementById('rr-tag');
+  const rrDesc=document.getElementById('rr-desc');
+  rrEl.textContent=risk_reward.toFixed(2);
+  const basisNote = rr_basis ? `以${rr_basis}為停損基準` : '以防守位為停損基準';
+  if(risk_reward>=2){
+    rrTag.textContent='✓ 報酬大於風險';rrTag.className='rr-tag good';
+    rrDesc.textContent=`損益比良好，值得評估進場（${basisNote}）`;
+  }else if(risk_reward>=1){
+    rrTag.textContent='⚡ 風險報酬尚可';rrTag.className='rr-tag mid';
+    rrDesc.textContent=`損益比尚可，需謹慎評估（${basisNote}）`;
+  }else{
+    rrTag.textContent='⚠ 風險大於報酬';rrTag.className='rr-tag bad';
+    rrDesc.textContent=`損益比偏低，不建議此位置進場（${basisNote}）`;
+  }
+
+  // 圖表
+  const tfL={D:'日K',W:'週K',M:'月K'}[tf]||'日K';
+  document.getElementById('chartName').textContent=`${stockLabel} · ${tfL}`;
+  C.bars=bars;C.support=support;C.resistance=resistance;
+  C.buyIdx=buy_signals;C.sellIdx=sell_signals;
+  C.buyStops=buy_stops||[];C.channel=channel||null;
+  C.breakoutIdx=(breakout_idx!=null)?breakout_idx:null;
+  C.breakdownIdx=(breakdown_idx!=null)?breakdown_idx:null;
+  C.breakoutStale=!!breakout_stale;
+  C.breakdownStale=!!breakdown_stale;
+  C.viewEnd=0;C.viewCount=Math.min(C.viewCount,bars.length);
+  document.getElementById('countInput').value=C.viewCount;
+  recalcMA();buildLegend(enabledMA);buildMAQuickBtns();drawChart();
+
+  // 加入自選按鈕狀態
+  C._currentId=stock_id||'';
+  C._currentName=stock_name||'';
+  const inWatch=!!watchList.find(s=>s.id===C._currentId);
+  updateWatchBtn(C._currentId,inWatch);
+  document.getElementById('resultEl').className='result show';
+  loadDrawings(stock_id||id);
+  loadChips(stock_id||id);
+  loadPeerGroup(stock_id||id);
+}
+
+function recalcMA(){
+  const closes=C.bars.map(b=>b.close);
+  C.maArrays=maSettings.filter(m=>m.enabled&&m.n>0).map(m=>{
+    const arr=[];
+    for(let i=0;i<closes.length;i++){
+      if(i<m.n-1){arr.push(null);continue;}
+      arr.push(+(closes.slice(i-m.n+1,i+1).reduce((a,b)=>a+b,0)/m.n).toFixed(2));
+    }
+    return{...m,data:arr};
+  });
+}
+
+// ══════════════════════════════════════
+// 圖例
+// ══════════════════════════════════════
+function buildLegend(ma){
+  if(!ma)ma=C.maArrays;
+  const items=[
+    
+    {key:'sup',color:'rgba(26,143,94,.7)',label:'支撐',dash:true},
+    {key:'res',color:'rgba(214,59,59,.7)',label:'壓力',dash:true},
+    ...C.maArrays.map(m=>({key:`ma${m.n}`,color:m.color,label:`MA${m.n}`})),
+    {key:'buy',color:'var(--up)',label:'B',dot:true},
+    {key:'sell',color:'var(--dn)',label:'S',dot:true},
+  ];
+  document.getElementById('legendEl').innerHTML=items.map(it=>{
+    const vis=isVis(it.key);
+    let sw;
+    if(it.dot)sw=`width:7px;height:7px;border-radius:50%;background:${it.color}`;
+    else if(it.dash)sw=`width:12px;height:0;border-bottom:2px dashed ${it.color}`;
+    else if(it.line)sw=`width:12px;height:0;border-bottom:2px solid ${it.color}`;
+    else sw=`width:12px;height:2px;background:${it.color};border-radius:1px`;
+    return `<div class="leg${vis?'':' off'}" onclick="toggleVis('${it.key}')"><div class="leg-sw" style="${sw}"></div>${it.label}</div>`;
+  }).join('');
+}
+function toggleVis(key){VIS[key]=VIS[key]===false?true:false;buildLegend();buildMAQuickBtns();drawChart();}
+
+function buildMAQuickBtns(){
+  const cont=document.getElementById('maQuickBtns');
+  if(!cont)return;
+  cont.innerHTML=C.maArrays.map(m=>{
+    const on=isVis('ma'+m.n);
+    return `<button onclick="toggleVis('ma${m.n}')" style="
+      padding:3px 10px;border-radius:12px;border:1.5px solid ${m.color};
+      background:${on?m.color:'transparent'};
+      color:${on?'#fff':m.color};
+      font-size:11px;font-weight:500;cursor:pointer;
+      transition:all .15s">MA${m.n}</button>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════
+// 繪圖
+// ══════════════════════════════════════
+function getViewBars(){
+  const n=C.bars.length;const end=n-C.viewEnd;const start=Math.max(0,end-C.viewCount);
+  return{start,end,slice:C.bars.slice(start,end),offset:start};
+}
+
+function drawChart(){
+  if(!C.bars.length)return;
+  const{start,end,slice:bars,offset}=getViewBars();
+  const kCv=document.getElementById('kChart'),vCv=document.getElementById('volChart');
+  const dpr=window.devicePixelRatio||1;
+  const KH_CSS=360,VH_CSS=100;
+  kCv.style.height=KH_CSS+'px';vCv.style.height=VH_CSS+'px';
+  const kW=kCv.offsetWidth||window.innerWidth-32;
+  kCv.width=kW*dpr;kCv.height=KH_CSS*dpr;
+  vCv.width=kW*dpr;vCv.height=VH_CSS*dpr;
+  const kCtx=kCv.getContext('2d'),vCtx=vCv.getContext('2d');
+  kCtx.scale(dpr,dpr);vCtx.scale(dpr,dpr);
+  const W=kW,KH=KH_CSS,VH=VH_CSS;
+  const PL=4,PR=52,PT=18,PB=18;
+  const cW=W-PL-PR,cH=KH-PT-PB;
+  const n=bars.length;if(n===0)return;
+  const candleW=cW/n,bodyW=Math.max(1.5,candleW*0.6);
+
+  const allH=bars.map(b=>b.high),allL=bars.map(b=>b.low);
+  C.maArrays.forEach(m=>{for(let i=offset;i<offset+n;i++){const v=m.data[i];if(v){allH.push(v);allL.push(v);}}});
+  allH.push(C.resistance*1.004);allL.push(C.support*0.996);
+  const pMax=Math.max(...allH),pMin=Math.min(...allL),pRange=pMax-pMin||1;
+  const py=p=>PT+cH-(p-pMin)/pRange*cH;
+  const px=i=>PL+(i+0.5)*candleW;
+
+  const dark=matchMedia('(prefers-color-scheme:dark)').matches;
+  const tCol=dark?'rgba(255,255,255,.3)':'rgba(0,0,0,.3)';
+  const gCol=dark?'rgba(255,255,255,.04)':'rgba(0,0,0,.04)';
+  const upFill=dark?'#F06060':'#D63B3B';
+  const dnFill=dark?'#2DC88A':'#1A8F5E';
+  const upBorder=dark?'#B02020':'#8B1A1A';
+  const dnBorder=dark?'#1A9060':'#0D6040';
+
+  kCtx.clearRect(0,0,W,KH);vCtx.clearRect(0,0,W,VH);
+
+  // 格線
+  for(let i=1;i<5;i++){const y=PT+cH/5*i;kCtx.strokeStyle=gCol;kCtx.lineWidth=.5;kCtx.beginPath();kCtx.moveTo(PL,y);kCtx.lineTo(W-PR,y);kCtx.stroke();}
+
+  // 趨勢軌道（已移除自動畫線，改用手繪工具）
+
+  // 支撐壓力
+  const hline=(price,col,lbl,key)=>{
+    if(!isVis(key))return;const y=py(price);
+    kCtx.save();
+    kCtx.setLineDash([6,4]);kCtx.strokeStyle=col;kCtx.lineWidth=1.8;
+    kCtx.beginPath();kCtx.moveTo(PL,y);kCtx.lineTo(W-PR,y);kCtx.stroke();
+    kCtx.setLineDash([]);
+    // 標籤底色
+    const tag=`${lbl} ${price.toFixed(0)}`;
+    kCtx.font='bold 10px sans-serif';
+    const tw=kCtx.measureText(tag).width+8;
+    kCtx.fillStyle=col;
+    kCtx.beginPath();
+    if(kCtx.roundRect) kCtx.roundRect(W-PR+2,y-8,tw,16,3);
+    else kCtx.rect(W-PR+2,y-8,tw,16);
+    kCtx.fill();
+    kCtx.fillStyle='#fff';kCtx.textAlign='left';
+    kCtx.fillText(tag,W-PR+6,y+4);
+    kCtx.restore();
+  };
+  hline(C.support,'rgba(26,143,94,.9)','支',  'sup');
+  hline(C.resistance,'rgba(214,59,59,.9)','壓','res');
+
+  // 均線
+  C.maArrays.forEach(m=>{
+    if(!isVis(`ma${m.n}`))return;
+    kCtx.beginPath();kCtx.strokeStyle=m.color;kCtx.lineWidth=1.5;let started=false;
+    for(let i=0;i<n;i++){const v=m.data[offset+i];if(v===null||v===undefined){started=false;continue;}
+      const x=px(i),y=py(v);if(!started){kCtx.moveTo(x,y);started=true;}else kCtx.lineTo(x,y);}
+    kCtx.stroke();
+  });
+
+  // 橫盤整理
+  {
+    let rs=0;const cons=[];
+    for(let i=1;i<n;i++){
+      const seg=bars.slice(rs,i+1);
+      const maxC=Math.max(...seg.map(b=>b.close));
+      const minC=Math.min(...seg.map(b=>b.close));
+      if((maxC-minC)/minC*100>2.5){
+        if(i-rs>=3){
+          const s=bars.slice(rs,i);
+          cons.push({start:rs,end:i-1,hi:Math.max(...s.map(b=>b.close)),lo:Math.min(...s.map(b=>b.close))});
+        }
+        rs=i;
+      }
+    }
+    const lastSeg=bars.slice(rs);
+    if(lastSeg.length>=3){
+      const maxC=Math.max(...lastSeg.map(b=>b.close));
+      const minC=Math.min(...lastSeg.map(b=>b.close));
+      if((maxC-minC)/minC*100<=2.5)cons.push({start:rs,end:n-1,hi:maxC,lo:minC});
+    }
+    cons.slice(-2).forEach(con=>{
+      const x1=px(con.start),x2=px(con.end)+bodyW/2;
+      const yH=py(con.hi),yL=py(con.lo);
+      kCtx.save();
+      kCtx.fillStyle='rgba(176,112,16,.06)';kCtx.fillRect(x1,yH,x2-x1,yL-yH);
+      kCtx.strokeStyle='rgba(176,112,16,.5)';kCtx.lineWidth=1;kCtx.setLineDash([4,3]);
+      kCtx.beginPath();kCtx.moveTo(x1,yH);kCtx.lineTo(x2,yH);kCtx.stroke();
+      kCtx.beginPath();kCtx.moveTo(x1,yL);kCtx.lineTo(x2,yL);kCtx.stroke();
+      kCtx.setLineDash([]);kCtx.fillStyle='rgba(176,112,16,.7)';kCtx.font='9px sans-serif';kCtx.textAlign='left';
+      kCtx.fillText(`整理${con.end-con.start+1}根`,x1+2,yH-3);kCtx.restore();
+    });
+  }
+
+  // 蠟燭 + 量圖
+  const volMax=Math.max(...bars.map(b=>b.volume||0),1);
+  const VP=3,vCH=VH-VP*2;
+  vCtx.clearRect(0,0,W,VH);
+  bars.forEach((b,i)=>{
+    const isUp=b.close>=b.open;
+    const fill=isUp?upFill:dnFill,border=isUp?upBorder:dnBorder;
+    const x=px(i),oY=py(b.open),cY=py(b.close),hY=py(b.high),lY=py(b.low);
+    kCtx.strokeStyle=border;kCtx.lineWidth=Math.max(.8,candleW*.07);
+    kCtx.beginPath();kCtx.moveTo(x,hY);kCtx.lineTo(x,lY);kCtx.stroke();
+    const bTop=Math.min(oY,cY),bH=Math.max(1.5,Math.abs(oY-cY));
+    kCtx.fillStyle=fill;kCtx.strokeStyle=border;kCtx.lineWidth=.5;
+    kCtx.beginPath();
+    if(kCtx.roundRect)kCtx.roundRect(x-bodyW/2,bTop,bodyW,bH,Math.min(1.5,bodyW*.15));
+    else kCtx.rect(x-bodyW/2,bTop,bodyW,bH);
+    kCtx.fill();kCtx.stroke();
+    const vh=Math.max(1,(b.volume||0)/volMax*vCH);
+    vCtx.fillStyle=isUp?'rgba(214,59,59,.65)':'rgba(26,143,94,.65)';
+    vCtx.fillRect(x-bodyW/2,VH-VP-vh,bodyW,vh);
+  });
+
+  // 買賣點
+  const drawSig=(gIdx,type)=>{
+    const lIdx=gIdx-offset;if(lIdx<0||lIdx>=n||!isVis(type))return;
+    const b=bars[lIdx];const isB=type==='buy';
+    const x=px(lIdx),y=isB?py(b.low)+9:py(b.high)-9;
+    const sz=Math.max(7,Math.min(10,candleW*.9));
+    kCtx.save();kCtx.fillStyle=isB?upFill:dnFill;
+    kCtx.beginPath();
+    if(isB){kCtx.moveTo(x,y+sz);kCtx.lineTo(x-sz*.7,y);kCtx.lineTo(x+sz*.7,y);}
+    else{kCtx.moveTo(x,y-sz);kCtx.lineTo(x-sz*.7,y);kCtx.lineTo(x+sz*.7,y);}
+    kCtx.closePath();kCtx.fill();
+    kCtx.font=`bold ${Math.max(7,sz*.9)}px sans-serif`;kCtx.textAlign='center';
+    kCtx.fillText(isB?'B':'S',x,isB?y+sz*2.3:y-sz*1.3);kCtx.restore();
+  };
+  C.buyIdx.forEach(i=>drawSig(i,'buy'));C.sellIdx.forEach(i=>drawSig(i,'sell'));
+
+  // 布林通道（畫在主圖）
+  drawBollinger(kCtx, bars, offset, n, py, px);
+
+  // 重繪手繪層
+  redrawDrawLayer();
+  // 重繪副圖指標
+  drawAllIndicators();
+
+  // 突破壓力 / 跌破支撐訊號（橘色B★ / 紫色S★）
+  const drawBreakSig=(gIdx,type,stale)=>{
+    if(gIdx==null)return;
+    const lIdx=gIdx-offset;if(lIdx<0||lIdx>=n)return;
+    const b=bars[lIdx];const isBO=type==='breakout';
+    const x=px(lIdx);
+    const sz=Math.max(8,Math.min(12,candleW*1.0));
+    // stale 訊號透明度降低，顯示為虛線輪廓
+    const alpha=stale?0.35:1.0;
+    const col=isBO?`rgba(220,120,20,${alpha})`:`rgba(140,60,200,${alpha})`;
+    const y=isBO?py(b.low)+12:py(b.high)-12;
+    kCtx.save();
+    // 外圈光暈
+    kCtx.fillStyle=isBO?`rgba(220,120,20,${stale?0.06:0.18})`:`rgba(140,60,200,${stale?0.06:0.18})`;
+    kCtx.beginPath();kCtx.arc(x,y,sz*1.5,0,Math.PI*2);kCtx.fill();
+    // 三角形（stale 用虛線描邊，不填色）
+    kCtx.beginPath();
+    if(isBO){kCtx.moveTo(x,y+sz);kCtx.lineTo(x-sz*.75,y);kCtx.lineTo(x+sz*.75,y);}
+    else{kCtx.moveTo(x,y-sz);kCtx.lineTo(x-sz*.75,y);kCtx.lineTo(x+sz*.75,y);}
+    kCtx.closePath();
+    if(stale){
+      kCtx.strokeStyle=col;kCtx.setLineDash([3,2]);kCtx.lineWidth=1.2;kCtx.stroke();
+      kCtx.setLineDash([]);
+    }else{
+      kCtx.fillStyle=col;kCtx.fill();
+    }
+    // 文字標籤
+    kCtx.fillStyle=col;
+    kCtx.font=`${stale?'':'bold '}${Math.max(8,sz*.85)}px sans-serif`;kCtx.textAlign='center';
+    kCtx.fillText(isBO?'突破':'跌破',x,isBO?y+sz*2.6:y-sz*1.5);
+    kCtx.restore();
+  };
+  drawBreakSig(C.breakoutIdx,'breakout',C.breakoutStale);
+  drawBreakSig(C.breakdownIdx,'breakdown',C.breakdownStale);
+
+  // 刻度
+  kCtx.fillStyle=tCol;kCtx.font='9px sans-serif';kCtx.textAlign='left';
+  for(let i=0;i<=5;i++){const p=pMin+pRange/5*i;kCtx.fillText(p.toFixed(0),W-PR+3,py(p)+3);}
+  kCtx.fillStyle=tCol;kCtx.textAlign='center';kCtx.font='9px sans-serif';
+  const step=Math.ceil(n/6);
+  bars.forEach((b,i)=>{if(i%step!==0)return;kCtx.fillText(b.date.slice(2),px(i),KH-4);});
+}
+
+// ══════════════════════════════════════
+// 互動：滾輪、拖拉、觸控、十字線
+// ══════════════════════════════════════
+function attachInteractions(){
+  const kCv=document.getElementById('kChart');
+
+  // 滾輪縮放
+  kCv.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const delta=e.deltaY>0?1.15:1/1.15;
+    const newCount=Math.round(Math.min(C.bars.length,Math.max(20,C.viewCount*delta)));
+    C.viewCount=newCount;C.viewEnd=Math.max(0,Math.min(C.viewEnd,C.bars.length-newCount));
+    document.getElementById('countInput').value=newCount;
+    document.querySelectorAll('#rangeBtns .rb').forEach(b=>b.classList.remove('active'));
+    drawChart();
+  },{passive:false});
+
+  // 滑鼠拖拉
+  kCv.addEventListener('mousedown',e=>{C.isDragging=true;C.dragStartX=e.clientX;C.dragStartEnd=C.viewEnd;kCv.style.cursor='grabbing';});
+  window.addEventListener('mousemove',e=>{
+    if(!C.isDragging)return;
+    const pxPerBar=(kCv.getBoundingClientRect().width-56)/C.viewCount;
+    const shift=Math.round((e.clientX-C.dragStartX)/pxPerBar);
+    const newEnd=Math.max(0,Math.min(C.bars.length-C.viewCount,C.dragStartEnd+shift));
+    if(newEnd!==C.viewEnd){C.viewEnd=newEnd;drawChart();}
+  });
+  window.addEventListener('mouseup',()=>{C.isDragging=false;kCv.style.cursor='crosshair';});
+
+  // 觸控：拖拉 + 雙指縮放
+  let lastTouchDist=0;
+  kCv.addEventListener('touchstart',e=>{
+    if(e.touches.length===1){C.dragStartX=e.touches[0].clientX;C.dragStartEnd=C.viewEnd;}
+    if(e.touches.length===2){
+      const dx=e.touches[0].clientX-e.touches[1].clientX;
+      const dy=e.touches[0].clientY-e.touches[1].clientY;
+      lastTouchDist=Math.sqrt(dx*dx+dy*dy);
+    }
+  },{passive:true});
+  kCv.addEventListener('touchmove',e=>{
+    e.preventDefault();
+    if(e.touches.length===1){
+      const W=kCv.getBoundingClientRect().width;
+      const pxPerBar=(W-56)/C.viewCount;
+      const shift=Math.round((e.touches[0].clientX-C.dragStartX)/pxPerBar);
+      const newEnd=Math.max(0,Math.min(C.bars.length-C.viewCount,C.dragStartEnd+shift));
+      if(newEnd!==C.viewEnd){C.viewEnd=newEnd;drawChart();}
+    }
+    if(e.touches.length===2){
+      const dx=e.touches[0].clientX-e.touches[1].clientX;
+      const dy=e.touches[0].clientY-e.touches[1].clientY;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(lastTouchDist>0){
+        const scale=lastTouchDist/dist;
+        const newCount=Math.round(Math.min(C.bars.length,Math.max(20,C.viewCount*scale)));
+        C.viewCount=newCount;document.getElementById('countInput').value=newCount;drawChart();
+      }
+      lastTouchDist=dist;
+    }
+  },{passive:false});
+
+  // 十字線
+  kCv.addEventListener('mousemove',e=>{
+    if(C.isDragging||!C.bars.length)return;
+    const rect=kCv.getBoundingClientRect();
+    const mx=e.clientX-rect.left;
+    const my=e.clientY-rect.top;   // 滑鼠 Y 座標
+    const W=kCv.offsetWidth||rect.width;
+    const PL=4,PR=52,PT=18,PB=18;
+    const cW=W-PL-PR,cH=360-PT-PB;
+    const{slice:bars,offset}=getViewBars();const n=bars.length;
+    const idx=Math.floor((mx-PL)/(cW/n));if(idx<0||idx>=n)return;
+    const b=bars[idx];
+    const chg=((b.close-b.open)/b.open*100).toFixed(2);
+    const isUp=b.close>=b.open;
+    const dark=document.documentElement.getAttribute('data-theme')==='dark'||(document.documentElement.getAttribute('data-theme')!=='light'&&matchMedia('(prefers-color-scheme:dark)').matches);
+    const upC=dark?'#F06060':'#D63B3B';
+    const dnC=dark?'#2DC88A':'#1A8F5E';
+
+    // 更新資訊欄
+    document.getElementById('xhairBar').innerHTML=`
+      <span style="color:var(--text3)">${b.date}</span>
+      <span>開${b.open}</span>
+      <span style="color:${upC}">高${b.high}</span>
+      <span style="color:${dnC}">低${b.low}</span>
+      <span style="color:${isUp?upC:dnC}">收${b.close}</span>
+      <span style="color:${isUp?upC:dnC}">${isUp?'+':''}${chg}%</span>
+      ${C.maArrays.filter(m=>isVis('ma'+m.n)).map(m=>{
+        const v=m.data[offset+idx];
+        return v!=null?'<span style="color:'+m.color+'">M'+m.n+' '+v+'</span>':'';
+      }).join('')}`;
+
+    // 重繪圖表再疊加十字線
+    drawChart();
+
+    // 計算 py 函式（跟 drawChart 一致）
+    const allH=bars.map(b=>b.high),allL=bars.map(b=>b.low);
+    C.maArrays.forEach(m=>{for(let i=offset;i<offset+n;i++){const v=m.data[i];if(v){allH.push(v);allL.push(v);}}});
+    allH.push(C.resistance*1.004);allL.push(C.support*0.996);
+    const pMax=Math.max(...allH),pMin=Math.min(...allL),pRange=pMax-pMin||1;
+    const pyFn=p=>PT+cH-(p-pMin)/pRange*cH;
+    const pxFn=i=>PL+(i+0.5)*(cW/n);
+
+    // 滑鼠實際 Y 對應的價格
+    const mousePrice=pMin+(1-(my-PT)/cH)*pRange;
+
+    const kCtx=kCv.getContext('2d');
+    const dpr=window.devicePixelRatio||1;
+    kCtx.save();
+    kCtx.scale(dpr,dpr);
+
+    // X：磁吸到 K 棒中心；Y：跟著滑鼠實際位置
+    const x=pxFn(idx);
+    const yMouse=Math.max(PT, Math.min(PT+cH, my));  // 限制在圖表範圍內
+    const KH=360;
+    const lineColor=dark?'rgba(255,255,255,.7)':'rgba(0,0,0,.7)';
+    const labelBg=isUp?(dark?'#F06060':'#D63B3B'):(dark?'#2DC88A':'#1A8F5E');
+
+    // 垂直線（從頂部延伸到底部，超出成交量圖）
+    kCtx.setLineDash([4,3]);
+    kCtx.strokeStyle=lineColor;
+    kCtx.lineWidth=1;
+    kCtx.beginPath();
+    kCtx.moveTo(x,0);
+    kCtx.lineTo(x,KH);
+    kCtx.stroke();
+
+    // 水平線 — 跟著滑鼠 Y 位置（自由移動）
+    kCtx.beginPath();
+    kCtx.moveTo(0,yMouse);
+    kCtx.lineTo(W,yMouse);
+    kCtx.stroke();
+    kCtx.setLineDash([]);
+
+    // 右側價格標籤 — 顯示滑鼠對應的實際價格
+    const priceLabel=mousePrice.toFixed(1);
+    const labelW=priceLabel.length*6.5+10;
+    kCtx.fillStyle='rgba(80,80,80,.85)';
+    kCtx.beginPath();
+    if(kCtx.roundRect) kCtx.roundRect(W-PR+2,yMouse-9,labelW,18,3);
+    else kCtx.rect(W-PR+2,yMouse-9,labelW,18);
+    kCtx.fill();
+    kCtx.fillStyle='#fff';
+    kCtx.font='bold 10px sans-serif';
+    kCtx.textAlign='left';
+    kCtx.fillText(priceLabel,W-PR+6,yMouse+4);
+
+    // 十字中心圓點 — 磁吸到 K 棒收盤價 X，滑鼠 Y
+    const yClose=pyFn(b.close);
+    kCtx.fillStyle=labelBg;
+    kCtx.beginPath();
+    kCtx.arc(x,yMouse,3.5,0,Math.PI*2);
+    kCtx.fill();
+
+    // 頂部日期標籤
+    const dateLabel=b.date.slice(2);
+    const dLabelW=dateLabel.length*5.5+8;
+    kCtx.fillStyle=dark?'rgba(60,60,58,.9)':'rgba(240,240,238,.9)';
+    kCtx.beginPath();
+    if(kCtx.roundRect) kCtx.roundRect(x-dLabelW/2,2,dLabelW,14,3);
+    else kCtx.rect(x-dLabelW/2,2,dLabelW,14);
+    kCtx.fill();
+    kCtx.fillStyle=dark?'rgba(255,255,255,.8)':'rgba(0,0,0,.7)';
+    kCtx.font='9px sans-serif';
+    kCtx.textAlign='center';
+    kCtx.fillText(dateLabel,x,12);
+
+    kCtx.restore();
+
+    // 成交量圖也畫垂直線
+    const vCv=document.getElementById('volChart');
+    const vCtx=vCv.getContext('2d');
+    vCtx.save();
+    vCtx.scale(dpr,dpr);
+    vCtx.setLineDash([4,3]);
+    vCtx.strokeStyle=lineColor;
+    vCtx.lineWidth=1;
+    vCtx.beginPath();
+    vCtx.moveTo(x,0);
+    vCtx.lineTo(x,60);
+    vCtx.stroke();
+    vCtx.setLineDash([]);
+    vCtx.restore();
+  });
+
+  kCv.addEventListener('mouseleave',()=>{
+    document.getElementById('xhairBar').innerHTML='<span style="color:var(--text3)">滑動查看K棒</span>';
+    drawChart();
+  });
+}
+
+let resizeT;
+window.addEventListener('resize',()=>{clearTimeout(resizeT);resizeT=setTimeout(()=>{if(C.bars.length)drawChart();},120);});
+
+function qp(id){document.getElementById('stockInput').value=id;analyzeStock();}
+
+// ══════════════════════════════════════
+// 主題切換
+// ══════════════════════════════════════
+function setTheme(th){
+  localStorage.setItem('theme',th);
+  if(th==='auto') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme',th);
+  document.querySelectorAll('#themeSeg button').forEach(b=>b.classList.toggle('active',b.dataset.th===th));
+  // 重繪圖表以更新顏色
+  if(C.bars.length) drawChart();
+}
+function applyStoredTheme(){
+  const th=localStorage.getItem('theme')||'auto';
+  setTheme(th);
+}
+
+// 通用摺疊
+function toggleSection(bodyId, arrId){
+  const body=document.getElementById(bodyId);
+  const arr=document.getElementById(arrId);
+  const open=body.style.display==='none';
+  body.style.display=open?'block':'none';
+  arr.textContent=open?'▲ 收起':'▼ 展開';
+  // 展開族群時才載入資料
+  if(open && bodyId==='peerBody' && _currentPeerStock) _loadPeerData(_currentPeerStock);
+  // 展開籌碼時才載入資料
+  if(open && bodyId==='chipsBody' && _currentChipsStock) _loadChipsData(_currentChipsStock);
+}
+
+// ══════════════════════════════════════
+// 籌碼面篩選
+// ══════════════════════════════════════
+let _chipsCurrentDays=5;
+let _chipsCurrentInst='all';
+let _currentChipsStock='';
+let _chipsRawData=null;
+
+function setChipsDays(d){
+  _chipsCurrentDays=d;
+  document.querySelectorAll('[data-days]').forEach(b=>b.classList.toggle('active',+b.dataset.days===d));
+  if(_chipsRawData) renderChipsData(_chipsRawData);
+}
+function setChipsInst(inst){
+  _chipsCurrentInst=inst;
+  document.querySelectorAll('[data-inst]').forEach(b=>b.classList.toggle('active',b.dataset.inst===inst));
+  if(_chipsRawData) renderChipsData(_chipsRawData);
+}
+
+async function loadChips(stockId){
+  _currentChipsStock=stockId;
+  document.getElementById('chipsSection').style.display='block';
+  // 預設收起，不自動載入
+}
+
+async function _loadChipsData(stockId){
+  document.getElementById('instSummary').innerHTML=
+    '<div style="grid-column:1/-1;padding:8px 0;color:var(--text3);font-size:12px">載入籌碼資料中...</div>';
+  try{
+    const r=await fetch(`${getAPI()}/api/chips/${stockId}?days=30`,{signal:AbortSignal.timeout(15000)});
+    if(!r.ok) throw new Error('API error');
+    _chipsRawData=await r.json();
+    renderChipsData(_chipsRawData);
+  }catch(e){
+    document.getElementById('instSummary').innerHTML=
+      '<div style="grid-column:1/-1;padding:8px 0;color:var(--text3);font-size:12px">籌碼資料載入失敗</div>';
+  }
+}
+
+function renderChipsData(d){
+  const inst=d.institutional||{};
+  const daily=(inst.daily||[]);
+  const n=_chipsCurrentDays;
+  const instKey=_chipsCurrentInst;
+  const sub=daily.slice(-n);
+
+  // 摘要
+  const sumV=sub.reduce((acc,r)=>({
+    foreign:acc.foreign+(r.foreign||0),
+    invest: acc.invest+(r.invest||0),
+    dealer: acc.dealer+(r.dealer||0),
+    total:  acc.total+(r.total||0),
+  }),{foreign:0,invest:0,dealer:0,total:0});
+
+  const fmtK=v=>{
+    const k=Math.round(v/1000);
+    const col=k>0?'var(--up)':k<0?'var(--dn)':'var(--text2)';
+    return `<span style="color:${col}">${k>0?'+':''}${k.toLocaleString()}張</span>`;
+  };
+
+  let cards='';
+  if(instKey==='all'||instKey==='foreign') cards+=metricChip(`外資近${n}日`,fmtK(sumV.foreign));
+  if(instKey==='all'||instKey==='invest')  cards+=metricChip(`投信近${n}日`,fmtK(sumV.invest));
+  if(instKey==='all'||instKey==='dealer')  cards+=metricChip(`自營近${n}日`,fmtK(sumV.dealer));
+  if(instKey==='all') cards+=metricChip(`三大合計近${n}日`,fmtK(sumV.total));
+  document.getElementById('instSummary').innerHTML=cards;
+
+  // 長條圖
+  const label={'all':'三大法人','foreign':'外資','invest':'投信','dealer':'自營'}[instKey];
+  document.getElementById('instChartLabel').textContent=`${label}買賣超（張）· 近${n}日`;
+  drawInstChart(sub, instKey);
+
+  // 融資融券
+  const mg=d.margin||{};
+  const mgDaily=(mg.daily||[]).slice(-n);
+  const fmtMg=v=>v!=null?Math.round(v/1000).toLocaleString()+'張':'—';
+  const fmtChg=v=>{
+    if(v==null)return '—';
+    const k=Math.round(v/1000);
+    const col=k>0?'var(--up)':k<0?'var(--dn)':'var(--text2)';
+    return `<span style="color:${col}">${k>0?'▲':'▼'}${Math.abs(k).toLocaleString()}張</span>`;
+  };
+  // 近n日增減
+  const mgChg=mgDaily.length>=2?mgDaily[mgDaily.length-1].margin_bal-mgDaily[0].margin_bal:0;
+  const shChg=mgDaily.length>=2?mgDaily[mgDaily.length-1].short_bal-mgDaily[0].short_bal:0;
+  document.getElementById('marginSummary').innerHTML=`
+    ${metricChip('融資餘額',fmtMg(mg.margin_latest))}
+    ${metricChip(`融資近${n}日增減`,fmtChg(mgChg))}
+    ${metricChip('融券餘額',fmtMg(mg.short_latest))}
+    ${metricChip(`融券近${n}日增減`,fmtChg(shChg))}
+  `;
+  if(mgDaily.length) drawMarginChart(mgDaily);
+}
+
+function metricChip(label,valHtml){
+  return `<div style="background:var(--bg2);border-radius:var(--radius);padding:10px 12px">
+    <div style="font-size:11px;color:var(--text3);margin-bottom:4px">${label}</div>
+    <div style="font-size:13px;font-weight:500">${valHtml}</div>
+  </div>`;
+}
+
+function drawInstChart(daily, instKey='all'){
+  const canvas=document.getElementById('instChart');
+  if(!canvas)return;
+  const W=canvas.parentElement.clientWidth-24||300;
+  canvas.width=W;
+  const ctx=canvas.getContext('2d');
+  const n=daily.length;if(!n)return;
+  const barW=Math.max(4,Math.floor((W-20)/n)-2);
+  const getVal=r=>{
+    if(instKey==='foreign') return r.foreign||0;
+    if(instKey==='invest')  return r.invest||0;
+    if(instKey==='dealer')  return r.dealer||0;
+    return r.total||0;
+  };
+  const vals=daily.map(r=>Math.round(getVal(r)/1000));
+  const maxV=Math.max(...vals.map(Math.abs),1);
+  const H=120;const midY=H/2;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='rgba(128,128,128,.3)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,midY);ctx.lineTo(W,midY);ctx.stroke();
+  vals.forEach((v,i)=>{
+    const x=10+i*(barW+2);
+    const h=Math.max(1,Math.abs(v)/maxV*(midY-4));
+    ctx.fillStyle=v>=0?'rgba(214,59,59,.8)':'rgba(26,143,94,.8)';
+    if(v>=0) ctx.fillRect(x,midY-h,barW,h);
+    else     ctx.fillRect(x,midY,barW,h);
+  });
+  if(daily.length){
+    ctx.fillStyle='rgba(128,128,128,.6)';ctx.font='9px sans-serif';ctx.textAlign='right';
+    ctx.fillText(daily[daily.length-1].date.slice(5),W-4,H-2);
+  }
+}
+
+function drawMarginChart(daily){
+  const canvas=document.getElementById('marginChart');
+  if(!canvas)return;
+  const W=canvas.parentElement.clientWidth-24||300;
+  canvas.width=W;
+  const ctx=canvas.getContext('2d');
+  const H=100;
+  ctx.clearRect(0,0,W,H);
+
+  const margins=daily.map(r=>r.margin_bal/1000);
+  const shorts =daily.map(r=>r.short_bal/1000);
+  const allVals=[...margins,...shorts].filter(v=>v>0);
+  if(!allVals.length)return;
+  const minV=Math.min(...allVals)*0.98;
+  const maxV=Math.max(...allVals)*1.02;
+  const range=maxV-minV||1;
+  const n=daily.length;
+  const step=(W-20)/(n-1||1);
+
+  const drawLine=(vals,col)=>{
+    ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.beginPath();
+    vals.forEach((v,i)=>{
+      const x=10+i*step;
+      const y=H-4-(v-minV)/range*(H-12);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+  };
+  drawLine(margins,'var(--up)');
+  drawLine(shorts,'var(--dn)');
+
+  // 圖例
+  ctx.font='9px sans-serif';ctx.textAlign='left';
+  ctx.fillStyle='var(--up)';ctx.fillRect(4,4,10,6);
+  ctx.fillStyle='var(--text3)';ctx.fillText('融資',16,10);
+  ctx.fillStyle='var(--dn)';ctx.fillRect(44,4,10,6);
+  ctx.fillStyle='var(--text3)';ctx.fillText('融券',56,10);
+}
+
+// ══════════════════════════════════════
+// 同族群 / 概念股
+// ══════════════════════════════════════
+let _currentPeerStock='';
+let _peerTab='peer';
+
+function switchPeerTab(tab){
+  _peerTab=tab;
+  document.getElementById('tabPeer').style.cssText=`padding:4px 14px;border-radius:20px;font-size:12px;cursor:pointer;border:${tab==='peer'?'none':'.5px solid var(--border2)'};background:${tab==='peer'?'var(--green)':'transparent'};color:${tab==='peer'?'#fff':'var(--text2)'}`;
+  document.getElementById('tabConcept').style.cssText=`padding:4px 14px;border-radius:20px;font-size:12px;cursor:pointer;border:${tab==='concept'?'none':'.5px solid var(--border2)'};background:${tab==='concept'?'var(--green)':'transparent'};color:${tab==='concept'?'#fff':'var(--text2)'}`;
+  if(_currentPeerStock) _loadPeerData(_currentPeerStock);
+}
+
+async function loadPeerGroup(stockId){
+  _currentPeerStock=stockId;
+  // 先顯示 section，再載資料，避免切 tab 時閃滅
+  document.getElementById('peerSection').style.display='block';
+  document.getElementById('peerList').innerHTML=
+    '<div style="padding:12px 0;color:var(--text3);font-size:12px">載入中...</div>';
+  await _loadPeerData(stockId);
+}
+
+async function _loadPeerData(stockId){
+  const section=document.getElementById('peerSection');
+  const listEl=document.getElementById('peerList');
+  const industryEl=document.getElementById('peerIndustry');
+  try{
+    if(_peerTab==='peer'){
+      const r=await fetch(`${getAPI()}/api/peers/${stockId}`,{signal:AbortSignal.timeout(10000)});
+      if(!r.ok){listEl.innerHTML='<div style="padding:12px 0;color:var(--text3);font-size:12px">查無資料</div>';return;}
+      const d=await r.json();
+      if(!d.peers||!d.peers.length){listEl.innerHTML='<div style="padding:12px 0;color:var(--text3);font-size:12px">查無同族群</div>';return;}
+      industryEl.textContent=d.industry||'';
+      listEl.innerHTML=d.peers.map(s=>stockRow(s.stock_id,s.stock_name)).join('');
+    }else{
+      const r=await fetch(`${getAPI()}/api/concept/${stockId}`,{signal:AbortSignal.timeout(10000)});
+      if(!r.ok){listEl.innerHTML='<div style="padding:12px 0;color:var(--text3);font-size:12px">查無資料</div>';return;}
+      const d=await r.json();
+      if(!d.chains||!d.chains.length){listEl.innerHTML='<div style="padding:12px 0;color:var(--text3);font-size:12px">查無概念股資料</div>';return;}
+      industryEl.textContent=`${d.count} 檔相關`;
+      listEl.innerHTML=d.chains.map(chain=>`
+        <div style="font-size:11px;color:var(--text3);padding:6px 0 4px;font-weight:500">${chain.chain_name}</div>
+        ${chain.stocks.map(s=>stockRow(s.stock_id,s.stock_name)).join('')}
+      `).join('');
+    }
+  }catch(e){
+    listEl.innerHTML='<div style="padding:12px 0;color:var(--text3);font-size:12px">載入失敗，請確認後端連線</div>';
+    console.warn('族群載入失敗',e);
+  }
+}
+
+function stockRow(id,name){
+  return `<div onclick="qp('${id}')" style="
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 12px;background:var(--bg2);border-radius:var(--radius);
+    cursor:pointer;transition:opacity .15s"
+    onmouseenter="this.style.opacity='.75'" onmouseleave="this.style.opacity='1'">
+    <div>
+      <span style="font-weight:500;font-size:13px">${id}</span>
+      <span style="font-size:13px;color:var(--text2);margin-left:6px">${name}</span>
+    </div>
+    <span style="font-size:11px;color:var(--green)">分析 ›</span>
+  </div>`;
+}
+
+// ══════════════════════════════════════
+// 技術指標
+// ══════════════════════════════════════
+let _indicators = null;
+const _activeInds = {bb:false, rsi:false, macd:false, kd:false, obv:false};
+
+function toggleInd(ind){
+  _activeInds[ind] = !_activeInds[ind];
+  document.querySelector(`[data-ind="${ind}"]`)?.classList.toggle('active', _activeInds[ind]);
+  if(ind==='bb'){
+    // 布林通道畫在主圖，重繪即可
+    if(C.bars.length) drawChart();
+  } else {
+    const panel = document.getElementById(`ind-${ind}-panel`);
+    if(panel){
+      panel.classList.toggle('show', _activeInds[ind]);
+      if(_activeInds[ind] && _indicators) drawIndicator(ind);
+    }
+  }
+}
+
+function toggleIndPanel(ind){
+  // 點標題折疊/展開
+  const canvas = document.getElementById(`ind-${ind}-canvas`);
+  if(canvas) canvas.style.display = canvas.style.display==='none'?'block':'none';
+}
+
+function drawIndicator(ind){
+  if(!_indicators) return;
+  const {start,end,slice:bars,offset} = getViewBars();
+  const n = bars.length;
+  if(!n) return;
+
+  const canvas = document.getElementById(`ind-${ind}-canvas`);
+  if(!canvas) return;
+  const W = canvas.parentElement.clientWidth || 300;
+  canvas.width = W * (window.devicePixelRatio||1);
+  const H = 80;
+  canvas.style.height = H+'px';
+  canvas.height = H * (window.devicePixelRatio||1);
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio||1;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0,0,W,H);
+
+  const dark = document.documentElement.getAttribute('data-theme')==='dark' ||
+    (document.documentElement.getAttribute('data-theme')!=='light' && matchMedia('(prefers-color-scheme:dark)').matches);
+  const gridCol = dark?'rgba(255,255,255,.06)':'rgba(0,0,0,.06)';
+  const textCol = dark?'rgba(255,255,255,.4)':'rgba(0,0,0,.4)';
+
+  const px = i => (i+0.5)*(W/n);
+  const slice = (arr) => arr ? arr.slice(offset, offset+n) : [];
+
+  if(ind==='rsi'){
+    const vals = slice(_indicators.rsi);
+    drawSubLine(ctx,W,H,vals,30,70,gridCol,textCol,[
+      {vals,color:'#e8a030',label:'RSI'}
+    ],[30,50,70]);
+    const last = vals.filter(v=>v!=null).pop();
+    const el = document.getElementById('ind-rsi-val');
+    if(el && last!=null) el.textContent = ` ${last.toFixed(1)}`;
+
+  } else if(ind==='macd'){
+    const macdV = slice(_indicators.macd);
+    const sigV  = slice(_indicators.macd_sig);
+    const histV = slice(_indicators.macd_hist);
+    const allV  = [...macdV,...sigV,...histV].filter(v=>v!=null);
+    const maxV  = Math.max(...allV.map(Math.abs), 0.001);
+    const midY  = H/2;
+    // 零軸
+    ctx.strokeStyle = gridCol; ctx.lineWidth=.5;
+    ctx.beginPath(); ctx.moveTo(0,midY); ctx.lineTo(W,midY); ctx.stroke();
+    // Histogram
+    histV.forEach((v,i)=>{
+      if(v==null) return;
+      const x=px(i), barH=Math.abs(v)/maxV*(H/2-4);
+      ctx.fillStyle = v>=0?'rgba(214,59,59,.6)':'rgba(26,143,94,.6)';
+      ctx.fillRect(x-2, v>=0?midY-barH:midY, 4, barH);
+    });
+    // MACD line
+    drawLine(ctx,macdV,px,H,maxV,'#e8a030');
+    drawLine(ctx,sigV, px,H,maxV,'#8060e0');
+    const lastM = macdV.filter(v=>v!=null).pop();
+    const el = document.getElementById('ind-macd-val');
+    if(el && lastM!=null) el.textContent = ` ${lastM.toFixed(3)}`;
+
+  } else if(ind==='kd'){
+    const kV = slice(_indicators.k);
+    const dV = slice(_indicators.d);
+    drawSubLine(ctx,W,H,kV,20,80,gridCol,textCol,[
+      {vals:kV, color:'#e8a030', label:'K'},
+      {vals:dV, color:'#8060e0', label:'D'}
+    ],[20,50,80]);
+    const lastK = kV.filter(v=>v!=null).pop();
+    const lastD = dV.filter(v=>v!=null).pop();
+    const el = document.getElementById('ind-kd-val');
+    if(el) el.textContent = lastK!=null?` K:${lastK.toFixed(1)} D:${lastD?.toFixed(1)||''}` :'';
+
+  } else if(ind==='obv'){
+    const obvV = slice(_indicators.obv);
+    const validV = obvV.filter(v=>v!=null);
+    if(!validV.length) return;
+    const minV = Math.min(...validV), maxV = Math.max(...validV);
+    const range = maxV - minV || 1;
+    const pyO = v => H-4-(v-minV)/range*(H-8);
+    ctx.strokeStyle='#5090e0'; ctx.lineWidth=1.5; ctx.beginPath();
+    let started=false;
+    obvV.forEach((v,i)=>{
+      if(v==null){started=false;return;}
+      const x=px(i),y=pyO(v);
+      if(!started){ctx.moveTo(x,y);started=true;} else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    ctx.fillStyle=textCol; ctx.font='9px sans-serif'; ctx.textAlign='right';
+    ctx.fillText(Math.round(validV[validV.length-1]/1000)+'K', W-4, H-4);
+  }
+}
+
+function drawSubLine(ctx,W,H,refVals,low,high,gridCol,textCol,lines,gridLines){
+  // 格線
+  gridLines.forEach(v=>{
+    const y = H-4-(v-0)/(100)*(H-8);
+    ctx.strokeStyle=gridCol; ctx.lineWidth=.5;
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+    ctx.fillStyle=textCol; ctx.font='8px sans-serif'; ctx.textAlign='right';
+    ctx.fillText(v, W-3, y-1);
+  });
+  lines.forEach(({vals,color})=>{
+    const n = vals.length;
+    const px = i => (i+0.5)*(W/n);
+    drawLine(ctx,vals,px,H,50,color,0,100);
+  });
+}
+
+function drawLine(ctx,vals,px,H,halfRange,color,minV,maxV){
+  if(minV===undefined) minV=-halfRange;
+  if(maxV===undefined) maxV=halfRange;
+  const range=maxV-minV||1;
+  ctx.strokeStyle=color; ctx.lineWidth=1.2; ctx.beginPath();
+  let started=false;
+  vals.forEach((v,i)=>{
+    if(v==null){started=false;return;}
+    const x=px(i), y=H-4-(v-minV)/range*(H-8);
+    if(!started){ctx.moveTo(x,y);started=true;} else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+}
+
+function drawAllIndicators(){
+  Object.keys(_activeInds).forEach(ind=>{
+    if(_activeInds[ind] && ind!=='bb') drawIndicator(ind);
+  });
+}
+
+// 布林通道畫在主圖（由 drawChart 呼叫）
+function drawBollinger(kCtx, bars, offset, n, py, px){
+  if(!_indicators||!_activeInds.bb) return;
+  const upper = _indicators.bb_upper.slice(offset,offset+n);
+  const mid   = _indicators.bb_mid.slice(offset,offset+n);
+  const lower = _indicators.bb_lower.slice(offset,offset+n);
+  [[upper,'rgba(160,80,220,1)',1.5],[mid,'rgba(160,80,220,.6)',1],[lower,'rgba(160,80,220,1)',1.5]].forEach(([arr,col,lw])=>{
+    kCtx.strokeStyle=col; kCtx.lineWidth=lw; kCtx.setLineDash([]); kCtx.beginPath();
+    let started=false;
+    arr.forEach((v,i)=>{
+      if(v==null){started=false;return;}
+      const x=px(i),y=py(v);
+      if(!started){kCtx.moveTo(x,y);started=true;} else kCtx.lineTo(x,y);
+    });
+    kCtx.stroke(); kCtx.setLineDash([]);
+  });
+}
+
+// ══════════════════════════════════════
+// 手繪工具
+// ══════════════════════════════════════
+let _drawTool = 'trend';
+let _drawings = [];
+let _drawing  = null;
+let _drawBarVisible = false;
+let _drawColor = '#FFD700';
+let _selectedIdx = -1;   // 選取的線索引
+let _dragging = false;
+let _dragOffsetP1 = null;
+let _dragOffsetP2 = null;
+let _parallelSource = null; // 平行線來源
+
+function toggleDrawBar(){
+  _drawBarVisible = !_drawBarVisible;
+  document.getElementById('drawBar').classList.toggle('show', _drawBarVisible);
+  document.querySelector('[data-ind="draw"]')?.classList.toggle('active', _drawBarVisible);
+  const layer = document.getElementById('drawLayer');
+  layer.classList.toggle('active', _drawBarVisible);
+  if(_drawBarVisible) setDrawTool('trend');
+  else { _selectedIdx=-1; redrawDrawLayer(); }
+}
+
+function setDrawTool(tool){
+  _drawTool = tool;
+  _selectedIdx = -1;
+  _parallelSource = null;
+  document.querySelectorAll('.draw-btn[data-tool]').forEach(b=>b.classList.toggle('active',b.dataset.tool===tool));
+  document.getElementById('patternSelect').style.display = tool==='pattern'?'inline-block':'none';
+  const layer = document.getElementById('drawLayer');
+  layer.style.cursor = tool==='select'?'default':'crosshair';
+  redrawDrawLayer();
+}
+
+function setDrawColor(color){
+  _drawColor = color;
+  document.querySelectorAll('#colorPicker div').forEach(d=>{
+    d.style.border = d.style.background===color?`2px solid white`:`2px solid transparent`;
+  });
+  // 若有選取的線，修改顏色
+  if(_selectedIdx>=0 && _drawings[_selectedIdx]){
+    _drawings[_selectedIdx].color = color;
+    saveDrawings(); redrawDrawLayer();
+  }
+}
+
+function clearDrawings(){
+  _drawings=[]; _selectedIdx=-1; _parallelSource=null;
+  saveDrawings(); redrawDrawLayer();
+}
+
+function saveDrawings(){
+  try{ localStorage.setItem(`drawings_${C._currentId||''}`, JSON.stringify(_drawings)); }catch(e){}
+}
+
+function loadDrawings(stockId){
+  try{ _drawings = JSON.parse(localStorage.getItem(`drawings_${stockId||''}`)||'[]'); }
+  catch{ _drawings=[]; }
+  _selectedIdx=-1; redrawDrawLayer();
+}
+
+// ── 座標轉換 ──
+function screenToChart(sx, sy){
+  const kCv = document.getElementById('kChart');
+  const rect = kCv.getBoundingClientRect();
+  const W=kCv.offsetWidth, PL=4,PR=52,PT=18,PB=18,KH=360;
+  const cW=W-PL-PR, cH=KH-PT-PB;
+  const {slice:bars,offset}=getViewBars(); const n=bars.length;
+  if(!n) return null;
+  const mx=sx-rect.left, my=sy-rect.top;
+  const idx=Math.floor((mx-PL)/(cW/n));
+  const allH=bars.map(b=>b.high),allL=bars.map(b=>b.low);
+  C.maArrays.forEach(m=>{for(let i=offset;i<offset+n;i++){const v=m.data[i];if(v){allH.push(v);allL.push(v);}}});
+  allH.push(C.resistance*1.004); allL.push(C.support*0.996);
+  const pMax=Math.max(...allH),pMin=Math.min(...allL),pRange=pMax-pMin||1;
+  const price=pMin+(1-(my-PT)/cH)*pRange;
+  return {barIdx:Math.max(0,Math.min(n-1,idx))+offset, price:Math.round(price*100)/100, sx:mx, sy:my};
+}
+
+function chartToScreen(barIdx, price){
+  const kCv=document.getElementById('kChart');
+  const W=kCv.offsetWidth, PL=4,PR=52,PT=18,PB=18,KH=360;
+  const cW=W-PL-PR, cH=KH-PT-PB;
+  const {slice:bars,offset}=getViewBars(); const n=bars.length;
+  if(!n) return null;
+  const allH=bars.map(b=>b.high),allL=bars.map(b=>b.low);
+  C.maArrays.forEach(m=>{for(let i=offset;i<offset+n;i++){const v=m.data[i];if(v){allH.push(v);allL.push(v);}}});
+  allH.push(C.resistance*1.004); allL.push(C.support*0.996);
+  const pMax=Math.max(...allH),pMin=Math.min(...allL),pRange=pMax-pMin||1;
+  const lIdx=barIdx-offset;
+  return {x:PL+(lIdx+0.5)*(cW/n), y:PT+cH-(price-pMin)/pRange*cH};
+}
+
+// ── 射線延伸：從p1到p2方向延伸到畫布邊界 ──
+function getRayEndpoint(p1x, p1y, p2x, p2y, W, H){
+  if(p2x===p1x) return {x:p2x, y:p2y>p1y?H:0};
+  const slope=(p2y-p1y)/(p2x-p1x);
+  const candidates=[];
+  // 右邊界
+  const yr=p1y+slope*(W-p1x); if(yr>=0&&yr<=H) candidates.push({x:W,y:yr});
+  // 左邊界
+  const yl=p1y+slope*(0-p1x); if(yl>=0&&yl<=H) candidates.push({x:0,y:yl});
+  // 上邊界
+  if(slope!==0){const xt=(0-p1y)/slope+p1x; if(xt>=0&&xt<=W) candidates.push({x:xt,y:0});}
+  // 下邊界
+  if(slope!==0){const xb=(H-p1y)/slope+p1x; if(xb>=0&&xb<=W) candidates.push({x:xb,y:H});}
+  // 取和 p2 同方向的最遠點
+  const dir=p2x-p1x;
+  const valid=candidates.filter(c=>(c.x-p1x)*dir>0);
+  if(!valid.length) return {x:p2x,y:p2y};
+  return valid.reduce((a,b)=>Math.hypot(b.x-p1x,b.y-p1y)>Math.hypot(a.x-p1x,a.y-p1y)?b:a);
+}
+
+// ── 畫單條線 ──
+function drawOneDrawing(ctx, d, W, H, selected){
+  ctx.save();
+  ctx.strokeStyle = d.color||'#FFD700';
+  ctx.fillStyle   = d.color||'#FFD700';
+  ctx.lineWidth   = selected?2.5:1.8;
+  ctx.font='bold 11px sans-serif';
+  if(selected){ ctx.shadowColor=d.color||'#FFD700'; ctx.shadowBlur=6; }
+
+  if(d.type==='trend'||d.type==='segment'||d.type==='hline'||d.type==='parallel'){
+    const p1=chartToScreen(d.p1.barIdx,d.p1.price);
+    const p2=chartToScreen(d.p2.barIdx,d.p2.price);
+    if(!p1||!p2){ctx.restore();return;}
+    ctx.beginPath();ctx.moveTo(p1.x,p1.y);
+    if(d.type==='trend'){
+      // 射線：從p1延伸到畫布邊界
+      const ep=getRayEndpoint(p1.x,p1.y,p2.x,p2.y,W,H);
+      ctx.lineTo(ep.x,ep.y);
+    } else {
+      ctx.lineTo(p2.x,p2.y);
+    }
+    ctx.stroke();
+    // 選取時顯示控制點
+    if(selected){
+      [p1,p2].forEach(p=>{
+        ctx.fillStyle=d.color||'#FFD700';
+        ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);ctx.fill();
+      });
+    }
+  } else if(d.type==='rect'){
+    const p1=chartToScreen(d.p1.barIdx,d.p1.price);
+    const p2=chartToScreen(d.p2.barIdx,d.p2.price);
+    if(!p1||!p2){ctx.restore();return;}
+    const rx=Math.min(p1.x,p2.x),ry=Math.min(p1.y,p2.y);
+    const rw=Math.abs(p2.x-p1.x),rh=Math.abs(p2.y-p1.y);
+    ctx.strokeRect(rx,ry,rw,rh);
+    ctx.fillStyle=(d.color||'#FFD700')+'22';
+    ctx.fillRect(rx,ry,rw,rh);
+  } else if(d.type==='text'){
+    const p=chartToScreen(d.p1.barIdx,d.p1.price);
+    if(!p){ctx.restore();return;}
+    ctx.font='bold 15px sans-serif';
+    const tw=ctx.measureText(d.text).width;
+    // 背景色塊
+    ctx.fillStyle='rgba(0,0,0,.55)';
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(p.x-3,p.y-13,tw+8,17,3);
+    else ctx.rect(p.x-3,p.y-13,tw+8,17);
+    ctx.fill();
+    // 文字輪廓
+    ctx.strokeStyle='rgba(0,0,0,.8)';ctx.lineWidth=3;
+    ctx.strokeText(d.text,p.x+1,p.y);
+    // 文字本體
+    ctx.fillStyle=d.color||'#FFD700';
+    ctx.fillText(d.text,p.x+1,p.y);
+  } else if(d.type==='pattern'){
+    const p=chartToScreen(d.p1.barIdx,d.p1.price);
+    if(!p){ctx.restore();return;}
+    ctx.font='bold 15px sans-serif';
+    const tw=ctx.measureText(d.pattern).width;
+    // 背景色塊
+    ctx.fillStyle='rgba(0,0,0,.6)';
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(p.x-4,p.y-14,tw+10,19,4);
+    else ctx.rect(p.x-4,p.y-14,tw+10,19);
+    ctx.fill();
+    // 文字輪廓
+    ctx.strokeStyle='rgba(0,0,0,.9)';ctx.lineWidth=3;
+    ctx.strokeText(d.pattern,p.x+1,p.y);
+    // 文字本體
+    ctx.fillStyle=d.color||'#FFD700';
+    ctx.fillText(d.pattern,p.x+1,p.y);
+  }
+  ctx.restore();
+}
+
+function redrawDrawLayer(){
+  const layer=document.getElementById('drawLayer');
+  const kCv=document.getElementById('kChart');
+  const W=kCv.offsetWidth||300, H=360, dpr=window.devicePixelRatio||1;
+  layer.width=W*dpr; layer.height=H*dpr;
+  layer.style.width=W+'px'; layer.style.height=H+'px';
+  const ctx=layer.getContext('2d');
+  ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,W,H);
+  _drawings.forEach((d,i)=>drawOneDrawing(ctx,d,W,H,i===_selectedIdx));
+}
+
+// ── 命中測試：點擊位置是否在某條線附近 ──
+function hitTest(sx,sy){
+  const W=document.getElementById('kChart').offsetWidth||300;
+  for(let i=_drawings.length-1;i>=0;i--){
+    const d=_drawings[i];
+    const p1=chartToScreen(d.p1.barIdx,d.p1.price);
+    if(!p1) continue;
+    if(d.type==='text'||d.type==='pattern'){
+      if(Math.hypot(p1.x-sx,p1.y-sy)<20) return i;
+      continue;
+    }
+    const p2=d.p2?chartToScreen(d.p2.barIdx,d.p2.price):null;
+    if(!p2) continue;
+    // 線段距離
+    const dx=p2.x-p1.x, dy=p2.y-p1.y;
+    const len=Math.hypot(dx,dy)||1;
+    const t=((sx-p1.x)*dx+(sy-p1.y)*dy)/(len*len);
+    const tc=Math.max(0,Math.min(1,t));
+    const nx=p1.x+tc*dx, ny=p1.y+tc*dy;
+    if(Math.hypot(nx-sx,ny-sy)<10) return i;
+  }
+  return -1;
+}
+
+// ── 手繪事件 ──
+function attachDrawEvents(){
+  const layer=document.getElementById('drawLayer');
+  let _mouseDownPt=null;
+
+  layer.addEventListener('mousedown',e=>{
+    if(!_drawBarVisible) return;
+    const pt=screenToChart(e.clientX,e.clientY);
+    if(!pt) return;
+    const sx=pt.sx, sy=pt.sy;
+
+    // 選取工具
+    if(_drawTool==='select'){
+      const hit=hitTest(sx,sy);
+      _selectedIdx=hit;
+      if(hit>=0){
+        _dragging=true;
+        _dragOffsetP1={dBar:0,dPrice:0};
+        _dragOffsetP2={dBar:0,dPrice:0};
+        _mouseDownPt=pt;
+      }
+      redrawDrawLayer(); return;
+    }
+
+    if(_drawTool==='eraser'){
+      const hit=hitTest(sx,sy);
+      if(hit>=0){ _drawings.splice(hit,1); saveDrawings(); redrawDrawLayer(); }
+      return;
+    }
+    if(_drawTool==='text'){
+      const txt=prompt('輸入標注文字：');
+      if(txt){ _drawings.push({type:'text',p1:pt,text:txt,color:_drawColor}); saveDrawings(); redrawDrawLayer(); }
+      return;
+    }
+    if(_drawTool==='pattern'){
+      const sel=document.getElementById('patternSelect').value;
+      _drawings.push({type:'pattern',p1:pt,pattern:sel,color:_drawColor});
+      saveDrawings(); redrawDrawLayer(); return;
+    }
+    if(_drawTool==='hline'){
+      _drawings.push({type:'hline',
+        p1:{barIdx:0,price:pt.price},
+        p2:{barIdx:C.bars.length-1,price:pt.price},
+        color:_drawColor});
+      saveDrawings(); redrawDrawLayer(); return;
+    }
+    if(_drawTool==='parallel'){
+      // 第一次點：選取要平行的線
+      if(_parallelSource===null){
+        const hit=hitTest(sx,sy);
+        if(hit>=0){
+          _parallelSource=hit;
+          _selectedIdx=hit;
+          redrawDrawLayer();
+          // 提示
+          document.getElementById('xhairBar').innerHTML='<span style="color:var(--amber)">已選取線段，再點一下畫面設定平行線位置</span>';
+        }
+      } else {
+        // 第二次點：以 pt 的價格為基準，平行複製
+        const src=_drawings[_parallelSource];
+        const priceDiff=pt.price-src.p1.price;
+        _drawings.push({
+          type:src.type,
+          p1:{barIdx:src.p1.barIdx, price:src.p1.price+priceDiff},
+          p2:{barIdx:src.p2.barIdx, price:src.p2.price+priceDiff},
+          color:_drawColor,
+        });
+        _parallelSource=null; _selectedIdx=-1;
+        saveDrawings(); redrawDrawLayer();
+      }
+      return;
+    }
+    // 趨勢線 / 線段 / 矩形：開始拖拉
+    _drawing={type:_drawTool, p1:pt, p2:pt, color:_drawColor};
+  });
+
+  layer.addEventListener('mousemove',e=>{
+    if(!_drawBarVisible) return;
+    const pt=screenToChart(e.clientX,e.clientY);
+    if(!pt) return;
+
+    // 移動選取的線
+    if(_dragging&&_selectedIdx>=0&&_mouseDownPt){
+      const d=_drawings[_selectedIdx];
+      const dBar=pt.barIdx-_mouseDownPt.barIdx;
+      const dPrice=pt.price-_mouseDownPt.price;
+      _mouseDownPt=pt;
+      d.p1={barIdx:d.p1.barIdx+dBar, price:Math.round((d.p1.price+dPrice)*100)/100};
+      if(d.p2) d.p2={barIdx:d.p2.barIdx+dBar, price:Math.round((d.p2.price+dPrice)*100)/100};
+      redrawDrawLayer(); return;
+    }
+
+    if(!_drawing) return;
+    _drawing.p2=pt;
+    redrawDrawLayer();
+    // 預覽虛線
+    const layer2=document.getElementById('drawLayer');
+    const ctx=layer2.getContext('2d');
+    const dpr=window.devicePixelRatio||1;
+    ctx.save();ctx.scale(dpr,dpr);
+    const p1=chartToScreen(_drawing.p1.barIdx,_drawing.p1.price);
+    const p2=chartToScreen(_drawing.p2.barIdx,_drawing.p2.price);
+    if(p1&&p2){
+      ctx.strokeStyle=_drawing.color;ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
+      ctx.beginPath();
+      if(_drawing.type==='trend'){
+        const W2=document.getElementById('kChart').offsetWidth||300;
+        const ep=getRayEndpoint(p1.x,p1.y,p2.x,p2.y,W2,360);
+        ctx.moveTo(p1.x,p1.y);ctx.lineTo(ep.x,ep.y);
+      } else if(_drawing.type==='rect'){
+        ctx.strokeRect(Math.min(p1.x,p2.x),Math.min(p1.y,p2.y),Math.abs(p2.x-p1.x),Math.abs(p2.y-p1.y));
+      } else {
+        ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);
+      }
+      ctx.stroke();ctx.setLineDash([]);
+    }
+    ctx.restore();
+  });
+
+  window.addEventListener('mouseup',e=>{
+    if(_dragging){ _dragging=false; saveDrawings(); return; }
+    if(!_drawing) return;
+    const pt=screenToChart(e.clientX,e.clientY);
+    if(pt) _drawing.p2=pt;
+    if(_drawing.p1.barIdx!==_drawing.p2?.barIdx||_drawing.p1.price!==_drawing.p2?.price){
+      _drawings.push(_drawing);
+      saveDrawings();
+    }
+    _drawing=null;
+    redrawDrawLayer();
+  });
+}
+
+// 載入儲存的 API
+document.addEventListener('DOMContentLoaded',()=>{
+  const saved=localStorage.getItem('apiBase');
+  if(saved)document.getElementById('apiBase').value=saved;
+  applyStoredTheme();
+  buildMABody();
+  attachInteractions();
+  attachDrawEvents();
+  loadHotkeys();
+});
+
+async function loadHotkeys(){
+  renderHotkeys();
+}
+
+function renderHotkeys(){
+  const el=document.getElementById('hotkeysEl');
+  const DEFAULT=[
+    {id:'2330',name:'台積電'},{id:'2317',name:'鴻海'},
+    {id:'2454',name:'聯發科'},{id:'2308',name:'台達電'},
+    {id:'2412',name:'中華電'},{id:'2882',name:'國泰金'},
+    {id:'3008',name:'大立光'},
+  ];
+  const list=historyList.length
+    ? historyList.slice(0,10).map(s=>({id:s.id,name:s.name}))
+    : DEFAULT;
+  el.innerHTML=list.map(s=>
+    `<div class="hk" onclick="qp('${s.id}')">${s.name||s.id}</div>`
+  ).join('');
+}
+</script>
+</body>
+</html>
