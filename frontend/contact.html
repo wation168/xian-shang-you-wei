@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>聯絡我們 — 線上有位</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0b0f1a;--surface:#111827;--surface2:#1a2236;--border:#1e2d45;
+    --accent:#3b82f6;--accent2:#22d3ee;--text:#e2e8f0;--text-muted:#64748b;
+    --text-dim:#94a3b8;--green:#10b981;--red:#ef4444;--radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-serif;min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(59,130,246,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,0.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+  body::after{content:'';position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(59,130,246,0.12) 0%,transparent 70%);pointer-events:none;z-index:0;}
+  .wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:40px 20px 80px;}
+  .nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:56px;}
+  .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);font-weight:700;font-size:1.05rem;letter-spacing:.02em;}
+  .nav-logo .dot{width:8px;height:8px;border-radius:50%;background:var(--accent2);box-shadow:0 0 8px var(--accent2);animation:pulse 2s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .nav-back{display:flex;align-items:center;gap:6px;color:var(--text-muted);text-decoration:none;font-size:.875rem;transition:color .2s;}
+  .nav-back:hover{color:var(--accent);}
+  .header{margin-bottom:48px;animation:fadeUp .6s ease both;}
+  .header-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);border-radius:999px;padding:4px 12px;font-size:.75rem;color:var(--accent);font-family:'DM Mono',monospace;letter-spacing:.05em;margin-bottom:20px;}
+  .header h1{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.2;margin-bottom:12px;background:linear-gradient(135deg,#e2e8f0,#94a3b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .header p{color:var(--text-dim);font-size:.95rem;line-height:1.7;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  .form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:32px;margin-bottom:48px;animation:fadeUp .6s ease .1s both;}
+  .form-card h2{font-size:1rem;font-weight:600;color:var(--text);margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border);}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+  @media(max-width:500px){.form-row{grid-template-columns:1fr;}}
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+  label{font-size:.8rem;color:var(--text-dim);font-weight:500;letter-spacing:.03em;}
+  label span.req{color:var(--accent);margin-left:2px;}
+  input,textarea{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Noto Sans TC',sans-serif;font-size:.9rem;padding:10px 14px;outline:none;transition:border-color .2s,box-shadow .2s;width:100%;}
+  input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.15);}
+  textarea{resize:vertical;min-height:120px;line-height:1.6;}
+  input::placeholder,textarea::placeholder{color:var(--text-muted);}
+  .submit-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px 24px;margin-top:24px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;border-radius:8px;font-family:'Noto Sans TC',sans-serif;font-size:.95rem;font-weight:600;cursor:pointer;transition:opacity .2s,transform .15s,box-shadow .2s;box-shadow:0 4px 20px rgba(59,130,246,.35);}
+  .submit-btn:hover:not(:disabled){opacity:.9;transform:translateY(-1px);box-shadow:0 6px 24px rgba(59,130,246,.45);}
+  .submit-btn:active{transform:translateY(0);}
+  .submit-btn:disabled{opacity:.5;cursor:not-allowed;}
+  .toast{display:none;align-items:center;gap:10px;padding:14px 18px;border-radius:8px;font-size:.875rem;margin-top:16px;animation:fadeUp .3s ease;}
+  .toast.success{display:flex;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:var(--green);}
+  .toast.error{display:flex;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red);}
+  .messages-section{animation:fadeUp .6s ease .2s both;}
+  .section-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
+  .section-header h2{font-size:1rem;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;}
+  .msg-count{background:rgba(59,130,246,.15);color:var(--accent);font-size:.75rem;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:999px;}
+  .search-bar{position:relative;margin-bottom:20px;}
+  .search-bar input{padding-left:38px;font-size:.875rem;}
+  .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:.9rem;pointer-events:none;}
+  .search-clear{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1rem;line-height:1;display:none;padding:2px;transition:color .2s;}
+  .search-clear:hover{color:var(--red);}
+  .search-clear.visible{display:block;}
+  .msg-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:12px;transition:border-color .2s,opacity .3s,transform .35s;animation:fadeUp .4s ease both;}
+  .msg-card:hover{border-color:rgba(59,130,246,.3);}
+  .msg-card.mine{border-color:rgba(34,211,238,.25);}
+  .msg-card.deleting{opacity:0;transform:scale(.97);}
+  .msg-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:12px;}
+  .msg-author{display:flex;align-items:center;gap:10px;min-width:0;}
+  .avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;color:#fff;flex-shrink:0;}
+  .msg-name{font-weight:600;font-size:.9rem;color:var(--text);line-height:1.2;}
+  .msg-email{font-size:.75rem;color:var(--text-muted);font-family:'DM Mono',monospace;}
+  .msg-meta{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+  .msg-time{font-size:.72rem;color:var(--text-muted);font-family:'DM Mono',monospace;white-space:nowrap;}
+  .mine-badge{font-size:.65rem;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:var(--accent2);border-radius:999px;padding:1px 7px;letter-spacing:.04em;white-space:nowrap;}
+  .del-btn{background:none;border:1px solid transparent;border-radius:6px;color:var(--text-muted);cursor:pointer;font-size:.8rem;padding:3px 8px;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:4px;font-family:'Noto Sans TC',sans-serif;}
+  .del-btn:hover{border-color:rgba(239,68,68,.4);color:var(--red);background:rgba(239,68,68,.07);}
+  .del-btn:disabled{opacity:.4;cursor:not-allowed;}
+  .msg-body{font-size:.875rem;color:var(--text-dim);line-height:1.75;padding-left:46px;white-space:pre-wrap;word-break:break-word;}
+  mark{background:rgba(59,130,246,.25);color:var(--text);border-radius:2px;padding:0 1px;}
+  .empty{text-align:center;padding:48px 20px;color:var(--text-muted);}
+  .empty .icon{font-size:2.5rem;margin-bottom:12px;}
+  .empty p{font-size:.875rem;line-height:1.6;}
+  .loading-dots{display:flex;justify-content:center;gap:6px;padding:32px;}
+  .loading-dots span{width:6px;height:6px;border-radius:50%;background:var(--text-muted);animation:bounce 1.2s ease infinite;}
+  .loading-dots span:nth-child(2){animation-delay:.2s;}
+  .loading-dots span:nth-child(3){animation-delay:.4s;}
+  @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-8px)}}
+  .footer{text-align:center;margin-top:64px;color:var(--text-muted);font-size:.8rem;}
+  .footer a{color:var(--accent);text-decoration:none;}
+  .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center;}
+  .modal-backdrop.show{display:flex;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 32px;max-width:360px;width:calc(100% - 40px);animation:fadeUp .25s ease;}
+  .modal h3{font-size:1rem;font-weight:600;margin-bottom:10px;color:var(--text);}
+  .modal p{font-size:.875rem;color:var(--text-dim);margin-bottom:24px;line-height:1.6;}
+  .modal-btns{display:flex;gap:10px;justify-content:flex-end;}
+  .btn-cancel{padding:8px 18px;border:1px solid var(--border);background:transparent;color:var(--text-dim);border-radius:7px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;font-size:.875rem;transition:border-color .2s;}
+  .btn-cancel:hover{border-color:var(--text-muted);}
+  .btn-confirm-del{padding:8px 18px;background:var(--red);border:none;color:#fff;border-radius:7px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;font-size:.875rem;font-weight:600;transition:opacity .2s;}
+  .btn-confirm-del:hover{opacity:.85;}
+  .btn-confirm-del:disabled{opacity:.5;cursor:not-allowed;}
+</style>
+</head>
+<body>
+
+<div class="modal-backdrop" id="delModal">
+  <div class="modal">
+    <h3>🗑 確認刪除</h3>
+    <p>確定要刪除這則留言嗎？<br>此操作無法復原。</p>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-confirm-del" id="confirmDelBtn">確認刪除</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <nav class="nav">
+    <a href="/" class="nav-logo"><div class="dot"></div>線上有位</a>
+    <a href="/landing.html" class="nav-back">← 返回首頁</a>
+  </nav>
+
+  <div class="header">
+    <div class="header-tag">✉ CONTACT</div>
+    <h1>聯絡我們</h1>
+    <p>有任何問題、建議或功能需求，歡迎留言。<br>我們看到後會盡快回覆您的 Email。</p>
+  </div>
+
+  <div class="form-card">
+    <h2>✏️ 留下訊息</h2>
+    <div class="form-row">
+      <div class="field">
+        <label>您的名稱 <span class="req">*</span></label>
+        <input type="text" id="name" placeholder="請輸入姓名或暱稱" maxlength="50">
+      </div>
+      <div class="field">
+        <label>Email <span class="req">*</span></label>
+        <input type="email" id="email" placeholder="your@email.com">
+      </div>
+    </div>
+    <div class="field">
+      <label>訊息內容 <span class="req">*</span></label>
+      <textarea id="message" placeholder="請輸入您的問題或建議… (Ctrl+Enter 快速送出)" maxlength="1000"></textarea>
+    </div>
+    <button class="submit-btn" id="submitBtn" onclick="submitMessage()">
+      <span id="btnText">送出訊息</span>
+    </button>
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <div class="messages-section">
+    <div class="section-header">
+      <h2>💬 所有留言 <span class="msg-count" id="msgCount">載入中…</span></h2>
+    </div>
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="搜尋留言關鍵字…" oninput="onSearch(this.value)">
+      <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+    </div>
+    <div id="messageList">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>© 2026 線上有位 · <a href="mailto:watione@yahoo.com.tw">watione@yahoo.com.tw</a></p>
+  </div>
+</div>
+
+<script>
+  const API = 'https://stock-navigator-api.zeabur.app';
+  const STORAGE_KEY = 'contact_my_ids';
+  let allMessages = [];
+
+  function getMyIds(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');}catch{return[];}}
+  function addMyId(id){const ids=getMyIds();if(!ids.includes(id)){ids.push(id);localStorage.setItem(STORAGE_KEY,JSON.stringify(ids));}}
+  function removeMyId(id){localStorage.setItem(STORAGE_KEY,JSON.stringify(getMyIds().filter(x=>x!==id)));}
+
+  const COLORS=['#3b82f6','#8b5cf6','#ec4899','#f59e0b','#10b981','#06b6d4','#f97316'];
+  function avatarColor(s){let h=0;for(let c of s)h=(h*31+c.charCodeAt(0))%COLORS.length;return COLORS[h];}
+  function initials(n){return n.trim().slice(0,1).toUpperCase();}
+  function formatTime(iso){const d=new Date(iso+'Z'),diff=(Date.now()-d)/1000;if(diff<60)return'剛剛';if(diff<3600)return Math.floor(diff/60)+' 分鐘前';if(diff<86400)return Math.floor(diff/3600)+' 小時前';if(diff<604800)return Math.floor(diff/86400)+' 天前';return d.toLocaleDateString('zh-TW',{month:'short',day:'numeric',year:'numeric'});}
+  function maskEmail(e){const[u,d]=e.split('@');return u.slice(0,2)+'***@'+d;}
+  function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
+  function highlight(text,kw){if(!kw)return escHtml(text);const safe=kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return escHtml(text).replace(new RegExp(safe,'gi'),m=>`<mark>${m}</mark>`);}
+
+  function showToast(type,msg){const t=document.getElementById('toast');t.className='toast '+type;t.innerHTML=(type==='success'?'✅ ':'❌ ')+msg;setTimeout(()=>{t.className='toast';},5000);}
+
+  function onSearch(val){document.getElementById('searchClear').classList.toggle('visible',val.length>0);renderMessages(val.trim());}
+  function clearSearch(){document.getElementById('searchInput').value='';document.getElementById('searchClear').classList.remove('visible');renderMessages('');}
+
+  function renderMessages(kw=''){
+    const myIds=getMyIds();
+    const list=document.getElementById('messageList');
+    const countEl=document.getElementById('msgCount');
+    let msgs=allMessages;
+    if(kw){const lk=kw.toLowerCase();msgs=msgs.filter(m=>m.name.toLowerCase().includes(lk)||m.message.toLowerCase().includes(lk));}
+    countEl.textContent=msgs.length+' 則'+(kw?`（篩選自 ${allMessages.length} 則）`:'');
+    if(msgs.length===0){list.innerHTML=`<div class="empty"><div class="icon">${kw?'🔎':'💌'}</div><p>${kw?'找不到符合「'+escHtml(kw)+'」的留言':'還沒有留言，成為第一個！'}</p></div>`;return;}
+    list.innerHTML=msgs.map((m,i)=>{
+      const isMine=myIds.includes(m.id);
+      return `<div class="msg-card${isMine?' mine':''}" id="card-${m.id}" style="animation-delay:${Math.min(i,10)*0.04}s">
+        <div class="msg-header">
+          <div class="msg-author">
+            <div class="avatar" style="background:${avatarColor(m.name)}">${initials(m.name)}</div>
+            <div><div class="msg-name">${highlight(m.name,kw)}</div><div class="msg-email">${maskEmail(m.email)}</div></div>
+          </div>
+          <div class="msg-meta">
+            ${isMine?'<span class="mine-badge">我的留言</span>':''}
+            <span class="msg-time">${formatTime(m.created_at)}</span>
+            ${isMine?`<button class="del-btn" onclick="askDelete(${m.id})">🗑 刪除</button>`:''}
+          </div>
+        </div>
+        <div class="msg-body">${highlight(m.message,kw)}</div>
+      </div>`;
+    }).join('');
+  }
+
+  async function loadMessages(){
+    try{
+      const res=await fetch(`${API}/api/contact/messages`);
+      const data=await res.json();
+      allMessages=data.messages||[];
+      renderMessages(document.getElementById('searchInput').value.trim());
+    }catch(e){document.getElementById('messageList').innerHTML='<div class="empty"><p>無法載入留言，請稍後再試。</p></div>';}
+  }
+
+  async function submitMessage(){
+    const name=document.getElementById('name').value.trim();
+    const email=document.getElementById('email').value.trim();
+    const message=document.getElementById('message').value.trim();
+    const btn=document.getElementById('submitBtn');
+    const btnText=document.getElementById('btnText');
+    if(!name){showToast('error','請輸入姓名');return;}
+    if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showToast('error','請輸入有效的 Email');return;}
+    if(!message){showToast('error','請輸入訊息內容');return;}
+    btn.disabled=true;btnText.textContent='傳送中…';
+    try{
+      const res=await fetch(`${API}/api/contact`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,message})});
+      const data=await res.json();
+      if(res.ok){
+        if(data.id)addMyId(data.id);
+        showToast('success','訊息已收到！我們會盡快回覆您的 Email。');
+        document.getElementById('name').value='';
+        document.getElementById('email').value='';
+        document.getElementById('message').value='';
+        setTimeout(loadMessages,600);
+      }else{showToast('error',data.detail||'送出失敗，請稍後再試。');}
+    }catch(e){showToast('error','連線失敗，請稍後再試。');}
+    finally{btn.disabled=false;btnText.textContent='送出訊息';}
+  }
+
+  function askDelete(id){
+    document.getElementById('delModal').classList.add('show');
+    document.getElementById('confirmDelBtn').onclick=()=>confirmDelete(id);
+  }
+  function closeModal(){document.getElementById('delModal').classList.remove('show');}
+
+  async function confirmDelete(id){
+    const myIds=getMyIds();
+    if(!myIds.includes(id)){closeModal();return;}
+    const btn=document.getElementById('confirmDelBtn');
+    btn.disabled=true;btn.textContent='刪除中…';
+    try{
+      const res=await fetch(`${API}/api/contact/${id}`,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:'owner'})});
+      if(res.ok){
+        const card=document.getElementById(`card-${id}`);
+        if(card){card.classList.add('deleting');setTimeout(()=>{removeMyId(id);allMessages=allMessages.filter(m=>m.id!==id);renderMessages(document.getElementById('searchInput').value.trim());},350);}
+        closeModal();
+      }else{const d=await res.json();alert(d.detail||'刪除失敗，請稍後再試。');}
+    }catch(e){alert('連線失敗，請稍後再試。');}
+    finally{btn.disabled=false;btn.textContent='確認刪除';}
+  }
+
+  document.getElementById('delModal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+  document.getElementById('message').addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='Enter')submitMessage();});
+  loadMessages();
+</script>
+</body>
+</html>

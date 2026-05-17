@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>線上有位 — 管理後台</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1D9E75;--green-d:#157a5a;
+  --bg:#f2f1ec;--white:#fff;
+  --text:#1a1a18;--text2:#4a4948;--text3:#888780;
+  --border:rgba(0,0,0,.1);--border2:rgba(0,0,0,.18);
+  --up:#D63B3B;--radius:10px;--radius-lg:14px;
+}
+body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+.wrap{max-width:640px;margin:0 auto;padding:24px 16px 60px}
+
+/* ── 登入畫面 ── */
+#loginScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.login-box{background:var(--white);border-radius:var(--radius-lg);padding:32px 24px;width:100%;max-width:360px;box-shadow:0 8px 32px rgba(0,0,0,.1)}
+.login-logo{font-size:22px;font-weight:900;text-align:center;margin-bottom:4px}
+.login-logo em{color:var(--green);font-style:normal}
+.login-sub{font-size:13px;color:var(--text3);text-align:center;margin-bottom:24px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:500}
+.field input{width:100%;padding:11px 14px;border:1px solid var(--border2);border-radius:8px;background:var(--bg);color:var(--text);font-size:15px;outline:none;transition:border .2s}
+.field input:focus{border-color:var(--green)}
+.btn{width:100%;padding:13px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s}
+.btn:hover{background:var(--green-d)}
+.btn:disabled{opacity:.6;cursor:default}
+.err{font-size:12px;color:var(--up);margin-top:8px;min-height:18px;text-align:center}
+
+/* ── 主後台 ── */
+#adminScreen{display:none}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.topbar-logo{font-size:16px;font-weight:700}
+.topbar-logo em{color:var(--green);font-style:normal}
+.topbar-right{display:flex;gap:8px;align-items:center}
+.badge-admin{font-size:11px;background:var(--green);color:#fff;border-radius:20px;padding:3px 10px;font-weight:600}
+.logout-btn{font-size:12px;color:var(--text3);border:none;background:none;cursor:pointer}
+
+/* ── 卡片 ── */
+.card{background:var(--white);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;border:1px solid var(--border)}
+.card-title{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+
+/* ── 快捷操作 ── */
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.action-btn{padding:14px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s;line-height:1.5}
+.action-btn:hover{border-color:var(--green);color:var(--green);background:rgba(29,158,117,.05)}
+.action-btn .icon{font-size:20px;display:block;margin-bottom:4px}
+.action-btn.danger:hover{border-color:var(--up);color:var(--up);background:rgba(214,59,59,.05)}
+
+/* ── 開通表單 ── */
+.form-row{display:flex;gap:8px;align-items:flex-end;margin-bottom:10px;flex-wrap:wrap}
+.form-row .field{flex:1;min-width:140px;margin-bottom:0}
+.form-row select{width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg);color:var(--text);font-size:14px;outline:none;-webkit-appearance:none}
+.inline-btn{padding:10px 16px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;height:42px}
+.inline-btn.secondary{background:var(--bg);color:var(--text2);border:1px solid var(--border2)}
+.result-box{background:var(--bg);border-radius:8px;padding:12px;font-size:12px;font-family:'SF Mono','Fira Code',monospace;color:var(--text2);white-space:pre-wrap;word-break:break-all;min-height:40px;line-height:1.7;display:none}
+.result-box.show{display:block}
+.result-box.success{color:var(--green)}
+.result-box.error{color:var(--up)}
+
+/* ── 會員卡片 ── */
+.mem-card{background:var(--bg);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;border:1px solid var(--border)}
+.mem-card:last-child{margin-bottom:0}
+.mem-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.mem-id{font-size:11px;color:var(--text3);font-weight:600;min-width:28px}
+.mem-email{font-size:13px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mem-status{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600;white-space:nowrap;flex-shrink:0}
+.status-active{background:rgba(29,158,117,.12);color:var(--green)}
+.status-expired{background:rgba(214,59,59,.12);color:var(--up)}
+.status-free{background:rgba(0,0,0,.06);color:var(--text3)}
+.mem-meta{font-size:11px;color:var(--text2);display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;margin-bottom:8px}
+.mem-meta span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mem-actions{display:flex;gap:6px}
+.mem-btn{flex:1;padding:7px 0;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s}
+.mem-btn:hover{border-color:var(--green);color:var(--green)}
+.mem-btn.danger{background:#fee2e2;color:#dc2626;border-color:#fca5a5}
+.mem-btn.danger:hover{background:#fecaca}
+
+/* ── 統計數字 ── */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat-card{background:var(--bg);border-radius:var(--radius);padding:12px;text-align:center}
+.stat-val{font-size:26px;font-weight:900;color:var(--green)}
+.stat-lbl{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* ── Toast ── */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a1a18;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;z-index:999;transition:transform .3s;pointer-events:none;white-space:nowrap}
+#toast.show{transform:translateX(-50%) translateY(0)}
+
+.spin{display:inline-block;width:10px;height:10px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite;margin-right:6px;vertical-align:middle}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- ── 登入畫面 ── -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">線上<em>有位</em></div>
+    <div class="login-sub">管理後台</div>
+    <div class="field">
+      <label>管理員密碼</label>
+      <input type="password" id="adminPwdInput" placeholder="••••••" autocomplete="off"/>
+    </div>
+    <div class="err" id="loginErr"></div>
+    <button class="btn" onclick="doAdminLogin()">登入</button>
+  </div>
+</div>
+
+<!-- ── 管理後台 ── -->
+<div id="adminScreen">
+  <div class="topbar">
+    <div class="topbar-logo">線上<em>有位</em> 後台</div>
+    <div class="topbar-right">
+      <span class="badge-admin">管理員</span>
+      <button class="logout-btn" onclick="doAdminLogout()">登出</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+
+    <!-- 統計 -->
+    <div class="card">
+      <div class="card-title">📊 會員統計</div>
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card"><div class="stat-val">—</div><div class="stat-lbl">總會員</div></div>
+        <div class="stat-card"><div class="stat-val">—</div><div class="stat-lbl">付費中</div></div>
+        <div class="stat-card"><div class="stat-val">—</div><div class="stat-lbl">免費版</div></div>
+      </div>
+    </div>
+
+    <!-- 快捷操作 -->
+    <div class="card">
+      <div class="card-title">⚡ 快捷操作</div>
+      <div class="action-grid">
+        <button class="action-btn" onclick="loadMembers()">
+          <span class="icon">👥</span>查看所有會員
+        </button>
+        <button class="action-btn" onclick="doBackup()">
+          <span class="icon">💾</span>備份資料庫
+        </button>
+        <button class="action-btn" onclick="showSection('grant')">
+          <span class="icon">✅</span>開通帳號
+        </button>
+        <button class="action-btn" onclick="showSection('reset')">
+          <span class="icon">🔐</span>重設密碼
+        </button>
+      </div>
+    </div>
+
+    <!-- 開通帳號 -->
+    <div class="card" id="sec-grant" style="display:none">
+      <div class="card-title">✅ 手動開通帳號</div>
+      <div class="form-row">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="grantEmail" placeholder="對方 Email"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>方案</label>
+          <select id="grantPlan">
+            <option value="monthly">月費（30天）</option>
+            <option value="quarterly" selected>季費（90天）</option>
+            <option value="yearly">年費（365天）</option>
+          </select>
+        </div>
+        <button class="inline-btn" onclick="doGrant()">開通</button>
+      </div>
+      <div class="result-box" id="grantResult"></div>
+    </div>
+
+    <!-- 重設密碼 -->
+    <div class="card" id="sec-reset" style="display:none">
+      <div class="card-title">🔐 重設會員密碼</div>
+      <div class="form-row">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="resetEmail" placeholder="對方 Email"/>
+        </div>
+        <button class="inline-btn" onclick="doReset()">重設</button>
+      </div>
+      <div class="result-box" id="resetResult"></div>
+    </div>
+
+    <!-- 會員列表 -->
+    <div class="card" id="sec-members" style="display:none">
+      <div class="card-title">👥 所有會員</div>
+      <div id="memberList"><div style="color:var(--text3);font-size:13px">載入中...</div></div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = 'https://stock-navigator-api.zeabur.app';
+const ADMIN_KEY = 'xyw2026-liankai-';
+const ADMIN_PWD = '630428';
+
+// ── 登入 ──
+function doAdminLogin(){
+  const pwd = document.getElementById('adminPwdInput').value;
+  const err = document.getElementById('loginErr');
+  if(pwd !== ADMIN_PWD){
+    err.textContent = '密碼錯誤';
+    return;
+  }
+  sessionStorage.setItem('adminAuth','1');
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('adminScreen').style.display = 'block';
+  loadStats();
+}
+document.getElementById('adminPwdInput').addEventListener('keydown', e=>{
+  if(e.key==='Enter') doAdminLogin();
+});
+function doAdminLogout(){
+  sessionStorage.removeItem('adminAuth');
+  location.reload();
+}
+// 自動恢復登入狀態
+if(sessionStorage.getItem('adminAuth')==='1'){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('adminScreen').style.display='block';
+  loadStats();
+}
+
+// ── 顯示/隱藏區塊 ──
+function showSection(name){
+  ['grant','reset','members'].forEach(s=>{
+    document.getElementById('sec-'+s).style.display = s===name ? 'block' : 'none';
+  });
+  if(name==='members') loadMembers();
+}
+
+// ── Toast ──
+function toast(msg, dur=2500){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), dur);
+}
+
+// ── 統計 ──
+async function loadStats(){
+  try{
+    const r = await fetch(`${API}/admin/members?key=${ADMIN_KEY}`);
+    if(!r.ok) return;
+    const data = await r.json();
+    const members = data.members || data || [];
+    const paid = members.filter(m=>m.plan!=='free'&&m.is_active).length;
+    const free = members.filter(m=>m.plan==='free').length;
+    document.getElementById('statsGrid').innerHTML=`
+      <div class="stat-card"><div class="stat-val">${members.length}</div><div class="stat-lbl">總會員</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--green)">${paid}</div><div class="stat-lbl">付費中</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--text3)">${free}</div><div class="stat-lbl">免費版</div></div>
+    `;
+  }catch(e){}
+}
+
+// ── 查看會員 ──
+async function loadMembers(){
+  document.getElementById('sec-members').style.display='block';
+  const el=document.getElementById('memberList');
+  el.innerHTML='<div style="color:var(--text3);font-size:13px">載入中...</div>';
+  try{
+    const r=await fetch(`${API}/admin/members?key=${ADMIN_KEY}`);
+    if(!r.ok) throw new Error();
+    const data=await r.json();
+    const members=data.members||data||[];
+    if(!members.length){el.innerHTML='<div style="color:var(--text3);font-size:13px">尚無會員</div>';return;}
+    const planMap={free:'免費',monthly:'月費',quarterly:'季費',yearly:'年費',test:'測試'};
+    const fmtDate=s=>{if(!s)return'—';return String(s).slice(0,10);};
+    const fmtDT=s=>{if(!s)return'—';return String(s).slice(0,16).replace('T',' ');};
+    el.innerHTML=members.map(m=>{
+      const isPaid=m.plan!=='free'&&m.is_active;
+      const isExpired=m.plan!=='free'&&!m.is_active;
+      const statusClass=isExpired?'status-expired':isPaid?'status-active':'status-free';
+      const statusLabel=isExpired?'已到期':isPaid?'付費中':'免費';
+      const planLabel=planMap[m.plan]||m.plan;
+      return `<div class="mem-card">
+        <div class="mem-head">
+          <span class="mem-id">#${m.id||'—'}</span>
+          <span class="mem-email">${m.email}</span>
+          <span class="mem-status ${statusClass}">${statusLabel}</span>
+        </div>
+        <div class="mem-meta">
+          <span>方案：${planLabel}</span>
+          <span>到期：${fmtDate(m.expire_at)}</span>
+          <span>建立：${fmtDate(m.created_at)}</span>
+          <span>登入：${fmtDT(m.last_login)}</span>
+        </div>
+        <div class="mem-actions">
+          <button class="mem-btn" onclick="quickReset('${m.email}')">🔐 重設密碼</button>
+          <button class="mem-btn danger" onclick="doDelete('${m.email}')">🗑 刪除</button>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    el.innerHTML='<div style="color:var(--up);font-size:13px">載入失敗，請確認後端連線</div>';
+  }
+}
+
+// ── 開通帳號 ──
+const PLAN_DAYS={monthly:30,quarterly:90,yearly:365};
+async function doGrant(){
+  const email=document.getElementById('grantEmail').value.trim();
+  const plan=document.getElementById('grantPlan').value;
+  const days=PLAN_DAYS[plan];
+  const res=document.getElementById('grantResult');
+  if(!email){res.textContent='請輸入 Email';res.className='result-box show error';return;}
+  res.textContent='開通中...';res.className='result-box show';
+  try{
+    const r=await fetch(`${API}/admin/grant?key=${ADMIN_KEY}&email=${encodeURIComponent(email)}&plan=${plan}&days=${days}`,{method:'POST'});
+    const data=await r.json();
+    if(!r.ok){res.textContent='失敗：'+(data.detail||'未知錯誤');res.className='result-box show error';return;}
+    const pwd=data.password||data.temp_password||'（請查看後端回傳）';
+    res.textContent=`✅ 開通成功！\n帳號：${email}\n密碼：${pwd}\n方案：${plan}（${days}天）\n\n請將帳號密碼傳給對方。`;
+    res.className='result-box show success';
+    loadStats();
+  }catch(e){
+    res.textContent='連線失敗，請確認後端是否正常';
+    res.className='result-box show error';
+  }
+}
+
+// ── 重設密碼 ──
+async function doReset(){
+  const email=document.getElementById('resetEmail').value.trim();
+  const res=document.getElementById('resetResult');
+  if(!email){res.textContent='請輸入 Email';res.className='result-box show error';return;}
+  res.textContent='重設中...';res.className='result-box show';
+  try{
+    const r=await fetch(`${API}/admin/reset-password?key=${ADMIN_KEY}&email=${encodeURIComponent(email)}`,{method:'POST'});
+    const data=await r.json();
+    if(!r.ok){res.textContent='失敗：'+(data.detail||'未知錯誤');res.className='result-box show error';return;}
+    const pwd=data.password||data.new_password||'（請查看後端回傳）';
+    res.textContent=`✅ 重設成功！\n帳號：${email}\n新密碼：${pwd}\n\n請將新密碼傳給對方。`;
+    res.className='result-box show success';
+  }catch(e){
+    res.textContent='連線失敗';
+    res.className='result-box show error';
+  }
+}
+
+// ── 快速重設（從會員列表觸發）──
+async function doDelete(email){
+  if(!confirm(`確定要刪除帳號 ${email}？此操作無法復原！`)) return;
+  try{
+    const r=await fetch(`${API}/admin/delete-member?key=${ADMIN_KEY}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email})
+    });
+    const data=await r.json();
+    if(r.ok){ alert('✅ 刪除成功'); loadMembers(); }
+    else{ alert('❌ '+(data.detail||'刪除失敗')); }
+  }catch(e){ alert('連線失敗'); }
+}
+async function quickReset(email){
+  if(!confirm(`確定要重設 ${email} 的密碼嗎？`)) return;
+  document.getElementById('resetEmail').value=email;
+  showSection('reset');
+  await doReset();
+}
+
+// ── 備份 ──
+function doBackup(){
+  const url=`${API}/admin/backup-db?key=${ADMIN_KEY}`;
+  window.open(url,'_blank');
+  toast('📥 備份下載中...');
+}
+</script>
+</body>
+</html>
