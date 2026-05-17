@@ -16,6 +16,32 @@ OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "output")
 
 
 # ──────────────────────────────────────────
+# Claude API 失敗時的技術指標降級描述
+# ──────────────────────────────────────────
+def _tech_fallback(stock: dict) -> dict:
+    """Claude API 無法使用時，以技術指標自動產生分析文字"""
+    trend    = stock.get("trend", "盤整")
+    kline    = stock.get("kline_pattern", "常態K線")
+    wr_pct   = int(stock.get("win_rate", 0.50) * 100)
+    l1       = (stock.get("signal_label", "") or "技術金叉").replace("✅ ", "").replace("⚠️ ", "")
+    dif      = stock.get("macd_dif", 0.0)
+    vol      = stock.get("vol_ratio", 1.0)
+    tech_scr = stock.get("score", 0)
+
+    reason = (
+        f"技術面呈{trend}，出現{kline}（勝率{wr_pct}%），"
+        f"{l1}確認方向，MACD DIF={dif:.2f} 動能偏多，"
+        f"量能為均量{vol:.1f}倍，技術評分 {tech_scr} 分。"
+    )
+    return {
+        "score":       min(50 + tech_scr * 6, 88),
+        "reason":      reason,
+        "watch_point": "量能持續放大且守住均線可考慮追蹤",
+        "risk":        "技術指標翻空或跌破均線須留意停損",
+    }
+
+
+# ──────────────────────────────────────────
 # Claude API 呼叫
 # ──────────────────────────────────────────
 def claude_evaluate(stock: dict) -> dict:
@@ -83,13 +109,8 @@ def claude_evaluate(stock: dict) -> dict:
         return json.loads(text.strip())
 
     except Exception as e:
-        print(f"[generator] Claude API 失敗 {stock['stock_id']}：{e}")
-        return {
-            "score": 0,
-            "reason": "分析暫時無法取得",
-            "watch_point": "—",
-            "risk": "—",
-        }
+        print(f"[generator] Claude API 失敗 {stock['stock_id']}：{e}，改用技術指標描述")
+        return _tech_fallback(stock)
 
 
 # ──────────────────────────────────────────

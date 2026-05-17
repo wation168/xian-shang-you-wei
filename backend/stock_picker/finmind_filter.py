@@ -180,6 +180,17 @@ def analyze_stock(stock_id: str, news_list: list[dict]) -> dict | None:
     if avg_vol_20 < CFG["min_avg_volume"]:
         return None
 
+    # ── 均線趨勢 ──
+    if ma60_t is not None:
+        if ma5_t > ma20_t > ma60_t:
+            trend = "上升"
+        elif ma5_t < ma20_t < ma60_t:
+            trend = "下降"
+        else:
+            trend = "盤整"
+    else:
+        trend = "上升" if ma5_t > ma20_t else ("下降" if ma5_t < ma20_t else "盤整")
+
     # ── 篩選層旗標 ──
     pass_l1         = ma_cross or kd_cross
     pass_l2         = avg_vol_5 >= avg_vol_20 * CFG["vol_ratio_threshold"]
@@ -269,6 +280,8 @@ def analyze_stock(stock_id: str, news_list: list[dict]) -> dict | None:
         "is_risk":              False,
         "kline_pattern":        kline_pattern,
         "win_rate":             win_rate,
+        "trend":                trend,
+        "macd_dif":             round(dif_t, 3),
         # 篩選層旗標（供 run_filter 判斷，不傳給 generator）
         "pass_l1":              pass_l1,
         "pass_l2":              pass_l2,
