@@ -1,184 +1,94 @@
 """
-finmind_filter.py — 數值篩選層
-輸入：股票代號列表（從新聞萃取）
-輸出：通過篩選的個股，附帶量化指標
+finmind_filter.py — 數值篩選層（v3）
 
-選股三要素：
-  1. 鉅亨有題材新聞（有故事）← 必要條件
-  2. 法人近 N 日連續買超（籌碼回流）
-  3. 成交量從低量開始放大（量先價行）
-
-型態偵測（v2）：
-  - is_breakout_signal：均線糾結轉強  →「🚀 突破轉強」
-  - is_golden_cross：轉多頭金叉      →「✅ 強勢金叉」/「✅ 金叉轉多」
-  - is_death_cross：轉空頭死叉       →「⚠️ 強勢死叉」/「⚠️ 死叉轉空」（風險警示）
+篩選邏輯：
+  第一層（必要，任一成立）：金叉型態
+    - MA5  上穿 MA20（前日 MA5 <= MA20，今日 MA5 > MA20）
+    - MA20 上穿 MA60（前日 MA20 <= MA60，今日 MA20 > MA60）
+    - KD 金叉（前日 K <= D，今日 K > D，且 K < 80 非超買）
+  第二層（必要）：量能放大
+    - 近5日均量 >= 近20日均量 * 1.5
+  第三層（必要）：MACD DIF 在 0 軸以上或剛上穿
+    - DIF > 0（含由負轉正）
+    - 若無股票通過，放寬為 DIF > -0.5
+  第四層（加分，影響排序）：
+    - 有鉅亨個股新聞：+2
+    - 法人連買 >= 3 日：+2
+    - 法人連買 >= 2 日：+1
+    - KD 金叉：+1
+    - MA 均線金叉：+1
+  輸出：依總分排序，取前 20 名
 """
 
 from crawler import fetch_price_history, fetch_institutional
 import time
 
 
-# ──────────────────────────────────────────
-# 篩選參數（可調整）
-# ──────────────────────────────────────────
 CFG = {
-    # 【必要條件】鉅亨需有題材新聞才納入
-    "require_news": True,
-
-    # 法人連續買超天數門檻（純型態訊號可放寬）
-    "min_consecutive_buy_days": 3,
-
-    # 量能放大：近 5 日均量 / 近 20 日均量
-    "min_vol_ratio": 1.2,
-
-    # 最低成交量（張）：太冷門的過濾掉
-    "min_avg_volume": 300,
-
-    # 現價下限（過濾雞蛋水餃股）
-    "min_price": 10.0,
+    "min_avg_volume":      300,
+    "min_price":           10.0,
+    "vol_ratio_threshold": 1.5,
 }
 
 
 # ──────────────────────────────────────────
-# 型態偵測函數
+# 技術指標計算
 # ──────────────────────────────────────────
 
-def is_breakout_signal(prices: list[dict]) -> dict:
+def calc_kd(prices: list[dict], n: int = 9) -> tuple[float, float, float, float]:
     """
-    均線糾結轉強（同時滿足）：
-    - MA5、MA20、MA60 差距皆 < 3%（糾結）
-    - 當日成交量 ≥ 前5日均量的 1.5 倍
-    - 收盤價 > 開盤價（收紅K）
-    - 收盤價 > MA5、MA20、MA60
-    - 收盤價 > 前10日最高價（突破近期高點）
+    計算隨機指標 KD（n 日 RSV，預設 9 日）
+    回傳 (K今, D今, K昨, D昨)；資料不足時回傳 (50, 50, 50, 50)
     """
-    if len(prices) < 62:
-        return {"triggered": False, "label": ""}
+    if len(prices) < n + 1:
+        return 50.0, 50.0, 50.0, 50.0
 
-    closes = [p["close"] for p in prices]
-    ma5  = sum(closes[-5:])  / 5
-    ma20 = sum(closes[-20:]) / 20
-    ma60 = sum(closes[-60:]) / 60
+    K, D = 67.0, 67.0
+    K_prev, D_prev = 67.0, 67.0
 
-    # MA 差距 < 3%（糾結判斷）
-    ma_max = max(ma5, ma20, ma60)
-    ma_min = min(ma5, ma20, ma60)
-    if ma_min <= 0 or (ma_max - ma_min) / ma_min >= 0.03:
-        return {"triggered": False, "label": ""}
+    for i in range(n - 1, len(prices)):
+        window = prices[i - n + 1: i + 1]
+        high9  = max(p["high"] for p in window)
+        low9   = min(p["low"]  for p in window)
+        close  = prices[i]["close"]
+        rsv    = (close - low9) / (high9 - low9) * 100 if high9 != low9 else 50.0
+        K_prev, D_prev = K, D
+        K = K * 2 / 3 + rsv / 3
+        D = D * 2 / 3 + K   / 3
 
-    last  = prices[-1]
-    close = last["close"]
-    open_ = last["open"]
-    vol   = last["volume"]
-
-    # 收紅K
-    if close <= open_:
-        return {"triggered": False, "label": ""}
-
-    # 收盤 > 三條均線
-    if not (close > ma5 and close > ma20 and close > ma60):
-        return {"triggered": False, "label": ""}
-
-    # 成交量 ≥ 前5日均量 × 1.5
-    prev5_avg = sum(p["volume"] for p in prices[-6:-1]) / 5
-    if prev5_avg <= 0 or vol < prev5_avg * 1.5:
-        return {"triggered": False, "label": ""}
-
-    # 收盤 > 前10日最高價（不含今日）
-    recent_high = max(p["high"] for p in prices[-11:-1])
-    if close <= recent_high:
-        return {"triggered": False, "label": ""}
-
-    return {"triggered": True, "label": "🚀 突破轉強"}
+    return K, D, K_prev, D_prev
 
 
-def is_golden_cross(prices: list[dict]) -> dict:
+def calc_macd(closes: list[float]) -> tuple[float, float]:
     """
-    轉多頭金叉：
-    長線（主要）：MA20 上穿 MA60 + MA60 斜率向上 + 收盤 > MA60 + 量 ≥ 前5日均量 1.2x
-    短線（輔助）：MA5 上穿 MA20 → 標籤升級為「強勢金叉」
+    計算 MACD DIF（EMA12 - EMA26）
+    回傳 (DIF今, DIF昨)；資料不足時回傳 (0.0, 0.0)
     """
-    if len(prices) < 62:
-        return {"triggered": False, "label": ""}
+    if len(closes) < 27:
+        return 0.0, 0.0
 
-    closes = [p["close"] for p in prices]
+    def _ema_series(data: list[float], period: int) -> list[float]:
+        k    = 2 / (period + 1)
+        seed = sum(data[:period]) / period
+        out  = [seed]
+        for p in data[period:]:
+            seed = p * k + seed * (1 - k)
+            out.append(seed)
+        return out
 
-    # 今日 / 昨日 MA20、MA60
-    ma20_t = sum(closes[-20:])   / 20
-    ma20_y = sum(closes[-21:-1]) / 20
-    ma60_t = sum(closes[-60:])   / 60
-    ma60_y = sum(closes[-61:-1]) / 60
+    ema12 = _ema_series(closes, 12)
+    ema26 = _ema_series(closes, 26)
+    # ema12 比 ema26 長；兩者皆以最新日收尾，從尾端對齊
+    dif = [a - b for a, b in zip(ema12[-len(ema26):], ema26)]
 
-    # MA60 斜率（與 5 日前比較）
-    ma60_5ago = sum(closes[-65:-5]) / 60 if len(closes) >= 65 else None
-
-    last  = prices[-1]
-    close = last["close"]
-    vol   = last["volume"]
-    prev5 = sum(p["volume"] for p in prices[-6:-1]) / 5
-
-    # 長線金叉條件
-    long_ok = (
-        ma20_t > ma60_t and          # 今日 MA20 > MA60
-        ma20_y <= ma60_y and         # 昨日 MA20 <= MA60（剛上穿）
-        (ma60_5ago is None or ma60_t > ma60_5ago) and  # MA60 斜率向上
-        close > ma60_t and           # 收盤 > MA60
-        prev5 > 0 and vol >= prev5 * 1.2              # 量能確認
-    )
-    if not long_ok:
-        return {"triggered": False, "label": ""}
-
-    # 短線金叉（輔助）
-    ma5_t = sum(closes[-5:])   / 5
-    ma5_y = sum(closes[-6:-1]) / 5
-    short_ok = (ma5_t > ma20_t and ma5_y <= ma20_y)
-
-    label = "✅ 強勢金叉" if short_ok else "✅ 金叉轉多"
-    return {"triggered": True, "label": label}
+    if len(dif) < 2:
+        return dif[-1] if dif else 0.0, 0.0
+    return dif[-1], dif[-2]
 
 
-def is_death_cross(prices: list[dict]) -> dict:
-    """
-    轉空頭死叉：
-    長線（主要）：MA20 下穿 MA60 + MA60 斜率向下 + 收盤 < MA60 + 量 ≥ 前5日均量 1.2x
-    短線（輔助）：MA5 下穿 MA20 → 標籤升級為「強勢死叉」
-    """
-    if len(prices) < 62:
-        return {"triggered": False, "label": ""}
-
-    closes = [p["close"] for p in prices]
-
-    ma20_t = sum(closes[-20:])   / 20
-    ma20_y = sum(closes[-21:-1]) / 20
-    ma60_t = sum(closes[-60:])   / 60
-    ma60_y = sum(closes[-61:-1]) / 60
-
-    ma60_5ago = sum(closes[-65:-5]) / 60 if len(closes) >= 65 else None
-
-    last  = prices[-1]
-    close = last["close"]
-    vol   = last["volume"]
-    prev5 = sum(p["volume"] for p in prices[-6:-1]) / 5
-
-    # 長線死叉條件
-    long_ok = (
-        ma20_t < ma60_t and          # 今日 MA20 < MA60
-        ma20_y >= ma60_y and         # 昨日 MA20 >= MA60（剛下穿）
-        (ma60_5ago is None or ma60_t < ma60_5ago) and  # MA60 斜率向下
-        close < ma60_t and           # 收盤 < MA60
-        prev5 > 0 and vol >= prev5 * 1.2              # 量能確認
-    )
-    if not long_ok:
-        return {"triggered": False, "label": ""}
-
-    # 短線死叉（輔助）
-    ma5_t = sum(closes[-5:])   / 5
-    ma5_y = sum(closes[-6:-1]) / 5
-    short_ok = (ma5_t < ma20_t and ma5_y >= ma20_y)
-
-    label = "⚠️ 強勢死叉" if short_ok else "⚠️ 死叉轉空"
-    return {"triggered": True, "label": label}
-
+# ──────────────────────────────────────────
+# K 線型態偵測
+# ──────────────────────────────────────────
 
 def detect_kline_patterns(closes, opens, highs, lows, volumes):
     """偵測最新 K 線型態，回傳 (型態標籤, 勝率)"""
@@ -198,12 +108,10 @@ def detect_kline_patterns(closes, opens, highs, lows, volumes):
         return "量增大紅棒（突破確認）", 0.62
     if vol_surge and (body_size0 >= range0 * 0.5) and (c0 < o0):
         return "量增大黑棒（跌破確認）", 0.62
-    # 錘子線：下影線夠長（>=40%全幅）、下影線>=實體1.5倍、上影線短（<=20%全幅）
     if (is_downtrend and (lower_shadow0 >= range0 * 0.4)
             and (lower_shadow0 >= body_size0 * 1.5)
             and (upper_shadow0 <= range0 * 0.2)):
         return "低檔錘子線（底部承接力道強）", 0.53
-    # 流星線：上影線夠長（>=40%全幅）、上影線>=實體1.5倍、下影線短（<=20%全幅）
     if (is_uptrend and (upper_shadow0 >= range0 * 0.4)
             and (upper_shadow0 >= body_size0 * 1.5)
             and (lower_shadow0 <= range0 * 0.2)):
@@ -217,13 +125,68 @@ def detect_kline_patterns(closes, opens, highs, lows, volumes):
 
 def analyze_stock(stock_id: str, news_list: list[dict]) -> dict | None:
     """
-    對單一股票做量化分析，回傳指標 dict 或 None（不符合條件）
-
-    回傳結構（新增欄位）：
-      signal_label: str  ← 觸發的型態標籤（空字串表示無型態）
-      is_risk: bool      ← True 表示死叉風險警示
+    對單一股票計算技術指標並標記各層通過狀態。
+    回傳 dict（含 pass_l1/l2/l3/pass_l3_relaxed/score），或 None（資料不足）。
     """
-    # ── 先確認有無題材新聞（必要條件，省去不必要的 API 呼叫）──
+    # ── 股價資料（拉 90 日曆天 ≈ 60~65 交易日，支援 MA60+KD+MACD）──
+    prices = fetch_price_history(stock_id, days=90)
+    if len(prices) < 26:
+        return None
+
+    price = prices[-1]["close"]
+    if price < CFG["min_price"]:
+        return None
+
+    closes = [p["close"] for p in prices]
+    m      = len(closes)
+
+    if m < 21:
+        return None
+
+    # ── MA 計算 ──
+    ma5_t  = sum(closes[-5:])    / 5
+    ma5_y  = sum(closes[-6:-1])  / 5
+    ma20_t = sum(closes[-20:])   / 20
+    ma20_y = sum(closes[-21:-1]) / 20
+
+    if m >= 61:
+        ma60_t = sum(closes[-60:])   / 60
+        ma60_y = sum(closes[-61:-1]) / 60
+    else:
+        ma60_t = ma60_y = None
+
+    # 均線金叉
+    ma5_20_cross  = (ma5_t > ma20_t) and (ma5_y <= ma20_y)
+    ma20_60_cross = (ma60_t is not None
+                     and ma20_t > ma60_t and ma20_y <= ma60_y)
+    ma_cross      = ma5_20_cross or ma20_60_cross
+
+    # ── KD ──
+    K_t, D_t, K_y, D_y = calc_kd(prices)
+    kd_cross = (K_t > D_t) and (K_y <= D_y) and (K_t < 80)
+
+    # ── MACD ──
+    dif_t, dif_y      = calc_macd(closes)
+    macd_cross_zero   = (dif_y < 0) and (dif_t > 0)   # 由負轉正
+    macd_pass         = dif_t > 0                       # 含上穿0軸
+    macd_pass_relaxed = dif_t > -0.5
+
+    # ── 量能 ──
+    vols       = [p["volume"] for p in prices if p["volume"] > 0]
+    avg_vol_20 = sum(vols[-20:]) / min(20, len(vols)) if vols else 0
+    avg_vol_5  = sum(p["volume"] for p in prices[-5:]) / 5
+    vol_ratio  = round(avg_vol_5 / avg_vol_20, 2) if avg_vol_20 > 0 else 0
+
+    if avg_vol_20 < CFG["min_avg_volume"]:
+        return None
+
+    # ── 篩選層旗標 ──
+    pass_l1         = ma_cross or kd_cross
+    pass_l2         = avg_vol_5 >= avg_vol_20 * CFG["vol_ratio_threshold"]
+    pass_l3         = macd_pass
+    pass_l3_relaxed = macd_pass_relaxed
+
+    # ── 新聞（加分用，不作為必要條件）──
     related_news = []
     for n in news_list:
         if stock_id in n["codes"] and n["title"]:
@@ -232,107 +195,61 @@ def analyze_stock(stock_id: str, news_list: list[dict]) -> dict | None:
                 "link":     n["link"],
                 "keywords": n["keywords"],
             })
+    has_news = bool(related_news)
 
-    if CFG["require_news"] and not related_news:
-        return None
+    # ── 法人（L1+L2 皆通過才呼叫 API，節省配額）──
+    consecutive_buy_days = 0
+    inst_5d_total        = 0
+    inst_20d_total       = 0
+    if pass_l1 and pass_l2:
+        inst = fetch_institutional(stock_id, days=20)
+        if inst:
+            for row in reversed(inst):
+                if row["total"] > 0:
+                    consecutive_buy_days += 1
+                else:
+                    break
+            inst_5d_total  = sum(r["total"] for r in inst[-5:])
+            inst_20d_total = sum(r["total"] for r in inst)
 
-    # ── 股價資料（拉 90 日以支援 MA60 計算）──
-    prices = fetch_price_history(stock_id, days=90)
-    if len(prices) < 10:
-        return None
+    # ── 第四層評分 ──
+    score = 0
+    if has_news:                    score += 2
+    if consecutive_buy_days >= 3:   score += 2
+    elif consecutive_buy_days >= 2: score += 1
+    if kd_cross:                    score += 1
+    if ma_cross:                    score += 1
 
-    price = prices[-1]["close"]
-    if price < CFG["min_price"]:
-        return None
-
-    # ── 基本量能計算 ──
-    vols       = [p["volume"] for p in prices if p["volume"] > 0]
-    avg_vol_20 = sum(vols) / len(vols) if vols else 0
-    avg_vol_5  = sum(p["volume"] for p in prices[-5:]) / 5
-    vol_ratio  = round(avg_vol_5 / avg_vol_20, 2) if avg_vol_20 > 0 else 0
-
-    # ── K 線型態偵測 ──
-    _closes  = [p["close"]  for p in prices]
-    _opens   = [p["open"]   for p in prices]
-    _highs   = [p["high"]   for p in prices]
-    _lows    = [p["low"]    for p in prices]
-    _volumes = [p["volume"] for p in prices]
-    kline_pattern, win_rate = detect_kline_patterns(_closes, _opens, _highs, _lows, _volumes)
-
-    # ── 型態偵測（在拉法人之前先跑，死叉可跳過法人條件）──
-    breakout = is_breakout_signal(prices)
-    golden   = is_golden_cross(prices)
-    death    = is_death_cross(prices)
-
-    kws = list({kw for n in related_news for kw in n["keywords"]})
-
-    # ── 死叉路徑：不需法人連買，直接標記為風險警示 ──
-    if death["triggered"]:
-        score_factors = [
-            f"鉅亨題材新聞 {len(related_news)} 則，關鍵字：{', '.join(kws[:5]) if kws else '無特定題材標籤'}",
-            f"量能：近5日均量是20日均量的 {vol_ratio}x，現價 {price}",
-            f"型態警示：{death['label']}（MA20 下穿 MA60，注意下跌風險）",
-        ]
-        return {
-            "stock_id":             stock_id,
-            "price":                price,
-            "consecutive_buy_days": 0,
-            "inst_5d_total":        0,
-            "inst_20d_total":       0,
-            "vol_ratio":            vol_ratio,
-            "avg_vol_5":            round(avg_vol_5),
-            "avg_vol_20":           round(avg_vol_20),
-            "news":                 related_news[:5],
-            "score_factors":        score_factors,
-            "signal_label":         death["label"],
-            "is_risk":              True,
-            "kline_pattern":        kline_pattern,
-            "win_rate":             win_rate,
-        }
-
-    # ── 正常路徑：量能基本門檻 ──
-    if avg_vol_20 < CFG["min_avg_volume"]:
-        return None
-
-    # 型態訊號自帶量能條件，可放寬整體量比門檻
-    if vol_ratio < CFG["min_vol_ratio"] and not breakout["triggered"] and not golden["triggered"]:
-        return None
-
-    # ── 法人買賣超 ──
-    inst = fetch_institutional(stock_id, days=20)
-    if not inst:
-        consecutive_buy_days = 0
-        inst_5d_total        = 0
-        inst_20d_total       = 0
-    else:
-        consecutive_buy_days = 0
-        for row in reversed(inst):
-            if row["total"] > 0:
-                consecutive_buy_days += 1
-            else:
-                break
-        inst_5d_total  = sum(r["total"] for r in inst[-5:])
-        inst_20d_total = sum(r["total"] for r in inst)
-
-    # 型態訊號可放寬法人連買門檻
-    if (consecutive_buy_days < CFG["min_consecutive_buy_days"]
-            and not breakout["triggered"] and not golden["triggered"]):
-        return None
-
-    # ── 決定信號標籤 ──
-    if breakout["triggered"]:
-        signal_label = breakout["label"]
-    elif golden["triggered"]:
-        signal_label = golden["label"]
+    # ── 信號標籤 ──
+    if ma5_20_cross and ma20_60_cross:
+        signal_label = "✅ 雙均線金叉"
+    elif ma5_20_cross:
+        signal_label = "✅ MA5穿MA20金叉"
+    elif ma20_60_cross:
+        signal_label = "✅ MA20穿MA60金叉"
+    elif kd_cross:
+        signal_label = f"✅ KD金叉（K={K_t:.1f}）"
     else:
         signal_label = ""
 
-    # ── 評分依據（給 Claude 閱讀）──
+    # ── K 線型態 ──
+    kline_pattern, win_rate = detect_kline_patterns(
+        closes,
+        [p["open"]   for p in prices],
+        [p["high"]   for p in prices],
+        [p["low"]    for p in prices],
+        [p["volume"] for p in prices],
+    )
+
+    kws = list({kw for n in related_news for kw in n["keywords"]})
+    macd_desc = "上穿0軸" if macd_cross_zero else ("0軸以上" if dif_t > 0 else "0軸以下")
     score_factors = [
-        f"鉅亨題材新聞 {len(related_news)} 則，關鍵字：{', '.join(kws[:5]) if kws else '無特定題材標籤'}",
-        f"法人連續買超 {consecutive_buy_days} 天，近5日合計 {inst_5d_total:+,} 張，近20日 {inst_20d_total:+,} 張",
-        f"量能放大：近5日均量是20日均量的 {vol_ratio}x（量先價行跡象{'明顯' if vol_ratio >= 1.5 else '初現'}）",
-        f"現價 {price}，近5日均量約 {round(avg_vol_5):,} 張",
+        f"鉅亨題材新聞 {len(related_news)} 則" + (f"，關鍵字：{', '.join(kws[:5])}" if kws else ""),
+        f"量能：近5日均量是20日均量的 {vol_ratio}x（門檻 {CFG['vol_ratio_threshold']}x）",
+        f"MACD DIF={dif_t:.3f}（{macd_desc}）",
+        f"KD: K={K_t:.1f} D={D_t:.1f}（{'金叉' if kd_cross else '未金叉'}）",
+        f"法人連買 {consecutive_buy_days} 日，近5日 {inst_5d_total:+,} 張，近20日 {inst_20d_total:+,} 張",
+        f"現價 {price}，近5日均量 {round(avg_vol_5):,} 張",
     ]
     if signal_label:
         score_factors.append(f"型態：{signal_label}")
@@ -352,46 +269,55 @@ def analyze_stock(stock_id: str, news_list: list[dict]) -> dict | None:
         "is_risk":              False,
         "kline_pattern":        kline_pattern,
         "win_rate":             win_rate,
+        # 篩選層旗標（供 run_filter 判斷，不傳給 generator）
+        "pass_l1":              pass_l1,
+        "pass_l2":              pass_l2,
+        "pass_l3":              pass_l3,
+        "pass_l3_relaxed":      pass_l3_relaxed,
+        "score":                score,
     }
 
 
 def run_filter(candidate_ids: list[str], news_list: list[dict],
-               max_results: int = 20, max_risk: int = 10,
-               delay: float = 1.0) -> list[dict]:
+               max_results: int = 20, delay: float = 1.0) -> list[dict]:
     """
-    對候選代號列表逐一篩選，回傳通過的個股清單
-    - 做多候選（is_risk=False）最多 max_results 檔
-    - 風險警示（is_risk=True）最多 max_risk 檔
-    - delay：每檔之間的間隔秒數，避免 FinMind rate limit
+    對候選代號逐一分析，三層篩選後依分數排序，回傳前 max_results 檔。
+    若無股票通過第三層，自動放寬 DIF 門檻（> -0.5）再篩一次。
     """
-    long_list = []
-    risk_list = []
+    all_analyzed = []
     total = len(candidate_ids)
     print(f"[filter] 開始篩選 {total} 檔候選股票...")
 
     for i, sid in enumerate(candidate_ids, 1):
         print(f"[filter] ({i}/{total}) {sid} ...", end=" ", flush=True)
-        result = analyze_stock(sid, news_list)
-        if result:
-            label = result.get("signal_label", "")
-            if result.get("is_risk"):
-                print(f"⚠️ 風險警示（{label}，量能 {result['vol_ratio']}x，"
-                      f"新聞 {len(result['news'])} 則）")
-                risk_list.append(result)
-            else:
-                tag = f"，型態：{label}" if label else ""
-                print(f"✓ 通過（量能 {result['vol_ratio']}x，"
-                      f"法人連買 {result['consecutive_buy_days']}日，"
-                      f"新聞 {len(result['news'])} 則{tag}）")
-                long_list.append(result)
+        r = analyze_stock(sid, news_list)
+        if r:
+            all_analyzed.append(r)
+            print(
+                f"L1={'✓' if r['pass_l1'] else '✗'} "
+                f"L2={'✓' if r['pass_l2'] else '✗'} "
+                f"L3={'✓' if r['pass_l3'] else '✗'} "
+                f"分={r['score']}"
+            )
         else:
-            print("✗ 未通過")
+            print("✗ 資料不足")
         if i < total:
             time.sleep(delay)
 
-    print(f"[filter] 篩選完畢：做多候選 {len(long_list)} 檔，"
-          f"風險警示 {len(risk_list)} 檔（共 {total} 檔候選）")
-    return long_list[:max_results] + risk_list[:max_risk]
+    # 正常篩選：L1 + L2 + L3
+    passed = [r for r in all_analyzed
+              if r["pass_l1"] and r["pass_l2"] and r["pass_l3"]]
+
+    # 備援：放寬 L3（DIF > -0.5）
+    if not passed:
+        print("[filter] ⚠️ 無股票通過三層篩選，放寬第三層（DIF > -0.5）")
+        passed = [r for r in all_analyzed
+                  if r["pass_l1"] and r["pass_l2"] and r["pass_l3_relaxed"]]
+
+    passed.sort(key=lambda x: x["score"], reverse=True)
+    result = passed[:max_results]
+    print(f"[filter] 篩選完畢：{len(result)} 檔通過（共 {total} 檔候選）")
+    return result
 
 
 if __name__ == "__main__":
