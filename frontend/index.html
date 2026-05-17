@@ -300,11 +300,6 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
         <input type="text" id="stockInput" placeholder="代號或股名 例：2330 台積電" inputmode="text" autocomplete="off"/>
         <div class="search-dropdown" id="searchDropdown"></div>
       </div>
-      <div class="seg" id="tfSeg">
-        <button class="seg-btn active" data-tf="D">日</button>
-        <button class="seg-btn" data-tf="W">週</button>
-        <button class="seg-btn" data-tf="M">月</button>
-      </div>
       <button class="btn-analyze" onclick="analyzeStock()">分析</button>
     </div>
     <div style="display:flex;gap:6px;flex-shrink:0;margin-left:4px;align-items:center">
@@ -387,6 +382,14 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
 
     <!-- 圖表 -->
     <div class="chart-box">
+      <!-- 日/週/月 切換列（有分析結果才顯示）-->
+      <div id="tfSegWrap" style="display:none;padding:6px 12px 2px">
+        <div class="seg" id="tfSeg">
+          <button class="seg-btn active" data-tf="D">日</button>
+          <button class="seg-btn" data-tf="W">週</button>
+          <button class="seg-btn" data-tf="M">月</button>
+        </div>
+      </div>
       <div class="chart-top">
         <span class="chart-name" id="chartName">—</span>
         <div class="chart-ctrl">
@@ -1447,6 +1450,7 @@ function renderResult(d,enabledMA){
   const inWatch=!!watchList.find(s=>s.id===C._currentId);
   updateWatchBtn(C._currentId,inWatch);
   document.getElementById('resultEl').className='result show';
+  document.getElementById('tfSegWrap').style.display='';
   const qb=document.getElementById('resultQuickBtns');
   qb.style.display='flex';
   qb.innerHTML=`<button onclick="toggleSection('peerBody','peerArr')" style="flex:1;padding:8px 0;border-radius:8px;border:.5px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:12px;cursor:pointer">👥 同族群</button><button onclick="toggleSection('chipsBody','chipsArr')" style="flex:1;padding:8px 0;border-radius:8px;border:.5px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:12px;cursor:pointer">📊 籌碼</button>`;
@@ -3137,6 +3141,18 @@ document.addEventListener('DOMContentLoaded', () => {
   if('serviceWorker' in navigator){
     navigator.serviceWorker.register('/sw.js').catch(()=>{});
   }
+
+  // 手機鍵盤彈出時隱藏快捷股票列，收鍵盤後恢復
+  const _inp = document.getElementById('stockInput');
+  const _hk  = document.getElementById('hotkeysEl');
+  _inp.addEventListener('focus', () => {
+    if(_hk) _hk.style.display = 'none';
+    // iOS: 確保輸入框在視窗可見範圍內
+    setTimeout(() => { _inp.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, 150);
+  });
+  _inp.addEventListener('blur', () => {
+    if(_hk) _hk.style.display = '';
+  });
 });
 
 // ══════════════════════════════════════
