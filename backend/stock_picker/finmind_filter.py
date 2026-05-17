@@ -189,18 +189,24 @@ def detect_kline_patterns(closes, opens, highs, lows, volumes):
     body_size0    = abs(c0 - o0)
     upper_shadow0 = h0 - max(c0, o0)
     lower_shadow0 = min(c0, o0) - l0
-    range0        = (h0 - l0) or 0.001
-    avg_vol    = sum(volumes[-6:-1]) / 5 if n >= 6 else (sum(volumes[:-1]) / max(len(volumes) - 1, 1))
-    vol_surge  = v0 > avg_vol * 1.5
-    is_downtrend = closes[-1] < closes[-5] if n >= 5 else False
-    is_uptrend   = closes[-1] > closes[-5] if n >= 5 else False
-    if vol_surge and (body_size0 >= range0 * 0.6) and (c0 > o0):
+    range0        = max(h0 - l0, 0.001)
+    avg_vol       = sum(volumes[-6:-1]) / 5 if n >= 6 else (sum(volumes[:-1]) / max(len(volumes) - 1, 1))
+    vol_surge     = v0 > avg_vol * 1.3
+    is_downtrend  = closes[-1] < closes[-5] if n >= 5 else False
+    is_uptrend    = closes[-1] > closes[-5] if n >= 5 else False
+    if vol_surge and (body_size0 >= range0 * 0.5) and (c0 > o0):
         return "量增大紅棒（突破確認）", 0.62
-    if vol_surge and (body_size0 >= range0 * 0.6) and (c0 < o0):
+    if vol_surge and (body_size0 >= range0 * 0.5) and (c0 < o0):
         return "量增大黑棒（跌破確認）", 0.62
-    if is_downtrend and (lower_shadow0 >= body_size0 * 2) and (upper_shadow0 <= body_size0 * 0.5) and (c0 > o0):
+    # 錘子線：下影線夠長（>=40%全幅）、下影線>=實體1.5倍、上影線短（<=20%全幅）
+    if (is_downtrend and (lower_shadow0 >= range0 * 0.4)
+            and (lower_shadow0 >= body_size0 * 1.5)
+            and (upper_shadow0 <= range0 * 0.2)):
         return "低檔錘子線（底部承接力道強）", 0.53
-    if is_uptrend and (upper_shadow0 >= body_size0 * 2) and (lower_shadow0 <= body_size0 * 0.5) and (c0 < o0):
+    # 流星線：上影線夠長（>=40%全幅）、上影線>=實體1.5倍、下影線短（<=20%全幅）
+    if (is_uptrend and (upper_shadow0 >= range0 * 0.4)
+            and (upper_shadow0 >= body_size0 * 1.5)
+            and (lower_shadow0 <= range0 * 0.2)):
         return "高檔流星線（多頭上攻力竭）", 0.53
     return "常態 K 線（無觸發極端型態）", 0.50
 
