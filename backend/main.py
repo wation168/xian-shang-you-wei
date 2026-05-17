@@ -4,14 +4,28 @@
 啟動（上線）：uvicorn main:app --host 0.0.0.0 --port 8000
 """
 
-from fastapi import FastAPI, HTTPException
+import sys, io
+# Windows cmd 預設 ASCII，強制改為 UTF-8 避免中文 print 錯誤
+if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
+import os
+
+from fastapi import FastAPI, HTTPException, Depends, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, PlainTextResponse
 from contextlib import asynccontextmanager
+from pydantic import BaseModel
 import yfinance as yf
 import pandas as pd
 import numpy as np
 from scipy.signal import argrelextrema
-import os
+import sqlite3, hashlib, hmac, secrets, time as _time_mod
+import json as _json_mod
+from datetime import datetime, timedelta, date as _date_cls
+import re as _re
+
 
 # ══════════════════════════════════════════════════════════
 # 環境設定（上線用環境變數，本機用 fallback）
@@ -19,6 +33,31 @@ import os
 FINMIND_TOKEN = os.environ.get("FINMIND_TOKEN", "")
 if not FINMIND_TOKEN:
     raise RuntimeError("❌ 請設定環境變數 FINMIND_TOKEN")
+
+# JWT 密鑰（請在 Zeabur 設定環境變數 JWT_SECRET）
+JWT_SECRET = os.environ.get("JWT_SECRET", "change-me-in-production-please")
+JWT_EXPIRE_DAYS = 30   # token 有效期
+
+# 綠界 Webhook 驗證用
+ECPAY_MERCHANT_ID = os.environ.get("ECPAY_MERCHANT_ID", "3443173")
+ECPAY_HASH_KEY = os.environ.get("ECPAY_HASH_KEY", "")
+ECPAY_HASH_IV  = os.environ.get("ECPAY_HASH_IV", "")
+FRONTEND_URL   = os.environ.get("FRONTEND_URL", "https://stock-navigator.zeabur.app")
+BACKEND_URL    = os.environ.get("BACKEND_URL",  "https://stock-navigator-api.zeabur.app")
+
+# 寄信設定
+SMTP_HOST = os.environ.get("SMTP_HOST", "")
+SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
+SMTP_USER = os.environ.get("SMTP_USER", "")
+SMTP_PASS = os.environ.get("SMTP_PASS", "")
+SMTP_FROM = os.environ.get("SMTP_FROM", SMTP_USER)
+
+# SQLite 資料庫路徑（Zeabur 持久化硬碟）
+DB_PATH = os.environ.get("DB_PATH", "/data/members.db")
+
+# 免費用戶每日查詢次數
+FREE_DAILY_LIMIT = 3   # 免費會員每日查詢次數
+GUEST_DAILY_LIMIT = 1  # 遊客（未登入）每日查詢次數
 
 # CORS：允許的前端來源
 # 本機開發時設 ALLOWED_ORIGINS=* 或留空
@@ -43,10 +82,122 @@ async def lifespan(app: FastAPI):
     env = "生產環境 🚀" if IS_PROD else "開發環境 💻"
     print(f"✅ 線上有位 API 啟動中（{env}）")
     print(f"   CORS 允許來源：{ALLOWED_ORIGINS}")
+
+    # 初始化 SQLite 資料庫
+    try:
+        os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    except Exception:
+        pass
+    _db_init()
+    print(f"   ✅ 會員資料庫初始化完成（{DB_PATH}）")
+
+    # 啟動時主動載入 FinMind 全台股名稱快取，避免查詢時才抓造成延遲或亂碼
+    try:
+        import urllib.request as _ureq, json as _json
+        url = (f"https://api.finmindtrade.com/api/v4/data"
+               f"?dataset=TaiwanStockInfo&token={FINMIND_TOKEN}")
+        req = _ureq.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with _ureq.urlopen(req, timeout=10) as resp:
+            data = _json.loads(resp.read())
+        if data.get("status") == 200:
+            count = 0
+            for item in data.get("data", []):
+                sid = str(item.get("stock_id", ""))
+                sname = str(item.get("stock_name", ""))
+                stype = str(item.get("type", "")).lower()   # "twse" / "otc" / "rotc"
+                if sid and sname and sid not in _name_cache:
+                    _name_cache[sid] = sname
+                    count += 1
+                if sid and stype:
+                    _market_cache[sid] = stype
+            print(f"   ✅ 股名快取載入完成，共 {count} 筆")
+        else:
+            print(f"   ⚠️ FinMind 回應異常：{data.get('msg','')}")
+    except Exception as e:
+        print(f"   ⚠️ 股名快取載入失敗（{e}），將在查詢時重試")
+
+    # 啟動 APScheduler 排程
+    _bg_scheduler = None
+    _picker_running   = False
+    _expire_running   = False
+    try:
+        from apscheduler.schedulers.background import BackgroundScheduler
+        import sys as _sys
+        _picker_path = os.path.join(os.path.dirname(__file__), "stock_picker")
+
+        def _run_stock_picker_job():
+            nonlocal _picker_running
+            if _picker_running:
+                print("   ⚠️ 選股排程已在執行中，跳過本次")
+                return
+            _picker_running = True
+            try:
+                if _picker_path not in _sys.path:
+                    _sys.path.insert(0, _picker_path)
+                from scheduler import run_once
+                run_once()
+            except Exception as _e:
+                print(f"   ❌ 選股排程執行失敗：{_e}")
+            finally:
+                _picker_running = False
+
+        def _run_expire_notice_job():
+            nonlocal _expire_running
+            if _expire_running:
+                print("   ⚠️ 到期提醒排程已在執行中，跳過本次")
+                return
+            _expire_running = True
+            try:
+                from zoneinfo import ZoneInfo
+                today_str = datetime.now(ZoneInfo("Asia/Taipei")).strftime("%Y-%m-%d")
+                conn = _db_conn()
+                members = conn.execute(
+                    "SELECT email, expire_at, last_expire_notice_date FROM members "
+                    "WHERE plan != 'free' AND expire_at IS NOT NULL AND expire_at >= ?",
+                    (today_str,)
+                ).fetchall()
+                conn.close()
+                for m in members:
+                    if m["last_expire_notice_date"] == today_str:
+                        continue
+                    try:
+                        delta = (datetime.fromisoformat(m["expire_at"]) - datetime.fromisoformat(today_str)).days
+                    except Exception:
+                        continue
+                    if delta == 3:
+                        _send_email(m["email"], "【線上有位】訂閱即將到期",
+                            f'<p>您的訂閱將於 <b>{m["expire_at"]}</b> 到期（剩 3 天）。</p>'
+                            f'<p><a href="{FRONTEND_URL}/landing.html#pricing">立即續訂</a></p>')
+                        _update_notice_date(m["email"], today_str)
+                    elif delta == 0:
+                        _send_email(m["email"], "【線上有位】訂閱已到期",
+                            f'<p>您的訂閱已於今日（{today_str}）到期。</p>'
+                            f'<p><a href="{FRONTEND_URL}/landing.html#pricing">立即續訂</a></p>')
+                        _update_notice_date(m["email"], today_str)
+            except Exception as _e:
+                print(f"   ❌ 到期提醒排程執行失敗：{_e}")
+            finally:
+                _expire_running = False
+
+        _bg_scheduler = BackgroundScheduler(timezone="Asia/Taipei")
+        _bg_scheduler.add_job(_run_stock_picker_job,  "cron", hour=14, minute=35, day_of_week="mon-fri")
+        _bg_scheduler.add_job(_run_expire_notice_job, "cron", hour=9,  minute=0)
+        _bg_scheduler.start()
+        print("   ✅ APScheduler 排程已啟動（選股 14:35、到期提醒 09:00）")
+    except ImportError:
+        print("   ⚠️ apscheduler 未安裝，選股排程請以 scheduler.py 獨立執行")
+    except Exception as _sch_err:
+        print(f"   ⚠️ 排程啟動失敗：{_sch_err}")
+
     yield
+
+    if _bg_scheduler and _bg_scheduler.running:
+        _bg_scheduler.shutdown(wait=False)
     print("🛑 線上有位 API 關閉")
 
 # 上線時關閉 /docs 和 /redoc，避免 API 被掃描濫用
+# 付款暫存資料已改為 SQLite pending_orders 表，見 _db_init()
+
 app = FastAPI(
     title="線上有位 API",
     version="2.0.0",
@@ -55,12 +206,15 @@ app = FastAPI(
     redoc_url=None if IS_PROD else "/redoc",
     openapi_url=None if IS_PROD else "/openapi.json",
 )
+# CORS：明確列出允許來源，支援帶 Authorization header 的請求
+_cors_origins = ALLOWED_ORIGINS if ALLOWED_ORIGINS else ["*"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
-    allow_methods=["GET"],       # 只需要 GET
-    allow_headers=["*"],
+    allow_origins=_cors_origins,
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+    allow_headers=["*", "Authorization", "Content-Type"],
     allow_credentials=False,
+    expose_headers=["*"],
 )
 
 
@@ -68,10 +222,16 @@ app.add_middleware(
 # 工具函式
 # ══════════════════════════════════════════════════════════
 def resolve_symbol(stock_id: str) -> str:
+    """根據 FinMind market 資訊智慧選 .TW / .TWO 後綴"""
     stock_id = stock_id.strip().upper()
     if stock_id.endswith((".TW", ".TWO")):
         return stock_id
-    return stock_id + ".TW"
+    code = stock_id
+    mtype = _market_cache.get(code, "")
+    if mtype in ("otc", "rotc"):
+        return code + ".TWO"
+    # twse 或未知 → 先試 .TW（try_fetch 會做 .TWO fallback）
+    return code + ".TW"
 
 
 def safe_float(v):
@@ -99,17 +259,83 @@ def fetch_df(symbol, period, interval):
     return df
 
 
+def fetch_df_finmind(stock_id: str, period: str, interval: str):
+    """
+    FinMind 備援抓取台股日線 K 線資料
+    只支援日線（interval=1d），週線/月線由日線重採樣
+    """
+    import urllib.request, json as _json
+    from datetime import date, timedelta
+
+    code = stock_id.strip().upper().replace(".TW", "").replace(".TWO", "")
+
+    # 依 period 換算起始日
+    period_days = {"5d": 7, "1mo": 35, "3mo": 95, "6mo": 185,
+                   "1y": 370, "2y": 740, "3y": 1100, "5y": 1830, "10y": 3660}
+    days = period_days.get(period, 1100)
+    start = (date.today() - timedelta(days=days)).strftime("%Y-%m-%d")
+    end   = date.today().strftime("%Y-%m-%d")
+
+    try:
+        url = (f"https://api.finmindtrade.com/api/v4/data"
+               f"?dataset=TaiwanStockPrice&data_id={code}"
+               f"&start_date={start}&end_date={end}&token={FINMIND_TOKEN}")
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = _json.loads(resp.read())
+        if data.get("status") != 200 or not data.get("data"):
+            return pd.DataFrame()
+        rows = data["data"]
+        df = pd.DataFrame(rows)
+        df = df.rename(columns={
+            "date": "Date", "open": "Open", "max": "High",
+            "min": "Low", "close": "Close", "Trading_Volume": "Volume"
+        })
+        df["Date"] = pd.to_datetime(df["Date"])
+        df = df.set_index("Date").sort_index()
+        df = df[["Open", "High", "Low", "Close", "Volume"]].astype(float)
+
+        # 週線/月線重採樣
+        if interval == "1wk":
+            df = df.resample("W").agg({
+                "Open": "first", "High": "max",
+                "Low": "min", "Close": "last", "Volume": "sum"
+            }).dropna()
+        elif interval == "1mo":
+            df = df.resample("ME").agg({
+                "Open": "first", "High": "max",
+                "Low": "min", "Close": "last", "Volume": "sum"
+            }).dropna()
+
+        return df
+    except Exception as e:
+        print(f"   FinMind 備援抓取失敗 {code}：{e}")
+        return pd.DataFrame()
+
+
 def try_fetch(stock_id, period, interval):
     symbol = resolve_symbol(stock_id)
     df = fetch_df(symbol, period, interval)
     if df.empty and not stock_id.upper().endswith((".TW", ".TWO")):
-        symbol = stock_id.strip().upper() + ".TWO"
-        df = fetch_df(symbol, period, interval)
+        alt_symbol = stock_id.strip().upper() + ".TWO"
+        df_alt = fetch_df(alt_symbol, period, interval)
+        if not df_alt.empty:
+            return alt_symbol, df_alt
+
+    # yfinance 都抓不到 → FinMind 備援
+    if df.empty:
+        print(f"   yfinance 無資料，切換 FinMind 備援：{stock_id}")
+        df_fm = fetch_df_finmind(stock_id, period, interval)
+        if not df_fm.empty:
+            return symbol, df_fm
+
     return symbol, df
 
 
 # 股名快取（避免重複查詢）
 _name_cache: dict[str, str] = {}
+# 市場別快取：{stock_id: "twse"(上市) | "otc"(上櫃) | "rotc"(興櫃)}
+_market_cache: dict[str, str] = {}
 
 # 台股中文名稱對照表（常用股票，優先查表）
 STOCK_NAMES = {
@@ -120,7 +346,8 @@ STOCK_NAMES = {
     "2890": "永豐金", "5880": "合庫金", "2801": "彰銀",
     "2002": "中鋼", "1301": "台塑", "1303": "南亞", "1326": "台化",
     "2303": "聯電", "2357": "華碩", "2382": "廣達", "2395": "研華",
-    "2408": "南亞科", "2409": "友達", "2449": "京元電子", "2474": "可成",
+    "2402": "毅嘉", "2408": "南亞科", "2409": "友達", "2449": "京元電子",
+    "2474": "可成", "2476": "巨祥",
     "2376": "技嘉", "2379": "瑞昱", "2385": "群光", "2392": "正崴",
     "3711": "日月光投控", "2301": "光寶科", "2325": "矽品",
     "3034": "聯詠", "3037": "欣興", "3045": "台灣大", "3702": "大聯大",
@@ -129,57 +356,49 @@ STOCK_NAMES = {
     "2603": "長榮", "2609": "陽明", "2607": "榮運",
     "1216": "統一", "2912": "統一超", "2207": "和泰車", "2105": "正新",
     "1402": "遠東新", "1101": "台泥", "1102": "亞泥",
-    "2823": "中壽", "2壽": "南山人壽",
-    "3008": "大立光", "2352": "佳世達", "2344": "華邦電",
-    "2337": "旺宏", "2360": "致茂", "2376": "技嘉",
+    "2823": "中壽", "3008": "大立光", "2352": "佳世達", "2344": "華邦電",
+    "2337": "旺宏", "2360": "致茂", "3354": "律勝", "3443": "創意",
+    "6488": "環球晶", "6510": "精測", "6770": "力積電", "3661": "世芯KY",
+    "6533": "晶心科", "6278": "台表科", "6121": "新普", "5274": "信驊",
+    "3529": "力旺", "3532": "台勝科", "5483": "中美晶", "4989": "榮科",
 }
 
 def get_stock_name(symbol: str) -> str:
-    """取得台股中文名稱：對照表 → FinMind → yfinance"""
+    """取得台股中文名稱：靜態表 → 快取 → FinMind → 回傳代號"""
     code = symbol.replace(".TWO", "").replace(".TW", "").strip()
 
-    # 1. 先查對照表
+    # 1. 靜態對照表（最快）
     if code in STOCK_NAMES:
         return STOCK_NAMES[code]
 
-    # 2. 查快取
+    # 2. 快取（啟動時已預載全台股，通常直接命中）
     if code in _name_cache:
         return _name_cache[code]
 
-    # 3. 查 FinMind（一次抓全部台股名稱存入快取）
+    # 3. 快取沒命中，嘗試即時查 FinMind（可能是新上市股票）
     try:
-        import urllib.request, json as _json
+        import urllib.request as _ureq, json as _json
         url = (f"https://api.finmindtrade.com/api/v4/data"
                f"?dataset=TaiwanStockInfo&token={FINMIND_TOKEN}")
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=5) as resp:
+        req = _ureq.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with _ureq.urlopen(req, timeout=5) as resp:
             data = _json.loads(resp.read())
         if data.get("status") == 200:
             for item in data.get("data", []):
                 sid = str(item.get("stock_id", ""))
                 sname = str(item.get("stock_name", ""))
+                stype = str(item.get("type", "")).lower()
                 if sid and sname:
                     _name_cache[sid] = sname
+                if sid and stype:
+                    _market_cache[sid] = stype
         if code in _name_cache:
             return _name_cache[code]
     except Exception:
         pass
 
-    # 4. 備援：yfinance
-    try:
-        ticker = yf.Ticker(symbol)
-        info = ticker.info
-        name = info.get("longName") or info.get("shortName") or ""
-        for suffix in [" Co., Ltd.", " Co.,Ltd.", " Corporation", " Corp.",
-                       " Ltd.", " Inc.", " Co.", "股份有限公司",
-                       "Taiwan Semiconductor Manufacturing Company"]:
-            name = name.replace(suffix, "")
-        name = name.strip()[:20]
-        if name:
-            _name_cache[code] = name
-        return name
-    except Exception:
-        return ""
+    # 4. 都找不到，直接回傳代號（不走 yfinance 避免亂碼）
+    return code
 
 
 def calc_rsi(closes: np.ndarray, period: int = 14) -> np.ndarray:
@@ -279,7 +498,7 @@ def serialize_indicator(arr: np.ndarray, decimals=2) -> list:
     return [None if np.isnan(v) else round(float(v), decimals) for v in arr]
 
 
-def find_support_resistance(highs, lows, closes, volumes, price):
+def find_support_resistance(highs, lows, closes, volumes, price, channel_support=None):
     n = len(closes)
     candidates = []
 
@@ -292,13 +511,60 @@ def find_support_resistance(highs, lows, closes, volumes, price):
     for i in range(19, n):
         vol_ma20[i] = volumes[i - 19: i + 1].mean()
 
-    # ── 1. 回測後低點（突破壓力後拉回不破的低點，最具支撐意義）──
-    # 邏輯：找轉折高點（舊壓力），突破後的第一個轉折低點就是回測低點
+    # ── 1. 最近20根密集不破（多次測試守住的強支撐）──
+    # 邏輯：掃描最近20根的低點，找 ±1% 內聚集 ≥ 3 根的價位帶
+    recent_20 = list(range(max(0, n - 20), n))
+    recent_20_lows = [(i, lows[i]) for i in recent_20 if lows[i] < price * 0.999]
+    if len(recent_20_lows) >= 3:
+        best_cluster_price = None
+        best_cluster_count = 0
+        best_cluster_vol_bonus = 0
+        for anchor_i, anchor_p in recent_20_lows:
+            band_lo, band_hi = anchor_p * 0.99, anchor_p * 1.01
+            cluster = [(i, lows[i]) for i, p in recent_20_lows if band_lo <= p <= band_hi]
+            if len(cluster) >= 3:
+                # 量能加分：量縮（健康測試）或爆量守住（力道測試）
+                vol_bonus = 0
+                for ci, _ in cluster:
+                    if not np.isnan(vol_ma20[ci]):
+                        if volumes[ci] < vol_ma20[ci] * 0.6:    # 量縮測試
+                            vol_bonus += 2
+                        elif volumes[ci] > vol_ma20[ci] * 1.5:  # 爆量守住
+                            vol_bonus += 1
+                total_score = len(cluster) * 3 + vol_bonus
+                if total_score > best_cluster_count * 3 + best_cluster_vol_bonus:
+                    best_cluster_count = len(cluster)
+                    best_cluster_vol_bonus = vol_bonus
+                    best_cluster_price = float(np.mean([p for _, p in cluster]))
+        if best_cluster_price and best_cluster_price < price * 0.999:
+            vol_note = "含量能確認" if best_cluster_vol_bonus > 0 else ""
+            candidates.append((round(best_cluster_price, 2), "dense_20",
+                                f"近20根密集不破（{best_cluster_count}次測試守住{'，' + vol_note if vol_note else ''}）"))
+
+    # ── 2. 回測低點（每個「漲→跌→漲」的轉折低點，取最近3個）──
+    # 只取在現價以下的轉折低點，最近3個，並依量能加權
+    valid_lo = [i for i in lo_idx if lows[i] < price * 0.999]
+    # 只取最近的（最多往前看200根），取最近3個
+    recent_lo = [i for i in valid_lo if i >= n - 200][-3:] if valid_lo else []
+    for lo_i in reversed(recent_lo):
+        ago = n - lo_i
+        vol_note = ""
+        weight = "pullback_low"
+        if not np.isnan(vol_ma20[lo_i]):
+            if volumes[lo_i] < vol_ma20[lo_i] * 0.6:
+                vol_note = "，量縮守住"
+                weight = "pullback_low_shrink"
+            elif volumes[lo_i] > vol_ma20[lo_i] * 1.5:
+                vol_note = "，爆量守住"
+                weight = "pullback_low_surge"
+        candidates.append((round(float(lows[lo_i]), 2), weight,
+                            f"轉折低點（{ago}根前{vol_note}）"))
+
+    # ── 3. 回測後低點（突破壓力後拉回不破，最具支撐意義）──
     for hi in reversed(hi_idx):
         resist_price = highs[hi]
         if resist_price >= price * 1.001:
-            continue  # 此高點仍在現價上方，不是已突破的壓力
-        # 找突破後（hi之後）有沒有收盤價站上此壓力
+            continue
         breakout_i = None
         for i in range(hi + 1, n):
             if closes[i] > resist_price * 1.005:
@@ -306,47 +572,22 @@ def find_support_resistance(highs, lows, closes, volumes, price):
                 break
         if breakout_i is None:
             continue
-        # 找突破後的轉折低點（回測低點），且低點要在舊壓力附近（±5%）
         pullback_lows = [i for i in lo_idx
                          if i > breakout_i
                          and lows[i] >= resist_price * 0.95
                          and lows[i] < price * 0.999]
         if pullback_lows:
-            best_pb = max(pullback_lows)  # 最近的回測低點
+            best_pb = max(pullback_lows)
             ago = n - best_pb
-            candidates.append((round(float(lows[best_pb]), 2), "pullback_low",
-                                f"回測後低點（{ago}根前，突破{resist_price:.0f}後撐住）"))
-            break  # 找到最近一次有效回測就夠了
+            candidates.append((round(float(lows[best_pb]), 2), "pullback_confirmed",
+                                f"突破回測低點（{ago}根前，突破{resist_price:.0f}後撐住）"))
+            break
 
-    # ── 2. 低點密集區（多個轉折低點聚集在同一價位帶）──
-    valid_lo = [i for i in lo_idx if lows[i] < price * 0.999]
-    if len(valid_lo) >= 2:
-        # 以每個轉折低點為中心，找 ±1.5% 內有幾個低點
-        best_cluster_price = None
-        best_cluster_count = 0
-        best_cluster_recent = -1
-        for anchor in valid_lo:
-            ap = lows[anchor]
-            band_lo, band_hi = ap * 0.985, ap * 1.015
-            cluster = [i for i in valid_lo if band_lo <= lows[i] <= band_hi]
-            if len(cluster) >= 2 and len(cluster) >= best_cluster_count:
-                # 同樣數量時選較近的
-                most_recent = max(cluster)
-                if len(cluster) > best_cluster_count or most_recent > best_cluster_recent:
-                    best_cluster_count = len(cluster)
-                    best_cluster_recent = most_recent
-                    best_cluster_price = float(np.mean([lows[i] for i in cluster]))
-        if best_cluster_price and best_cluster_price < price * 0.999:
-            ago = n - best_cluster_recent
-            candidates.append((round(best_cluster_price, 2), "cluster_low",
-                                f"低點密集區（{best_cluster_count}個低點聚集，最近{ago}根前）"))
-
-    # ── 3. 整理平台低點（連續≥3根K棒波動≤2%，平台底部）──
+    # ── 4. 整理平台低點 ──
     plat_start = 0
     best_plat = None
     best_plat_recent = -1
     for i in range(1, n):
-        seg = range(plat_start, i + 1)
         seg_hi = max(highs[plat_start:i + 1])
         seg_lo = min(lows[plat_start:i + 1])
         if seg_lo > 0 and (seg_hi - seg_lo) / seg_lo * 100 > 2.0:
@@ -357,7 +598,6 @@ def find_support_resistance(highs, lows, closes, volumes, price):
                     best_plat = (plo, plat_start, i - 1)
                     best_plat_recent = i
             plat_start = i
-    # 檢查最後一段
     if n - plat_start >= 3:
         seg_hi = max(highs[plat_start:n])
         seg_lo = min(lows[plat_start:n])
@@ -373,7 +613,7 @@ def find_support_resistance(highs, lows, closes, volumes, price):
         candidates.append((round(float(plo), 2), "platform_low",
                             f"整理平台低點（{length}根平台，{ago}根前結束）"))
 
-    # ── 4. 爆量支撐 ──
+    # ── 5. 爆量支撐 ──
     boom_idx = [i for i in range(20, n)
                 if not np.isnan(vol_ma20[i])
                 and volumes[i] > vol_ma20[i] * 1.5
@@ -386,7 +626,7 @@ def find_support_resistance(highs, lows, closes, volumes, price):
             candidates.append((round(float(lows[best]), 2), "volume_surge",
                                f"爆量支撐（{n - best}根前，{ratio:.1f}倍均量）"))
 
-    # ── 5. 凹洞量支撐 ──
+    # ── 6. 凹洞量支撐 ──
     hollow_idx = [i for i in range(20, n)
                   if not np.isnan(vol_ma20[i])
                   and volumes[i] < vol_ma20[i] * 0.5
@@ -399,34 +639,45 @@ def find_support_resistance(highs, lows, closes, volumes, price):
             candidates.append((round(float(lows[best]), 2), "hollow_volume",
                                f"凹洞量支撐（{n - best}根前，量僅{ratio:.1f}倍均量）"))
 
-    # ── 6. 均線動態支撐 ──
+    # ── 7. 均線動態支撐 ──
     for period, name in [(20, "MA20"), (60, "MA60")]:
         ma = calc_ma(closes, period)
         v = ma[-1]
         if not np.isnan(v) and v < price * 0.999:
             candidates.append((round(float(v), 2), f"ma{period}", f"{name} 動態支撐"))
 
+    # ── 8. 軌道下緣（距現價 ≤8% 才納入競爭；>8% 不影響支撐選擇）──
+    if channel_support and channel_support < price * 0.999:
+        ch_dist_pct = (price - channel_support) / price * 100
+        if ch_dist_pct <= 8:
+            candidates.append((round(float(channel_support), 2), "channel_low",
+                                f"軌道下緣（距現價 -{ch_dist_pct:.1f}%）"))
+
     # ── 最終選擇：優先順序加權 ──
-    # 來源權重：回測後低點 > 低點密集區 > 整理平台 > 爆量 > 凹洞量 > 均線
     SOURCE_WEIGHT = {
-        "pullback_low": 6,
-        "cluster_low":  5,
-        "platform_low": 4,
-        "volume_surge": 3,
-        "hollow_volume":2,
+        "dense_20":           8,   # 最近20根密集不破（最強）
+        "pullback_confirmed": 7,   # 突破回測後守住
+        "pullback_low_shrink":6,   # 轉折低點+量縮
+        "pullback_low_surge": 6,   # 轉折低點+爆量
+        "pullback_low":       5,   # 普通轉折低點
+        "cluster_low":        5,
+        "platform_low":       4,
+        "channel_low":        4,   # 軌道下緣動態支撐
+        "volume_surge":       3,
+        "hollow_volume":      2,
         "ma20": 1, "ma60": 1,
     }
     below = [(p, src, desc) for p, src, desc in candidates if p < price]
 
     if below:
-        # 分數 = 來源權重 + 距現價越近分數越高（最近現價 = 1，最遠 = 0）
         prices_only = [p for p, _, _ in below]
         price_range = (price - min(prices_only)) or 1
         def score(item):
             p, src, _ = item
             w = SOURCE_WEIGHT.get(src, 1)
-            proximity = (p - min(prices_only)) / price_range  # 0~1，越接近現價越高
-            return w * 2 + proximity
+            # proximity 只做次要排序，權重極小（0~0.1），不會蓋過來源強度差異
+            proximity = (p - min(prices_only)) / price_range * 0.1
+            return w + proximity
         best_item = max(below, key=score)
         support, support_source, support_desc = best_item
     else:
@@ -446,16 +697,20 @@ def find_support_resistance(highs, lows, closes, volumes, price):
         resistance = round(float(highs[nearest_hi]), 2)
         resistance_desc = f"轉折高點（{n - nearest_hi}根前）"
     else:
-        resistance = round(float(highs[-20:].max()), 2)
+        # 排除今天（最後一根），避免今日創高時壓力 = 現價
+        hist_highs = highs[:-1] if len(highs) > 20 else highs
+        resistance = round(float(hist_highs[-20:].max()), 2)
         resistance_desc = "近20日最高點（備援）"
 
+    scored = sorted(below, key=score, reverse=True) if below else []
     detail = {
         "support_source": support_source,
         "support_desc": support_desc,
         "resistance_desc": resistance_desc,
         "all_candidates": [
-            {"price": p, "source": src, "desc": desc}
-            for p, src, desc in sorted(below, key=lambda x: x[0], reverse=True)
+            {"price": p, "source": src, "desc": desc,
+             "score": round(score((p, src, desc)), 3)}
+            for p, src, desc in scored
         ],
     }
     return support, resistance, detail
@@ -482,10 +737,18 @@ def calc_risk_level(price, support, resistance, rr_ratio, near_top, near_bot, pa
         risk_level = "medium"
         risk_label = "留意"
         risk_color = "amber"
-    elif near_bot or sup_dist < 3:
+    elif (near_bot or sup_dist < 3) and pattern not in [
+        "大黑棒（強勢賣壓）", "黑棒", "跌破型態", "吞噬（空頭）",
+        "射擊之星", "烏雲蓋頂", "下降趨勢"
+    ]:
         risk_level = "low"
         risk_label = "相對安全"
         risk_color = "green"
+    elif (near_bot or sup_dist < 3):
+        # 靠近支撐但出現空頭K棒，升為留意
+        risk_level = "medium"
+        risk_label = "留意"
+        risk_color = "amber"
     else:
         risk_level = "watch"
         risk_label = "觀望"
@@ -496,7 +759,8 @@ def calc_risk_level(price, support, resistance, rr_ratio, near_top, near_bot, pa
 
 def build_summary(price, support, support_desc, resistance, resistance_desc,
                   trend, pattern, rr_ratio, risk_level, risk_label,
-                  near_top, near_bot, stop_loss, target1, rr_basis="防守位"):
+                  near_top, near_bot, stop_loss, target1, rr_basis="防守位",
+                  kline_pattern="常態 K 線（無觸發極端型態）", win_rate=0.50):
     """條列式分析摘要"""
     sup_dist = (price - support) / price * 100
     res_dist = (resistance - price) / price * 100
@@ -545,7 +809,37 @@ def build_summary(price, support, support_desc, resistance, resistance_desc,
         rr_comment = "損益比不佳，風險大於報酬"
     lines.append(f"風險報酬 {rr_ratio}（以{rr_basis}為停損基準，{rr_comment}）")
 
+    lines.append(f"最新 K 線型態：{kline_pattern}")
+    lines.append(f"型態大數據勝率：{win_rate*100:.0f}%")
+    if win_rate > 0.50:
+        lines.append("需伴隨成交量倍增與隔日收盤站穩確認")
+
     return lines
+
+
+def detect_kline_patterns(closes, opens, highs, lows, volumes):
+    """根據最新K棒判斷型態與大數據勝率"""
+    n = len(closes)
+    if n < 3:
+        return "常態 K 線（無觸發極端型態）", 0.50
+    c0, o0, h0, l0, v0 = closes[-1], opens[-1], highs[-1], lows[-1], volumes[-1]
+    body_size0   = abs(c0 - o0)
+    upper_shadow0 = h0 - max(c0, o0)
+    lower_shadow0 = min(c0, o0) - l0
+    range0       = h0 - l0 or 0.001
+    avg_vol      = sum(volumes[-6:-1]) / 5 if n >= 6 else (sum(volumes[:-1]) / max(len(volumes)-1, 1))
+    vol_surge    = v0 > avg_vol * 1.5
+    is_downtrend = closes[-1] < closes[-5] if n >= 5 else False
+    is_uptrend   = closes[-1] > closes[-5] if n >= 5 else False
+    if vol_surge and (body_size0 >= range0 * 0.6) and (c0 > o0):
+        return "量增大紅棒（突破確認）", 0.62
+    if vol_surge and (body_size0 >= range0 * 0.6) and (c0 < o0):
+        return "量增大黑棒（跌破確認）", 0.62
+    if is_downtrend and (lower_shadow0 >= body_size0 * 2) and (upper_shadow0 <= body_size0 * 0.5) and (c0 > o0):
+        return "低檔錘子線（底部承接力道強）", 0.53
+    if is_uptrend and (upper_shadow0 >= body_size0 * 2) and (lower_shadow0 <= body_size0 * 0.5) and (c0 < o0):
+        return "高檔流星線（多頭上攻力竭）", 0.53
+    return "常態 K 線（無觸發極端型態）", 0.50
 
 
 # ══════════════════════════════════════════════════════════
@@ -929,26 +1223,6 @@ def detect_reversal_pattern(highs, lows, closes):
             break
 
     return None
-    """葛蘭碧 + 量能過濾 + 防守點"""
-    n = len(closes)
-    ma = np.full(n, np.nan)
-    for i in range(ma_period-1, n):
-        ma[i] = closes[i-ma_period+1:i+1].mean()
-    vol_ma = np.full(n, np.nan)
-    for i in range(19, n):
-        vol_ma[i] = volumes[i-19:i+1].mean()
-    buys, sells, stops = [], [], []
-    for i in range(ma_period+1, n):
-        if any(np.isnan(x) for x in [ma[i], ma[i-1], ma[i-2], vol_ma[i]]): continue
-        ma_up   = ma[i] > ma[i-2]
-        ma_dn   = ma[i] < ma[i-2]
-        vol_big = volumes[i] > vol_ma[i] * 1.2
-        if closes[i-1] < ma[i-1] and closes[i] > ma[i] and ma_up and vol_big:
-            buys.append(i)
-            stops.append(round(min(float(lows[i]), float(ma[i])), 2))
-        elif closes[i-1] > ma[i-1] and closes[i] < ma[i] and ma_dn and vol_big:
-            sells.append(i)
-    return buys[-3:], sells[-3:], stops[-3:]
 
 
 def gann_signals(closes, ma20):
@@ -984,6 +1258,45 @@ def calc_gann_filtered(closes, highs, lows, volumes, ma_period=20):
         elif closes[i-1] > ma[i-1] and closes[i] < ma[i] and ma_dn and vol_big:
             sells.append(i)
     return buys[-3:], sells[-3:], stops[-3:]
+
+
+def detect_gann_recross(closes, highs, lows, volumes, ma_period=20, lookback=5):
+    """
+    葛蘭碧站回訊號：
+    條件：前N根內曾跌破均線，最新收盤站回均線之上
+    回傳：(訊號是否成立, 均線值, 均線名稱, 防守建議)
+    """
+    n = len(closes)
+    if n < ma_period + lookback + 1:
+        return False, None, None, None
+
+    ma = np.full(n, np.nan)
+    for i in range(ma_period - 1, n):
+        ma[i] = closes[i - ma_period + 1: i + 1].mean()
+
+    curr_close = closes[-1]
+    curr_ma    = ma[-1]
+    if np.isnan(curr_ma):
+        return False, None, None, None
+
+    # 現在要站上均線
+    if curr_close <= curr_ma:
+        return False, None, None, None
+
+    # 往前 lookback 根內，至少有一根收在均線下方（曾跌破）
+    had_below = any(
+        not np.isnan(ma[-(lookback + 1 + j)]) and closes[-(lookback + 1 + j)] < ma[-(lookback + 1 + j)]
+        for j in range(lookback)
+    )
+    if not had_below:
+        return False, None, None, None
+
+    # 均線方向：水平或向上才算有效站回（下降趨勢中的反彈不算）
+    ma_slope_ok = ma[-1] >= ma[-(min(5, n))]  # 近5根均線不往下
+
+    name = f"MA{ma_period}"
+    stop = round(float(curr_ma) * 0.985, 2)   # 防守位：均線下 1.5%
+    return True, round(float(curr_ma), 2), name, stop
 
 
 def calc_breakout_signals(closes, highs, lows, volumes, support, resistance):
@@ -1071,18 +1384,284 @@ def _cache_set(key: str, data: dict):
 # ══════════════════════════════════════════════════════════
 # 端點
 # ══════════════════════════════════════════════════════════
+
+# ══════════════════════════════════════════════════════════
+# 會員系統核心函式（需在端點前定義）
+# ══════════════════════════════════════════════════════════
+import base64 as _base64_mod
+
+def _db_conn():
+    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def _db_init():
+    conn = _db_conn()
+    c = conn.cursor()
+    c.executescript("""
+        CREATE TABLE IF NOT EXISTS members (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            email       TEXT UNIQUE NOT NULL,
+            password    TEXT NOT NULL,
+            plan        TEXT DEFAULT 'free',
+            expire_at   TEXT DEFAULT NULL,
+            created_at  TEXT DEFAULT (datetime('now','localtime')),
+            last_login  TEXT DEFAULT NULL,
+            token_ver   INTEGER DEFAULT 0,
+            session_id  TEXT DEFAULT NULL
+        );
+        CREATE TABLE IF NOT EXISTS query_log (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            member_id  INTEGER NOT NULL,
+            date       TEXT NOT NULL,
+            count      INTEGER DEFAULT 0,
+            ip         TEXT    NOT NULL DEFAULT "",
+        UNIQUE(member_id, date, ip)
+        );
+        CREATE TABLE IF NOT EXISTS visits (
+            id    INTEGER PRIMARY KEY AUTOINCREMENT,
+            ip    TEXT NOT NULL,
+            date  TEXT NOT NULL,
+            UNIQUE(ip, date)
+        );
+        CREATE TABLE IF NOT EXISTS pending_orders (
+            merchant_trade_no TEXT PRIMARY KEY,
+            email             TEXT NOT NULL,
+            hashed_password   TEXT NOT NULL,
+            plan              TEXT NOT NULL,
+            created_at        TEXT DEFAULT (datetime('now','localtime'))
+        );
+        CREATE TABLE IF NOT EXISTS processed_orders (
+            merchant_trade_no TEXT PRIMARY KEY,
+            processed_at      TEXT DEFAULT (datetime('now','localtime'))
+        );
+        CREATE TABLE IF NOT EXISTS contact_messages (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            name       TEXT NOT NULL,
+            email      TEXT NOT NULL,
+            message    TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS password_reset_tokens (
+            token      TEXT PRIMARY KEY,
+            email      TEXT NOT NULL,
+            expires_at TEXT NOT NULL,
+            used       INTEGER DEFAULT 0,
+            ip         TEXT    DEFAULT '',
+            created_at TEXT DEFAULT (datetime('now','localtime'))
+        );
+        CREATE TABLE IF NOT EXISTS price_alerts (
+            id           INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_email   TEXT    NOT NULL,
+            stock_id     TEXT    NOT NULL,
+            target_price REAL    NOT NULL,
+            direction    TEXT    NOT NULL,
+            created_at   TEXT    NOT NULL,
+            triggered    INTEGER DEFAULT 0,
+            triggered_at TEXT    DEFAULT NULL
+        );
+    """)
+    conn.commit()
+
+    # 自動補上新欄位（舊資料庫升級用）
+    new_columns = [
+        ("members", "session_id", "TEXT DEFAULT NULL"),
+        ("members", "token_ver",  "INTEGER DEFAULT 0"),
+        ("members", "expire_at",  "TEXT DEFAULT NULL"),
+        ("members", "last_login", "TEXT DEFAULT NULL"),
+        ("query_log", "ip",                   "TEXT NOT NULL DEFAULT ''"),
+        ("members",   "password_changed_at",  "TEXT DEFAULT NULL"),
+        ("members",   "last_expire_notice_date", "TEXT DEFAULT NULL"),
+    ]
+    for table, col, coldef in new_columns:
+        try:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {col} {coldef}")
+            conn.commit()
+            print(f"   ✅ 資料庫補欄位：{table}.{col}")
+        except Exception:
+            pass  # 欄位已存在，忽略
+
+    # 自動建立管理員帳號（已存在則不覆蓋）
+    ADMIN_EMAIL = "watione@yahoo.com.tw"
+    ADMIN_PWD   = "630428"
+    ADMIN_EXPIRE = "2099-12-31"
+    existing = conn.execute("SELECT id FROM members WHERE email=?", (ADMIN_EMAIL,)).fetchone()
+    if not existing:
+        conn.execute(
+            "INSERT INTO members (email, password, plan, expire_at) VALUES (?, ?, ?, ?)",
+            (ADMIN_EMAIL, _hash_pw(ADMIN_PWD), "yearly", ADMIN_EXPIRE)
+        )
+        conn.commit()
+        print(f"   ✅ 管理員帳號已建立：{ADMIN_EMAIL}")
+    else:
+        print(f"   ✅ 管理員帳號已存在：{ADMIN_EMAIL}")
+
+    conn.close()
+
+def _b64url_encode(data: bytes) -> str:
+    return _base64_mod.urlsafe_b64encode(data).rstrip(b"=").decode()
+
+def _b64url_decode(s: str) -> bytes:
+    pad = 4 - len(s) % 4
+    if pad != 4:
+        s += "=" * pad
+    return _base64_mod.urlsafe_b64decode(s)
+
+def _jwt_create(payload: dict) -> str:
+    header = _b64url_encode(_json_mod.dumps({"alg":"HS256","typ":"JWT"}).encode())
+    body   = _b64url_encode(_json_mod.dumps(payload).encode())
+    sig_input = f"{header}.{body}".encode()
+    sig = hmac.new(JWT_SECRET.encode(), sig_input, hashlib.sha256).digest()
+    return f"{header}.{body}.{_b64url_encode(sig)}"
+
+def _jwt_verify(token: str) -> dict | None:
+    try:
+        parts = token.split(".")
+        if len(parts) != 3:
+            return None
+        header, body, sig = parts
+        sig_input = f"{header}.{body}".encode()
+        expected = hmac.new(JWT_SECRET.encode(), sig_input, hashlib.sha256).digest()
+        if not hmac.compare_digest(_b64url_decode(sig), expected):
+            return None
+        payload = _json_mod.loads(_b64url_decode(body))
+        if payload.get("exp", 0) < _time_mod.time():
+            return None
+        return payload
+    except Exception:
+        return None
+
+def _hash_pw(password: str) -> str:
+    salt = secrets.token_hex(16)
+    h = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 100000)
+    return f"{salt}:{h.hex()}"
+
+def _verify_pw(password: str, stored: str) -> bool:
+    try:
+        salt, h = stored.split(":", 1)
+        expected = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 100000)
+        return hmac.compare_digest(expected.hex(), h)
+    except Exception:
+        return False
+
+def get_current_user(authorization: str | None = Header(default=None)) -> dict | None:
+    if not authorization or not authorization.startswith("Bearer "):
+        return None
+    token = authorization[7:]
+    payload = _jwt_verify(token)
+    if not payload:
+        return None
+    conn = _db_conn()
+    row = conn.execute("SELECT * FROM members WHERE id=?", (payload["sub"],)).fetchone()
+    conn.close()
+    if not row or row["token_ver"] != payload.get("ver", 0):
+        return None
+    # 帳號共享防護：session_id 不符代表已在其他裝置登入
+    if row["session_id"] and payload.get("sid") and row["session_id"] != payload.get("sid"):
+        return None
+    return dict(row)
+
+def require_user(user: dict | None = Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="請先登入")
+    return user
+
+def require_paid_user(user: dict | None = Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="請先登入")
+    today = _date_cls.today().isoformat()
+    if user["plan"] == "free":
+        raise HTTPException(status_code=403, detail="此功能需付費方案")
+    if user.get("expire_at") and user["expire_at"] < today:
+        raise HTTPException(status_code=403, detail="訂閱已到期，請續費後使用")
+    return user
+
+def _taipei_today() -> str:
+    """台北時間今日日期（YYYY-MM-DD），用於每日查詢次數重置"""
+    from zoneinfo import ZoneInfo
+    return datetime.now(ZoneInfo("Asia/Taipei")).strftime("%Y-%m-%d")
+
+def _check_query_limit(member_id: int, plan: str) -> tuple[bool, int, int]:
+    """回傳 (允許查詢, 今日已用次數, 上限)"""
+    if plan != "free":
+        return True, 0, 999
+    today = _taipei_today()
+    conn = _db_conn()
+    row = conn.execute(
+        "SELECT count FROM query_log WHERE member_id=? AND date=?",
+        (member_id, today)
+    ).fetchone()
+    used = row["count"] if row else 0
+    conn.close()
+    return used < FREE_DAILY_LIMIT, used, FREE_DAILY_LIMIT
+
+def _inc_query_count(member_id: int):
+    today = _taipei_today()
+    conn = _db_conn()
+    row = conn.execute(
+        "SELECT id, count FROM query_log WHERE member_id=? AND date=? AND ip=''",
+        (member_id, today)
+    ).fetchone()
+    if row:
+        conn.execute(
+            "UPDATE query_log SET count=count+1 WHERE id=?",
+            (row["id"],)
+        )
+    else:
+        conn.execute(
+            "INSERT INTO query_log (member_id, date, ip, count) VALUES (?, ?, '', 1)",
+            (member_id, today)
+        )
+    conn.commit()
+    conn.close()
+
 PERIOD_MAP = {"D": ("3y", "1d"), "W": ("5y", "1wk"), "M": ("10y", "1mo")}
 
 
+@app.get("/api/debug/{stock_id}")
+def debug_stock(stock_id: str):
+    """
+    診斷用：查詢股票的市場別判斷 + yfinance 是否能抓到資料
+    範例：/api/debug/2377
+    """
+    code = stock_id.strip().upper()
+    mtype = _market_cache.get(code, "未知（未在 FinMind 快取中）")
+    symbol_tw  = code + ".TW"
+    symbol_two = code + ".TWO"
+
+    results = {}
+    for sym in [symbol_tw, symbol_two]:
+        try:
+            df = fetch_df(sym, "5d", "1d")
+            results[sym] = {
+                "empty": df.empty,
+                "rows": len(df),
+                "last_close": safe_float(df["Close"].iloc[-1]) if not df.empty else None,
+            }
+        except Exception as e:
+            results[sym] = {"error": str(e)}
+
+    return {
+        "stock_id": code,
+        "market_cache": mtype,
+        "resolved_symbol": resolve_symbol(code),
+        "yfinance_results": results,
+    }
+
+
 @app.get("/api/kline/{stock_id}")
-def get_kline(stock_id: str, tf: str = "D"):
+def get_kline(stock_id: str, tf: str = "D", user: dict = Depends(require_user)):
     period, interval = PERIOD_MAP.get(tf.upper(), ("3y", "1d"))
     try:
         symbol, df = try_fetch(stock_id, period, interval)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"下載失敗：{e}")
     if df.empty:
-        raise HTTPException(status_code=404, detail=f"找不到股票：{stock_id}")
+        mtype = _market_cache.get(stock_id.strip().upper(), "未知")
+        raise HTTPException(
+            status_code=404,
+            detail=f"找不到股票：{stock_id}（嘗試代碼：{symbol}，市場別：{mtype}）"
+        )
     df = df[["Open", "High", "Low", "Close", "Volume"]].dropna()
     records = []
     for idx, row in df.iterrows():
@@ -1096,9 +1675,10 @@ def get_kline(stock_id: str, tf: str = "D"):
     return {"symbol": symbol, "tf": tf, "count": len(records), "bars": records}
 
 
-@app.get("/api/analyze/{stock_id}")
-def analyze(stock_id: str, tf: str = "D",
-            ma1: int = 5, ma2: int = 10, ma3: int = 20, ma4: int = 60, ma5: int = 120):
+def _do_analyze(stock_id: str, tf: str = "D",
+                ma1: int = 5, ma2: int = 10, ma3: int = 20, ma4: int = 60, ma5: int = 120,
+                user: dict | None = None):
+    """核心分析邏輯（不含驗證），供 analyze() 和 batch_analyze() 共用"""
     # 快取：同股票+時間框架 5 分鐘內直接回傳
     _cache_key = f"{stock_id.strip().upper()}_{tf.upper()}"
     cached = _cache_get(_cache_key)
@@ -1111,7 +1691,12 @@ def analyze(stock_id: str, tf: str = "D",
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     if df.empty:
-        raise HTTPException(status_code=404, detail=f"找不到股票：{stock_id}")
+        mtype = _market_cache.get(stock_id.strip().upper(), "未知")
+        raise HTTPException(
+            status_code=404,
+            detail=f"找不到股票：{stock_id}（嘗試代碼：{symbol}，市場別：{mtype}）。"
+                   f"可能是 Yahoo Finance 暫時無資料，請稍後再試。"
+        )
 
     df = df[["Open", "High", "Low", "Close", "Volume"]].dropna()
     opens      = df["Open"].values.astype(float)
@@ -1137,17 +1722,7 @@ def analyze(stock_id: str, tf: str = "D",
         s, l = avail[0][1], avail[-1][1]
         trend = "上升趨勢" if s > l * 1.005 else "下降趨勢" if s < l * 0.995 else "盤整"
 
-    # 支撐壓力
-    support, resistance, supp_detail = find_support_resistance(
-        highs, lows, closes, volumes, price)
-
-    # 軌道
-    ch_hi    = round(float(highs[-20:].max()), 2)
-    ch_lo    = round(float(lows[-20:].min()), 2)
-    near_top = price > ch_hi * 0.97
-    near_bot = price < ch_lo * 1.03
-
-    # 趨勢軌道（先算，軌道上下緣納入支撐壓力）
+    # 趨勢軌道（先算，軌道下緣納入支撐候選競爭）
     channel = find_trend_channel(highs, lows, closes)
 
     # 若直線軌道 R² 不高，嘗試三角形型態
@@ -1155,6 +1730,18 @@ def analyze(stock_id: str, tf: str = "D",
         tri = detect_triangle_channel(highs, lows, closes)
         if tri and tri.get("r2", 0) > (channel.get("r2", 0) if channel else 0):
             channel = tri
+
+    # 支撐壓力（把軌道下緣一起傳入，納入候選競爭）
+    _ch_support = channel.get("support_now") if channel else None
+    support, resistance, supp_detail = find_support_resistance(
+        highs, lows, closes, volumes, price, channel_support=_ch_support)
+
+    # 近期高低點（用於 near_top / near_bot 判斷）
+    # 排除今天（最後一根），避免今日創高時 near_top 誤判
+    ch_hi    = round(float(highs[:-1][-20:].max()), 2) if len(highs) > 1 else round(float(highs.max()), 2)
+    ch_lo    = round(float(lows[-20:].min()), 2)
+    near_top = price > ch_hi * 0.97
+    near_bot = price < ch_lo * 1.03
 
     # 反轉型態（W底/M頭/頭肩）— 優先級最高，若找到則覆蓋軌道
     reversal = detect_reversal_pattern(highs, lows, closes)
@@ -1174,13 +1761,13 @@ def analyze(stock_id: str, tf: str = "D",
         reversal_desc = None
         reversal_pos  = None
 
-    # 支撐距現價 >8% 時降級，改用 MA20 或 MA60 補位
+    # 支撐距現價 >12% 時降級，改用 MA20 或 MA60 補位（閾值從8%放寬到12%，保留真實支撐）
     sup_dist_pct = (price - support) / price * 100
-    if sup_dist_pct > 8:
+    if sup_dist_pct > 12:
         ma20_val = safe_float(calc_ma(closes_full, 20)[-1])
         ma60_val = safe_float(calc_ma(closes_full, 60)[-1])
         for ma_v, ma_name in [(ma20_val, "MA20"), (ma60_val, "MA60")]:
-            if not np.isnan(ma_v) and ma_v < price * 0.999:
+            if ma_v is not None and ma_v < price * 0.999:
                 new_dist = (price - ma_v) / price * 100
                 if new_dist < sup_dist_pct:
                     support = round(float(ma_v), 2)
@@ -1189,24 +1776,63 @@ def analyze(stock_id: str, tf: str = "D",
                     sup_dist_pct = new_dist
                     break
 
-    # 軌道上下緣補充進支撐壓力
+    # 軌道上緣：若在現價以上且比現有壓力更近，則取代
     if channel:
-        ch_sup = channel.get("support_now", 0)
         ch_res = channel.get("resist_now", 0)
-        # 軌道下緣：若在現價以下且比現有支撐更近，則取代
-        if ch_sup > 0 and ch_sup < price * 0.999:
-            if ch_sup > support:  # 更接近現價
-                support = round(ch_sup, 2)
-                supp_detail["support_source"] = "channel_low"
-                supp_detail["support_desc"] = f"上升軌道下緣（{channel['desc']}）"
-        # 軌道上緣：若在現價以上且比現有壓力更近，則取代
         if ch_res > 0 and ch_res > price * 1.001:
-            if ch_res < resistance:  # 更接近現價
+            if ch_res < resistance:
                 resistance = round(ch_res, 2)
-                supp_detail["resistance_desc"] = f"上升軌道上緣（{channel['desc']}）"
+                supp_detail["resistance_desc"] = f"軌道上緣（{channel['desc']}）"
+        # 軌道下緣 >8% 時不納入支撐競爭，但在說明補充提示
+        ch_sup = channel.get("support_now", 0)
+        if ch_sup and ch_sup < price * 0.999:
+            ch_sup_dist = (price - ch_sup) / price * 100
+            if ch_sup_dist > 8:
+                supp_detail["support_desc"] += f"，軌道下緣 {round(ch_sup,1)}（-{ch_sup_dist:.1f}%，長線參考）"
+
+    # ── 今日突破快速判斷：現價超過前19根最高點 ──
+    # 避免今天創高時，近20日最高點 = 現價，導致壓力 = 現價、損益比 = 0
+    prev_high = round(float(highs[:-1][-19:].max()), 2) if len(highs) > 1 else resistance
+    today_breakout = float(closes[-1]) > prev_high * 1.001
+
+    # 突破當日不顯示「靠近壓力」警告
+    if today_breakout:
+        near_top = False
+
+    # ── 壓力最小距離過濾：壓力距現價 < 3% 時往上找下一個有效壓力 ──
+    MIN_RES_DIST = 0.03
+    res_dist_pct = (resistance - price) / price
+    if res_dist_pct < MIN_RES_DIST:
+        alt_res = None
+        alt_res_desc = ""
+        from scipy.signal import argrelextrema as _argrelextrema
+        # 排除今天（index -1）避免今日高點被選為壓力
+        hi_idx_all = _argrelextrema(highs[:-1], np.greater, order=5)[0]
+        candidates = [(highs[i], i) for i in hi_idx_all
+                      if highs[i] > price * (1 + MIN_RES_DIST)]
+        if candidates:
+            alt_val, alt_i = min(candidates, key=lambda x: x[0])
+            alt_res = round(float(alt_val), 2)
+            alt_res_desc = f"轉折高點（{len(highs) - 1 - alt_i}根前）"
+        else:
+            # fallback：軌道上緣估算或歷史高點
+            if channel and channel.get("target1") and channel["target1"] > price * (1 + MIN_RES_DIST):
+                alt_res = round(float(channel["target1"]), 2)
+                alt_res_desc = "軌道目標價"
+            else:
+                alt_res = round(float(highs[:-1].max()), 2)
+                alt_res_desc = "歷史高點（備援）"
+
+        if alt_res and alt_res != resistance:
+            resistance = alt_res
+            supp_detail["resistance_desc"] = alt_res_desc + ("（突破後下一壓力）" if today_breakout else "（原壓力過近已調整）")
 
     # 型態
-    pattern, pattern_sub = detect_pattern(price, support, resistance, ch_lo, ch_hi)
+    # today_breakout 優先：今日收盤突破前高，直接判斷為突破型態，不進 detect_pattern
+    if today_breakout:
+        pattern, pattern_sub = "突破型態", "今日突破"
+    else:
+        pattern, pattern_sub = detect_pattern(price, support, resistance, ch_lo, ch_hi)
 
     # K棒型態辨識
     kbar_pattern, kbar_warning, kbar_dir = detect_kbar_pattern(opens, highs, lows, closes)
@@ -1215,12 +1841,39 @@ def analyze(stock_id: str, tf: str = "D",
     ma20_arr = calc_ma(closes, 20)
     buy_idx, sell_idx, buy_stops = calc_gann_filtered(closes, highs, lows, volumes, 20)
 
+    # 葛蘭碧站回偵測（跌破後站回 MA20 / MA60）
+    gann_ma20_signal, gann_ma20_val, gann_ma20_name, gann_ma20_stop = detect_gann_recross(closes, highs, lows, volumes, 20)
+    gann_ma60_signal, gann_ma60_val, gann_ma60_name, gann_ma60_stop = detect_gann_recross(closes, highs, lows, volumes, 60)
+    # 優先用 MA60 站回（較強訊號），其次 MA20
+    gann_recross = None
+    if gann_ma60_signal:
+        gann_recross = {"ma": gann_ma60_name, "val": gann_ma60_val, "stop": gann_ma60_stop}
+    elif gann_ma20_signal:
+        gann_recross = {"ma": gann_ma20_name, "val": gann_ma20_val, "stop": gann_ma20_stop}
+
     # 突破壓力 / 跌破支撐訊號
     breakout_idx, breakdown_idx, breakout_stale, breakdown_stale = calc_breakout_signals(
         closes, highs, lows, volumes, support, resistance)
 
-    # 防守位：支撐下 1.5%，最小距現價 2%，最大不超過現價 10%
-    raw_stop  = round(support * 0.985, 2)
+    # 防守位：優先順序
+    # 1. 若軌道下緣距現價 ≤8%，用軌道下緣下 1.5% 作防守位
+    # 2. 若支撐距現價超過 5%，改用現價下方 5%（避免防守位過遠失去意義）
+    # 3. 否則用支撐下 1.5%
+    # 4. 最小距現價 2%，最大不超過現價 10%
+    ch_sup_now = channel.get("support_now") if channel else None
+    sup_dist_pct = (price - support) / price * 100
+    if ch_sup_now and ch_sup_now < price * 0.999:
+        ch_sup_dist_pct = (price - ch_sup_now) / price * 100
+        if ch_sup_dist_pct <= 8:
+            raw_stop = round(ch_sup_now * 0.985, 2)
+        elif sup_dist_pct > 5:
+            raw_stop = round(price * 0.95, 2)
+        else:
+            raw_stop = round(support * 0.985, 2)
+    elif sup_dist_pct > 5:
+        raw_stop = round(price * 0.95, 2)
+    else:
+        raw_stop = round(support * 0.985, 2)
     min_stop  = round(price * 0.98, 2)   # 最近不能超過現價 2%
     max_stop  = round(price * 0.90, 2)   # 最遠不超過現價 10%
     stop_loss = min(min_stop, max(raw_stop, max_stop))
@@ -1243,12 +1896,18 @@ def analyze(stock_id: str, tf: str = "D",
     risk_level, risk_label, risk_color = calc_risk_level(
         price, support, resistance, rr_ratio, near_top, near_bot, pattern)
 
+    # K 線型態大數據勝率
+    k_pattern, h_win_rate = detect_kline_patterns(
+        closes.tolist(), opens.tolist(), highs.tolist(), lows.tolist(), volumes.tolist()
+    )
+
     # 條列摘要
     summary_lines = build_summary(
         price, support, supp_detail["support_desc"],
         resistance, supp_detail["resistance_desc"],
         trend, pattern, rr_ratio, risk_level, risk_label,
-        near_top, near_bot, stop_loss, target1, rr_basis)
+        near_top, near_bot, stop_loss, target1, rr_basis,
+        kline_pattern=k_pattern, win_rate=h_win_rate)
 
     # K棒型態加進摘要
     if kbar_pattern:
@@ -1286,20 +1945,20 @@ def analyze(stock_id: str, tf: str = "D",
 
     # K棒操作說明對照（具體化）
     KBAR_ACTION = {
-        "錘頭線":       f"明天收紅且量縮可試多，停損設今日低點 {round(float(lows[-1]),2)} 下方",
-        "射擊之星":     f"明天若開低收黑，減碼或停損，停損設今日高點 {round(float(highs[-1]),2)} 上方",
+        "錘頭線":       f"明天收紅且量縮可試多，防守位設 {stop_loss}",
+        "射擊之星":     f"頂部反轉訊號，建議先出場觀望，等回測支撐 {support} 守住再重新評估進場時機",
         "十字星":       f"方向未定，等明天收盤確認，不宜追高也不宜殺低",
         "大紅棒":       f"今日強攻，明天若縮量整理不跌破今日收盤 {round(float(closes[-1]),2)}，多頭延續可持有",
-        "大黑棒":       f"今日強殺，明天若無法收復今日一半 {round((float(opens[-1])+float(closes[-1]))/2,2)}，持續空頭，持有者停損",
+        "大黑棒":       f"今日強殺，建議出場觀望，等股價回到支撐 {support} 附近且出現止跌訊號再重新評估",
         "多頭吞噬":     f"底部反轉訊號，明天收紅確認後可設防守位 {stop_loss} 試多",
-        "空頭吞噬":     f"頂部反轉訊號，明天收黑確認後應減碼，停損設今日高點 {round(float(highs[-1]),2)}",
+        "空頭吞噬":     f"頂部反轉訊號，明天收黑確認後建議減碼出場，等回測支撐 {support} 守住再重新布局",
         "孕線":         f"整理型態，等突破今日高低點再進場，不宜在盤中追價",
-        "穿刺線":       f"底部潛在反轉，明天若繼續收紅可加碼，停損設前低 {support}",
-        "烏雲蓋頂":     f"頂部潛在反轉，明天若收黑應減碼，停損設今日高點 {round(float(highs[-1]),2)}",
+        "穿刺線":       f"底部潛在反轉，明天若繼續收紅可加碼，防守位設 {stop_loss}",
+        "烏雲蓋頂":     f"頂部潛在反轉，明天若收黑確認建議出場，等拉回至支撐 {support} 附近再重新評估",
         "早晨之星":     f"底部強力反轉，確認訊號，可設防守位 {stop_loss} 進場，目標看 {resistance}",
-        "黃昏之星":     f"頂部強力反轉，應立即檢視持倉，停損設三根K棒最高點 {round(float(highs[-3:].max()),2)}",
+        "黃昏之星":     f"頂部強力反轉，建議出場觀望，待股價拉回至支撐 {support} 附近出現止跌K棒再重新布局",
         "三紅兵":       f"多頭強勢，可持有，但連漲三天後注意追高風險，不宜此時首次進場",
-        "三烏鴉":       f"空頭強勢，持倉應全數停損，等企穩再重新評估",
+        "三烏鴉":       f"空頭強勢，建議全數出場觀望，等跌勢止穩、支撐 {support} 守住後再重新評估進場",
     }
 
     # 找對應的操作說明
@@ -1312,31 +1971,65 @@ def analyze(stock_id: str, tf: str = "D",
     near_sup = pattern in ("支撐整理",) or (price - support) / price < 0.04
     near_res = pattern in ("壓力整理",) or (resistance - price) / price < 0.04
 
+    # 軌道下緣靠近判斷（距現價 ≤3%）
+    ch_near_sup = False
+    ch_sup_desc = ""
+    if channel and channel.get("position") == "near_support":
+        ch_near_sup = True
+        ch_sup_val = channel.get("support_now", support)
+        ch_sup_desc = f"靠近軌道下緣支撐 {ch_sup_val}"
+
     if near_sup:
         if rr_ratio >= 1.5 and kbar_bullish:
             conclusion = f"靠近支撐 {support}，出現多頭K棒（{kbar_pattern}），損益比 {rr_ratio} 佳。操作：{kbar_action or f'可設防守位 {stop_loss} 試多，目標壓力 {resistance}'}"
         elif rr_ratio >= 1.5 and kbar_neutral:
             conclusion = f"靠近支撐 {support}，K棒方向未定（{kbar_pattern or '無明確型態'}）。操作：等明天收盤確認方向再進場，防守位 {stop_loss}"
         elif rr_ratio >= 1.5 and kbar_bearish:
-            conclusion = f"靠近支撐 {support}，但出現空頭K棒（{kbar_pattern}），支撐恐失守。操作：{kbar_action or f'先觀望，跌破 {support} 停損出場'}"
+            conclusion = f"靠近支撐 {support}，但出現空頭K棒（{kbar_pattern}），支撐恐失守。操作：{kbar_action or f'先觀望，跌破 {support} 出場'}"
         else:
             conclusion = f"靠近支撐 {support}，但損益比 {rr_ratio} 偏低（壓力 {resistance} 太遠或太近）。操作：等支撐確認守住再評估，防守位 {stop_loss}"
+    elif ch_near_sup and not near_res:
+        # 軌道下緣靠近，優先給出低風險試多建議
+        ch_sup_val = channel.get("support_now", support)
+        if kbar_bullish:
+            conclusion = f"{ch_sup_desc}，出現多頭K棒（{kbar_pattern}），相對低風險位置。操作：{kbar_action or f'可設防守位 {stop_loss} 試多，目標壓力 {resistance}'}"
+        elif kbar_bearish:
+            conclusion = f"{ch_sup_desc}，但出現空頭K棒（{kbar_pattern}），軌道支撐恐失守。操作：{kbar_action or f'觀望，若跌破軌道下緣 {ch_sup_val} 出場'}"
+        else:
+            conclusion = f"{ch_sup_desc}，相對低風險觀察位。操作：等明天出現止跌K棒確認守住後可設防守位 {stop_loss} 試多，目標壓力 {resistance}"
+    elif gann_recross:
+        # 葛蘭碧站回訊號
+        ma_name = gann_recross["ma"]
+        ma_val  = gann_recross["val"]
+        g_stop  = gann_recross["stop"]
+        if kbar_bullish:
+            conclusion = f"跌破後站回 {ma_name}（{ma_val}），出現多頭K棒（{kbar_pattern}）。葛蘭碧買點確認，操作：可設防守位 {g_stop}（{ma_name} 下方）試多，目標壓力 {resistance}"
+        elif kbar_bearish:
+            conclusion = f"跌破後站回 {ma_name}（{ma_val}），但出現空頭K棒（{kbar_pattern}），站回力道存疑。操作：等明天確認站穩 {ma_name} 再進場，防守位 {g_stop}"
+        else:
+            conclusion = f"跌破後站回 {ma_name}（{ma_val}），葛蘭碧潛在買點。操作：明天若確認站穩 {ma_name} 可設防守位 {g_stop} 試多，目標壓力 {resistance}"
     elif near_res:
         if kbar_bullish:
             conclusion = f"靠近壓力 {resistance}，出現多頭K棒（{kbar_pattern}）。操作：{kbar_action or f'等放量突破 {resistance} 再追，未突破先觀望，停損 {stop_loss}'}"
         elif kbar_bearish:
-            conclusion = f"靠近壓力 {resistance}，出現空頭K棒（{kbar_pattern}），拉回風險高。操作：{kbar_action or f'減碼或觀望，回測支撐 {support} 再評估'}"
+            conclusion = f"靠近壓力 {resistance}，出現空頭K棒（{kbar_pattern}），拉回風險高。操作：{kbar_action or f'建議先出場或減碼觀望，等拉回至支撐 {support} 附近守住再重新評估進場'}"
         else:
             conclusion = f"靠近壓力 {resistance}，追價風險高。操作：等放量突破確認後再跟，或等回測支撐 {support} 後進場，停損 {stop_loss}"
     elif pattern == "突破型態":
-        conclusion = f"股價突破壓力 {resistance}。操作：{'縮量回測不破可加碼，停損設' + str(stop_loss) if not kbar_bearish else f'出現{kbar_pattern}，留意假突破，停損設 {stop_loss}'}"
+        if today_breakout:
+            if kbar_bearish:
+                conclusion = f"今日突破前高 {prev_high}，但出現空頭K棒（{kbar_pattern}），留意假突破。操作：等明天確認守住 {prev_high} 再進場，防守位 {stop_loss}"
+            else:
+                conclusion = f"今日放量突破前高 {prev_high}，突破型態確立。操作：可持有，明天若縮量回測不破 {prev_high} 可加碼，防守位 {stop_loss}，下一壓力參考 {resistance}"
+        else:
+            conclusion = f"股價突破壓力 {prev_high}。操作：{'縮量回測不破可加碼，防守位 ' + str(stop_loss) if not kbar_bearish else f'出現{kbar_pattern}，留意假突破，防守位 {stop_loss}'}"
     elif pattern == "跌破型態":
-        conclusion = f"股價跌破支撐 {support}，前支撐轉壓力。操作：{'持倉停損 ' + str(stop_loss) + '，等止跌再重新評估' if not kbar_bullish else f'出現{kbar_pattern}，觀察是否為假跌破，守住 {support} 才考慮反彈操作'}"
+        conclusion = f"股價跌破支撐 {support}，前支撐轉壓力。操作：{'建議出場觀望，等止跌企穩、支撐 ' + str(support) + ' 重新守住後再重新評估進場' if not kbar_bullish else f'出現{kbar_pattern}，觀察是否為假跌破，守住 {support} 才考慮反彈操作'}"
     else:
         if kbar_bullish:
             conclusion = f"位於軌道中段，出現多頭K棒（{kbar_pattern}）。操作：{kbar_action or f'可小量試多，等突破壓力 {resistance} 確認再加碼，停損 {stop_loss}'}"
         elif kbar_bearish:
-            conclusion = f"位於軌道中段，出現空頭K棒（{kbar_pattern}）。操作：{kbar_action or f'減碼觀望，跌破支撐 {support} 停損，等止跌再評估'}"
+            conclusion = f"位於軌道中段，出現空頭K棒（{kbar_pattern}）。操作：{kbar_action or f'建議減碼觀望，等拉回至支撐 {support} 附近止跌後再重新評估進場時機'}"
         else:
             conclusion = f"位於軌道中段，方向未明。操作：觀望為主，等突破 {resistance} 或跌破 {support} 再跟進，防守位 {stop_loss}"
 
@@ -1394,6 +2087,8 @@ def analyze(stock_id: str, tf: str = "D",
         "conflict_note": conflict_note,
         "kbar_pattern": kbar_pattern, "kbar_warning": kbar_warning,
         "kbar_dir": kbar_dir, "kbar_action": kbar_action,
+        "gann_recross": gann_recross,
+        "today_breakout": today_breakout, "prev_high": prev_high,
         "near_top": near_top, "near_bot": near_bot,
         "ma_values": ma_values, "buy_signals": buy_idx, "sell_signals": sell_idx,
         "buy_stops": buy_stops, "channel": channel,
@@ -1404,9 +2099,67 @@ def analyze(stock_id: str, tf: str = "D",
         "reversal_pattern": reversal,
         "indicators": indicators,
         "bars": bars,
+        "kline_pattern": k_pattern,
+        "win_rate": h_win_rate,
     }
     _cache_set(_cache_key, result)
+
+    # 計入查詢次數（免費用戶）
+    if user and user["plan"] == "free":
+        _inc_query_count(user["id"])
+
     return result
+
+
+@app.get("/api/analyze/{stock_id}")
+def analyze(stock_id: str, tf: str = "D",
+            ma1: int = 5, ma2: int = 10, ma3: int = 20, ma4: int = 60, ma5: int = 120,
+            request: Request = None,
+            user: dict | None = Depends(get_current_user)):
+    """API 端點：遊客可查 1 次，免費會員 3 次，付費無限"""
+    today = _taipei_today()
+
+    if user:
+        plan = user["plan"]
+        # 付費狀態驗證
+        if plan != "free" and user["expire_at"] and user["expire_at"] < today:
+            raise HTTPException(status_code=403, detail="訂閱已到期，請續費後繼續使用")
+        # 免費用戶次數限制
+        if plan == "free":
+            allowed, used, limit = _check_query_limit(user["id"], plan)
+            if not allowed:
+                raise HTTPException(
+                    status_code=429,
+                    detail=f"today_limit|今日免費查詢次數已用完（{limit} 次），升級付費方案即可無限查詢"
+                )
+    else:
+        # 遊客：用 IP 追蹤次數
+        client_ip = request.client.host if request else "unknown"
+        conn = _db_conn()
+        row = conn.execute(
+            "SELECT count FROM query_log WHERE member_id=0 AND date=? AND ip=?",
+            (today, client_ip)
+        ).fetchone()
+        used = row["count"] if row else 0
+        if used >= GUEST_DAILY_LIMIT:
+            raise HTTPException(
+                status_code=429,
+                detail=f"guest_limit|免費試用已達上限（{GUEST_DAILY_LIMIT} 次），登入後每日可查 {FREE_DAILY_LIMIT} 次"
+            )
+        # 記錄遊客查詢
+        conn.execute(
+            "INSERT INTO query_log (member_id, date, ip, count) VALUES (0, ?, ?, 1) "
+            "ON CONFLICT(member_id, date) DO UPDATE SET count=count+1",
+            (today, client_ip)
+        )
+        conn.commit()
+        conn.close()
+
+    # 記錄獨立訪客
+    client_ip = request.client.host if request else "unknown"
+    _record_visit(client_ip)
+
+    return _do_analyze(stock_id, tf, ma1, ma2, ma3, ma4, ma5, user=user)
 
 
 @app.get("/api/top_gainers")
@@ -1474,9 +2227,297 @@ def get_top_gainers(limit: int = 10):
     return {"date": "", "gainers": fallback}
 
 
+@app.get("/api/quote/{stock_id}")
+def get_quote(stock_id: str, user: dict = Depends(require_user)):
+    """
+    即時報價（盤中 snapshot）
+    資料來源：FinMind taiwan_stock_tick_snapshot
+    回傳：現價、漲跌、漲跌幅%、成交量、開高低、時間、是否盤中
+    盤後或假日回傳 is_trading=False，前端據此停止輪詢
+    """
+    import urllib.request, json as _json
+    from datetime import datetime, time as dtime
+    from zoneinfo import ZoneInfo
+
+    code = stock_id.strip().replace(".TW", "").replace(".TWO", "")
+
+    # ── 判斷是否在台股交易時間（09:00~13:30 週一~五）──
+    tz = ZoneInfo("Asia/Taipei")
+    now = datetime.now(tz)
+    is_weekday = now.weekday() < 5
+    market_open  = dtime(9, 0)
+    market_close = dtime(13, 30)
+    in_session = is_weekday and market_open <= now.time() <= market_close
+
+    try:
+        url = (f"https://api.finmindtrade.com/api/v4/taiwan_stock_tick_snapshot"
+               f"?data_id={code}&token={FINMIND_TOKEN}")
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=6) as resp:
+            data = _json.loads(resp.read())
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"FinMind 連線失敗：{e}")
+
+    rows = data.get("data", [])
+    if not rows:
+        # snapshot 無資料（盤後或股票停牌），仍回傳結構，is_trading=False
+        return {
+            "stock_id": code,
+            "price": None, "change": None, "change_pct": None,
+            "open": None, "high": None, "low": None,
+            "volume": None, "time": None,
+            "is_trading": False,
+            "in_session": in_session,
+        }
+
+    r = rows[0]
+    close_price = r.get("close") or r.get("price") or r.get("Close")
+    open_price  = r.get("open")  or r.get("Open")
+    high_price  = r.get("high")  or r.get("High")
+    low_price   = r.get("low")   or r.get("Low")
+    yesterday   = r.get("yesterday_price") or r.get("reference_price")
+    volume      = r.get("total_volume") or r.get("volume") or r.get("Volume")
+    tick_time   = r.get("time") or r.get("date") or ""
+
+    change = None
+    change_pct = None
+    if close_price and yesterday:
+        try:
+            change = round(float(close_price) - float(yesterday), 2)
+            change_pct = round(change / float(yesterday) * 100, 2)
+        except Exception:
+            pass
+
+    return {
+        "stock_id":   code,
+        "price":      safe_float(close_price),
+        "change":     safe_float(change),
+        "change_pct": safe_float(change_pct),
+        "open":       safe_float(open_price),
+        "high":       safe_float(high_price),
+        "low":        safe_float(low_price),
+        "volume":     int(volume) if volume else None,
+        "time":       str(tick_time),
+        "is_trading": bool(close_price and in_session),
+        "in_session": in_session,
+    }
+
+
+
+
+
+
+# ══════════════════════════════════════════════════════════
+# 管理者端點
+# ══════════════════════════════════════════════════════════
+
+def _check_admin(key: str):
+    """驗證管理者 key = JWT_SECRET 前 16 碼"""
+    if key != JWT_SECRET[:16]:
+        raise HTTPException(status_code=403, detail="無權限")
+
+@app.get("/admin/backup-db")
+def backup_db(key: str = ""):
+    """下載 members.db 備份，key = JWT_SECRET 前16碼"""
+    from fastapi.responses import FileResponse
+    _check_admin(key)
+    if not os.path.exists(DB_PATH):
+        raise HTTPException(status_code=404, detail="資料庫不存在")
+    from datetime import date
+    filename = f"members_backup_{date.today().isoformat()}.db"
+    return FileResponse(DB_PATH, media_type="application/octet-stream", filename=filename)
+
+
+@app.get("/admin/members")
+def admin_list_members(key: str = ""):
+    """列出所有會員"""
+    _check_admin(key)
+    conn = _db_conn()
+    rows = conn.execute(
+        "SELECT id, email, plan, expire_at, created_at, last_login FROM members ORDER BY id DESC"
+    ).fetchall()
+    conn.close()
+    today = _date_cls.today().isoformat()
+    members = []
+    for r in rows:
+        d = dict(r)
+        if d["plan"] == "free":
+            d["is_active"] = True
+        elif d["expire_at"]:
+            d["is_active"] = d["expire_at"] >= today
+        else:
+            d["is_active"] = False
+        members.append(d)
+    return {"total": len(members), "members": members}
+
+
+@app.post("/admin/grant")
+def admin_grant(key: str = "", email: str = "", plan: str = "monthly", days: int = 30):
+    """
+    手動開通或延長會員
+    plan: free / monthly / quarterly / yearly
+    使用方式：POST /admin/grant?key=xxx&email=xxx&plan=monthly&days=30
+    """
+    _check_admin(key)
+    email = email.strip().lower()
+    if not email:
+        raise HTTPException(status_code=400, detail="請填 email")
+
+    from datetime import date, timedelta, datetime
+    new_expire = (datetime.today() + timedelta(days=days)).strftime("%Y-%m-%d")
+
+    conn = _db_conn()
+    row = conn.execute("SELECT * FROM members WHERE email=?", (email,)).fetchone()
+    if row:
+        conn.execute(
+            "UPDATE members SET plan=?, expire_at=?, token_ver=token_ver+1 WHERE email=?",
+            (plan, new_expire, email)
+        )
+        conn.commit()
+        conn.close()
+        return {"ok": True, "action": "updated", "email": email, "plan": plan, "expire_at": new_expire}
+    else:
+        # 新帳號，自動產生密碼
+        password = secrets.token_urlsafe(8)
+        conn.execute(
+            "INSERT INTO members (email, password, plan, expire_at) VALUES (?, ?, ?, ?)",
+            (email, _hash_pw(password), plan, new_expire)
+        )
+        conn.commit()
+        conn.close()
+        return {"ok": True, "action": "created", "email": email, "password": password, "plan": plan, "expire_at": new_expire}
+
+
+@app.post("/admin/reset-password")
+def admin_reset_password(key: str = "", email: str = ""):
+    """重設某用戶密碼，回傳新密碼"""
+    _check_admin(key)
+    email = email.strip().lower()
+    conn = _db_conn()
+    row = conn.execute("SELECT id FROM members WHERE email=?", (email,)).fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="找不到此用戶")
+    new_pw = secrets.token_urlsafe(8)
+    conn.execute(
+        "UPDATE members SET password=?, token_ver=token_ver+1 WHERE email=?",
+        (_hash_pw(new_pw), email)
+    )
+    conn.commit()
+    conn.close()
+    return {"ok": True, "email": email, "new_password": new_pw}
+
+
+class _DeleteMemberReq(BaseModel):
+    email: str = ""
+
+@app.post("/admin/delete-member")
+def admin_delete_member(req: _DeleteMemberReq, key: str = ""):
+    """刪除會員帳號"""
+    _check_admin(key)
+    email = req.email.strip().lower()
+    conn = _db_conn()
+    conn.execute("DELETE FROM members WHERE email=?", (email,))
+    conn.commit()
+    conn.close()
+    return {"ok": True, "deleted": email}
+
+def _record_visit(ip: str):
+    today = _date_cls.today().isoformat()
+    conn = _db_conn()
+    conn.execute("INSERT OR IGNORE INTO visits (ip, date) VALUES (?, ?)", (ip, today))
+    conn.commit()
+    conn.close()
+
+@app.get("/api/stats")
+def api_stats():
+    conn = _db_conn()
+    visit_count = conn.execute("SELECT COUNT(*) FROM visits").fetchone()[0]
+    query_count = conn.execute("SELECT COALESCE(SUM(count), 0) FROM query_log").fetchone()[0]
+    conn.close()
+    return {"visit_count": int(visit_count), "query_count": int(query_count)}
+
 @app.get("/")
 def root():
     return {"status": "ok", "app": "線上有位 API", "version": "1.3.0"}
+
+
+# ── 批次分析端點（關注頁用）──
+from pydantic import BaseModel as _BaseModel
+from typing import List as _List
+import asyncio as _asyncio
+from concurrent.futures import ThreadPoolExecutor as _ThreadPoolExecutor
+
+class BatchRequest(_BaseModel):
+    ids: _List[str]
+    tf: str = "D"
+
+@app.post("/batch_analyze")
+def batch_analyze(req: BatchRequest, user: dict = Depends(require_user)):
+    """
+    批次分析多檔股票，回傳 {股票代號: 分析結果} 的 dict
+    每檔獨立處理，單一失敗不影響其他，最多並發 5 個
+    """
+    tf = req.tf.upper()
+    ids = [i.strip().upper() for i in req.ids if i.strip()][:30]  # 最多30檔
+
+    def _analyze_one(stock_id):
+        try:
+            # 複用快取
+            _cache_key = f"{stock_id}_{tf}"
+            cached = _cache_get(_cache_key)
+            if cached:
+                # 只回傳前端需要的欄位，減少傳輸量
+                return stock_id, _slim(cached)
+            # 未快取則查詢
+            result = _do_analyze(stock_id, tf, user=user)
+            return stock_id, _slim(result)
+        except Exception as e:
+            print(f"batch_analyze {stock_id} 失敗：{e}")
+            return stock_id, None
+
+    def _slim(d):
+        """只保留關注頁卡片需要的欄位"""
+        if not d:
+            return None
+        # 從 summary 組出一行結論（取第一、二行）
+        summary = d.get("summary", [])
+        conclusion = "、".join(summary[:2]) if summary else ""
+        # volume_ratio：取最近一根成交量 / 20日均量
+        bars = d.get("bars", [])
+        volume_ratio = None
+        if bars and len(bars) >= 20:
+            recent_vol = bars[-1].get("volume", 0) or 0
+            avg_vol = sum(b.get("volume", 0) or 0 for b in bars[-20:]) / 20
+            volume_ratio = round(recent_vol / avg_vol, 2) if avg_vol > 0 else None
+        return {
+            "price":        d.get("price"),
+            "support":      d.get("support"),
+            "resistance":   d.get("resistance"),
+            "trend":        d.get("trend"),
+            "pattern":      d.get("pattern"),
+            "risk_level":   d.get("risk_level"),
+            "risk_label":   d.get("risk_label"),
+            "risk_color":   d.get("risk_color"),
+            "conclusion":   conclusion,
+            "rr_ratio":     d.get("risk_reward"),   # 正確 key
+            "rr_basis":     d.get("rr_basis"),
+            "stop_loss":    d.get("stop_loss"),
+            "today_breakout": d.get("today_breakout"),
+            "near_top":     d.get("near_top"),
+            "near_bot":     d.get("near_bot"),
+            "kbar_dir":     d.get("kbar_dir"),
+            "volume_ratio": volume_ratio,
+        }
+
+    results = {}
+    with _ThreadPoolExecutor(max_workers=5) as ex:
+        futures = {ex.submit(_analyze_one, sid): sid for sid in ids}
+        for fut in futures:
+            sid, val = fut.result()
+            results[sid] = val
+
+    return results
 
 
 # ── FinMind 股票資料快取 ──
@@ -1506,7 +2547,7 @@ def get_all_stock_info() -> list:
 
 
 @app.get("/api/search")
-def search_stock(q: str, limit: int = 10):
+def search_stock(q: str, limit: int = 10, user: dict = Depends(require_user)):
     """
     股票搜尋：支援代號（2330）或中文名稱（台積電、律勝）
     回傳最多 limit 筆匹配結果
@@ -1565,7 +2606,7 @@ def search_stock(q: str, limit: int = 10):
 
 
 @app.get("/api/peers/{stock_id}")
-def get_peers(stock_id: str, limit: int = 15):
+def get_peers(stock_id: str, limit: int = 15, user: dict = Depends(require_user)):
     """同產業個股列表"""
     code = stock_id.strip().replace(".TW", "").replace(".TWO", "")
     all_stocks = get_all_stock_info()
@@ -1598,44 +2639,6 @@ def get_peers(stock_id: str, limit: int = 15):
     }
 
 
-@app.get("/api/concept/{stock_id}")
-def get_concept(stock_id: str):
-    """所屬產業鏈 / 概念股"""
-    import urllib.request, json as _json
-    code = stock_id.strip().replace(".TW", "").replace(".TWO", "")
-    try:
-        url = (f"https://api.finmindtrade.com/api/v4/data"
-               f"?dataset=TaiwanStockIndustryChain"
-               f"&data_id={code}&token={FINMIND_TOKEN}")
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=8) as resp:
-            data = _json.loads(resp.read())
-    except Exception as e:
-        raise HTTPException(status_code=503, detail=f"FinMind 連線失敗：{e}")
-
-    if data.get("status") != 200:
-        raise HTTPException(status_code=404, detail="查無產業鏈資料")
-
-    raw = data.get("data", [])
-    if not raw:
-        return {"stock_id": code, "chains": [], "count": 0}
-
-    # 整理：依 industry_chain_name 分組
-    from collections import defaultdict
-    groups: dict = defaultdict(list)
-    for item in raw:
-        chain = item.get("industry_chain_name") or "其他"
-        sid   = item.get("stock_id2") or item.get("related_stock_id", "")
-        sname = item.get("stock_name2") or item.get("related_stock_name", "")
-        if sid and sid != code:
-            groups[chain].append({"stock_id": sid, "stock_name": sname})
-
-    chains = [{"chain_name": k, "stocks": v} for k, v in groups.items()]
-    return {
-        "stock_id": code,
-        "chains": chains,
-        "count": sum(len(c["stocks"]) for c in chains),
-    }
 
 
 def detect_kbar_pattern(opens, highs, lows, closes):
@@ -1647,7 +2650,7 @@ def detect_kbar_pattern(opens, highs, lows, closes):
     """
     n = len(closes)
     if n < 3:
-        return "", ""
+        return "", "", "neutral"
 
     o1,h1,l1,c1 = opens[-1],highs[-1],lows[-1],closes[-1]  # 最新根
     o2,h2,l2,c2 = opens[-2],highs[-2],lows[-2],closes[-2]  # 前一根
@@ -1833,7 +2836,7 @@ def _finmind_get(dataset: str, stock_id: str, start_date: str, end_date: str) ->
 
 
 @app.get("/api/chips/{stock_id}")
-def get_chips(stock_id: str, days: int = 30):
+def get_chips(stock_id: str, days: int = 30, user: dict = Depends(require_user)):
     """
     籌碼面：三大法人買賣超 + 融資融券
     回傳最近 N 天資料 + 統計摘要
@@ -1944,3 +2947,785 @@ def get_chips(stock_id: str, days: int = 30):
     return result
 
 
+
+
+
+
+# ══════════════════════════════════════════════════════════
+# 會員 API 端點
+# ══════════════════════════════════════════════════════════
+
+class LoginReq(BaseModel):
+    email: str
+    password: str
+
+class RegisterReq(BaseModel):
+    email: str
+    password: str
+
+class ChangePasswordReq(BaseModel):
+    old_password: str
+    new_password: str
+
+
+@app.post("/auth/register")
+def auth_register(req: RegisterReq):
+    email = req.email.strip().lower()
+    if not _re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
+        raise HTTPException(status_code=400, detail="Email 格式不正確")
+    if len(req.password) < 6:
+        raise HTTPException(status_code=400, detail="密碼至少 6 個字元")
+    conn = _db_conn()
+    try:
+        conn.execute(
+            "INSERT INTO members (email, password) VALUES (?, ?)",
+            (email, _hash_pw(req.password))
+        )
+        conn.commit()
+    except sqlite3.IntegrityError:
+        conn.close()
+        raise HTTPException(status_code=409, detail="此 Email 已註冊")
+    conn.close()
+    return {"ok": True, "message": "註冊成功"}
+
+
+@app.post("/register")
+def register_free(req: RegisterReq):
+    email = req.email.strip().lower()
+    if not _re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
+        raise HTTPException(status_code=400, detail="Email 格式不正確")
+    if len(req.password) < 6:
+        raise HTTPException(status_code=400, detail="密碼至少 6 個字元")
+    conn = _db_conn()
+    try:
+        conn.execute(
+            "INSERT INTO members (email, password, plan) VALUES (?, ?, 'free')",
+            (email, _hash_pw(req.password))
+        )
+        conn.commit()
+    except sqlite3.IntegrityError:
+        conn.close()
+        raise HTTPException(status_code=409, detail="此 Email 已註冊")
+    conn.close()
+    return {"ok": True, "message": "免費帳號建立成功"}
+
+
+@app.post("/auth/login")
+def auth_login(req: LoginReq):
+    email = req.email.strip().lower()
+    conn = _db_conn()
+    row = conn.execute("SELECT * FROM members WHERE email=?", (email,)).fetchone()
+    if not row or not _verify_pw(req.password, row["password"]):
+        conn.close()
+        raise HTTPException(status_code=401, detail="帳號或密碼錯誤")
+    session_id = secrets.token_hex(16)
+    conn.execute("UPDATE members SET last_login=datetime('now','localtime'), session_id=? WHERE id=?", (session_id, row["id"]))
+    conn.commit()
+    conn.close()
+
+    payload = {
+        "sub": row["id"],
+        "email": email,
+        "plan": row["plan"],
+        "ver": row["token_ver"],
+        "sid": session_id,
+        "exp": _time_mod.time() + JWT_EXPIRE_DAYS * 86400,
+    }
+    token = _jwt_create(payload)
+    return {
+        "token": token,
+        "email": email,
+        "plan": row["plan"],
+        "expire_at": row["expire_at"],
+    }
+
+
+@app.get("/auth/me")
+def auth_me(user: dict = Depends(require_user)):
+    today = _date_cls.today().isoformat()
+    conn = _db_conn()
+    row = conn.execute(
+        "SELECT count FROM query_log WHERE member_id=? AND date=?",
+        (user["id"], today)
+    ).fetchone()
+    conn.close()
+    used = row["count"] if row else 0
+    plan = user["plan"]
+    is_active = True
+    if plan != "free" and user["expire_at"]:
+        is_active = user["expire_at"] >= today
+    plan_labels = {"free":"免費會員","monthly":"月費會員","quarterly":"季費會員","yearly":"年費會員","test":"測試會員"}
+    plan_label  = plan_labels.get(plan, plan)
+    days_left   = None
+    is_expiring_soon = False
+    if user["expire_at"] and plan != "free":
+        try:
+            delta = (datetime.fromisoformat(user["expire_at"]) - datetime.today()).days
+            days_left = max(0, delta)
+            is_expiring_soon = 0 <= days_left <= 3
+        except Exception:
+            pass
+    return {
+        "email": user["email"],
+        "plan": plan,
+        "plan_label": plan_label,
+        "is_active": is_active,
+        "expire_at": user["expire_at"],
+        "queries_used": used,
+        "queries_limit": FREE_DAILY_LIMIT if plan == "free" else 999,
+        "days_left": days_left,
+        "is_expiring_soon": is_expiring_soon,
+    }
+
+
+@app.post("/auth/logout")
+def auth_logout(user: dict = Depends(require_user)):
+    conn = _db_conn()
+    conn.execute("UPDATE members SET token_ver = token_ver + 1 WHERE id=?", (user["id"],))
+    conn.commit()
+    conn.close()
+    return {"ok": True}
+
+
+@app.post("/auth/change-password")
+def auth_change_password(req: ChangePasswordReq, user: dict = Depends(require_user)):
+    if not _verify_pw(req.old_password, user["password"]):
+        raise HTTPException(status_code=401, detail="舊密碼錯誤")
+    if len(req.new_password) < 6:
+        raise HTTPException(status_code=400, detail="新密碼至少 6 個字元")
+    conn = _db_conn()
+    conn.execute(
+        "UPDATE members SET password=?, token_ver=token_ver+1 WHERE id=?",
+        (_hash_pw(req.new_password), user["id"])
+    )
+    conn.commit()
+    conn.close()
+    return {"ok": True, "message": "密碼已更新，請重新登入"}
+
+
+def _send_email(to: str, subject: str, html: str):
+    """寄送 HTML 信件，失敗只 log 不 raise"""
+    import smtplib
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+    if not SMTP_HOST or not SMTP_USER or not SMTP_PASS:
+        print(f"   ⚠️ SMTP 未設定，略過寄信 → {to}")
+        return
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"]    = SMTP_FROM
+        msg["To"]      = to
+        msg.attach(MIMEText(html, "html", "utf-8"))
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=15) as server:
+            server.ehlo()
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASS)
+            server.sendmail(SMTP_FROM, [to], msg.as_string())
+        print(f"   ✅ 寄信成功 → {to}：{subject}")
+    except Exception as e:
+        print(f"   ❌ 寄信失敗 → {to}：{e}")
+
+
+def _ecpay_verify(params: dict) -> bool:
+    """驗證綠界 CheckMacValue"""
+    import urllib.parse, hashlib
+    check_mac = params.get("CheckMacValue", "")
+    filtered = {k: v for k, v in params.items() if k != "CheckMacValue"}
+    sorted_params = sorted(filtered.items(), key=lambda x: x[0].lower())
+    raw = "&".join(f"{k}={v}" for k, v in sorted_params)
+    raw = f"HashKey={ECPAY_HASH_KEY}&{raw}&HashIV={ECPAY_HASH_IV}"
+    raw = urllib.parse.quote_plus(raw).lower()
+    expected = hashlib.sha256(raw.encode()).hexdigest().upper()
+    return expected == check_mac.upper()
+
+
+def _plan_days(item_name: str) -> int:
+    """依商品名稱判斷天數"""
+    if "年" in item_name:
+        return 365
+    elif "季" in item_name:
+        return 90
+    elif "測試" in item_name or "test" in item_name.lower():
+        return 1
+    else:
+        return 30
+
+
+@app.post("/pay/result")
+async def pay_result(request: Request):
+    """綠界 OrderResultURL（POST），驗證後 redirect 到前端結果頁"""
+    from fastapi.responses import RedirectResponse
+    body = await request.form()
+    rtn_code = body.get("RtnCode", "0")
+    if rtn_code == "1":
+        return RedirectResponse(url=f"{FRONTEND_URL}/landing.html?pay=done", status_code=303)
+    else:
+        return RedirectResponse(url=f"{FRONTEND_URL}/landing.html?pay=fail", status_code=303)
+
+@app.post("/create_order")
+async def create_order(request: Request):
+    """
+    前端呼叫此端點產生綠界訂單，回傳付款網址
+    Body: { email, plan }
+    """
+    from fastapi import Request
+    import urllib.parse, hashlib, time as _t
+
+    body = await request.json()
+    email    = body.get("email", "").strip().lower()
+    plan     = body.get("plan", "quarterly")
+    password = body.get("password", "").strip()  # 用戶自設密碼
+
+    if not email or not _re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
+        raise HTTPException(status_code=400, detail="Email 格式不正確")
+
+    plan_info = {
+        "monthly":   {"name": "線上有位月費方案", "amount": 399,  "days": 30},
+        "quarterly": {"name": "線上有位季費方案", "amount": 999,  "days": 90},
+        "yearly":    {"name": "線上有位年費方案", "amount": 3688, "days": 365},
+        "test":      {"name": "線上有位測試方案", "amount": 6,    "days": 1},
+    }
+    if plan not in plan_info:
+        raise HTTPException(status_code=400, detail="無效方案")
+
+    info = plan_info[plan]
+    trade_no = f"XYW{int(_t.time())}{secrets.token_hex(3).upper()}"
+
+    params = {
+        "MerchantID":        ECPAY_MERCHANT_ID,
+        "MerchantTradeNo":   trade_no,
+        "MerchantTradeDate": datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
+        "PaymentType":       "aio",
+        "TotalAmount":       str(info["amount"]),
+        "TradeDesc":         urllib.parse.quote("線上有位訂閱"),
+        "ItemName":          info["name"],
+        "ReturnURL":         f"{BACKEND_URL}/webhook/ecpay",
+        "OrderResultURL":    f"{BACKEND_URL}/pay/result",
+        "ClientBackURL":     f"{FRONTEND_URL}/landing.html?pay=fail",
+        "ChoosePayment":     "ALL",
+        "EncryptType":       "1",
+        "CustomField1":      email,
+    }
+
+    # 暫存密碼到 DB（後端重啟也不遺失）
+    if password and len(password) >= 6:
+        _po_conn = _db_conn()
+        _po_conn.execute(
+            "INSERT OR REPLACE INTO pending_orders "
+            "(merchant_trade_no, email, hashed_password, plan) VALUES (?, ?, ?, ?)",
+            (trade_no, email, _hash_pw(password), plan)
+        )
+        _po_conn.commit()
+        _po_conn.close()
+
+    # 產生 CheckMacValue
+    sorted_params = sorted(params.items(), key=lambda x: x[0].lower())
+    raw = "&".join(f"{k}={v}" for k, v in sorted_params)
+    raw = f"HashKey={ECPAY_HASH_KEY}&{raw}&HashIV={ECPAY_HASH_IV}"
+    raw = urllib.parse.quote_plus(raw).lower()
+    check_mac = hashlib.sha256(raw.encode()).hexdigest().upper()
+    params["CheckMacValue"] = check_mac
+
+    # 建立自動提交的 HTML form（綠界不支援 GET redirect，需要 POST form）
+    form_html = f"""<!DOCTYPE html><html><body>
+<form id="f" method="POST" action="https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5">
+{''.join(f'<input type="hidden" name="{k}" value="{v}"/>' for k,v in params.items())}
+</form>
+<script>document.getElementById('f').submit();</script>
+</body></html>"""
+
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(content=form_html)
+
+
+@app.get("/api/picks/latest")
+def get_latest_picks(request: Request, token: str = "", user: dict | None = Depends(get_current_user)):
+    # 支援 ?token= query param（iframe 無法帶 Authorization header）
+    if not user and token:
+        payload = _jwt_verify(token)
+        if payload:
+            conn = _db_conn()
+            row = conn.execute("SELECT * FROM members WHERE id=?", (payload["sub"],)).fetchone()
+            conn.close()
+            if row and row["token_ver"] == payload.get("ver", 0):
+                user = dict(row)
+    if not user:
+        raise HTTPException(status_code=401, detail="請先登入")
+    """
+    選股名單：只有付費且有效的會員可以查看
+    回傳最新的 stock_picker/output/latest.html
+    """
+    from fastapi.responses import HTMLResponse
+    today = _date_cls.today().isoformat()
+    plan = user["plan"]
+    # 免費用戶無法使用
+    if plan == "free":
+        raise HTTPException(status_code=403, detail="此功能需要付費方案")
+    # 訂閱已到期
+    if user["expire_at"] and user["expire_at"] < today:
+        raise HTTPException(status_code=403, detail="訂閱已到期，請續費後繼續使用")
+
+    # 嘗試幾個可能的路徑
+    import os
+    candidates = [
+        "/app/stock_picker/output/latest.html",
+        "stock_picker/output/latest.html",
+        os.path.join(os.path.dirname(__file__), "stock_picker", "output", "latest.html"),
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            with open(path, encoding="utf-8") as f:
+                return HTMLResponse(content=f.read())
+
+    # 尚無資料
+    placeholder = """<!DOCTYPE html>
+<html lang="zh-TW">
+<head><meta charset="UTF-8">
+<style>
+body{font-family:-apple-system,sans-serif;background:#020817;color:#f1f5f9;
+     display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
+.box{text-align:center;padding:40px 20px}
+.icon{font-size:48px;margin-bottom:16px}
+.title{font-size:18px;font-weight:700;margin-bottom:8px}
+.desc{font-size:13px;color:#64748b;line-height:1.6}
+</style></head>
+<body>
+<div class="box">
+  <div class="icon">🔍</div>
+  <div class="title">選股名單尚未產生</div>
+  <div class="desc">每個交易日 14:35 自動更新<br>請明日再回來查看</div>
+</div>
+</body></html>"""
+    return HTMLResponse(content=placeholder)
+
+
+@app.post("/webhook/ecpay")
+async def webhook_ecpay(request: Request):
+    body = await request.form()
+    params = dict(body)
+    print(f"   ECPay Webhook: {params}")
+
+    # 驗證 MerchantID（CheckMacValue 因收款連結格式不同暫以 MerchantID 驗證）
+    if params.get("MerchantID") != ECPAY_MERCHANT_ID:
+        print(f"   ❌ MerchantID 不符：{params.get('MerchantID')}")
+        return JSONResponse(content="0|Error")
+
+    if params.get("RtnCode") != "1":
+        return JSONResponse(content="1|OK")  # 非成功狀態，回應 OK 但不處理
+
+    email      = params.get("CustomField1", "").strip().lower()
+    trade_no_w = params.get("MerchantTradeNo", "")
+    item_name  = params.get("ItemName", "")
+    trade_no   = params.get("TradeNo", "")
+    amount     = params.get("TradeAmt", "0")
+
+    if not email:
+        print("   ❌ CustomField1 (email) 為空")
+        return JSONResponse(content="1|OK")
+
+    # 冪等保護 + 取出暫存 hashed_password（同一 connection 做完再關）
+    _tmp = _db_conn()
+    _already = _tmp.execute(
+        "SELECT 1 FROM processed_orders WHERE merchant_trade_no=?", (trade_no_w,)
+    ).fetchone()
+    _po = _tmp.execute(
+        "SELECT hashed_password FROM pending_orders WHERE merchant_trade_no=?", (trade_no_w,)
+    ).fetchone()
+    if _po:
+        _tmp.execute("DELETE FROM pending_orders WHERE merchant_trade_no=?", (trade_no_w,))
+        _tmp.commit()
+    _tmp.close()
+
+    if _already:
+        print(f"   ⚠️ 重複 Webhook，已處理過：{trade_no_w}")
+        return JSONResponse(content="1|OK")
+
+    hashed_password = _po["hashed_password"] if _po else _hash_pw(secrets.token_urlsafe(8))
+
+    days = _plan_days(item_name)
+    plan = "yearly" if days >= 365 else ("quarterly" if days >= 90 else "monthly")
+
+    conn = _db_conn()
+    row = conn.execute("SELECT * FROM members WHERE email=?", (email,)).fetchone()
+
+    if row:
+        # 既有用戶：更新方案、延長到期日
+        current_expire = row["expire_at"] or _date_cls.today().isoformat()
+        base = max(current_expire, _date_cls.today().isoformat())
+        new_expire = (datetime.fromisoformat(base) + timedelta(days=days)).strftime("%Y-%m-%d")
+        if _po:
+            conn.execute(
+                "UPDATE members SET plan=?, expire_at=?, password=?, token_ver=token_ver+1 WHERE email=?",
+                (plan, new_expire, hashed_password, email)
+            )
+        else:
+            conn.execute(
+                "UPDATE members SET plan=?, expire_at=?, token_ver=token_ver+1 WHERE email=?",
+                (plan, new_expire, email)
+            )
+        conn.commit()
+        conn.close()
+        plan_label = {"monthly":"月費方案","quarterly":"季費方案","yearly":"年費方案","test":"測試方案"}.get(plan, plan)
+        upgrade_ad = "" if plan == "yearly" else """
+        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:16px;margin:20px 0;text-align:center">
+          <p style="margin:0 0 8px;font-weight:700;color:#166534">💡 升級年費方案，省更多！</p>
+          <p style="margin:0 0 12px;font-size:13px;color:#15803d">年費 $3,688 = 月費 9.2 個月的價格，多送近 3 個月</p>
+          <a href="https://stock-navigator.zeabur.app/landing.html" style="background:#16a34a;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:700">立即升級年費</a>
+        </div>"""
+        _send_email(email, "【線上有位】升級成功！您的方案已開通",
+            f"""<div style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px">
+              <div style="text-align:center;margin-bottom:24px">
+                <h1 style="font-size:24px;color:#1D9E75;margin:0">線上<span style="color:#333">有位</span></h1>
+                <p style="color:#666;font-size:13px;margin:4px 0 0">台股技術分析輔助系統</p>
+              </div>
+              <div style="background:#f0fdf4;border-radius:12px;padding:24px;margin-bottom:20px;border:1px solid #86efac">
+                <h2 style="margin:0 0 16px;font-size:18px;color:#166534">🎉 升級成功！</h2>
+                <p style="color:#555;margin:0 0 16px">感謝您升級線上有位！您的付費方案已成功開通。</p>
+                <table style="width:100%;border-collapse:collapse">
+                  <tr><td style="padding:8px 0;color:#888;font-size:13px">方案</td><td style="padding:8px 0;font-weight:700;color:#333">{plan_label}</td></tr>
+                  <tr><td style="padding:8px 0;color:#888;font-size:13px">到期日</td><td style="padding:8px 0;font-weight:700;color:#333">{new_expire}</td></tr>
+                  <tr><td style="padding:8px 0;color:#888;font-size:13px">帳號</td><td style="padding:8px 0;font-weight:700;color:#333">{email}</td></tr>
+                </table>
+              </div>
+              <div style="text-align:center;margin-bottom:20px">
+                <a href="https://stock-navigator.zeabur.app" style="background:#1D9E75;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px">立即登入使用</a>
+              </div>
+              {upgrade_ad}
+              <div style="background:#fff8e1;border-radius:8px;padding:16px;margin-bottom:20px">
+                <p style="margin:0 0 8px;font-weight:700;color:#92400e">📢 廣告合作推薦</p>
+                <p style="margin:0;font-size:13px;color:#78350f">把線上有位推薦給朋友，讓更多人享受 AI 輔助的台股分析工具！分享您的使用心得，幫助我們持續優化服務。</p>
+              </div>
+              <div style="border-top:1px solid #e5e7eb;padding-top:16px;text-align:center;color:#9ca3af;font-size:12px">
+                <p style="margin:0">如有問題請聯繫客服：<a href="mailto:watione@yahoo.com.tw" style="color:#1D9E75">watione@yahoo.com.tw</a></p>
+                <p style="margin:4px 0 0">線上有位 © 2026</p>
+              </div>
+            </div>"""
+        )
+    else:
+        # 新用戶：hashed_password 已從 pending_orders 取出（或隨機備用）
+        new_expire = (datetime.today() + timedelta(days=days)).strftime("%Y-%m-%d")
+        try:
+            conn.execute(
+                "INSERT INTO members (email, password, plan, expire_at) VALUES (?, ?, ?, ?)",
+                (email, hashed_password, plan, new_expire)
+            )
+            conn.commit()
+        except sqlite3.IntegrityError:
+            conn.close()
+            _rec = _db_conn()
+            _rec.execute("INSERT OR IGNORE INTO processed_orders (merchant_trade_no) VALUES (?)", (trade_no_w,))
+            _rec.commit()
+            _rec.close()
+            return JSONResponse(content="1|OK")
+        conn.close()
+        plan_label2 = {"monthly":"月費方案","quarterly":"季費方案","yearly":"年費方案","test":"測試方案"}.get(plan, plan)
+        pwd_hint = "<tr><td style='padding:8px 0;color:#888;font-size:13px'>密碼</td><td style='padding:8px 0;font-weight:700;color:#333'>您訂購時自行設定的密碼</td></tr>"
+        _send_email(email, "【線上有位】歡迎！您的帳號已開通",
+            f"""<div style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px">
+              <div style="text-align:center;margin-bottom:24px">
+                <h1 style="font-size:24px;color:#1D9E75;margin:0">線上<span style="color:#333">有位</span></h1>
+                <p style="color:#666;font-size:13px;margin:4px 0 0">台股技術分析輔助系統</p>
+              </div>
+              <div style="background:#f0fdf4;border-radius:12px;padding:24px;margin-bottom:20px;border:1px solid #86efac">
+                <h2 style="margin:0 0 16px;font-size:18px;color:#166534">🎉 歡迎加入線上有位！</h2>
+                <p style="color:#555;margin:0 0 16px">感謝您的訂閱！以下是您的帳號資訊，請妥善保管：</p>
+                <div style="background:#fff;border-radius:8px;padding:16px;margin-bottom:12px">
+                  <table style="width:100%;border-collapse:collapse">
+                    <tr><td style="padding:8px 0;color:#888;font-size:13px;width:80px">帳號</td><td style="padding:8px 0;font-weight:700;color:#333">{email}</td></tr>
+                    {pwd_hint}
+                    <tr><td style="padding:8px 0;color:#888;font-size:13px">方案</td><td style="padding:8px 0;font-weight:700;color:#333">{plan_label2}</td></tr>
+                    <tr><td style="padding:8px 0;color:#888;font-size:13px">到期日</td><td style="padding:8px 0;font-weight:700;color:#333">{new_expire}</td></tr>
+                  </table>
+                </div>
+                <p style="margin:0;font-size:12px;color:#555">如忘記密碼，可至「我的」頁面更改密碼，或聯繫客服協助重設。</p>
+              </div>
+              <div style="text-align:center;margin-bottom:20px">
+                <a href="https://stock-navigator.zeabur.app" style="background:#1D9E75;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px">立即登入使用 →</a>
+              </div>
+              <div style="background:#f8fafc;border-radius:8px;padding:16px;margin-bottom:16px">
+                <p style="margin:0 0 12px;font-weight:700;color:#333">🚀 您可以使用以下功能：</p>
+                <ul style="margin:0;padding-left:20px;color:#555;font-size:13px;line-height:2">
+                  <li>輸入任意台股代號，即時取得技術分析報告</li>
+                  <li>支撐壓力、軌道、型態、損益比一次掌握</li>
+                  <li>K 線圖搭配均線、布林、RSI、MACD 等指標</li>
+                  <li>每日 AI 自動篩選低基期潛力股（選股功能）</li>
+                </ul>
+              </div>
+              <div style="background:#fff8e1;border-radius:8px;padding:16px;margin-bottom:16px">
+                <p style="margin:0 0 8px;font-weight:700;color:#92400e">💡 升級年費，省更多！</p>
+                <p style="margin:0 0 12px;font-size:13px;color:#78350f">年費 $3,688 相當於月費 9.2 個月，多享近 3 個月服務</p>
+                <a href="https://stock-navigator.zeabur.app/landing.html" style="background:#f59e0b;color:#fff;padding:8px 20px;border-radius:6px;text-decoration:none;font-weight:700;font-size:13px">了解年費方案</a>
+              </div>
+              <div style="background:#eff6ff;border-radius:8px;padding:16px;margin-bottom:20px">
+                <p style="margin:0 0 8px;font-weight:700;color:#1e40af">📢 推薦好友，一起分析台股</p>
+                <p style="margin:0;font-size:13px;color:#1e3a8a">把線上有位分享給投資朋友，一起利用 AI 找到好的進場位置！</p>
+              </div>
+              <div style="border-top:1px solid #e5e7eb;padding-top:16px;text-align:center;color:#9ca3af;font-size:12px">
+                <p style="margin:0">如有問題請聯繫客服：<a href="mailto:watione@yahoo.com.tw" style="color:#1D9E75">watione@yahoo.com.tw</a></p>
+                <p style="margin:4px 0 0">線上有位 © 2026</p>
+              </div>
+            </div>"""
+        )
+
+    # 記錄已處理，防止重複 Webhook 再次開通
+    _rec_conn = _db_conn()
+    _rec_conn.execute("INSERT OR IGNORE INTO processed_orders (merchant_trade_no) VALUES (?)", (trade_no_w,))
+    _rec_conn.commit()
+    _rec_conn.close()
+
+    print(f"   ✅ Webhook 處理完成：{email} → {plan} 到 {new_expire}")
+    return JSONResponse(content="1|OK")
+
+
+# ══════════════════════════════════════════════════════════
+# 聯絡留言板 API
+# ══════════════════════════════════════════════════════════
+
+class ContactMessage(BaseModel):
+    name: str
+    email: str
+    message: str
+
+class DeleteToken(BaseModel):
+    token: str
+
+CONTACT_ADMIN_PWD = "630428"
+
+
+@app.post("/api/contact")
+async def submit_contact(msg: ContactMessage):
+    name    = msg.name.strip()[:50]
+    email   = msg.email.strip()[:100]
+    message = msg.message.strip()[:1000]
+
+    if not name or not email or not message:
+        raise HTTPException(status_code=400, detail="欄位不完整")
+
+    now = datetime.utcnow().isoformat()
+    with sqlite3.connect(DB_PATH) as conn:
+        cur = conn.execute(
+            "INSERT INTO contact_messages (name, email, message, created_at) VALUES (?,?,?,?)",
+            (name, email, message, now)
+        )
+        new_id = cur.lastrowid
+
+    # 寄通知信給管理員
+    try:
+        import ssl as _ssl
+        html_body = f"""
+        <div style="font-family:sans-serif;max-width:500px;margin:auto;padding:24px;
+                    background:#f8f9fa;border-radius:12px;">
+          <h2 style="color:#3b82f6;margin-bottom:4px;">📬 新留言通知</h2>
+          <hr style="border:1px solid #e2e8f0;margin-bottom:20px;">
+          <p><strong>姓名：</strong>{name}</p>
+          <p><strong>Email：</strong>{email}</p>
+          <p><strong>時間：</strong>{now} UTC</p>
+          <p style="margin-top:16px;"><strong>內容：</strong></p>
+          <div style="background:#fff;border-left:4px solid #3b82f6;
+                      padding:12px 16px;border-radius:4px;white-space:pre-wrap;">{message}</div>
+          <p style="margin-top:20px;color:#64748b;font-size:12px;">此信由 線上有位 系統自動發送</p>
+        </div>"""
+        _send_email("watione@yahoo.com.tw", f"【線上有位】新留言來自 {name}", html_body)
+    except Exception as e:
+        print(f"[contact] 寄信失敗: {e}")
+
+    return {"ok": True, "id": new_id, "message": "訊息已收到"}
+
+
+@app.get("/api/contact/messages")
+async def get_contact_messages():
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute(
+            "SELECT id, name, email, message, created_at "
+            "FROM contact_messages ORDER BY id DESC LIMIT 100"
+        ).fetchall()
+    return {
+        "messages": [
+            {"id": r["id"], "name": r["name"], "email": r["email"],
+             "message": r["message"], "created_at": r["created_at"]}
+            for r in rows
+        ]
+    }
+
+
+@app.delete("/api/contact/{msg_id}")
+async def delete_contact_message(msg_id: int, body: DeleteToken):
+    # 留言者刪除：token="owner"（前端 localStorage 記住自己的 id）
+    # 管理員刪除：token="630428"
+    if body.token not in ("owner", CONTACT_ADMIN_PWD):
+        raise HTTPException(status_code=403, detail="無刪除權限")
+
+    with sqlite3.connect(DB_PATH) as conn:
+        cur = conn.execute(
+            "DELETE FROM contact_messages WHERE id = ?", (msg_id,)
+        )
+        if cur.rowcount == 0:
+            raise HTTPException(status_code=404, detail="留言不存在")
+
+    return {"ok": True}
+
+def _update_notice_date(email: str, date_str: str):
+    conn = _db_conn()
+    conn.execute("UPDATE members SET last_expire_notice_date=? WHERE email=?", (date_str, email))
+    conn.commit()
+    conn.close()
+
+
+# ── 忘記密碼 ──────────────────────────────────────────────
+class ForgotPwdReq(BaseModel):
+    email: str
+
+class ResetPwdReq(BaseModel):
+    token: str
+    new_password: str
+
+@app.post("/forgot-password")
+async def forgot_password(req: ForgotPwdReq, request: Request):
+    import uuid as _uuid
+    email = req.email.strip().lower()
+    client_ip = request.client.host if request.client else "unknown"
+    one_min_ago = (datetime.now() - timedelta(minutes=1)).strftime("%Y-%m-%d %H:%M:%S")
+    one_hour_ago = (datetime.now() - timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")
+
+    conn = _db_conn()
+    # Rate limit: 同一 IP 每分鐘最多 3 次
+    ip_count = conn.execute(
+        "SELECT COUNT(*) FROM password_reset_tokens WHERE ip=? AND created_at > ?",
+        (client_ip, one_min_ago)
+    ).fetchone()[0]
+    if ip_count >= 3:
+        conn.close()
+        raise HTTPException(status_code=429, detail="請求太頻繁，請稍後再試")
+
+    # 同一 email 一小時內只能寄一次（帳號存在才檢查）
+    user = conn.execute("SELECT id FROM members WHERE email=?", (email,)).fetchone()
+    if user:
+        recent = conn.execute(
+            "SELECT COUNT(*) FROM password_reset_tokens WHERE email=? AND created_at > ? AND used=0",
+            (email, one_hour_ago)
+        ).fetchone()[0]
+        if recent > 0:
+            conn.close()
+            return {"ok": True, "message": "若此信箱已註冊，重設連結將寄出"}
+
+        token = str(_uuid.uuid4())
+        expires_at = (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")
+        conn.execute(
+            "INSERT INTO password_reset_tokens (token, email, expires_at, ip) VALUES (?, ?, ?, ?)",
+            (token, email, expires_at, client_ip)
+        )
+        conn.commit()
+        conn.close()
+        reset_url = f"{FRONTEND_URL}/reset-password.html?token={token}"
+        _send_email(email, "線上有位 — 密碼重設連結",
+            f"""<div style="font-family:-apple-system,sans-serif;max-width:480px;margin:0 auto;padding:24px">
+              <h2 style="color:#1D9E75">密碼重設</h2>
+              <p>請點擊以下連結重設密碼（有效期 1 小時）：</p>
+              <p><a href="{reset_url}" style="background:#1D9E75;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:700">重設密碼</a></p>
+              <p style="font-size:12px;color:#888">若您未申請重設，請忽略此信。</p>
+            </div>"""
+        )
+    else:
+        conn.close()
+    return {"ok": True, "message": "若此信箱已註冊，重設連結將寄出"}
+
+
+@app.post("/reset-password")
+async def reset_password(req: ResetPwdReq):
+    token = req.token.strip()
+    new_pw = req.new_password
+    if len(new_pw) < 6:
+        raise HTTPException(status_code=400, detail="密碼至少 6 個字元")
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    conn = _db_conn()
+    row = conn.execute(
+        "SELECT email, expires_at, used FROM password_reset_tokens WHERE token=?", (token,)
+    ).fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=400, detail="連結無效，請重新申請")
+    if row["used"]:
+        conn.close()
+        raise HTTPException(status_code=400, detail="連結已使用，請重新申請")
+    if row["expires_at"] < now_str:
+        conn.close()
+        raise HTTPException(status_code=400, detail="連結已過期，請重新申請忘記密碼")
+    email = row["email"]
+    conn.execute("UPDATE members SET password=?, token_ver=token_ver+1, password_changed_at=? WHERE email=?",
+                 (_hash_pw(new_pw), now_str, email))
+    conn.execute("UPDATE password_reset_tokens SET used=1 WHERE token=?", (token,))
+    conn.commit()
+    conn.close()
+    return {"ok": True, "message": "密碼已重設，請重新登入"}
+
+
+# ── 到價提醒 ──────────────────────────────────────────────
+class AlertReq(BaseModel):
+    stock_id:     str
+    target_price: float
+    direction:    str   # 'above' or 'below'
+
+@app.get("/api/alerts")
+def get_alerts(user: dict = Depends(require_paid_user)):
+    conn = _db_conn()
+    rows = conn.execute(
+        "SELECT * FROM price_alerts WHERE user_email=? AND triggered=0 ORDER BY created_at DESC",
+        (user["email"],)
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+@app.post("/api/alerts")
+def create_alert(req: AlertReq, request: Request, user: dict = Depends(require_paid_user)):
+    if req.direction not in ("above", "below"):
+        raise HTTPException(status_code=400, detail="direction 必須為 above 或 below")
+    conn = _db_conn()
+    count = conn.execute(
+        "SELECT COUNT(*) FROM price_alerts WHERE user_email=? AND triggered=0",
+        (user["email"],)
+    ).fetchone()[0]
+    if count >= 10:
+        conn.close()
+        raise HTTPException(status_code=400, detail="每人最多設定 10 個到價提醒")
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    conn.execute(
+        "INSERT INTO price_alerts (user_email, stock_id, target_price, direction, created_at) VALUES (?, ?, ?, ?, ?)",
+        (user["email"], req.stock_id.strip().upper(), req.target_price, req.direction, now_str)
+    )
+    conn.commit()
+    conn.close()
+    return {"ok": True}
+
+@app.delete("/api/alerts/{alert_id}")
+def delete_alert(alert_id: int, user: dict = Depends(require_user)):
+    conn = _db_conn()
+    row = conn.execute("SELECT user_email FROM price_alerts WHERE id=?", (alert_id,)).fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="提醒不存在")
+    if row["user_email"] != user["email"]:
+        conn.close()
+        raise HTTPException(status_code=403, detail="無權限刪除")
+    conn.execute("DELETE FROM price_alerts WHERE id=?", (alert_id,))
+    conn.commit()
+    conn.close()
+    return {"ok": True}
+
+
+# ── 全台股掃描結果 ──────────────────────────────────────────
+@app.get("/api/scan/latest")
+def get_scan_latest(user: dict = Depends(require_paid_user)):
+    scan_path = os.path.join(os.path.dirname(__file__), "stock_picker", "output", "scan_result.html")
+    if not os.path.exists(scan_path):
+        raise HTTPException(status_code=503, detail="掃描結果每日15:30更新，請稍後再試")
+    with open(scan_path, "r", encoding="utf-8") as f:
+        html = f.read()
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(content=html)
+
+
+@app.get("/ads.txt")
+async def ads_txt():
+    return PlainTextResponse("google.com, pub-1768270548115739, DIRECT, f08c47fec0942fa0")

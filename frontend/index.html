@@ -2,6 +2,9 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<meta http-equiv="Expires" content="0"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
@@ -84,7 +87,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 
 /* ── 狀態列 ── */
 .status{font-size:11px;color:var(--text3);padding:4px 16px;min-height:20px}
-.status.err{color:var(--up)}
+.status.err{color:#e05555}
 .spin{display:inline-block;width:9px;height:9px;border:1.5px solid var(--green);border-top-color:transparent;border-radius:50%;animation:sp .6s linear infinite;margin-right:4px;vertical-align:middle}
 @keyframes sp{to{transform:rotate(360deg)}}
 
@@ -129,8 +132,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .summary-list li.conflict{background:rgba(220,60,40,.07);border-radius:6px;padding:5px 8px;font-weight:600}
 .summary-list li.conflict .dot{background:var(--up)}
 .summary-list li.conflict{color:var(--up)}
-/* 整合結論（最後操作指引） */
-.summary-list li.conclusion{border-top:1px solid var(--border);margin-top:4px;padding-top:6px;font-size:13px;font-weight:600;color:var(--text)}
+/* 整合結論（置頂，最醒目） */
+.summary-list li.conclusion{font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 .summary-list li.conclusion .dot{display:none}
 
 /* ── 指標卡 ── */
@@ -201,6 +204,9 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
 .ma-row input[type=number]{width:54px;height:26px;border:.5px solid var(--border2);border-radius:6px;padding:0 6px;font-size:12px;background:var(--bg);color:var(--text);outline:none}
 .ma-row input[type=checkbox]{accent-color:var(--green);width:15px;height:15px}
 
+/* ── skeleton pulse 動畫 ── */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
 /* ── 底部導航 ── */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;height:calc(56px + var(--safe-bottom));background:var(--bg);border-top:.5px solid var(--border);display:flex;align-items:flex-start;padding-top:6px;z-index:100}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;cursor:pointer;color:var(--text3);font-size:9px;border:none;background:none}
@@ -218,14 +224,77 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
 .overlay.show{display:block}
 
 .disc{font-size:9px;color:var(--text3);line-height:1.6;padding:10px 16px calc(10px + var(--safe-bottom));border-top:.5px solid var(--border)}
+
+/* ── 登入 Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-box{background:var(--bg);border-radius:var(--radius-lg);padding:24px;width:100%;max-width:360px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:4px}
+.modal-sub{font-size:13px;color:var(--text3);margin-bottom:20px}
+.modal-field{margin-bottom:14px}
+.modal-field label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px}
+.modal-field input{width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:15px;outline:none}
+.modal-field input:focus{border-color:var(--green)}
+.modal-btn{width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px}
+.modal-btn:active{opacity:.85}
+.modal-err{font-size:12px;color:#e05555;margin-top:8px;min-height:18px}
+.modal-link{font-size:12px;color:var(--green);cursor:pointer;text-decoration:underline}
+/* ── 會員卡 ── */
+.member-card{background:var(--bg2);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.member-plan-badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;margin-bottom:8px}
+.badge-free{background:var(--bg3);color:var(--text2)}
+.badge-paid{background:var(--green);color:#fff}
+.member-email{font-size:14px;font-weight:600;margin-bottom:4px}
+.member-expire{font-size:12px;color:var(--text3)}
+.query-bar{background:var(--bg3);border-radius:6px;height:6px;margin:8px 0 4px;overflow:hidden}
+.query-bar-fill{height:100%;background:var(--green);transition:width .3s}
+.query-bar-fill.full{background:#e05555}
 </style>
 </head>
 <body>
 <div class="app">
 
+<!-- ── 新手導覽 Tour ── -->
+<div id="tourOverlay" style="display:none;position:fixed;inset:0;z-index:999;pointer-events:none">
+  <div id="tourBox" style="
+    position:fixed;bottom:80px;left:16px;right:16px;
+    background:var(--bg);border-radius:16px;
+    box-shadow:0 8px 40px rgba(0,0,0,.25);
+    padding:20px;pointer-events:all;
+    border:1px solid var(--border2);
+    max-width:560px;margin:0 auto;
+  ">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-size:11px;color:var(--text3)" id="tourStep">步驟 1／4</div>
+      <button onclick="endTour()" style="border:none;background:none;color:var(--text3);font-size:12px;cursor:pointer">跳過</button>
+    </div>
+    <div style="font-size:15px;font-weight:600;margin-bottom:6px" id="tourTitle"></div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.7" id="tourDesc"></div>
+    <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+      <button id="tourPrev" onclick="tourMove(-1)" style="padding:8px 16px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:13px;cursor:pointer;display:none">上一步</button>
+      <button id="tourNext" onclick="tourMove(1)" style="padding:8px 20px;border-radius:20px;border:none;background:var(--green);color:#fff;font-size:13px;font-weight:600;cursor:pointer">下一步 →</button>
+    </div>
+    <!-- 進度點 -->
+    <div style="display:flex;gap:5px;justify-content:center;margin-top:14px" id="tourDots"></div>
+  </div>
+  <!-- 半透明遮罩（點擊不關閉） -->
+  <div style="position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:-1"></div>
+</div>
+
+<!-- ── PWA 安裝提示 ── -->
+<div id="pwaBanner" style="display:none;position:fixed;top:68px;left:16px;right:16px;z-index:90;
+  background:var(--green);border-radius:12px;padding:12px 16px;
+  display:none;align-items:center;gap:10px;box-shadow:0 4px 16px rgba(29,158,117,.4);
+  max-width:568px;margin:0 auto">
+  <div style="flex:1">
+    <div style="font-size:13px;font-weight:600;color:#fff">📲 加入主畫面，像 App 一樣使用</div>
+    <div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:2px">瀏覽器選單 → 加入主畫面</div>
+  </div>
+  <button onclick="dismissPWA()" style="border:none;background:rgba(255,255,255,.2);color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer">知道了</button>
+</div>
+
   <!-- 頂部搜尋 -->
   <div class="topbar">
-    <div class="logo">線上<em>有位</em></div>
+    <div class="logo" id="logoEl" onclick="adminTap()" style="cursor:default">線上<em>有位</em></div>
     <div class="search-wrap">
       <div class="search-box">
         <input type="text" id="stockInput" placeholder="代號或股名 例：2330 台積電" inputmode="text" autocomplete="off"/>
@@ -237,6 +306,10 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
         <button class="seg-btn" data-tf="M">月</button>
       </div>
       <button class="btn-analyze" onclick="analyzeStock()">分析</button>
+    </div>
+    <div style="display:flex;gap:6px;flex-shrink:0;margin-left:4px;align-items:center">
+      <a href="/landing.html" style="font-size:11px;color:var(--text3);text-decoration:none;padding:4px 8px;border-radius:6px;border:.5px solid var(--border2);white-space:nowrap">介紹頁</a>
+      <button id="topLoginBtn" onclick="showLoginModal()" style="font-size:11px;background:var(--green);color:#fff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;white-space:nowrap">登入</button>
     </div>
   </div>
 
@@ -265,11 +338,15 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
       <ul class="summary-list" id="summaryList"></ul>
     </div>
 
+    <!-- 快捷功能按鈕 -->
+    <div id="resultQuickBtns" style="display:none;flex-direction:row;gap:8px;margin:0 0 12px"></div>
+
     <!-- 指標卡 -->
     <div class="metrics">
       <div class="metric">
-        <div class="m-lbl">現價</div>
+        <div class="m-lbl">現價 <span id="quoteLiveTag" style="display:none;font-size:9px;color:var(--green);font-weight:600;letter-spacing:0.3px">● LIVE</span></div>
         <div class="m-val lg" id="m-price">—</div>
+        <div class="m-sub" id="m-change" style="font-size:11px;margin-top:2px"></div>
       </div>
       <div class="metric">
         <div class="m-lbl">趨勢</div>
@@ -447,19 +524,15 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
       </div>
     </div>
 
-    <!-- 同族群 / 概念股（摺疊） -->
+    <!-- 同族群（摺疊） -->
     <div id="peerSection" style="display:none;margin-top:4px">
       <div class="ma-cfg">
         <div class="ma-hdr" onclick="toggleSection('peerBody','peerArr')">
-          <span>同族群 / 概念股</span>
+          <span>同族群</span>
           <span class="arr" id="peerArr">▼ 展開</span>
         </div>
         <div id="peerBody" style="display:none;padding:10px 0">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:0 0 8px">
-            <div style="display:flex;gap:6px">
-              <button id="tabPeer" onclick="switchPeerTab('peer')" style="padding:4px 14px;border-radius:20px;border:none;background:var(--green);color:#fff;font-size:12px;cursor:pointer">同族群</button>
-              <button id="tabConcept" onclick="switchPeerTab('concept')" style="padding:4px 14px;border-radius:20px;border:.5px solid var(--border2);background:transparent;color:var(--text2);font-size:12px;cursor:pointer">概念股</button>
-            </div>
             <span id="peerIndustry" style="font-size:11px;color:var(--text3)"></span>
           </div>
           <div id="peerList" style="display:flex;flex-direction:column;gap:6px"></div>
@@ -470,19 +543,153 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
 </div>
 
 
+<!-- 登入 Modal -->
+<!-- 遊客次數用完 Modal -->
+<div id="guestLimitModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1001;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--bg2);border-radius:20px;max-width:340px;width:100%;padding:32px 24px;text-align:center">
+    <div style="font-size:40px;margin-bottom:12px">🔓</div>
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:8px">免費試用已用完</h3>
+    <p style="font-size:13px;color:var(--text3);line-height:1.6;margin-bottom:20px">
+      登入後每日可查詢 <strong>3 次</strong><br>升級付費方案可無限查詢
+    </p>
+    <button onclick="_hideGuestLimitModal();showLoginModal();"
+      style="width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px">
+      登入 / 加入會員
+    </button>
+    <button onclick="_hideGuestLimitModal()"
+      style="width:100%;padding:10px;background:transparent;color:var(--text3);border:none;border-radius:10px;font-size:13px;cursor:pointer">
+      稍後再說
+    </button>
+  </div>
+</div>
+
+<!-- 免費會員次數用完 Modal -->
+<div id="freeLimitModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1001;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--bg2);border-radius:20px;max-width:340px;width:100%;padding:32px 24px;text-align:center">
+    <div style="font-size:40px;margin-bottom:12px">⭐</div>
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:8px">今日查詢次數已用完</h3>
+    <p style="font-size:13px;color:var(--text3);line-height:1.6;margin-bottom:20px">
+      免費方案每日限查 <strong>3 次</strong><br>升級付費方案，無限查詢不受限
+    </p>
+    <button onclick="_hideFreeLimitModal();showUpgradeModal()"
+      style="width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px">
+      立即升級付費方案
+    </button>
+    <button onclick="_hideFreeLimitModal()"
+      style="width:100%;padding:10px;background:transparent;color:var(--text3);border:none;border-radius:10px;font-size:13px;cursor:pointer">
+      明天再來
+    </button>
+  </div>
+</div>
+
+<div id="loginModal" class="modal-overlay" style="display:none">
+  <div class="modal-box">
+    <div style="display:flex;border-bottom:1px solid var(--border2);margin-bottom:20px">
+      <button id="tabLogin" onclick="switchLoginTab('login')" style="flex:1;padding:10px;background:none;border:none;border-bottom:2px solid var(--green);color:var(--text);font-size:14px;font-weight:700;cursor:pointer">登入</button>
+      <button id="tabRegister" onclick="switchLoginTab('register')" style="flex:1;padding:10px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);font-size:14px;cursor:pointer">免費註冊</button>
+    </div>
+    <div id="loginView">
+      <div class="modal-title">線上有位</div>
+      <div class="modal-sub">請登入後使用</div>
+      <div class="modal-field">
+        <label>Email</label>
+        <input type="email" id="loginEmail" placeholder="your@email.com" autocomplete="email"/>
+      </div>
+      <div class="modal-field">
+        <label>密碼</label>
+        <input type="password" id="loginPwd" placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+      <div class="modal-err" id="loginErr"></div>
+      <button class="modal-btn" onclick="doLogin()">登入</button>
+      <div style="text-align:center;margin-top:12px;font-size:12px">
+        <a href="#" onclick="showForgotView();return false;" style="color:var(--text3);text-decoration:none">忘記密碼？</a>
+      </div>
+    </div>
+    <div id="forgotView" style="display:none">
+      <div class="modal-title">重設密碼</div>
+      <div class="modal-sub">輸入帳號 Email，收信後點連結設定新密碼</div>
+      <div class="modal-field">
+        <label>Email</label>
+        <input type="email" id="forgotEmail" placeholder="your@email.com" autocomplete="email"/>
+      </div>
+      <div class="modal-err" id="forgotErr"></div>
+      <button class="modal-btn" onclick="doForgotPassword()">寄出重設連結</button>
+      <div style="text-align:center;margin-top:12px;font-size:12px">
+        <a href="#" onclick="switchLoginTab('login');return false;" style="color:var(--text3);text-decoration:none">← 返回登入</a>
+      </div>
+    </div>
+    <div id="registerView" style="display:none">
+      <div class="modal-title">免費加入</div>
+      <div class="modal-sub">每日 3 次免費查詢</div>
+      <div class="modal-field">
+        <label>Email</label>
+        <input type="email" id="regEmail" placeholder="your@email.com" autocomplete="email"/>
+      </div>
+      <div class="modal-field">
+        <label>密碼（6 碼以上）</label>
+        <input type="password" id="regPwd" placeholder="••••••••" autocomplete="new-password"/>
+      </div>
+      <div class="modal-field">
+        <label>確認密碼</label>
+        <input type="password" id="regPwd2" placeholder="••••••••" autocomplete="new-password"/>
+      </div>
+      <div class="modal-err" id="registerErr"></div>
+      <button class="modal-btn" onclick="doRegister()">建立免費帳號</button>
+    </div>
+  </div>
+</div>
+
+<!-- 升級方案 Modal -->
+<div id="upgradeModal" class="modal-overlay" style="display:none">
+  <div class="modal-box">
+    <div class="modal-title">升級付費方案</div>
+    <div id="upgradeEmail" style="text-align:center;font-size:13px;color:var(--green);margin-bottom:16px"></div>
+    <p style="font-size:13px;color:var(--text3);margin-bottom:16px;text-align:center">付款完成後系統自動升級，無需重新登入</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button onclick="doUpgrade('monthly',this)" style="width:100%;padding:12px;background:var(--bg3);color:var(--text);border:none;border-radius:10px;font-size:14px;cursor:pointer;text-align:left">月費方案 <span style="float:right;color:var(--green);font-weight:700">$399／月</span></button>
+      <button onclick="doUpgrade('quarterly',this)" style="width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:14px;cursor:pointer;text-align:left;font-weight:600">季費方案 <span style="float:right">$999／季 ⭐</span></button>
+      <button onclick="doUpgrade('yearly',this)" style="width:100%;padding:12px;background:var(--bg3);color:var(--text);border:none;border-radius:10px;font-size:14px;cursor:pointer;text-align:left">年費方案 <span style="float:right;color:var(--green);font-weight:700">$3,688／年</span></button>
+    </div>
+    <button onclick="hideUpgradeModal()" style="width:100%;margin-top:12px;padding:10px;background:transparent;color:var(--text3);border:none;font-size:13px;cursor:pointer">取消</button>
+  </div>
+</div>
+
+<!-- 改密碼 Modal -->
+<div id="changePwdModal" class="modal-overlay" style="display:none">
+  <div class="modal-box">
+    <div class="modal-title" style="margin-bottom:16px">更改密碼</div>
+    <div class="modal-field">
+      <label>目前密碼</label>
+      <input type="password" id="oldPwd" placeholder="••••••••"/>
+    </div>
+    <div class="modal-field">
+      <label>新密碼（至少 6 個字元）</label>
+      <input type="password" id="newPwd" placeholder="••••••••"/>
+    </div>
+    <div class="modal-err" id="changePwdErr"></div>
+    <button class="modal-btn" onclick="doChangePassword()">更新密碼</button>
+    <div style="text-align:center;margin-top:12px">
+      <span class="modal-link" onclick="closeChangePwdModal()">取消</span>
+    </div>
+  </div>
+</div>
+
 <!-- 底部導航 -->
 <div class="bottom-nav">
   <button class="nav-btn active" onclick="showPage('home')">
     <div class="nav-icon">📊</div>分析
   </button>
   <button class="nav-btn" onclick="showPage('watch')">
-    <div class="nav-icon">⭐</div>自選
+    <div class="nav-icon">🔥</div>關注
   </button>
   <button class="nav-btn" onclick="showPage('history')">
-    <div class="nav-icon">🕐</div>紀錄
+    <div class="nav-icon">📈</div>戰績
   </button>
-  <button class="nav-btn" onclick="openDrawer()">
-    <div class="nav-icon">⚙️</div>設定
+  <button class="nav-btn" onclick="showPage('picks')">
+    <div class="nav-icon">🔍</div>選股
+  </button>
+  <button class="nav-btn" onclick="showPage('my')">
+    <div class="nav-icon">👤</div>我的
   </button>
 </div>
 
@@ -498,9 +705,6 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
 <div class="drawer" id="drawer">
   <div class="drawer-handle"></div>
   <h3>設定</h3>
-  <div style="font-size:12px;color:var(--text3);margin-bottom:6px">後端 API 位址</div>
-  <input type="text" id="apiBase" value="http://localhost:8000" placeholder="http://localhost:8000"/>
-  <button class="drawer-btn" onclick="testAndClose()">測試連線並儲存</button>
   <div class="theme-row">
     <span>顯示主題</span>
     <div class="theme-seg" id="themeSeg">
@@ -614,7 +818,7 @@ document.getElementById('stockInput').addEventListener('input',e=>{
   if(/^\d+$/.test(q)&&q.length>=4){closeDropdown();return;}
   _searchTimer=setTimeout(async()=>{
     try{
-      const r=await fetch(`${getAPI()}/api/search?q=${encodeURIComponent(q)}&limit=8`);
+      const r=await fetch(`${getAPI()}/api/search?q=${encodeURIComponent(q)}&limit=8`,{headers:_authHeaders()});
       const d=await r.json();
       const dd=document.getElementById('searchDropdown');
       if(!d.results||!d.results.length){closeDropdown();return;}
@@ -656,7 +860,7 @@ document.getElementById('countInput').addEventListener('change',e=>{
 // 底部導航
 // ══════════════════════════════════════
 function showPage(page){
-  document.querySelectorAll('.nav-btn').forEach((b,i)=>b.classList.toggle('active',['home','watch','history','settings'][i]===page));
+  document.querySelectorAll('.nav-btn').forEach((b,i)=>b.classList.toggle('active',['home','watch','history','picks','my'][i]===page));
   const overlay=document.getElementById('pageOverlay');
   if(page==='home'){
     overlay.style.display='none';
@@ -666,6 +870,12 @@ function showPage(page){
   }else if(page==='history'){
     overlay.style.display='block';
     showHistory();
+  }else if(page==='picks'){
+    overlay.style.display='block';
+    showPicksPage();
+  }else if(page==='my'){
+    overlay.style.display='block';
+    showMyPage();
   }
 }
 function openDrawer(){
@@ -676,37 +886,207 @@ function closeDrawer(){
   document.getElementById('drawer').classList.remove('open');
   document.getElementById('overlay').classList.remove('show');
 }
-async function testAndClose(){
-  const base=document.getElementById('apiBase').value.trim().replace(/\/$/,'');
-  localStorage.setItem('apiBase',base);
-  try{
-    const r=await fetch(`${base}/`,{signal:AbortSignal.timeout(4000)});
-    if(r.ok){setSt('✓ 連線成功',false);}
-    else setSt('✗ 回應異常',true);
-  }catch{setSt('✗ 無法連線',true);}
-  closeDrawer();
-}
 
 // ══════════════════════════════════════
-// 自選股
+// 自選股（每日作戰中心）
 // ══════════════════════════════════════
+let _watchCache = {}; // 暫存分析結果
+let _watchLoading = false;
+
 function showWatchList(){
   const el=document.getElementById('pageContent');
   if(!watchList.length){
-    el.innerHTML='<div style="padding:40px 0;text-align:center;color:var(--text3);font-size:14px">尚無自選股<br><small>分析股票後按「加入自選」</small></div>';
+    el.innerHTML=`<div style="padding:60px 0;text-align:center;color:var(--text3)">
+      <div style="font-size:36px;margin-bottom:12px">🔥</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:6px">關注清單是空的</div>
+      <div style="font-size:13px;margin-bottom:10px">分析股票後按「加入自選」</div>
+      <div style="font-size:11px;color:var(--text3);background:var(--bg2);border-radius:8px;padding:10px 14px;text-align:left;max-width:280px;margin:0 auto">
+        💡 加入自選後可在此快速查看，支援批次分析
+      </div>
+    </div>`;
     return;
   }
-  el.innerHTML=`<div style="padding:8px 0">
-    <div style="font-size:13px;font-weight:600;color:var(--text2);padding:8px 0 12px">⭐ 自選股（${watchList.length}）</div>
-    ${watchList.map(s=>`
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:.5px solid var(--border)">
-      <div onclick="qpAndHome('${s.id}')" style="flex:1;cursor:pointer">
-        <div style="font-weight:500">${s.id} ${s.name}</div>
-        <div style="font-size:11px;color:var(--text3)">加入時間 ${s.date}</div>
-      </div>
-      <button onclick="removeWatch('${s.id}')" style="border:none;background:none;color:var(--up);font-size:12px;cursor:pointer;padding:4px 8px">移除</button>
-    </div>`).join('')}
+  _renderWatchSkeleton(el);
+  _fetchWatchBatch();
+}
+
+function _renderWatchSkeleton(el){
+  const skeletonCard = `<div style="background:var(--bg2);border-radius:12px;padding:14px 16px;margin-bottom:8px;animation:pulse 1.5s infinite">
+    <div style="height:14px;width:40%;background:var(--border2);border-radius:4px;margin-bottom:8px"></div>
+    <div style="height:12px;width:70%;background:var(--border);border-radius:4px"></div>
   </div>`;
+  el.innerHTML=`
+    <div style="padding:4px 0 16px;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:16px;font-weight:700">🔥 今日關注</div>
+      <div style="font-size:11px;color:var(--text3)" id="watchUpdateTime">更新中...</div>
+    </div>
+    <div id="watchGroups">${skeletonCard.repeat(Math.min(watchList.length,4))}</div>`;
+}
+
+async function _fetchWatchBatch(){
+  if(_watchLoading) return;
+  _watchLoading=true;
+  const base=getAPI();
+  const ids=watchList.map(s=>s.id);
+  
+  try{
+    // 嘗試批次端點，若不存在則逐一查詢
+    let results={};
+    try{
+      const r=await fetch(`${base}/batch_analyze`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ids, tf:'D'}),
+        signal:AbortSignal.timeout(20000)
+      });
+      if(r.ok) results=await r.json();
+    }catch{
+      // fallback：逐一查詢（限制並發5個）
+      const chunks=[];
+      for(let i=0;i<ids.length;i+=5) chunks.push(ids.slice(i,i+5));
+      for(const chunk of chunks){
+        await Promise.all(chunk.map(async id=>{
+          try{
+            const r=await fetch(`${base}/api/analyze/${id}?tf=D`,{signal:AbortSignal.timeout(8000),headers:_authHeaders?_authHeaders():{}});
+            if(r.ok) results[id]=await r.json();
+          }catch{}
+        }));
+      }
+    }
+    _watchCache=results;
+    _renderWatchGroups(results);
+  }catch(e){
+    _renderWatchFallback();
+  }finally{
+    _watchLoading=false;
+  }
+}
+
+function _getRiskColor(level){
+  if(!level) return 'var(--text3)';
+  if(level==='高風險') return 'var(--up)';
+  if(level==='留意風險') return '#f59e0b';
+  return 'var(--green)';
+}
+
+function _getRiskBg(level){
+  if(!level) return 'var(--bg2)';
+  if(level==='高風險') return 'rgba(255,59,48,0.08)';
+  if(level==='留意風險') return 'rgba(245,158,11,0.08)';
+  return 'rgba(0,201,122,0.08)';
+}
+
+function _renderWatchGroups(results){
+  const groups={
+    danger:  {label:'🚨 今日注意',  items:[], color:'var(--up)'},
+    strong:  {label:'🚀 今日強勢',  items:[], color:'var(--green)'},
+    nearRes: {label:'⚠️ 接近壓力',  items:[], color:'#f59e0b'},
+    nearSup: {label:'🛡️ 接近支撐',  items:[], color:'#60a5fa'},
+    volume:  {label:'📊 爆量異動',  items:[], color:'#a78bfa'},
+    normal:  {label:'😴 無特殊訊號',items:[], color:'var(--text3)'},
+  };
+
+  watchList.forEach(s=>{
+    const d=results[s.id];
+    if(!d){
+      groups.normal.items.push({...s, data:null});
+      return;
+    }
+    const pattern = d.pattern||'';
+    const riskLevel = d.risk_level||'';
+    const resDistPct = d.resistance && d.price ? (d.resistance - d.price)/d.price*100 : 99;
+    const supDistPct = d.support && d.price ? (d.price - d.support)/d.price*100 : 99;
+    const volRatio = d.volume_ratio||1;
+
+    if(riskLevel==='high' || pattern==='跌破型態'){
+      groups.danger.items.push({...s,data:d});
+    }else if(pattern==='突破型態' || d.today_breakout || (d.trend==='上升趨勢' && volRatio>1.8)){
+      groups.strong.items.push({...s,data:d});
+    }else if(resDistPct < 5){
+      groups.nearRes.items.push({...s,data:d});
+    }else if(supDistPct < 5){
+      groups.nearSup.items.push({...s,data:d});
+    }else if(volRatio > 2){
+      groups.volume.items.push({...s,data:d});
+    }else{
+      groups.normal.items.push({...s,data:d});
+    }
+  });
+
+  const now=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('watchUpdateTime').textContent=`更新 ${now}`;
+
+  let html='';
+  Object.values(groups).forEach(g=>{
+    if(!g.items.length) return;
+    html+=`<div style="margin-bottom:20px">
+      <div style="font-size:12px;font-weight:700;color:${g.color};margin-bottom:8px;letter-spacing:0.5px">${g.label}（${g.items.length}）</div>
+      ${g.items.map(s=>_watchCard(s)).join('')}
+    </div>`;
+  });
+
+  document.getElementById('watchGroups').innerHTML=html||'<div style="padding:20px 0;text-align:center;color:var(--text3);font-size:13px">資料載入失敗，請稍後再試</div>';
+}
+
+function _watchCard(s){
+  const d=s.data;
+  if(!d) return `
+    <div onclick="qpAndHome('${s.id}')" style="display:flex;justify-content:space-between;align-items:center;background:var(--bg2);border-radius:12px;padding:14px 16px;margin-bottom:8px;cursor:pointer">
+      <div>
+        <div style="font-weight:600;font-size:14px">${s.id} ${s.name}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">點擊查詢</div>
+      </div>
+      <div style="color:var(--text3);font-size:18px">›</div>
+    </div>`;
+
+  const riskColor=_getRiskColor(d.risk_level);
+  const riskBg=_getRiskBg(d.risk_level);
+  const price=d.price?`${d.price}`:'--';
+  const conclusion=(d.conclusion||'').slice(0,40)+(d.conclusion&&d.conclusion.length>40?'…':'');
+  const resDistPct = d.resistance && d.price ? ((d.resistance-d.price)/d.price*100).toFixed(1) : null;
+  const supDistPct = d.support && d.price ? ((d.price-d.support)/d.price*100).toFixed(1) : null;
+
+  return `
+    <div onclick="qpAndHome('${s.id}')" style="background:${riskBg};border:1px solid ${riskColor}22;border-radius:12px;padding:14px 16px;margin-bottom:8px;cursor:pointer;position:relative">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div>
+          <span style="font-weight:700;font-size:15px">${s.id}</span>
+          <span style="font-size:13px;color:var(--text2);margin-left:6px">${s.name}</span>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:16px;font-weight:700">${price}</div>
+          <div style="font-size:10px;color:${riskColor};font-weight:600;margin-top:1px">${d.risk_label||d.risk_level||''}</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px">${conclusion}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${supDistPct?`<span style="font-size:10px;color:var(--green);background:rgba(0,201,122,0.1);padding:2px 7px;border-radius:4px">支 -${supDistPct}%</span>`:''}
+        ${resDistPct?`<span style="font-size:10px;color:#f59e0b;background:rgba(245,158,11,0.1);padding:2px 7px;border-radius:4px">壓 +${resDistPct}%</span>`:''}
+        ${d.pattern?`<span style="font-size:10px;color:var(--text3);background:var(--border);padding:2px 7px;border-radius:4px">${d.pattern}</span>`:''}
+        ${d.rr_ratio!=null?`<span style="font-size:10px;color:${d.rr_ratio>=2?'var(--green)':d.rr_ratio>=1?'#f59e0b':'var(--up)'};background:var(--border);padding:2px 7px;border-radius:4px">RR ${d.rr_ratio}</span>`:''}
+        ${d.today_breakout?`<span style="font-size:10px;color:#a78bfa;background:rgba(167,139,250,0.1);padding:2px 7px;border-radius:4px">🚀今日突破</span>`:''}
+        ${d.near_bot?`<span style="font-size:10px;color:var(--green);background:rgba(0,201,122,0.1);padding:2px 7px;border-radius:4px">📍接近底部</span>`:''}
+      </div>
+      <div style="position:absolute;right:16px;bottom:14px;color:var(--text3);font-size:16px">›</div>
+    </div>`;
+}
+
+function _renderWatchFallback(){
+  // API 失敗時降級顯示純清單
+  const el=document.getElementById('watchGroups');
+  if(!el) return;
+  el.innerHTML=`<div style="margin-bottom:8px;font-size:12px;color:var(--text3)">⚠️ 無法取得即時資料，顯示基本清單</div>`+
+    watchList.map(s=>`
+    <div onclick="qpAndHome('${s.id}')" style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:.5px solid var(--border);cursor:pointer">
+      <div>
+        <div style="font-weight:500">${s.id} ${s.name}</div>
+        <div style="font-size:11px;color:var(--text3)">${s.date}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button onclick="event.stopPropagation();removeWatch('${s.id}')" style="border:none;background:none;color:var(--up);font-size:12px;cursor:pointer;padding:4px">移除</button>
+        <span style="color:var(--text3)">›</span>
+      </div>
+    </div>`).join('');
 }
 function addWatch(id,name){
   if(!watchList.find(s=>s.id===id)){
@@ -750,25 +1130,115 @@ function qpAndHome(id){
 function showHistory(){
   const el=document.getElementById('pageContent');
   if(!historyList.length){
-    el.innerHTML='<div style="padding:40px 0;text-align:center;color:var(--text3);font-size:14px">尚無分析紀錄</div>';
+    el.innerHTML=`<div style="padding:60px 0;text-align:center;color:var(--text3)">
+      <div style="font-size:36px;margin-bottom:12px">📈</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:6px">還沒有分析紀錄</div>
+      <div style="font-size:13px">分析股票後自動記錄</div>
+    </div>`;
     return;
   }
-  el.innerHTML=`<div style="padding:8px 0">
-    <div style="font-size:13px;font-weight:600;color:var(--text2);padding:8px 0 12px">🕐 最近紀錄（${historyList.length}）</div>
-    ${historyList.map(s=>`
-    <div onclick="qpAndHome('${s.id}')" style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:.5px solid var(--border);cursor:pointer">
-      <div>
-        <div style="font-weight:500">${s.id} ${s.name}</div>
-        <div style="font-size:11px;color:var(--text3)">${s.date} · ${s.price}</div>
-      </div>
-      <div style="font-size:12px;color:${s.risk==='high'?'var(--up)':s.risk==='low'?'var(--dn)':'var(--amber)'}">${s.riskLabel}</div>
-    </div>`).join('')}
+
+  // 本月統計
+  const now=new Date();
+  const thisMonth=`${now.getFullYear()}/${now.getMonth()+1}`;
+  const monthList=historyList.filter(s=>{
+    if(!s.date) return false;
+    return s.date.startsWith(thisMonth.replace('/','/'));
+  });
+
+  // 多頭/空頭比例（依風險等級）
+  let bullCount=0, bearCount=0;
+  historyList.forEach(s=>{
+    if(s.risk==='low') bullCount++;
+    else if(s.risk==='high') bearCount++;
+  });
+  const total=historyList.length;
+  const bullPct=total>0?Math.round(bullCount/total*100):0;
+  const bearPct=total>0?Math.round(bearCount/total*100):0;
+
+  // 統計卡
+  const statsHtml=`
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px">
+    <div style="background:var(--bg2);border-radius:10px;padding:12px;text-align:center">
+      <div style="font-size:20px;font-weight:700;color:var(--text)">${historyList.length}</div>
+      <div style="font-size:10px;color:var(--text3);margin-top:2px">累計分析</div>
+    </div>
+    <div style="background:var(--bg2);border-radius:10px;padding:12px;text-align:center">
+      <div style="font-size:20px;font-weight:700;color:var(--text)">${monthList.length}</div>
+      <div style="font-size:10px;color:var(--text3);margin-top:2px">本月分析</div>
+    </div>
+  </div>
+  <div style="background:var(--bg2);border-radius:10px;padding:12px;margin-bottom:16px">
+    <div style="font-size:11px;color:var(--text3);margin-bottom:8px">多空分布（依風險等級）</div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px">
+      <span style="color:var(--dn)">多頭 ${bullPct}%</span>
+      <span style="color:var(--up)">空頭 ${bearPct}%</span>
+    </div>
+    <div style="height:6px;border-radius:4px;background:var(--border);overflow:hidden">
+      <div style="height:100%;width:${bullPct}%;background:var(--dn);border-radius:4px;transition:width .6s ease"></div>
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin-top:6px">低風險 ${bullCount} 筆・高風險 ${bearCount} 筆・中性 ${total-bullCount-bearCount} 筆</div>
   </div>`;
+
+  // 日誌清單
+  const logHtml=historyList.map(s=>{
+    const snap=parseFloat(s.snapPrice||s.price||0);
+    const curr=parseFloat(s.price||0);
+    const chg=snap&&curr?((curr-snap)/snap*100):null;
+    const chgStr=chg!==null?(chg>=0?`+${chg.toFixed(1)}%`:`${chg.toFixed(1)}%`):null;
+    const chgColor=chg===null?'var(--text3)':chg>=0?'var(--green)':'var(--up)';
+    const riskColor=s.risk==='high'?'var(--up)':s.risk==='low'?'var(--dn)':'#f59e0b';
+    const conclusionShort=(s.conclusion||'').replace(/^→\s*/,'').slice(0,35)+(s.conclusion&&s.conclusion.length>35?'…':'');
+
+    return `<div onclick="qpAndHome('${s.id}')" style="background:var(--bg2);border-radius:12px;padding:14px 16px;margin-bottom:8px;cursor:pointer">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div>
+          <span style="font-weight:700;font-size:14px">${s.id}</span>
+          <span style="font-size:13px;color:var(--text2);margin-left:6px">${s.name}</span>
+          ${s.pattern?`<span style="font-size:10px;background:var(--border);color:var(--text3);padding:1px 6px;border-radius:4px;margin-left:4px">${s.pattern}</span>`:''}
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:14px;font-weight:700">${s.price||'--'}</div>
+          ${chgStr?`<div style="font-size:10px;color:${chgColor}">${chgStr}</div>`:''}
+        </div>
+      </div>
+      ${conclusionShort?`<div style="font-size:11px;color:var(--text3);margin-bottom:6px">${conclusionShort}</div>`:''}
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:10px;color:var(--text3)">${s.snapDate||s.date} 記錄</div>
+        <span style="font-size:10px;color:${riskColor};font-weight:600">${s.riskLabel||''}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML=`
+    <div style="padding:4px 0 16px;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:16px;font-weight:700">📈 戰績日誌</div>
+      <button onclick="if(confirm('確定清除所有紀錄？')){historyList=[];localStorage.removeItem('historyList');showHistory()}"
+        style="font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;padding:4px 8px">清除</button>
+    </div>
+    ${statsHtml}
+    <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px">📋 分析紀錄（${historyList.length}）</div>
+    ${logHtml}
+    <div style="height:20px"></div>`;
 }
-function addHistory(id,name,price,risk,riskLabel){
+function addHistory(id,name,price,risk,riskLabel,extra){
+  // extra: {conclusion, pattern, rr_ratio, support, resistance}
+  const existing = historyList.find(s=>s.id===id);
   historyList=historyList.filter(s=>s.id!==id);
-  historyList.unshift({id,name,price,risk,riskLabel,date:new Date().toLocaleDateString('zh-TW')});
-  if(historyList.length>20)historyList=historyList.slice(0,20);
+  historyList.unshift({
+    id, name, price, risk, riskLabel,
+    conclusion: extra?.conclusion||'',
+    pattern:    extra?.pattern||'',
+    rr_ratio:   extra?.rr_ratio||null,
+    support:    extra?.support||null,
+    resistance: extra?.resistance||null,
+    date: new Date().toLocaleDateString('zh-TW'),
+    ts:   Date.now(),
+    // 保留歷史對比用的快照（第一次記錄）
+    snapPrice: existing?.snapPrice || price,
+    snapDate:  existing?.snapDate  || new Date().toLocaleDateString('zh-TW'),
+  });
+  if(historyList.length>50)historyList=historyList.slice(0,50);
   localStorage.setItem('historyList',JSON.stringify(historyList));
 }
 
@@ -776,11 +1246,9 @@ function addHistory(id,name,price,risk,riskLabel){
 // API
 // ══════════════════════════════════════
 function getAPI(){
-  const saved = localStorage.getItem('apiBase');
-  if(saved) return saved.replace(/\/$/,'');
-  // 上線後前後端同 domain，自動用相對路徑；本機開發用 localhost:8000
   const isLocal = location.hostname==='localhost'||location.hostname==='127.0.0.1'||location.hostname.startsWith('192.168');
-  return isLocal ? 'http://localhost:8000' : '';
+  if(isLocal) return 'http://localhost:8000';
+  return 'https://stock-navigator-api.zeabur.app';
 }
 function setSt(msg,err){const el=document.getElementById('statusBar');el.innerHTML=msg;el.className='status'+(err?' err':'');}
 
@@ -792,17 +1260,63 @@ async function analyzeStock(){
   const maParts=enabled.map((m,i)=>`ma${i+1}=${m.n}`).join('&');
   const url=`${getAPI()}/api/analyze/${id}?tf=${currentTF}&${maParts}`;
   setSt('<span class="spin"></span>分析中...',false);
+  stopQuotePolling();  // 換股時停止舊輪詢
   document.getElementById('resultEl').classList.remove('show');
   let data;
   try{
-    const r=await fetch(url,{signal:AbortSignal.timeout(30000)});
-    if(!r.ok){const e=await r.json().catch(()=>({detail:'錯誤'}));throw new Error(e.detail||`HTTP ${r.status}`);}
-    data=await r.json();
-  }catch(e){setSt(`❌ ${e.message}`,true);return;}
-  setSt(`✓ ${data.symbol}${data.stock_name?' '+data.stock_name:''} · ${data.bars.length}根 · 盤後資料`,false);
-  addHistory(id,data.stock_name||'',data.price,data.risk_level,data.risk_label);
+    const r=await fetch(url,{
+      signal:AbortSignal.timeout(30000),
+      headers: _authHeaders ? _authHeaders() : {}
+    });
+    if(!r.ok){
+      const txt=await r.text().catch(()=>'');
+      let detail=`HTTP ${r.status}`;
+      try{const j=JSON.parse(txt);detail=j.detail||j.message||detail;}catch{}
+      if(r.status===401){ showLoginModal(); setSt('❌ 請先登入',true); return; }
+      if(r.status===403){ setSt('❌ 訂閱已到期，請至「我的」頁面續費',true); return; }
+      if(r.status===429){
+        if(detail.includes('guest_limit')){
+          // 遊客次數已到，顯示登入提示
+          _showGuestLimitModal();
+          setSt('',false);
+        } else if(detail.includes('today_limit')){
+          // 免費會員次數已到
+          _showFreeLimitModal();
+          setSt('',false);
+        } else {
+          setSt(`❌ ${detail.replace(/^[^|]+\|/,'')}`,true);
+        }
+        return;
+      }
+      if(detail.includes('找不到股票')) detail=`找不到股票：${id}，請確認代號是否正確`;
+      throw new Error(detail);
+    }
+    const txt=await r.text();
+    try{data=JSON.parse(txt);}
+    catch{throw new Error('伺服器回應異常，請稍後再試');}
+  }catch(e){
+    const msg=e.message||'未知錯誤';
+    if(msg.includes('timeout')||msg.includes('TimeoutError')) setSt('❌ 連線逾時，請稍後再試',true);
+    else if(msg.includes('Failed to fetch')||msg.includes('NetworkError')) setSt('❌ 無法連線伺服器，請檢查網路',true);
+    else setSt(`❌ ${msg}`,true);
+    return;
+  }
+  const _now=new Date();
+  const _pad=n=>String(n).padStart(2,'0');
+  const _dtStr=`${_now.getFullYear()}/${_pad(_now.getMonth()+1)}/${_pad(_now.getDate())} ${_pad(_now.getHours())}:${_pad(_now.getMinutes())}`;
+  const _mktLabel=(_now.getHours()*60+_now.getMinutes()<13*60+30)?'盤中資料':'盤後資料';
+  setSt(`✓ ${data.symbol}${data.stock_name?' '+data.stock_name:''} · ${_dtStr} ${_mktLabel}`,false);
+  addHistory(id,data.stock_name||'',data.price,data.risk_level,data.risk_label,{
+    conclusion: data.warning,
+    pattern:    data.pattern,
+    rr_ratio:   data.risk_reward,
+    support:    data.support,
+    resistance: data.resistance,
+  });
   renderHotkeys();
   renderResult(data,enabled);
+  // 第一次分析完才顯示新手導覽
+  setTimeout(startTour, 800);
 }
 
 // ══════════════════════════════════════
@@ -834,27 +1348,15 @@ function renderResult(d,enabledMA){
 
   const coreLines = [];
 
-  // 0. 軌道趨勢矛盾警告（最優先，醒目顯示）
+  // 0. 結論最前面，最醒目
+  if(d.warning) coreLines.push({text:`→ ${d.warning}`, cls:'conclusion'});
+
+  // 1. 軌道趨勢矛盾警告
   if(conflict_note){
     coreLines.push({text: conflict_note, cls:'conflict'});
   }
 
-  // 1. 軌道+位置
-  if(channel) coreLines.push({
-    text:`軌道：${channel.desc}，${channel.position_desc}`,
-    cls: channel.position==='near_support'?'md':channel.position==='near_resist'?'hi':''
-  });
-  // 2. 趨勢
-  const trendMap={'上升趨勢':'均線多頭排列，趨勢偏多，回測支撐是買點','下降趨勢':'均線空頭排列，趨勢偏空，反彈壓力是賣點','盤整':'均線糾結，多空拉鋸，等待突破方向再跟進'};
-  const trendCls = trend==='下降趨勢'?'hi':'';
-  coreLines.push({text:`趨勢：${trendMap[trend]||trend}`, cls: trendCls});
-  // 3. 支撐壓力
-  coreLines.push({text:`支撐 ${support}（${support_desc}），壓力 ${resistance}（${resistance_desc}）`, cls:''});
-  // 4. 防守位 + 損益比
-  const basisLabel = rr_basis ? `（以${rr_basis}為停損）` : '';
-  coreLines.push({text:`防守位 ${stop_loss}（距現價 ${pct(stop_loss,price)}%），損益比 ${rr}${basisLabel}`, cls: rr>=1.5?'md':rr<1?'hi':''});
-
-  // 5. K棒型態（拆兩行：型態名稱 + 操作說明）
+  // 2. K棒型態（型態名稱 + 操作說明）
   if(kbar_pattern){
     const kDir = kbar_dir||'neutral';
     const kCls = kDir==='bullish'?'kbar-bull': kDir==='bearish'?'kbar-bear':'kbar-neu';
@@ -865,9 +1367,30 @@ function renderResult(d,enabledMA){
       coreLines.push({text:`操作：${opText}`, cls: opCls});
     }
   }
+  // K 線大數據型態勝率
+  if(d.kline_pattern){
+    const wr = d.win_rate||0.50;
+    const wrCls = wr > 0.55 ? 'md' : wr < 0.50 ? 'hi' : '';
+    coreLines.push({text:`K線型態：${d.kline_pattern}　勝率：${Math.round(wr*100)}%`, cls: wrCls});
+  }
 
-  // 6. 整合結論（含具體操作的最終一句，最醒目）
-  if(d.warning) coreLines.push({text:`→ ${d.warning}`, cls:'conclusion'});
+  // 3. 防守位 + 損益比
+  const basisLabel = rr_basis ? `（以${rr_basis}為停損）` : '';
+  coreLines.push({text:`防守位 ${stop_loss}（距現價 ${pct(stop_loss,price)}%），損益比 ${rr}${basisLabel}`, cls: rr>=1.5?'md':rr<1?'hi':''});
+
+  // 4. 支撐壓力
+  coreLines.push({text:`支撐 ${support}（${support_desc}），壓力 ${resistance}（${resistance_desc}）`, cls:''});
+
+  // 5. 趨勢
+  const trendMap={'上升趨勢':'均線多頭排列，趨勢偏多，回測支撐是買點','下降趨勢':'均線空頭排列，趨勢偏空，反彈壓力是賣點','盤整':'均線糾結，多空拉鋸，等待突破方向再跟進'};
+  const trendCls = trend==='下降趨勢'?'hi':'';
+  coreLines.push({text:`趨勢：${trendMap[trend]||trend}`, cls: trendCls});
+
+  // 6. 軌道+位置
+  if(channel) coreLines.push({
+    text:`軌道：${channel.desc}，${channel.position_desc}`,
+    cls: channel.position==='near_support'?'md':channel.position==='near_resist'?'hi':''
+  });
 
   document.getElementById('summaryList').innerHTML=coreLines.map(({text,cls})=>{
     const isConclusion = cls==='conclusion';
@@ -924,9 +1447,14 @@ function renderResult(d,enabledMA){
   const inWatch=!!watchList.find(s=>s.id===C._currentId);
   updateWatchBtn(C._currentId,inWatch);
   document.getElementById('resultEl').className='result show';
+  const qb=document.getElementById('resultQuickBtns');
+  qb.style.display='flex';
+  qb.innerHTML=`<button onclick="toggleSection('peerBody','peerArr')" style="flex:1;padding:8px 0;border-radius:8px;border:.5px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:12px;cursor:pointer">👥 同族群</button><button onclick="toggleSection('chipsBody','chipsArr')" style="flex:1;padding:8px 0;border-radius:8px;border:.5px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:12px;cursor:pointer">📊 籌碼</button>`;
   loadDrawings(stock_id||id);
   loadChips(stock_id||id);
   loadPeerGroup(stock_id||id);
+  // 啟動即時報價輪詢（盤中自動更新，盤後停止）
+  startQuotePolling(stock_id||id);
 }
 
 function recalcMA(){
@@ -1435,7 +1963,7 @@ async function _loadChipsData(stockId){
   document.getElementById('instSummary').innerHTML=
     '<div style="grid-column:1/-1;padding:8px 0;color:var(--text3);font-size:12px">載入籌碼資料中...</div>';
   try{
-    const r=await fetch(`${getAPI()}/api/chips/${stockId}?days=30`,{signal:AbortSignal.timeout(15000)});
+    const r=await fetch(`${getAPI()}/api/chips/${stockId}?days=30`,{signal:AbortSignal.timeout(15000),headers:_authHeaders()});
     if(!r.ok) throw new Error('API error');
     _chipsRawData=await r.json();
     renderChipsData(_chipsRawData);
@@ -1583,18 +2111,9 @@ function drawMarginChart(daily){
 // 同族群 / 概念股
 // ══════════════════════════════════════
 let _currentPeerStock='';
-let _peerTab='peer';
-
-function switchPeerTab(tab){
-  _peerTab=tab;
-  document.getElementById('tabPeer').style.cssText=`padding:4px 14px;border-radius:20px;font-size:12px;cursor:pointer;border:${tab==='peer'?'none':'.5px solid var(--border2)'};background:${tab==='peer'?'var(--green)':'transparent'};color:${tab==='peer'?'#fff':'var(--text2)'}`;
-  document.getElementById('tabConcept').style.cssText=`padding:4px 14px;border-radius:20px;font-size:12px;cursor:pointer;border:${tab==='concept'?'none':'.5px solid var(--border2)'};background:${tab==='concept'?'var(--green)':'transparent'};color:${tab==='concept'?'#fff':'var(--text2)'}`;
-  if(_currentPeerStock) _loadPeerData(_currentPeerStock);
-}
 
 async function loadPeerGroup(stockId){
   _currentPeerStock=stockId;
-  // 先顯示 section，再載資料，避免切 tab 時閃滅
   document.getElementById('peerSection').style.display='block';
   document.getElementById('peerList').innerHTML=
     '<div style="padding:12px 0;color:var(--text3);font-size:12px">載入中...</div>';
@@ -1602,28 +2121,15 @@ async function loadPeerGroup(stockId){
 }
 
 async function _loadPeerData(stockId){
-  const section=document.getElementById('peerSection');
   const listEl=document.getElementById('peerList');
   const industryEl=document.getElementById('peerIndustry');
   try{
-    if(_peerTab==='peer'){
-      const r=await fetch(`${getAPI()}/api/peers/${stockId}`,{signal:AbortSignal.timeout(10000)});
-      if(!r.ok){listEl.innerHTML='<div style="padding:12px 0;color:var(--text3);font-size:12px">查無資料</div>';return;}
-      const d=await r.json();
-      if(!d.peers||!d.peers.length){listEl.innerHTML='<div style="padding:12px 0;color:var(--text3);font-size:12px">查無同族群</div>';return;}
-      industryEl.textContent=d.industry||'';
-      listEl.innerHTML=d.peers.map(s=>stockRow(s.stock_id,s.stock_name)).join('');
-    }else{
-      const r=await fetch(`${getAPI()}/api/concept/${stockId}`,{signal:AbortSignal.timeout(10000)});
-      if(!r.ok){listEl.innerHTML='<div style="padding:12px 0;color:var(--text3);font-size:12px">查無資料</div>';return;}
-      const d=await r.json();
-      if(!d.chains||!d.chains.length){listEl.innerHTML='<div style="padding:12px 0;color:var(--text3);font-size:12px">查無概念股資料</div>';return;}
-      industryEl.textContent=`${d.count} 檔相關`;
-      listEl.innerHTML=d.chains.map(chain=>`
-        <div style="font-size:11px;color:var(--text3);padding:6px 0 4px;font-weight:500">${chain.chain_name}</div>
-        ${chain.stocks.map(s=>stockRow(s.stock_id,s.stock_name)).join('')}
-      `).join('');
-    }
+    const r=await fetch(`${getAPI()}/api/peers/${stockId}`,{signal:AbortSignal.timeout(10000),headers:_authHeaders()});
+    if(!r.ok){listEl.innerHTML='<div style="padding:12px 0;color:var(--text3);font-size:12px">查無資料</div>';return;}
+    const d=await r.json();
+    if(!d.peers||!d.peers.length){listEl.innerHTML='<div style="padding:12px 0;color:var(--text3);font-size:12px">查無同族群</div>';return;}
+    industryEl.textContent=d.industry||'';
+    listEl.innerHTML=d.peers.map(s=>stockRow(s.stock_id,s.stock_name)).join('');
   }catch(e){
     listEl.innerHTML='<div style="padding:12px 0;color:var(--text3);font-size:12px">載入失敗，請確認後端連線</div>';
     console.warn('族群載入失敗',e);
@@ -1645,7 +2151,91 @@ function stockRow(id,name){
 }
 
 // ══════════════════════════════════════
-// 技術指標
+// 即時報價輪詢
+// ══════════════════════════════════════
+let _quoteTimer = null;
+let _quoteStockId = '';
+const QUOTE_INTERVAL = 30000; // 30秒
+
+async function startQuotePolling(stockId){
+  stopQuotePolling();
+  _quoteStockId = stockId;
+  // 立刻拉一次
+  await fetchAndUpdateQuote(stockId);
+}
+
+function stopQuotePolling(){
+  if(_quoteTimer){ clearTimeout(_quoteTimer); _quoteTimer=null; }
+  _quoteStockId='';
+  // 隱藏 LIVE 標記
+  const tag=document.getElementById('quoteLiveTag');
+  if(tag) tag.style.display='none';
+}
+
+async function fetchAndUpdateQuote(stockId){
+  // 若已換股，停止
+  if(stockId !== _quoteStockId) return;
+  try{
+    const r=await fetch(`${getAPI()}/api/quote/${stockId}`,{signal:AbortSignal.timeout(8000)});
+    if(!r.ok) return scheduleNext(stockId, false);
+    const d=await r.json();
+    updateQuoteUI(d);
+    // 盤中繼續輪詢；盤後停止
+    scheduleNext(stockId, d.in_session);
+  }catch(e){
+    scheduleNext(stockId, false);
+  }
+}
+
+function scheduleNext(stockId, inSession){
+  if(!inSession) return; // 盤後不繼續
+  _quoteTimer = setTimeout(()=>fetchAndUpdateQuote(stockId), QUOTE_INTERVAL);
+}
+
+function updateQuoteUI(d){
+  const priceEl = document.getElementById('m-price');
+  const changeEl = document.getElementById('m-change');
+  const liveTag = document.getElementById('quoteLiveTag');
+  if(!priceEl || !d.price) return;
+
+  // 現價：閃一下讓用戶感知到更新
+  const newPrice = d.price.toFixed(2);
+  if(priceEl.textContent !== newPrice){
+    priceEl.style.transition='opacity .15s';
+    priceEl.style.opacity='0';
+    setTimeout(()=>{
+      priceEl.textContent=newPrice;
+      priceEl.style.opacity='1';
+    },150);
+  }
+
+  // 漲跌顏色（台股：漲=紅 tw-up，跌=綠 tw-dn）
+  if(d.change!=null && d.change_pct!=null){
+    const sign = d.change>=0?'+':'';
+    const cls = d.change>0?'tw-up':d.change<0?'tw-dn':'';
+    changeEl.className=`m-sub ${cls}`;
+    changeEl.textContent=`${sign}${d.change} (${sign}${d.change_pct}%)`;
+  } else {
+    changeEl.textContent='';
+  }
+
+  // LIVE 標記：盤中顯示，盤後隱藏
+  liveTag.style.display = d.is_trading ? 'inline' : 'none';
+
+  // statusBar 補充即時時間
+  if(d.is_trading && d.time){
+    const timeStr = d.time.length>=8 ? d.time.slice(0,8) : d.time;
+    const statusEl=document.getElementById('statusBar');
+    if(statusEl && !statusEl.innerHTML.includes('分析中')){
+      // 只更新尾部，不覆蓋主要訊息
+      const base=statusEl.dataset.base||statusEl.innerHTML;
+      statusEl.dataset.base=base;
+      statusEl.innerHTML=`${base} <span style="color:var(--text3);font-size:10px">· 即時 ${timeStr}</span>`;
+    }
+  }
+}
+
+
 // ══════════════════════════════════════
 let _indicators = null;
 const _activeInds = {bb:false, rsi:false, macd:false, kd:false, obv:false};
@@ -1836,6 +2426,8 @@ function toggleDrawBar(){
   document.querySelector('[data-ind="draw"]')?.classList.toggle('active', _drawBarVisible);
   const layer = document.getElementById('drawLayer');
   layer.classList.toggle('active', _drawBarVisible);
+  // 畫線模式啟動時鎖定 touch-action，避免手指滑動觸發頁面捲動
+  layer.style.touchAction = _drawBarVisible ? 'none' : 'pan-y';
   if(_drawBarVisible) setDrawTool('trend');
   else { _selectedIdx=-1; redrawDrawLayer(); }
 }
@@ -2047,25 +2639,27 @@ function attachDrawEvents(){
   const layer=document.getElementById('drawLayer');
   let _mouseDownPt=null;
 
-  layer.addEventListener('mousedown',e=>{
+  // ── 統一座標取得（支援 mouse 和 touch）──
+  function getXY(e){
+    if(e.touches && e.touches.length>0) return {clientX:e.touches[0].clientX, clientY:e.touches[0].clientY};
+    if(e.changedTouches && e.changedTouches.length>0) return {clientX:e.changedTouches[0].clientX, clientY:e.changedTouches[0].clientY};
+    return {clientX:e.clientX, clientY:e.clientY};
+  }
+
+  // ── 共用 down 邏輯 ──
+  function onDown(e){
     if(!_drawBarVisible) return;
-    const pt=screenToChart(e.clientX,e.clientY);
+    const {clientX,clientY}=getXY(e);
+    const pt=screenToChart(clientX,clientY);
     if(!pt) return;
     const sx=pt.sx, sy=pt.sy;
 
-    // 選取工具
     if(_drawTool==='select'){
       const hit=hitTest(sx,sy);
       _selectedIdx=hit;
-      if(hit>=0){
-        _dragging=true;
-        _dragOffsetP1={dBar:0,dPrice:0};
-        _dragOffsetP2={dBar:0,dPrice:0};
-        _mouseDownPt=pt;
-      }
+      if(hit>=0){ _dragging=true; _dragOffsetP1={dBar:0,dPrice:0}; _dragOffsetP2={dBar:0,dPrice:0}; _mouseDownPt=pt; }
       redrawDrawLayer(); return;
     }
-
     if(_drawTool==='eraser'){
       const hit=hitTest(sx,sy);
       if(hit>=0){ _drawings.splice(hit,1); saveDrawings(); redrawDrawLayer(); }
@@ -2089,41 +2683,34 @@ function attachDrawEvents(){
       saveDrawings(); redrawDrawLayer(); return;
     }
     if(_drawTool==='parallel'){
-      // 第一次點：選取要平行的線
       if(_parallelSource===null){
         const hit=hitTest(sx,sy);
         if(hit>=0){
-          _parallelSource=hit;
-          _selectedIdx=hit;
-          redrawDrawLayer();
-          // 提示
+          _parallelSource=hit; _selectedIdx=hit; redrawDrawLayer();
           document.getElementById('xhairBar').innerHTML='<span style="color:var(--amber)">已選取線段，再點一下畫面設定平行線位置</span>';
         }
       } else {
-        // 第二次點：以 pt 的價格為基準，平行複製
         const src=_drawings[_parallelSource];
         const priceDiff=pt.price-src.p1.price;
-        _drawings.push({
-          type:src.type,
+        _drawings.push({type:src.type,
           p1:{barIdx:src.p1.barIdx, price:src.p1.price+priceDiff},
           p2:{barIdx:src.p2.barIdx, price:src.p2.price+priceDiff},
-          color:_drawColor,
-        });
+          color:_drawColor});
         _parallelSource=null; _selectedIdx=-1;
         saveDrawings(); redrawDrawLayer();
       }
       return;
     }
-    // 趨勢線 / 線段 / 矩形：開始拖拉
     _drawing={type:_drawTool, p1:pt, p2:pt, color:_drawColor};
-  });
+  }
 
-  layer.addEventListener('mousemove',e=>{
+  // ── 共用 move 邏輯 ──
+  function onMove(e){
     if(!_drawBarVisible) return;
-    const pt=screenToChart(e.clientX,e.clientY);
+    const {clientX,clientY}=getXY(e);
+    const pt=screenToChart(clientX,clientY);
     if(!pt) return;
 
-    // 移動選取的線
     if(_dragging&&_selectedIdx>=0&&_mouseDownPt){
       const d=_drawings[_selectedIdx];
       const dBar=pt.barIdx-_mouseDownPt.barIdx;
@@ -2137,7 +2724,6 @@ function attachDrawEvents(){
     if(!_drawing) return;
     _drawing.p2=pt;
     redrawDrawLayer();
-    // 預覽虛線
     const layer2=document.getElementById('drawLayer');
     const ctx=layer2.getContext('2d');
     const dpr=window.devicePixelRatio||1;
@@ -2159,12 +2745,14 @@ function attachDrawEvents(){
       ctx.stroke();ctx.setLineDash([]);
     }
     ctx.restore();
-  });
+  }
 
-  window.addEventListener('mouseup',e=>{
+  // ── 共用 up 邏輯 ──
+  function onUp(e){
     if(_dragging){ _dragging=false; saveDrawings(); return; }
     if(!_drawing) return;
-    const pt=screenToChart(e.clientX,e.clientY);
+    const {clientX,clientY}=getXY(e);
+    const pt=screenToChart(clientX,clientY);
     if(pt) _drawing.p2=pt;
     if(_drawing.p1.barIdx!==_drawing.p2?.barIdx||_drawing.p1.price!==_drawing.p2?.price){
       _drawings.push(_drawing);
@@ -2172,13 +2760,35 @@ function attachDrawEvents(){
     }
     _drawing=null;
     redrawDrawLayer();
-  });
+  }
+
+  // ── Mouse 事件 ──
+  layer.addEventListener('mousedown', onDown);
+  layer.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onUp);
+
+  // ── Touch 事件（阻止預設捲動以免干擾畫線）──
+  layer.addEventListener('touchstart', e=>{
+    if(!_drawBarVisible) return;
+    e.preventDefault();   // 阻止捲動
+    onDown(e);
+  }, {passive:false});
+
+  layer.addEventListener('touchmove', e=>{
+    if(!_drawBarVisible) return;
+    e.preventDefault();   // 阻止捲動
+    onMove(e);
+  }, {passive:false});
+
+  layer.addEventListener('touchend', e=>{
+    if(!_drawBarVisible) return;
+    e.preventDefault();
+    onUp(e);
+  }, {passive:false});
 }
 
 // 載入儲存的 API
 document.addEventListener('DOMContentLoaded',()=>{
-  const saved=localStorage.getItem('apiBase');
-  if(saved)document.getElementById('apiBase').value=saved;
   applyStoredTheme();
   buildMABody();
   attachInteractions();
@@ -2205,6 +2815,607 @@ function renderHotkeys(){
     `<div class="hk" onclick="qp('${s.id}')">${s.name||s.id}</div>`
   ).join('');
 }
+
+
+// ── 付款跳轉（從 App 內）────────────────────────────────
+const _PAY_URLS = {
+  monthly:   'https://p.ecpay.com.tw/7C5BBBC',
+  quarterly: 'https://p.ecpay.com.tw/CE41E25',
+  yearly:    'https://p.ecpay.com.tw/FC6D8A7',
+};
+function goPayFromApp(plan) {
+  window.open(_PAY_URLS[plan], '_blank');
+}
+
+// ══════════════════════════════════════
+// 會員系統
+// ══════════════════════════════════════
+let _authUser = null;  // 目前登入的用戶資訊
+
+function _getToken(){ return localStorage.getItem('auth_token'); }
+function _setToken(t){ localStorage.setItem('auth_token', t); }
+function _clearToken(){ localStorage.removeItem('auth_token'); }
+
+function _authHeaders(){
+  const t = _getToken();
+  return t ? { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+}
+
+// 啟動時自動驗證 token
+async function _initAuth(){
+  const token = _getToken();
+  if(!token){
+    // 遊客：不強制登入，直接進入頁面
+    _authUser = null;
+    _updateGuestUI();
+    return;
+  }
+  try{
+    const r = await fetch(`${getAPI()}/auth/me`, { headers: _authHeaders(), signal: AbortSignal.timeout(8000) });
+    if(r.ok){
+      _authUser = await r.json();
+      _onLoginSuccess();
+    } else {
+      _clearToken();
+      _authUser = null;
+      _updateGuestUI();
+    }
+  } catch(e){
+    console.warn('auth check failed', e);
+    _clearToken();
+    _authUser = null;
+    _updateGuestUI();
+  }
+}
+
+function switchLoginTab(tab){
+  const isLogin = tab === 'login';
+  document.getElementById('loginView').style.display = isLogin ? '' : 'none';
+  document.getElementById('registerView').style.display = isLogin ? 'none' : '';
+  const fv = document.getElementById('forgotView');
+  if(fv) fv.style.display = 'none';
+  const tl = document.getElementById('tabLogin');
+  const tr = document.getElementById('tabRegister');
+  tl.style.borderBottomColor = isLogin ? 'var(--green)' : 'transparent';
+  tl.style.color = isLogin ? 'var(--text)' : 'var(--text3)';
+  tl.style.fontWeight = isLogin ? '700' : 'normal';
+  tr.style.borderBottomColor = isLogin ? 'transparent' : 'var(--green)';
+  tr.style.color = isLogin ? 'var(--text3)' : 'var(--text)';
+  tr.style.fontWeight = isLogin ? 'normal' : '700';
+}
+
+function showForgotView(){
+  document.getElementById('loginView').style.display = 'none';
+  const fv = document.getElementById('forgotView');
+  if(fv){ fv.style.display = ''; }
+  const errEl = document.getElementById('forgotErr');
+  if(errEl){ errEl.textContent = ''; errEl.style.color = ''; }
+}
+
+async function doForgotPassword(){
+  const email = document.getElementById('forgotEmail').value.trim();
+  const errEl = document.getElementById('forgotErr');
+  errEl.textContent = ''; errEl.style.color = '';
+  if(!email){ errEl.textContent = '請輸入 Email'; return; }
+  const btn = document.querySelector('#forgotView .modal-btn');
+  btn.textContent = '寄送中...'; btn.disabled = true;
+  try{
+    const r = await fetch(`${getAPI()}/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+      signal: AbortSignal.timeout(10000)
+    });
+    const data = await r.json();
+    if(!r.ok){ errEl.textContent = data.detail || '請求失敗'; return; }
+    errEl.style.color = 'var(--green)';
+    errEl.textContent = data.message || '重設連結已寄出，請檢查信箱';
+  } catch(e){
+    errEl.textContent = '連線失敗，請稍後再試';
+  } finally {
+    btn.textContent = '寄出重設連結'; btn.disabled = false;
+  }
+}
+
+async function doRegister(){
+  const email = document.getElementById('regEmail').value.trim();
+  const pwd   = document.getElementById('regPwd').value;
+  const pwd2  = document.getElementById('regPwd2').value;
+  const errEl = document.getElementById('registerErr');
+  errEl.textContent = ''; errEl.style.color = '';
+  if(!email || !pwd){ errEl.textContent = '請輸入 Email 和密碼'; return; }
+  if(pwd.length < 6){ errEl.textContent = '密碼至少 6 個字元'; return; }
+  if(pwd !== pwd2){ errEl.textContent = '兩次密碼不一致'; return; }
+  const btn = document.querySelector('#registerView .modal-btn');
+  btn.textContent = '建立中...'; btn.disabled = true;
+  try{
+    const r = await fetch(`${getAPI()}/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pwd }),
+      signal: AbortSignal.timeout(10000)
+    });
+    const data = await r.json();
+    if(!r.ok){ errEl.textContent = data.detail || '註冊失敗'; return; }
+    errEl.style.color = 'var(--green)';
+    errEl.textContent = '帳號建立成功！正在切換至登入…';
+    document.getElementById('loginEmail').value = email;
+    document.getElementById('loginPwd').value = pwd;
+    setTimeout(() => switchLoginTab('login'), 1000);
+  } catch(e){
+    errEl.textContent = '連線失敗，請稍後再試';
+  } finally {
+    btn.textContent = '建立免費帳號'; btn.disabled = false;
+  }
+}
+
+function showUpgradeModal(){
+  if(!_authUser){ showLoginModal(); return; }
+  const emailEl = document.getElementById('upgradeEmail');
+  if(emailEl) emailEl.textContent = _authUser.email || '';
+  document.getElementById('upgradeModal').style.display = 'flex';
+}
+
+function hideUpgradeModal(){
+  document.getElementById('upgradeModal').style.display = 'none';
+}
+
+async function doUpgrade(plan, btn){
+  if(!_authUser){ showLoginModal(); return; }
+  const origInner = btn.innerHTML;
+  btn.disabled = true;
+  btn.textContent = '建立訂單中…';
+  try{
+    const r = await fetch(`${getAPI()}/create_order`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: _authUser.email, plan, password: '' }),
+      signal: AbortSignal.timeout(15000)
+    });
+    if(!r.ok){
+      let msg = '建立訂單失敗';
+      try{ msg = (await r.json()).detail || msg; }catch{}
+      alert(msg); return;
+    }
+    const html = await r.text();
+    const w = window.open('', '_blank');
+    if(w){ w.document.write(html); w.document.close(); }
+    hideUpgradeModal();
+  } catch(e){
+    alert('連線失敗，請稍後再試');
+  } finally {
+    btn.innerHTML = origInner; btn.disabled = false;
+  }
+}
+
+function _updateGuestUI(){
+  const myBtn = document.querySelector('.nav-btn[onclick*="my"]');
+  if(myBtn) myBtn.innerHTML = '<div class="nav-icon">👤</div>登入';
+  const topLoginBtn = document.getElementById('topLoginBtn');
+  if(topLoginBtn) topLoginBtn.style.display = '';
+}
+
+// ── 遊客次數用完 Modal ──
+function _showGuestLimitModal(){
+  const el = document.getElementById('guestLimitModal');
+  if(el) el.style.display = 'flex';
+}
+function _hideGuestLimitModal(){
+  const el = document.getElementById('guestLimitModal');
+  if(el) el.style.display = 'none';
+}
+
+// ── 免費會員次數用完 Modal ──
+function _showFreeLimitModal(){
+  const el = document.getElementById('freeLimitModal');
+  if(el) el.style.display = 'flex';
+}
+function _hideFreeLimitModal(){
+  const el = document.getElementById('freeLimitModal');
+  if(el) el.style.display = 'none';
+}
+
+function showLoginModal(){
+  switchLoginTab('login');
+  document.getElementById('loginModal').style.display = 'flex';
+  const errEl = document.getElementById('loginErr');
+  errEl.textContent = ''; errEl.style.color = '';
+  setTimeout(() => document.getElementById('loginEmail').focus(), 100);
+}
+
+function hideLoginModal(){
+  document.getElementById('loginModal').style.display = 'none';
+}
+
+async function doLogin(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const pwd   = document.getElementById('loginPwd').value;
+  const errEl = document.getElementById('loginErr');
+  errEl.textContent = ''; errEl.style.color = '';
+  if(!email || !pwd){ errEl.textContent = '請輸入帳號和密碼'; return; }
+  const btn = document.querySelector('#loginView .modal-btn');
+  btn.textContent = '登入中...'; btn.disabled = true;
+  try{
+    const r = await fetch(`${getAPI()}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pwd }),
+      signal: AbortSignal.timeout(10000)
+    });
+    const data = await r.json();
+    if(!r.ok){ errEl.textContent = data.detail || '登入失敗'; return; }
+    _setToken(data.token);
+    _authUser = data;
+    hideLoginModal();
+    _onLoginSuccess();
+    // 更新完整用戶資訊
+    const me = await fetch(`${getAPI()}/auth/me`, { headers: _authHeaders() });
+    if(me.ok) _authUser = await me.json();
+  } catch(e){
+    errEl.textContent = '連線失敗，請稍後再試';
+  } finally {
+    btn.textContent = '登入'; btn.disabled = false;
+  }
+}
+
+function _onLoginSuccess(){
+  hideLoginModal();
+  document.getElementById('loginPwd').onkeydown = null;
+  const topLoginBtn = document.getElementById('topLoginBtn');
+  if(topLoginBtn) topLoginBtn.style.display = 'none';
+  const myBtn = document.querySelector('.nav-btn[onclick*="my"]');
+  if(myBtn) myBtn.innerHTML = '<div class="nav-icon">👤</div>我的';
+}
+
+async function doLogout(){
+  try{
+    await fetch(`${getAPI()}/auth/logout`, { method: 'POST', headers: _authHeaders() });
+  } catch(e){}
+  _clearToken();
+  _authUser = null;
+  _updateGuestUI();
+  showPage('home');
+}
+
+// Enter 鍵登入
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('loginPwd').addEventListener('keydown', e => {
+    if(e.key === 'Enter') doLogin();
+  });
+  document.getElementById('loginEmail').addEventListener('keydown', e => {
+    if(e.key === 'Enter') document.getElementById('loginPwd').focus();
+  });
+  document.getElementById('regPwd').addEventListener('keydown', e => {
+    if(e.key === 'Enter') document.getElementById('regPwd2').focus();
+  });
+  document.getElementById('regPwd2').addEventListener('keydown', e => {
+    if(e.key === 'Enter') doRegister();
+  });
+  _initAuth();
+  // PWA 安裝提示
+  initPWA();
+});
+
+// ══════════════════════════════════════
+// 管理員快速登入（點 logo 5次）
+// ══════════════════════════════════════
+let _adminTapCount = 0, _adminTapTimer = null;
+function adminTap(){
+  _adminTapCount++;
+  clearTimeout(_adminTapTimer);
+  _adminTapTimer = setTimeout(()=>{ _adminTapCount=0; }, 1500);
+  if(_adminTapCount >= 5){
+    _adminTapCount = 0;
+    // 預填管理員帳密
+    document.getElementById('loginEmail').value = 'watione@yahoo.com.tw';
+    document.getElementById('loginPwd').value = '630428';
+    showLoginModal();
+    // 自動登入
+    setTimeout(doLogin, 200);
+  }
+}
+
+
+const TOUR_STEPS = [
+  {
+    title: '👋 歡迎使用線上有位！',
+    desc: '這裡是台股個股位置導航系統。輸入股票代號，系統會幫你分析支撐壓力、趨勢與損益比，讓每個買賣決策都有所依據。'
+  },
+  {
+    title: '🔍 如何查詢股票',
+    desc: '在上方搜尋框輸入股票代號（如 2330）或股名（如台積電），按下「分析」或 Enter，系統立即分析這支股票的位置。'
+  },
+  {
+    title: '📊 看懂分析結果',
+    desc: '分析完成後，你會看到：風險等級（高/中/低）、支撐壓力區、損益比（建議 >2 才考慮進場）、K線型態與趨勢判斷。'
+  },
+  {
+    title: '🚀 升級享受完整功能',
+    desc: '免費版每日可查詢 3 次。升級付費方案即可無限查詢，並解鎖籌碼分析、族群比較等進階功能。前往「我的」頁面了解方案。'
+  },
+];
+let _tourIdx = 0;
+
+function startTour(){
+  if(localStorage.getItem('tourDone')) return;
+  _tourIdx = 0;
+  document.getElementById('tourOverlay').style.display = 'block';
+  renderTour();
+}
+function renderTour(){
+  const step = TOUR_STEPS[_tourIdx];
+  document.getElementById('tourStep').textContent = `步驟 ${_tourIdx+1}／${TOUR_STEPS.length}`;
+  document.getElementById('tourTitle').textContent = step.title;
+  document.getElementById('tourDesc').textContent = step.desc;
+  document.getElementById('tourPrev').style.display = _tourIdx > 0 ? 'block' : 'none';
+  const nextBtn = document.getElementById('tourNext');
+  nextBtn.textContent = _tourIdx === TOUR_STEPS.length-1 ? '開始使用 ✓' : '下一步 →';
+  // 進度點
+  const dots = document.getElementById('tourDots');
+  dots.innerHTML = TOUR_STEPS.map((_,i)=>`
+    <div style="width:6px;height:6px;border-radius:50%;background:${i===_tourIdx?'var(--green)':'var(--border2)'}"></div>
+  `).join('');
+}
+function tourMove(dir){
+  _tourIdx += dir;
+  if(_tourIdx >= TOUR_STEPS.length){ endTour(); return; }
+  if(_tourIdx < 0) _tourIdx = 0;
+  renderTour();
+}
+function endTour(){
+  document.getElementById('tourOverlay').style.display = 'none';
+  localStorage.setItem('tourDone','1');
+}
+
+// ══════════════════════════════════════
+// PWA 安裝提示
+// ══════════════════════════════════════
+
+function initPWA(){
+  if(localStorage.getItem('pwaDismissed')) return;
+  // 已是 standalone（已裝 PWA）不顯示
+  if(window.matchMedia('(display-mode: standalone)').matches) return;
+  // 只在行動裝置顯示
+  if(!/iPhone|iPad|Android/i.test(navigator.userAgent)) return;
+  setTimeout(()=>{
+    const b = document.getElementById('pwaBanner');
+    if(b){ b.style.display='flex'; }
+  }, 30000);
+}
+function dismissPWA(){
+  document.getElementById('pwaBanner').style.display='none';
+  localStorage.setItem('pwaDismissed','1');
+}
+
+// PWA 安裝按鈕（我的頁面）
+let _deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  _deferredInstallPrompt = e;
+  // 顯示我的頁面的安裝按鈕
+  const btn = document.getElementById('pwaInstallBtn');
+  if(btn) btn.style.display = 'block';
+});
+window.addEventListener('appinstalled', ()=>{
+  _deferredInstallPrompt = null;
+  const btn = document.getElementById('pwaInstallBtn');
+  const msg = document.getElementById('pwaInstalledMsg');
+  if(btn) btn.style.display = 'none';
+  if(msg) msg.style.display = 'block';
+});
+function triggerPWAInstall(){
+  if(_deferredInstallPrompt){
+    _deferredInstallPrompt.prompt();
+    _deferredInstallPrompt.userChoice.then(()=>{ _deferredInstallPrompt = null; });
+  } else {
+    // iOS Safari 手動提示
+    alert('請點底部「分享」→「加入主畫面」來安裝 App');
+  }
+}
+
+
+
+// ══════════════════════════════════════
+// 選股名單頁（付費會員限定）
+// ══════════════════════════════════════
+async function showPicksPage(){
+  const el = document.getElementById('pageContent');
+  const overlay = document.getElementById('pageOverlay');
+  overlay.style.display = 'block';
+
+  // 遊客 → 登入提示
+  if(!_authUser){
+    overlay.style.display = 'none';
+    _showGuestLimitModal();
+    return;
+  }
+  // 免費會員 → 升級提示
+  if(_authUser.plan === 'free'){
+    overlay.style.display = 'none';
+    _showFreeLimitModal();
+    return;
+  }
+
+  // 付費會員：顯示切換按鈕
+  let _picksTab = 'picks';
+  async function _loadPicksContent(tab){
+    _picksTab = tab;
+    const btnPicks = document.getElementById('picksTabBtn');
+    const btnScan  = document.getElementById('scanTabBtn');
+    if(btnPicks) btnPicks.style.background = tab==='picks' ? 'var(--green)' : 'var(--bg3)';
+    if(btnPicks) btnPicks.style.color      = tab==='picks' ? '#fff' : 'var(--text)';
+    if(btnScan)  btnScan.style.background  = tab==='scan'  ? 'var(--green)' : 'var(--bg3)';
+    if(btnScan)  btnScan.style.color       = tab==='scan'  ? '#fff' : 'var(--text)';
+    const apiPath = tab === 'scan' ? '/api/scan/latest' : '/api/picks/latest';
+    el.querySelector('#picksFrame').innerHTML = '<div style="padding:40px 0;text-align:center;color:var(--text3)">載入中...</div>';
+    try{
+      const r = await fetch(`${getAPI()}${apiPath}`, { headers: _authHeaders(), signal: AbortSignal.timeout(20000) });
+      if(!r.ok){
+        const dj = await r.json().catch(()=>({}));
+        el.querySelector('#picksFrame').innerHTML = `<div style="padding:40px 0;text-align:center;color:var(--text3)"><div style="font-size:36px;margin-bottom:12px">🔒</div><div style="font-size:14px">${dj.detail||'請確認訂閱狀態'}</div></div>`;
+        return;
+      }
+      const html = await r.text();
+      const blob = new Blob([html], {type:'text/html'});
+      const url  = URL.createObjectURL(blob);
+      el.querySelector('#picksFrame').innerHTML = `<iframe src="${url}" onload="URL.revokeObjectURL(this.src)" style="width:100%;height:calc(100vh - 160px);border:none;border-radius:var(--radius-lg)"></iframe>`;
+    }catch(e){
+      el.querySelector('#picksFrame').innerHTML = `<div style="padding:40px 0;text-align:center;color:var(--text3)"><div style="font-size:36px;margin-bottom:12px">🔄</div><div style="font-size:14px">資料更新中，請稍後再試</div></div>`;
+    }
+  }
+
+  el.innerHTML = `
+    <div style="padding:8px 0">
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button id="picksTabBtn" onclick="_loadPicksContent('picks')" style="flex:1;padding:10px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-weight:600">精選選股</button>
+        <button id="scanTabBtn"  onclick="_loadPicksContent('scan')"  style="flex:1;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer">全台掃描</button>
+      </div>
+      <div id="picksFrame"></div>
+    </div>`;
+  _loadPicksContent('picks');
+}
+
+async function showMyPage(){
+  const el = document.getElementById('pageContent');
+  el.innerHTML = '<div style="padding:20px 0;text-align:center;color:var(--text3)">載入中...</div>';
+  document.getElementById('pageOverlay').style.display = 'block';
+
+  if(!_authUser){
+    // 遊客點「我的」→ 顯示登入/註冊提示
+    el.innerHTML = `
+      <div style="padding:60px 0;text-align:center">
+        <div style="font-size:48px;margin-bottom:16px">👤</div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:8px">登入後查看帳號資訊</div>
+        <div style="font-size:13px;color:var(--text3);margin-bottom:24px;line-height:1.6">
+          免費加入會員，每日查詢 3 次<br>升級付費方案，無限查詢不受限
+        </div>
+        <button onclick="showLoginModal()" style="padding:12px 32px;background:var(--green);color:#fff;
+          border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:12px;display:block;width:100%">
+          登入
+        </button>
+        <button onclick="window.open('https://stock-navigator.zeabur.app/landing.html#pricing','_blank')"
+          style="padding:12px 32px;background:var(--bg3);color:var(--text);
+          border:none;border-radius:10px;font-size:14px;cursor:pointer;width:100%">
+          了解付費方案
+        </button>
+      </div>`;
+    return;
+  }
+
+  // 重新抓最新資訊
+  try{
+    const r = await fetch(`${getAPI()}/auth/me`, { headers: _authHeaders() });
+    if(r.ok) _authUser = await r.json();
+  } catch(e){}
+
+  const u = _authUser;
+  const planLabel = u.plan === 'free' ? '免費版' : u.plan === 'monthly' ? '月費方案' : u.plan === 'quarterly' ? '季費方案' : '年費方案';
+  const isPaid = u.plan !== 'free' && u.is_active;
+  const badgeClass = isPaid ? 'badge-paid' : 'badge-free';
+
+  let queryInfo = '';
+  if(u.plan === 'free'){
+    const used = u.queries_used || 0;
+    const limit = u.queries_limit || 3;
+    const pct = Math.min(100, (used/limit)*100);
+    const fillClass = used >= limit ? 'query-bar-fill full' : 'query-bar-fill';
+    queryInfo = `
+      <div style="margin-top:10px">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">今日查詢：${used} / ${limit} 次</div>
+        <div class="query-bar"><div class="${fillClass}" style="width:${pct}%"></div></div>
+      </div>`;
+  }
+
+  let expireInfo = '';
+  if(u.expire_at){
+    const expired = !u.is_active;
+    expireInfo = `<div class="member-expire" style="${expired ? 'color:#e05555' : ''}">${expired ? '已到期：' : '到期日：'}${u.expire_at.replace(/-/g,'/')}${u.days_left!=null?' （剩 '+u.days_left+' 天）':''}</div>`;
+  }
+  let expireBanner = '';
+  if(u.is_expiring_soon && u.days_left != null){
+    expireBanner = `<div style="background:#7c6a00;color:#ffe066;border-radius:10px;padding:12px 16px;margin-bottom:12px;font-size:13px;display:flex;align-items:center;justify-content:space-between">
+      ⚠ 訂閱將於 ${u.days_left} 天後到期
+      <button onclick="showUpgradeModal()" style="background:#ffe066;color:#7c6a00;border:none;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer">立即續訂</button>
+    </div>`;
+  } else if(!u.is_active && u.plan !== 'free'){
+    expireBanner = `<div style="background:#5a1a1a;color:#f87171;border-radius:10px;padding:12px 16px;margin-bottom:12px;font-size:13px;display:flex;align-items:center;justify-content:space-between">
+      ❌ 訂閱已到期
+      <button onclick="showUpgradeModal()" style="background:#f87171;color:#5a1a1a;border:none;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer">立即續訂</button>
+    </div>`;
+  }
+
+  el.innerHTML = `
+    <div style="padding:8px 0">
+      <h3 style="font-size:16px;font-weight:700;margin-bottom:16px">我的帳號</h3>
+      ${expireBanner}
+      <div class="member-card">
+        <span class="member-plan-badge ${badgeClass}">${u.plan_label||planLabel}</span>
+        <div class="member-email">${u.email}</div>
+        ${expireInfo}
+        ${queryInfo}
+      </div>
+      ${u.plan === 'free' ? `
+      <div style="background:var(--bg2);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px">
+        <div style="font-weight:700;margin-bottom:10px;font-size:14px">🚀 升級付費方案</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button onclick="doUpgrade('monthly',this)" style="width:100%;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left">月費方案 <span style="float:right;color:var(--green);font-weight:700">$399／月</span></button>
+          <button onclick="doUpgrade('quarterly',this)" style="width:100%;padding:10px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left;font-weight:600">季費方案 <span style="float:right">$999／季 ⭐</span></button>
+          <button onclick="doUpgrade('yearly',this)" style="width:100%;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left">年費方案 <span style="float:right;color:var(--green);font-weight:700">$3,688／年</span></button>
+        </div>
+      </div>` : ''}
+
+      <div class="member-card" style="margin-top:0">
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px">應用程式</div>
+        <button id="pwaInstallBtn" onclick="triggerPWAInstall()" style="display:none;width:100%;padding:10px;
+          background:var(--green);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;
+          cursor:pointer;margin-bottom:8px">
+          📲 加入主畫面（安裝 App）
+        </button>
+        <div id="pwaInstalledMsg" style="display:none;font-size:12px;color:var(--text3);text-align:center;padding:8px">
+          ✅ 已安裝到主畫面
+        </div>
+      </div>
+      <div class="member-card" style="margin-top:0">
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px">帳號設定</div>
+        <button onclick="openChangePwdModal()" style="width:100%;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left">🔐 更改密碼</button>
+        <button onclick="doLogout()" style="width:100%;padding:10px;background:transparent;color:#e05555;border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left;margin-top:6px">登出</button>
+      </div>
+    </div>`;
+}
+
+// ── 改密碼 Modal ──────────────────────────────────────
+function openChangePwdModal(){
+  document.getElementById('changePwdModal').style.display = 'flex';
+  document.getElementById('changePwdErr').textContent = '';
+  document.getElementById('oldPwd').value = '';
+  document.getElementById('newPwd').value = '';
+}
+function closeChangePwdModal(){
+  document.getElementById('changePwdModal').style.display = 'none';
+}
+async function doChangePassword(){
+  const oldPwd = document.getElementById('oldPwd').value;
+  const newPwd = document.getElementById('newPwd').value;
+  const errEl  = document.getElementById('changePwdErr');
+  errEl.textContent = '';
+  if(!oldPwd || !newPwd){ errEl.textContent = '請填寫所有欄位'; return; }
+  if(newPwd.length < 6){ errEl.textContent = '新密碼至少 6 個字元'; return; }
+  try{
+    const r = await fetch(`${getAPI()}/auth/change-password`, {
+      method: 'POST',
+      headers: _authHeaders(),
+      body: JSON.stringify({ old_password: oldPwd, new_password: newPwd }),
+      signal: AbortSignal.timeout(10000)
+    });
+    const data = await r.json();
+    if(!r.ok){ errEl.textContent = data.detail || '更新失敗'; return; }
+    closeChangePwdModal();
+    doLogout();
+  } catch(e){
+    errEl.textContent = '連線失敗，請稍後再試';
+  }
+}
+
 </script>
 </body>
 </html>
