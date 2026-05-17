@@ -69,6 +69,105 @@ def main():
     print("=" * 50)
 
 
+def run_full_scan():
+    """全台股掃描：逐一分析均線/趨勢/K線型態，輸出 scan_result.html"""
+    import time as _time
+    from crawler import get_all_tw_stocks, fetch_price_history, fetch_stock_name
+    from finmind_filter import detect_kline_patterns
+    from generator import generate_scan_result
+
+    print("[scan] 取得全台股票列表...")
+    all_stocks = get_all_tw_stocks()
+    if not all_stocks:
+        print("[scan] ❌ 無法取得股票列表，請確認 FINMIND_TOKEN")
+        return None
+
+    batch = all_stocks[:500]
+    print(f"[scan] 開始掃描 {len(batch)} 檔（每檔間隔 0.4s）...")
+
+    results = []
+    for i, sid in enumerate(batch, 1):
+        try:
+            prices = fetch_price_history(sid, days=70)
+            if len(prices) < 20:
+                continue
+
+            closes  = [p["close"]  for p in prices]
+            opens   = [p["open"]   for p in prices]
+            highs   = [p["high"]   for p in prices]
+            lows    = [p["low"]    for p in prices]
+            volumes = [p["volume"] for p in prices]
+
+            price = closes[-1]
+            if price < 10:
+                continue
+
+            n60  = min(60, len(closes))
+            ma5  = sum(closes[-5:]) / 5
+            ma20 = sum(closes[-20:]) / 20
+            ma60 = sum(closes[-n60:]) / n60
+
+            support    = min(lows[-20:])
+            resistance = max(highs[-20:])
+
+            if ma5 > ma20 > ma60:
+                trend = "多頭"
+            elif ma5 < ma20 < ma60:
+                trend = "空頭"
+            else:
+                trend = "整理"
+
+            if trend == "多頭" and price > ma60:
+                risk_level = "low"
+            elif trend == "空頭" or price < ma60 * 0.95:
+                risk_level = "high"
+            else:
+                risk_level = "medium"
+
+            kline_pattern, win_rate = detect_kline_patterns(closes, opens, highs, lows, volumes)
+
+            risk     = max(price - support, 0.01)
+            reward   = max(resistance - price, 0)
+            rr_ratio = round(reward / risk, 2)
+
+            results.append({
+                "stock_id":      sid,
+                "name":          "",
+                "price":         price,
+                "ma5":           round(ma5, 2),
+                "ma20":          round(ma20, 2),
+                "ma60":          round(ma60, 2),
+                "support":       round(support, 2),
+                "resistance":    round(resistance, 2),
+                "trend":         trend,
+                "risk_level":    risk_level,
+                "kline_pattern": kline_pattern,
+                "win_rate":      win_rate,
+                "rr_ratio":      rr_ratio,
+            })
+        except Exception:
+            pass
+
+        if i % 50 == 0:
+            print(f"[scan] 已處理 {i}/{len(batch)}，通過 {len(results)} 檔")
+            _time.sleep(2)
+        else:
+            _time.sleep(0.4)
+
+    print(f"[scan] 掃描完畢：{len(results)} 檔通過（共 {len(batch)} 檔）")
+    if not results:
+        print("[scan] ⚠️ 無結果，跳過輸出")
+        return None
+
+    for s in results:
+        try:
+            s["name"] = fetch_stock_name(s["stock_id"])
+        except Exception:
+            pass
+
+    return generate_scan_result(results)
+
+
 if __name__ == "__main__":
     if "--schedule" in sys.argv:
         # 排程模式：常駐背景，每日 14:35 自動跑

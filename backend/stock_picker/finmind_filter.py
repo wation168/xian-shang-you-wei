@@ -180,6 +180,31 @@ def is_death_cross(prices: list[dict]) -> dict:
     return {"triggered": True, "label": label}
 
 
+def detect_kline_patterns(closes, opens, highs, lows, volumes):
+    """偵測最新 K 線型態，回傳 (型態標籤, 勝率)"""
+    n = len(closes)
+    if n < 3:
+        return "常態 K 線（無觸發極端型態）", 0.50
+    c0, o0, h0, l0, v0 = closes[-1], opens[-1], highs[-1], lows[-1], volumes[-1]
+    body_size0    = abs(c0 - o0)
+    upper_shadow0 = h0 - max(c0, o0)
+    lower_shadow0 = min(c0, o0) - l0
+    range0        = (h0 - l0) or 0.001
+    avg_vol    = sum(volumes[-6:-1]) / 5 if n >= 6 else (sum(volumes[:-1]) / max(len(volumes) - 1, 1))
+    vol_surge  = v0 > avg_vol * 1.5
+    is_downtrend = closes[-1] < closes[-5] if n >= 5 else False
+    is_uptrend   = closes[-1] > closes[-5] if n >= 5 else False
+    if vol_surge and (body_size0 >= range0 * 0.6) and (c0 > o0):
+        return "量增大紅棒（突破確認）", 0.62
+    if vol_surge and (body_size0 >= range0 * 0.6) and (c0 < o0):
+        return "量增大黑棒（跌破確認）", 0.62
+    if is_downtrend and (lower_shadow0 >= body_size0 * 2) and (upper_shadow0 <= body_size0 * 0.5) and (c0 > o0):
+        return "低檔錘子線（底部承接力道強）", 0.53
+    if is_uptrend and (upper_shadow0 >= body_size0 * 2) and (lower_shadow0 <= body_size0 * 0.5) and (c0 < o0):
+        return "高檔流星線（多頭上攻力竭）", 0.53
+    return "常態 K 線（無觸發極端型態）", 0.50
+
+
 # ──────────────────────────────────────────
 # 主篩選函數
 # ──────────────────────────────────────────
@@ -220,6 +245,14 @@ def analyze_stock(stock_id: str, news_list: list[dict]) -> dict | None:
     avg_vol_5  = sum(p["volume"] for p in prices[-5:]) / 5
     vol_ratio  = round(avg_vol_5 / avg_vol_20, 2) if avg_vol_20 > 0 else 0
 
+    # ── K 線型態偵測 ──
+    _closes  = [p["close"]  for p in prices]
+    _opens   = [p["open"]   for p in prices]
+    _highs   = [p["high"]   for p in prices]
+    _lows    = [p["low"]    for p in prices]
+    _volumes = [p["volume"] for p in prices]
+    kline_pattern, win_rate = detect_kline_patterns(_closes, _opens, _highs, _lows, _volumes)
+
     # ── 型態偵測（在拉法人之前先跑，死叉可跳過法人條件）──
     breakout = is_breakout_signal(prices)
     golden   = is_golden_cross(prices)
@@ -247,6 +280,8 @@ def analyze_stock(stock_id: str, news_list: list[dict]) -> dict | None:
             "score_factors":        score_factors,
             "signal_label":         death["label"],
             "is_risk":              True,
+            "kline_pattern":        kline_pattern,
+            "win_rate":             win_rate,
         }
 
     # ── 正常路徑：量能基本門檻 ──
@@ -309,6 +344,8 @@ def analyze_stock(stock_id: str, news_list: list[dict]) -> dict | None:
         "score_factors":        score_factors,
         "signal_label":         signal_label,
         "is_risk":              False,
+        "kline_pattern":        kline_pattern,
+        "win_rate":             win_rate,
     }
 
 

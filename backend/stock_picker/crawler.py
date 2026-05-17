@@ -193,6 +193,24 @@ def fetch_stock_name(stock_id: str) -> str:
     return stock_id
 
 
+def get_all_tw_stocks() -> list[str]:
+    """取得全台上市（TWSE）及上櫃（OTC）股票代號列表"""
+    url = f"https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockInfo&token={FINMIND_TOKEN}"
+    try:
+        data = _finmind_request(url)
+        if data.get("status") != 200:
+            return []
+        return [
+            str(item["stock_id"])
+            for item in data.get("data", [])
+            if item.get("type", "").lower() in ("twse", "otc")
+            and item.get("stock_id")
+        ]
+    except Exception as e:
+        print(f"[crawler] get_all_tw_stocks 失敗：{e}")
+        return []
+
+
 if __name__ == "__main__":
     # 快速測試
     news = fetch_cnyes_news(20)

@@ -3065,7 +3065,46 @@ function _onLoginSuccess(){
   if(topLoginBtn) topLoginBtn.style.display = 'none';
   const myBtn = document.querySelector('.nav-btn[onclick*="my"]');
   if(myBtn) myBtn.innerHTML = '<div class="nav-icon">👤</div>我的';
+  _subscribeWebPush();
 }
+
+async function _subscribeWebPush(){
+  if(!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  if(!VAPID_PUBLIC_KEY) return;
+  try{
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if(!sub){
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: _urlB64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+    }
+    const subJson = sub.toJSON();
+    await fetch(`${getAPI()}/api/webpush/subscribe`,{
+      method:'POST',
+      headers: _authHeaders(),
+      body: JSON.stringify({ endpoint: subJson.endpoint, keys: subJson.keys })
+    });
+  } catch(e){}
+}
+
+function _urlB64ToUint8Array(base64String){
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64  = (base64String + padding).replace(/-/g,'+').replace(/_/g,'/');
+  const raw     = window.atob(base64);
+  const out     = new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++) out[i]=raw.charCodeAt(i);
+  return out;
+}
+
+let VAPID_PUBLIC_KEY = '';
+(async ()=>{
+  try{
+    const r = await fetch(`${getAPI()}/api/webpush/vapid-public-key`);
+    if(r.ok){ const d=await r.json(); VAPID_PUBLIC_KEY=d.publicKey||''; }
+  } catch(e){}
+})();
 
 async function doLogout(){
   try{
@@ -3094,6 +3133,10 @@ document.addEventListener('DOMContentLoaded', () => {
   _initAuth();
   // PWA 安裝提示
   initPWA();
+  // 註冊 Service Worker（PWA + Web Push）
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  }
 });
 
 // ══════════════════════════════════════
@@ -3375,12 +3418,73 @@ async function showMyPage(){
           ✅ 已安裝到主畫面
         </div>
       </div>
+      ${isPaid ? `
+      <div class="member-card" style="margin-top:0" id="alertsCard">
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px">🔔 到價提醒</div>
+        <div id="alertsList" style="margin-bottom:10px;font-size:12px;color:var(--text3)">載入中...</div>
+        <div style="display:flex;gap:6px;margin-bottom:6px">
+          <input id="alertStock" placeholder="股票代號，如 2330" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--text);outline:none">
+          <input id="alertPrice" type="number" placeholder="目標價" style="width:80px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--text);outline:none">
+          <select id="alertDir" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 6px;font-size:12px;color:var(--text);outline:none">
+            <option value="above">漲至</option>
+            <option value="below">跌至</option>
+          </select>
+        </div>
+        <button onclick="doAddAlert()" style="width:100%;padding:8px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">新增提醒</button>
+        <div id="alertErr" style="font-size:12px;color:#f87171;min-height:16px;margin-top:4px;text-align:center"></div>
+      </div>` : ''}
       <div class="member-card" style="margin-top:0">
         <div style="font-size:13px;font-weight:600;margin-bottom:10px">帳號設定</div>
         <button onclick="openChangePwdModal()" style="width:100%;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left">🔐 更改密碼</button>
         <button onclick="doLogout()" style="width:100%;padding:10px;background:transparent;color:#e05555;border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left;margin-top:6px">登出</button>
       </div>
     </div>`;
+
+  if(isPaid) _loadAlerts();
+}
+
+async function _loadAlerts(){
+  const el = document.getElementById('alertsList');
+  if(!el) return;
+  try{
+    const r = await fetch(`${getAPI()}/api/alerts`, { headers: _authHeaders() });
+    if(!r.ok){ el.textContent='載入失敗'; return; }
+    const list = await r.json();
+    if(!list.length){ el.textContent='目前無提醒（最多 10 個）'; return; }
+    el.innerHTML = list.map(a=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text)"><b>${a.stock_id}</b> ${a.direction==='above'?'漲至':'跌至'} <b style="color:var(--green)">${a.target_price}</b>${a.triggered?'　<span style="color:#22c55e;font-size:11px">✅ 已觸發</span>':''}</span>
+        <button onclick="doDeleteAlert(${a.id})" style="background:transparent;border:none;color:#f87171;font-size:13px;cursor:pointer;padding:2px 6px">✕</button>
+      </div>`).join('');
+  } catch(e){ el.textContent='載入失敗'; }
+}
+
+async function doAddAlert(){
+  const stock = document.getElementById('alertStock').value.trim();
+  const price = parseFloat(document.getElementById('alertPrice').value);
+  const dir   = document.getElementById('alertDir').value;
+  const errEl = document.getElementById('alertErr');
+  errEl.textContent = '';
+  if(!stock){ errEl.textContent='請輸入股票代號'; return; }
+  if(!price || price <= 0){ errEl.textContent='請輸入有效目標價'; return; }
+  try{
+    const r = await fetch(`${getAPI()}/api/alerts`,{
+      method:'POST', headers: _authHeaders(),
+      body: JSON.stringify({ stock_id: stock, target_price: price, direction: dir })
+    });
+    const d = await r.json();
+    if(!r.ok){ errEl.textContent = d.detail||'新增失敗'; return; }
+    document.getElementById('alertStock').value = '';
+    document.getElementById('alertPrice').value = '';
+    _loadAlerts();
+  } catch(e){ errEl.textContent='連線失敗'; }
+}
+
+async function doDeleteAlert(id){
+  try{
+    await fetch(`${getAPI()}/api/alerts/${id}`,{ method:'DELETE', headers: _authHeaders() });
+    _loadAlerts();
+  } catch(e){}
 }
 
 // ── 改密碼 Modal ──────────────────────────────────────

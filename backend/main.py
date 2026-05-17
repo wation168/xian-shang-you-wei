@@ -55,6 +55,18 @@ SMTP_FROM = os.environ.get("SMTP_FROM", SMTP_USER)
 # SQLite 資料庫路徑（Zeabur 持久化硬碟）
 DB_PATH = os.environ.get("DB_PATH", "/data/members.db")
 
+# Web Push VAPID 金鑰（請在 Zeabur 設定環境變數，或用 py-vapid 產生一次）
+VAPID_PRIVATE_KEY = os.environ.get("VAPID_PRIVATE_KEY", "")
+VAPID_PUBLIC_KEY  = os.environ.get("VAPID_PUBLIC_KEY",  "")
+VAPID_SUBJECT     = os.environ.get("VAPID_SUBJECT", f"mailto:{os.environ.get('SMTP_FROM','admin@example.com')}")
+
+# pywebpush（選裝）
+try:
+    from pywebpush import webpush as _webpush_fn, WebPushException as _WebPushException
+    _WEBPUSH_AVAILABLE = True
+except ImportError:
+    _WEBPUSH_AVAILABLE = False
+
 # 免費用戶每日查詢次數
 FREE_DAILY_LIMIT = 3   # 免費會員每日查詢次數
 GUEST_DAILY_LIMIT = 1  # 遊客（未登入）每日查詢次數
@@ -118,8 +130,10 @@ async def lifespan(app: FastAPI):
 
     # 啟動 APScheduler 排程
     _bg_scheduler = None
-    _picker_running   = False
-    _expire_running   = False
+    _picker_running  = False
+    _expire_running  = False
+    _scan_running    = False
+    _alert_running   = False
     try:
         from apscheduler.schedulers.background import BackgroundScheduler
         import sys as _sys
@@ -179,11 +193,98 @@ async def lifespan(app: FastAPI):
             finally:
                 _expire_running = False
 
+        def _run_full_scan_job():
+            nonlocal _scan_running
+            if _scan_running:
+                print("   ⚠️ 全台掃描排程已在執行中，跳過本次")
+                return
+            _scan_running = True
+            try:
+                if _picker_path not in _sys.path:
+                    _sys.path.insert(0, _picker_path)
+                from main_picker import run_full_scan
+                run_full_scan()
+            except Exception as _e:
+                print(f"   ❌ 全台掃描排程執行失敗：{_e}")
+            finally:
+                _scan_running = False
+
+        def _run_price_alert_job():
+            nonlocal _alert_running
+            if _alert_running:
+                return
+            _alert_running = True
+            try:
+                import urllib.request as _ureq2, json as _json2
+                from datetime import date as _date2, timedelta as _td2
+                conn = _db_conn()
+                alerts = conn.execute(
+                    "SELECT * FROM price_alerts WHERE triggered=0"
+                ).fetchall()
+                conn.close()
+                if not alerts:
+                    return
+                # 每股只查一次最新收盤價
+                stock_prices: dict = {}
+                for _a in alerts:
+                    sid = _a["stock_id"]
+                    if sid in stock_prices:
+                        continue
+                    try:
+                        _start = (_date2.today() - _td2(days=5)).strftime("%Y-%m-%d")
+                        _end   = _date2.today().strftime("%Y-%m-%d")
+                        _url   = (f"https://api.finmindtrade.com/api/v4/data"
+                                  f"?dataset=TaiwanStockPrice&data_id={sid}"
+                                  f"&start_date={_start}&end_date={_end}&token={FINMIND_TOKEN}")
+                        _req = _ureq2.Request(_url, headers={"User-Agent": "Mozilla/5.0"})
+                        with _ureq2.urlopen(_req, timeout=8) as _resp:
+                            _d = _json2.loads(_resp.read())
+                        _rows = _d.get("data", [])
+                        stock_prices[sid] = float(_rows[-1]["close"]) if _rows else None
+                    except Exception:
+                        stock_prices[sid] = None
+                conn = _db_conn()
+                for _a in alerts:
+                    _price = stock_prices.get(_a["stock_id"])
+                    if _price is None:
+                        continue
+                    _triggered = (
+                        (_a["direction"] == "above" and _price >= _a["target_price"]) or
+                        (_a["direction"] == "below" and _price <= _a["target_price"])
+                    )
+                    if not _triggered:
+                        continue
+                    conn.execute(
+                        "UPDATE price_alerts SET triggered=1, triggered_at=? WHERE id=?",
+                        (datetime.now().isoformat(), _a["id"])
+                    )
+                    _dir_text = "漲至" if _a["direction"] == "above" else "跌至"
+                    _title = f"到價提醒：{_a['stock_id']}"
+                    _body  = f"{_a['stock_id']} 已{_dir_text} {_price}，目標 {_a['target_price']}"
+                    # Web Push
+                    _subs = conn.execute(
+                        "SELECT * FROM push_subscriptions WHERE user_email=?",
+                        (_a["user_email"],)
+                    ).fetchall()
+                    for _sub in _subs:
+                        send_web_push(dict(_sub), _title, _body, "/")
+                    # Email
+                    _send_email(_a["user_email"], f"【線上有位】{_title}",
+                        f'<p>{_body}</p><p><a href="{FRONTEND_URL}">立即查看</a></p>')
+                conn.commit()
+                conn.close()
+            except Exception as _e:
+                print(f"   ❌ 到價提醒排程執行失敗：{_e}")
+            finally:
+                _alert_running = False
+
         _bg_scheduler = BackgroundScheduler(timezone="Asia/Taipei")
         _bg_scheduler.add_job(_run_stock_picker_job,  "cron", hour=14, minute=35, day_of_week="mon-fri")
         _bg_scheduler.add_job(_run_expire_notice_job, "cron", hour=9,  minute=0)
+        _bg_scheduler.add_job(_run_full_scan_job,     "cron", hour=15, minute=30, day_of_week="mon-fri")
+        _bg_scheduler.add_job(_run_price_alert_job,   "cron", hour=15, minute=35, day_of_week="mon-fri")
         _bg_scheduler.start()
-        print("   ✅ APScheduler 排程已啟動（選股 14:35、到期提醒 09:00）")
+        print("   ✅ APScheduler 排程已啟動（選股 14:35、全台掃描 15:30、到價提醒 15:35、到期通知 09:00）")
     except ImportError:
         print("   ⚠️ apscheduler 未安裝，選股排程請以 scheduler.py 獨立執行")
     except Exception as _sch_err:
@@ -1459,6 +1560,14 @@ def _db_init():
             created_at   TEXT    NOT NULL,
             triggered    INTEGER DEFAULT 0,
             triggered_at TEXT    DEFAULT NULL
+        );
+        CREATE TABLE IF NOT EXISTS push_subscriptions (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_email  TEXT    NOT NULL,
+            endpoint    TEXT    NOT NULL UNIQUE,
+            p256dh      TEXT    NOT NULL,
+            auth        TEXT    NOT NULL,
+            created_at  TEXT    DEFAULT (datetime('now','localtime'))
         );
     """)
     conn.commit()
@@ -3573,6 +3682,24 @@ def _update_notice_date(email: str, date_str: str):
     conn.close()
 
 
+def send_web_push(subscription: dict, title: str, body: str, url: str = "/"):
+    """送出 Web Push 通知（需 pywebpush + VAPID 金鑰）"""
+    if not _WEBPUSH_AVAILABLE or not VAPID_PRIVATE_KEY:
+        return
+    try:
+        _webpush_fn(
+            subscription_info={
+                "endpoint": subscription["endpoint"],
+                "keys": {"p256dh": subscription["p256dh"], "auth": subscription["auth"]},
+            },
+            data=_json_mod.dumps({"title": title, "body": body, "url": url}),
+            vapid_private_key=VAPID_PRIVATE_KEY,
+            vapid_claims={"sub": VAPID_SUBJECT},
+        )
+    except Exception as _e:
+        print(f"   ⚠️ Web Push 失敗：{_e}")
+
+
 # ── 忘記密碼 ──────────────────────────────────────────────
 class ForgotPwdReq(BaseModel):
     email: str
@@ -3724,6 +3851,32 @@ def get_scan_latest(user: dict = Depends(require_paid_user)):
         html = f.read()
     from fastapi.responses import HTMLResponse
     return HTMLResponse(content=html)
+
+
+# ── Web Push ────────────────────────────────────────────
+class WebPushSubReq(BaseModel):
+    endpoint: str
+    keys:     dict   # {p256dh: str, auth: str}
+
+@app.get("/api/webpush/vapid-public-key")
+def get_vapid_public_key():
+    return {"publicKey": VAPID_PUBLIC_KEY}
+
+@app.post("/api/webpush/subscribe")
+def subscribe_webpush(req: WebPushSubReq, user: dict = Depends(require_user)):
+    conn = _db_conn()
+    conn.execute("""
+        INSERT INTO push_subscriptions (user_email, endpoint, p256dh, auth)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(endpoint) DO UPDATE SET
+            user_email=excluded.user_email,
+            p256dh=excluded.p256dh,
+            auth=excluded.auth
+    """, (user["email"], req.endpoint,
+          req.keys.get("p256dh", ""), req.keys.get("auth", "")))
+    conn.commit()
+    conn.close()
+    return {"ok": True}
 
 
 @app.get("/ads.txt")

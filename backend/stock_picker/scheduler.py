@@ -31,8 +31,10 @@ logger = logging.getLogger(__name__)
 TZ = ZoneInfo("Asia/Taipei")
 
 # 每日執行時間（24小時制）
-RUN_HOUR   = 14
-RUN_MINUTE = 35   # 14:35，確保盤後資料更新完畢
+RUN_HOUR    = 14
+RUN_MINUTE  = 35   # 14:35，確保盤後資料更新完畢
+SCAN_HOUR   = 15
+SCAN_MINUTE = 30   # 15:30，盤後全台掃描
 
 
 def run_once():
@@ -90,21 +92,37 @@ def main():
         run_once()
         return
 
-    logger.info(f"🕐 排程器啟動，每日 {RUN_HOUR:02d}:{RUN_MINUTE:02d} 台北時間自動執行")
+    logger.info(f"🕐 排程器啟動，選股 {RUN_HOUR:02d}:{RUN_MINUTE:02d}、全台掃描 {SCAN_HOUR:02d}:{SCAN_MINUTE:02d}（台北時間）")
     logger.info("   按 Ctrl+C 停止")
 
-    last_run_date = None
+    last_run_date  = None
+    last_scan_date = None
 
     while True:
         now = datetime.now(TZ)
         today = now.date()
 
-        # 到了執行時間、是交易日、今天還沒跑過
+        # 選股 14:35
         if (now.hour == RUN_HOUR and now.minute == RUN_MINUTE
                 and is_trading_day(today)
                 and last_run_date != today):
             last_run_date = today
             run_once()
+
+        # 全台掃描 15:30
+        if (now.hour == SCAN_HOUR and now.minute == SCAN_MINUTE
+                and is_trading_day(today)
+                and last_scan_date != today):
+            last_scan_date = today
+            logger.info("=" * 50)
+            logger.info("📡 全台股掃描 開始執行")
+            logger.info("=" * 50)
+            try:
+                from main_picker import run_full_scan
+                run_full_scan()
+                logger.info("✅ 全台股掃描完成")
+            except Exception as e:
+                logger.error(f"❌ 全台股掃描失敗：{e}", exc_info=True)
 
         # 每 30 秒檢查一次
         time.sleep(30)

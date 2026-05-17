@@ -349,6 +349,105 @@ def run(filtered_stocks: list[dict], api_delay: float = 2.0) -> str:
     return filepath
 
 
+def generate_scan_result(stocks_data: list[dict]) -> str:
+    """全台股掃描：分低/中/高風險三區輸出 scan_result.html"""
+    low_risk    = sorted([s for s in stocks_data if s.get("risk_level") == "low"],
+                         key=lambda x: x.get("rr_ratio", 0), reverse=True)
+    medium_risk = sorted([s for s in stocks_data if s.get("risk_level") == "medium"],
+                         key=lambda x: x.get("rr_ratio", 0), reverse=True)
+    high_risk   = sorted([s for s in stocks_data if s.get("risk_level") == "high"],
+                         key=lambda x: x.get("rr_ratio", 0), reverse=True)
+    generated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    def _scan_card(s: dict) -> str:
+        rl = s.get("risk_level", "medium")
+        border = "#14532d" if rl == "low" else ("#7f1d1d" if rl == "high" else "#1e293b")
+        bg     = "#0a1f0f" if rl == "low" else ("#1a0a0a" if rl == "high" else "#0f172a")
+        trend  = s.get("trend", "整理")
+        tc     = "#22c55e" if trend == "多頭" else ("#ef4444" if trend == "空頭" else "#94a3b8")
+        wr     = s.get("win_rate", 0.50)
+        wrc    = "#22c55e" if wr > 0.55 else ("#ef4444" if wr < 0.50 else "#94a3b8")
+        kline  = s.get("kline_pattern", "")
+        kline_html = (f'<div style="color:#a78bfa;margin-top:4px;font-size:11px">{kline}</div>'
+                      if kline and "常態" not in kline else "")
+        return (
+            f'<div style="background:{bg};border:1px solid {border};border-radius:14px;padding:16px;font-size:12px">'
+            f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+            f'<div><span style="font-size:15px;font-weight:700;color:#f1f5f9">{s["stock_id"]}</span>'
+            f'<span style="color:#64748b;margin-left:6px">{s.get("name","")}</span></div>'
+            f'<span style="font-size:14px;font-weight:700;color:#e2e8f0">NT${s["price"]}</span></div>'
+            f'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">'
+            f'<span style="padding:2px 8px;border-radius:20px;background:#1e293b;color:{tc}">{trend}</span>'
+            f'<span style="padding:2px 8px;border-radius:20px;background:#1e293b;color:#94a3b8">RR {s.get("rr_ratio",0)}x</span>'
+            f'<span style="padding:2px 8px;border-radius:20px;background:#1e293b;color:{wrc}">勝率 {int(wr*100)}%</span>'
+            f'</div>'
+            f'<div style="color:#64748b;line-height:1.8">'
+            f'<div>MA5 <b style="color:#e2e8f0">{s["ma5"]}</b>　MA20 <b style="color:#e2e8f0">{s["ma20"]}</b>　MA60 <b style="color:#e2e8f0">{s["ma60"]}</b></div>'
+            f'<div>支撐 <b style="color:#22c55e">{s["support"]}</b>　壓力 <b style="color:#f59e0b">{s["resistance"]}</b></div>'
+            f'{kline_html}</div></div>'
+        )
+
+    def _section(title, color, items, note):
+        if not items:
+            return ""
+        cards = "\n".join(_scan_card(s) for s in items[:150])
+        return (
+            f'<div style="margin-bottom:40px">'
+            f'<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'
+            f'<h2 style="font-size:18px;font-weight:700;color:{color}">{title}</h2>'
+            f'<span style="font-size:12px;color:#475569">{len(items)} 檔　{note}</span></div>'
+            f'<div class="grid">{cards}</div></div>'
+        )
+
+    body = (
+        _section("🟢 低風險", "#22c55e", low_risk,    "MA5>MA20>MA60，趨勢多頭") +
+        _section("🟡 中風險", "#f59e0b", medium_risk, "均線整理，等待方向") +
+        _section("🔴 高風險", "#ef4444", high_risk,   "趨勢空頭，謹慎操作")
+    )
+
+    html = f"""<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>全台股掃描 — {generated_at[:10]}</title>
+<style>
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{background:#020817;color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;padding:24px 16px 48px}}
+.container{{max-width:1200px;margin:0 auto}}
+.grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}}
+.stat{{background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:10px 16px;font-size:12px;color:#64748b}}
+.stat strong{{display:block;font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:2px}}
+.disclaimer{{margin-top:32px;padding:16px;background:#0f172a;border-radius:10px;font-size:11px;color:#475569;line-height:1.7}}
+@media(max-width:600px){{.grid{{grid-template-columns:1fr}}}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div style="margin-bottom:28px">
+    <h1 style="font-size:22px;font-weight:700;margin-bottom:6px">📡 全台股掃描</h1>
+    <p style="font-size:13px;color:#64748b">產生時間：{generated_at}　｜　掃描 {len(stocks_data)} 檔　｜　技術面風險分級</p>
+  </div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px">
+    <div class="stat"><strong style="color:#22c55e">{len(low_risk)}</strong>低風險</div>
+    <div class="stat"><strong style="color:#f59e0b">{len(medium_risk)}</strong>中風險</div>
+    <div class="stat"><strong style="color:#ef4444">{len(high_risk)}</strong>高風險</div>
+    <div class="stat"><strong>{len(stocks_data)}</strong>掃描總數</div>
+  </div>
+  {body}
+  <div class="disclaimer">⚠️ 本頁面資料僅供參考，不構成買賣建議。股市有風險，請自行評估後決策。</div>
+</div>
+</body>
+</html>"""
+
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    scan_path = os.path.join(OUTPUT_DIR, "scan_result.html")
+    with open(scan_path, "w", encoding="utf-8") as f:
+        f.write(html)
+    print(f"[generator] ✅ 全台掃描輸出：{scan_path}（{len(stocks_data)} 檔）")
+    return scan_path
+
+
 if __name__ == "__main__":
     # 單獨測試：用假資料跑一次
     dummy = [{
