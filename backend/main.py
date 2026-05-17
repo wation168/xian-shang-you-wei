@@ -3381,12 +3381,9 @@ def get_latest_picks(request: Request, token: str = "", user: dict | None = Depe
     if user["expire_at"] and user["expire_at"] < today:
         raise HTTPException(status_code=403, detail="訂閱已到期，請續費後繼續使用")
 
-    # 嘗試幾個可能的路徑
-    import os
     candidates = [
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "stock_picker", "output", "latest.html"),
         "/app/stock_picker/output/latest.html",
-        "stock_picker/output/latest.html",
-        os.path.join(os.path.dirname(__file__), "stock_picker", "output", "latest.html"),
     ]
     for path in candidates:
         if os.path.exists(path):
@@ -3850,7 +3847,7 @@ def delete_alert(alert_id: int, user: dict = Depends(require_user)):
 # ── 全台股掃描結果 ──────────────────────────────────────────
 @app.get("/api/scan/latest")
 def get_scan_latest(user: dict = Depends(require_paid_user)):
-    scan_path = os.path.join(os.path.dirname(__file__), "stock_picker", "output", "scan_result.html")
+    scan_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "stock_picker", "output", "scan_result.html")
     if not os.path.exists(scan_path):
         raise HTTPException(status_code=503, detail="掃描結果每日15:30更新，請稍後再試")
     with open(scan_path, "r", encoding="utf-8") as f:
