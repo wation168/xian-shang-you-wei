@@ -1,125 +1,90 @@
 """
-generator.py — 產出層
-1. 對每檔通過篩選的股票，呼叫 Claude API 給分 + 說明
-2. 組合成 HTML 卡片頁面，寫入 output/stock_picks_YYYYMMDD.html
+generator.py — 產出層（v2 純規則）
+對篩選後的股票以規則文字生成分析，產出 HTML。
 """
 
 import os
-import json
-import time
-import urllib.request
 from datetime import datetime
 
-
-ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "output")
 
 
 # ──────────────────────────────────────────
-# Claude API 失敗時的技術指標降級描述
+# 規則式評分與文字生成
 # ──────────────────────────────────────────
-def _tech_fallback(stock: dict) -> dict:
-    """Claude API 無法使用時，以技術指標自動產生分析文字"""
+def rule_evaluate(stock: dict) -> dict:
+    """以技術指標規則自動產生評分與說明"""
     trend    = stock.get("trend", "盤整")
     kline    = stock.get("kline_pattern", "常態K線")
     wr_pct   = int(stock.get("win_rate", 0.50) * 100)
-    l1       = (stock.get("signal_label", "") or "技術金叉").replace("✅ ", "").replace("⚠️ ", "")
+    signal   = (stock.get("signal_label", "") or "").replace("✅ ", "").replace("⚠️ ", "")
     dif      = stock.get("macd_dif", 0.0)
     vol      = stock.get("vol_ratio", 1.0)
     tech_scr = stock.get("score", 0)
+    cons_buy = stock.get("consecutive_buy_days", 0)
+    inst5    = stock.get("inst_5d_total", 0)
 
-    reason = (
-        f"技術面呈{trend}，出現{kline}（勝率{wr_pct}%），"
-        f"{l1}確認方向，MACD DIF={dif:.2f} 動能偏多，"
-        f"量能為均量{vol:.1f}倍，技術評分 {tech_scr} 分。"
-    )
+    # 建構說明文字
+    trend_text = {
+        "上升": "均線多頭排列，技術結構偏強",
+        "下降": "均線空頭排列，技術結構偏弱",
+        "盤整": "均線糾結，等待突破方向",
+    }.get(trend, "")
+
+    reason_parts = []
+    if trend_text:
+        reason_parts.append(trend_text)
+    if signal:
+        reason_parts.append(f"{signal}確認方向")
+    if vol >= 1.5:
+        reason_parts.append(f"量能放大至 {vol:.1f}x 均量")
+    if dif > 0:
+        reason_parts.append(f"MACD DIF={dif:.2f} 在 0 軸以上，動能偏多")
+    elif dif > -0.5:
+        reason_parts.append(f"MACD DIF={dif:.2f} 接近 0 軸，觀察動能轉強")
+    if cons_buy >= 3:
+        reason_parts.append(f"法人連買 {cons_buy} 日（+{inst5:,} 張）")
+    elif cons_buy >= 2:
+        reason_parts.append(f"法人連買 {cons_buy} 日")
+    if "常態" not in kline:
+        reason_parts.append(f"{kline}（勝率{wr_pct}%）")
+
+    reason = "，".join(reason_parts) + "。" if reason_parts else "技術指標觸發篩選條件。"
+
+    # 觀察重點
+    if trend == "上升":
+        watch_point = "守住均線且量能持續放大可考慮進場追蹤"
+    elif signal and "MA" in signal:
+        watch_point = "均線金叉後確認站穩，縮量回測不破為加碼點"
+    elif signal and "KD" in signal:
+        watch_point = "KD金叉後等待強勢K棒確認，避免假突破"
+    else:
+        watch_point = "量能持續放大且守住均線再評估進場"
+
+    # 風險
+    if dif < 0:
+        risk = "MACD 仍在 0 軸以下，注意動能轉弱風險"
+    elif trend == "下降":
+        risk = "均線仍呈空頭排列，須等待趨勢明確轉多再進場"
+    else:
+        risk = "技術指標翻空或跌破均線須留意停損"
+
+    score = min(50 + tech_scr * 6, 88)
     return {
-        "score":       min(50 + tech_scr * 6, 88),
+        "score":       score,
         "reason":      reason,
-        "watch_point": "量能持續放大且守住均線可考慮追蹤",
-        "risk":        "技術指標翻空或跌破均線須留意停損",
+        "watch_point": watch_point,
+        "risk":        risk,
     }
-
-
-# ──────────────────────────────────────────
-# Claude API 呼叫
-# ──────────────────────────────────────────
-def claude_evaluate(stock: dict) -> dict:
-    """
-    呼叫 Claude API 對單一股票評分 + 生成說明
-    回傳 {score: 0~100, reason: str, watch_point: str, risk: str}
-    """
-    factors = "\n".join(f"- {f}" for f in stock["score_factors"])
-    news_text = ""
-    if stock["news"]:
-        news_text = "\n最近相關新聞：\n" + "\n".join(
-            f"- {n['title']}" for n in stock["news"][:3]
-        )
-
-    prompt = f"""你是台股技術面與籌碼面分析師。
-以下是一檔台股的客觀數據，這檔股票是透過以下三個條件篩選出來的：
-1. 均線金叉（MA5穿MA20 或 MA20穿MA60）或 KD金叉（K穿D且K<80）
-2. 近5日均量 >= 近20日均量 × 1.5（量能明顯放大）
-3. MACD DIF > 0（動能在0軸以上，趨勢偏多）
-
-股票代號：{stock['stock_id']}
-現價：{stock['price']}
-量化指標：
-{factors}
-{news_text}
-
-請以 JSON 格式回答，不要輸出任何其他文字：
-{{
-  "score": <整數 0~100，綜合金叉型態、量能、動能給出關注分數>,
-  "reason": "<50字以內，說明為何值得關注，強調均線金叉＋量能放大的共振情況>",
-  "watch_point": "<30字以內，具體說明何時適合進一步追蹤或等待的訊號>",
-  "risk": "<30字以內，最主要的一個風險點>"
-}}
-
-評分參考：
-- 90+：金叉、量能、動能三者明確共振，強力關注
-- 70~89：兩項以上條件良好，值得追蹤
-- 50~69：條件初現，需觀察量能是否持續
-- 50以下：條件薄弱，暫不關注"""
-
-    headers = {
-        "Content-Type": "application/json",
-        "x-api-key": ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-    }
-    body = json.dumps({
-        "model": "claude-sonnet-4-20250514",
-        "max_tokens": 400,
-        "messages": [{"role": "user", "content": prompt}],
-    }).encode()
-
-    try:
-        req = urllib.request.Request(
-            "https://api.anthropic.com/v1/messages",
-            data=body, headers=headers, method="POST")
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            data = json.loads(resp.read())
-
-        text = data["content"][0]["text"].strip()
-        # 移除可能的 markdown code fence
-        if text.startswith("```"):
-            text = text.split("```")[1]
-            if text.startswith("json"):
-                text = text[4:]
-        return json.loads(text.strip())
-
-    except Exception as e:
-        print(f"[generator] Claude API 失敗 {stock['stock_id']}：{e}，改用技術指標描述")
-        return _tech_fallback(stock)
 
 
 # ──────────────────────────────────────────
 # HTML 產出
 # ──────────────────────────────────────────
 def score_color(score: int) -> str:
-    if score >= 80: return "#22c55e"   # 綠
-    if score >= 60: return "#f59e0b"   # 橘
-    return "#94a3b8"                   # 灰
+    if score >= 80: return "#22c55e"
+    if score >= 60: return "#f59e0b"
+    return "#94a3b8"
 
 
 def score_label(score: int) -> str:
@@ -132,73 +97,53 @@ def score_label(score: int) -> str:
 def render_card(stock: dict, eval_result: dict) -> str:
     s = stock
     e = eval_result
-    score       = e.get("score", 0)
-    color       = score_color(score)
-    label       = score_label(score)
-    signal      = s.get("signal_label", "")
-    is_risk     = s.get("is_risk", False)
+    score  = e.get("score", 0)
+    color  = score_color(score)
+    label  = score_label(score)
+    signal = s.get("signal_label", "")
 
     inst_dir   = "買超" if s["inst_5d_total"] > 0 else ("賣超" if s["inst_5d_total"] < 0 else "持平")
     inst_color = "#22c55e" if s["inst_5d_total"] > 0 else ("#ef4444" if s["inst_5d_total"] < 0 else "#94a3b8")
     vol_color  = "#22c55e" if s["vol_ratio"] >= 1.5 else "#f59e0b" if s["vol_ratio"] >= 1.2 else "#94a3b8"
     vol_label  = "量大增" if s["vol_ratio"] >= 1.5 else "量增" if s["vol_ratio"] >= 1.2 else "量平"
 
-    # 型態標籤 badge
     signal_badge = ""
     if signal:
-        if "死叉" in signal or "空" in signal:
-            sig_bg, sig_fg = "#7f1d1d", "#fca5a5"
-        else:
-            sig_bg, sig_fg = "#14532d", "#86efac"
+        sig_bg, sig_fg = ("#14532d", "#86efac") if "死叉" not in signal else ("#7f1d1d", "#fca5a5")
         signal_badge = (
             f'<span style="font-size:10px;padding:2px 10px;border-radius:20px;'
             f'background:{sig_bg};color:{sig_fg};font-weight:700">{signal}</span>'
         )
 
-    # 題材關鍵字 badges
     kws = list({kw for n in s["news"] for kw in n["keywords"]})[:4]
     kw_badges = "".join(
         f'<span style="font-size:10px;padding:2px 8px;border-radius:20px;'
-        f'background:#7c3aed22;color:#a78bfa">{k}</span>'
-        for k in kws
+        f'background:#7c3aed22;color:#a78bfa">{k}</span>' for k in kws
     )
 
-    # 新聞連結
     news_html = ""
     for n in s["news"][:2]:
         news_html += (
             f'<a href="{n["link"]}" target="_blank" style="display:block;font-size:11px;'
             f'color:#94a3b8;text-decoration:none;padding:4px 0;border-top:1px solid #1e293b;'
-            f'line-height:1.4" onmouseover="this.style.color=\'#e2e8f0\'"'
-            f' onmouseout="this.style.color=\'#94a3b8\'">'
-            f'{n["title"][:50]}{"…" if len(n["title"])>50 else ""}'
-            f'</a>'
+            f'line-height:1.4">{n["title"][:50]}{"…" if len(n["title"])>50 else ""}</a>'
         )
 
-    # 卡片邊框：風險警示用紅色
-    card_border = "#7f1d1d" if is_risk else "#1e293b"
-    card_bg     = "#1a0a0a" if is_risk else "#0f172a"
-
-    # 法人顯示（風險警示無法人資料時不顯示）
     inst_badge = (
         f'<span style="font-size:10px;padding:2px 8px;border-radius:20px;'
         f'background:#1e293b;color:{inst_color}">法人連{inst_dir} {s["consecutive_buy_days"]}日</span>'
-    ) if not is_risk else ""
+    )
 
     return f"""
-<div style="background:{card_bg};border:1px solid {card_border};border-radius:16px;padding:20px;
+<div style="background:#0f172a;border:1px solid #1e293b;border-radius:16px;padding:20px;
      display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden">
-
-  <!-- 評分圓圈 -->
   <div style="position:absolute;top:16px;right:16px;width:52px;height:52px;border-radius:50%;
        background:conic-gradient({color} {score * 3.6}deg, #1e293b 0deg);
        display:flex;align-items:center;justify-content:center">
-    <div style="width:40px;height:40px;border-radius:50%;background:{card_bg};
+    <div style="width:40px;height:40px;border-radius:50%;background:#0f172a;
          display:flex;align-items:center;justify-content:center;
          font-size:13px;font-weight:700;color:{color}">{score}</div>
   </div>
-
-  <!-- 標頭 -->
   <div style="padding-right:60px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
       <span style="font-size:17px;font-weight:700;color:#f1f5f9">{s['stock_id']}</span>
@@ -214,16 +159,11 @@ def render_card(stock: dict, eval_result: dict) -> str:
       {kw_badges}
     </div>
   </div>
-
-  <!-- 數據列 -->
   <div style="display:flex;gap:16px;font-size:12px;color:#64748b;flex-wrap:wrap">
     <span>現價 <strong style="color:#f1f5f9;font-size:15px">{s['price']}</strong></span>
     <span>近5日均量 <strong style="color:#94a3b8">{s['avg_vol_5']:,}</strong> 張</span>
-    {f'<span>法人近5日 <strong style="color:{inst_color}">{s["inst_5d_total"]:+,}</strong> 張</span>' if not is_risk else ''}
-    {f'<span>近20日 <strong style="color:{inst_color}">{s["inst_20d_total"]:+,}</strong> 張</span>' if not is_risk else ''}
+    <span>法人近5日 <strong style="color:{inst_color}">{s["inst_5d_total"]:+,}</strong> 張</span>
   </div>
-
-  <!-- Claude 分析 -->
   <div style="background:#1e293b;border-radius:10px;padding:12px;font-size:12px;line-height:1.6">
     <div style="color:#e2e8f0;margin-bottom:8px">{e.get('reason','')}</div>
     <div style="display:flex;flex-direction:column;gap:4px">
@@ -233,46 +173,30 @@ def render_card(stock: dict, eval_result: dict) -> str:
            <span style="color:#94a3b8">{e.get('risk','')}</span></div>
     </div>
   </div>
-
-  <!-- 相關新聞 -->
   {f'<div style="margin-top:-4px">{news_html}</div>' if news_html else ''}
 </div>"""
 
 
 def render_page(stocks_with_eval: list[tuple[dict, dict]], generated_at: str) -> str:
-    """組合完整 HTML 頁面（做多候選 + 風險警示兩區塊）"""
-    # 分離做多候選與風險警示
-    long_items = [(s, e) for s, e in stocks_with_eval if not s.get("is_risk")]
-    risk_items = [(s, e) for s, e in stocks_with_eval if s.get("is_risk")]
-
-    # 各自依分數排序
-    long_items = sorted(long_items, key=lambda x: x[1].get("score", 0), reverse=True)
-    risk_items = sorted(risk_items, key=lambda x: x[1].get("score", 0), reverse=True)
-
+    long_items = sorted(
+        [(s, e) for s, e in stocks_with_eval if not s.get("is_risk")],
+        key=lambda x: x[1].get("score", 0), reverse=True
+    )
+    risk_items = sorted(
+        [(s, e) for s, e in stocks_with_eval if s.get("is_risk")],
+        key=lambda x: x[1].get("score", 0), reverse=True
+    )
     long_count = len(long_items)
-    risk_count = len(risk_items)
     high_count = sum(1 for _, e in long_items if e.get("score", 0) >= 70)
-
     long_cards = "\n".join(render_card(s, e) for s, e in long_items)
-    risk_cards = "\n".join(render_card(s, e) for s, e in risk_items)
 
-    # 風險區塊 HTML（有死叉才顯示）
     risk_section = ""
     if risk_items:
+        risk_cards = "\n".join(render_card(s, e) for s, e in risk_items)
         risk_section = f"""
   <div style="margin-top:40px">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-      <h2 style="font-size:18px;font-weight:700;color:#fca5a5">⚠️ 風險警示</h2>
-      <span style="font-size:12px;color:#94a3b8">以下個股出現死叉型態，有題材但需注意下跌風險</span>
-    </div>
-    <div style="background:#7f1d1d22;border:1px solid #7f1d1d;border-radius:10px;
-         padding:12px 16px;font-size:12px;color:#fca5a5;margin-bottom:16px;line-height:1.6">
-      ⚠️ 以下股票雖有新聞題材，但均線出現死亡交叉（MA20 下穿 MA60），
-      短期趨勢偏空，不建議追買，可列入空方觀察或等待止跌訊號。
-    </div>
-    <div class="grid">
-      {risk_cards}
-    </div>
+    <h2 style="font-size:18px;font-weight:700;color:#fca5a5;margin-bottom:16px">⚠️ 風險警示</h2>
+    <div class="grid">{risk_cards}</div>
   </div>"""
 
     return f"""<!DOCTYPE html>
@@ -282,48 +206,31 @@ def render_page(stocks_with_eval: list[tuple[dict, dict]], generated_at: str) ->
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>選股名單 — {generated_at[:10]}</title>
 <style>
-* {{ box-sizing:border-box; margin:0; padding:0 }}
-body {{ background:#020817; color:#f1f5f9; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-       min-height:100vh; padding:24px 16px 48px }}
-.container {{ max-width:960px; margin:0 auto }}
-.header {{ margin-bottom:28px }}
-.header h1 {{ font-size:22px; font-weight:700; margin-bottom:6px }}
-.header p  {{ font-size:13px; color:#64748b; line-height:1.6 }}
-.stats {{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px }}
-.stat {{ background:#0f172a; border:1px solid #1e293b; border-radius:10px;
-         padding:10px 16px; font-size:12px; color:#64748b }}
-.stat strong {{ display:block; font-size:18px; font-weight:700; color:#f1f5f9; margin-bottom:2px }}
-.grid {{ display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:16px }}
-.disclaimer {{ margin-top:32px; padding:16px; background:#0f172a; border-radius:10px;
-               font-size:11px; color:#475569; line-height:1.7 }}
-@media(max-width:600px){{ .grid{{ grid-template-columns:1fr }} }}
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{background:#020817;color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;padding:24px 16px 48px}}
+.container{{max-width:960px;margin:0 auto}}
+.stats{{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}}
+.stat{{background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:10px 16px;font-size:12px;color:#64748b}}
+.stat strong{{display:block;font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:2px}}
+.grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}}
+.disclaimer{{margin-top:32px;padding:16px;background:#0f172a;border-radius:10px;font-size:11px;color:#475569;line-height:1.7}}
+@media(max-width:600px){{.grid{{grid-template-columns:1fr}}}}
 </style>
 </head>
 <body>
 <div class="container">
-
-  <div class="header">
-    <h1>🔍 選股名單</h1>
-    <p>產生時間：{generated_at}　｜　篩選條件：有題材新聞 ＋ 型態偵測 ＋ 量能確認　｜　由 Claude AI 評分</p>
+  <div style="margin-bottom:28px">
+    <h1 style="font-size:22px;font-weight:700;margin-bottom:6px">🔍 選股名單</h1>
+    <p style="font-size:13px;color:#64748b">產生時間：{generated_at}　｜　篩選條件：均線/KD金叉＋量能放大＋MACD確認</p>
   </div>
-
   <div class="stats">
     <div class="stat"><strong>{long_count}</strong>檔做多候選</div>
     <div class="stat"><strong>{high_count}</strong>檔評分 70+</div>
-    <div class="stat"><strong style="color:#fca5a5">{risk_count}</strong>檔風險警示</div>
     <div class="stat"><strong style="color:#22c55e">●</strong>盤後資料</div>
   </div>
-
-  <!-- 做多候選 -->
-  {f'<div style="margin-bottom:12px"><h2 style="font-size:18px;font-weight:700;color:#86efac;margin-bottom:16px">📈 做多候選</h2><div class="grid">{long_cards}</div></div>' if long_items else '<div style="padding:32px 0;text-align:center;color:#475569">今日無做多候選股票</div>'}
-
+  {f'<div><h2 style="font-size:18px;font-weight:700;color:#86efac;margin-bottom:16px">📈 做多候選</h2><div class="grid">{long_cards}</div></div>' if long_items else '<div style="padding:32px 0;text-align:center;color:#475569">今日無做多候選股票</div>'}
   {risk_section}
-
-  <div class="disclaimer">
-    ⚠️ 本頁面資料僅供參考，不構成買賣建議。股市有風險，請自行評估後決策。
-    所有分析結果均為系統自動產出，實際走勢以市場為準。
-  </div>
-
+  <div class="disclaimer">⚠️ 本頁面資料僅供參考，不構成買賣建議。股市有風險，請自行評估後決策。</div>
 </div>
 </body>
 </html>"""
@@ -332,42 +239,27 @@ body {{ background:#020817; color:#f1f5f9; font-family:-apple-system,BlinkMacSys
 # ──────────────────────────────────────────
 # 主流程
 # ──────────────────────────────────────────
-def run(filtered_stocks: list[dict], api_delay: float = 2.0) -> str:
-    """
-    主函式：對篩選後的股票列表呼叫 Claude 評分，產出 HTML
-    回傳：輸出檔案路徑
-    """
-    if not ANTHROPIC_API_KEY:
-        raise RuntimeError("請設定環境變數 ANTHROPIC_API_KEY")
-
-    print(f"[generator] 開始對 {len(filtered_stocks)} 檔股票進行 Claude 分析...")
-    stocks_with_eval = []
-
-    for i, stock in enumerate(filtered_stocks, 1):
-        print(f"[generator] ({i}/{len(filtered_stocks)}) 分析 {stock['stock_id']}...")
-        eval_result = claude_evaluate(stock)
-        print(f"  → 評分：{eval_result.get('score', '?')} | {eval_result.get('reason', '')[:40]}")
-        stocks_with_eval.append((stock, eval_result))
-        if i < len(filtered_stocks):
-            time.sleep(api_delay)
-
+def generate_picks_html(filtered_stocks: list[dict]) -> str:
+    """規則式評分，產出 latest.html，回傳輸出路徑"""
+    stocks_with_eval = [(s, rule_evaluate(s)) for s in filtered_stocks]
     generated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
     html = render_page(stocks_with_eval, generated_at)
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     filename = f"stock_picks_{datetime.now().strftime('%Y%m%d_%H%M')}.html"
     filepath = os.path.join(OUTPUT_DIR, filename)
-
     with open(filepath, "w", encoding="utf-8") as f:
         f.write(html)
-
-    # 同時寫一份 latest.html 供固定連結存取
     latest_path = os.path.join(OUTPUT_DIR, "latest.html")
     with open(latest_path, "w", encoding="utf-8") as f:
         f.write(html)
-
-    print(f"[generator] ✅ 輸出完成：{filepath}")
+    print(f"[generator] ✅ 選股輸出完成：{filepath}")
     return filepath
+
+
+def run(filtered_stocks: list[dict], api_delay: float = 0.0) -> str:
+    """向後相容介面，內部改用規則式評分"""
+    return generate_picks_html(filtered_stocks)
 
 
 def generate_scan_result(stocks_data: list[dict]) -> str:
@@ -381,7 +273,7 @@ def generate_scan_result(stocks_data: list[dict]) -> str:
     generated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     def _scan_card(s: dict) -> str:
-        rl = s.get("risk_level", "medium")
+        rl    = s.get("risk_level", "medium")
         border = "#14532d" if rl == "low" else ("#7f1d1d" if rl == "high" else "#1e293b")
         bg     = "#0a1f0f" if rl == "low" else ("#1a0a0a" if rl == "high" else "#0f172a")
         trend  = s.get("trend", "整理")
@@ -467,27 +359,3 @@ body{{background:#020817;color:#f1f5f9;font-family:-apple-system,BlinkMacSystemF
         f.write(html)
     print(f"[generator] ✅ 全台掃描輸出：{scan_path}（{len(stocks_data)} 檔）")
     return scan_path
-
-
-if __name__ == "__main__":
-    # 單獨測試：用假資料跑一次
-    dummy = [{
-        "stock_id": "2330",
-        "name": "台積電",
-        "price": 750.0,
-        "high_60": 1080.0,
-        "drawdown_pct": 30.6,
-        "consecutive_buy_days": 5,
-        "inst_5d_total": 12000,
-        "inst_20d_total": 35000,
-        "vol_ratio": 1.5,
-        "avg_vol_5": 25000,
-        "news": [{"title": "外資連5日買超台積電", "link": "#", "keywords": ["外資買"]}],
-        "score_factors": [
-            "回檔幅度 30.6%（60日高點 1080，現價 750）",
-            "法人連續買超 5 天，近5日合計 +12,000 張",
-            "量能：近5日均量是60日均量的 1.5x（放大）",
-            "鉅亨題材新聞 1 則，關鍵字：外資買",
-        ],
-    }]
-    run(dummy)

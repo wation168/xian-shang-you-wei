@@ -88,6 +88,12 @@ else:
 
 IS_PROD = os.environ.get("ZEABUR_SERVICE_ID") is not None  # Zeabur 會自動注入此變數
 
+# In-memory SEO cache
+SEO_CACHE: dict = {
+    "sitemap":  {"data": None, "expires": 0},
+    "rankings": {"data": None, "expires": 0},
+}
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -139,21 +145,21 @@ async def lifespan(app: FastAPI):
         import sys as _sys
         _picker_path = os.path.join(os.path.dirname(__file__), "stock_picker")
 
-        def _run_stock_picker_job():
-            nonlocal _picker_running
-            if _picker_running:
-                print("   ⚠️ 選股排程已在執行中，跳過本次")
+        def _run_unified_scan_job():
+            nonlocal _scan_running
+            if _scan_running:
+                print("   ⚠️ 統合選股排程已在執行中，跳過本次")
                 return
-            _picker_running = True
+            _scan_running = True
             try:
                 if _picker_path not in _sys.path:
                     _sys.path.insert(0, _picker_path)
-                from scheduler import run_once
-                run_once()
+                from main_picker import run_unified_scan
+                run_unified_scan()
             except Exception as _e:
-                print(f"   ❌ 選股排程執行失敗：{_e}")
+                print(f"   ❌ 統合選股排程執行失敗：{_e}")
             finally:
-                _picker_running = False
+                _scan_running = False
 
         def _run_expire_notice_job():
             nonlocal _expire_running
@@ -193,21 +199,6 @@ async def lifespan(app: FastAPI):
             finally:
                 _expire_running = False
 
-        def _run_full_scan_job():
-            nonlocal _scan_running
-            if _scan_running:
-                print("   ⚠️ 全台掃描排程已在執行中，跳過本次")
-                return
-            _scan_running = True
-            try:
-                if _picker_path not in _sys.path:
-                    _sys.path.insert(0, _picker_path)
-                from main_picker import run_full_scan
-                run_full_scan()
-            except Exception as _e:
-                print(f"   ❌ 全台掃描排程執行失敗：{_e}")
-            finally:
-                _scan_running = False
 
         def _run_price_alert_job():
             nonlocal _alert_running
@@ -279,12 +270,11 @@ async def lifespan(app: FastAPI):
                 _alert_running = False
 
         _bg_scheduler = BackgroundScheduler(timezone="Asia/Taipei")
-        _bg_scheduler.add_job(_run_stock_picker_job,  "cron", hour=14, minute=35, day_of_week="mon-fri")
+        _bg_scheduler.add_job(_run_unified_scan_job,  "cron", hour=15, minute=30, day_of_week="mon-fri")
         _bg_scheduler.add_job(_run_expire_notice_job, "cron", hour=9,  minute=0)
-        _bg_scheduler.add_job(_run_full_scan_job,     "cron", hour=15, minute=30, day_of_week="mon-fri")
         _bg_scheduler.add_job(_run_price_alert_job,   "cron", hour=15, minute=35, day_of_week="mon-fri")
         _bg_scheduler.start()
-        print("   ✅ APScheduler 排程已啟動（選股 14:35、全台掃描 15:30、到價提醒 15:35、到期通知 09:00）")
+        print("   ✅ APScheduler 排程已啟動（統合選股 15:30、到價提醒 15:35、到期通知 09:00）")
     except ImportError:
         print("   ⚠️ apscheduler 未安裝，選股排程請以 scheduler.py 獨立執行")
     except Exception as _sch_err:
@@ -1575,6 +1565,28 @@ def _db_init():
             auth        TEXT    NOT NULL,
             created_at  TEXT    DEFAULT (datetime('now','localtime'))
         );
+        CREATE TABLE IF NOT EXISTS stock_reports (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            stock_id    TEXT NOT NULL,
+            report_date TEXT NOT NULL,
+            stock_name  TEXT NOT NULL DEFAULT '',
+            report_html TEXT NOT NULL,
+            created_at  TEXT DEFAULT (datetime('now','localtime')),
+            UNIQUE(stock_id, report_date)
+        );
+        CREATE TABLE IF NOT EXISTS referral_codes (
+            user_email  TEXT PRIMARY KEY,
+            code        TEXT UNIQUE NOT NULL,
+            created_at  TEXT DEFAULT (datetime('now','localtime'))
+        );
+        CREATE TABLE IF NOT EXISTS referral_logs (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            inviter_email TEXT NOT NULL,
+            invitee_email TEXT NOT NULL,
+            invitee_ip    TEXT NOT NULL DEFAULT '',
+            status        TEXT DEFAULT 'pending',
+            created_at    TEXT DEFAULT (datetime('now','localtime'))
+        );
     """)
     conn.commit()
 
@@ -1587,6 +1599,7 @@ def _db_init():
         ("query_log", "ip",                   "TEXT NOT NULL DEFAULT ''"),
         ("members",   "password_changed_at",  "TEXT DEFAULT NULL"),
         ("members",   "last_expire_notice_date", "TEXT DEFAULT NULL"),
+        ("members",   "referral_unlocked",       "INTEGER DEFAULT 0"),
     ]
     for table, col, coldef in new_columns:
         try:
@@ -1684,6 +1697,8 @@ def require_user(user: dict | None = Depends(get_current_user)):
 def require_paid_user(user: dict | None = Depends(get_current_user)):
     if not user:
         raise HTTPException(status_code=401, detail="請先登入")
+    if user.get("referral_unlocked", 0) == 1:
+        return user
     today = _date_cls.today().isoformat()
     if user["plan"] == "free":
         raise HTTPException(status_code=403, detail="此功能需付費方案")
@@ -2236,11 +2251,12 @@ def analyze(stock_id: str, tf: str = "D",
 
     if user:
         plan = user["plan"]
+        is_referral_unlocked = user.get("referral_unlocked", 0) == 1
         # 付費狀態驗證
         if plan != "free" and user["expire_at"] and user["expire_at"] < today:
             raise HTTPException(status_code=403, detail="訂閱已到期，請續費後繼續使用")
-        # 免費用戶次數限制
-        if plan == "free":
+        # 免費用戶次數限制（邀請解鎖視為付費）
+        if plan == "free" and not is_referral_unlocked:
             allowed, used, limit = _check_query_limit(user["id"], plan)
             if not allowed:
                 raise HTTPException(
@@ -2273,6 +2289,13 @@ def analyze(stock_id: str, tf: str = "D",
     # 記錄獨立訪客
     client_ip = request.client.host if request else "unknown"
     _record_visit(client_ip)
+
+    # 完成邀請制（首次查詢觸發）
+    if user:
+        try:
+            _complete_referral_if_pending(user["email"])
+        except Exception:
+            pass
 
     return _do_analyze(stock_id, tf, ma1, ma2, ma3, ma4, ma5, user=user)
 
@@ -3084,7 +3107,7 @@ class ChangePasswordReq(BaseModel):
 
 
 @app.post("/auth/register")
-def auth_register(req: RegisterReq):
+def auth_register(req: RegisterReq, ref: str = "", request: Request = None):
     email = req.email.strip().lower()
     if not _re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
         raise HTTPException(status_code=400, detail="Email 格式不正確")
@@ -3100,12 +3123,27 @@ def auth_register(req: RegisterReq):
     except sqlite3.IntegrityError:
         conn.close()
         raise HTTPException(status_code=409, detail="此 Email 已註冊")
+    _get_or_create_referral_code(email)
+    if ref:
+        inviter_row = conn.execute("SELECT user_email FROM referral_codes WHERE code=?", (ref.upper().strip(),)).fetchone()
+        if inviter_row and inviter_row["user_email"] != email:
+            client_ip = request.client.host if request else ""
+            dupe = conn.execute(
+                "SELECT id FROM referral_logs WHERE invitee_ip=? AND inviter_email=?",
+                (client_ip, inviter_row["user_email"])
+            ).fetchone()
+            if not dupe:
+                conn.execute(
+                    "INSERT INTO referral_logs (inviter_email, invitee_email, invitee_ip) VALUES (?,?,?)",
+                    (inviter_row["user_email"], email, client_ip)
+                )
+                conn.commit()
     conn.close()
     return {"ok": True, "message": "註冊成功"}
 
 
 @app.post("/register")
-def register_free(req: RegisterReq):
+def register_free(req: RegisterReq, ref: str = "", request: Request = None):
     email = req.email.strip().lower()
     if not _re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
         raise HTTPException(status_code=400, detail="Email 格式不正確")
@@ -3121,6 +3159,21 @@ def register_free(req: RegisterReq):
     except sqlite3.IntegrityError:
         conn.close()
         raise HTTPException(status_code=409, detail="此 Email 已註冊")
+    _get_or_create_referral_code(email)
+    if ref:
+        inviter_row = conn.execute("SELECT user_email FROM referral_codes WHERE code=?", (ref.upper().strip(),)).fetchone()
+        if inviter_row and inviter_row["user_email"] != email:
+            client_ip = request.client.host if request else ""
+            dupe = conn.execute(
+                "SELECT id FROM referral_logs WHERE invitee_ip=? AND inviter_email=?",
+                (client_ip, inviter_row["user_email"])
+            ).fetchone()
+            if not dupe:
+                conn.execute(
+                    "INSERT INTO referral_logs (inviter_email, invitee_email, invitee_ip) VALUES (?,?,?)",
+                    (inviter_row["user_email"], email, client_ip)
+                )
+                conn.commit()
     conn.close()
     return {"ok": True, "message": "免費帳號建立成功"}
 
@@ -3190,6 +3243,7 @@ def auth_me(user: dict = Depends(require_user)):
         "queries_limit": FREE_DAILY_LIMIT if plan == "free" else 999,
         "days_left": days_left,
         "is_expiring_soon": is_expiring_soon,
+        "referral_unlocked": user.get("referral_unlocked", 0),
     }
 
 
@@ -3200,6 +3254,24 @@ def auth_logout(user: dict = Depends(require_user)):
     conn.commit()
     conn.close()
     return {"ok": True}
+
+
+@app.get("/api/referral/status")
+def get_referral_status(user: dict = Depends(require_user)):
+    email = user["email"]
+    code = _get_or_create_referral_code(email)
+    conn = _db_conn()
+    completed = conn.execute(
+        "SELECT COUNT(*) FROM referral_logs WHERE inviter_email=? AND status='completed'", (email,)
+    ).fetchone()[0]
+    conn.close()
+    return {
+        "code": code,
+        "invite_link": f"{FRONTEND_URL}?ref={code}",
+        "completed_count": completed,
+        "required_count": 3,
+        "unlocked": bool(user.get("referral_unlocked", 0)),
+    }
 
 
 @app.post("/auth/change-password")
@@ -3374,11 +3446,12 @@ def get_latest_picks(request: Request, token: str = "", user: dict | None = Depe
     from fastapi.responses import HTMLResponse
     today = _date_cls.today().isoformat()
     plan = user["plan"]
-    # 免費用戶無法使用
-    if plan == "free":
+    is_referral_unlocked = user.get("referral_unlocked", 0) == 1
+    # 免費用戶無法使用（邀請解鎖視為付費）
+    if plan == "free" and not is_referral_unlocked:
         raise HTTPException(status_code=403, detail="此功能需要付費方案")
     # 訂閱已到期
-    if user["expire_at"] and user["expire_at"] < today:
+    if not is_referral_unlocked and user["expire_at"] and user["expire_at"] < today:
         raise HTTPException(status_code=403, detail="訂閱已到期，請續費後繼續使用")
 
     candidates = [
@@ -3685,6 +3758,166 @@ def _update_notice_date(email: str, date_str: str):
     conn.close()
 
 
+def _get_or_create_referral_code(email: str) -> str:
+    conn = _db_conn()
+    row = conn.execute("SELECT code FROM referral_codes WHERE user_email=?", (email,)).fetchone()
+    if row:
+        conn.close()
+        return row["code"]
+    code = secrets.token_hex(4).upper()
+    conn.execute("INSERT OR IGNORE INTO referral_codes (user_email, code) VALUES (?, ?)", (email, code))
+    conn.commit()
+    conn.close()
+    return code
+
+
+def _complete_referral_if_pending(user_email: str):
+    conn = _db_conn()
+    row = conn.execute(
+        "SELECT * FROM referral_logs WHERE invitee_email=? AND status='pending'", (user_email,)
+    ).fetchone()
+    if not row:
+        conn.close()
+        return
+    conn.execute("UPDATE referral_logs SET status='completed' WHERE id=?", (row["id"],))
+    conn.commit()
+    inviter = row["inviter_email"]
+    cnt = conn.execute(
+        "SELECT COUNT(*) FROM referral_logs WHERE inviter_email=? AND status='completed'", (inviter,)
+    ).fetchone()[0]
+    if cnt >= 3:
+        prev = conn.execute("SELECT referral_unlocked FROM members WHERE email=?", (inviter,)).fetchone()
+        if prev and prev["referral_unlocked"] == 0:
+            conn.execute("UPDATE members SET referral_unlocked=1 WHERE email=?", (inviter,))
+            conn.commit()
+            _send_email(
+                inviter, "【線上有位】恭喜！已解鎖全功能",
+                f'<p>您已成功邀請 {cnt} 位好友完成首次查詢，全功能已自動解鎖！即日起可無限查詢。</p>'
+                f'<p><a href="{FRONTEND_URL}">立即使用</a></p>'
+            )
+    conn.close()
+
+
+def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict) -> str:
+    price      = d.get("price", 0)
+    trend      = d.get("trend", "盤整")
+    risk_level = d.get("risk_level", "medium")
+    risk_label = d.get("risk_label", "中風險")
+    support    = d.get("support", 0)
+    resistance = d.get("resistance", 0)
+    stop_loss  = d.get("stop_loss", 0)
+    rr_ratio   = d.get("risk_reward", 0)
+    kbar_pattern = d.get("kbar_pattern", "")
+    kline_pattern = d.get("kline_pattern", "")
+    win_rate   = d.get("win_rate", 0.5)
+    supp_desc  = d.get("support_desc", "")
+    res_desc   = d.get("resistance_desc", "")
+
+    # 9 text rules
+    bullets = []
+    if trend == "上升趨勢":
+        bullets.append("均線三線多頭排列（MA5>MA20>MA60），中長期趨勢偏強，回測支撐是買點。")
+    elif trend == "下降趨勢":
+        bullets.append("均線三線空頭排列（MA5<MA20<MA60），技術結構偏弱，反彈壓力是出場點。")
+    else:
+        bullets.append("均線糾結，多空交戰，暫無明確方向，宜等待突破訊號。")
+
+    if rr_ratio >= 2:
+        bullets.append(f"損益比 {rr_ratio:.2f}，風險報酬比良好，值得評估進場。")
+    elif rr_ratio >= 1:
+        bullets.append(f"損益比 {rr_ratio:.2f}，風險報酬尚可，需謹慎評估。")
+    else:
+        bullets.append(f"損益比 {rr_ratio:.2f}，風險大於報酬，不建議此位置進場。")
+
+    bullets.append(f"支撐位 {support}（{supp_desc}），壓力位 {resistance}（{res_desc}）。")
+    bullets.append(f"操作防守位 {stop_loss}，跌破需停損出場。")
+
+    if kbar_pattern:
+        bullets.append(f"最新K棒型態：{kbar_pattern}，操作方向參考型態訊號。")
+    if kline_pattern and "常態" not in kline_pattern:
+        bullets.append(f"K線大數據型態：{kline_pattern}（歷史勝率 {int(win_rate*100)}%）。")
+
+    risk_colors = {"low": "#4ade80", "medium": "#fbbf24", "high": "#f87171"}
+    risk_color = risk_colors.get(risk_level, "#fbbf24")
+
+    bullets_html = "".join(
+        f'<li style="padding:8px 0;border-bottom:1px solid #2d4a2d;font-size:14px;line-height:1.7;color:#e8e0d0">{b}</li>'
+        for b in bullets
+    )
+
+    json_ld = _json_mod.dumps({
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": f"{stock_id} {stock_name} 個股分析報告",
+        "datePublished": report_date,
+        "publisher": {"@type": "Organization", "name": "線上有位"},
+        "description": f"{stock_id} {stock_name} {report_date} 技術分析：{trend}，支撐 {support}，壓力 {resistance}",
+    }, ensure_ascii=False)
+
+    return f"""<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{stock_id} {stock_name} 個股分析報告 {report_date} — 線上有位</title>
+<meta name="description" content="{stock_id} {stock_name} {report_date} 技術分析報告：{trend}，支撐 {support}，壓力 {resistance}，損益比 {rr_ratio:.2f}">
+<meta property="og:title" content="{stock_id} {stock_name} 分析報告">
+<meta property="og:description" content="{trend}｜支撐 {support}｜壓力 {resistance}｜損益比 {rr_ratio:.2f}">
+<meta property="og:type" content="article">
+<script type="application/ld+json">{json_ld}</script>
+<style>
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{background:#1a2a1a;color:#e8e0d0;font-family:-apple-system,'Noto Sans TC',sans-serif;min-height:100vh;padding:24px 16px 48px}}
+.container{{max-width:720px;margin:0 auto}}
+.card{{background:#243324;border-radius:14px;padding:20px;margin-bottom:16px}}
+.tag{{display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:8px}}
+a{{color:#4ade80;text-decoration:none}}
+a:hover{{text-decoration:underline}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div style="margin-bottom:20px">
+    <a href="{FRONTEND_URL}" style="font-size:13px;color:#6b9f6b">← 線上有位</a>
+  </div>
+  <div class="card">
+    <span class="tag" style="background:{risk_color}22;color:{risk_color}">{risk_label}</span>
+    <div style="font-size:26px;font-weight:700;margin-bottom:4px">{stock_id} {stock_name}</div>
+    <div style="font-size:13px;color:#8fac8f;margin-bottom:16px">分析日期：{report_date}</div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px">
+      <div><div style="font-size:11px;color:#6b9f6b;margin-bottom:2px">現價</div><div style="font-size:28px;font-weight:700">{price}</div></div>
+      <div><div style="font-size:11px;color:#6b9f6b;margin-bottom:2px">趨勢</div><div style="font-size:20px;font-weight:700">{trend}</div></div>
+      <div><div style="font-size:11px;color:#6b9f6b;margin-bottom:2px">損益比</div><div style="font-size:20px;font-weight:700">{rr_ratio:.2f}</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div style="background:#1a2a1a;border-radius:10px;padding:12px">
+        <div style="font-size:11px;color:#6b9f6b;margin-bottom:4px">支撐位</div>
+        <div style="font-size:18px;font-weight:700;color:#4ade80">{support}</div>
+        <div style="font-size:11px;color:#6b9f6b;margin-top:2px">{supp_desc}</div>
+      </div>
+      <div style="background:#1a2a1a;border-radius:10px;padding:12px">
+        <div style="font-size:11px;color:#6b9f6b;margin-bottom:4px">壓力位</div>
+        <div style="font-size:18px;font-weight:700;color:#fbbf24">{resistance}</div>
+        <div style="font-size:11px;color:#6b9f6b;margin-top:2px">{res_desc}</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:15px;font-weight:700;margin-bottom:12px;color:#4ade80">技術分析摘要</div>
+    <ul style="list-style:none">{bullets_html}</ul>
+  </div>
+  <div class="card" style="text-align:center">
+    <div style="font-size:14px;color:#8fac8f;margin-bottom:12px">查看完整互動圖表與即時報價</div>
+    <a href="{FRONTEND_URL}?q={stock_id}" style="display:inline-block;background:#4ade80;color:#1a2a1a;padding:12px 28px;border-radius:30px;font-weight:700;font-size:15px">前往線上有位 →</a>
+  </div>
+  <div style="font-size:11px;color:#4a6a4a;text-align:center;margin-top:16px;line-height:1.6">
+    ⚠️ 本報告僅供參考，不構成買賣建議。投資有風險，請自行評估。
+  </div>
+</div>
+</body>
+</html>"""
+
+
 def send_web_push(subscription: dict, title: str, body: str, url: str = "/"):
     """送出 Web Push 通知（需 pywebpush + VAPID 金鑰）"""
     if not _WEBPUSH_AVAILABLE or not VAPID_PRIVATE_KEY:
@@ -3885,3 +4118,232 @@ def subscribe_webpush(req: WebPushSubReq, user: dict = Depends(require_user)):
 @app.get("/ads.txt")
 async def ads_txt():
     return PlainTextResponse("google.com, pub-1768270548115739, DIRECT, f08c47fec0942fa0")
+
+
+# ══════════════════════════════════════════════════════════
+# 個股報告頁（Task 1）
+# ══════════════════════════════════════════════════════════
+
+class ReportReq(BaseModel):
+    stock_id: str
+
+
+@app.post("/api/report/generate")
+def report_generate(req: ReportReq):
+    stock_id = req.stock_id.strip().upper()
+    report_date = _taipei_today()
+
+    # same-day cache
+    conn = _db_conn()
+    cached = conn.execute(
+        "SELECT report_html FROM stock_reports WHERE stock_id=? AND report_date=?",
+        (stock_id, report_date)
+    ).fetchone()
+    conn.close()
+    if cached:
+        return {"ok": True, "url": f"{FRONTEND_URL}/report/{stock_id}-{report_date}"}
+
+    try:
+        d = _do_analyze(stock_id, "D", user=None)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"分析失敗：{e}")
+
+    stock_name = d.get("stock_name", stock_id)
+    report_html = _build_report_html(stock_id, stock_name, report_date, d)
+
+    conn = _db_conn()
+    try:
+        conn.execute(
+            "INSERT OR REPLACE INTO stock_reports (stock_id, report_date, stock_name, report_html) VALUES (?,?,?,?)",
+            (stock_id, report_date, stock_name, report_html)
+        )
+        conn.commit()
+    except Exception:
+        pass
+    finally:
+        conn.close()
+
+    return {"ok": True, "url": f"{FRONTEND_URL}/report/{stock_id}-{report_date}"}
+
+
+@app.get("/report/{slug}")
+def get_report(slug: str):
+    from fastapi.responses import HTMLResponse
+    m = _re.match(r"^([A-Za-z0-9]+)-(\d{4}-\d{2}-\d{2})$", slug)
+    if m:
+        stock_id, report_date = m.group(1).upper(), m.group(2)
+    else:
+        stock_id = slug.upper()
+        report_date = _taipei_today()
+
+    conn = _db_conn()
+    row = conn.execute(
+        "SELECT report_html FROM stock_reports WHERE stock_id=? AND report_date=? ORDER BY created_at DESC LIMIT 1",
+        (stock_id, report_date)
+    ).fetchone()
+    if not row:
+        row = conn.execute(
+            "SELECT report_html FROM stock_reports WHERE stock_id=? ORDER BY created_at DESC LIMIT 1",
+            (stock_id,)
+        ).fetchone()
+    conn.close()
+
+    if row:
+        return HTMLResponse(content=row["report_html"])
+
+    # 即時產生
+    try:
+        d = _do_analyze(stock_id, "D", user=None)
+        stock_name = d.get("stock_name", stock_id)
+        html = _build_report_html(stock_id, stock_name, report_date, d)
+        conn = _db_conn()
+        try:
+            conn.execute(
+                "INSERT OR REPLACE INTO stock_reports (stock_id, report_date, stock_name, report_html) VALUES (?,?,?,?)",
+                (stock_id, report_date, stock_name, html)
+            )
+            conn.commit()
+        except Exception:
+            pass
+        finally:
+            conn.close()
+        return HTMLResponse(content=html)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"無法取得 {stock_id} 報告：{e}")
+
+
+# ══════════════════════════════════════════════════════════
+# SEO：sitemap.xml + /rankings（Task 2）
+# ══════════════════════════════════════════════════════════
+
+_SEO_HARDCODED_STOCKS = [
+    "2330","2317","2454","2308","2412","6505","2882","2881","2886","2891",
+    "2884","2892","2883","2885","2887","2888","2890","5880","2801","2002",
+    "1301","1303","1326","2303","2357","2382","2395","2402","2408","2409",
+    "2449","2474","2476","2376","2379","2385","2392","3711","2301","2325",
+    "3034","3037","3045","3702","4904","4938","5871","6415","6669","2610",
+]
+
+
+@app.get("/sitemap.xml")
+def sitemap():
+    now = _time_mod.time()
+    c = SEO_CACHE["sitemap"]
+    if c["data"] and c["expires"] > now:
+        return PlainTextResponse(c["data"], media_type="application/xml")
+
+    conn = _db_conn()
+    reports = conn.execute(
+        "SELECT stock_id, report_date FROM stock_reports ORDER BY created_at DESC LIMIT 200"
+    ).fetchall()
+    conn.close()
+
+    locs = []
+    for u in [FRONTEND_URL + "/", FRONTEND_URL + "/landing.html", BACKEND_URL + "/rankings"]:
+        locs.append(f"  <url><loc>{u}</loc><changefreq>daily</changefreq><priority>0.8</priority></url>")
+    for sid in _SEO_HARDCODED_STOCKS:
+        locs.append(f"  <url><loc>{BACKEND_URL}/report/{sid}</loc><changefreq>daily</changefreq><priority>0.6</priority></url>")
+    for r in reports:
+        locs.append(f"  <url><loc>{BACKEND_URL}/report/{r['stock_id']}-{r['report_date']}</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>")
+
+    xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    xml += "\n".join(locs) + "\n</urlset>"
+
+    c["data"] = xml
+    c["expires"] = now + 21600
+    return PlainTextResponse(xml, media_type="application/xml")
+
+
+@app.get("/rankings")
+def rankings():
+    from fastapi.responses import HTMLResponse
+    now = _time_mod.time()
+    c = SEO_CACHE["rankings"]
+    if c["data"] and c["expires"] > now:
+        return HTMLResponse(c["data"])
+
+    conn = _db_conn()
+    recent_reports = conn.execute(
+        "SELECT stock_id, stock_name, report_date FROM stock_reports ORDER BY created_at DESC LIMIT 50"
+    ).fetchall()
+    conn.close()
+
+    rows_html = ""
+    seen = set()
+    rank = 1
+    for r in recent_reports:
+        if r["stock_id"] in seen:
+            continue
+        seen.add(r["stock_id"])
+        rows_html += (
+            f'<tr>'
+            f'<td style="padding:10px 12px;color:#6b9f6b;font-weight:700">{rank}</td>'
+            f'<td style="padding:10px 12px"><a href="{BACKEND_URL}/report/{r["stock_id"]}-{r["report_date"]}" '
+            f'style="color:#4ade80;text-decoration:none;font-weight:600">{r["stock_id"]}</a></td>'
+            f'<td style="padding:10px 12px;color:#e8e0d0">{r["stock_name"]}</td>'
+            f'<td style="padding:10px 12px;color:#6b9f6b;font-size:12px">{r["report_date"]}</td>'
+            f'</tr>'
+        )
+        rank += 1
+
+    hot_links = ""
+    for sid in _SEO_HARDCODED_STOCKS[:20]:
+        name = STOCK_NAMES.get(sid, sid)
+        hot_links += (
+            f'<a href="{BACKEND_URL}/report/{sid}" '
+            f'style="display:inline-block;padding:6px 14px;margin:4px;background:#243324;'
+            f'border-radius:20px;color:#4ade80;text-decoration:none;font-size:13px">'
+            f'{sid} {name}</a>'
+        )
+
+    json_ld = _json_mod.dumps({
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "台股個股分析報告 — 線上有位",
+        "description": "台股技術分析報告查詢，支撐壓力損益比分析，每日更新",
+        "publisher": {"@type": "Organization", "name": "線上有位"},
+    }, ensure_ascii=False)
+
+    html = f"""<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>台股個股分析報告查詢 — 線上有位</title>
+<meta name="description" content="台股個股技術分析報告，支撐壓力損益比計算，每日更新，涵蓋台積電、鴻海、聯發科等上市上櫃股票">
+<script type="application/ld+json">{json_ld}</script>
+<style>
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{background:#1a2a1a;color:#e8e0d0;font-family:-apple-system,'Noto Sans TC',sans-serif;min-height:100vh;padding:24px 16px 48px}}
+.container{{max-width:800px;margin:0 auto}}
+table{{width:100%;border-collapse:collapse;background:#243324;border-radius:12px;overflow:hidden}}
+thead th{{padding:12px;text-align:left;font-size:12px;color:#6b9f6b;font-weight:600;border-bottom:1px solid #2d4a2d}}
+tbody tr:hover{{background:#2d4a2d}}
+a{{color:#4ade80}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div style="margin-bottom:24px">
+    <a href="{FRONTEND_URL}" style="font-size:13px;color:#6b9f6b">← 線上有位</a>
+  </div>
+  <h1 style="font-size:24px;font-weight:700;margin-bottom:8px">台股個股分析報告</h1>
+  <p style="font-size:14px;color:#6b9f6b;margin-bottom:24px">技術分析・支撐壓力・損益比 — 每日更新</p>
+
+  <div style="margin-bottom:28px">
+    <h2 style="font-size:15px;font-weight:700;margin-bottom:12px;color:#4ade80">熱門個股</h2>
+    <div style="line-height:2">{hot_links}</div>
+  </div>
+
+  {'<div><h2 style="font-size:15px;font-weight:700;margin-bottom:12px;color:#4ade80">最新分析報告</h2><table><thead><tr><th>#</th><th>代號</th><th>名稱</th><th>日期</th></tr></thead><tbody>' + rows_html + '</tbody></table></div>' if rows_html else ''}
+
+  <div style="margin-top:24px;font-size:11px;color:#4a6a4a;text-align:center">
+    ⚠️ 本頁面資料僅供參考，不構成買賣建議。
+  </div>
+</div>
+</body>
+</html>"""
+
+    c["data"] = html
+    c["expires"] = now + 900
+    return HTMLResponse(html)

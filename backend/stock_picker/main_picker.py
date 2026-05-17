@@ -168,10 +168,123 @@ def run_full_scan():
     return generate_scan_result(results)
 
 
+def run_unified_scan():
+    """統合選股：全台掃描 + 新聞選股 → 同時輸出 scan_result.html + latest.html"""
+    import time as _time
+    from crawler import (get_all_tw_stocks, fetch_price_history, fetch_stock_name,
+                         fetch_cnyes_news, fetch_institutional)
+    from finmind_filter import detect_kline_patterns, run_filter
+    from generator import generate_picks_html, generate_scan_result
+
+    print("[unified] === 統合選股開始 ===")
+
+    # ── Step 1：全台股掃描 ──
+    print("[unified] 取得全台股票列表...")
+    all_stocks = get_all_tw_stocks()
+    if not all_stocks:
+        print("[unified] ❌ 無法取得股票列表")
+        return
+
+    batch = all_stocks[:500]
+    print(f"[unified] 開始掃描 {len(batch)} 檔...")
+    scan_results = []
+    for i, sid in enumerate(batch, 1):
+        try:
+            prices = fetch_price_history(sid, days=70)
+            if len(prices) < 20:
+                continue
+            closes  = [p["close"]  for p in prices]
+            opens   = [p["open"]   for p in prices]
+            highs   = [p["high"]   for p in prices]
+            lows    = [p["low"]    for p in prices]
+            volumes = [p["volume"] for p in prices]
+            price = closes[-1]
+            if price < 10:
+                continue
+            n60  = min(60, len(closes))
+            ma5  = sum(closes[-5:]) / 5
+            ma20 = sum(closes[-20:]) / 20
+            ma60 = sum(closes[-n60:]) / n60
+            support    = min(lows[-20:])
+            resistance = max(highs[-20:])
+            if ma5 > ma20 > ma60:
+                trend = "多頭"
+            elif ma5 < ma20 < ma60:
+                trend = "空頭"
+            else:
+                trend = "整理"
+            if trend == "多頭" and price > ma60:
+                risk_level = "low"
+            elif trend == "空頭" or price < ma60 * 0.95:
+                risk_level = "high"
+            else:
+                risk_level = "medium"
+            kline_pattern, win_rate = detect_kline_patterns(closes, opens, highs, lows, volumes)
+            risk   = max(price - support, 0.01)
+            reward = max(resistance - price, 0)
+            scan_results.append({
+                "stock_id":      sid,
+                "name":          "",
+                "price":         price,
+                "ma5":           round(ma5, 2),
+                "ma20":          round(ma20, 2),
+                "ma60":          round(ma60, 2),
+                "support":       round(support, 2),
+                "resistance":    round(resistance, 2),
+                "trend":         trend,
+                "risk_level":    risk_level,
+                "kline_pattern": kline_pattern,
+                "win_rate":      win_rate,
+                "rr_ratio":      round(reward / risk, 2),
+            })
+        except Exception:
+            pass
+        if i % 50 == 0:
+            print(f"[unified] 掃描進度 {i}/{len(batch)}，通過 {len(scan_results)} 檔")
+            _time.sleep(2)
+        else:
+            _time.sleep(0.4)
+
+    print(f"[unified] 全台掃描完畢：{len(scan_results)} 檔")
+    if scan_results:
+        for s in scan_results:
+            try:
+                s["name"] = fetch_stock_name(s["stock_id"])
+            except Exception:
+                pass
+        generate_scan_result(scan_results)
+
+    # ── Step 2：新聞選股 ──
+    print("[unified] 爬取鉅亨新聞...")
+    news_list = fetch_cnyes_news(max_items=100)
+    all_codes = []
+    for n in news_list:
+        for c in n["codes"]:
+            if c not in all_codes:
+                all_codes.append(c)
+    print(f"[unified] 新聞候選代號：{len(all_codes)} 個")
+
+    if not all_codes:
+        print("[unified] ⚠️ 無新聞候選代號，跳過選股")
+        return
+
+    filtered = run_filter(all_codes, news_list, max_results=20, delay=1.2)
+    if not filtered:
+        print("[unified] ⚠️ 無股票通過篩選")
+        return
+
+    for stock in filtered:
+        stock["name"] = fetch_stock_name(stock["stock_id"])
+
+    output_path = generate_picks_html(filtered)
+    print(f"[unified] === 統合選股完成：{output_path} ===")
+
+
 if __name__ == "__main__":
     if "--schedule" in sys.argv:
-        # 排程模式：常駐背景，每日 14:35 自動跑
         from scheduler import main as schedule_main
         schedule_main()
+    elif "--unified" in sys.argv:
+        run_unified_scan()
     else:
         main()

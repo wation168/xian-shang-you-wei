@@ -487,6 +487,14 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
       <div class="ma-body" id="maBody"></div>
     </div>
 
+    <div style="padding:0 0 12px">
+      <button id="reportBtn" onclick="doGenerateReport()" data-sid=""
+        style="width:100%;padding:10px;background:var(--bg2);border:.5px solid var(--border2);
+               color:var(--text2);border-radius:10px;font-size:13px;cursor:pointer;
+               display:flex;align-items:center;justify-content:center;gap:6px">
+        📄 產出完整分析報告
+      </button>
+    </div>
     <div class="disc">本系統僅提供技術分析輔助，不構成任何投資建議或獲利保證。投資有風險，請自行判斷。資料來源：Yahoo Finance，盤後更新。</div>
 
     <!-- 籌碼面（摺疊） -->
@@ -1453,6 +1461,28 @@ function renderResult(d,enabledMA){
   loadPeerGroup(stock_id||id);
   // 啟動即時報價輪詢（盤中自動更新，盤後停止）
   startQuotePolling(stock_id||id);
+  // 報告按鈕顯示
+  const rptBtn=document.getElementById('reportBtn');
+  if(rptBtn){rptBtn.dataset.sid=stock_id||id;}
+}
+
+async function doGenerateReport(){
+  const btn=document.getElementById('reportBtn');
+  if(!btn)return;
+  const sid=btn.dataset.sid||'';
+  if(!sid)return;
+  btn.disabled=true;btn.textContent='產出中...';
+  try{
+    const r=await fetch(API+'/api/report/generate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({stock_id:sid})
+    });
+    const j=await r.json();
+    if(j.ok&&j.url){window.open(j.url,'_blank');}
+    else{alert('報告產出失敗，請稍後再試');}
+  }catch(e){alert('報告產出失敗');}
+  finally{btn.disabled=false;btn.textContent='📄 產出完整分析報告';}
 }
 
 function recalcMA(){
@@ -3443,6 +3473,27 @@ async function showMyPage(){
         <button onclick="doAddAlert()" style="width:100%;padding:8px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">新增提醒</button>
         <div id="alertErr" style="font-size:12px;color:#f87171;min-height:16px;margin-top:4px;text-align:center"></div>
       </div>` : ''}
+      <div class="member-card" style="margin-top:0" id="referralCard">
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px">🎁 邀請好友</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">邀請 3 位好友完成首次查詢，即可永久解鎖全功能（等同付費會員）</div>
+        <div id="referralLoading" style="font-size:12px;color:var(--text3)">載入中...</div>
+        <div id="referralContent" style="display:none">
+          <div style="margin-bottom:8px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:4px">進度</div>
+            <div style="background:var(--bg3);border-radius:6px;height:8px;overflow:hidden;margin-bottom:4px">
+              <div id="referralBar" style="height:100%;background:var(--green);transition:width .3s;border-radius:6px"></div>
+            </div>
+            <div id="referralCount" style="font-size:12px;color:var(--text3)"></div>
+          </div>
+          <div style="background:var(--bg3);border-radius:8px;padding:8px 10px;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+            <span id="referralLink" style="flex:1;font-size:11px;color:var(--text2);word-break:break-all;font-family:var(--mono)"></span>
+            <button onclick="copyReferralLink()" style="padding:4px 10px;background:var(--green);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">複製</button>
+          </div>
+          <div id="referralUnlocked" style="display:none;background:var(--dn-l);border-radius:8px;padding:10px;font-size:13px;color:var(--dn);font-weight:600;text-align:center">
+            ✅ 已解鎖全功能！感謝您的分享
+          </div>
+        </div>
+      </div>
       <div class="member-card" style="margin-top:0">
         <div style="font-size:13px;font-weight:600;margin-bottom:10px">帳號設定</div>
         <button onclick="openChangePwdModal()" style="width:100%;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left">🔐 更改密碼</button>
@@ -3451,6 +3502,37 @@ async function showMyPage(){
     </div>`;
 
   if(isPaid) _loadAlerts();
+  _loadReferralStatus();
+}
+
+async function _loadReferralStatus(){
+  const card=document.getElementById('referralCard');
+  if(!card)return;
+  const token=localStorage.getItem('token');
+  if(!token)return;
+  try{
+    const r=await fetch(API+'/api/referral/status',{headers:{Authorization:'Bearer '+token}});
+    if(!r.ok)return;
+    const d=await r.json();
+    document.getElementById('referralLoading').style.display='none';
+    document.getElementById('referralContent').style.display='';
+    const pct=Math.min(d.completed_count/d.required_count*100,100);
+    document.getElementById('referralBar').style.width=pct+'%';
+    document.getElementById('referralCount').textContent=`已邀請 ${d.completed_count} / ${d.required_count} 位`;
+    document.getElementById('referralLink').textContent=d.invite_link;
+    document.getElementById('referralLink').dataset.link=d.invite_link;
+    if(d.unlocked){
+      document.getElementById('referralUnlocked').style.display='';
+    }
+  }catch(e){}
+}
+
+function copyReferralLink(){
+  const link=document.getElementById('referralLink').dataset.link||'';
+  if(!link)return;
+  navigator.clipboard.writeText(link).then(()=>alert('邀請連結已複製！')).catch(()=>{
+    prompt('請手動複製以下連結：',link);
+  });
 }
 
 async function _loadAlerts(){
