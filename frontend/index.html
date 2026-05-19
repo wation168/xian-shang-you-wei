@@ -156,6 +156,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .rr-tag.mid{background:var(--amber)}
 .rr-tag.bad{background:var(--up)}
 .rr-desc{font-size:10px;color:var(--text3);margin-top:4px}
+/* ── 分析結果鎖定遮罩 ── */
+.lock-ov{position:absolute;inset:0;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);background:rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;z-index:5;border-radius:inherit;cursor:pointer}
+.lock-ov-msg{font-size:11px;font-weight:600;padding:6px 14px;background:var(--bg);border-radius:8px;color:var(--text2);box-shadow:0 2px 8px rgba(0,0,0,.14);white-space:nowrap}
 
 /* ── 圖表 ── */
 .chart-box{border:.5px solid var(--border);border-radius:var(--radius-lg);margin-bottom:12px;background:var(--bg);overflow:hidden}
@@ -297,7 +300,7 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
     <div class="logo" id="logoEl" onclick="adminTap()" style="cursor:default">線上<em>有位</em></div>
     <div class="search-wrap">
       <div class="search-box">
-        <input type="text" id="stockInput" placeholder="代號或股名 例：2330 台積電" inputmode="text" autocomplete="off"/>
+        <input type="text" id="stockInput" placeholder="輸入股票代號或名稱，如：2330 或 台積電" inputmode="text" autocomplete="off"/>
         <div class="search-dropdown" id="searchDropdown"></div>
       </div>
       <button class="btn-analyze" onclick="analyzeStock()">分析</button>
@@ -330,13 +333,20 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
           <div class="risk-badge" id="riskBadge">—</div>
         </div>
       </div>
-      <ul class="summary-list" id="summaryList"></ul>
+      <div id="summaryWrap" style="position:relative"><ul class="summary-list" id="summaryList"></ul></div>
+      <div id="reportCta" onclick="doGenerateReport()" style="display:none;margin-top:12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 16px;align-items:center;justify-content:space-between;gap:12px;cursor:pointer">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#1e3a5f">📄 完整個股報告</div>
+          <div style="font-size:11px;color:#6b7280;margin-top:2px">含新聞題材、支撐壓力、操作建議</div>
+        </div>
+        <button id="reportBtn" data-sid="" style="background:#3b82f6;color:#fff;border:none;border-radius:20px;padding:6px 16px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;pointer-events:none">立即產出 →</button>
+      </div>
     </div>
 
     <!-- 指標卡 -->
     <div class="metrics">
       <div class="metric">
-        <div class="m-lbl">現價 <span id="quoteLiveTag" style="display:none;font-size:9px;color:var(--green);font-weight:600;letter-spacing:0.3px">● LIVE</span></div>
+        <div class="m-lbl">現價 <span id="quoteLiveTag" style="display:none;font-size:9px;color:var(--green);font-weight:600;letter-spacing:0.3px">● LIVE</span><span id="quotePrevCloseTag" style="display:none;font-size:9px;color:var(--text3);font-weight:500;margin-left:2px">昨收</span></div>
         <div class="m-val lg" id="m-price">—</div>
         <div class="m-sub" id="m-change" style="font-size:11px;margin-top:2px"></div>
       </div>
@@ -487,15 +497,7 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
       <div class="ma-body" id="maBody"></div>
     </div>
 
-    <div style="padding:0 0 12px">
-      <button id="reportBtn" onclick="doGenerateReport()" data-sid=""
-        style="width:100%;padding:10px;background:var(--bg2);border:.5px solid var(--border2);
-               color:var(--text2);border-radius:10px;font-size:13px;cursor:pointer;
-               display:flex;align-items:center;justify-content:center;gap:6px">
-        📄 產出完整分析報告
-      </button>
-    </div>
-    <div class="disc">本系統僅提供技術分析輔助，不構成任何投資建議或獲利保證。投資有風險，請自行判斷。資料來源：Yahoo Finance，盤後更新。</div>
+    <div class="disc">本系統僅提供技術分析輔助，不構成任何投資建議或獲利保證。投資有風險，請自行判斷。資料來源：FinMind / TWSE，盤後更新。</div>
 
     <!-- 籌碼面（摺疊） -->
     <div id="chipsSection" style="display:none;margin-top:4px">
@@ -556,13 +558,13 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
 <div id="guestLimitModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1001;align-items:center;justify-content:center;padding:20px">
   <div style="background:var(--bg2);border-radius:20px;max-width:340px;width:100%;padding:32px 24px;text-align:center">
     <div style="font-size:40px;margin-bottom:12px">🔓</div>
-    <h3 style="font-size:18px;font-weight:700;margin-bottom:8px">免費試用已用完</h3>
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:8px">今日試用次數已用完</h3>
     <p style="font-size:13px;color:var(--text3);line-height:1.6;margin-bottom:20px">
-      登入後每日可查詢 <strong>3 次</strong><br>升級付費方案可無限查詢
+      加入<strong>免費會員</strong>，解鎖每日 <strong>3 次</strong>查詢<br>升級付費方案可無限查詢
     </p>
     <button onclick="_hideGuestLimitModal();showLoginModal();"
-      style="width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px">
-      登入 / 加入會員
+      style="width:100%;padding:12px;background:#3b82f6;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px">
+      免費註冊 / 登入
     </button>
     <button onclick="_hideGuestLimitModal()"
       style="width:100%;padding:10px;background:transparent;color:var(--text3);border:none;border-radius:10px;font-size:13px;cursor:pointer">
@@ -571,17 +573,44 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
   </div>
 </div>
 
+<!-- 報告產出次數用完 Modal -->
+<div id="reportLimitModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1001;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--bg2);border-radius:20px;max-width:340px;width:100%;padding:32px 24px;text-align:center">
+    <div style="font-size:40px;margin-bottom:12px">📄</div>
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:8px">完整報告為進階功能</h3>
+    <p style="font-size:13px;color:var(--text3);line-height:1.6;margin-bottom:20px">
+      升級付費方案，或邀請 <strong>3 位好友</strong><br>即可無限產出個股完整報告
+    </p>
+    <button onclick="document.getElementById('reportLimitModal').style.display='none';showUpgradeModal()"
+      style="width:100%;padding:12px;background:#3b82f6;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px">
+      升級付費方案
+    </button>
+    <button onclick="document.getElementById('reportLimitModal').style.display='none';showTab('my')"
+      style="width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px">
+      邀請 3 位好友，免費解鎖 30 天
+    </button>
+    <button onclick="document.getElementById('reportLimitModal').style.display='none'"
+      style="width:100%;padding:10px;background:transparent;color:var(--text3);border:none;border-radius:10px;font-size:13px;cursor:pointer">
+      取消
+    </button>
+  </div>
+</div>
+
 <!-- 免費會員次數用完 Modal -->
 <div id="freeLimitModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1001;align-items:center;justify-content:center;padding:20px">
   <div style="background:var(--bg2);border-radius:20px;max-width:340px;width:100%;padding:32px 24px;text-align:center">
-    <div style="font-size:40px;margin-bottom:12px">⭐</div>
+    <div style="font-size:40px;margin-bottom:12px">🔒</div>
     <h3 style="font-size:18px;font-weight:700;margin-bottom:8px">今日查詢次數已用完</h3>
     <p style="font-size:13px;color:var(--text3);line-height:1.6;margin-bottom:20px">
-      免費方案每日限查 <strong>3 次</strong><br>升級付費方案，無限查詢不受限
+      免費會員每日 <strong>3 次</strong>查詢已用完<br>升級或邀請好友可繼續使用
     </p>
     <button onclick="_hideFreeLimitModal();showUpgradeModal()"
+      style="width:100%;padding:12px;background:#3b82f6;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px">
+      升級付費方案
+    </button>
+    <button onclick="_hideFreeLimitModal();showTab('my')"
       style="width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px">
-      立即升級付費方案
+      邀請 3 位朋友，免費解鎖 30 天
     </button>
     <button onclick="_hideFreeLimitModal()"
       style="width:100%;padding:10px;background:transparent;color:var(--text3);border:none;border-radius:10px;font-size:13px;cursor:pointer">
@@ -647,6 +676,22 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
   </div>
 </div>
 
+<!-- 免費註冊成功 — 邀請碼 Modal -->
+<div id="referralWelcomeModal" class="modal-overlay" style="display:none">
+  <div class="modal-box" style="max-width:360px;text-align:center">
+    <div class="modal-title">🎉 歡迎加入！</div>
+    <p style="color:var(--text2);font-size:14px;line-height:1.6;margin:0 0 16px">邀請 3 位好友完成首次查詢，即可解鎖全功能 30 天。<br>之後可在「我的」頁面隨時查看邀請連結。</p>
+    <div id="rwmLoading" style="color:var(--text3);font-size:13px;margin-bottom:12px">載入邀請連結中…</div>
+    <div id="rwmContent" style="display:none;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 12px">
+        <span id="rwmLink" style="flex:1;font-size:12px;color:var(--text2);word-break:break-all;font-family:monospace;text-align:left"></span>
+        <button onclick="copyReferralWelcomeLink()" style="padding:4px 10px;background:var(--green);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">複製</button>
+      </div>
+    </div>
+    <button class="modal-btn" onclick="hideReferralWelcomeModal()">開始使用</button>
+  </div>
+</div>
+
 <!-- 升級方案 Modal -->
 <div id="upgradeModal" class="modal-overlay" style="display:none">
   <div class="modal-box">
@@ -658,7 +703,8 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
       <button onclick="doUpgrade('quarterly',this)" style="width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:14px;cursor:pointer;text-align:left;font-weight:600">季費方案 <span style="float:right">$999／季 ⭐</span></button>
       <button onclick="doUpgrade('yearly',this)" style="width:100%;padding:12px;background:var(--bg3);color:var(--text);border:none;border-radius:10px;font-size:14px;cursor:pointer;text-align:left">年費方案 <span style="float:right;color:var(--green);font-weight:700">$3,688／年</span></button>
     </div>
-    <button onclick="hideUpgradeModal()" style="width:100%;margin-top:12px;padding:10px;background:transparent;color:var(--text3);border:none;font-size:13px;cursor:pointer">取消</button>
+    <button onclick="hideUpgradeModal();showTab('my')" style="width:100%;margin-top:12px;padding:12px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer">或邀請3位好友免費解鎖30天</button>
+    <button onclick="hideUpgradeModal()" style="width:100%;margin-top:8px;padding:10px;background:transparent;color:var(--text3);border:none;font-size:13px;cursor:pointer">取消</button>
   </div>
 </div>
 
@@ -1111,6 +1157,7 @@ function removeWatch(id){
   showWatchList();
 }
 function toggleWatch(id,name){
+  if(!_authUser){ showLoginModal(); return; }
   if(watchList.find(s=>s.id===id)){
     removeWatch(id);
   }else{
@@ -1137,6 +1184,15 @@ function qpAndHome(id){
 // ══════════════════════════════════════
 function showHistory(){
   const el=document.getElementById('pageContent');
+  if(!_authUser){
+    el.innerHTML=`<div style="padding:60px 0;text-align:center;color:var(--text3)">
+      <div style="font-size:36px;margin-bottom:12px">📈</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:6px;color:var(--text)">登入後查看歷史紀錄</div>
+      <div style="font-size:13px;margin-bottom:20px">分析紀錄需登入才能同步保存</div>
+      <button onclick="showLoginModal()" style="padding:10px 24px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">登入 / 加入會員</button>
+    </div>`;
+    return;
+  }
   if(!historyList.length){
     el.innerHTML=`<div style="padding:60px 0;text-align:center;color:var(--text3)">
       <div style="font-size:36px;margin-bottom:12px">📈</div>
@@ -1267,6 +1323,11 @@ async function analyzeStock(){
   const enabled=maSettings.filter(m=>m.enabled&&m.n>0);
   const maParts=enabled.map((m,i)=>`ma${i+1}=${m.n}`).join('&');
   const url=`${getAPI()}/api/analyze/${id}?tf=${currentTF}&${maParts}`;
+  // 遊客第二次起：每日 1 次前端限制
+  if(!_authUser && localStorage.getItem('guest_visited')){
+    const _gk='guest_day_'+new Date().toISOString().slice(0,10);
+    if(parseInt(localStorage.getItem(_gk)||'0',10)>=1){_showGuestLimitModal();return;}
+  }
   setSt('<span class="spin"></span>分析中...',false);
   stopQuotePolling();  // 換股時停止舊輪詢
   document.getElementById('resultEl').classList.remove('show');
@@ -1463,26 +1524,42 @@ function renderResult(d,enabledMA){
   startQuotePolling(stock_id||id);
   // 報告按鈕顯示
   const rptBtn=document.getElementById('reportBtn');
-  if(rptBtn){rptBtn.dataset.sid=stock_id||id;}
+  if(rptBtn){
+    rptBtn.dataset.sid=stock_id||id;
+    const cta=document.getElementById('reportCta');
+    if(cta) cta.style.display='flex';
+  }
+  // 免費會員記錄當日查詢次數（付費不計）
+  if(_authUser && !_hasPremium()) _incFreeQueryCount();
+  // 遊客：標記首次訪問並記錄每日次數
+  if(!_authUser){
+    localStorage.setItem('guest_visited','1');
+    const _gk='guest_day_'+new Date().toISOString().slice(0,10);
+    localStorage.setItem(_gk,String(parseInt(localStorage.getItem(_gk)||'0',10)+1));
+  }
+  // 依登入/付費狀態套用分析結果遮罩
+  _applyResultMasks();
 }
 
 async function doGenerateReport(){
+  if(!_authUser){ showLoginModal(); return; }
   const btn=document.getElementById('reportBtn');
   if(!btn)return;
   const sid=btn.dataset.sid||'';
   if(!sid)return;
   btn.disabled=true;btn.textContent='產出中...';
   try{
-    const r=await fetch(API+'/api/report/generate',{
+    const r=await fetch(getAPI()+'/api/report/generate',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{'Content-Type':'application/json',..._authHeaders()},
       body:JSON.stringify({stock_id:sid})
     });
+    if(r.status===403){ document.getElementById('reportLimitModal').style.display='flex'; return; }
     const j=await r.json();
     if(j.ok&&j.url){window.open(j.url,'_blank');}
     else{alert('報告產出失敗，請稍後再試');}
   }catch(e){alert('報告產出失敗');}
-  finally{btn.disabled=false;btn.textContent='📄 產出完整分析報告';}
+  finally{btn.disabled=false;btn.textContent='立即產出 →';}
 }
 
 function recalcMA(){
@@ -1769,7 +1846,11 @@ function attachInteractions(){
   // 觸控：拖拉 + 雙指縮放
   let lastTouchDist=0;
   kCv.addEventListener('touchstart',e=>{
-    if(e.touches.length===1){C.dragStartX=e.touches[0].clientX;C.dragStartEnd=C.viewEnd;}
+    if(e.touches.length===1){
+      C.dragStartX=e.touches[0].clientX;C.dragStartEnd=C.viewEnd;
+      C._txStart=e.touches[0].clientX;C._tyStart=e.touches[0].clientY;
+      C._touchMode='pending';
+    }
     if(e.touches.length===2){
       const dx=e.touches[0].clientX-e.touches[1].clientX;
       const dy=e.touches[0].clientY-e.touches[1].clientY;
@@ -1779,11 +1860,18 @@ function attachInteractions(){
   kCv.addEventListener('touchmove',e=>{
     e.preventDefault();
     if(e.touches.length===1){
-      const W=kCv.getBoundingClientRect().width;
-      const pxPerBar=(W-56)/C.viewCount;
-      const shift=Math.round((e.touches[0].clientX-C.dragStartX)/pxPerBar);
-      const newEnd=Math.max(0,Math.min(C.bars.length-C.viewCount,C.dragStartEnd+shift));
-      if(newEnd!==C.viewEnd){C.viewEnd=newEnd;drawChart();}
+      const t=e.touches[0];
+      const dxAbs=Math.abs(t.clientX-(C._txStart||t.clientX));
+      if(C._touchMode==='pending') C._touchMode=dxAbs>12?'drag':'crosshair';
+      if(C._touchMode==='drag'){
+        const W=kCv.getBoundingClientRect().width;
+        const pxPerBar=(W-56)/C.viewCount;
+        const shift=Math.round((t.clientX-C.dragStartX)/pxPerBar);
+        C.viewEnd=Math.max(0,Math.min(C.bars.length-C.viewCount,C.dragStartEnd+shift));
+      }
+      // always update crosshair on touchmove so sliding across bars updates the position
+      const rect=kCv.getBoundingClientRect();
+      _drawCrosshair(t.clientX-rect.left,t.clientY-rect.top);
     }
     if(e.touches.length===2){
       const dx=e.touches[0].clientX-e.touches[1].clientX;
@@ -1797,14 +1885,15 @@ function attachInteractions(){
       lastTouchDist=dist;
     }
   },{passive:false});
+  kCv.addEventListener('touchend',()=>{
+    drawChart();
+    C._touchMode='pending';
+  },{passive:true});
 
-  // 十字線
-  kCv.addEventListener('mousemove',e=>{
-    if(C.isDragging||!C.bars.length)return;
-    const rect=kCv.getBoundingClientRect();
-    const mx=e.clientX-rect.left;
-    const my=e.clientY-rect.top;   // 滑鼠 Y 座標
-    const W=kCv.offsetWidth||rect.width;
+  // 十字線（共用函式，滑鼠與觸控均呼叫）
+  function _drawCrosshair(mx,my){
+    if(!C.bars.length)return;
+    const W=kCv.offsetWidth||kCv.getBoundingClientRect().width;
     const PL=4,PR=52,PT=18,PB=18;
     const cW=W-PL-PR,cH=360-PT-PB;
     const{slice:bars,offset}=getViewBars();const n=bars.length;
@@ -1816,7 +1905,6 @@ function attachInteractions(){
     const upC=dark?'#F06060':'#D63B3B';
     const dnC=dark?'#2DC88A':'#1A8F5E';
 
-    // 更新資訊欄
     document.getElementById('xhairBar').innerHTML=`
       <span style="color:var(--text3)">${b.date}</span>
       <span>開${b.open}</span>
@@ -1829,18 +1917,14 @@ function attachInteractions(){
         return v!=null?'<span style="color:'+m.color+'">M'+m.n+' '+v+'</span>':'';
       }).join('')}`;
 
-    // 重繪圖表再疊加十字線
     drawChart();
 
-    // 計算 py 函式（跟 drawChart 一致）
     const allH=bars.map(b=>b.high),allL=bars.map(b=>b.low);
     C.maArrays.forEach(m=>{for(let i=offset;i<offset+n;i++){const v=m.data[i];if(v){allH.push(v);allL.push(v);}}});
     allH.push(C.resistance*1.004);allL.push(C.support*0.996);
     const pMax=Math.max(...allH),pMin=Math.min(...allL),pRange=pMax-pMin||1;
     const pyFn=p=>PT+cH-(p-pMin)/pRange*cH;
     const pxFn=i=>PL+(i+0.5)*(cW/n);
-
-    // 滑鼠實際 Y 對應的價格
     const mousePrice=pMin+(1-(my-PT)/cH)*pRange;
 
     const kCtx=kCv.getContext('2d');
@@ -1848,30 +1932,19 @@ function attachInteractions(){
     kCtx.save();
     kCtx.scale(dpr,dpr);
 
-    // X：磁吸到 K 棒中心；Y：跟著滑鼠實際位置
     const x=pxFn(idx);
-    const yMouse=Math.max(PT, Math.min(PT+cH, my));  // 限制在圖表範圍內
+    const yMouse=Math.max(PT,Math.min(PT+cH,my));
     const KH=360;
     const lineColor=dark?'rgba(255,255,255,.7)':'rgba(0,0,0,.7)';
     const labelBg=isUp?(dark?'#F06060':'#D63B3B'):(dark?'#2DC88A':'#1A8F5E');
 
-    // 垂直線（從頂部延伸到底部，超出成交量圖）
     kCtx.setLineDash([4,3]);
     kCtx.strokeStyle=lineColor;
     kCtx.lineWidth=1;
-    kCtx.beginPath();
-    kCtx.moveTo(x,0);
-    kCtx.lineTo(x,KH);
-    kCtx.stroke();
-
-    // 水平線 — 跟著滑鼠 Y 位置（自由移動）
-    kCtx.beginPath();
-    kCtx.moveTo(0,yMouse);
-    kCtx.lineTo(W,yMouse);
-    kCtx.stroke();
+    kCtx.beginPath();kCtx.moveTo(x,0);kCtx.lineTo(x,KH);kCtx.stroke();
+    kCtx.beginPath();kCtx.moveTo(0,yMouse);kCtx.lineTo(W,yMouse);kCtx.stroke();
     kCtx.setLineDash([]);
 
-    // 右側價格標籤 — 顯示滑鼠對應的實際價格
     const priceLabel=mousePrice.toFixed(1);
     const labelW=priceLabel.length*6.5+10;
     kCtx.fillStyle='rgba(80,80,80,.85)';
@@ -1879,19 +1952,12 @@ function attachInteractions(){
     if(kCtx.roundRect) kCtx.roundRect(W-PR+2,yMouse-9,labelW,18,3);
     else kCtx.rect(W-PR+2,yMouse-9,labelW,18);
     kCtx.fill();
-    kCtx.fillStyle='#fff';
-    kCtx.font='bold 10px sans-serif';
-    kCtx.textAlign='left';
+    kCtx.fillStyle='#fff';kCtx.font='bold 10px sans-serif';kCtx.textAlign='left';
     kCtx.fillText(priceLabel,W-PR+6,yMouse+4);
 
-    // 十字中心圓點 — 磁吸到 K 棒收盤價 X，滑鼠 Y
-    const yClose=pyFn(b.close);
     kCtx.fillStyle=labelBg;
-    kCtx.beginPath();
-    kCtx.arc(x,yMouse,3.5,0,Math.PI*2);
-    kCtx.fill();
+    kCtx.beginPath();kCtx.arc(x,yMouse,3.5,0,Math.PI*2);kCtx.fill();
 
-    // 頂部日期標籤
     const dateLabel=b.date.slice(2);
     const dLabelW=dateLabel.length*5.5+8;
     kCtx.fillStyle=dark?'rgba(60,60,58,.9)':'rgba(240,240,238,.9)';
@@ -1900,26 +1966,21 @@ function attachInteractions(){
     else kCtx.rect(x-dLabelW/2,2,dLabelW,14);
     kCtx.fill();
     kCtx.fillStyle=dark?'rgba(255,255,255,.8)':'rgba(0,0,0,.7)';
-    kCtx.font='9px sans-serif';
-    kCtx.textAlign='center';
+    kCtx.font='9px sans-serif';kCtx.textAlign='center';
     kCtx.fillText(dateLabel,x,12);
-
     kCtx.restore();
 
-    // 成交量圖也畫垂直線
     const vCv=document.getElementById('volChart');
     const vCtx=vCv.getContext('2d');
-    vCtx.save();
-    vCtx.scale(dpr,dpr);
-    vCtx.setLineDash([4,3]);
-    vCtx.strokeStyle=lineColor;
-    vCtx.lineWidth=1;
-    vCtx.beginPath();
-    vCtx.moveTo(x,0);
-    vCtx.lineTo(x,60);
-    vCtx.stroke();
-    vCtx.setLineDash([]);
-    vCtx.restore();
+    vCtx.save();vCtx.scale(dpr,dpr);
+    vCtx.setLineDash([4,3]);vCtx.strokeStyle=lineColor;vCtx.lineWidth=1;
+    vCtx.beginPath();vCtx.moveTo(x,0);vCtx.lineTo(x,60);vCtx.stroke();
+    vCtx.setLineDash([]);vCtx.restore();
+  }
+  kCv.addEventListener('mousemove',e=>{
+    if(C.isDragging||!C.bars.length)return;
+    const rect=kCv.getBoundingClientRect();
+    _drawCrosshair(e.clientX-rect.left,e.clientY-rect.top);
   });
 
   kCv.addEventListener('mouseleave',()=>{
@@ -2249,6 +2310,8 @@ function updateQuoteUI(d){
 
   // LIVE 標記：盤中顯示，盤後隱藏
   liveTag.style.display = d.is_trading ? 'inline' : 'none';
+  const prevCloseTag = document.getElementById('quotePrevCloseTag');
+  if(prevCloseTag) prevCloseTag.style.display = d.price_note ? 'inline' : 'none';
 
   // statusBar 補充即時時間
   if(d.is_trading && d.time){
@@ -2876,6 +2939,8 @@ async function _initAuth(){
     // 遊客：不強制登入，直接進入頁面
     _authUser = null;
     _updateGuestUI();
+    // landing 帶 ?login=1 跳轉過來時自動開登入 Modal
+    if(new URLSearchParams(location.search).get('login') === '1') showLoginModal();
     return;
   }
   try{
@@ -2965,8 +3030,29 @@ async function doRegister(){
     });
     const data = await r.json();
     if(!r.ok){ errEl.textContent = data.detail || '註冊失敗'; return; }
+    // 自動登入
+    try{
+      const lr = await fetch(`${getAPI()}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: pwd }),
+        signal: AbortSignal.timeout(10000)
+      });
+      const ld = await lr.json();
+      if(lr.ok){
+        _setToken(ld.token);
+        _authUser = ld;
+        hideLoginModal();
+        _onLoginSuccess();
+        const me = await fetch(`${getAPI()}/auth/me`, { headers: _authHeaders() });
+        if(me.ok){ _authUser = await me.json(); _applyResultMasks(); }
+        showReferralWelcomeModal();
+        return;
+      }
+    } catch(e){}
+    // 自動登入失敗，退回手動登入
     errEl.style.color = 'var(--green)';
-    errEl.textContent = '帳號建立成功！正在切換至登入…';
+    errEl.textContent = '帳號建立成功！請登入以繼續。';
     document.getElementById('loginEmail').value = email;
     document.getElementById('loginPwd').value = pwd;
     setTimeout(() => switchLoginTab('login'), 1000);
@@ -3016,11 +3102,92 @@ async function doUpgrade(plan, btn){
   }
 }
 
+function _hasPremium(){
+  if(!_authUser) return false;
+  const u = _authUser;
+  if(u.plan !== 'free' && u.is_active) return true;
+  if(u.referral_unlocked){
+    const exp = u.referral_expire_date;
+    if(!exp) return true; // 舊帳號無過期日，向下相容
+    return exp >= new Date().toISOString().slice(0,10);
+  }
+  return false;
+}
+
+function _freeQueryKey(){
+  return 'free_query_count_' + new Date().toISOString().slice(0,10);
+}
+function _getFreeQueryCount(){
+  return parseInt(localStorage.getItem(_freeQueryKey())||'0', 10);
+}
+function _incFreeQueryCount(){
+  const k = _freeQueryKey();
+  localStorage.setItem(k, (parseInt(localStorage.getItem(k)||'0', 10) + 1).toString());
+}
+
+function _applyResultMasks(){
+  if(!document.getElementById('resultEl').classList.contains('show')) return;
+
+  let locked, msg, action;
+  if(_hasPremium()){
+    locked = false;
+  } else if(_authUser){
+    const cnt = _getFreeQueryCount();
+    locked = cnt > 3;
+    msg = '升級或邀請3位好友查看完整分析';
+    action = showUpgradeModal;
+  } else {
+    locked = true;
+    msg = '登入後查看完整分析';
+    action = showLoginModal;
+  }
+
+  // 壓力區 / 防守位 metric — blur only（現價、趨勢、支撐區保持可見）
+  const metricRes  = document.getElementById('m-res')?.closest('.metric');
+  const metricStop = document.getElementById('m-stop')?.closest('.metric');
+  [metricRes, metricStop].forEach(el => {
+    if(!el) return;
+    el.style.filter        = locked ? 'blur(5px)' : '';
+    el.style.pointerEvents = locked ? 'none' : '';
+    el.style.userSelect    = locked ? 'none' : '';
+  });
+
+  // 損益比卡 — overlay + 升級提示
+  const rrCard = document.querySelector('.rr-card');
+  if(rrCard){
+    rrCard.style.position = 'relative';
+    let ov = rrCard.querySelector('.lock-ov');
+    if(locked){
+      if(!ov){ ov = document.createElement('div'); ov.className = 'lock-ov'; rrCard.appendChild(ov); }
+      ov.innerHTML = `<div class="lock-ov-msg">${msg}</div>`;
+      ov.style.display = 'flex';
+      ov.onclick = action;
+    } else if(ov){ ov.style.display = 'none'; }
+  }
+
+  // 風險等級 badge — blur
+  const badge = document.getElementById('riskBadge');
+  if(badge) badge.style.filter = locked ? 'blur(4px)' : '';
+
+  // 分析摘要 — overlay（backdrop-filter 負責 blur + 半透明）+ 升級提示
+  const sumWrap = document.getElementById('summaryWrap');
+  if(sumWrap){
+    let sumOv = sumWrap.querySelector('.lock-ov');
+    if(locked){
+      if(!sumOv){ sumOv = document.createElement('div'); sumOv.className = 'lock-ov'; sumWrap.appendChild(sumOv); }
+      sumOv.innerHTML = `<div class="lock-ov-msg">${msg}</div>`;
+      sumOv.style.display = 'flex';
+      sumOv.onclick = action;
+    } else if(sumOv){ sumOv.style.display = 'none'; }
+  }
+}
+
 function _updateGuestUI(){
   const myBtn = document.querySelector('.nav-btn[onclick*="my"]');
   if(myBtn) myBtn.innerHTML = '<div class="nav-icon">👤</div>登入';
   const topLoginBtn = document.getElementById('topLoginBtn');
   if(topLoginBtn) topLoginBtn.style.display = '';
+  _applyResultMasks();
 }
 
 // ── 遊客次數用完 Modal ──
@@ -3076,9 +3243,9 @@ async function doLogin(){
     _authUser = data;
     hideLoginModal();
     _onLoginSuccess();
-    // 更新完整用戶資訊
+    // 更新完整用戶資訊（含 referral_expire_date 等完整欄位）
     const me = await fetch(`${getAPI()}/auth/me`, { headers: _authHeaders() });
-    if(me.ok) _authUser = await me.json();
+    if(me.ok){ _authUser = await me.json(); _applyResultMasks(); }
   } catch(e){
     errEl.textContent = '連線失敗，請稍後再試';
   } finally {
@@ -3094,6 +3261,7 @@ function _onLoginSuccess(){
   const myBtn = document.querySelector('.nav-btn[onclick*="my"]');
   if(myBtn) myBtn.innerHTML = '<div class="nav-icon">👤</div>我的';
   _subscribeWebPush();
+  _applyResultMasks();
 }
 
 async function _subscribeWebPush(){
@@ -3306,16 +3474,38 @@ async function showPicksPage(){
   const overlay = document.getElementById('pageOverlay');
   overlay.style.display = 'block';
 
-  // 遊客 → 登入提示
-  if(!_authUser){
+  // 遊客 / 免費會員（邀請未解鎖或已過期）→ 鎖定預覽
+  if(!_authUser || !_hasPremium()){
     overlay.style.display = 'none';
-    _showGuestLimitModal();
-    return;
-  }
-  // 免費會員 → 升級提示
-  if(_authUser.plan === 'free'){
-    overlay.style.display = 'none';
-    _showFreeLimitModal();
+    const isGuest = !_authUser;
+    const lockMsg = isGuest ? '登入後查看選股名單' : '升級或邀請 3 人解鎖';
+    const lockBtn = isGuest
+      ? `<button onclick="showLoginModal()" style="padding:10px 24px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">登入</button>`
+      : `<button onclick="showUpgradeModal()" style="padding:10px 24px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">立即升級</button>`;
+    const fakeRows = ['2330','2317','2454','3034','6415'].map(id=>`
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:.5px solid var(--border)">
+        <span style="font-weight:600;font-size:14px;color:var(--text)">${id}</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:12px;color:var(--text3)">— 分</span>
+          <button disabled title="升級或邀請 3 人解鎖" style="padding:4px 10px;background:var(--bg3);color:var(--text3);border:none;border-radius:6px;font-size:11px;cursor:not-allowed">展開 ▾</button>
+        </div>
+      </div>`).join('');
+    el.innerHTML = `
+      <div style="padding:8px 0">
+        <div style="position:relative">
+          <div style="background:var(--bg2);border-radius:var(--radius-lg);overflow:hidden;filter:blur(2px);pointer-events:none;user-select:none">
+            ${fakeRows}
+          </div>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+            <div style="background:var(--bg2);border-radius:14px;padding:24px 20px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.18);max-width:260px;width:90%">
+              <div style="font-size:36px;margin-bottom:10px">🔒</div>
+              <div style="font-size:15px;font-weight:700;margin-bottom:6px;color:var(--text)">${lockMsg}</div>
+              <div style="font-size:12px;color:var(--text3);margin-bottom:16px;line-height:1.5">精選選股名單為付費功能<br>邀請 3 位好友也可解鎖 30 天</div>
+              ${lockBtn}
+            </div>
+          </div>
+        </div>
+      </div>`;
     return;
   }
 
@@ -3475,7 +3665,7 @@ async function showMyPage(){
       </div>` : ''}
       <div class="member-card" style="margin-top:0" id="referralCard">
         <div style="font-size:13px;font-weight:600;margin-bottom:4px">🎁 邀請好友</div>
-        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">邀請 3 位好友完成首次查詢，即可永久解鎖全功能（等同付費會員）</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">邀請 3 位好友完成首次查詢，即可解鎖全功能 30 天（可重複達成延長）</div>
         <div id="referralLoading" style="font-size:12px;color:var(--text3)">載入中...</div>
         <div id="referralContent" style="display:none">
           <div style="margin-bottom:8px">
@@ -3508,10 +3698,10 @@ async function showMyPage(){
 async function _loadReferralStatus(){
   const card=document.getElementById('referralCard');
   if(!card)return;
-  const token=localStorage.getItem('token');
+  const token=_getToken();
   if(!token)return;
   try{
-    const r=await fetch(API+'/api/referral/status',{headers:{Authorization:'Bearer '+token}});
+    const r=await fetch('https://stock-navigator-api.zeabur.app/api/referral/status',{headers:{Authorization:'Bearer '+token}});
     if(!r.ok)return;
     const d=await r.json();
     document.getElementById('referralLoading').style.display='none';
@@ -3522,7 +3712,12 @@ async function _loadReferralStatus(){
     document.getElementById('referralLink').textContent=d.invite_link;
     document.getElementById('referralLink').dataset.link=d.invite_link;
     if(d.unlocked){
-      document.getElementById('referralUnlocked').style.display='';
+      const expEl = document.getElementById('referralUnlocked');
+      if(expEl){
+        const expDate = d.referral_expire_date ? `（有效至 ${d.referral_expire_date.replace(/-/g,'/')}）` : '';
+        expEl.innerHTML = `✅ 已解鎖全功能！感謝您的分享 ${expDate}`;
+        expEl.style.display = '';
+      }
     }
   }catch(e){}
 }
@@ -3532,6 +3727,38 @@ function copyReferralLink(){
   if(!link)return;
   navigator.clipboard.writeText(link).then(()=>alert('邀請連結已複製！')).catch(()=>{
     prompt('請手動複製以下連結：',link);
+  });
+}
+
+async function showReferralWelcomeModal(){
+  document.getElementById('referralWelcomeModal').style.display = 'flex';
+  document.getElementById('rwmLoading').style.display = '';
+  document.getElementById('rwmContent').style.display = 'none';
+  const token = _getToken();
+  if(!token) return;
+  try{
+    const r = await fetch('https://stock-navigator-api.zeabur.app/api/referral/status', {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+    if(!r.ok) return;
+    const d = await r.json();
+    document.getElementById('rwmLoading').style.display = 'none';
+    document.getElementById('rwmContent').style.display = '';
+    const el = document.getElementById('rwmLink');
+    el.textContent = d.invite_link || '';
+    el.dataset.link = d.invite_link || '';
+  } catch(e){}
+}
+
+function hideReferralWelcomeModal(){
+  document.getElementById('referralWelcomeModal').style.display = 'none';
+}
+
+function copyReferralWelcomeLink(){
+  const link = document.getElementById('rwmLink').dataset.link || '';
+  if(!link) return;
+  navigator.clipboard.writeText(link).then(() => alert('邀請連結已複製！')).catch(() => {
+    prompt('請手動複製以下連結：', link);
   });
 }
 
@@ -3545,7 +3772,7 @@ async function _loadAlerts(){
     if(!list.length){ el.textContent='目前無提醒（最多 10 個）'; return; }
     el.innerHTML = list.map(a=>`
       <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
-        <span style="color:var(--text)"><b>${a.stock_id}</b> ${a.direction==='above'?'漲至':'跌至'} <b style="color:var(--green)">${a.target_price}</b>${a.triggered?'　<span style="color:#22c55e;font-size:11px">✅ 已觸發</span>':''}</span>
+        <span style="color:var(--text)"><b>${a.stock_id}</b> ${a.direction==='above'?'漲至':'跌至'} <b style="color:var(--green)">${a.target_price}</b>${a.triggered?'　<span style="color:#3b82f6;font-size:11px">✅ 已觸發</span>':''}</span>
         <button onclick="doDeleteAlert(${a.id})" style="background:transparent;border:none;color:#f87171;font-size:13px;cursor:pointer;padding:2px 6px">✕</button>
       </div>`).join('');
   } catch(e){ el.textContent='載入失敗'; }

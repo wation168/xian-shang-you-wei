@@ -92,6 +92,30 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
 
 .spin{display:inline-block;width:10px;height:10px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite;margin-right:6px;vertical-align:middle}
 @keyframes sp{to{transform:rotate(360deg)}}
+
+/* ── 留言管理 ── */
+.contact-card{background:var(--bg);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;border:1px solid var(--border)}
+.contact-card:last-child{margin-bottom:0}
+.contact-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px}
+.contact-meta{font-size:11px;color:var(--text3)}
+.contact-email{font-size:12px;font-weight:700;color:var(--green)}
+.contact-body{font-size:13px;color:var(--text);margin-bottom:8px;white-space:pre-wrap;word-break:break-word;line-height:1.6}
+.contact-actions{display:flex;gap:6px;flex-wrap:wrap}
+.contact-reply-list{margin-top:8px;display:flex;flex-direction:column;gap:4px}
+.contact-reply-item{background:rgba(29,158,117,.07);border-left:3px solid var(--green);border-radius:0 6px 6px 0;padding:6px 10px;font-size:12px;color:var(--text2)}
+.reply-box{display:none;margin-top:8px}
+.reply-box textarea{width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--white);color:var(--text);font-size:13px;resize:vertical;min-height:60px;outline:none;font-family:inherit}
+.reply-box textarea:focus{border-color:var(--green)}
+.reply-box-btns{display:flex;gap:6px;margin-top:6px}
+.search-row{margin-bottom:10px}
+.search-row input{width:100%;padding:9px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;outline:none}
+.search-row input:focus{border-color:var(--green)}
+.block-item{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:12px;gap:8px}
+.block-item:last-child{border-bottom:none}
+.block-email{font-weight:700;font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.block-type-badge{font-size:11px;padding:2px 7px;border-radius:20px;font-weight:600;white-space:nowrap;flex-shrink:0}
+.block-comment{background:rgba(245,158,11,.12);color:#b45309}
+.block-login{background:rgba(214,59,59,.12);color:var(--up)}
 </style>
 </head>
 <body>
@@ -148,6 +172,12 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
         <button class="action-btn" onclick="showSection('reset')">
           <span class="icon">🔐</span>重設密碼
         </button>
+        <button class="action-btn" onclick="showSection('messages')">
+          <span class="icon">💬</span>留言管理
+        </button>
+        <button class="action-btn" onclick="showSection('blocklist')">
+          <span class="icon">🚫</span>封鎖名單
+        </button>
       </div>
     </div>
 
@@ -193,6 +223,21 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
       <div id="memberList"><div style="color:var(--text3);font-size:13px">載入中...</div></div>
     </div>
 
+    <!-- 留言管理 -->
+    <div class="card" id="sec-messages" style="display:none">
+      <div class="card-title">💬 留言管理</div>
+      <div class="search-row">
+        <input type="text" id="msgSearchInput" placeholder="搜尋 email / 留言內容…" oninput="filterContactMessages(this.value)">
+      </div>
+      <div id="contactMsgList"><div style="color:var(--text3);font-size:13px">載入中...</div></div>
+    </div>
+
+    <!-- 封鎖名單 -->
+    <div class="card" id="sec-blocklist" style="display:none">
+      <div class="card-title">🚫 封鎖名單</div>
+      <div id="blockList"><div style="color:var(--text3);font-size:13px">載入中...</div></div>
+    </div>
+
   </div>
 </div>
 
@@ -232,10 +277,12 @@ if(sessionStorage.getItem('adminAuth')==='1'){
 
 // ── 顯示/隱藏區塊 ──
 function showSection(name){
-  ['grant','reset','members'].forEach(s=>{
+  ['grant','reset','members','messages','blocklist'].forEach(s=>{
     document.getElementById('sec-'+s).style.display = s===name ? 'block' : 'none';
   });
   if(name==='members') loadMembers();
+  if(name==='messages') loadContactMessages();
+  if(name==='blocklist') loadBlocklist();
 }
 
 // ── Toast ──
@@ -374,6 +421,140 @@ function doBackup(){
   const url=`${API}/admin/backup-db?key=${ADMIN_KEY}`;
   window.open(url,'_blank');
   toast('📥 備份下載中...');
+}
+
+// ── 留言管理 ──
+let allContactMsgs=[];
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fmtTime(iso){if(!iso)return'—';return String(iso).slice(0,16).replace('T',' ');}
+
+async function loadContactMessages(){
+  const el=document.getElementById('contactMsgList');
+  el.innerHTML='<div style="color:var(--text3);font-size:13px">載入中...</div>';
+  try{
+    const r=await fetch(`${API}/api/contact/messages`);
+    const data=await r.json();
+    allContactMsgs=data.messages||[];
+    renderContactMessages(document.getElementById('msgSearchInput').value.trim());
+  }catch(e){
+    el.innerHTML='<div style="color:var(--up);font-size:13px">載入失敗</div>';
+  }
+}
+
+function filterContactMessages(kw){renderContactMessages(kw.trim());}
+
+function renderContactMessages(kw=''){
+  const el=document.getElementById('contactMsgList');
+  let msgs=allContactMsgs;
+  if(kw){const lk=kw.toLowerCase();msgs=msgs.filter(m=>m.email.toLowerCase().includes(lk)||m.message.toLowerCase().includes(lk)||m.name.toLowerCase().includes(lk));}
+  if(!msgs.length){el.innerHTML='<div style="color:var(--text3);font-size:13px">無留言</div>';return;}
+  el.innerHTML=msgs.map(m=>{
+    const repliesHtml=(m.replies||[]).map(r=>`
+      <div class="contact-reply-item">官方回覆（${fmtTime(r.created_at)}）：${escHtml(r.reply)}</div>
+    `).join('');
+    return `<div class="contact-card" id="cmsg-${m.id}">
+      <div class="contact-head">
+        <div>
+          <div class="contact-email">${escHtml(m.email)}</div>
+          <div class="contact-meta">${escHtml(m.name)} · ${fmtTime(m.created_at)} · 回覆 ${(m.replies||[]).length} 則</div>
+        </div>
+      </div>
+      <div class="contact-body">${escHtml(m.message)}</div>
+      ${repliesHtml?`<div class="contact-reply-list">${repliesHtml}</div>`:''}
+      <div class="contact-actions">
+        <button class="mem-btn" onclick="toggleReplyBox(${m.id})">✏️ 回覆</button>
+        <button class="mem-btn danger" onclick="adminDeleteMsg(${m.id})">🗑 刪除</button>
+        <select id="blockType-${m.id}" style="padding:6px 8px;border:1px solid var(--border2);border-radius:6px;background:var(--bg);color:var(--text2);font-size:12px;outline:none">
+          <option value="comment">封鎖留言</option>
+          <option value="login">封鎖登入</option>
+        </select>
+        <button class="mem-btn" onclick="doBlock('${escHtml(m.email)}',${m.id})">🚫 封鎖</button>
+      </div>
+      <div class="reply-box" id="reply-${m.id}">
+        <textarea id="replyText-${m.id}" placeholder="輸入官方回覆…"></textarea>
+        <div class="reply-box-btns">
+          <button class="inline-btn" onclick="submitReply(${m.id})">送出回覆</button>
+          <button class="inline-btn secondary" onclick="toggleReplyBox(${m.id})">取消</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleReplyBox(id){
+  const box=document.getElementById(`reply-${id}`);
+  box.style.display=box.style.display==='block'?'none':'block';
+  if(box.style.display==='block') document.getElementById(`replyText-${id}`).focus();
+}
+
+async function submitReply(id){
+  const txt=document.getElementById(`replyText-${id}`).value.trim();
+  if(!txt){toast('請輸入回覆內容');return;}
+  try{
+    const r=await fetch(`${API}/api/contact/${id}/reply`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token:ADMIN_PWD,reply:txt})
+    });
+    if(r.ok){toast('✅ 回覆已送出');loadContactMessages();}
+    else{const d=await r.json();toast('❌ '+(d.detail||'失敗'));}
+  }catch(e){toast('連線失敗');}
+}
+
+async function adminDeleteMsg(id){
+  if(!confirm('確定要刪除這則留言？')) return;
+  try{
+    const r=await fetch(`${API}/api/contact/${id}`,{
+      method:'DELETE',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token:ADMIN_PWD})
+    });
+    if(r.ok){toast('✅ 已刪除');allContactMsgs=allContactMsgs.filter(m=>m.id!==id);renderContactMessages(document.getElementById('msgSearchInput').value.trim());}
+    else{const d=await r.json();toast('❌ '+(d.detail||'失敗'));}
+  }catch(e){toast('連線失敗');}
+}
+
+async function doBlock(email,msgId){
+  const blockType=document.getElementById(`blockType-${msgId}`).value;
+  const label=blockType==='comment'?'封鎖留言':'封鎖登入（停用帳號）';
+  if(!confirm(`確定要對 ${email} 執行「${label}」？`)) return;
+  try{
+    const r=await fetch(`${API}/api/block`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token:ADMIN_PWD,email,block_type:blockType})
+    });
+    if(r.ok){toast(`✅ 已封鎖 ${email}`);}
+    else{const d=await r.json();toast('❌ '+(d.detail||'失敗'));}
+  }catch(e){toast('連線失敗');}
+}
+
+// ── 封鎖名單 ──
+async function loadBlocklist(){
+  const el=document.getElementById('blockList');
+  el.innerHTML='<div style="color:var(--text3);font-size:13px">載入中...</div>';
+  try{
+    const r=await fetch(`${API}/api/block?token=${ADMIN_PWD}`);
+    const data=await r.json();
+    const list=data.blocked||[];
+    if(!list.length){el.innerHTML='<div style="color:var(--text3);font-size:13px">目前無封鎖記錄</div>';return;}
+    el.innerHTML=list.map(b=>`
+      <div class="block-item">
+        <span class="block-email">${escHtml(b.email)}</span>
+        <span class="block-type-badge ${b.block_type==='login'?'block-login':'block-comment'}">${b.block_type==='login'?'封鎖登入':'封鎖留言'}</span>
+        <span style="font-size:11px;color:var(--text3);white-space:nowrap">${fmtTime(b.created_at)}</span>
+        <button class="mem-btn" style="flex:0;white-space:nowrap;padding:5px 10px" onclick="doUnblock('${escHtml(b.email)}')">解除</button>
+      </div>
+    `).join('');
+  }catch(e){
+    el.innerHTML='<div style="color:var(--up);font-size:13px">載入失敗</div>';
+  }
+}
+
+async function doUnblock(email){
+  if(!confirm(`確定解除封鎖 ${email}？`)) return;
+  try{
+    const r=await fetch(`${API}/api/block/${encodeURIComponent(email)}?token=${ADMIN_PWD}`,{method:'DELETE'});
+    if(r.ok){toast('✅ 已解除封鎖');loadBlocklist();}
+    else{const d=await r.json();toast('❌ '+(d.detail||'失敗'));}
+  }catch(e){toast('連線失敗');}
 }
 </script>
 </body>

@@ -83,6 +83,11 @@
   @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-8px)}}
   .footer{text-align:center;margin-top:64px;color:var(--text-muted);font-size:.8rem;}
   .footer a{color:var(--accent);text-decoration:none;}
+  .reply-list{margin-top:10px;padding-left:46px;display:flex;flex-direction:column;gap:6px;}
+  .reply-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:8px 12px;}
+  .reply-badge{display:inline-block;font-size:.7rem;font-family:'DM Mono',monospace;color:var(--accent);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.25);border-radius:999px;padding:1px 8px;margin-bottom:4px;letter-spacing:.04em;}
+  .reply-text{display:block;font-size:.825rem;color:var(--text-dim);line-height:1.65;white-space:pre-wrap;word-break:break-word;margin-top:2px;}
+  .reply-time{display:block;font-size:.7rem;color:var(--text-muted);font-family:'DM Mono',monospace;margin-top:4px;}
   .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center;}
   .modal-backdrop.show{display:flex;}
   .modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 32px;max-width:360px;width:calc(100% - 40px);animation:fadeUp .25s ease;}
@@ -194,6 +199,12 @@
     if(msgs.length===0){list.innerHTML=`<div class="empty"><div class="icon">${kw?'🔎':'💌'}</div><p>${kw?'找不到符合「'+escHtml(kw)+'」的留言':'還沒有留言，成為第一個！'}</p></div>`;return;}
     list.innerHTML=msgs.map((m,i)=>{
       const isMine=myIds.includes(m.id);
+      const repliesHtml=(m.replies||[]).length?`<div class="reply-list">${(m.replies||[]).map(r=>`
+        <div class="reply-item">
+          <span class="reply-badge">官方回覆</span>
+          <span class="reply-text">${escHtml(r.reply)}</span>
+          <span class="reply-time">${formatTime(r.created_at)}</span>
+        </div>`).join('')}</div>`:'';
       return `<div class="msg-card${isMine?' mine':''}" id="card-${m.id}" style="animation-delay:${Math.min(i,10)*0.04}s">
         <div class="msg-header">
           <div class="msg-author">
@@ -207,6 +218,7 @@
           </div>
         </div>
         <div class="msg-body">${highlight(m.message,kw)}</div>
+        ${repliesHtml}
       </div>`;
     }).join('');
   }
@@ -240,6 +252,7 @@
         document.getElementById('email').value='';
         document.getElementById('message').value='';
         setTimeout(loadMessages,600);
+      }else if(res.status===403){showToast('error','您的帳號已被限制留言，如有疑問請聯絡客服。');
       }else{showToast('error',data.detail||'送出失敗，請稍後再試。');}
     }catch(e){showToast('error','連線失敗，請稍後再試。');}
     finally{btn.disabled=false;btnText.textContent='送出訊息';}

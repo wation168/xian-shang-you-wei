@@ -17,7 +17,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
 from contextlib import asynccontextmanager
 from pydantic import BaseModel
-import yfinance as yf
 import pandas as pd
 import numpy as np
 from scipy.signal import argrelextrema
@@ -69,7 +68,7 @@ except ImportError:
 
 # 免費用戶每日查詢次數
 FREE_DAILY_LIMIT = 3   # 免費會員每日查詢次數
-GUEST_DAILY_LIMIT = 1  # 遊客（未登入）每日查詢次數
+GUEST_DAILY_LIMIT = 10  # 遊客（未登入）每日查詢次數
 
 # CORS：允許的前端來源
 # 本機開發時設 ALLOWED_ORIGINS=* 或留空
@@ -125,6 +124,7 @@ async def lifespan(app: FastAPI):
                 stype = str(item.get("type", "")).lower()   # "twse" / "otc" / "rotc"
                 if sid and sname and sid not in _name_cache:
                     _name_cache[sid] = sname
+                    _name_to_code[sname] = sid
                     count += 1
                 if sid and stype:
                     _market_cache[sid] = stype
@@ -342,42 +342,35 @@ def calc_ma(closes: np.ndarray, period: int) -> np.ndarray:
     return ma
 
 
-def fetch_df(symbol, period, interval):
-    df = yf.download(symbol, period=period, interval=interval,
-                     auto_adjust=True, progress=False)
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = df.columns.get_level_values(0)
-    return df
-
 
 def fetch_df_finmind(stock_id: str, period: str, interval: str):
     """
-    FinMind 備援抓取台股日線 K 線資料
-    只支援日線（interval=1d），週線/月線由日線重採樣
+    FinMind 主力抓取台股 K 線資料（TaiwanStockPrice）
+    盤中若今日資料尚未收錄，自動用 tick_snapshot 補一筆今日 K 棒
+    週線/月線由日線重採樣
     """
-    import urllib.request, json as _json
-    from datetime import date, timedelta
+    import urllib.request as _ur, json as _j
+    from datetime import date, timedelta, datetime, time as _dtime
+    from zoneinfo import ZoneInfo
 
     code = stock_id.strip().upper().replace(".TW", "").replace(".TWO", "")
 
-    # 依 period 換算起始日
     period_days = {"5d": 7, "1mo": 35, "3mo": 95, "6mo": 185,
                    "1y": 370, "2y": 740, "3y": 1100, "5y": 1830, "10y": 3660}
     days = period_days.get(period, 1100)
-    start = (date.today() - timedelta(days=days)).strftime("%Y-%m-%d")
-    end   = date.today().strftime("%Y-%m-%d")
+    start     = (date.today() - timedelta(days=days)).strftime("%Y-%m-%d")
+    today_str = date.today().strftime("%Y-%m-%d")
 
     try:
         url = (f"https://api.finmindtrade.com/api/v4/data"
                f"?dataset=TaiwanStockPrice&data_id={code}"
-               f"&start_date={start}&end_date={end}&token={FINMIND_TOKEN}")
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            data = _json.loads(resp.read())
-        if data.get("status") != 200 or not data.get("data"):
+               f"&start_date={start}&end_date={today_str}&token={FINMIND_TOKEN}")
+        req = _ur.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with _ur.urlopen(req, timeout=15) as resp:
+            raw = _j.loads(resp.read())
+        if raw.get("status") != 200 or not raw.get("data"):
             return pd.DataFrame()
-        rows = data["data"]
-        df = pd.DataFrame(rows)
+        df = pd.DataFrame(raw["data"])
         df = df.rename(columns={
             "date": "Date", "open": "Open", "max": "High",
             "min": "Low", "close": "Close", "Trading_Volume": "Volume"
@@ -385,6 +378,107 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
         df["Date"] = pd.to_datetime(df["Date"])
         df = df.set_index("Date").sort_index()
         df = df[["Open", "High", "Low", "Close", "Volume"]].astype(float)
+
+        # ── 盤中補今日 K 棒 ──
+        # 若今日是交易日且資料集尚無今日資料，用 tick_snapshot 補一筆
+        tz = ZoneInfo("Asia/Taipei")
+        now_tw = datetime.now(tz)
+        is_weekday = now_tw.weekday() < 5
+        in_or_just_after = is_weekday and _dtime(9, 0) <= now_tw.time() <= _dtime(14, 30)
+        today_ts = pd.Timestamp(today_str)
+        if in_or_just_after:
+            try:
+                snap_url = (f"https://api.finmindtrade.com/api/v4/taiwan_stock_tick_snapshot"
+                            f"?data_id={code}&token={FINMIND_TOKEN}")
+                snap_req = _ur.Request(snap_url, headers={"User-Agent": "Mozilla/5.0"})
+                with _ur.urlopen(snap_req, timeout=6) as sr:
+                    snap = _j.loads(sr.read())
+                snap_rows = snap.get("data", [])
+                if snap_rows:
+                    r = snap_rows[0]
+                    cp = float(r.get("close") or r.get("price") or 0)
+                    op = float(r.get("open") or cp)
+                    hi = float(r.get("high") or cp)
+                    lo = float(r.get("low") or cp)
+                    vol = float(r.get("total_volume") or r.get("volume") or 0)
+                    if cp > 0:
+                        today_bar = pd.DataFrame(
+                            [[op, hi, lo, cp, vol]],
+                            index=[today_ts],
+                            columns=["Open", "High", "Low", "Close", "Volume"]
+                        )
+                        df = df[df.index != today_ts]
+                        df = pd.concat([df, today_bar])
+                        print(f"   FinMind 盤中補今日 K 棒：{code} close={cp}")
+            except Exception as _e:
+                if not (hasattr(_e, 'code') and _e.code == 400):
+                    print(f"   FinMind tick_snapshot 補棒失敗 {code}：{_e}")
+
+        # ── TWSE/TPEX 月報補今日 K 棒（上述來源均無資料時的最終 fallback）──
+        if today_ts not in df.index:
+            today_obj = date.today()
+            roc_year  = today_obj.year - 1911
+            roc_date  = f"{roc_year}/{today_obj.month:02d}/{today_obj.day:02d}"
+            yyyymmdd  = today_obj.strftime("%Y%m%d")
+            mm        = today_obj.strftime("%m")
+
+            def _parse_tw_num(s):
+                return float(str(s).replace(",", "")) if str(s).strip() not in ("--", "", "X") else 0.0
+
+            filled = False
+            try:
+                twse_url = (f"https://www.twse.com.tw/exchangeReport/STOCK_DAY"
+                            f"?response=json&date={yyyymmdd}&stockNo={code}")
+                twse_req = _ur.Request(twse_url, headers={"User-Agent": "Mozilla/5.0"})
+                with _ur.urlopen(twse_req, timeout=8) as tr:
+                    twse_raw = _j.loads(tr.read())
+                for row in twse_raw.get("data", []):
+                    if str(row[0]).strip() == roc_date:
+                        op  = _parse_tw_num(row[3])
+                        hi  = _parse_tw_num(row[4])
+                        lo  = _parse_tw_num(row[5])
+                        cp  = _parse_tw_num(row[6])
+                        vol = _parse_tw_num(row[1])
+                        if cp > 0:
+                            today_bar = pd.DataFrame(
+                                [[op, hi, lo, cp, vol]],
+                                index=[today_ts],
+                                columns=["Open", "High", "Low", "Close", "Volume"]
+                            )
+                            df = pd.concat([df, today_bar])
+                            print(f"   TWSE 月報補今日 K 棒：{code} close={cp}")
+                            filled = True
+                        break
+            except Exception as _e:
+                print(f"   TWSE 月報補棒失敗 {code}：{_e}")
+
+            if not filled:
+                try:
+                    tpex_d   = f"{roc_year}/{mm}"
+                    tpex_url = (f"https://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info"
+                                f"/st43_result.php?l=zh-tw&d={tpex_d}&stkno={code}")
+                    tpex_req = _ur.Request(tpex_url, headers={"User-Agent": "Mozilla/5.0"})
+                    with _ur.urlopen(tpex_req, timeout=8) as pr:
+                        tpex_raw = _j.loads(pr.read())
+                    for row in tpex_raw.get("aaData", []):
+                        if str(row[0]).strip() == roc_date:
+                            op  = _parse_tw_num(row[3])
+                            hi  = _parse_tw_num(row[4])
+                            lo  = _parse_tw_num(row[5])
+                            cp  = _parse_tw_num(row[6])
+                            vol = _parse_tw_num(row[1])
+                            if cp > 0:
+                                today_bar = pd.DataFrame(
+                                    [[op, hi, lo, cp, vol]],
+                                    index=[today_ts],
+                                    columns=["Open", "High", "Low", "Close", "Volume"]
+                                )
+                                df = pd.concat([df, today_bar])
+                                print(f"   TPEX 月報補今日 K 棒：{code} close={cp}")
+                                filled = True
+                            break
+                except Exception as _e:
+                    print(f"   TPEX 月報補棒失敗 {code}：{_e}")
 
         # 週線/月線重採樣
         if interval == "1wk":
@@ -400,31 +494,20 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
 
         return df
     except Exception as e:
-        print(f"   FinMind 備援抓取失敗 {code}：{e}")
+        print(f"   FinMind 抓取失敗 {code}：{e}")
         return pd.DataFrame()
 
 
 def try_fetch(stock_id, period, interval):
-    symbol = resolve_symbol(stock_id)
-    df = fetch_df(symbol, period, interval)
-    if df.empty and not stock_id.upper().endswith((".TW", ".TWO")):
-        alt_symbol = stock_id.strip().upper() + ".TWO"
-        df_alt = fetch_df(alt_symbol, period, interval)
-        if not df_alt.empty:
-            return alt_symbol, df_alt
-
-    # yfinance 都抓不到 → FinMind 備援
-    if df.empty:
-        print(f"   yfinance 無資料，切換 FinMind 備援：{stock_id}")
-        df_fm = fetch_df_finmind(stock_id, period, interval)
-        if not df_fm.empty:
-            return symbol, df_fm
-
-    return symbol, df
+    """FinMind 抓取台股 K 線資料（唯一來源）"""
+    code = stock_id.strip().upper().replace(".TW", "").replace(".TWO", "")
+    df = fetch_df_finmind(code, period, interval)
+    return resolve_symbol(stock_id), df
 
 
 # 股名快取（避免重複查詢）
-_name_cache: dict[str, str] = {}
+_name_cache: dict[str, str] = {}          # {stock_id: stock_name}
+_name_to_code: dict[str, str] = {}        # {stock_name: stock_id}，供名稱查詢轉代號
 # 市場別快取：{stock_id: "twse"(上市) | "otc"(上櫃) | "rotc"(興櫃)}
 _market_cache: dict[str, str] = {}
 
@@ -481,6 +564,7 @@ def get_stock_name(symbol: str) -> str:
                 stype = str(item.get("type", "")).lower()
                 if sid and sname:
                     _name_cache[sid] = sname
+                    _name_to_code[sname] = sid
                 if sid and stype:
                     _market_cache[sid] = stype
         if code in _name_cache:
@@ -1459,20 +1543,20 @@ def calc_breakout_signals(closes, highs, lows, volumes, support, resistance):
 # API 快取（同股票+時間框架，5分鐘內不重複抓取）
 # ══════════════════════════════════════════════════════════
 import time as _time
-_analyze_cache: dict = {}   # key: "{stock_id}_{tf}" → {"ts": float, "data": dict}
-_CACHE_TTL = 300            # 5 分鐘
+_analyze_cache: dict = {}   # key: "{stock_id}_{tf}_{YYYYMMDD}" → {"ts": float, "data": dict}
+
+_ANALYZE_CACHE_TTL = 86400  # key 含日期，當天只打一次 FinMind，隔天 key 不同自動失效
 
 def _cache_get(key: str):
     entry = _analyze_cache.get(key)
-    if entry and (_time.time() - entry["ts"]) < _CACHE_TTL:
+    if entry and (_time.time() - entry["ts"]) < _ANALYZE_CACHE_TTL:
         return entry["data"]
     return None
 
 def _cache_set(key: str, data: dict):
     _analyze_cache[key] = {"ts": _time.time(), "data": data}
-    # 清理過期快取，避免記憶體堆積（超過 200 筆時清掉舊的）
     if len(_analyze_cache) > 200:
-        cutoff = _time.time() - _CACHE_TTL
+        cutoff = _time.time() - _ANALYZE_CACHE_TTL
         expired = [k for k, v in _analyze_cache.items() if v["ts"] < cutoff]
         for k in expired:
             _analyze_cache.pop(k, None)
@@ -1539,6 +1623,17 @@ def _db_init():
             message    TEXT NOT NULL,
             created_at TEXT NOT NULL
         );
+        CREATE TABLE IF NOT EXISTS blocked_users (
+            email      TEXT PRIMARY KEY,
+            block_type TEXT NOT NULL,
+            created_at TEXT DEFAULT (datetime('now','localtime'))
+        );
+        CREATE TABLE IF NOT EXISTS contact_replies (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            message_id INTEGER NOT NULL,
+            reply      TEXT NOT NULL,
+            created_at TEXT DEFAULT (datetime('now','localtime'))
+        );
         CREATE TABLE IF NOT EXISTS password_reset_tokens (
             token      TEXT PRIMARY KEY,
             email      TEXT NOT NULL,
@@ -1600,6 +1695,8 @@ def _db_init():
         ("members",   "password_changed_at",  "TEXT DEFAULT NULL"),
         ("members",   "last_expire_notice_date", "TEXT DEFAULT NULL"),
         ("members",   "referral_unlocked",       "INTEGER DEFAULT 0"),
+        ("members",   "referral_expire_date",    "TEXT DEFAULT NULL"),
+        ("query_log", "report_count",             "INTEGER DEFAULT 0"),
     ]
     for table, col, coldef in new_columns:
         try:
@@ -1697,7 +1794,7 @@ def require_user(user: dict | None = Depends(get_current_user)):
 def require_paid_user(user: dict | None = Depends(get_current_user)):
     if not user:
         raise HTTPException(status_code=401, detail="請先登入")
-    if user.get("referral_unlocked", 0) == 1:
+    if _is_referral_active(user):
         return user
     today = _date_cls.today().isoformat()
     if user["plan"] == "free":
@@ -1710,6 +1807,15 @@ def _taipei_today() -> str:
     """台北時間今日日期（YYYY-MM-DD），用於每日查詢次數重置"""
     from zoneinfo import ZoneInfo
     return datetime.now(ZoneInfo("Asia/Taipei")).strftime("%Y-%m-%d")
+
+def _is_referral_active(user: dict) -> bool:
+    """邀請制解鎖是否有效（已解鎖 且 未過期）"""
+    if not user.get("referral_unlocked", 0):
+        return False
+    exp = user.get("referral_expire_date")
+    if not exp:
+        return True  # 舊資料無過期日，向下相容視為有效
+    return exp >= _date_cls.today().isoformat()
 
 def _check_query_limit(member_id: int, plan: str) -> tuple[bool, int, int]:
     """回傳 (允許查詢, 今日已用次數, 上限)"""
@@ -1742,6 +1848,29 @@ def _inc_query_count(member_id: int):
             "INSERT INTO query_log (member_id, date, ip, count) VALUES (?, ?, '', 1)",
             (member_id, today)
         )
+    conn.commit()
+    conn.close()
+
+def _check_report_limit(member_id: int) -> tuple[bool, int]:
+    """回傳 (允許產出報告, 今日已產出次數)"""
+    today = _taipei_today()
+    conn = _db_conn()
+    row = conn.execute(
+        "SELECT report_count FROM query_log WHERE member_id=? AND date=? AND ip=''",
+        (member_id, today)
+    ).fetchone()
+    used = row["report_count"] if row else 0
+    conn.close()
+    return used < FREE_DAILY_LIMIT, used
+
+def _inc_report_count(member_id: int):
+    today = _taipei_today()
+    conn = _db_conn()
+    conn.execute(
+        "INSERT INTO query_log (member_id, date, ip, count, report_count) VALUES (?,?,'',0,1) "
+        "ON CONFLICT(member_id, date, ip) DO UPDATE SET report_count=report_count+1",
+        (member_id, today)
+    )
     conn.commit()
     conn.close()
 
@@ -1809,8 +1938,8 @@ def _do_analyze(stock_id: str, tf: str = "D",
                 ma1: int = 5, ma2: int = 10, ma3: int = 20, ma4: int = 60, ma5: int = 120,
                 user: dict | None = None):
     """核心分析邏輯（不含驗證），供 analyze() 和 batch_analyze() 共用"""
-    # 快取：同股票+時間框架 5 分鐘內直接回傳
-    _cache_key = f"{stock_id.strip().upper()}_{tf.upper()}"
+    # 快取：同股票+時間框架+當天，盤中 15 分鐘更新，收盤後固定到隔天
+    _cache_key = f"{stock_id.strip().upper()}_{tf.upper()}_{_taipei_today().replace('-', '')}"
     cached = _cache_get(_cache_key)
     if cached:
         return cached
@@ -2247,11 +2376,22 @@ def analyze(stock_id: str, tf: str = "D",
             request: Request = None,
             user: dict | None = Depends(get_current_user)):
     """API 端點：遊客可查 1 次，免費會員 3 次，付費無限"""
+    # 股名轉代號：非純數字視為股票名稱，在對照表搜尋
+    sid_clean = stock_id.strip()
+    if not sid_clean.replace(".", "").isdigit():
+        resolved = _name_to_code.get(sid_clean)
+        if not resolved:
+            # 模糊搜尋：包含輸入文字的第一筆
+            resolved = next((code for name, code in _name_to_code.items() if sid_clean in name), None)
+        if resolved:
+            stock_id = resolved
+        else:
+            raise HTTPException(status_code=404, detail=f"找不到股票：{sid_clean}")
     today = _taipei_today()
 
     if user:
         plan = user["plan"]
-        is_referral_unlocked = user.get("referral_unlocked", 0) == 1
+        is_referral_unlocked = _is_referral_active(user)
         # 付費狀態驗證
         if plan != "free" and user["expire_at"] and user["expire_at"] < today:
             raise HTTPException(status_code=403, detail="訂閱已到期，請續費後繼續使用")
@@ -2294,8 +2434,8 @@ def analyze(stock_id: str, tf: str = "D",
     if user:
         try:
             _complete_referral_if_pending(user["email"])
-        except Exception:
-            pass
+        except Exception as _ref_e:
+            print(f"[REFERRAL] complete_referral_if_pending 失敗 {user['email']}：{_ref_e}")
 
     return _do_analyze(stock_id, tf, ma1, ma2, ma3, ma4, ma5, user=user)
 
@@ -2368,76 +2508,175 @@ def get_top_gainers(limit: int = 10):
 @app.get("/api/quote/{stock_id}")
 def get_quote(stock_id: str, user: dict = Depends(require_user)):
     """
-    即時報價（盤中 snapshot）
-    資料來源：FinMind taiwan_stock_tick_snapshot
-    回傳：現價、漲跌、漲跌幅%、成交量、開高低、時間、是否盤中
-    盤後或假日回傳 is_trading=False，前端據此停止輪詢
+    即時報價
+    盤中：tick_snapshot > TWSE z > FinMind 今日收盤
+    盤後：FinMind 今日收盤 > TWSE y（昨收）
     """
     import urllib.request, json as _json
-    from datetime import datetime, time as dtime
+    from datetime import datetime, time as dtime, date as _date
     from zoneinfo import ZoneInfo
 
     code = stock_id.strip().replace(".TW", "").replace(".TWO", "")
 
-    # ── 判斷是否在台股交易時間（09:00~13:30 週一~五）──
     tz = ZoneInfo("Asia/Taipei")
     now = datetime.now(tz)
     is_weekday = now.weekday() < 5
-    market_open  = dtime(9, 0)
-    market_close = dtime(13, 30)
-    in_session = is_weekday and market_open <= now.time() <= market_close
+    in_session       = is_weekday and dtime(9, 0)  <= now.time() <= dtime(13, 30)
+    just_after_close = is_weekday and dtime(13, 30) < now.time() <= dtime(14, 0)
 
-    try:
-        url = (f"https://api.finmindtrade.com/api/v4/taiwan_stock_tick_snapshot"
-               f"?data_id={code}&token={FINMIND_TOKEN}")
+    def _twse_fetch(ex: str):
+        url = (f"https://mis.twse.com.tw/stock/api/getStockInfo.jsp"
+               f"?ex_ch={ex}_{code}.tw&json=1&delay=0")
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=6) as resp:
-            data = _json.loads(resp.read())
-    except Exception as e:
-        raise HTTPException(status_code=503, detail=f"FinMind 連線失敗：{e}")
+            return _json.loads(resp.read())
 
-    rows = data.get("data", [])
-    if not rows:
-        # snapshot 無資料（盤後或股票停牌），仍回傳結構，is_trading=False
-        return {
-            "stock_id": code,
-            "price": None, "change": None, "change_pct": None,
-            "open": None, "high": None, "low": None,
-            "volume": None, "time": None,
-            "is_trading": False,
-            "in_session": in_session,
-        }
-
-    r = rows[0]
-    close_price = r.get("close") or r.get("price") or r.get("Close")
-    open_price  = r.get("open")  or r.get("Open")
-    high_price  = r.get("high")  or r.get("High")
-    low_price   = r.get("low")   or r.get("Low")
-    yesterday   = r.get("yesterday_price") or r.get("reference_price")
-    volume      = r.get("total_volume") or r.get("volume") or r.get("Volume")
-    tick_time   = r.get("time") or r.get("date") or ""
-
-    change = None
-    change_pct = None
-    if close_price and yesterday:
+    # ── 1. tick_snapshot（盤中 or 剛收盤 13:30–14:00）──
+    snap_price = snap_open = snap_high = snap_low = snap_vol = None
+    if in_session or just_after_close:
         try:
-            change = round(float(close_price) - float(yesterday), 2)
-            change_pct = round(change / float(yesterday) * 100, 2)
+            snap_url = (f"https://api.finmindtrade.com/api/v4/taiwan_stock_tick_snapshot"
+                        f"?data_id={code}&token={FINMIND_TOKEN}")
+            snap_req = urllib.request.Request(snap_url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(snap_req, timeout=6) as sr:
+                snap = _json.loads(sr.read())
+            snap_rows = snap.get("data", [])
+            if snap_rows:
+                r = snap_rows[0]
+                cp = float(r.get("close") or r.get("price") or 0)
+                if cp > 0:
+                    snap_price = cp
+                    snap_open  = float(r.get("open")  or cp) or None
+                    snap_high  = float(r.get("high")  or cp) or None
+                    snap_low   = float(r.get("low")   or cp) or None
+                    snap_vol   = float(r.get("total_volume") or r.get("volume") or 0) or None
+        except Exception as _e:
+            if not (hasattr(_e, 'code') and _e.code == 400):
+                print(f"[QUOTE] tick_snapshot 失敗 {code}：{_e}")
+
+    # ── 2. TWSE（z 現價、y 昨收、OHLV 備用）──
+    twse_data = None
+    for ex in ("tse", "otc"):
+        try:
+            resp = _twse_fetch(ex)
+            arr = resp.get("msgArray", [])
+            if arr:
+                z_raw = str(arr[0].get("z", "-")).strip()
+                if z_raw not in ("-", ""):
+                    twse_data = arr[0]
+                    break
+                if not twse_data:
+                    twse_data = arr[0]
+        except Exception:
+            continue
+
+    def _val(k):
+        v = str(twse_data.get(k, "-")).strip() if twse_data else "-"
+        return None if v in ("-", "") else v
+
+    z         = _val("z")
+    y         = _val("y")
+    open_twse = _val("o")
+    high_twse = _val("h")
+    low_twse  = _val("l")
+    vol_twse  = _val("v")
+    tick_time = _val("t") or ""
+
+    # ── 3. FinMind 今日收盤（snap 失敗 or 盤後 fallback）──
+    finmind_close = None
+    if snap_price is None:
+        try:
+            today_str = _date.today().strftime("%Y-%m-%d")
+            fm_url = (f"https://api.finmindtrade.com/api/v4/data"
+                      f"?dataset=TaiwanStockPrice&data_id={code}"
+                      f"&start_date={today_str}&end_date={today_str}&token={FINMIND_TOKEN}")
+            fm_req = urllib.request.Request(fm_url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(fm_req, timeout=8) as fr:
+                fm_raw = _json.loads(fr.read())
+            fm_rows = fm_raw.get("data", [])
+            if fm_rows:
+                finmind_close = float(fm_rows[-1].get("close") or 0) or None
+        except Exception as _e:
+            print(f"[QUOTE] FinMind 今日收盤失敗 {code}：{_e}")
+
+    # ── 決定現價與來源 ──
+    if in_session or just_after_close:
+        if snap_price:
+            price_val    = snap_price
+            price_source = "tick_snapshot"
+            open_val = snap_open  or safe_float(open_twse)
+            high_val = snap_high  or safe_float(high_twse)
+            low_val  = snap_low   or safe_float(low_twse)
+            vol_val  = int(snap_vol) if snap_vol else (int(float(vol_twse) * 1000) if vol_twse else None)
+        elif finmind_close:
+            price_val    = finmind_close
+            price_source = "finmind_close"
+            open_val = safe_float(open_twse)
+            high_val = safe_float(high_twse)
+            low_val  = safe_float(low_twse)
+            vol_val  = int(float(vol_twse) * 1000) if vol_twse else None
+        elif z:
+            price_val    = safe_float(z)
+            price_source = "twse_z"
+            open_val = safe_float(open_twse)
+            high_val = safe_float(high_twse)
+            low_val  = safe_float(low_twse)
+            vol_val  = int(float(vol_twse) * 1000) if vol_twse else None
+        elif y:
+            price_val    = safe_float(y)
+            price_source = "twse_y"
+            open_val = safe_float(open_twse)
+            high_val = safe_float(high_twse)
+            low_val  = safe_float(low_twse)
+            vol_val  = int(float(vol_twse) * 1000) if vol_twse else None
+        else:
+            price_val    = None
+            price_source = "none"
+            open_val = high_val = low_val = vol_val = None
+    else:
+        if finmind_close:
+            price_val    = finmind_close
+            price_source = "finmind_close"
+        elif y:
+            price_val    = safe_float(y)
+            price_source = "twse_y"
+        else:
+            price_val    = None
+            price_source = "none"
+        open_val = safe_float(open_twse)
+        high_val = safe_float(high_twse)
+        low_val  = safe_float(low_twse)
+        vol_val  = int(float(vol_twse) * 1000) if vol_twse else None
+
+    # ── 漲跌幅（以昨收 y 為基準）──
+    change = change_pct = None
+    ref = safe_float(y)
+    if price_val and ref:
+        try:
+            change     = round(price_val - ref, 2)
+            change_pct = round(change / ref * 100, 2)
         except Exception:
             pass
 
+    print(f"[QUOTE] {code} | {now.strftime('%Y-%m-%d %H:%M:%S %a')} "
+          f"| in_session={in_session} just_after={just_after_close} "
+          f"| snap={snap_price} z={z} y={y} fm_close={finmind_close} "
+          f"| price={price_val} source={price_source}")
+
     return {
-        "stock_id":   code,
-        "price":      safe_float(close_price),
-        "change":     safe_float(change),
-        "change_pct": safe_float(change_pct),
-        "open":       safe_float(open_price),
-        "high":       safe_float(high_price),
-        "low":        safe_float(low_price),
-        "volume":     int(volume) if volume else None,
-        "time":       str(tick_time),
-        "is_trading": bool(close_price and in_session),
-        "in_session": in_session,
+        "stock_id":     code,
+        "price":        price_val,
+        "change":       change,
+        "change_pct":   change_pct,
+        "open":         open_val,
+        "high":         high_val,
+        "low":          low_val,
+        "volume":       vol_val,
+        "time":         tick_time,
+        "is_trading":   bool((snap_price or z) and in_session),
+        "in_session":   in_session,
+        "price_source": price_source,
+        "price_note":   "以昨收價計算" if price_source == "twse_y" else None,
     }
 
 
@@ -2543,6 +2782,18 @@ def admin_reset_password(key: str = "", email: str = ""):
     )
     conn.commit()
     conn.close()
+    try:
+        _send_email(email, "線上有位 — 密碼已重設",
+            f"""<div style="font-family:-apple-system,sans-serif;max-width:480px;margin:0 auto;padding:24px">
+              <h2 style="color:#1D9E75">密碼已重設</h2>
+              <p>您的帳號密碼已由管理員重設。</p>
+              <p>新密碼：<strong style="font-size:18px;letter-spacing:2px">{new_pw}</strong></p>
+              <p>請儘快登入後自行修改密碼。</p>
+              <p style="font-size:12px;color:#888">若您未申請重設，請聯絡客服。</p>
+            </div>"""
+        )
+    except Exception as _e:
+        print(f"[admin_reset] 寄信失敗: {_e}")
     return {"ok": True, "email": email, "new_password": new_pw}
 
 
@@ -3129,8 +3380,8 @@ def auth_register(req: RegisterReq, ref: str = "", request: Request = None):
         if inviter_row and inviter_row["user_email"] != email:
             client_ip = request.client.host if request else ""
             dupe = conn.execute(
-                "SELECT id FROM referral_logs WHERE invitee_ip=? AND inviter_email=?",
-                (client_ip, inviter_row["user_email"])
+                "SELECT id FROM referral_logs WHERE invitee_email=? AND inviter_email=?",
+                (email, inviter_row["user_email"])
             ).fetchone()
             if not dupe:
                 conn.execute(
@@ -3165,8 +3416,8 @@ def register_free(req: RegisterReq, ref: str = "", request: Request = None):
         if inviter_row and inviter_row["user_email"] != email:
             client_ip = request.client.host if request else ""
             dupe = conn.execute(
-                "SELECT id FROM referral_logs WHERE invitee_ip=? AND inviter_email=?",
-                (client_ip, inviter_row["user_email"])
+                "SELECT id FROM referral_logs WHERE invitee_email=? AND inviter_email=?",
+                (email, inviter_row["user_email"])
             ).fetchone()
             if not dupe:
                 conn.execute(
@@ -3186,6 +3437,12 @@ def auth_login(req: LoginReq):
     if not row or not _verify_pw(req.password, row["password"]):
         conn.close()
         raise HTTPException(status_code=401, detail="帳號或密碼錯誤")
+    blocked = conn.execute(
+        "SELECT email FROM blocked_users WHERE email=? AND block_type='login'", (email,)
+    ).fetchone()
+    if blocked:
+        conn.close()
+        raise HTTPException(status_code=403, detail="帳號已被停用，請聯絡客服")
     session_id = secrets.token_hex(16)
     conn.execute("UPDATE members SET last_login=datetime('now','localtime'), session_id=? WHERE id=?", (session_id, row["id"]))
     conn.commit()
@@ -3244,6 +3501,7 @@ def auth_me(user: dict = Depends(require_user)):
         "days_left": days_left,
         "is_expiring_soon": is_expiring_soon,
         "referral_unlocked": user.get("referral_unlocked", 0),
+        "referral_expire_date": user.get("referral_expire_date"),
     }
 
 
@@ -3264,13 +3522,17 @@ def get_referral_status(user: dict = Depends(require_user)):
     completed = conn.execute(
         "SELECT COUNT(*) FROM referral_logs WHERE inviter_email=? AND status='completed'", (email,)
     ).fetchone()[0]
+    exp_row = conn.execute(
+        "SELECT referral_expire_date FROM members WHERE email=?", (email,)
+    ).fetchone()
     conn.close()
     return {
         "code": code,
-        "invite_link": f"{FRONTEND_URL}?ref={code}",
+        "invite_link": f"{FRONTEND_URL}/landing.html?ref={code}",
         "completed_count": completed,
         "required_count": 3,
         "unlocked": bool(user.get("referral_unlocked", 0)),
+        "referral_expire_date": exp_row["referral_expire_date"] if exp_row else None,
     }
 
 
@@ -3446,7 +3708,7 @@ def get_latest_picks(request: Request, token: str = "", user: dict | None = Depe
     from fastapi.responses import HTMLResponse
     today = _date_cls.today().isoformat()
     plan = user["plan"]
-    is_referral_unlocked = user.get("referral_unlocked", 0) == 1
+    is_referral_unlocked = _is_referral_active(user)
     # 免費用戶無法使用（邀請解鎖視為付費）
     if plan == "free" and not is_referral_unlocked:
         raise HTTPException(status_code=403, detail="此功能需要付費方案")
@@ -3687,6 +3949,15 @@ async def submit_contact(msg: ContactMessage):
     if not name or not email or not message:
         raise HTTPException(status_code=400, detail="欄位不完整")
 
+    # 檢查是否被封鎖留言
+    with sqlite3.connect(DB_PATH) as _bc:
+        _bc.row_factory = sqlite3.Row
+        _brow = _bc.execute(
+            "SELECT email FROM blocked_users WHERE email=? AND block_type='comment'", (email,)
+        ).fetchone()
+    if _brow:
+        raise HTTPException(status_code=403, detail="您的帳號已被限制留言")
+
     now = datetime.utcnow().isoformat()
     with sqlite3.connect(DB_PATH) as conn:
         cur = conn.execute(
@@ -3694,6 +3965,18 @@ async def submit_contact(msg: ContactMessage):
             (name, email, message, now)
         )
         new_id = cur.lastrowid
+
+    # Web Push 通知管理員
+    try:
+        with sqlite3.connect(DB_PATH) as _pc:
+            _pc.row_factory = sqlite3.Row
+            _subs = _pc.execute(
+                "SELECT * FROM push_subscriptions WHERE user_email='watione@yahoo.com.tw'"
+            ).fetchall()
+        for _sub in _subs:
+            send_web_push(dict(_sub), "新留言", f"{email}：{message[:20]}", "/contact.html")
+    except Exception as _pe:
+        print(f"[contact] Web Push 失敗: {_pe}")
 
     # 寄通知信給管理員
     try:
@@ -3726,10 +4009,20 @@ async def get_contact_messages():
             "SELECT id, name, email, message, created_at "
             "FROM contact_messages ORDER BY id DESC LIMIT 100"
         ).fetchall()
+        reply_rows = conn.execute(
+            "SELECT id, message_id, reply, created_at FROM contact_replies ORDER BY id ASC"
+        ).fetchall()
+    replies_map: dict = {}
+    for r in reply_rows:
+        mid = r["message_id"]
+        replies_map.setdefault(mid, []).append(
+            {"id": r["id"], "reply": r["reply"], "created_at": r["created_at"]}
+        )
     return {
         "messages": [
             {"id": r["id"], "name": r["name"], "email": r["email"],
-             "message": r["message"], "created_at": r["created_at"]}
+             "message": r["message"], "created_at": r["created_at"],
+             "replies": replies_map.get(r["id"], [])}
             for r in rows
         ]
     }
@@ -3750,6 +4043,76 @@ async def delete_contact_message(msg_id: int, body: DeleteToken):
             raise HTTPException(status_code=404, detail="留言不存在")
 
     return {"ok": True}
+
+
+class ReplyReq(BaseModel):
+    token: str
+    reply: str
+
+class BlockReq(BaseModel):
+    token: str
+    email: str
+    block_type: str  # 'comment' or 'login'
+
+
+@app.post("/api/contact/{msg_id}/reply")
+async def reply_contact_message(msg_id: int, body: ReplyReq):
+    if body.token != CONTACT_ADMIN_PWD:
+        raise HTTPException(status_code=403, detail="無權限")
+    reply_text = body.reply.strip()
+    if not reply_text:
+        raise HTTPException(status_code=400, detail="回覆內容不能為空")
+    now = datetime.utcnow().isoformat()
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        if not conn.execute("SELECT id FROM contact_messages WHERE id=?", (msg_id,)).fetchone():
+            raise HTTPException(status_code=404, detail="留言不存在")
+        cur = conn.execute(
+            "INSERT INTO contact_replies (message_id, reply, created_at) VALUES (?,?,?)",
+            (msg_id, reply_text, now)
+        )
+    return {"ok": True, "id": cur.lastrowid}
+
+
+@app.post("/api/block")
+async def block_user(body: BlockReq):
+    if body.token != CONTACT_ADMIN_PWD:
+        raise HTTPException(status_code=403, detail="無權限")
+    if body.block_type not in ("comment", "login"):
+        raise HTTPException(status_code=400, detail="block_type 必須為 comment 或 login")
+    email = body.email.strip().lower()
+    now = datetime.utcnow().isoformat()
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute(
+            "INSERT INTO blocked_users (email, block_type, created_at) VALUES (?,?,?) "
+            "ON CONFLICT(email) DO UPDATE SET block_type=excluded.block_type, created_at=excluded.created_at",
+            (email, body.block_type, now)
+        )
+    return {"ok": True}
+
+
+@app.delete("/api/block/{email}")
+async def unblock_user(email: str, token: str):
+    if token != CONTACT_ADMIN_PWD:
+        raise HTTPException(status_code=403, detail="無權限")
+    with sqlite3.connect(DB_PATH) as conn:
+        cur = conn.execute("DELETE FROM blocked_users WHERE email=?", (email,))
+        if cur.rowcount == 0:
+            raise HTTPException(status_code=404, detail="未找到封鎖記錄")
+    return {"ok": True}
+
+
+@app.get("/api/block")
+async def get_blocked_users(token: str):
+    if token != CONTACT_ADMIN_PWD:
+        raise HTTPException(status_code=403, detail="無權限")
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute(
+            "SELECT email, block_type, created_at FROM blocked_users ORDER BY created_at DESC"
+        ).fetchall()
+    return {"blocked": [dict(r) for r in rows]}
+
 
 def _update_notice_date(email: str, date_str: str):
     conn = _db_conn()
@@ -3773,32 +4136,62 @@ def _get_or_create_referral_code(email: str) -> str:
 
 def _complete_referral_if_pending(user_email: str):
     conn = _db_conn()
-    row = conn.execute(
-        "SELECT * FROM referral_logs WHERE invitee_email=? AND status='pending'", (user_email,)
-    ).fetchone()
-    if not row:
+    try:
+        row = conn.execute(
+            "SELECT * FROM referral_logs WHERE invitee_email=? AND status='pending'", (user_email,)
+        ).fetchone()
+        if not row:
+            return
+        conn.execute("UPDATE referral_logs SET status='completed' WHERE id=?", (row["id"],))
+        conn.commit()
+        inviter = row["inviter_email"]
+        cnt = conn.execute(
+            "SELECT COUNT(*) FROM referral_logs WHERE inviter_email=? AND status='completed'", (inviter,)
+        ).fetchone()[0]
+        if cnt >= 3:
+            prev = conn.execute("SELECT referral_unlocked FROM members WHERE email=?", (inviter,)).fetchone()
+            if prev and prev["referral_unlocked"] == 0:
+                expire_date = (_date_cls.today() + timedelta(days=30)).isoformat()
+                conn.execute(
+                    "UPDATE members SET referral_unlocked=1, referral_expire_date=? WHERE email=?",
+                    (expire_date, inviter)
+                )
+                conn.commit()
+                _send_email(
+                    inviter, "【線上有位】恭喜！已解鎖全功能 30 天",
+                    f'<p>您已成功邀請 {cnt} 位好友完成首次查詢，全功能已自動解鎖 30 天（有效期至 {expire_date}）。</p>'
+                    f'<p>繼續邀請好友可再次解鎖延長使用期限！</p>'
+                    f'<p><a href="{FRONTEND_URL}">立即使用</a></p>'
+                )
+        print(f"[REFERRAL] {user_email} 完成，inviter={inviter} cnt={cnt}")
+    finally:
         conn.close()
-        return
-    conn.execute("UPDATE referral_logs SET status='completed' WHERE id=?", (row["id"],))
-    conn.commit()
-    inviter = row["inviter_email"]
-    cnt = conn.execute(
-        "SELECT COUNT(*) FROM referral_logs WHERE inviter_email=? AND status='completed'", (inviter,)
-    ).fetchone()[0]
-    if cnt >= 3:
-        prev = conn.execute("SELECT referral_unlocked FROM members WHERE email=?", (inviter,)).fetchone()
-        if prev and prev["referral_unlocked"] == 0:
-            conn.execute("UPDATE members SET referral_unlocked=1 WHERE email=?", (inviter,))
-            conn.commit()
-            _send_email(
-                inviter, "【線上有位】恭喜！已解鎖全功能",
-                f'<p>您已成功邀請 {cnt} 位好友完成首次查詢，全功能已自動解鎖！即日起可無限查詢。</p>'
-                f'<p><a href="{FRONTEND_URL}">立即使用</a></p>'
-            )
-    conn.close()
 
 
-def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict) -> str:
+def _fetch_stock_news(stock_id: str, max_results: int = 3) -> list:
+    """從鉅亨 RSS 抓與該股票相關的新聞（代號精確比對 + 中文股名比對）"""
+    try:
+        import sys as _sys
+        _picker_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "stock_picker")
+        if _picker_path not in _sys.path:
+            _sys.path.insert(0, _picker_path)
+        from crawler import fetch_cnyes_news
+        stock_name = _name_cache.get(stock_id, "")
+        all_news = fetch_cnyes_news(100)
+        matched = [
+            {"title": n["title"], "link": n["link"]}
+            for n in all_news
+            if stock_id in n.get("codes", [])
+            or (stock_name and stock_name in n.get("title", ""))
+        ]
+        return matched[:max_results]
+    except Exception as _e:
+        print(f"[NEWS] _fetch_stock_news {stock_id} 失敗：{_e}")
+        return []
+
+
+def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict,
+                       news_items: list = None) -> str:
     price      = d.get("price", 0)
     trend      = d.get("trend", "盤整")
     risk_level = d.get("risk_level", "medium")
@@ -3837,13 +4230,29 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
     if kline_pattern and "常態" not in kline_pattern:
         bullets.append(f"K線大數據型態：{kline_pattern}（歷史勝率 {int(win_rate*100)}%）。")
 
-    risk_colors = {"low": "#4ade80", "medium": "#fbbf24", "high": "#f87171"}
+    risk_colors = {"low": "#3b82f6", "medium": "#fbbf24", "high": "#f87171"}
     risk_color = risk_colors.get(risk_level, "#fbbf24")
 
     bullets_html = "".join(
-        f'<li style="padding:8px 0;border-bottom:1px solid #2d4a2d;font-size:14px;line-height:1.7;color:#e8e0d0">{b}</li>'
+        f'<li style="padding:8px 0;border-bottom:1px solid #1e3a5a;font-size:14px;line-height:1.7;color:#e8e0d0">{b}</li>'
         for b in bullets
     )
+
+    if news_items:
+        news_rows = "".join(
+            f'<li style="padding:8px 0;border-bottom:1px solid #1e3a5a">'
+            f'<a href="{n["link"]}" target="_blank" rel="noopener" '
+            f'style="color:#3b82f6;font-size:13px;line-height:1.6">{n["title"]}</a></li>'
+            for n in news_items
+        )
+        news_html = (
+            '<div class="card">'
+            '<div style="font-size:15px;font-weight:700;margin-bottom:12px;color:#3b82f6">相關新聞</div>'
+            f'<ul style="list-style:none">{news_rows}</ul>'
+            '</div>'
+        )
+    else:
+        news_html = ""
 
     json_ld = _json_mod.dumps({
         "@context": "https://schema.org",
@@ -3867,50 +4276,51 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
 <script type="application/ld+json">{json_ld}</script>
 <style>
 *{{box-sizing:border-box;margin:0;padding:0}}
-body{{background:#1a2a1a;color:#e8e0d0;font-family:-apple-system,'Noto Sans TC',sans-serif;min-height:100vh;padding:24px 16px 48px}}
+body{{background:#0f1923;color:#e8e0d0;font-family:-apple-system,'Noto Sans TC',sans-serif;min-height:100vh;padding:24px 16px 48px}}
 .container{{max-width:720px;margin:0 auto}}
-.card{{background:#243324;border-radius:14px;padding:20px;margin-bottom:16px}}
+.card{{background:#1a2634;border-radius:14px;padding:20px;margin-bottom:16px}}
 .tag{{display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:8px}}
-a{{color:#4ade80;text-decoration:none}}
+a{{color:#3b82f6;text-decoration:none}}
 a:hover{{text-decoration:underline}}
 </style>
 </head>
 <body>
 <div class="container">
   <div style="margin-bottom:20px">
-    <a href="{FRONTEND_URL}" style="font-size:13px;color:#6b9f6b">← 線上有位</a>
+    <a href="{FRONTEND_URL}" style="font-size:13px;color:#6b8fbf">← 線上有位</a>
   </div>
   <div class="card">
     <span class="tag" style="background:{risk_color}22;color:{risk_color}">{risk_label}</span>
     <div style="font-size:26px;font-weight:700;margin-bottom:4px">{stock_id} {stock_name}</div>
-    <div style="font-size:13px;color:#8fac8f;margin-bottom:16px">分析日期：{report_date}</div>
+    <div style="font-size:13px;color:#8faabf;margin-bottom:16px">分析日期：{report_date}</div>
     <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px">
-      <div><div style="font-size:11px;color:#6b9f6b;margin-bottom:2px">現價</div><div style="font-size:28px;font-weight:700">{price}</div></div>
-      <div><div style="font-size:11px;color:#6b9f6b;margin-bottom:2px">趨勢</div><div style="font-size:20px;font-weight:700">{trend}</div></div>
-      <div><div style="font-size:11px;color:#6b9f6b;margin-bottom:2px">損益比</div><div style="font-size:20px;font-weight:700">{rr_ratio:.2f}</div></div>
+      <div><div style="font-size:11px;color:#6b8fbf;margin-bottom:2px">現價</div><div style="font-size:28px;font-weight:700">{price}</div></div>
+      <div><div style="font-size:11px;color:#6b8fbf;margin-bottom:2px">趨勢</div><div style="font-size:20px;font-weight:700">{trend}</div></div>
+      <div><div style="font-size:11px;color:#6b8fbf;margin-bottom:2px">損益比</div><div style="font-size:20px;font-weight:700">{rr_ratio:.2f}</div></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div style="background:#1a2a1a;border-radius:10px;padding:12px">
-        <div style="font-size:11px;color:#6b9f6b;margin-bottom:4px">支撐位</div>
-        <div style="font-size:18px;font-weight:700;color:#4ade80">{support}</div>
-        <div style="font-size:11px;color:#6b9f6b;margin-top:2px">{supp_desc}</div>
+      <div style="background:#0f1923;border-radius:10px;padding:12px">
+        <div style="font-size:11px;color:#6b8fbf;margin-bottom:4px">支撐位</div>
+        <div style="font-size:18px;font-weight:700;color:#3b82f6">{support}</div>
+        <div style="font-size:11px;color:#6b8fbf;margin-top:2px">{supp_desc}</div>
       </div>
-      <div style="background:#1a2a1a;border-radius:10px;padding:12px">
-        <div style="font-size:11px;color:#6b9f6b;margin-bottom:4px">壓力位</div>
+      <div style="background:#0f1923;border-radius:10px;padding:12px">
+        <div style="font-size:11px;color:#6b8fbf;margin-bottom:4px">壓力位</div>
         <div style="font-size:18px;font-weight:700;color:#fbbf24">{resistance}</div>
-        <div style="font-size:11px;color:#6b9f6b;margin-top:2px">{res_desc}</div>
+        <div style="font-size:11px;color:#6b8fbf;margin-top:2px">{res_desc}</div>
       </div>
     </div>
   </div>
   <div class="card">
-    <div style="font-size:15px;font-weight:700;margin-bottom:12px;color:#4ade80">技術分析摘要</div>
+    <div style="font-size:15px;font-weight:700;margin-bottom:12px;color:#3b82f6">技術分析摘要</div>
     <ul style="list-style:none">{bullets_html}</ul>
   </div>
+  {news_html}
   <div class="card" style="text-align:center">
-    <div style="font-size:14px;color:#8fac8f;margin-bottom:12px">查看完整互動圖表與即時報價</div>
-    <a href="{FRONTEND_URL}?q={stock_id}" style="display:inline-block;background:#4ade80;color:#1a2a1a;padding:12px 28px;border-radius:30px;font-weight:700;font-size:15px">前往線上有位 →</a>
+    <div style="font-size:14px;color:#8faabf;margin-bottom:12px">查看完整互動圖表與即時報價</div>
+    <a href="{FRONTEND_URL}?q={stock_id}" style="display:inline-block;background:#3b82f6;color:#fff;padding:12px 28px;border-radius:30px;font-weight:700;font-size:15px">前往線上有位 →</a>
   </div>
-  <div style="font-size:11px;color:#4a6a4a;text-align:center;margin-top:16px;line-height:1.6">
+  <div style="font-size:11px;color:#4a6a8f;text-align:center;margin-top:16px;line-height:1.6">
     ⚠️ 本報告僅供參考，不構成買賣建議。投資有風險，請自行評估。
   </div>
 </div>
@@ -4016,8 +4426,10 @@ async def reset_password(req: ResetPwdReq):
         conn.close()
         raise HTTPException(status_code=400, detail="連結已過期，請重新申請忘記密碼")
     email = row["email"]
+    email = email.strip().lower()
     conn.execute("UPDATE members SET password=?, token_ver=token_ver+1, password_changed_at=? WHERE email=?",
                  (_hash_pw(new_pw), now_str, email))
+    conn.commit()
     conn.execute("UPDATE password_reset_tokens SET used=1 WHERE token=?", (token,))
     conn.commit()
     conn.close()
@@ -4129,11 +4541,21 @@ class ReportReq(BaseModel):
 
 
 @app.post("/api/report/generate")
-def report_generate(req: ReportReq):
+def report_generate(req: ReportReq, user: dict = Depends(require_user)):
+    plan = user["plan"]
+    is_referral_unlocked = _is_referral_active(user)
+    if not is_referral_unlocked and user.get("expire_at") and user["expire_at"] < _taipei_today():
+        raise HTTPException(status_code=403, detail="訂閱已到期，請續費後繼續使用")
+    is_free = plan == "free" and not is_referral_unlocked
+    if is_free:
+        allowed, _, _ = _check_query_limit(user["id"], plan)
+        if not allowed:
+            raise HTTPException(status_code=403, detail="完整報告為付費功能，升級或邀請3位好友即可使用")
+
     stock_id = req.stock_id.strip().upper()
     report_date = _taipei_today()
 
-    # same-day cache
+    # same-day cache（快取命中不計入次數）
     conn = _db_conn()
     cached = conn.execute(
         "SELECT report_html FROM stock_reports WHERE stock_id=? AND report_date=?",
@@ -4141,7 +4563,7 @@ def report_generate(req: ReportReq):
     ).fetchone()
     conn.close()
     if cached:
-        return {"ok": True, "url": f"{FRONTEND_URL}/report/{stock_id}-{report_date}"}
+        return {"ok": True, "url": f"{BACKEND_URL}/report/{stock_id}-{report_date}"}
 
     try:
         d = _do_analyze(stock_id, "D", user=None)
@@ -4149,7 +4571,8 @@ def report_generate(req: ReportReq):
         raise HTTPException(status_code=500, detail=f"分析失敗：{e}")
 
     stock_name = d.get("stock_name", stock_id)
-    report_html = _build_report_html(stock_id, stock_name, report_date, d)
+    news_items = _fetch_stock_news(stock_id)
+    report_html = _build_report_html(stock_id, stock_name, report_date, d, news_items)
 
     conn = _db_conn()
     try:
@@ -4163,7 +4586,7 @@ def report_generate(req: ReportReq):
     finally:
         conn.close()
 
-    return {"ok": True, "url": f"{FRONTEND_URL}/report/{stock_id}-{report_date}"}
+    return {"ok": True, "url": f"{BACKEND_URL}/report/{stock_id}-{report_date}"}
 
 
 @app.get("/report/{slug}")
@@ -4195,7 +4618,8 @@ def get_report(slug: str):
     try:
         d = _do_analyze(stock_id, "D", user=None)
         stock_name = d.get("stock_name", stock_id)
-        html = _build_report_html(stock_id, stock_name, report_date, d)
+        news_items = _fetch_stock_news(stock_id)
+        html = _build_report_html(stock_id, stock_name, report_date, d, news_items)
         conn = _db_conn()
         try:
             conn.execute(
@@ -4254,6 +4678,83 @@ def sitemap():
     return PlainTextResponse(xml, media_type="application/xml")
 
 
+def _fetch_rankings_data():
+    """Fetch top-20 gainers/losers/volume from FinMind TaiwanStockPrice."""
+    import urllib.request as _ur, json as _j
+    from datetime import date as _d, timedelta as _td
+    for days_back in range(1, 6):
+        target = (_d.today() - _td(days=days_back)).strftime("%Y-%m-%d")
+        try:
+            url = (
+                f"https://api.finmindtrade.com/api/v4/data"
+                f"?dataset=TaiwanStockPrice&start_date={target}&end_date={target}"
+                f"&token={FINMIND_TOKEN}"
+            )
+            req = _ur.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with _ur.urlopen(req, timeout=15) as resp:
+                raw = _j.loads(resp.read())
+            rows = raw.get("data", [])
+            rows = [
+                r for r in rows
+                if str(r.get("stock_id", "")).isdigit()
+                and len(str(r.get("stock_id", ""))) == 4
+                and r.get("Trading_Volume", 0) > 500000
+                and r.get("open", 0) > 0
+                and r.get("close", 0) > 0
+            ]
+            if not rows:
+                continue
+            all_info = get_all_stock_info()
+            name_map = {s["stock_id"]: s.get("stock_name", "") for s in all_info}
+            enriched = []
+            for r in rows:
+                spread = r.get("spread", 0)
+                prev_close = r["close"] - spread
+                if prev_close > 0:
+                    change_pct = round(spread / prev_close * 100, 2)
+                else:
+                    change_pct = round((r["close"] - r["open"]) / r["open"] * 100, 2)
+                enriched.append({
+                    "stock_id": r["stock_id"],
+                    "stock_name": name_map.get(r["stock_id"], ""),
+                    "close": r["close"],
+                    "change_pct": change_pct,
+                    "volume": r.get("Trading_Volume", 0),
+                })
+            gainers = sorted(enriched, key=lambda x: x["change_pct"], reverse=True)[:20]
+            losers = sorted(enriched, key=lambda x: x["change_pct"])[:20]
+            by_volume = sorted(enriched, key=lambda x: x["volume"], reverse=True)[:20]
+            return {"date": target, "gainers": gainers, "losers": losers, "by_volume": by_volume}
+        except Exception as e:
+            print(f"_fetch_rankings_data {target}: {e}")
+            continue
+    return None
+
+
+def _rank_rows_html(stocks):
+    out = []
+    for i, s in enumerate(stocks, 1):
+        pct = s["change_pct"]
+        color = "#16a34a" if pct > 0 else ("#dc2626" if pct < 0 else "#666666")
+        sign = "+" if pct > 0 else ""
+        lots = s.get("volume", 0) // 1000
+        vol_str = f"{lots/10000:.1f}萬" if lots >= 10000 else f"{lots:,}"
+        link = f"{FRONTEND_URL}/?stock={s['stock_id']}"
+        name = s.get("stock_name") or ""
+        row = (
+            f'<tr onclick="location.href=\'{link}\'">'
+            f'<td class="r-num">{i}</td>'
+            f'<td class="r-stock"><a href="{link}">{s["stock_id"]}</a>'
+            f'<span class="r-name">{name}</span></td>'
+            f'<td class="r-price">{s["close"]}</td>'
+            f'<td class="r-pct" style="color:{color}">{sign}{pct}%</td>'
+            f'<td class="r-vol">{vol_str}</td>'
+            f'</tr>'
+        )
+        out.append(row)
+    return "\n".join(out)
+
+
 @app.get("/rankings")
 def rankings():
     from fastapi.responses import HTMLResponse
@@ -4262,45 +4763,18 @@ def rankings():
     if c["data"] and c["expires"] > now:
         return HTMLResponse(c["data"])
 
-    conn = _db_conn()
-    recent_reports = conn.execute(
-        "SELECT stock_id, stock_name, report_date FROM stock_reports ORDER BY created_at DESC LIMIT 50"
-    ).fetchall()
-    conn.close()
-
-    rows_html = ""
-    seen = set()
-    rank = 1
-    for r in recent_reports:
-        if r["stock_id"] in seen:
-            continue
-        seen.add(r["stock_id"])
-        rows_html += (
-            f'<tr>'
-            f'<td style="padding:10px 12px;color:#6b9f6b;font-weight:700">{rank}</td>'
-            f'<td style="padding:10px 12px"><a href="{BACKEND_URL}/report/{r["stock_id"]}-{r["report_date"]}" '
-            f'style="color:#4ade80;text-decoration:none;font-weight:600">{r["stock_id"]}</a></td>'
-            f'<td style="padding:10px 12px;color:#e8e0d0">{r["stock_name"]}</td>'
-            f'<td style="padding:10px 12px;color:#6b9f6b;font-size:12px">{r["report_date"]}</td>'
-            f'</tr>'
-        )
-        rank += 1
-
-    hot_links = ""
-    for sid in _SEO_HARDCODED_STOCKS[:20]:
-        name = STOCK_NAMES.get(sid, sid)
-        hot_links += (
-            f'<a href="{BACKEND_URL}/report/{sid}" '
-            f'style="display:inline-block;padding:6px 14px;margin:4px;background:#243324;'
-            f'border-radius:20px;color:#4ade80;text-decoration:none;font-size:13px">'
-            f'{sid} {name}</a>'
-        )
+    rdata = _fetch_rankings_data()
+    date_str = rdata["date"] if rdata else "—"
+    _err = '<tr><td colspan="5" style="text-align:center;color:#999;padding:24px">資料載入失敗，請稍後再試</td></tr>'
+    gainers_html = _rank_rows_html(rdata["gainers"]) if rdata else _err
+    losers_html  = _rank_rows_html(rdata["losers"])  if rdata else _err
+    volume_html  = _rank_rows_html(rdata["by_volume"]) if rdata else _err
 
     json_ld = _json_mod.dumps({
         "@context": "https://schema.org",
         "@type": "WebPage",
-        "name": "台股個股分析報告 — 線上有位",
-        "description": "台股技術分析報告查詢，支撐壓力損益比分析，每日更新",
+        "name": "台股排行榜 — 線上有位",
+        "description": "台股今日漲幅榜、跌幅榜、成交量榜 Top 20，每15分鐘更新",
         "publisher": {"@type": "Organization", "name": "線上有位"},
     }, ensure_ascii=False)
 
@@ -4309,38 +4783,84 @@ def rankings():
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>台股個股分析報告查詢 — 線上有位</title>
-<meta name="description" content="台股個股技術分析報告，支撐壓力損益比計算，每日更新，涵蓋台積電、鴻海、聯發科等上市上櫃股票">
+<title>台股排行榜 漲幅/跌幅/成交量 Top 20 — 線上有位</title>
+<meta name="description" content="台股今日漲幅榜、跌幅榜、成交量榜 Top 20，資料來源 FinMind，每15分鐘更新">
 <script type="application/ld+json">{json_ld}</script>
 <style>
 *{{box-sizing:border-box;margin:0;padding:0}}
-body{{background:#1a2a1a;color:#e8e0d0;font-family:-apple-system,'Noto Sans TC',sans-serif;min-height:100vh;padding:24px 16px 48px}}
-.container{{max-width:800px;margin:0 auto}}
-table{{width:100%;border-collapse:collapse;background:#243324;border-radius:12px;overflow:hidden}}
-thead th{{padding:12px;text-align:left;font-size:12px;color:#6b9f6b;font-weight:600;border-bottom:1px solid #2d4a2d}}
-tbody tr:hover{{background:#2d4a2d}}
-a{{color:#4ade80}}
+body{{background:#f5f0e8;color:#333;font-family:-apple-system,'Noto Sans TC',sans-serif;min-height:100vh;padding:20px 16px 60px}}
+.wrap{{max-width:680px;margin:0 auto}}
+.back{{font-size:13px;color:#666;text-decoration:none;display:inline-block;margin-bottom:20px}}
+.back:hover{{color:#333}}
+h1{{font-size:22px;font-weight:700;margin-bottom:4px}}
+.sub{{font-size:13px;color:#888;margin-bottom:20px}}
+.tabs{{display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid #e5ddd0}}
+.tab{{padding:10px 22px;font-size:14px;font-weight:600;border:none;background:none;color:#999;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s}}
+.tab.active{{color:#333;border-bottom-color:#333}}
+.tab:hover{{color:#555}}
+.panel{{display:none}}
+.panel.show{{display:block}}
+table{{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}}
+thead th{{padding:10px 12px;font-size:12px;color:#888;font-weight:600;text-align:left;border-bottom:1px solid #f0ebe0;background:#faf7f2}}
+tbody tr{{border-bottom:1px solid #f5f0ea;cursor:pointer;transition:background .12s}}
+tbody tr:last-child{{border-bottom:none}}
+tbody tr:hover{{background:#faf6ee}}
+td{{padding:11px 12px;vertical-align:middle}}
+.r-num{{color:#ccc;font-size:13px;width:30px;text-align:center;padding-left:8px}}
+.r-stock a{{font-size:14px;font-weight:700;color:#333;text-decoration:none}}
+.r-stock a:hover{{color:#555}}
+.r-name{{font-size:12px;color:#999;display:block;margin-top:1px}}
+.r-price{{font-size:14px;color:#555;text-align:right}}
+.r-pct{{font-size:14px;font-weight:700;text-align:right}}
+.r-vol{{font-size:13px;color:#aaa;text-align:right;padding-right:14px}}
+.disclaimer{{margin-top:32px;font-size:11px;color:#bbb;text-align:center;line-height:1.8}}
+@media(max-width:480px){{
+  .tab{{padding:8px 14px;font-size:13px}}
+  td{{padding:9px 8px}}
+  h1{{font-size:18px}}
+  .r-vol{{display:none}}
+  thead th:last-child{{display:none}}
+}}
 </style>
 </head>
 <body>
-<div class="container">
-  <div style="margin-bottom:24px">
-    <a href="{FRONTEND_URL}" style="font-size:13px;color:#6b9f6b">← 線上有位</a>
+<div class="wrap">
+  <a href="{FRONTEND_URL}" class="back">← 線上有位</a>
+  <h1>台股排行榜</h1>
+  <p class="sub">資料日期：{date_str}・每 15 分鐘更新</p>
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('gainers',this)">漲幅榜</button>
+    <button class="tab" onclick="showTab('losers',this)">跌幅榜</button>
+    <button class="tab" onclick="showTab('volume',this)">成交量榜</button>
   </div>
-  <h1 style="font-size:24px;font-weight:700;margin-bottom:8px">台股個股分析報告</h1>
-  <p style="font-size:14px;color:#6b9f6b;margin-bottom:24px">技術分析・支撐壓力・損益比 — 每日更新</p>
-
-  <div style="margin-bottom:28px">
-    <h2 style="font-size:15px;font-weight:700;margin-bottom:12px;color:#4ade80">熱門個股</h2>
-    <div style="line-height:2">{hot_links}</div>
+  <div id="p-gainers" class="panel show">
+    <table>
+      <thead><tr><th>#</th><th>股票</th><th style="text-align:right">現價</th><th style="text-align:right">漲跌幅</th><th style="text-align:right">成交量</th></tr></thead>
+      <tbody>{gainers_html}</tbody>
+    </table>
   </div>
-
-  {'<div><h2 style="font-size:15px;font-weight:700;margin-bottom:12px;color:#4ade80">最新分析報告</h2><table><thead><tr><th>#</th><th>代號</th><th>名稱</th><th>日期</th></tr></thead><tbody>' + rows_html + '</tbody></table></div>' if rows_html else ''}
-
-  <div style="margin-top:24px;font-size:11px;color:#4a6a4a;text-align:center">
-    ⚠️ 本頁面資料僅供參考，不構成買賣建議。
+  <div id="p-losers" class="panel">
+    <table>
+      <thead><tr><th>#</th><th>股票</th><th style="text-align:right">現價</th><th style="text-align:right">漲跌幅</th><th style="text-align:right">成交量</th></tr></thead>
+      <tbody>{losers_html}</tbody>
+    </table>
   </div>
+  <div id="p-volume" class="panel">
+    <table>
+      <thead><tr><th>#</th><th>股票</th><th style="text-align:right">現價</th><th style="text-align:right">漲跌幅</th><th style="text-align:right">成交量</th></tr></thead>
+      <tbody>{volume_html}</tbody>
+    </table>
+  </div>
+  <p class="disclaimer">⚠️ 本頁面資料僅供參考，不構成任何買賣建議。投資有風險，請自行評估。<br>資料來源：FinMind</p>
 </div>
+<script>
+function showTab(name,btn){{
+  document.querySelectorAll('.panel').forEach(function(p){{p.classList.remove('show')}});
+  document.querySelectorAll('.tab').forEach(function(t){{t.classList.remove('active')}});
+  document.getElementById('p-'+name).classList.add('show');
+  btn.classList.add('active');
+}}
+</script>
 </body>
 </html>"""
 
