@@ -178,6 +178,15 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
         <button class="action-btn" onclick="showSection('blocklist')">
           <span class="icon">🚫</span>封鎖名單
         </button>
+        <button class="action-btn" onclick="showSection('earlybird')">
+          <span class="icon">🎁</span>早鳥批次升級
+        </button>
+        <button class="action-btn" onclick="showSection('prebuild')">
+          <span class="icon">📄</span>預建熱門報告
+        </button>
+        <button class="action-btn" id="runScanBtn" onclick="doRunScan(this)" style="background:#c53030;color:#fff">
+          <span class="icon">⚡</span>立即產生選股
+        </button>
       </div>
     </div>
 
@@ -238,6 +247,35 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
       <div id="blockList"><div style="color:var(--text3);font-size:13px">載入中...</div></div>
     </div>
 
+    <!-- 早鳥批次升級 -->
+    <div class="card" id="sec-earlybird" style="display:none">
+      <div class="card-title">🎁 早鳥批次升級</div>
+      <div class="form-row" style="margin-bottom:10px">
+        <div class="field">
+          <label>升級方案</label>
+          <select id="earlybirdPlan">
+            <option value="monthly30">月費（30天）</option>
+            <option value="quarterly90">季費（90天）</option>
+          </select>
+        </div>
+        <button class="inline-btn secondary" onclick="loadFreeMembers()">載入免費會員</button>
+      </div>
+      <div id="freeMemberList" style="margin-bottom:10px"></div>
+      <div id="earlybirdBatchRow" style="display:none;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px" class="form-row">
+        <button class="inline-btn secondary" onclick="toggleSelectAll()" id="selectAllBtn">全選</button>
+        <button class="inline-btn" onclick="doEarlyBirdUpgrade()">批次升級 + 寄信</button>
+      </div>
+      <div class="result-box" id="earlybirdResult"></div>
+    </div>
+
+    <!-- 預建熱門報告 -->
+    <div class="card" id="sec-prebuild" style="display:none">
+      <div class="card-title">📄 預建熱門股報告（SEO）</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6">讀取 sitemap.xml 的 49 支熱門代號，批次產生今日個股報告頁並存入資料庫，讓 Google 可以索引。後台執行，約 10~20 分鐘完成。</p>
+      <button class="inline-btn" onclick="doPrebuildReports(this)">🚀 開始預建</button>
+      <div class="result-box" id="prebuildResult" style="margin-top:10px"></div>
+    </div>
+
   </div>
 </div>
 
@@ -277,7 +315,7 @@ if(sessionStorage.getItem('adminAuth')==='1'){
 
 // ── 顯示/隱藏區塊 ──
 function showSection(name){
-  ['grant','reset','members','messages','blocklist'].forEach(s=>{
+  ['grant','reset','members','messages','blocklist','earlybird','prebuild'].forEach(s=>{
     document.getElementById('sec-'+s).style.display = s===name ? 'block' : 'none';
   });
   if(name==='members') loadMembers();
@@ -417,6 +455,20 @@ async function quickReset(email){
 }
 
 // ── 備份 ──
+async function doRunScan(btn){
+  btn.disabled=true; btn.textContent='⏳ 產生中...';
+  try{
+    const r=await fetch(`${API}/admin/run-scan?key=${ADMIN_KEY}`,{method:'POST'});
+    const d=await r.json();
+    if(r.ok){ toast('✅ 選股排程已觸發，約 5~10 分鐘完成'); }
+    else{ toast('❌ 失敗：'+(d.detail||'未知錯誤')); }
+  }catch(e){
+    toast('❌ 連線失敗：'+e.message);
+  }finally{
+    setTimeout(()=>{ btn.disabled=false; btn.innerHTML='<span class="icon">⚡</span>立即產生選股'; },5000);
+  }
+}
+
 function doBackup(){
   const url=`${API}/admin/backup-db?key=${ADMIN_KEY}`;
   window.open(url,'_blank');
@@ -555,6 +607,106 @@ async function doUnblock(email){
     if(r.ok){toast('✅ 已解除封鎖');loadBlocklist();}
     else{const d=await r.json();toast('❌ '+(d.detail||'失敗'));}
   }catch(e){toast('連線失敗');}
+}
+
+// ── 早鳥批次升級 ──
+let _freeMembersCache = [];
+async function loadFreeMembers(){
+  const el = document.getElementById('freeMemberList');
+  el.innerHTML = '<div style="color:var(--text3);font-size:13px">載入中...</div>';
+  document.getElementById('earlybirdBatchRow').style.display = 'none';
+  try{
+    const r = await fetch(`${API}/admin/members?key=${ADMIN_KEY}`);
+    if(!r.ok) throw new Error();
+    const data = await r.json();
+    const members = data.members || data || [];
+    _freeMembersCache = members.filter(m => m.plan === 'free');
+    if(!_freeMembersCache.length){
+      el.innerHTML = '<div style="color:var(--text3);font-size:13px">目前無免費會員</div>';
+      return;
+    }
+    el.innerHTML = `
+      <div style="font-size:12px;color:var(--text3);margin-bottom:6px">共 ${_freeMembersCache.length} 位免費會員，勾選要升級的帳號：</div>
+      ${_freeMembersCache.map((m,i)=>`
+        <label style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg);border-radius:8px;margin-bottom:5px;cursor:pointer;font-size:13px">
+          <input type="checkbox" class="earlybird-chk" value="${escHtml(m.email)}" style="width:15px;height:15px;accent-color:var(--green)"/>
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(m.email)}</span>
+          <span style="font-size:11px;color:var(--text3)">建立 ${fmtTime(m.created_at)}</span>
+        </label>`).join('')}`;
+    document.getElementById('earlybirdBatchRow').style.display = 'flex';
+    document.getElementById('selectAllBtn').textContent = '全選';
+  }catch(e){
+    el.innerHTML = '<div style="color:var(--up);font-size:13px">載入失敗</div>';
+  }
+}
+
+function toggleSelectAll(){
+  const chks = document.querySelectorAll('.earlybird-chk');
+  const allChecked = [...chks].every(c=>c.checked);
+  chks.forEach(c=>c.checked=!allChecked);
+  document.getElementById('selectAllBtn').textContent = allChecked ? '全選' : '取消全選';
+}
+
+async function doEarlyBirdUpgrade(){
+  const chks = [...document.querySelectorAll('.earlybird-chk:checked')];
+  if(!chks.length){ toast('請先勾選要升級的會員'); return; }
+  const planVal = document.getElementById('earlybirdPlan').value;
+  const plan = planVal === 'quarterly90' ? 'quarterly' : 'monthly';
+  const days = planVal === 'quarterly90' ? 90 : 30;
+  const emails = chks.map(c=>c.value);
+  if(!confirm(`確定批次升級 ${emails.length} 位會員為${plan==='quarterly'?'季費（90天）':'月費（30天）'}並寄通知信？`)) return;
+  const res = document.getElementById('earlybirdResult');
+  res.textContent = `升級中... (0/${emails.length})`;
+  res.className = 'result-box show';
+  try{
+    const r = await fetch(`${API}/admin/batch-upgrade?key=${ADMIN_KEY}`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({emails, plan, days})
+    });
+    const data = await r.json();
+    if(!r.ok){ res.textContent='失敗：'+(data.detail||'未知錯誤'); res.className='result-box show error'; return; }
+    const ok = data.results.filter(x=>x.ok);
+    const fail = data.results.filter(x=>!x.ok);
+    const mailOk = ok.filter(x=>x.email_sent).length;
+    let txt = `✅ 升級完成！\n成功：${ok.length} 位，失敗：${fail.length} 位\n已寄信：${mailOk} 封`;
+    if(fail.length) txt += '\n\n失敗清單：\n'+fail.map(f=>`${f.email}：${f.reason}`).join('\n');
+    res.textContent = txt;
+    res.className = 'result-box show success';
+    loadStats();
+  }catch(e){
+    res.textContent = '連線失敗';
+    res.className = 'result-box show error';
+  }
+}
+
+// ── 預建熱門股報告 ──
+async function doPrebuildReports(btn){
+  if(!confirm('確定要預建 49 支熱門股的今日報告頁？後台執行約 10~20 分鐘。')) return;
+  btn.disabled = true;
+  btn.textContent = '⏳ 已觸發...';
+  const res = document.getElementById('prebuildResult');
+  res.className = 'result-box show';
+  res.textContent = '請求中...';
+  try{
+    const r = await fetch(`${API}/admin/prebuild-reports?key=${ADMIN_KEY}`, {method:'POST'});
+    const data = await r.json();
+    if(r.ok){
+      res.textContent = `✅ ${data.message}`;
+      res.className = 'result-box show success';
+      btn.textContent = '✅ 已觸發（後台執行中）';
+    }else{
+      res.textContent = '失敗：'+(data.detail||'未知錯誤');
+      res.className = 'result-box show error';
+      btn.disabled = false;
+      btn.textContent = '🚀 開始預建';
+    }
+  }catch(e){
+    res.textContent = '連線失敗';
+    res.className = 'result-box show error';
+    btn.disabled = false;
+    btn.textContent = '🚀 開始預建';
+  }
 }
 </script>
 </body>
