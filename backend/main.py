@@ -2519,6 +2519,52 @@ def get_top_gainers(limit: int = 10):
     return {"date": "", "gainers": fallback}
 
 
+@app.get("/api/quote/live/{stock_id}")
+def get_quote_live(stock_id: str):
+    """
+    TWSE MIS 即時報價 proxy（前端 CORS bypass，不需登入）
+    回傳 z/y/o/h/l/v/t 欄位
+    """
+    import urllib.request as _ur, json as _j
+    code = stock_id.strip().replace(".TW", "").replace(".TWO", "")
+
+    def _sf(v):
+        try:
+            f = float(str(v or "").replace(",", ""))
+            return f if f > 0 else None
+        except Exception:
+            return None
+
+    def _fetch(ex: str):
+        url = (f"https://mis.twse.com.tw/stock/api/getStockInfo.jsp"
+               f"?ex_ch={ex}_{code}.tw&json=1&delay=0")
+        req = _ur.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with _ur.urlopen(req, timeout=6) as r:
+            arr = _j.loads(r.read()).get("msgArray", [])
+            return arr[0] if arr else {}
+
+    row = {}
+    try:
+        row = _fetch("tse")
+        if not _sf(row.get("z")):          # z="-" → 試 OTC
+            row = _fetch("otc") or row
+    except Exception:
+        try:
+            row = _fetch("otc")
+        except Exception:
+            pass
+
+    return {
+        "z": _sf(row.get("z")),
+        "y": _sf(row.get("y")),
+        "o": _sf(row.get("o")),
+        "h": _sf(row.get("h")),
+        "l": _sf(row.get("l")),
+        "v": _sf(row.get("v")),
+        "t": str(row.get("t", "") or "").strip(),
+    }
+
+
 @app.get("/api/quote/{stock_id}")
 def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
     """

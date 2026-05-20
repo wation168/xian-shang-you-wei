@@ -2282,42 +2282,25 @@ async function fetchAndUpdateQuote(stockId){
 
   if(!_inSession){ scheduleNext(stockId, false); return; }
 
-  const _sf  = v => { const n=parseFloat(String(v||'').replace(/,/g,'')); return (!isNaN(n)&&n>0)?n:null; };
-
-  async function _mis(ex){
-    const r = await fetch(
-      `https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=${ex}_${code}.tw&json=1&delay=0`,
-      {signal:AbortSignal.timeout(6000)}
-    );
-    if(!r.ok) return null;
-    const d = await r.json();
-    return d?.msgArray?.[0]||null;
-  }
-
   try{
-    let row = await _mis('tse');
-    console.log('[QUOTE-FRONT] TSE raw z=', row?.z, 'y=', row?.y);
-    // TSE 無成交價時試 OTC
-    if(!_sf(row?.z)) row = await _mis('otc') || row;
-    if(!row){ scheduleNext(stockId, true); return; }
+    const r = await fetch(`${getAPI()}/api/quote/live/${code}`, {signal:AbortSignal.timeout(8000)});
+    if(!r.ok){ scheduleNext(stockId, true); return; }
+    const d = await r.json();
+    console.log('[QUOTE-FRONT] live z=', d.z, 'y=', d.y);
 
-    const z = _sf(row.z); // 成交價（可能為 null）
-    const y = _sf(row.y); // 昨收
-    console.log('[QUOTE-FRONT] z=', z, 'y=', y);
-
-    if(z){
-      const change     = y!=null ? +(z-y).toFixed(2) : null;
-      const change_pct = (y&&change!=null) ? +(change/y*100).toFixed(2) : null;
+    if(d.z){
+      const change     = d.y!=null ? +(d.z-d.y).toFixed(2) : null;
+      const change_pct = (d.y&&change!=null) ? +(change/d.y*100).toFixed(2) : null;
       updateQuoteUI({
-        price:z, change, change_pct,
+        price:d.z, change, change_pct,
         is_trading:true, in_session:true,
-        time:(row.t||'').trim(),
+        time:d.t||'',
         price_note:null,
       });
     }
     scheduleNext(stockId, true);
   }catch(e){
-    console.log('[QUOTE-FRONT] TWSE MIS 失敗：', e?.message||e);
+    console.log('[QUOTE-FRONT] live API 失敗：', e?.message||e);
     scheduleNext(stockId, true);
   }
 }
@@ -3583,7 +3566,8 @@ async function showPicksPage(){
       const html = await r.text();
       const blob = new Blob([html], {type:'text/html'});
       const url  = URL.createObjectURL(blob);
-      el.querySelector('#picksFrame').innerHTML = `<iframe src="${url}" onload="URL.revokeObjectURL(this.src)" style="width:100%;height:calc(100vh - 160px);border:none;border-radius:var(--radius-lg)"></iframe>`;
+      el.querySelector('#picksFrame').innerHTML = `<iframe src="${url}" style="width:100%;height:calc(100vh - 160px);border:none;border-radius:var(--radius-lg)"></iframe>`;
+      setTimeout(()=>URL.revokeObjectURL(url), 10000);
     }catch(e){
       el.querySelector('#picksFrame').innerHTML = `<div style="padding:40px 0;text-align:center;color:var(--text3)"><div style="font-size:36px;margin-bottom:12px">🔄</div><div style="font-size:14px">資料更新中，請稍後再試</div></div>`;
     }
