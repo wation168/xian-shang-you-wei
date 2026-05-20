@@ -3931,6 +3931,24 @@ def auth_register(req: RegisterReq, ref: str = "", request: Request = None):
     if len(req.password) < 6:
         raise HTTPException(status_code=400, detail="密碼至少 6 個字元")
     conn = _db_conn()
+    client_ip = request.client.host if request else ""
+    # 帶邀請碼時，先檢查同 IP 是否已有人用過同一邀請碼（INSERT 前攔截）
+    inviter_email = None
+    if ref:
+        inviter_row = conn.execute(
+            "SELECT user_email FROM referral_codes WHERE code=?", (ref.upper().strip(),)
+        ).fetchone()
+        if inviter_row and inviter_row["user_email"] != email:
+            inviter_email = inviter_row["user_email"]
+            if client_ip and conn.execute(
+                "SELECT id FROM referral_logs WHERE inviter_email=? AND invitee_ip=?",
+                (inviter_email, client_ip)
+            ).fetchone():
+                conn.close()
+                raise HTTPException(
+                    status_code=400,
+                    detail="此網路環境已有使用該邀請碼的帳號，請改用手機電信網路重新嘗試"
+                )
     try:
         conn.execute(
             "INSERT INTO members (email, password) VALUES (?, ?)",
@@ -3941,20 +3959,17 @@ def auth_register(req: RegisterReq, ref: str = "", request: Request = None):
         conn.close()
         raise HTTPException(status_code=409, detail="此 Email 已註冊")
     _get_or_create_referral_code(email)
-    if ref:
-        inviter_row = conn.execute("SELECT user_email FROM referral_codes WHERE code=?", (ref.upper().strip(),)).fetchone()
-        if inviter_row and inviter_row["user_email"] != email:
-            client_ip = request.client.host if request else ""
-            dupe = conn.execute(
-                "SELECT id FROM referral_logs WHERE invitee_email=? AND inviter_email=?",
-                (email, inviter_row["user_email"])
-            ).fetchone()
-            if not dupe:
-                conn.execute(
-                    "INSERT INTO referral_logs (inviter_email, invitee_email, invitee_ip) VALUES (?,?,?)",
-                    (inviter_row["user_email"], email, client_ip)
-                )
-                conn.commit()
+    if inviter_email:
+        dupe = conn.execute(
+            "SELECT id FROM referral_logs WHERE invitee_email=? AND inviter_email=?",
+            (email, inviter_email)
+        ).fetchone()
+        if not dupe:
+            conn.execute(
+                "INSERT INTO referral_logs (inviter_email, invitee_email, invitee_ip) VALUES (?,?,?)",
+                (inviter_email, email, client_ip)
+            )
+            conn.commit()
     conn.close()
     return {"ok": True, "message": "註冊成功"}
 
@@ -3967,6 +3982,23 @@ def register_free(req: RegisterReq, ref: str = "", request: Request = None):
     if len(req.password) < 6:
         raise HTTPException(status_code=400, detail="密碼至少 6 個字元")
     conn = _db_conn()
+    client_ip = request.client.host if request else ""
+    inviter_email = None
+    if ref:
+        inviter_row = conn.execute(
+            "SELECT user_email FROM referral_codes WHERE code=?", (ref.upper().strip(),)
+        ).fetchone()
+        if inviter_row and inviter_row["user_email"] != email:
+            inviter_email = inviter_row["user_email"]
+            if client_ip and conn.execute(
+                "SELECT id FROM referral_logs WHERE inviter_email=? AND invitee_ip=?",
+                (inviter_email, client_ip)
+            ).fetchone():
+                conn.close()
+                raise HTTPException(
+                    status_code=400,
+                    detail="此網路環境已有使用該邀請碼的帳號，請改用手機電信網路重新嘗試"
+                )
     try:
         conn.execute(
             "INSERT INTO members (email, password, plan) VALUES (?, ?, 'free')",
@@ -3977,20 +4009,17 @@ def register_free(req: RegisterReq, ref: str = "", request: Request = None):
         conn.close()
         raise HTTPException(status_code=409, detail="此 Email 已註冊")
     _get_or_create_referral_code(email)
-    if ref:
-        inviter_row = conn.execute("SELECT user_email FROM referral_codes WHERE code=?", (ref.upper().strip(),)).fetchone()
-        if inviter_row and inviter_row["user_email"] != email:
-            client_ip = request.client.host if request else ""
-            dupe = conn.execute(
-                "SELECT id FROM referral_logs WHERE invitee_email=? AND inviter_email=?",
-                (email, inviter_row["user_email"])
-            ).fetchone()
-            if not dupe:
-                conn.execute(
-                    "INSERT INTO referral_logs (inviter_email, invitee_email, invitee_ip) VALUES (?,?,?)",
-                    (inviter_row["user_email"], email, client_ip)
-                )
-                conn.commit()
+    if inviter_email:
+        dupe = conn.execute(
+            "SELECT id FROM referral_logs WHERE invitee_email=? AND inviter_email=?",
+            (email, inviter_email)
+        ).fetchone()
+        if not dupe:
+            conn.execute(
+                "INSERT INTO referral_logs (inviter_email, invitee_email, invitee_ip) VALUES (?,?,?)",
+                (inviter_email, email, client_ip)
+            )
+            conn.commit()
     conn.close()
     return {"ok": True, "message": "免費帳號建立成功"}
 
