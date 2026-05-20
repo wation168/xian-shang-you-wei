@@ -2277,9 +2277,11 @@ async function fetchAndUpdateQuote(stockId){
     _twH >= 9 &&
     (_twH < 13 || (_twH===13 && _twM<=30));
 
+  const code = stockId.replace(/\.(TW|TWO)$/i,'');
+  console.log('[QUOTE-FRONT] 開始抓即時價', code, '| 台灣時間', `${_twH}:${String(_twM).padStart(2,'0')}`, '| inSession=', _inSession);
+
   if(!_inSession){ scheduleNext(stockId, false); return; }
 
-  const code = stockId.replace(/\.(TW|TWO)$/i,'');
   const _sf  = v => { const n=parseFloat(String(v||'').replace(/,/g,'')); return (!isNaN(n)&&n>0)?n:null; };
 
   async function _mis(ex){
@@ -2294,12 +2296,14 @@ async function fetchAndUpdateQuote(stockId){
 
   try{
     let row = await _mis('tse');
+    console.log('[QUOTE-FRONT] TSE raw z=', row?.z, 'y=', row?.y);
     // TSE 無成交價時試 OTC
     if(!_sf(row?.z)) row = await _mis('otc') || row;
     if(!row){ scheduleNext(stockId, true); return; }
 
     const z = _sf(row.z); // 成交價（可能為 null）
     const y = _sf(row.y); // 昨收
+    console.log('[QUOTE-FRONT] z=', z, 'y=', y);
 
     if(z){
       const change     = y!=null ? +(z-y).toFixed(2) : null;
@@ -2313,7 +2317,7 @@ async function fetchAndUpdateQuote(stockId){
     }
     scheduleNext(stockId, true);
   }catch(e){
-    // TWSE MIS 失敗（CORS 或網路）→ 繼續輪詢
+    console.log('[QUOTE-FRONT] TWSE MIS 失敗：', e?.message||e);
     scheduleNext(stockId, true);
   }
 }
@@ -3516,8 +3520,11 @@ async function showPicksPage(){
   const overlay = document.getElementById('pageOverlay');
   overlay.style.display = 'block';
 
+  console.log('[ADMIN-CHECK]', _authUser?.email, '| _authUser=', _authUser);
+
   // 管理員判斷（先定義，供下方兩處共用）
   const _isAdmin = _authUser && _authUser.email === 'watione@yahoo.com.tw';
+  console.log('[ADMIN-CHECK] _isAdmin=', _isAdmin, '| _hasPremium()=', _hasPremium());
 
   // 遊客 / 免費會員（邀請未解鎖或已過期）→ 鎖定預覽（管理員跳過）
   if(!_authUser || (!_hasPremium() && !_isAdmin)){
