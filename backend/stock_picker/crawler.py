@@ -8,6 +8,7 @@ crawler.py — 資料爬取層
 import os
 import re
 import json
+import ssl
 import time
 import urllib.request
 from datetime import date, datetime, timedelta, timezone
@@ -16,15 +17,18 @@ from xml.etree import ElementTree as ET
 
 FINMIND_TOKEN = os.environ.get("FINMIND_TOKEN", "")
 
+# SSL context 供 TWSE 使用（TWSE 憑證缺少 Subject Key Identifier，無法通過預設驗證）
+_TWSE_SSL_CTX = ssl.create_default_context()
+_TWSE_SSL_CTX.check_hostname = False
+_TWSE_SSL_CTX.verify_mode = ssl.CERT_NONE
+
 # ──────────────────────────────────────────
-# 鉅亨 RSS feeds
+# 財經新聞 RSS feeds
 # ──────────────────────────────────────────
 CNYES_FEEDS = [
-    "https://feeds.feedburner.com/cnyes",                   # 頭條
-    "https://news.cnyes.com/rss/category/tw_stock",         # 台股
-    "https://news.cnyes.com/rss/category/fund",             # 產業基金
-    "https://news.cnyes.com/rss/category/tw_stock_news",    # 個股新聞
-    "https://news.cnyes.com/rss/category/industry",         # 產業
+    "https://feeds.feedburner.com/cnyes",                   # 鉅亨頭條
+    "https://tw.stock.yahoo.com/rss",                       # Yahoo 台股
+    "https://money.udn.com/rssfeed/news/1001/5590",         # 經濟日報個股
 ]
 
 # 股票代號正則（4~6碼數字，後接中文公司名 or 括號）
@@ -128,7 +132,7 @@ def fetch_twse_volume_top(n: int = 100) -> tuple[list[str], dict[str, str]]:
     url = f"https://www.twse.com.tw/exchangeReport/STOCK_DAY_ALL?response=json&date={today}"
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=12) as resp:
+        with urllib.request.urlopen(req, timeout=12, context=_TWSE_SSL_CTX) as resp:
             data = json.loads(resp.read())
 
         if data.get("stat") not in ("OK", "ok"):
@@ -136,7 +140,7 @@ def fetch_twse_volume_top(n: int = 100) -> tuple[list[str], dict[str, str]]:
             # fallback：不帶 date 參數
             url2 = "https://www.twse.com.tw/exchangeReport/STOCK_DAY_ALL?response=json"
             req2 = urllib.request.Request(url2, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(req2, timeout=12) as resp2:
+            with urllib.request.urlopen(req2, timeout=12, context=_TWSE_SSL_CTX) as resp2:
                 data = json.loads(resp2.read())
 
         rows = data.get("data", [])
