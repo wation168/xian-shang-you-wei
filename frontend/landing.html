@@ -121,6 +121,9 @@ footer p{font-size:12px;color:rgba(255,255,255,.3);line-height:1.8}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 .js-anim .reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
 .js-anim .reveal.visible{opacity:1;transform:none}
+.mistake-card{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
+.mistake-card.visible{opacity:1;transform:translateY(0)}
+.price-card:hover{transform:translateY(-6px);box-shadow:0 16px 48px rgba(0,0,0,.12)}
 @media(max-width:600px){
   nav{padding:0 16px}
   .hero{padding:80px 16px 40px}
@@ -146,12 +149,12 @@ footer p{font-size:12px;color:rgba(255,255,255,.3);line-height:1.8}
 
   <div style="display:flex;gap:32px;justify-content:center;margin-bottom:40px;animation:fadeUp .6s .25s ease both">
     <div style="text-align:center">
-      <div style="font-size:28px;font-weight:800;color:var(--green)" id="heroVisitCount">—</div>
+      <div style="font-size:28px;font-weight:800;color:var(--green)" id="heroVisits">—</div>
       <div style="font-size:12px;color:var(--text2);margin-top:2px">累計訪問</div>
     </div>
     <div style="width:1px;background:var(--border)"></div>
     <div style="text-align:center">
-      <div style="font-size:28px;font-weight:800;color:var(--green)" id="heroQueryCount">—</div>
+      <div style="font-size:28px;font-weight:800;color:var(--green)" id="heroAnalysis">—</div>
       <div style="font-size:12px;color:var(--text2);margin-top:2px">累計分析</div>
     </div>
   </div>
@@ -189,11 +192,11 @@ footer p{font-size:12px;color:rgba(255,255,255,.3);line-height:1.8}
   <div class="container">
     <div class="section-label">你是不是也這樣</div>
     <h2 class="section-title" style="color:#fff">散戶最常犯的錯</h2>
-    <div class="pain-grid reveal">
-      <div class="pain-card"><div class="pain-icon">📈</div><h3>看到漲就追，一追就套</h3><p>在高風險區進場，不知道上面還有多少壓力，停損也不知道設哪裡</p></div>
-      <div class="pain-card"><div class="pain-icon">📉</div><h3>看到跌就怕，一怕就砍，一砍就漲</h3><p>回測支撐的正常拉回，卻以為要崩盤，在最低點殺出，然後眼睜睜看它漲回去</p></div>
-      <div class="pain-card"><div class="pain-icon">😵</div><h3>指標看不懂，不知道該信哪個</h3><p>看了一堆數字，就是不知道現在能不能買</p></div>
-      <div class="pain-card"><div class="pain-icon">🎲</div><h3>靠感覺進場，輸了才後悔</h3><p>沒有設停損，沒有計算損益比，只是覺得這支會漲</p></div>
+    <div class="pain-grid">
+      <div class="pain-card mistake-card"><div class="pain-icon">📈</div><h3>看到漲就追，一追就套</h3><p>在高風險區進場，不知道上面還有多少壓力，停損也不知道設哪裡</p></div>
+      <div class="pain-card mistake-card"><div class="pain-icon">📉</div><h3>看到跌就怕，一怕就砍，一砍就漲</h3><p>回測支撐的正常拉回，卻以為要崩盤，在最低點殺出，然後眼睜睜看它漲回去</p></div>
+      <div class="pain-card mistake-card"><div class="pain-icon">😵</div><h3>指標看不懂，不知道該信哪個</h3><p>看了一堆數字，就是不知道現在能不能買</p></div>
+      <div class="pain-card mistake-card"><div class="pain-icon">🎲</div><h3>靠感覺進場，輸了才後悔</h3><p>沒有設停損，沒有計算損益比，只是覺得這支會漲</p></div>
     </div>
   </div>
 </section>
@@ -486,11 +489,25 @@ async function _loadHeroStats(){
     const r = await fetch(`${API}/api/stats`, {signal: AbortSignal.timeout(5000)});
     if(!r.ok) return;
     const d = await r.json();
-    _animateCount(document.getElementById('heroVisitCount'), d.visit_count || 0, 1200);
-    _animateCount(document.getElementById('heroQueryCount'), d.query_count || 0, 1400);
+    _animateCount(document.getElementById('heroVisits'),   d.page_views    || 0, 1400);
+    _animateCount(document.getElementById('heroAnalysis'), d.analyze_count || 0, 1600);
   }catch(e){}
 }
 _loadHeroStats();
+
+// 痛點卡片 Scroll Reveal（依序淡入，間隔 120ms）
+(function(){
+  const _mkObs = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting) return;
+      e.target.querySelectorAll('.mistake-card').forEach((c,i)=>
+        setTimeout(()=>c.classList.add('visible'), i*120)
+      );
+      _mkObs.unobserve(e.target);
+    });
+  },{threshold:.1});
+  document.querySelectorAll('.pain-grid').forEach(g=>_mkObs.observe(g));
+})();
 
 const PLANS = {
   monthly:   { label:'月費方案', price:'$399／月',   days:30  },
