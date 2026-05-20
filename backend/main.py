@@ -2515,11 +2515,11 @@ def get_top_gainers(limit: int = 10):
 
 
 @app.get("/api/quote/{stock_id}")
-def get_quote(stock_id: str, user: dict = Depends(require_user)):
+def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
     """
-    即時報價
-    盤中：tick_snapshot > TWSE z > FinMind 今日收盤
-    盤後：FinMind 今日收盤 > TWSE y（昨收）
+    即時報價（公開 endpoint，不需登入）
+    盤中：tick_snapshot > Yahoo chart > TWSE z > FinMind 今日收盤
+    盤後：FinMind 今日收盤 > TWSE z > STOCK_DAY > TWSE y（昨收）
     """
     import urllib.request, json as _json
     from datetime import datetime, time as dtime, date as _date
@@ -2562,6 +2562,32 @@ def get_quote(stock_id: str, user: dict = Depends(require_user)):
         except Exception as _e:
             if not (hasattr(_e, 'code') and _e.code == 400):
                 print(f"[QUOTE] tick_snapshot 失敗 {code}：{_e}")
+
+    # ── 1.5 Yahoo Finance chart API（snap 失敗時備援）──
+    yf_price = yf_open = yf_high = yf_low = None
+    if snap_price is None and (in_session or just_after_close):
+        try:
+            _sym = resolve_symbol(code)
+            _yf_url = (f"https://query1.finance.yahoo.com/v8/finance/chart/{_sym}"
+                       f"?interval=1d&range=2d")
+            _yf_req = urllib.request.Request(_yf_url, headers={
+                "User-Agent": ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                               "AppleWebKit/537.36 (KHTML, like Gecko) "
+                               "Chrome/121.0.0.0 Safari/537.36"),
+                "Accept": "application/json",
+            })
+            with urllib.request.urlopen(_yf_req, timeout=8) as _yr:
+                _yd = _json.loads(_yr.read())
+            _ym = _yd.get("chart", {}).get("result", [{}])[0].get("meta", {})
+            _lp = float(_ym.get("regularMarketPrice") or 0)
+            if _lp > 0:
+                yf_price = _lp
+                yf_open  = float(_ym.get("regularMarketOpen")    or _lp) or None
+                yf_high  = float(_ym.get("regularMarketDayHigh") or _lp) or None
+                yf_low   = float(_ym.get("regularMarketDayLow")  or _lp) or None
+                print(f"[QUOTE] {code} Yahoo chart: price={yf_price} h={yf_high} l={yf_low}")
+        except Exception as _ye:
+            print(f"[QUOTE] Yahoo chart 失敗 {code}：{_ye}")
 
     # ── 2. TWSE MIS（z 現價、y 昨收、OHLV 備用）──
     twse_data = None
@@ -2661,20 +2687,27 @@ def get_quote(stock_id: str, user: dict = Depends(require_user)):
 
     # ── 決定現價與來源 ──
     if in_session or just_after_close:
-        if z:  # TWSE MIS 現價（主力）
-            price_val    = safe_float(z)
-            price_source = "twse_z"
-            open_val = safe_float(open_twse)
-            high_val = safe_float(high_twse)
-            low_val  = safe_float(low_twse)
-            vol_val  = int(float(vol_twse) * 1000) if vol_twse else None
-        elif snap_price:  # FinMind tick_snapshot（備援）
+        if snap_price:  # FinMind tick_snapshot（最優先）
             price_val    = snap_price
             price_source = "tick_snapshot"
             open_val = snap_open  or safe_float(open_twse)
             high_val = snap_high  or safe_float(high_twse)
             low_val  = snap_low   or safe_float(low_twse)
             vol_val  = int(snap_vol) if snap_vol else (int(float(vol_twse) * 1000) if vol_twse else None)
+        elif yf_price:  # Yahoo Finance chart API（備援）
+            price_val    = yf_price
+            price_source = "yahoo_chart"
+            open_val = yf_open or safe_float(open_twse)
+            high_val = yf_high or safe_float(high_twse)
+            low_val  = yf_low  or safe_float(low_twse)
+            vol_val  = int(float(vol_twse) * 1000) if vol_twse else None
+        elif z:  # TWSE MIS z（有時為 "-"，第三選擇）
+            price_val    = safe_float(z)
+            price_source = "twse_z"
+            open_val = safe_float(open_twse)
+            high_val = safe_float(high_twse)
+            low_val  = safe_float(low_twse)
+            vol_val  = int(float(vol_twse) * 1000) if vol_twse else None
         elif finmind_close:
             price_val    = finmind_close
             price_source = "finmind_close"
@@ -2739,7 +2772,7 @@ def get_quote(stock_id: str, user: dict = Depends(require_user)):
         "low":          low_val,
         "volume":       vol_val,
         "time":         tick_time,
-        "is_trading":   bool((z or snap_price) and in_session),
+        "is_trading":   bool((snap_price or yf_price or z) and in_session),
         "in_session":   in_session,
         "price_source": price_source,
         "price_note":   "以昨收價計算" if price_source == "twse_y" else None,
