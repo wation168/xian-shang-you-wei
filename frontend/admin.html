@@ -90,7 +90,7 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
 .mem-btn.danger:hover{background:#fecaca}
 
 /* ── 統計數字 ── */
-.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
 .stat-card{background:var(--bg);border-radius:var(--radius);padding:12px;text-align:center}
 .stat-val{font-size:26px;font-weight:900;color:var(--green)}
 .stat-lbl{font-size:11px;color:var(--text3);margin-top:2px}
@@ -159,9 +159,11 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
     <div class="card">
       <div class="card-title">📊 會員統計</div>
       <div class="stats-grid" id="statsGrid">
-        <div class="stat-card"><div class="stat-val">—</div><div class="stat-lbl">總會員</div></div>
-        <div class="stat-card"><div class="stat-val">—</div><div class="stat-lbl">付費中</div></div>
-        <div class="stat-card"><div class="stat-val">—</div><div class="stat-lbl">免費版</div></div>
+        <div class="stat-card"><div class="stat-val" id="st-total">—</div><div class="stat-lbl">總會員</div></div>
+        <div class="stat-card"><div class="stat-val" id="st-paid" style="color:var(--green)">—</div><div class="stat-lbl">付費中</div></div>
+        <div class="stat-card"><div class="stat-val" id="st-free" style="color:var(--text3)">—</div><div class="stat-lbl">免費版</div></div>
+        <div class="stat-card"><div class="stat-val" id="st-pv" style="color:#60a5fa">—</div><div class="stat-lbl">累計頁面訪問</div></div>
+        <div class="stat-card"><div class="stat-val" id="st-ac" style="color:#a78bfa">—</div><div class="stat-lbl">累計分析次數</div></div>
       </div>
     </div>
 
@@ -342,17 +344,23 @@ function toast(msg, dur=2500){
 // ── 統計 ──
 async function loadStats(){
   try{
-    const r = await fetch(`${API}/admin/members?key=${ADMIN_KEY}`);
-    if(!r.ok) return;
-    const data = await r.json();
+    const [mr, sr] = await Promise.all([
+      fetch(`${API}/admin/members?key=${ADMIN_KEY}`),
+      fetch(`${API}/api/stats`)
+    ]);
+    if(!mr.ok) return;
+    const data = await mr.json();
     const members = data.members || data || [];
     const paid = members.filter(m=>m.plan!=='free'&&m.is_active).length;
     const free = members.filter(m=>m.plan==='free').length;
-    document.getElementById('statsGrid').innerHTML=`
-      <div class="stat-card"><div class="stat-val">${members.length}</div><div class="stat-lbl">總會員</div></div>
-      <div class="stat-card"><div class="stat-val" style="color:var(--green)">${paid}</div><div class="stat-lbl">付費中</div></div>
-      <div class="stat-card"><div class="stat-val" style="color:var(--text3)">${free}</div><div class="stat-lbl">免費版</div></div>
-    `;
+    document.getElementById('st-total').textContent = members.length;
+    document.getElementById('st-paid').textContent  = paid;
+    document.getElementById('st-free').textContent  = free;
+    if(sr.ok){
+      const s = await sr.json();
+      document.getElementById('st-pv').textContent = (s.page_views||0).toLocaleString();
+      document.getElementById('st-ac').textContent = (s.analyze_count||0).toLocaleString();
+    }
   }catch(e){}
 }
 

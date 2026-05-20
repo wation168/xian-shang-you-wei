@@ -1687,6 +1687,10 @@ def _db_init():
             status        TEXT DEFAULT 'pending',
             created_at    TEXT DEFAULT (datetime('now','+8 hours'))
         );
+        CREATE TABLE IF NOT EXISTS counters (
+            key   TEXT PRIMARY KEY,
+            value INTEGER DEFAULT 0
+        );
     """)
     conn.commit()
 
@@ -2686,9 +2690,10 @@ def analyze(stock_id: str, tf: str = "D",
         conn.commit()
         conn.close()
 
-    # 記錄獨立訪客
+    # 記錄獨立訪客 + 累計分析次數
     client_ip = request.client.host if request else "unknown"
     _record_visit(client_ip)
+    _inc_counter("analyze_count")
 
     # 完成邀請制（首次查詢觸發）
     if user:
@@ -3347,6 +3352,16 @@ def admin_prebuild_reports(key: str = ""):
     return {"ok": True, "total": len(_HOT_STOCKS), "message": f"已啟動預建 {len(_HOT_STOCKS)} 支熱門股報告，後台處理中..."}
 
 
+def _inc_counter(key: str):
+    conn = _db_conn()
+    conn.execute(
+        "INSERT INTO counters (key, value) VALUES (?, 1) "
+        "ON CONFLICT(key) DO UPDATE SET value=value+1",
+        (key,)
+    )
+    conn.commit()
+    conn.close()
+
 def _record_visit(ip: str):
     today = _date_cls.today().isoformat()
     conn = _db_conn()
@@ -3359,8 +3374,22 @@ def api_stats():
     conn = _db_conn()
     visit_count = conn.execute("SELECT COUNT(*) FROM visits").fetchone()[0]
     query_count = conn.execute("SELECT COALESCE(SUM(count), 0) FROM query_log").fetchone()[0]
+    row = conn.execute("SELECT value FROM counters WHERE key='page_views'").fetchone()
+    page_views = row[0] if row else 0
+    row2 = conn.execute("SELECT value FROM counters WHERE key='analyze_count'").fetchone()
+    analyze_count = row2[0] if row2 else 0
     conn.close()
-    return {"visit_count": int(visit_count), "query_count": int(query_count)}
+    return {
+        "visit_count": int(visit_count),
+        "query_count": int(query_count),
+        "page_views": int(page_views),
+        "analyze_count": int(analyze_count),
+    }
+
+@app.post("/api/page-view")
+def api_page_view():
+    _inc_counter("page_views")
+    return {"ok": True}
 
 @app.get("/")
 def root():
