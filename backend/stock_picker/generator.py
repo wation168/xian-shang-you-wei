@@ -168,42 +168,220 @@ def _card_headline(s: dict) -> str:
     return "技術面整理中，等待方向訊號明確"
 
 
+def _trading_rec(s: dict) -> tuple[str, str]:
+    """回傳 (建議文字, 顏色) based on trend + signals"""
+    trend = s.get("trend", "盤整")
+    cbd   = s.get("consecutive_buy_days", 0)
+    dif   = s.get("macd_dif", 0.0)
+    sig   = s.get("signal_label", "")
+    kd_k  = s.get("kd_k", 50)
+
+    if trend == "上升" and cbd >= 3 and dif > 0:
+        return "✅ 做多：法人連買+多頭趨勢+MACD正值，三重確認，可考慮分批進場", "#22c55e"
+    if trend == "上升" and "金叉" in sig:
+        return "✅ 做多：均線/KD金叉配合多頭趨勢，量能放大可分批進場", "#22c55e"
+    if trend == "上升" and cbd >= 1:
+        return "✅ 偏多：多頭趨勢+法人介入，等待回測均線不破後追進", "#86efac"
+    if trend == "上升":
+        return "👀 觀望：多頭趨勢但法人未明顯介入，等待量能放大確認", "#f59e0b"
+    if trend == "盤整" and "金叉" in sig:
+        return "👀 觀望：均線糾結，金叉需量能配合突破確認，可小量試探", "#f59e0b"
+    if kd_k <= 20:
+        return "👀 觀望（低檔）：KD 進入超賣區，等待金叉確認後再評估進場", "#f59e0b"
+    if trend == "下降":
+        return "⚠️ 注意停損：均線空頭排列，非多頭佈局時機，持有者設好停損", "#ef4444"
+    return "👀 觀望：技術面方向未明，等待明確訊號再評估進場時機", "#94a3b8"
+
+
+def _render_report(s: dict, e: dict) -> str:
+    """展開報告區塊 HTML（K棒/技術/法人/支撐壓力/建議）"""
+    sid   = s["stock_id"]
+    price = s.get("price", 0)
+
+    # K棒型態
+    kline   = s.get("kline_pattern", "常態K線")
+    wr_pct  = int(s.get("win_rate", 0.50) * 100)
+    vr      = s.get("vol_ratio", 1.0)
+    streak  = s.get("kbar_streak", 0)
+    streak_txt = (f"連{abs(streak)}{'紅' if streak > 0 else '黑'}K" if abs(streak) >= 2
+                  else "無連K訊號")
+    vol_txt = (f"量能放大 {vr:.1f}x 均量" if vr >= 1.5 else
+               f"量能正常 {vr:.1f}x"         if vr >= 0.8 else
+               f"量能萎縮 {vr:.1f}x，主力觀望")
+
+    # MA
+    ma5   = s.get("ma5")
+    ma20  = s.get("ma20")
+    ma60  = s.get("ma60")
+    trend = s.get("trend", "盤整")
+    tc    = "#22c55e" if trend == "上升" else ("#ef4444" if trend == "下降" else "#94a3b8")
+    trend_desc = "MA5>MA20>MA60" if trend == "上升" else ("MA5<MA20<MA60" if trend == "下降" else "均線糾結")
+    ma_rows = ""
+    if ma5 and ma20:
+        ma_rows += (f'<div class="rpt-row"><span class="rpt-label">MA5 / MA20</span>'
+                    f'<span class="rpt-val">{ma5} / {ma20}</span></div>')
+    if ma60:
+        ma_rows += (f'<div class="rpt-row"><span class="rpt-label">MA60</span>'
+                    f'<span class="rpt-val">{ma60}</span></div>')
+
+    # KD
+    kd_k      = s.get("kd_k", 50.0)
+    kd_d      = s.get("kd_d", 50.0)
+    kd_cross  = s.get("kd_cross", False)
+    kd_zone   = "超買" if kd_k >= 80 else ("超賣" if kd_k <= 20 else "中性")
+    kd_zc     = "#ef4444" if kd_k >= 80 else ("#22c55e" if kd_k <= 20 else "#94a3b8")
+    cross_tag = ' <span style="color:#22c55e;font-size:11px">金叉</span>' if kd_cross else ""
+
+    # MACD
+    dif   = s.get("macd_dif", 0.0)
+    dea   = s.get("macd_dea", 0.0)
+    mc    = "#22c55e" if dif > 0 else "#ef4444"
+    macd_note = "DIF 在 0 軸以上，多方動能" if dif > 0 else "DIF 在 0 軸以下，空方動能"
+
+    # 法人
+    cbd   = s.get("consecutive_buy_days", 0)
+    inst5 = s.get("inst_5d_total", 0)
+    for5  = s.get("inst_foreign_5d", 0)
+    inv5  = s.get("inst_invest_5d", 0)
+    dal5  = s.get("inst_dealer_5d", 0)
+    def _ic(v): return "#22c55e" if v > 0 else ("#ef4444" if v < 0 else "#64748b")
+    inst_head = (f'<div style="font-size:12px;color:#86efac;margin-bottom:6px">'
+                 f'連買 {cbd} 日（近5日合計 {inst5:+,} 張）</div>' if cbd >= 1 else
+                 '<div style="font-size:12px;color:#64748b;margin-bottom:6px">近期無明顯連買訊號</div>')
+
+    # 支撐壓力
+    support    = s.get("support", round(price * 0.95, 2))
+    resistance = s.get("resistance", round(price * 1.05, 2))
+    sup_note_parts = []
+    if ma20: sup_note_parts.append(f"MA20:{ma20}")
+    if ma60: sup_note_parts.append(f"MA60:{ma60}")
+    sup_note_parts.append(f"近低:{support}")
+    sup_note = " / ".join(sup_note_parts)
+
+    # 新聞
+    news = s.get("news", [])
+    news_html = ""
+    if news:
+        items = "".join(
+            f'<a href="{n["link"]}" target="_blank" rel="noopener" style="display:block;font-size:12px;'
+            f'color:#60a5fa;text-decoration:none;padding:4px 0;border-bottom:1px solid #1e293b;line-height:1.5">'
+            f'📰 {n["title"][:38]}{"…" if len(n["title"])>38 else ""}</a>'
+            for n in news[:3]
+        )
+        news_html = f'<div class="rpt-sec" style="margin-top:0">{items}</div>'
+
+    # 操作建議
+    rec_txt, rec_color = _trading_rec(s)
+
+    return (
+        f'<div style="display:flex;flex-direction:column;gap:8px;padding-top:6px">'
+
+        # K棒型態
+        f'<div class="rpt-sec">'
+        f'<div class="rpt-title">📊 K棒型態</div>'
+        f'<div style="font-size:13px;color:#a78bfa;font-weight:600;margin-bottom:6px">'
+        f'{kline}（勝率 {wr_pct}%）</div>'
+        f'<div class="rpt-row"><span class="rpt-label">連K</span>'
+        f'<span class="rpt-val">{streak_txt}</span></div>'
+        f'<div class="rpt-row"><span class="rpt-label">量能</span>'
+        f'<span class="rpt-val">{vol_txt}</span></div>'
+        f'</div>'
+
+        # 技術面
+        f'<div class="rpt-sec">'
+        f'<div class="rpt-title">📈 技術面</div>'
+        f'<div class="rpt-row"><span class="rpt-label">均線排列</span>'
+        f'<span style="font-weight:600;color:{tc}">{trend}（{trend_desc}）</span></div>'
+        f'{ma_rows}'
+        f'<div class="rpt-row"><span class="rpt-label">KD（K/D）</span>'
+        f'<span class="rpt-val">{kd_k:.0f} / {kd_d:.0f}'
+        f' <span style="color:{kd_zc};font-size:11px">（{kd_zone}）</span>{cross_tag}</span></div>'
+        f'<div class="rpt-row"><span class="rpt-label">MACD DIF / DEA</span>'
+        f'<span style="font-weight:600;color:{mc}">{dif:.3f} / {dea:.3f}</span></div>'
+        f'<div style="font-size:11px;color:#64748b;margin-top:2px">{macd_note}</div>'
+        f'</div>'
+
+        # 法人籌碼
+        f'<div class="rpt-sec">'
+        f'<div class="rpt-title">🏦 法人籌碼（近5日）</div>'
+        f'{inst_head}'
+        f'<div class="rpt-row"><span class="rpt-label">外資</span>'
+        f'<span style="font-weight:600;color:{_ic(for5)}">{for5:+,} 張</span></div>'
+        f'<div class="rpt-row"><span class="rpt-label">投信</span>'
+        f'<span style="font-weight:600;color:{_ic(inv5)}">{inv5:+,} 張</span></div>'
+        f'<div class="rpt-row"><span class="rpt-label">自營</span>'
+        f'<span style="font-weight:600;color:{_ic(dal5)}">{dal5:+,} 張</span></div>'
+        f'</div>'
+
+        # 支撐壓力
+        f'<div class="rpt-sec">'
+        f'<div class="rpt-title">🎯 支撐壓力</div>'
+        f'<div class="rpt-row"><span class="rpt-label">現價</span>'
+        f'<span class="rpt-val">{price}</span></div>'
+        f'<div class="rpt-row"><span class="rpt-label">支撐</span>'
+        f'<span style="font-weight:600;color:#22c55e">{support}</span></div>'
+        f'<div class="rpt-row"><span class="rpt-label">壓力</span>'
+        f'<span style="font-weight:600;color:#f59e0b">{resistance}</span></div>'
+        f'<div style="font-size:11px;color:#475569;margin-top:4px">{sup_note}</div>'
+        f'</div>'
+
+        # 操作建議
+        f'<div style="background:#0a0f1e;border:1px solid {rec_color};border-radius:8px;padding:12px">'
+        f'<div class="rpt-title">💡 操作建議</div>'
+        f'<div style="font-size:13px;font-weight:600;color:{rec_color};line-height:1.6">{rec_txt}</div>'
+        f'</div>'
+
+        f'{news_html}'
+        f'</div>'
+    )
+
+
 def render_card(stock: dict, eval_result: dict) -> str:
-    s      = stock
-    e      = eval_result
-    score  = e.get("score", 0)
-    color  = score_color(score)
-    stock_url = f"{FRONTEND_URL}/?stock={s['stock_id']}"
+    s     = stock
+    e     = eval_result
+    sid   = s["stock_id"]
+    score = e.get("score", 0)
+    color = score_color(score)
 
-    tags_html = _card_tags(s)
-    headline  = _card_headline(s)
+    tags_html   = _card_tags(s)
+    headline    = _card_headline(s)
+    report_html = _render_report(s, e)
 
-    return f"""
-<div style="background:#0f172a;border:1px solid #1e293b;border-radius:16px;padding:20px;
-     display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden;
-     cursor:pointer;transition:border-color .2s"
-     onmouseenter="this.style.borderColor='#334155'" onmouseleave="this.style.borderColor='#1e293b'"
-     onclick="if(!event.target.closest('a'))window.top.location.href='{stock_url}'">
-  <div style="position:absolute;top:16px;right:16px;width:52px;height:52px;border-radius:50%;
-       background:conic-gradient({color} {score * 3.6}deg, #1e293b 0deg);
-       display:flex;align-items:center;justify-content:center">
-    <div style="width:40px;height:40px;border-radius:50%;background:#0f172a;
-         display:flex;align-items:center;justify-content:center;
-         font-size:13px;font-weight:700;color:{color}">{score}</div>
-  </div>
-  <div style="padding-right:68px">
-    <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">
-      <span style="font-size:20px;font-weight:800;color:#f1f5f9">{s['stock_id']}</span>
-      <span style="font-size:13px;color:#64748b">{s.get('name', '')}</span>
-    </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">{tags_html}</div>
-  </div>
-  <div style="font-size:13px;color:#cbd5e1;line-height:1.6;
-       padding:10px 14px;background:#1e293b;border-radius:8px;
-       border-left:3px solid {color}">{headline}</div>
-  <div style="font-size:12px;color:#22c55e;text-align:right;letter-spacing:0.3px">
-    點擊查看完整技術分析 →</div>
-</div>"""
+    return (
+        f'<div style="background:#0f172a;border:1px solid #1e293b;border-radius:16px;padding:20px;'
+        f'display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden;'
+        f'transition:border-color .2s"'
+        f' onmouseenter="this.style.borderColor=\'#334155\'" onmouseleave="this.style.borderColor=\'#1e293b\'">'
+
+        # 評分圓圈
+        f'<div style="position:absolute;top:16px;right:16px;width:52px;height:52px;border-radius:50%;'
+        f'background:conic-gradient({color} {score * 3.6}deg, #1e293b 0deg);'
+        f'display:flex;align-items:center;justify-content:center">'
+        f'<div style="width:40px;height:40px;border-radius:50%;background:#0f172a;'
+        f'display:flex;align-items:center;justify-content:center;'
+        f'font-size:13px;font-weight:700;color:{color}">{score}</div></div>'
+
+        # 代號 + 名稱 + 標籤
+        f'<div style="padding-right:68px">'
+        f'<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">'
+        f'<span style="font-size:20px;font-weight:800;color:#f1f5f9">{sid}</span>'
+        f'<span style="font-size:13px;color:#64748b">{s.get("name", "")}</span></div>'
+        f'<div style="display:flex;gap:6px;flex-wrap:wrap">{tags_html}</div></div>'
+
+        # 一句話摘要
+        f'<div style="font-size:13px;color:#cbd5e1;line-height:1.6;'
+        f'padding:10px 14px;background:#1e293b;border-radius:8px;'
+        f'border-left:3px solid {color}">{headline}</div>'
+
+        # 展開按鈕
+        f'<button id="btn-{sid}" class="btn-report"'
+        f' onclick="toggleReport(\'{sid}\')">📄 完整個股報告&nbsp;&nbsp;立即產出 →</button>'
+
+        # 展開內容
+        f'<div id="rpt-{sid}" style="display:none">{report_html}</div>'
+
+        f'</div>'
+    )
 
 
 def render_page(stocks_with_eval: list[tuple[dict, dict]], generated_at: str) -> str:
@@ -243,8 +421,33 @@ body{{background:#020817;color:#f1f5f9;font-family:-apple-system,BlinkMacSystemF
 .stat strong{{display:block;font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:2px}}
 .grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}}
 .disclaimer{{margin-top:32px;padding:16px;background:#0f172a;border-radius:10px;font-size:11px;color:#475569;line-height:1.7}}
+.btn-report{{width:100%;padding:10px 14px;background:#1e293b;border:1px solid #334155;border-radius:8px;
+  color:#94a3b8;font-size:12px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:6px;
+  font-family:inherit;transition:.15s}}
+.btn-report:hover{{background:#253347;border-color:#475569;color:#e2e8f0}}
+.rpt-sec{{background:#0a0f1e;border:1px solid #1e293b;border-radius:8px;padding:12px}}
+.rpt-title{{font-size:10px;font-weight:700;color:#475569;letter-spacing:.6px;margin-bottom:8px;text-transform:uppercase}}
+.rpt-row{{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:12px;border-top:.5px solid #1e293b}}
+.rpt-row:first-of-type{{border-top:none}}
+.rpt-label{{color:#64748b}}
+.rpt-val{{font-weight:600;color:#e2e8f0}}
 @media(max-width:600px){{.grid{{grid-template-columns:1fr}}}}
 </style>
+<script>
+function toggleReport(id){{
+  var el=document.getElementById('rpt-'+id);
+  var btn=document.getElementById('btn-'+id);
+  if(el.style.display==='none'){{
+    el.style.display='block';
+    btn.innerHTML='▲ 收合報告';
+    btn.style.color='#64748b';
+  }}else{{
+    el.style.display='none';
+    btn.innerHTML='📄 完整個股報告&nbsp;&nbsp;立即產出 →';
+    btn.style.color='#94a3b8';
+  }}
+}}
+</script>
 </head>
 <body>
 <div class="container">

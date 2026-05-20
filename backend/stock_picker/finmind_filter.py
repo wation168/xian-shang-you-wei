@@ -48,13 +48,13 @@ def calc_kd(prices: list[dict], n: int = 9) -> tuple[float, float, float, float]
     return K, D, K_prev, D_prev
 
 
-def calc_macd(closes: list[float]) -> tuple[float, float]:
+def calc_macd(closes: list[float]) -> tuple[float, float, float]:
     """
-    計算 MACD DIF（EMA12 - EMA26）
-    回傳 (DIF今, DIF昨)；資料不足時回傳 (0.0, 0.0)
+    計算 MACD DIF（EMA12-EMA26）與 DEA（EMA9 of DIF）
+    回傳 (DIF今, DIF昨, DEA今)；資料不足時回傳 (0.0, 0.0, 0.0)
     """
     if len(closes) < 27:
-        return 0.0, 0.0
+        return 0.0, 0.0, 0.0
 
     def _ema_series(data: list[float], period: int) -> list[float]:
         k    = 2 / (period + 1)
@@ -67,12 +67,13 @@ def calc_macd(closes: list[float]) -> tuple[float, float]:
 
     ema12 = _ema_series(closes, 12)
     ema26 = _ema_series(closes, 26)
-    # ema12 比 ema26 長；兩者皆以最新日收尾，從尾端對齊
-    dif = [a - b for a, b in zip(ema12[-len(ema26):], ema26)]
+    dif   = [a - b for a, b in zip(ema12[-len(ema26):], ema26)]
 
     if len(dif) < 2:
-        return dif[-1] if dif else 0.0, 0.0
-    return dif[-1], dif[-2]
+        v = dif[-1] if dif else 0.0
+        return v, 0.0, v
+    dea_t = _ema_series(dif, 9)[-1] if len(dif) >= 9 else dif[-1]
+    return dif[-1], dif[-2], round(dea_t, 3)
 
 
 # ──────────────────────────────────────────
@@ -154,7 +155,7 @@ def analyze_stock(stock_id: str, news_list: list[dict] = []) -> dict | None:
     kd_cross = (K_t > D_t) and (K_y <= D_y) and (K_t < 80)
 
     # ── MACD ──
-    dif_t, dif_y      = calc_macd(closes)
+    dif_t, dif_y, dea_t = calc_macd(closes)
     macd_cross_zero   = (dif_y < 0) and (dif_t > 0)   # 由負轉正
     macd_pass         = dif_t > 0                       # 含上穿0軸
     macd_pass_relaxed = dif_t > -0.5
@@ -190,10 +191,36 @@ def analyze_stock(stock_id: str, news_list: list[dict] = []) -> dict | None:
             })
     has_news = bool(related_news)
 
+    # ── K棒連K方向 ──
+    kbar_streak = 0
+    for _p in reversed(prices):
+        _c, _o = _p["close"], _p["open"]
+        if kbar_streak == 0:
+            kbar_streak = 1 if _c >= _o else -1
+        elif kbar_streak > 0 and _c >= _o:
+            kbar_streak += 1
+        elif kbar_streak < 0 and _c < _o:
+            kbar_streak -= 1
+        else:
+            break
+
+    # ── 支撐壓力（近20日）──
+    recent20 = prices[-20:]
+    resistance = round(max(p["high"] for p in recent20), 2)
+    lows_20    = [p["low"] for p in recent20]
+    s_candidates = [ma20_t, min(lows_20)]
+    if ma60_t:
+        s_candidates.append(ma60_t)
+    below = [x for x in s_candidates if x < price]
+    support = round(max(below) if below else min(s_candidates), 2)
+
     # ── 法人買賣超 ──
     consecutive_buy_days = 0
     inst_5d_total        = 0
     inst_20d_total       = 0
+    inst_foreign_5d      = 0
+    inst_invest_5d       = 0
+    inst_dealer_5d       = 0
     inst = fetch_institutional(stock_id, days=20)
     if inst:
         for row in reversed(inst):
@@ -201,8 +228,12 @@ def analyze_stock(stock_id: str, news_list: list[dict] = []) -> dict | None:
                 consecutive_buy_days += 1
             else:
                 break
-        inst_5d_total  = sum(r["total"] for r in inst[-5:])
-        inst_20d_total = sum(r["total"] for r in inst)
+        inst_5d        = inst[-5:]
+        inst_5d_total  = sum(r["total"]              for r in inst_5d)
+        inst_20d_total = sum(r["total"]              for r in inst)
+        inst_foreign_5d = sum(r.get("foreign", 0)   for r in inst_5d)
+        inst_invest_5d  = sum(r.get("invest",  0)   for r in inst_5d)
+        inst_dealer_5d  = sum(r.get("dealer",  0)   for r in inst_5d)
 
     # ── 評分 ──
     score = 0
@@ -249,9 +280,18 @@ def analyze_stock(stock_id: str, news_list: list[dict] = []) -> dict | None:
     return {
         "stock_id":             stock_id,
         "price":                price,
+        "ma5":                  round(ma5_t, 2),
+        "ma20":                 round(ma20_t, 2),
+        "ma60":                 round(ma60_t, 2) if ma60_t else None,
+        "kd_k":                 round(K_t, 1),
+        "kd_d":                 round(D_t, 1),
+        "kd_cross":             kd_cross,
         "consecutive_buy_days": consecutive_buy_days,
         "inst_5d_total":        inst_5d_total,
         "inst_20d_total":       inst_20d_total,
+        "inst_foreign_5d":      inst_foreign_5d,
+        "inst_invest_5d":       inst_invest_5d,
+        "inst_dealer_5d":       inst_dealer_5d,
         "vol_ratio":            vol_ratio,
         "avg_vol_5":            round(avg_vol_5),
         "avg_vol_20":           round(avg_vol_20),
@@ -263,6 +303,10 @@ def analyze_stock(stock_id: str, news_list: list[dict] = []) -> dict | None:
         "win_rate":             win_rate,
         "trend":                trend,
         "macd_dif":             round(dif_t, 3),
+        "macd_dea":             round(dea_t, 3),
+        "kbar_streak":          kbar_streak,
+        "support":              support,
+        "resistance":           resistance,
         "score":                score,
     }
 
