@@ -1,66 +1,51 @@
 """
 finmind_filter.py — 數值篩選層
 輸入：股票代號列表（從新聞萃取）
-輸出：通過篩選的個股，附帶量化指標
+輸出：通過篩選的個股，依加分排序，上限 30 支（SEO 熱門股曝光用）
 
-選股三要素：
-  1. 鉅亨有題材新聞（有故事）← 必要條件
-  2. 法人近 N 日連續買超（籌碼回流）
-  3. 成交量從低量開始放大（量先價行）
+保留門檻：
+  - 最低均量 1000 張
+  - 最低股價 $10
+
+加分規則：
+  +2  有題材新聞
+  +2  法人連續買超 ≥ 3 日
+  +1  法人近日有買超（< 3 日）
 """
 
 from crawler import fetch_price_history, fetch_institutional
 import time
 
 
-# ──────────────────────────────────────────
-# 篩選參數（可調整）
-# ──────────────────────────────────────────
 CFG = {
-    # 【必要條件】鉅亨需有題材新聞才納入
-    "require_news": True,
-
-    # 法人連續買超天數門檻
-    "min_consecutive_buy_days": 3,
-
-    # 量能放大：近 5 日均量 / 近 20 日均量，超過才算「量增起步」
-    "min_vol_ratio": 1.2,
-
-    # 最低成交量（張）：太冷門的過濾掉
-    "min_avg_volume": 300,
-
-    # 現價下限（過濾雞蛋水餃股）
-    "min_price": 10.0,
+    "min_avg_volume": 1000,   # 最低均量（張）
+    "min_price":      10.0,   # 最低股價
 }
+
+MAX_RESULTS = 30
+
+
+def _score(result: dict) -> int:
+    s = 0
+    if result["news"]:
+        s += 2
+    if result["consecutive_buy_days"] >= 3:
+        s += 2
+    elif result["consecutive_buy_days"] >= 1:
+        s += 1
+    return s
 
 
 def analyze_stock(stock_id: str, news_list: list[dict]) -> dict | None:
     """
-    對單一股票做量化分析，回傳指標 dict 或 None（不符合條件）
-
-    回傳結構：
-    {
-      stock_id,
-      price, vol_ratio, avg_vol_5, avg_vol_20,
-      consecutive_buy_days, inst_5d_total, inst_20d_total,
-      news: [{title, link, keywords}],
-      score_factors: [...]   ← 給 Claude 看的評分依據
-    }
+    對單一股票做量化分析，回傳指標 dict 或 None（不符合基本門檻）
     """
-    # ── 先確認有無題材新聞（必要條件，省去不必要的 API 呼叫）──
-    related_news = []
-    for n in news_list:
-        if stock_id in n["codes"] and n["title"]:
-            related_news.append({
-                "title":    n["title"],
-                "link":     n["link"],
-                "keywords": n["keywords"],
-            })
+    related_news = [
+        {"title": n["title"], "link": n["link"], "keywords": n["keywords"]}
+        for n in news_list
+        if stock_id in n["codes"] and n["title"]
+    ]
 
-    if CFG["require_news"] and not related_news:
-        return None
-
-    # ── 股價資料 ──
     prices = fetch_price_history(stock_id, days=30)
     if len(prices) < 10:
         return None
@@ -69,22 +54,17 @@ def analyze_stock(stock_id: str, news_list: list[dict]) -> dict | None:
     if price < CFG["min_price"]:
         return None
 
-    # ── 量能：量先價行判斷 ──
     vols = [p["volume"] for p in prices if p["volume"] > 0]
     avg_vol_20 = sum(vols) / len(vols) if vols else 0
     if avg_vol_20 < CFG["min_avg_volume"]:
         return None
 
     avg_vol_5 = sum(p["volume"] for p in prices[-5:]) / 5
-    vol_ratio = round(avg_vol_5 / avg_vol_20, 2) if avg_vol_20 > 0 else 0
-    if vol_ratio < CFG["min_vol_ratio"]:
-        return None
 
-    # ── 法人買賣超 ──
     inst = fetch_institutional(stock_id, days=20)
     if not inst:
         consecutive_buy_days = 0
-        inst_5d_total = 0
+        inst_5d_total  = 0
         inst_20d_total = 0
     else:
         consecutive_buy_days = 0
@@ -96,37 +76,33 @@ def analyze_stock(stock_id: str, news_list: list[dict]) -> dict | None:
         inst_5d_total  = sum(r["total"] for r in inst[-5:])
         inst_20d_total = sum(r["total"] for r in inst)
 
-    if consecutive_buy_days < CFG["min_consecutive_buy_days"]:
-        return None
-
-    # ── 組合評分依據（給 Claude 閱讀）──
     kws = list({kw for n in related_news for kw in n["keywords"]})
     score_factors = [
-        f"鉅亨題材新聞 {len(related_news)} 則，關鍵字：{', '.join(kws[:5]) if kws else '無特定題材標籤'}",
-        f"法人連續買超 {consecutive_buy_days} 天，近5日合計 {inst_5d_total:+,} 張，近20日 {inst_20d_total:+,} 張",
-        f"量能放大：近5日均量是20日均量的 {vol_ratio}x（量先價行跡象{'明顯' if vol_ratio >= 1.5 else '初現'}）",
-        f"現價 {price}，近5日均量約 {round(avg_vol_5):,} 張",
+        f"題材新聞 {len(related_news)} 則，關鍵字：{', '.join(kws[:5]) if kws else '無'}",
+        f"法人連續買超 {consecutive_buy_days} 天，近5日 {inst_5d_total:+,} 張，近20日 {inst_20d_total:+,} 張",
+        f"近5日均量 {round(avg_vol_5):,} 張，近20日均量 {round(avg_vol_20):,} 張",
+        f"現價 {price}",
     ]
 
-    return {
+    result = {
         "stock_id":             stock_id,
         "price":                price,
         "consecutive_buy_days": consecutive_buy_days,
         "inst_5d_total":        inst_5d_total,
         "inst_20d_total":       inst_20d_total,
-        "vol_ratio":            vol_ratio,
         "avg_vol_5":            round(avg_vol_5),
         "avg_vol_20":           round(avg_vol_20),
         "news":                 related_news[:5],
         "score_factors":        score_factors,
     }
+    result["score"] = _score(result)
+    return result
 
 
 def run_filter(candidate_ids: list[str], news_list: list[dict],
-               max_results: int = 20, delay: float = 1.0) -> list[dict]:
+               max_results: int = MAX_RESULTS, delay: float = 1.0) -> list[dict]:
     """
-    對候選代號列表逐一篩選，回傳通過的個股清單
-    delay：每檔之間的間隔秒數，避免 FinMind rate limit
+    對候選代號列表逐一篩選，依加分排序後回傳前 max_results 支
     """
     passed = []
     total = len(candidate_ids)
@@ -136,7 +112,7 @@ def run_filter(candidate_ids: list[str], news_list: list[dict],
         print(f"[filter] ({i}/{total}) {sid} ...", end=" ", flush=True)
         result = analyze_stock(sid, news_list)
         if result:
-            print(f"✓ 通過（量能 {result['vol_ratio']}x，"
+            print(f"✓ 通過（分數 {result['score']}，"
                   f"法人連買 {result['consecutive_buy_days']}日，"
                   f"新聞 {len(result['news'])} 則）")
             passed.append(result)
@@ -145,7 +121,8 @@ def run_filter(candidate_ids: list[str], news_list: list[dict],
         if i < total:
             time.sleep(delay)
 
-    print(f"[filter] 篩選完畢，通過 {len(passed)}/{total} 檔")
+    passed.sort(key=lambda x: x["score"], reverse=True)
+    print(f"[filter] 篩選完畢，通過 {len(passed)}/{total} 檔，取前 {max_results} 支")
     return passed[:max_results]
 
 
