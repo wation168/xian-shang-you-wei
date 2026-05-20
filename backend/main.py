@@ -1705,6 +1705,7 @@ def _db_init():
         ("members",   "last_expire_notice_date", "TEXT DEFAULT NULL"),
         ("members",   "referral_unlocked",       "INTEGER DEFAULT 0"),
         ("members",   "referral_expire_date",    "TEXT DEFAULT NULL"),
+        ("members",   "referral_rewarded_count", "INTEGER DEFAULT 0"),
         ("query_log", "report_count",             "INTEGER DEFAULT 0"),
     ]
     for table, col, coldef in new_columns:
@@ -4709,26 +4710,51 @@ def _complete_referral_if_pending(user_email: str):
             return
         conn.execute("UPDATE referral_logs SET status='completed' WHERE id=?", (row["id"],))
         conn.commit()
+
         inviter = row["inviter_email"]
         cnt = conn.execute(
             "SELECT COUNT(*) FROM referral_logs WHERE inviter_email=? AND status='completed'", (inviter,)
         ).fetchone()[0]
-        if cnt >= 3:
-            prev = conn.execute("SELECT referral_unlocked FROM members WHERE email=?", (inviter,)).fetchone()
-            if prev and prev["referral_unlocked"] == 0:
-                expire_date = (_date_cls.today() + timedelta(days=30)).isoformat()
-                conn.execute(
-                    "UPDATE members SET referral_unlocked=1, referral_expire_date=? WHERE email=?",
-                    (expire_date, inviter)
-                )
-                conn.commit()
-                _send_email(
-                    inviter, "【線上有位】恭喜！已解鎖全功能 30 天",
-                    f'<p>您已成功邀請 {cnt} 位好友完成首次查詢，全功能已自動解鎖 30 天（有效期至 {expire_date}）。</p>'
-                    f'<p>繼續邀請好友可再次解鎖延長使用期限！</p>'
-                    f'<p><a href="{FRONTEND_URL}">立即使用</a></p>'
-                )
-        print(f"[REFERRAL] {user_email} 完成，inviter={inviter} cnt={cnt}")
+
+        # 每 3 人一個獎勵週期，用 referral_rewarded_count 記錄已發放次數，避免重複
+        earned_rewards  = cnt // 3
+        inviter_row = conn.execute(
+            "SELECT referral_unlocked, referral_expire_date, referral_rewarded_count FROM members WHERE email=?",
+            (inviter,)
+        ).fetchone()
+        if not inviter_row:
+            print(f"[REFERRAL] {user_email} 完成，inviter={inviter} cnt={cnt}（inviter 不存在）")
+            return
+
+        rewarded_so_far = inviter_row["referral_rewarded_count"] or 0
+        new_cycles      = earned_rewards - rewarded_so_far  # 本次新達標的週期數
+
+        if new_cycles > 0:
+            add_days  = new_cycles * 30
+            today_str = _date_cls.today().isoformat()
+            # 從現有到期日或今天起計算
+            cur_exp   = inviter_row["referral_expire_date"]
+            base_date = max(cur_exp, today_str) if cur_exp else today_str
+            from datetime import date as _d2
+            base      = _d2.fromisoformat(base_date)
+            new_exp   = (base + timedelta(days=add_days)).isoformat()
+
+            conn.execute(
+                "UPDATE members SET referral_unlocked=1, referral_expire_date=?, "
+                "referral_rewarded_count=? WHERE email=?",
+                (new_exp, rewarded_so_far + new_cycles, inviter)
+            )
+            conn.commit()
+            _send_email(
+                inviter, "【線上有位】恭喜！邀請獎勵解鎖成功",
+                f'<p>您已成功邀請 <b>{cnt}</b> 位好友完成首次查詢，'
+                f'本次新增 <b>{add_days}</b> 天全功能使用權（有效期至 <b>{new_exp}</b>）。</p>'
+                f'<p>每再邀請 3 位好友就自動再延長 30 天，繼續加油！</p>'
+                f'<p><a href="{FRONTEND_URL}">立即使用</a></p>'
+            )
+
+        print(f"[REFERRAL] {user_email} 完成，inviter={inviter} cnt={cnt} "
+              f"earned={earned_rewards} rewarded={rewarded_so_far} new_cycles={new_cycles}")
     finally:
         conn.close()
 
