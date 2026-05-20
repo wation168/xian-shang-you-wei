@@ -278,7 +278,8 @@ def fetch_institutional(stock_id: str, days: int = 25) -> list[dict]:
         for r in data.get("data", []):
             d    = r.get("date", "")[:10]
             name = r.get("name", "")
-            net  = int(r.get("buy", 0) or 0) - int(r.get("sell", 0) or 0)
+            # FinMind 回傳單位為股，除以 1000 換算成張
+            net  = (int(r.get("buy", 0) or 0) - int(r.get("sell", 0) or 0)) // 1000
             if d not in daily:
                 daily[d] = {"foreign": 0, "invest": 0, "dealer": 0}
             if "外資" in name or "Foreign" in name:
