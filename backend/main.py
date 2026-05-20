@@ -2862,6 +2862,35 @@ def admin_grant(key: str = "", email: str = "", plan: str = "monthly", days: int
     from datetime import date, timedelta, datetime
     new_expire = (datetime.today() + timedelta(days=days)).strftime("%Y-%m-%d")
 
+    plan_label = {"monthly": "月費方案", "quarterly": "季費方案", "yearly": "年費方案", "free": "免費方案"}.get(plan, plan)
+
+    def _send_grant_email(to: str, extra_html: str = ""):
+        _send_email(to, "【線上有位】🎉 您的方案已開通",
+            f"""<div style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px">
+              <div style="text-align:center;margin-bottom:24px">
+                <h1 style="font-size:24px;color:#1D9E75;margin:0">線上<span style="color:#333">有位</span></h1>
+                <p style="color:#666;font-size:13px;margin:4px 0 0">台股技術分析輔助系統</p>
+              </div>
+              <div style="background:#f0fdf4;border-radius:12px;padding:24px;margin-bottom:20px;border:1px solid #86efac">
+                <h2 style="margin:0 0 16px;font-size:18px;color:#166534">🎉 恭喜！升級成功</h2>
+                <p style="color:#555;margin:0 0 16px">您的付費方案已由管理員手動開通，立即登入即可使用。</p>
+                <table style="width:100%;border-collapse:collapse">
+                  <tr><td style="padding:8px 0;color:#888;font-size:13px">方案</td><td style="padding:8px 0;font-weight:700;color:#333">{plan_label}</td></tr>
+                  <tr><td style="padding:8px 0;color:#888;font-size:13px">到期日</td><td style="padding:8px 0;font-weight:700;color:#333">{new_expire}</td></tr>
+                  <tr><td style="padding:8px 0;color:#888;font-size:13px">帳號</td><td style="padding:8px 0;font-weight:700;color:#333">{to}</td></tr>
+                </table>
+              </div>
+              {extra_html}
+              <div style="text-align:center;margin-bottom:20px">
+                <a href="{FRONTEND_URL}" style="background:#1D9E75;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px">立即登入使用</a>
+              </div>
+              <div style="border-top:1px solid #e5e7eb;padding-top:16px;text-align:center;color:#9ca3af;font-size:12px">
+                <p style="margin:0">如有問題請聯繫客服：<a href="mailto:watione@yahoo.com.tw" style="color:#1D9E75">watione@yahoo.com.tw</a></p>
+                <p style="margin:4px 0 0">線上有位 © 2026</p>
+              </div>
+            </div>"""
+        )
+
     conn = _db_conn()
     row = conn.execute("SELECT * FROM members WHERE email=?", (email,)).fetchone()
     if row:
@@ -2871,6 +2900,7 @@ def admin_grant(key: str = "", email: str = "", plan: str = "monthly", days: int
         )
         conn.commit()
         conn.close()
+        _send_grant_email(email)
         return {"ok": True, "action": "updated", "email": email, "plan": plan, "expire_at": new_expire}
     else:
         # 新帳號，自動產生密碼
@@ -2881,6 +2911,13 @@ def admin_grant(key: str = "", email: str = "", plan: str = "monthly", days: int
         )
         conn.commit()
         conn.close()
+        _send_grant_email(email,
+            f"""<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:16px;margin-bottom:20px">
+              <p style="margin:0 0 6px;font-weight:700;color:#92400e">🔑 您的初始密碼</p>
+              <p style="margin:0;font-size:18px;letter-spacing:2px;font-weight:700;color:#333">{password}</p>
+              <p style="margin:8px 0 0;font-size:12px;color:#78350f">登入後請至「我的帳號」修改密碼</p>
+            </div>"""
+        )
         return {"ok": True, "action": "created", "email": email, "password": password, "plan": plan, "expire_at": new_expire}
 
 
