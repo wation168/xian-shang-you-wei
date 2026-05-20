@@ -426,33 +426,36 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
                 return float(str(s).replace(",", "")) if str(s).strip() not in ("--", "", "X") else 0.0
 
             filled = False
-            try:
-                twse_url = (f"https://www.twse.com.tw/exchangeReport/STOCK_DAY"
-                            f"?response=json&date={yyyymmdd}&stockNo={code}")
-                twse_req = _ur.Request(twse_url, headers={"User-Agent": "Mozilla/5.0"})
-                with _ur.urlopen(twse_req, timeout=8) as tr:
-                    twse_raw = _j.loads(tr.read())
-                for row in twse_raw.get("data", []):
-                    if str(row[0]).strip() == roc_date:
-                        op  = _parse_tw_num(row[3])
-                        hi  = _parse_tw_num(row[4])
-                        lo  = _parse_tw_num(row[5])
-                        cp  = _parse_tw_num(row[6])
-                        vol = _parse_tw_num(row[1])
-                        if cp > 0:
-                            today_bar = pd.DataFrame(
-                                [[op, hi, lo, cp, vol]],
-                                index=[today_ts],
-                                columns=["Open", "High", "Low", "Close", "Volume"]
-                            )
-                            df = pd.concat([df, today_bar])
-                            print(f"   TWSE 月報補今日 K 棒：{code} close={cp}")
-                            filled = True
-                        break
-            except Exception as _e:
-                print(f"   TWSE 月報補棒失敗 {code}：{_e}")
-
-            if not filled:
+            _is_otc = _market_cache.get(code, "") in ("otc", "rotc")
+            if not _is_otc:
+                # 上市：TWSE STOCK_DAY
+                try:
+                    twse_url = (f"https://www.twse.com.tw/exchangeReport/STOCK_DAY"
+                                f"?response=json&date={yyyymmdd}&stockNo={code}")
+                    twse_req = _ur.Request(twse_url, headers={"User-Agent": "Mozilla/5.0"})
+                    with _ur.urlopen(twse_req, timeout=8) as tr:
+                        twse_raw = _j.loads(tr.read())
+                    for row in twse_raw.get("data", []):
+                        if str(row[0]).strip() == roc_date:
+                            op  = _parse_tw_num(row[3])
+                            hi  = _parse_tw_num(row[4])
+                            lo  = _parse_tw_num(row[5])
+                            cp  = _parse_tw_num(row[6])
+                            vol = _parse_tw_num(row[1])
+                            if cp > 0:
+                                today_bar = pd.DataFrame(
+                                    [[op, hi, lo, cp, vol]],
+                                    index=[today_ts],
+                                    columns=["Open", "High", "Low", "Close", "Volume"]
+                                )
+                                df = pd.concat([df, today_bar])
+                                print(f"   TWSE 月報補今日 K 棒：{code} close={cp}")
+                                filled = True
+                            break
+                except Exception as _e:
+                    print(f"   TWSE 月報補棒失敗 {code}：{_e}")
+            else:
+                # 上櫃：TPEX st43
                 try:
                     tpex_d   = f"{roc_year}/{mm}"
                     tpex_url = (f"https://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info"
@@ -2616,26 +2619,28 @@ def get_quote(stock_id: str, user: dict = Depends(require_user)):
     _today_obj = _date.today()
     _is_after_close = is_weekday and now.time() >= dtime(13, 35)
     if snap_price is None and finmind_close is None and not z and _is_after_close:
-        _roc_y   = _today_obj.year - 1911
+        _roc_y    = _today_obj.year - 1911
         _roc_date = f"{_roc_y}/{_today_obj.month:02d}/{_today_obj.day:02d}"
         _yyyymmdd = _today_obj.strftime("%Y%m%d")
-        # TWSE（上市）
-        try:
-            _sd_url = (f"https://www.twse.com.tw/exchangeReport/STOCK_DAY"
-                       f"?response=json&date={_yyyymmdd}&stockNo={code}")
-            _sd_req = urllib.request.Request(_sd_url, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(_sd_req, timeout=8) as _sd:
-                _sd_raw = _json.loads(_sd.read())
-            for _row in _sd_raw.get("data", []):
-                if str(_row[0]).strip() == _roc_date:
-                    _cp = str(_row[6]).replace(",", "").strip()
-                    if _cp not in ("--", "", "X"):
-                        stock_day_close = float(_cp)
-                    break
-        except Exception:
-            pass
-        # TPEX（上櫃），TWSE 失敗時再試
-        if not stock_day_close:
+        _is_otc   = _market_cache.get(code, "") in ("otc", "rotc")
+        if not _is_otc:
+            # 上市：TWSE STOCK_DAY
+            try:
+                _sd_url = (f"https://www.twse.com.tw/exchangeReport/STOCK_DAY"
+                           f"?response=json&date={_yyyymmdd}&stockNo={code}")
+                _sd_req = urllib.request.Request(_sd_url, headers={"User-Agent": "Mozilla/5.0"})
+                with urllib.request.urlopen(_sd_req, timeout=8) as _sd:
+                    _sd_raw = _json.loads(_sd.read())
+                for _row in _sd_raw.get("data", []):
+                    if str(_row[0]).strip() == _roc_date:
+                        _cp = str(_row[6]).replace(",", "").strip()
+                        if _cp not in ("--", "", "X"):
+                            stock_day_close = float(_cp)
+                        break
+            except Exception:
+                pass
+        else:
+            # 上櫃：TPEX st43
             try:
                 _tpex_d = f"{_roc_y}/{_today_obj.month:02d}"
                 _tpex_url = (f"https://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info"

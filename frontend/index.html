@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+<title>線上有位｜台股個股位置分析｜支撐壓力・損益比・K線型態</title>
+<meta name="description" content="輸入台股代號或股票名稱，立即查看支撐壓力、防守位、均線趨勢、K線型態與損益比，買股前先確認位置風險。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/">
+<meta name="google-site-verification" content="dRrwxZJHPlxs6v3XnszHSnqPZZPZuu1EQ5WNktXsylc" />
 <meta charset="UTF-8"/>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
 <meta http-equiv="Pragma" content="no-cache"/>
@@ -2265,7 +2270,7 @@ async function fetchAndUpdateQuote(stockId){
   // 若已換股，停止
   if(stockId !== _quoteStockId) return;
   try{
-    const r=await fetch(`${getAPI()}/api/quote/${stockId}`,{signal:AbortSignal.timeout(8000)});
+    const r=await fetch(`${getAPI()}/api/quote/${stockId}`,{signal:AbortSignal.timeout(8000),headers:_authHeaders()});
     if(!r.ok) return scheduleNext(stockId, false);
     const d=await r.json();
     updateQuoteUI(d);
@@ -3474,8 +3479,11 @@ async function showPicksPage(){
   const overlay = document.getElementById('pageOverlay');
   overlay.style.display = 'block';
 
-  // 遊客 / 免費會員（邀請未解鎖或已過期）→ 鎖定預覽
-  if(!_authUser || !_hasPremium()){
+  // 管理員判斷（先定義，供下方兩處共用）
+  const _isAdmin = _authUser && _authUser.email === 'watione@yahoo.com.tw';
+
+  // 遊客 / 免費會員（邀請未解鎖或已過期）→ 鎖定預覽（管理員跳過）
+  if(!_authUser || (!_hasPremium() && !_isAdmin)){
     overlay.style.display = 'none';
     const isGuest = !_authUser;
     const lockMsg = isGuest ? '登入後查看選股名單' : '升級或邀請 3 人解鎖';
@@ -3537,15 +3545,36 @@ async function showPicksPage(){
     }
   }
 
+  const adminRunBtn = _isAdmin
+    ? `<button onclick="doAdminRunScan(this)" style="padding:8px 14px;background:#c53030;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">⚡ 立即產生</button>`
+    : '';
   el.innerHTML = `
     <div style="padding:8px 0">
       <div style="display:flex;gap:8px;margin-bottom:12px">
         <button id="picksTabBtn" onclick="_loadPicksContent('picks')" style="flex:1;padding:10px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-weight:600">精選選股</button>
         <button id="scanTabBtn"  onclick="_loadPicksContent('scan')"  style="flex:1;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer">全台掃描</button>
+        ${adminRunBtn}
       </div>
       <div id="picksFrame"></div>
     </div>`;
   _loadPicksContent('picks');
+}
+
+async function doAdminRunScan(btn){
+  if(btn){ btn.disabled=true; btn.textContent='產生中...'; }
+  try{
+    const r = await fetch(`${getAPI()}/admin/run-scan?key=xyw2026-liankai-`, {method:'POST'});
+    const d = await r.json();
+    if(r.ok){
+      if(btn){ btn.textContent='✅ 已觸發'; }
+      setTimeout(()=>{ if(btn){ btn.disabled=false; btn.textContent='⚡ 立即產生'; } }, 10000);
+    }else{
+      if(btn){ btn.disabled=false; btn.textContent='⚡ 立即產生'; }
+      alert('失敗：'+(d.detail||'未知錯誤'));
+    }
+  }catch(e){
+    if(btn){ btn.disabled=false; btn.textContent='⚡ 立即產生'; }
+  }
 }
 
 async function showMyPage(){
@@ -3566,7 +3595,7 @@ async function showMyPage(){
           border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:12px;display:block;width:100%">
           登入
         </button>
-        <button onclick="window.open('https://stock-navigator.zeabur.app/landing.html#pricing','_blank')"
+        <button onclick="window.open('https://softglow-ai.com/landing.html#pricing','_blank')"
           style="padding:12px 32px;background:var(--bg3);color:var(--text);
           border:none;border-radius:10px;font-size:14px;cursor:pointer;width:100%">
           了解付費方案
