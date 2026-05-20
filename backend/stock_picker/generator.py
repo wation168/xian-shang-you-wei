@@ -7,7 +7,8 @@ import os
 import json
 from datetime import datetime
 
-OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "output")
+OUTPUT_DIR   = os.path.join(os.path.dirname(__file__), "output")
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "https://softglow-ai.com")
 
 
 # ──────────────────────────────────────────
@@ -135,9 +136,13 @@ def render_card(stock: dict, eval_result: dict) -> str:
         f'background:#1e293b;color:{inst_color}">法人連{inst_dir} {s["consecutive_buy_days"]}日</span>'
     )
 
+    stock_url = f"{FRONTEND_URL}/?stock={s['stock_id']}"
     return f"""
 <div style="background:#0f172a;border:1px solid #1e293b;border-radius:16px;padding:20px;
-     display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden">
+     display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden;
+     cursor:pointer;transition:border-color .2s"
+     onmouseenter="this.style.borderColor='#334155'" onmouseleave="this.style.borderColor='#1e293b'"
+     onclick="if(!event.target.closest('a'))window.top.location.href='{stock_url}'">
   <div style="position:absolute;top:16px;right:16px;width:52px;height:52px;border-radius:50%;
        background:conic-gradient({color} {score * 3.6}deg, #1e293b 0deg);
        display:flex;align-items:center;justify-content:center">
@@ -327,8 +332,12 @@ def generate_scan_result(stocks_data: list[dict]) -> str:
         kline  = s.get("kline_pattern", "")
         kline_html = (f'<div style="color:#a78bfa;margin-top:4px;font-size:11px">{kline}</div>'
                       if kline and "常態" not in kline else "")
+        stock_url = f"{FRONTEND_URL}/?stock={s['stock_id']}"
         return (
-            f'<div style="background:{bg};border:1px solid {border};border-radius:14px;padding:16px;font-size:12px">'
+            f'<div style="background:{bg};border:1px solid {border};border-radius:14px;padding:16px;font-size:12px;'
+            f'cursor:pointer;transition:border-color .2s"'
+            f' onmouseenter="this.style.borderColor=\'#475569\'" onmouseleave="this.style.borderColor=\'{border}\'"'
+            f' onclick="window.top.location.href=\'{stock_url}\'">'
             f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
             f'<div><span style="font-size:15px;font-weight:700;color:#f1f5f9">{s["stock_id"]}</span>'
             f'<span style="color:#64748b;margin-left:6px">{s.get("name","")}</span></div>'
