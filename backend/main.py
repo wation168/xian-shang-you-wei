@@ -4529,6 +4529,7 @@ class ContactMessage(BaseModel):
     name: str
     email: str
     message: str
+    website: str = ""
 
 class DeleteToken(BaseModel):
     token: str
@@ -4538,6 +4539,9 @@ CONTACT_ADMIN_PWD = "630428"
 
 @app.post("/api/contact")
 async def submit_contact(msg: ContactMessage):
+    if msg.website:
+        return {"ok": True, "id": 0, "message": "訊息已收到"}
+
     name    = msg.name.strip()[:50]
     email   = msg.email.strip()[:100]
     message = msg.message.strip()[:1000]
