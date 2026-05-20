@@ -3544,20 +3544,10 @@ async function showPicksPage(){
     return;
   }
 
-  // 付費會員：顯示切換按鈕
-  let _picksTab = 'picks';
-  async function _loadPicksContent(tab){
-    _picksTab = tab;
-    const btnPicks = document.getElementById('picksTabBtn');
-    const btnScan  = document.getElementById('scanTabBtn');
-    if(btnPicks) btnPicks.style.background = tab==='picks' ? 'var(--green)' : 'var(--bg3)';
-    if(btnPicks) btnPicks.style.color      = tab==='picks' ? '#fff' : 'var(--text)';
-    if(btnScan)  btnScan.style.background  = tab==='scan'  ? 'var(--green)' : 'var(--bg3)';
-    if(btnScan)  btnScan.style.color       = tab==='scan'  ? '#fff' : 'var(--text)';
-    const apiPath = tab === 'scan' ? '/api/scan/latest' : '/api/picks/latest';
+  async function _loadPicksContent(){
     el.querySelector('#picksFrame').innerHTML = '<div style="padding:40px 0;text-align:center;color:var(--text3)">載入中...</div>';
     try{
-      const r = await fetch(`${getAPI()}${apiPath}`, { headers: _authHeaders(), signal: AbortSignal.timeout(20000) });
+      const r = await fetch(`${getAPI()}/api/picks/latest`, { headers: _authHeaders(), signal: AbortSignal.timeout(20000) });
       if(!r.ok){
         const dj = await r.json().catch(()=>({}));
         el.querySelector('#picksFrame').innerHTML = `<div style="padding:40px 0;text-align:center;color:var(--text3)"><div style="font-size:36px;margin-bottom:12px">🔒</div><div style="font-size:14px">${dj.detail||'請確認訂閱狀態'}</div></div>`;
@@ -3569,39 +3559,16 @@ async function showPicksPage(){
       el.querySelector('#picksFrame').innerHTML = `<iframe src="${url}" style="width:100%;height:calc(100vh - 160px);border:none;border-radius:var(--radius-lg)"></iframe>`;
       setTimeout(()=>URL.revokeObjectURL(url), 10000);
     }catch(e){
-      el.querySelector('#picksFrame').innerHTML = `<div style="padding:40px 0;text-align:center;color:var(--text3)"><div style="font-size:36px;margin-bottom:12px">🔄</div><div style="font-size:14px">資料更新中，請稍後再試</div></div>`;
+      el.querySelector('#picksFrame').innerHTML = `<div style="padding:40px 0;text-align:center;color:var(--text3)"><div style="font-size:36px;margin-bottom:12px">📅</div><div style="font-size:14px">每個交易日 16:30 自動更新</div></div>`;
     }
   }
 
-  // TODO: 暫時無條件顯示，確認按鈕能出現後再加回 _isAdmin 條件
-  const adminRunBtn = `<button onclick="doAdminRunScan(this)" style="padding:8px 14px;background:#c53030;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">⚡ 立即產生</button>`;
   el.innerHTML = `
     <div style="padding:8px 0">
-      <div style="display:flex;gap:8px;margin-bottom:12px">
-        <button id="picksTabBtn" onclick="_loadPicksContent('picks')" style="flex:1;padding:10px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-weight:600">精選選股</button>
-        <button id="scanTabBtn"  onclick="_loadPicksContent('scan')"  style="flex:1;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer">全台掃描</button>
-        ${adminRunBtn}
-      </div>
+      <div style="margin-bottom:12px;padding:10px 0;font-size:15px;font-weight:600;color:var(--text)">精選選股</div>
       <div id="picksFrame"></div>
     </div>`;
-  _loadPicksContent('picks');
-}
-
-async function doAdminRunScan(btn){
-  if(btn){ btn.disabled=true; btn.textContent='產生中...'; }
-  try{
-    const r = await fetch(`${getAPI()}/admin/run-scan?key=xyw2026-liankai-`, {method:'POST'});
-    const d = await r.json();
-    if(r.ok){
-      if(btn){ btn.textContent='✅ 已觸發'; }
-      setTimeout(()=>{ if(btn){ btn.disabled=false; btn.textContent='⚡ 立即產生'; } }, 10000);
-    }else{
-      if(btn){ btn.disabled=false; btn.textContent='⚡ 立即產生'; }
-      alert('失敗：'+(d.detail||'未知錯誤'));
-    }
-  }catch(e){
-    if(btn){ btn.disabled=false; btn.textContent='⚡ 立即產生'; }
-  }
+  _loadPicksContent();
 }
 
 async function showMyPage(){
