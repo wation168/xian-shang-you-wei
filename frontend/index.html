@@ -2269,10 +2269,10 @@ function stopQuotePolling(){
 async function fetchAndUpdateQuote(stockId){
   if(stockId !== _quoteStockId) return;
 
-  // 台灣時間判斷盤中
-  const _twNow = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Taipei'}));
-  const _dow = _twNow.getDay();
-  const _twH = _twNow.getHours(), _twM = _twNow.getMinutes();
+  // 台灣時間 UTC+8（用 getUTC* 加 8h，不依賴 locale 解析，任何時區瀏覽器都正確）
+  const _twNow = new Date(Date.now() + 8 * 3600000);
+  const _dow   = _twNow.getUTCDay();
+  const _twH   = _twNow.getUTCHours(), _twM = _twNow.getUTCMinutes();
   const _inSession = (_dow>=1 && _dow<=5) &&
     _twH >= 9 &&
     (_twH < 13 || (_twH===13 && _twM<=30));

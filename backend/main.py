@@ -247,7 +247,7 @@ async def lifespan(app: FastAPI):
                         continue
                     conn.execute(
                         "UPDATE price_alerts SET triggered=1, triggered_at=? WHERE id=?",
-                        (datetime.now().isoformat(), _a["id"])
+                        (_taipei_now_str(), _a["id"])
                     )
                     _dir_text = "漲至" if _a["direction"] == "above" else "跌至"
                     _title = f"到價提醒：{_a['stock_id']}"
@@ -1589,7 +1589,7 @@ def _db_init():
             password    TEXT NOT NULL,
             plan        TEXT DEFAULT 'free',
             expire_at   TEXT DEFAULT NULL,
-            created_at  TEXT DEFAULT (datetime('now','localtime')),
+            created_at  TEXT DEFAULT (datetime('now','+8 hours')),
             last_login  TEXT DEFAULT NULL,
             token_ver   INTEGER DEFAULT 0,
             session_id  TEXT DEFAULT NULL
@@ -1613,11 +1613,11 @@ def _db_init():
             email             TEXT NOT NULL,
             hashed_password   TEXT NOT NULL,
             plan              TEXT NOT NULL,
-            created_at        TEXT DEFAULT (datetime('now','localtime'))
+            created_at        TEXT DEFAULT (datetime('now','+8 hours'))
         );
         CREATE TABLE IF NOT EXISTS processed_orders (
             merchant_trade_no TEXT PRIMARY KEY,
-            processed_at      TEXT DEFAULT (datetime('now','localtime'))
+            processed_at      TEXT DEFAULT (datetime('now','+8 hours'))
         );
         CREATE TABLE IF NOT EXISTS contact_messages (
             id         INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1629,13 +1629,13 @@ def _db_init():
         CREATE TABLE IF NOT EXISTS blocked_users (
             email      TEXT PRIMARY KEY,
             block_type TEXT NOT NULL,
-            created_at TEXT DEFAULT (datetime('now','localtime'))
+            created_at TEXT DEFAULT (datetime('now','+8 hours'))
         );
         CREATE TABLE IF NOT EXISTS contact_replies (
             id         INTEGER PRIMARY KEY AUTOINCREMENT,
             message_id INTEGER NOT NULL,
             reply      TEXT NOT NULL,
-            created_at TEXT DEFAULT (datetime('now','localtime'))
+            created_at TEXT DEFAULT (datetime('now','+8 hours'))
         );
         CREATE TABLE IF NOT EXISTS password_reset_tokens (
             token      TEXT PRIMARY KEY,
@@ -1643,7 +1643,7 @@ def _db_init():
             expires_at TEXT NOT NULL,
             used       INTEGER DEFAULT 0,
             ip         TEXT    DEFAULT '',
-            created_at TEXT DEFAULT (datetime('now','localtime'))
+            created_at TEXT DEFAULT (datetime('now','+8 hours'))
         );
         CREATE TABLE IF NOT EXISTS price_alerts (
             id           INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1661,7 +1661,7 @@ def _db_init():
             endpoint    TEXT    NOT NULL UNIQUE,
             p256dh      TEXT    NOT NULL,
             auth        TEXT    NOT NULL,
-            created_at  TEXT    DEFAULT (datetime('now','localtime'))
+            created_at  TEXT    DEFAULT (datetime('now','+8 hours'))
         );
         CREATE TABLE IF NOT EXISTS stock_reports (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1669,13 +1669,13 @@ def _db_init():
             report_date TEXT NOT NULL,
             stock_name  TEXT NOT NULL DEFAULT '',
             report_html TEXT NOT NULL,
-            created_at  TEXT DEFAULT (datetime('now','localtime')),
+            created_at  TEXT DEFAULT (datetime('now','+8 hours')),
             UNIQUE(stock_id, report_date)
         );
         CREATE TABLE IF NOT EXISTS referral_codes (
             user_email  TEXT PRIMARY KEY,
             code        TEXT UNIQUE NOT NULL,
-            created_at  TEXT DEFAULT (datetime('now','localtime'))
+            created_at  TEXT DEFAULT (datetime('now','+8 hours'))
         );
         CREATE TABLE IF NOT EXISTS referral_logs (
             id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1683,7 +1683,7 @@ def _db_init():
             invitee_email TEXT NOT NULL,
             invitee_ip    TEXT NOT NULL DEFAULT '',
             status        TEXT DEFAULT 'pending',
-            created_at    TEXT DEFAULT (datetime('now','localtime'))
+            created_at    TEXT DEFAULT (datetime('now','+8 hours'))
         );
     """)
     conn.commit()
@@ -1816,6 +1816,11 @@ def _taipei_today() -> str:
     """台北時間今日日期（YYYY-MM-DD），用於每日查詢次數重置"""
     from zoneinfo import ZoneInfo
     return datetime.now(ZoneInfo("Asia/Taipei")).strftime("%Y-%m-%d")
+
+def _taipei_now_str(fmt: str = "%Y-%m-%d %H:%M:%S") -> str:
+    """台北時間現在（預設 YYYY-MM-DD HH:MM:SS），全後端存 DB 一律用這個"""
+    from zoneinfo import ZoneInfo
+    return datetime.now(ZoneInfo("Asia/Taipei")).strftime(fmt)
 
 def _is_referral_active(user: dict) -> bool:
     """邀請制解鎖是否有效（已解鎖 且 未過期）"""
@@ -3679,7 +3684,7 @@ def auth_login(req: LoginReq):
         conn.close()
         raise HTTPException(status_code=403, detail="帳號已被停用，請聯絡客服")
     session_id = secrets.token_hex(16)
-    conn.execute("UPDATE members SET last_login=datetime('now','localtime'), session_id=? WHERE id=?", (session_id, row["id"]))
+    conn.execute("UPDATE members SET last_login=datetime('now','+8 hours'), session_id=? WHERE id=?", (session_id, row["id"]))
     conn.commit()
     conn.close()
 
@@ -3879,7 +3884,7 @@ async def create_order(request: Request):
     params = {
         "MerchantID":        ECPAY_MERCHANT_ID,
         "MerchantTradeNo":   trade_no,
-        "MerchantTradeDate": datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
+        "MerchantTradeDate": _taipei_now_str("%Y/%m/%d %H:%M:%S"),
         "PaymentType":       "aio",
         "TotalAmount":       str(info["amount"]),
         "TradeDesc":         urllib.parse.quote("線上有位訂閱"),
@@ -4193,7 +4198,7 @@ async def submit_contact(msg: ContactMessage):
     if _brow:
         raise HTTPException(status_code=403, detail="您的帳號已被限制留言")
 
-    now = datetime.utcnow().isoformat()
+    now = _taipei_now_str()
     with sqlite3.connect(DB_PATH) as conn:
         cur = conn.execute(
             "INSERT INTO contact_messages (name, email, message, created_at) VALUES (?,?,?,?)",
@@ -4297,7 +4302,7 @@ async def reply_contact_message(msg_id: int, body: ReplyReq):
     reply_text = body.reply.strip()
     if not reply_text:
         raise HTTPException(status_code=400, detail="回覆內容不能為空")
-    now = datetime.utcnow().isoformat()
+    now = _taipei_now_str()
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         if not conn.execute("SELECT id FROM contact_messages WHERE id=?", (msg_id,)).fetchone():
@@ -4316,7 +4321,7 @@ async def block_user(body: BlockReq):
     if body.block_type not in ("comment", "login"):
         raise HTTPException(status_code=400, detail="block_type 必須為 comment 或 login")
     email = body.email.strip().lower()
-    now = datetime.utcnow().isoformat()
+    now = _taipei_now_str()
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute(
             "INSERT INTO blocked_users (email, block_type, created_at) VALUES (?,?,?) "
@@ -4594,8 +4599,9 @@ async def forgot_password(req: ForgotPwdReq, request: Request):
     import uuid as _uuid
     email = req.email.strip().lower()
     client_ip = request.client.host if request.client else "unknown"
-    one_min_ago = (datetime.now() - timedelta(minutes=1)).strftime("%Y-%m-%d %H:%M:%S")
-    one_hour_ago = (datetime.now() - timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")
+    _tw_now = datetime.fromisoformat(_taipei_now_str())
+    one_min_ago  = (_tw_now - timedelta(minutes=1)).strftime("%Y-%m-%d %H:%M:%S")
+    one_hour_ago = (_tw_now - timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")
 
     conn = _db_conn()
     # Rate limit: 同一 IP 每分鐘最多 3 次
@@ -4619,7 +4625,7 @@ async def forgot_password(req: ForgotPwdReq, request: Request):
             return {"ok": True, "message": "若此信箱已註冊，重設連結將寄出"}
 
         token = str(_uuid.uuid4())
-        expires_at = (datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")
+        expires_at = (datetime.fromisoformat(_taipei_now_str()) + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M:%S")
         conn.execute(
             "INSERT INTO password_reset_tokens (token, email, expires_at, ip) VALUES (?, ?, ?, ?)",
             (token, email, expires_at, client_ip)
@@ -4646,7 +4652,7 @@ async def reset_password(req: ResetPwdReq):
     new_pw = req.new_password
     if len(new_pw) < 6:
         raise HTTPException(status_code=400, detail="密碼至少 6 個字元")
-    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    now_str = _taipei_now_str()
     conn = _db_conn()
     row = conn.execute(
         "SELECT email, expires_at, used FROM password_reset_tokens WHERE token=?", (token,)
@@ -4699,7 +4705,7 @@ def create_alert(req: AlertReq, request: Request, user: dict = Depends(require_p
     if count >= 10:
         conn.close()
         raise HTTPException(status_code=400, detail="每人最多設定 10 個到價提醒")
-    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    now_str = _taipei_now_str()
     conn.execute(
         "INSERT INTO price_alerts (user_email, stock_id, target_price, direction, created_at) VALUES (?, ?, ?, ?, ?)",
         (user["email"], req.stock_id.strip().upper(), req.target_price, req.direction, now_str)
