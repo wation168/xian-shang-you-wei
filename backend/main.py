@@ -5252,16 +5252,17 @@ def picks_page():
             score = p.get("score", 0)
             sigs  = p.get("signals", [])
             sc    = _score_color(score)
+            stock_url = f"{FRONTEND_URL}/?stock={sid}"
             sig_tags = ""
             for sg in sigs:
                 bg, fg = _sig_color(sg)
                 sig_tags += (f'<span style="font-size:10px;padding:2px 9px;border-radius:20px;'
                              f'background:{bg};color:{fg};font-weight:600">{sg}</span> ')
             rows_html += f"""
-<tr onclick="window.open('{BACKEND_URL}/report/{sid}-{date_str}','_blank')" style="cursor:pointer">
+<tr onclick="location.href='{stock_url}'" style="cursor:pointer">
   <td class="r-num">{i}</td>
   <td class="r-stock">
-    <a href="{BACKEND_URL}/report/{sid}-{date_str}" target="_blank">{sid}</a>
+    <a href="{stock_url}">{sid}</a>
     <span class="r-name">{sname}</span>
   </td>
   <td style="text-align:right">
