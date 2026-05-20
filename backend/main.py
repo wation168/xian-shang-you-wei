@@ -5214,11 +5214,20 @@ def picks_page():
 
     now = _tm.time()
     c = SEO_CACHE["picks"]
+    picks_json = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                               "stock_picker", "output", "picks_data.json")
+
+    # 若 JSON 在快取建立後更新過，強制重建
+    if c["data"] and c["expires"] > now:
+        try:
+            if os.path.exists(picks_json) and os.path.getmtime(picks_json) > c.get("built_at", 0):
+                c["data"] = None  # JSON 有新版本，捨棄舊快取
+        except Exception:
+            pass
+
     if c["data"] and c["expires"] > now:
         return HTMLResponse(c["data"])
 
-    picks_json = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                               "stock_picker", "output", "picks_data.json")
     picks_data: dict = {}
     if os.path.exists(picks_json):
         try:
@@ -5227,6 +5236,7 @@ def picks_page():
         except Exception:
             pass
 
+    # generated_at 來自 picks_data.json（非快取建立時間）
     generated_at = picks_data.get("generated_at", "")
     picks        = picks_data.get("picks", [])
     date_str     = generated_at[:10] if generated_at else ""
@@ -5350,8 +5360,9 @@ td{{padding:12px 12px;vertical-align:middle}}
 </body>
 </html>"""
 
-    c["data"]    = html
-    c["expires"] = now + 900
+    c["data"]     = html
+    c["expires"]  = now + 900
+    c["built_at"] = now  # 記錄快取建立時間，供 mtime 比對用
     return HTMLResponse(html)
 
 _SEO_HARDCODED_STOCKS = [

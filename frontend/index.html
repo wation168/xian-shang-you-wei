@@ -3021,7 +3021,7 @@ function attachDrawEvents(){
 }
 
 // 載入儲存的 API
-document.addEventListener('DOMContentLoaded',()=>{
+document.addEventListener('DOMContentLoaded', async ()=>{
   applyStoredTheme();
   buildMABody();
   attachInteractions();
@@ -3030,7 +3030,12 @@ document.addEventListener('DOMContentLoaded',()=>{
   fetch(getAPI()+'/api/page-view',{method:'POST'}).catch(()=>{});
   const _stockParam=new URLSearchParams(location.search).get('stock');
   if(_stockParam){
-    document.getElementById('stockInput').value=_stockParam.trim();
+    console.log('[stock-param] 偵測到 ?stock=', _stockParam);
+    const _inp=document.getElementById('stockInput');
+    if(_inp) _inp.value=_stockParam.trim();
+    // 先完成 auth 初始化，確保 _authUser 已設定再分析（避免登入用戶被當訪客限制）
+    try{ await _initAuth(); }catch(e){ console.warn('[stock-param] _initAuth 失敗', e); }
+    console.log('[stock-param] 呼叫 analyzeStock(), user=', _authUser ? _authUser.email : 'guest');
     analyzeStock();
   }
 });
