@@ -3811,23 +3811,51 @@ async function showMyPage(){
         <div id="alertErr" style="font-size:12px;color:#f87171;min-height:16px;margin-top:4px;text-align:center"></div>
       </div>` : ''}
       <div class="member-card" style="margin-top:0" id="referralCard">
-        <div style="font-size:13px;font-weight:600;margin-bottom:4px">🎁 邀請好友</div>
-        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">邀請 3 位好友完成首次查詢，即可解鎖全功能 30 天（可重複達成延長）</div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px">🎁 邀請好友解鎖全功能</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:12px">每邀請 3 位好友完成首次查詢 = 解鎖 30 天，可累積延長</div>
         <div id="referralLoading" style="font-size:12px;color:var(--text3)">載入中...</div>
         <div id="referralContent" style="display:none">
-          <div style="margin-bottom:8px">
-            <div style="font-size:11px;color:var(--text3);margin-bottom:4px">進度</div>
-            <div style="background:var(--bg3);border-radius:6px;height:8px;overflow:hidden;margin-bottom:4px">
-              <div id="referralBar" style="height:100%;background:var(--green);transition:width .3s;border-radius:6px"></div>
+          <!-- 邀請碼 -->
+          <div style="margin-bottom:12px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:6px">我的邀請碼</div>
+            <div style="display:flex;align-items:center;gap:10px;background:var(--bg3);border-radius:8px;padding:10px 14px">
+              <span id="referralCode" style="flex:1;font-size:20px;font-weight:800;color:var(--text);letter-spacing:4px;font-family:monospace"></span>
+              <button onclick="copyReferralCode()" style="padding:5px 12px;background:var(--bg2);color:var(--text2);border:1px solid var(--border);border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;flex-shrink:0">複製</button>
             </div>
-            <div id="referralCount" style="font-size:12px;color:var(--text3)"></div>
           </div>
-          <div style="background:var(--bg3);border-radius:8px;padding:8px 10px;margin-bottom:8px;display:flex;align-items:center;gap:6px">
-            <span id="referralLink" style="flex:1;font-size:11px;color:var(--text2);word-break:break-all;font-family:var(--mono)"></span>
-            <button onclick="copyReferralLink()" style="padding:4px 10px;background:var(--green);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">複製</button>
+          <!-- 邀請連結 -->
+          <div style="margin-bottom:14px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:6px">邀請連結</div>
+            <div style="background:var(--bg3);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:6px">
+              <span id="referralLink" style="flex:1;font-size:11px;color:var(--text3);word-break:break-all;font-family:monospace"></span>
+              <button onclick="copyReferralLink()" style="padding:5px 12px;background:var(--green);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">複製連結</button>
+            </div>
           </div>
-          <div id="referralUnlocked" style="display:none;background:var(--dn-l);border-radius:8px;padding:10px;font-size:13px;color:var(--dn);font-weight:600;text-align:center">
-            ✅ 已解鎖全功能！感謝您的分享
+          <!-- 本輪進度 -->
+          <div style="margin-bottom:12px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+              <span style="font-size:11px;color:var(--text3)">本輪邀請進度</span>
+              <span id="referralCount" style="font-size:12px;font-weight:600;color:var(--text2)"></span>
+            </div>
+            <div style="background:var(--bg3);border-radius:6px;height:8px;overflow:hidden">
+              <div id="referralBar" style="height:100%;background:var(--green);transition:width .4s;border-radius:6px;width:0%"></div>
+            </div>
+            <div id="referralNextHint" style="font-size:11px;color:var(--text3);margin-top:5px"></div>
+          </div>
+          <!-- 獎勵摘要（有獎勵才顯示）-->
+          <div id="referralRewardSec" style="display:none;background:var(--bg3);border-radius:8px;padding:10px 14px;margin-bottom:10px">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+              <span style="color:var(--text3)">累計獲得</span>
+              <span id="referralMonths" style="font-weight:700;color:var(--green)"></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:12px">
+              <span style="color:var(--text3)">解鎖到期</span>
+              <span id="referralExpireDate" style="font-weight:600;color:var(--text)">—</span>
+            </div>
+          </div>
+          <!-- 解鎖中提示 -->
+          <div id="referralUnlocked" style="display:none;background:rgba(29,158,117,.1);border:1px solid var(--green);border-radius:8px;padding:10px;font-size:13px;color:var(--green);font-weight:600;text-align:center">
+            ✅ 全功能解鎖中
           </div>
         </div>
       </div>
@@ -3851,32 +3879,66 @@ async function _loadReferralStatus(){
   const token=_getToken();
   if(!token)return;
   try{
-    const r=await fetch('https://stock-navigator-api.zeabur.app/api/referral/status',{headers:{Authorization:'Bearer '+token}});
+    const r=await fetch(getAPI()+'/api/referral/status',{headers:{Authorization:'Bearer '+token}});
     if(!r.ok)return;
     const d=await r.json();
     document.getElementById('referralLoading').style.display='none';
     document.getElementById('referralContent').style.display='';
-    const pct=Math.min(d.completed_count/d.required_count*100,100);
-    document.getElementById('referralBar').style.width=pct+'%';
-    document.getElementById('referralCount').textContent=`已邀請 ${d.completed_count} / ${d.required_count} 位`;
-    document.getElementById('referralLink').textContent=d.invite_link;
-    document.getElementById('referralLink').dataset.link=d.invite_link;
+
+    // 邀請碼
+    const codeEl=document.getElementById('referralCode');
+    if(codeEl){codeEl.textContent=d.code||'';codeEl.dataset.code=d.code||'';}
+
+    // 邀請連結
+    const linkEl=document.getElementById('referralLink');
+    if(linkEl){linkEl.textContent=d.invite_link;linkEl.dataset.link=d.invite_link;}
+
+    // 本輪進度
+    const req=d.required_count||3;
+    const cycleProgress=d.completed_count%req;
+    const pct=cycleProgress/req*100;
+    const barEl=document.getElementById('referralBar');
+    if(barEl)barEl.style.width=pct+'%';
+    const cntEl=document.getElementById('referralCount');
+    if(cntEl)cntEl.textContent=`${cycleProgress} / ${req} 位`;
+    const hintEl=document.getElementById('referralNextHint');
+    if(hintEl){
+      const need=req-cycleProgress;
+      hintEl.textContent=need>0?`再邀請 ${need} 位即可再獲 30 天`:'🎉 本輪目標達成！';
+    }
+
+    // 獎勵摘要
+    const rewarded=d.rewarded_count!=null?d.rewarded_count:Math.floor(d.completed_count/req);
+    if(rewarded>0||d.unlocked){
+      const secEl=document.getElementById('referralRewardSec');
+      if(secEl)secEl.style.display='';
+      const mEl=document.getElementById('referralMonths');
+      if(mEl)mEl.textContent=`${rewarded} 個月（${rewarded*30} 天）`;
+      const expEl=document.getElementById('referralExpireDate');
+      if(expEl)expEl.textContent=d.referral_expire_date?d.referral_expire_date.replace(/-/g,'/'):'—';
+    }
+
+    // 解鎖狀態
     if(d.unlocked){
-      const expEl = document.getElementById('referralUnlocked');
-      if(expEl){
-        const expDate = d.referral_expire_date ? `（有效至 ${d.referral_expire_date.replace(/-/g,'/')}）` : '';
-        expEl.innerHTML = `✅ 已解鎖全功能！感謝您的分享 ${expDate}`;
-        expEl.style.display = '';
-      }
+      const uEl=document.getElementById('referralUnlocked');
+      if(uEl)uEl.style.display='';
     }
   }catch(e){}
 }
 
 function copyReferralLink(){
-  const link=document.getElementById('referralLink').dataset.link||'';
+  const link=document.getElementById('referralLink')?.dataset.link||'';
   if(!link)return;
   navigator.clipboard.writeText(link).then(()=>alert('邀請連結已複製！')).catch(()=>{
     prompt('請手動複製以下連結：',link);
+  });
+}
+
+function copyReferralCode(){
+  const code=document.getElementById('referralCode')?.dataset.code||'';
+  if(!code)return;
+  navigator.clipboard.writeText(code).then(()=>alert('邀請碼已複製：'+code)).catch(()=>{
+    prompt('請手動複製邀請碼：',code);
   });
 }
 

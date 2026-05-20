@@ -4126,6 +4126,7 @@ def get_referral_status(user: dict = Depends(require_user)):
         "invite_link": f"{FRONTEND_URL}/landing.html?ref={code}",
         "completed_count": completed,
         "required_count": 3,
+        "rewarded_count": user.get("referral_rewarded_count", 0),
         "unlocked": bool(user.get("referral_unlocked", 0)),
         "referral_expire_date": exp_row["referral_expire_date"] if exp_row else None,
     }
