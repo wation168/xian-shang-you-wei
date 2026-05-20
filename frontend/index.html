@@ -2267,17 +2267,54 @@ function stopQuotePolling(){
 }
 
 async function fetchAndUpdateQuote(stockId){
-  // 若已換股，停止
   if(stockId !== _quoteStockId) return;
+
+  // 台灣時間判斷盤中
+  const _twNow = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Taipei'}));
+  const _dow = _twNow.getDay();
+  const _twH = _twNow.getHours(), _twM = _twNow.getMinutes();
+  const _inSession = (_dow>=1 && _dow<=5) &&
+    _twH >= 9 &&
+    (_twH < 13 || (_twH===13 && _twM<=30));
+
+  if(!_inSession){ scheduleNext(stockId, false); return; }
+
+  const code = stockId.replace(/\.(TW|TWO)$/i,'');
+  const _sf  = v => { const n=parseFloat(String(v||'').replace(/,/g,'')); return (!isNaN(n)&&n>0)?n:null; };
+
+  async function _mis(ex){
+    const r = await fetch(
+      `https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=${ex}_${code}.tw&json=1&delay=0`,
+      {signal:AbortSignal.timeout(6000)}
+    );
+    if(!r.ok) return null;
+    const d = await r.json();
+    return d?.msgArray?.[0]||null;
+  }
+
   try{
-    const r=await fetch(`${getAPI()}/api/quote/${stockId}`,{signal:AbortSignal.timeout(8000),headers:_authHeaders()});
-    if(!r.ok) return scheduleNext(stockId, false);
-    const d=await r.json();
-    updateQuoteUI(d);
-    // 盤中繼續輪詢；盤後停止
-    scheduleNext(stockId, d.in_session);
+    let row = await _mis('tse');
+    // TSE 無成交價時試 OTC
+    if(!_sf(row?.z)) row = await _mis('otc') || row;
+    if(!row){ scheduleNext(stockId, true); return; }
+
+    const z = _sf(row.z); // 成交價（可能為 null）
+    const y = _sf(row.y); // 昨收
+
+    if(z){
+      const change     = y!=null ? +(z-y).toFixed(2) : null;
+      const change_pct = (y&&change!=null) ? +(change/y*100).toFixed(2) : null;
+      updateQuoteUI({
+        price:z, change, change_pct,
+        is_trading:true, in_session:true,
+        time:(row.t||'').trim(),
+        price_note:null,
+      });
+    }
+    scheduleNext(stockId, true);
   }catch(e){
-    scheduleNext(stockId, false);
+    // TWSE MIS 失敗（CORS 或網路）→ 繼續輪詢
+    scheduleNext(stockId, true);
   }
 }
 
