@@ -1950,6 +1950,230 @@ def get_kline(stock_id: str, tf: str = "D", user: dict = Depends(require_user)):
     return {"symbol": symbol, "tf": tf, "count": len(records), "bars": records}
 
 
+def _classify_kbar_simple(opens, highs, lows, closes, volumes) -> dict:
+    """簡易K棒分類：大紅/小紅/十字星/小黑/大黑/錘子線/流星線 + 連K天數 + 量能說明"""
+    if len(closes) < 3:
+        return {}
+    o, h, l, c = float(opens[-1]), float(highs[-1]), float(lows[-1]), float(closes[-1])
+    body     = c - o
+    body_pct = body / o * 100 if o > 0 else 0
+    rng      = h - l or 0.001
+    upper    = h - max(o, c)
+    lower    = min(o, c) - l
+    is_red   = c >= o
+    avg_vol  = float(np.mean(volumes[-6:-1])) if len(volumes) >= 6 else float(np.mean(volumes[:-1]))
+    today_vol = float(volumes[-1])
+    vol_surge = avg_vol > 0 and today_vol > avg_vol * 1.3
+
+    if abs(body) / rng < 0.15:
+        ktype, meaning, direction = "十字星", "多空交戰，方向不明，等待次日確認", "neutral"
+    elif lower >= abs(body) * 2 and upper <= abs(body) * 0.5:
+        note = "量縮更具底部意義" if not vol_surge else "量增止跌訊號更強"
+        ktype, meaning, direction = "錘子線", f"下引線長，低位有強撐；{note}", "bullish"
+    elif upper >= abs(body) * 2 and lower <= abs(body) * 0.5:
+        ktype, meaning, direction = "流星線", "上引線長，高位賣壓重，注意回調風險", "bearish"
+    elif is_red and body_pct >= 2.0:
+        note = "量增突破力道強" if vol_surge else "注意是否有量能配合"
+        ktype, meaning = "大紅棒", f"多頭強攻，實體漲幅 {body_pct:.1f}%；{note}"
+        direction = "bullish"
+    elif is_red:
+        ktype, meaning, direction = "小紅棒", "溫和上漲，多頭動能一般，觀察是否持續", "slightly_bullish"
+    elif body_pct <= -2.0:
+        ktype, meaning, direction = "大黑棒", f"空頭強殺，實體跌幅 {abs(body_pct):.1f}%，留意賣壓是否持續", "bearish"
+    else:
+        ktype, meaning, direction = "小黑棒", "溫和下跌，觀察支撐是否守住", "slightly_bearish"
+
+    streak = 0
+    for i in range(-1, -min(11, len(closes)), -1):
+        bar_red = float(closes[i]) >= float(opens[i])
+        if (is_red and bar_red) or (not is_red and not bar_red):
+            streak += 1
+        else:
+            break
+
+    vol_note = ""
+    if avg_vol > 0:
+        ratio = today_vol / avg_vol
+        if vol_surge and is_red:
+            vol_note = f"量增紅K（今量是均量 {ratio:.1f}x），多頭最強格局"
+        elif vol_surge and not is_red:
+            vol_note = f"量增黑K（今量是均量 {ratio:.1f}x），賣壓沉重"
+        elif ratio < 0.7:
+            vol_note = f"縮量（今量僅均量 {ratio:.1f}x），{'拉回偏健康' if is_red else '跌勢衰竭跡象'}"
+
+    return {
+        "type": ktype, "meaning": meaning, "direction": direction,
+        "body_pct": round(body_pct, 2),
+        "streak": streak, "streak_dir": "紅" if is_red else "黑",
+        "vol_note": vol_note,
+    }
+
+
+def _ma_alignment_desc(ma_values: dict) -> dict:
+    """描述均線多空排列"""
+    ma5  = ma_values.get("ma5")
+    ma20 = ma_values.get("ma20")
+    ma60 = ma_values.get("ma60")
+    if None in (ma5, ma20, ma60):
+        if ma5 and ma20:
+            d = "bullish" if ma5 > ma20 else "bearish"
+            return {"text": f"MA5({ma5:.1f}) {'>' if ma5>ma20 else '<'} MA20({ma20:.1f})，{'短線多頭' if ma5>ma20 else '短線偏空'}", "direction": d}
+        return {"text": "均線資料不足", "direction": "neutral"}
+    if ma5 > ma20 > ma60:
+        return {"text": f"多頭排列 MA5({ma5:.1f}) > MA20({ma20:.1f}) > MA60({ma60:.1f})", "direction": "bullish"}
+    if ma5 < ma20 < ma60:
+        return {"text": f"空頭排列 MA5({ma5:.1f}) < MA20({ma20:.1f}) < MA60({ma60:.1f})", "direction": "bearish"}
+    if ma5 > ma20 and ma20 < ma60:
+        return {"text": f"短多長空，MA5({ma5:.1f}) > MA20 但 MA20({ma20:.1f}) < MA60({ma60:.1f})，趨勢轉換中", "direction": "neutral"}
+    if ma5 < ma20 and ma20 > ma60:
+        return {"text": f"短空中多，MA5({ma5:.1f}) 回落但 MA20({ma20:.1f}) 仍在 MA60({ma60:.1f}) 以上", "direction": "slightly_bearish"}
+    return {"text": f"均線糾結，MA5={ma5:.1f} MA20={ma20:.1f} MA60={ma60:.1f}，等待方向明確", "direction": "neutral"}
+
+
+def _kd_status_desc(k_arr, d_arr) -> dict:
+    """描述KD位置與金死叉"""
+    vk = k_arr[~np.isnan(k_arr)]
+    vd = d_arr[~np.isnan(d_arr)]
+    if len(vk) < 2 or len(vd) < 2:
+        return {"text": "KD資料不足", "direction": "neutral", "k": None, "d": None}
+    k_now, d_now   = float(vk[-1]), float(vd[-1])
+    k_prev, d_prev = float(vk[-2]), float(vd[-2])
+    golden = k_now > d_now and k_prev <= d_prev
+    death  = k_now < d_now and k_prev >= d_prev
+    if k_now >= 80:
+        zone, zone_dir = "超買區（>80），注意高檔鈍化風險", "warning"
+    elif k_now <= 20:
+        zone, zone_dir = "超賣區（<20），關注底部反彈機會", "bullish"
+    elif k_now >= 50:
+        zone, zone_dir = "多方優勢區（50~80）", "bullish"
+    else:
+        zone, zone_dir = "空方優勢區（20~50）", "bearish"
+    cross = "，本日金叉（多方進場訊號）" if golden else ("，本日死叉（空方訊號）" if death else "")
+    direction = "bullish" if golden else ("bearish" if death else zone_dir)
+    return {
+        "text": f"K={k_now:.1f}，D={d_now:.1f}，位於{zone}{cross}",
+        "direction": direction, "k": k_now, "d": d_now,
+        "golden_cross": golden, "death_cross": death,
+    }
+
+
+def _macd_status_desc(macd_line, macd_sig, macd_hist) -> dict:
+    """描述MACD DIF/DEA關係"""
+    vl = macd_line[~np.isnan(macd_line)]
+    vs = macd_sig[~np.isnan(macd_sig)]
+    vh = macd_hist[~np.isnan(macd_hist)]
+    if len(vl) < 2 or len(vs) < 2 or len(vh) < 2:
+        return {"text": "MACD資料不足", "direction": "neutral", "dif": None, "dea": None}
+    dif, dea = float(vl[-1]), float(vs[-1])
+    hist_rising = float(vh[-1]) > float(vh[-2])
+    above_zero  = dif > 0
+    dif_above   = dif > dea
+    hist_txt    = "柱體擴大↑" if hist_rising else "柱體縮小↓"
+    if above_zero and dif_above and hist_rising:
+        signal, direction = "多頭強勢", "bullish"
+    elif above_zero and dif_above:
+        signal, direction = "多頭但動能趨緩", "slightly_bullish"
+    elif above_zero:
+        signal, direction = "多頭轉弱，注意死叉風險", "slightly_bearish"
+    elif hist_rising:
+        signal, direction = "空頭反彈，觀察能否穿越0軸", "neutral"
+    else:
+        signal, direction = "空頭格局", "bearish"
+    return {
+        "text": f"DIF={dif:.3f}（{'0軸以上' if above_zero else '0軸以下'}），DEA={dea:.3f}（{'DIF在DEA上方' if dif_above else 'DIF在DEA下方'}），{hist_txt} → {signal}",
+        "direction": direction, "dif": dif, "dea": dea,
+    }
+
+
+def _vol_analysis_desc(volumes, closes, opens) -> dict:
+    """分析近5日 vs 20日量能"""
+    vols = [float(v) for v in volumes if v > 0]
+    if len(vols) < 20:
+        return {"text": "量能資料不足", "ratio": 1.0, "avg_5": 0, "avg_20": 0}
+    avg_5  = sum(vols[-5:]) / 5
+    avg_20 = sum(vols[-20:]) / 20
+    ratio  = avg_5 / avg_20 if avg_20 > 0 else 1.0
+    is_red = len(closes) >= 1 and len(opens) >= 1 and float(closes[-1]) >= float(opens[-1])
+    if ratio >= 1.5:
+        note = "量增紅K最強格局" if is_red else "量增黑K，賣壓沉重"
+    elif ratio >= 1.2:
+        note = "量略放大" + ("，持續追蹤" if is_red else "，注意跌破支撐")
+    elif ratio <= 0.7:
+        note = "縮量" + ("拉回偏健康" if is_red else "，跌勢衰竭跡象")
+    else:
+        note = "量能正常範圍"
+    return {
+        "text": f"近5日均量 {round(avg_5):,} 張，20日均量 {round(avg_20):,} 張，比值 {ratio:.2f}x，{note}",
+        "ratio": round(ratio, 2), "avg_5": round(avg_5), "avg_20": round(avg_20),
+    }
+
+
+def _fetch_institutional_safe(stock_id: str) -> dict:
+    """Best-effort FinMind 法人資料，失敗回傳 {}"""
+    try:
+        import sys as _sys, os as _os
+        _sp = _os.path.join(_os.path.dirname(__file__), "stock_picker")
+        if _sp not in _sys.path:
+            _sys.path.insert(0, _sp)
+        from crawler import fetch_institutional
+        rows = fetch_institutional(stock_id, days=20)
+        if not rows:
+            return {}
+        consecutive_buy = 0
+        for r in reversed(rows):
+            if r["total"] > 0:
+                consecutive_buy += 1
+            else:
+                break
+        inst_5d  = rows[-5:] if len(rows) >= 5 else rows
+        foreign5 = sum(r.get("foreign", 0) for r in inst_5d)
+        invest5  = sum(r.get("invest",  0) for r in inst_5d)
+        dealer5  = sum(r.get("dealer",  0) for r in inst_5d)
+        total5   = sum(r.get("total",   0) for r in inst_5d)
+        def _dir(v): return "買超" if v > 0 else ("賣超" if v < 0 else "持平")
+        extra = f"，法人連買 {consecutive_buy} 日" if consecutive_buy >= 2 else ""
+        return {
+            "consecutive_buy_days": consecutive_buy,
+            "total_5d": total5, "foreign_5d": foreign5,
+            "invest_5d": invest5, "dealer_5d": dealer5,
+            "foreign_dir": _dir(foreign5), "invest_dir": _dir(invest5),
+            "summary": f"近5日三大法人合計 {total5:+,} 張（外資 {foreign5:+,}・投信 {invest5:+,}・自營 {dealer5:+,}）{extra}",
+        }
+    except Exception as _e:
+        print(f"[analyze] institutional best-effort failed {stock_id}: {_e}")
+        return {}
+
+
+def _individualized_risk(price, support, resistance, rr_ratio,
+                          kd_info: dict, macd_info: dict,
+                          kbar_info: dict, inst: dict) -> list[str]:
+    """根據各股實際數據產生個股化風險提示"""
+    risks = []
+    if rr_ratio < 1.0:
+        risks.append(f"損益比 {rr_ratio}，現價距壓力 {resistance} 空間不足，進場時機需審慎")
+    k_val = kd_info.get("k")
+    if k_val and k_val >= 80:
+        risks.append(f"KD={k_val:.0f} 進入超買區，高檔容易鈍化，追高風險增加")
+    elif kd_info.get("death_cross"):
+        risks.append(f"KD 剛發生死叉（K={k_val:.0f}），動能轉弱，留意後續賣壓")
+    dif_val = macd_info.get("dif")
+    if dif_val is not None and dif_val < -0.5:
+        risks.append(f"MACD DIF={dif_val:.3f} 在 0 軸深處，空頭動能強，反彈需謹慎")
+    elif macd_info.get("direction") == "slightly_bearish":
+        risks.append("MACD 多頭轉弱，接近死叉，注意動能確認")
+    supp_dist = (price - support) / price * 100
+    if supp_dist > 8:
+        risks.append(f"支撐 {support} 距現價 {supp_dist:.1f}%，停損空間較大，建議控制部位大小")
+    total5 = inst.get("total_5d", 0)
+    if total5 < -500:
+        risks.append(f"法人近5日賣超 {total5:,} 張，籌碼持續外流，需謹慎追多")
+    if kbar_info.get("direction") == "bearish":
+        risks.append(f"K棒出現{kbar_info.get('type','')}，空頭訊號，建議等止跌確認後再進場")
+    if not risks:
+        risks.append(f"技術面無明顯警示，持續追蹤均線支撐 {support} 是否守住")
+    return risks
+
+
 def _do_analyze(stock_id: str, tf: str = "D",
                 ma1: int = 5, ma2: int = 10, ma3: int = 20, ma4: int = 60, ma5: int = 120,
                 user: dict | None = None):
@@ -2331,6 +2555,18 @@ def _do_analyze(stock_id: str, tf: str = "D",
         "obv":       serialize_indicator(obv_arr, 0),
     }
 
+    # ── 深度分析欄位 ──
+    kbar_simple  = _classify_kbar_simple(opens, highs, lows, closes, volumes)
+    ma_alignment = _ma_alignment_desc(ma_values)
+    kd_status    = _kd_status_desc(k_arr, d_arr)
+    macd_status  = _macd_status_desc(macd_line, macd_sig, macd_hist)
+    vol_analysis = _vol_analysis_desc(volumes, closes, opens)
+    institutional = _fetch_institutional_safe(stock_id)
+    risk_factors  = _individualized_risk(
+        price, support, resistance, rr_ratio,
+        kd_status, macd_status, kbar_simple, institutional
+    )
+
     # K 線資料
     bars = []
     for i in range(len(df)):
@@ -2376,6 +2612,14 @@ def _do_analyze(stock_id: str, tf: str = "D",
         "bars": bars,
         "kline_pattern": k_pattern,
         "win_rate": h_win_rate,
+        # 深度分析
+        "kbar_simple":   kbar_simple,
+        "ma_alignment":  ma_alignment,
+        "kd_status":     kd_status,
+        "macd_status":   macd_status,
+        "vol_analysis":  vol_analysis,
+        "institutional": institutional,
+        "risk_factors":  risk_factors,
     }
     _cache_set(_cache_key, result)
 

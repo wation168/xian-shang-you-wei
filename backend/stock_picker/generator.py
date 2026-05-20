@@ -96,50 +96,91 @@ def score_label(score: int) -> str:
     return "暫不關注"
 
 
+def _card_tags(s: dict) -> str:
+    """選出 2~3 個最具代表性的標籤 HTML（依優先順序）"""
+    badges = []
+
+    cbd = s.get("consecutive_buy_days", 0)
+    if cbd >= 2:
+        badges.append(
+            f'<span style="font-size:10px;padding:3px 10px;border-radius:20px;'
+            f'background:#14532d;color:#86efac;font-weight:700">法人連買{cbd}日</span>'
+        )
+
+    sig = s.get("signal_label", "")
+    if sig and len(badges) < 3:
+        sig_bg = "#14532d" if "死叉" not in sig else "#7f1d1d"
+        sig_fg = "#86efac" if "死叉" not in sig else "#fca5a5"
+        clean  = sig.replace("✅ ", "").replace("⚠️ ", "")
+        badges.append(
+            f'<span style="font-size:10px;padding:3px 10px;border-radius:20px;'
+            f'background:{sig_bg};color:{sig_fg};font-weight:700">{clean}</span>'
+        )
+
+    vr = s.get("vol_ratio", 1.0)
+    if vr >= 1.2 and len(badges) < 3:
+        vc = "#22c55e" if vr >= 1.5 else "#f59e0b"
+        badges.append(
+            f'<span style="font-size:10px;padding:3px 10px;border-radius:20px;'
+            f'background:#1e293b;color:{vc}">量增 {vr:.1f}x</span>'
+        )
+
+    if s.get("trend") == "上升" and len(badges) < 3:
+        badges.append(
+            f'<span style="font-size:10px;padding:3px 10px;border-radius:20px;'
+            f'background:#1e293b;color:#22c55e">多頭趨勢</span>'
+        )
+
+    return "".join(badges[:3])
+
+
+def _card_headline(s: dict) -> str:
+    """根據最強訊號自動產生一句話摘要，每張卡片不同"""
+    cbd   = s.get("consecutive_buy_days", 0)
+    vr    = s.get("vol_ratio", 1.0)
+    sig   = s.get("signal_label", "")
+    trend = s.get("trend", "盤整")
+    dif   = s.get("macd_dif", 0.0)
+    inst5 = s.get("inst_5d_total", 0)
+
+    if cbd >= 3:
+        return f"法人連買 {cbd} 日，累積 {inst5:+,} 張，籌碼持續集中"
+    if cbd == 2:
+        return f"法人連買 2 日，近5日 {inst5:+,} 張，短線有買盤進場"
+    if "雙均線" in sig:
+        return "MA5/MA20 雙均線金叉，短中期趨勢同步走強"
+    if "MA5穿MA20" in sig:
+        return "MA5 穿越 MA20 金叉，短線多頭動能啟動"
+    if "MA20穿MA60" in sig:
+        return "MA20 穿越 MA60，中期趨勢確認轉多"
+    if "KD金叉" in sig:
+        return "KD 由超賣區金叉，動能由弱轉強，注意量能配合"
+    if vr >= 1.5 and trend == "上升":
+        return f"量能放大 {vr:.1f} 倍，搭配多頭趨勢，主力介入跡象明顯"
+    if vr >= 1.5:
+        return f"成交量急增至均量 {vr:.1f} 倍，異常量能值得追蹤"
+    if trend == "上升" and dif > 0:
+        return "均線多頭排列且 MACD 在 0 軸以上，雙重多頭確認"
+    if trend == "上升":
+        return "均線多頭排列，趨勢偏強，等待量能放大確認"
+    if dif > 0:
+        return f"MACD DIF {dif:.2f} 維持 0 軸以上，多方動能持續"
+    return "技術面整理中，等待方向訊號明確"
+
+
 def render_card(stock: dict, eval_result: dict) -> str:
-    s = stock
-    e = eval_result
+    s      = stock
+    e      = eval_result
     score  = e.get("score", 0)
     color  = score_color(score)
-    label  = score_label(score)
-    signal = s.get("signal_label", "")
-
-    inst_dir   = "買超" if s["inst_5d_total"] > 0 else ("賣超" if s["inst_5d_total"] < 0 else "持平")
-    inst_color = "#22c55e" if s["inst_5d_total"] > 0 else ("#ef4444" if s["inst_5d_total"] < 0 else "#94a3b8")
-    vol_color  = "#22c55e" if s["vol_ratio"] >= 1.5 else "#f59e0b" if s["vol_ratio"] >= 1.2 else "#94a3b8"
-    vol_label  = "量大增" if s["vol_ratio"] >= 1.5 else "量增" if s["vol_ratio"] >= 1.2 else "量平"
-
-    signal_badge = ""
-    if signal:
-        sig_bg, sig_fg = ("#14532d", "#86efac") if "死叉" not in signal else ("#7f1d1d", "#fca5a5")
-        signal_badge = (
-            f'<span style="font-size:10px;padding:2px 10px;border-radius:20px;'
-            f'background:{sig_bg};color:{sig_fg};font-weight:700">{signal}</span>'
-        )
-
-    kws = list({kw for n in s["news"] for kw in n["keywords"]})[:4]
-    kw_badges = "".join(
-        f'<span style="font-size:10px;padding:2px 8px;border-radius:20px;'
-        f'background:#7c3aed22;color:#a78bfa">{k}</span>' for k in kws
-    )
-
-    news_html = ""
-    for n in s["news"][:2]:
-        news_html += (
-            f'<a href="{n["link"]}" target="_blank" style="display:block;font-size:11px;'
-            f'color:#94a3b8;text-decoration:none;padding:4px 0;border-top:1px solid #1e293b;'
-            f'line-height:1.4">{n["title"][:50]}{"…" if len(n["title"])>50 else ""}</a>'
-        )
-
-    inst_badge = (
-        f'<span style="font-size:10px;padding:2px 8px;border-radius:20px;'
-        f'background:#1e293b;color:{inst_color}">法人連{inst_dir} {s["consecutive_buy_days"]}日</span>'
-    )
-
     stock_url = f"{FRONTEND_URL}/?stock={s['stock_id']}"
+
+    tags_html = _card_tags(s)
+    headline  = _card_headline(s)
+
     return f"""
 <div style="background:#0f172a;border:1px solid #1e293b;border-radius:16px;padding:20px;
-     display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden;
+     display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden;
      cursor:pointer;transition:border-color .2s"
      onmouseenter="this.style.borderColor='#334155'" onmouseleave="this.style.borderColor='#1e293b'"
      onclick="if(!event.target.closest('a'))window.top.location.href='{stock_url}'">
@@ -150,36 +191,18 @@ def render_card(stock: dict, eval_result: dict) -> str:
          display:flex;align-items:center;justify-content:center;
          font-size:13px;font-weight:700;color:{color}">{score}</div>
   </div>
-  <div style="padding-right:60px">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-      <span style="font-size:17px;font-weight:700;color:#f1f5f9">{s['stock_id']}</span>
+  <div style="padding-right:68px">
+    <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">
+      <span style="font-size:20px;font-weight:800;color:#f1f5f9">{s['stock_id']}</span>
       <span style="font-size:13px;color:#64748b">{s.get('name', '')}</span>
     </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      {signal_badge}
-      <span style="font-size:10px;padding:2px 8px;border-radius:20px;
-            background:{color}22;color:{color};font-weight:600">{label}</span>
-      <span style="font-size:10px;padding:2px 8px;border-radius:20px;
-            background:#1e293b;color:{vol_color}">📊 {vol_label} {s['vol_ratio']}x</span>
-      {inst_badge}
-      {kw_badges}
-    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">{tags_html}</div>
   </div>
-  <div style="display:flex;gap:16px;font-size:12px;color:#64748b;flex-wrap:wrap">
-    <span>現價 <strong style="color:#f1f5f9;font-size:15px">{s['price']}</strong></span>
-    <span>近5日均量 <strong style="color:#94a3b8">{s['avg_vol_5']:,}</strong> 張</span>
-    <span>法人近5日 <strong style="color:{inst_color}">{s["inst_5d_total"]:+,}</strong> 張</span>
-  </div>
-  <div style="background:#1e293b;border-radius:10px;padding:12px;font-size:12px;line-height:1.6">
-    <div style="color:#e2e8f0;margin-bottom:8px">{e.get('reason','')}</div>
-    <div style="display:flex;flex-direction:column;gap:4px">
-      <div><span style="color:#22c55e;font-weight:600">📍 觀察重點：</span>
-           <span style="color:#94a3b8">{e.get('watch_point','')}</span></div>
-      <div><span style="color:#f59e0b;font-weight:600">⚠️ 風險：</span>
-           <span style="color:#94a3b8">{e.get('risk','')}</span></div>
-    </div>
-  </div>
-  {f'<div style="margin-top:-4px">{news_html}</div>' if news_html else ''}
+  <div style="font-size:13px;color:#cbd5e1;line-height:1.6;
+       padding:10px 14px;background:#1e293b;border-radius:8px;
+       border-left:3px solid {color}">{headline}</div>
+  <div style="font-size:12px;color:#22c55e;text-align:right;letter-spacing:0.3px">
+    點擊查看完整技術分析 →</div>
 </div>"""
 
 
