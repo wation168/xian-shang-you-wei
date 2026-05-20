@@ -141,6 +141,17 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .summary-list li.conclusion{font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 .summary-list li.conclusion .dot{display:none}
 
+/* ── 深度分析區塊 ── */
+.deep-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.deep-card{background:var(--bg2);border:.5px solid var(--border);border-radius:var(--radius);padding:12px 14px}
+.deep-title{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:0.4px;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.deep-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.deep-val{font-size:12.5px;color:var(--text);line-height:1.55;font-weight:500}
+.deep-sub{font-size:11px;color:var(--text3);margin-top:4px;line-height:1.5}
+.deep-risk-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+.deep-risk-list li{font-size:12px;color:var(--text2);line-height:1.55;padding-left:14px;position:relative}
+.deep-risk-list li::before{content:'▸';position:absolute;left:0;color:var(--amber)}
+@media(max-width:480px){.deep-grid{grid-template-columns:1fr}}
 /* ── 指標卡 ── */
 .metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
 .metric{background:var(--bg2);border-radius:var(--radius);padding:10px 12px}
@@ -390,6 +401,19 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
         <div class="rr-tag" id="rr-tag">—</div>
         <div class="rr-desc" id="rr-desc">—</div>
       </div>
+    </div>
+
+    <!-- 深度分析區塊 -->
+    <div id="deepAnalysis" style="display:none;padding:4px 12px 8px">
+      <div class="deep-grid">
+        <div class="deep-card" id="da-kbar"></div>
+        <div class="deep-card" id="da-ma"></div>
+        <div class="deep-card" id="da-kd"></div>
+        <div class="deep-card" id="da-macd"></div>
+        <div class="deep-card" id="da-vol"></div>
+        <div class="deep-card" id="da-inst"></div>
+      </div>
+      <div class="deep-card" id="da-risk" style="margin-top:8px"></div>
     </div>
 
     <!-- 圖表 -->
@@ -1542,8 +1566,98 @@ function renderResult(d,enabledMA){
     const _gk='guest_day_'+new Date().toISOString().slice(0,10);
     localStorage.setItem(_gk,String(parseInt(localStorage.getItem(_gk)||'0',10)+1));
   }
+  // 深度分析欄位
+  renderDeepAnalysis(d);
   // 依登入/付費狀態套用分析結果遮罩
   _applyResultMasks();
+}
+
+function renderDeepAnalysis(d) {
+  const el = document.getElementById('deepAnalysis');
+  if (!el) return;
+
+  const kbar  = d.kbar_simple   || {};
+  const ma    = d.ma_alignment  || {};
+  const kd    = d.kd_status     || {};
+  const macd  = d.macd_status   || {};
+  const vol   = d.vol_analysis  || {};
+  const inst  = d.institutional || {};
+  const risks = d.risk_factors  || [];
+
+  function dirC(dir) {
+    if (!dir) return 'var(--text2)';
+    if (dir === 'bullish' || dir === 'slightly_bullish') return 'var(--green)';
+    if (dir === 'bearish' || dir === 'slightly_bearish') return 'var(--up)';
+    return 'var(--amber)';
+  }
+  function card(id, dotColor, title, body) {
+    document.getElementById(id).innerHTML =
+      `<div class="deep-title"><div class="deep-dot" style="background:${dotColor}"></div>${title}</div>${body}`;
+  }
+
+  // 1. K棒型態
+  const kbarC = dirC(kbar.direction);
+  const streakTxt = (kbar.streak > 1) ? `，連${kbar.streak_dir}K ${kbar.streak}日` : '';
+  card('da-kbar', kbarC, 'K棒型態',
+    `<div class="deep-val" style="color:${kbarC}">${kbar.type || '—'}</div>
+     <div class="deep-sub">${kbar.meaning || ''}${streakTxt}</div>
+     ${kbar.vol_note ? `<div class="deep-sub" style="margin-top:3px;color:${kbarC}">${kbar.vol_note}</div>` : ''}`
+  );
+
+  // 2. MA排列
+  const maC = dirC(ma.direction);
+  card('da-ma', maC, 'MA均線排列',
+    `<div class="deep-val" style="color:${maC}">${ma.text || '—'}</div>`
+  );
+
+  // 3. KD
+  const kdC = dirC(kd.direction);
+  const kdCrossTag = kd.golden_cross
+    ? `<span style="font-size:10px;background:rgba(29,158,117,.15);color:var(--green);padding:1px 7px;border-radius:10px;margin-left:6px;font-weight:700">金叉</span>`
+    : kd.death_cross
+    ? `<span style="font-size:10px;background:rgba(214,59,59,.12);color:var(--up);padding:1px 7px;border-radius:10px;margin-left:6px;font-weight:700">死叉</span>`
+    : '';
+  card('da-kd', kdC, `KD隨機指標${kdCrossTag}`,
+    `<div class="deep-val" style="color:${kdC}">${kd.text || '—'}</div>`
+  );
+
+  // 4. MACD
+  const macdC = dirC(macd.direction);
+  card('da-macd', macdC, 'MACD動能',
+    `<div class="deep-val" style="color:${macdC}">${macd.text || '—'}</div>`
+  );
+
+  // 5. 量能
+  const volRatio = vol.ratio || 1;
+  const volC = volRatio >= 1.5 ? 'var(--green)' : volRatio >= 1.2 ? 'var(--amber)' : 'var(--text2)';
+  card('da-vol', volC, '量能分析',
+    `<div class="deep-val">${vol.text || '—'}</div>`
+  );
+
+  // 6. 法人籌碼
+  const total5 = inst.total_5d || 0;
+  const instC  = total5 > 0 ? 'var(--green)' : total5 < 0 ? 'var(--up)' : 'var(--text3)';
+  if (inst.summary) {
+    const buyBadge = (inst.consecutive_buy_days >= 2)
+      ? `<span style="font-size:10px;background:rgba(29,158,117,.15);color:var(--green);padding:1px 7px;border-radius:10px;margin-left:6px;font-weight:700">連買${inst.consecutive_buy_days}日</span>`
+      : '';
+    card('da-inst', instC, `法人籌碼${buyBadge}`,
+      `<div class="deep-val" style="color:${instC}">${inst.summary}</div>
+       <div class="deep-sub" style="margin-top:3px">外資 ${inst.foreign_dir || '—'}・投信 ${inst.invest_dir || '—'}</div>`
+    );
+  } else {
+    card('da-inst', 'var(--text3)', '法人籌碼',
+      `<div class="deep-sub">資料更新中…</div>`
+    );
+  }
+
+  // 7. 風險提示
+  card('da-risk', 'var(--amber)', '個股化風險提示',
+    `<ul class="deep-risk-list">${(risks.length ? risks : ['無明顯風險警示'])
+      .map(r => `<li>${r}</li>`).join('')}</ul>`
+  );
+
+  el.style.display = '';
 }
 
 async function doGenerateReport(){
