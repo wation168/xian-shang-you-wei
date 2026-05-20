@@ -151,24 +151,38 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .summary-list li.conclusion .dot{display:none}
 
 /* ── 深度分析區塊 ── */
-#deepSection{display:none;padding:0 12px 8px}
-#deepSection .ds-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
-.deep-card{background:var(--bg2);border:.5px solid var(--border);border-radius:var(--radius);padding:12px 14px}
-.deep-card-h{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.4px;margin-bottom:8px;display:flex;align-items:center;gap:5px}
-.deep-card-h-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.dtag{display:inline-block;font-size:10px;font-weight:700;padding:1px 8px;border-radius:10px;margin-left:5px;vertical-align:middle}
-.dtag-g{background:rgba(29,158,117,.15);color:var(--green)}
-.dtag-r{background:rgba(214,59,59,.12);color:var(--up)}
-.dtag-a{background:rgba(176,112,16,.12);color:var(--amber)}
-.inst-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-top:.5px solid var(--border);font-size:12px}
-.inst-row:first-of-type{border-top:none;padding-top:0}
-.inst-label{color:var(--text3)}
-.inst-val{font-weight:600}
-.risk-item{font-size:12px;color:var(--text2);line-height:1.55;padding:5px 0 5px 16px;position:relative;border-top:.5px solid var(--border)}
-.risk-item:first-of-type{border-top:none;padding-top:0}
-.risk-item::before{content:'▸';position:absolute;left:0;top:5px;color:var(--amber);font-size:11px}
-.risk-item:first-of-type::before{top:0}
-@media(max-width:480px){#deepSection .ds-grid{grid-template-columns:1fr}}
+#deepSection{display:none;padding:0 0 4px}
+.deep-section{margin-bottom:12px}
+.deep-title{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);padding:0 0 6px 0;margin-bottom:8px;border-bottom:.5px solid var(--border);display:flex;align-items:center;gap:5px}
+.deep-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.deep-card{background:var(--bg2);border-radius:var(--radius);padding:11px 12px;min-width:0;border:.5px solid var(--border)}
+.deep-card.full{grid-column:1/-1}
+.deep-lbl{font-size:10px;color:var(--text3);font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:4px}
+.deep-val{font-size:13px;font-weight:700;color:var(--text);line-height:1.35;margin-bottom:2px}
+.deep-sub{font-size:11px;color:var(--text2);line-height:1.55}
+.dtag{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:5px;letter-spacing:.2px}
+.dtag.bull{background:var(--dn-l);color:var(--dn)}
+.dtag.bear{background:var(--up-l);color:var(--up)}
+.dtag.neu{background:var(--bg3);color:var(--text3)}
+.dtag.ob{background:var(--up-l);color:var(--up)}
+.dtag.os{background:var(--dn-l);color:var(--dn)}
+.dtag.warn{background:var(--amber-l);color:var(--amber)}
+.inst-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:.5px solid var(--border)}
+.inst-row:last-child{border-bottom:none}
+.inst-lbl{font-size:11.5px;color:var(--text2)}
+.inst-val{font-size:11.5px;font-weight:700}
+.inst-val.buy{color:var(--up)}
+.inst-val.sell{color:var(--dn)}
+.inst-val.neu{color:var(--text3)}
+.risk-items{display:flex;flex-direction:column;gap:6px;margin-top:2px}
+.risk-item{font-size:11.5px;color:var(--text2);line-height:1.6;display:flex;gap:7px;align-items:flex-start}
+.risk-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.risk-dot.warn{background:var(--amber)}
+.risk-dot.bad{background:var(--up)}
+.risk-dot.ok{background:var(--dn)}
+.ind-nums{display:flex;gap:10px;margin-bottom:3px}
+.ind-num-item{font-size:11px;color:var(--text3)}
+.ind-num-item span{font-weight:700;color:var(--text);font-family:var(--mono)}
 /* ── 指標卡 ── */
 .metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
 .metric{background:var(--bg2);border-radius:var(--radius);padding:10px 12px}
@@ -433,17 +447,18 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
       </div>
     </div>
 
-    <!-- 深度分析區塊 -->
-    <div id="deepSection">
-      <div class="ds-grid">
-        <div class="deep-card" id="ds-kbar"></div>
-        <div class="deep-card" id="ds-ma"></div>
-        <div class="deep-card" id="ds-kd"></div>
-        <div class="deep-card" id="ds-macd"></div>
-        <div class="deep-card" id="ds-vol"></div>
-        <div class="deep-card" id="ds-inst"></div>
+    <!-- ── 深度分析七欄位 ── -->
+    <div id="deepSection" style="display:none;padding:0 0 4px">
+      <div class="deep-title">📐 深度分析</div>
+      <div class="deep-grid">
+        <div class="deep-card" id="dcard-kbar"><div class="deep-lbl">🕯 K棒型態</div><div id="d-kbar-tag"></div><div class="deep-val" id="d-kbar-name">—</div><div class="deep-sub" id="d-kbar-sub"></div></div>
+        <div class="deep-card" id="dcard-ma"><div class="deep-lbl">📊 均線排列</div><div id="d-ma-tag"></div><div class="deep-sub" id="d-ma-sub"></div></div>
+        <div class="deep-card" id="dcard-kd"><div class="deep-lbl">〽️ KD 指標</div><div id="d-kd-tag"></div><div class="ind-nums" id="d-kd-nums"></div><div class="deep-sub" id="d-kd-sub"></div></div>
+        <div class="deep-card" id="dcard-macd"><div class="deep-lbl">📈 MACD</div><div id="d-macd-tag"></div><div class="ind-nums" id="d-macd-nums"></div><div class="deep-sub" id="d-macd-sub"></div></div>
+        <div class="deep-card full" id="dcard-vol"><div class="deep-lbl">🔊 量能分析</div><div id="d-vol-tag"></div><div class="deep-sub" id="d-vol-sub"></div></div>
+        <div class="deep-card full" id="dcard-inst"><div class="deep-lbl">🏦 法人動向</div><div id="d-inst-rows"><div style="font-size:11px;color:var(--text3)">載入中…</div></div></div>
+        <div class="deep-card full" id="dcard-risk"><div class="deep-lbl">⚡ 風險提示</div><div class="risk-items" id="d-risk-list"></div></div>
       </div>
-      <div class="deep-card" id="ds-risk"></div>
     </div>
 
     <!-- 圖表 -->
@@ -1608,6 +1623,13 @@ function renderResult(d,enabledMA){
   document.getElementById('resultEl').className='result show';
   // 換股票時重置深度分析（避免舊資料殘留）
   const _dsSec=document.getElementById('deepSection'); if(_dsSec) _dsSec.style.display='none';
+  ['d-kbar-tag','d-kbar-name','d-kbar-sub','d-ma-tag','d-ma-sub',
+   'd-kd-tag','d-kd-nums','d-kd-sub','d-macd-tag','d-macd-nums','d-macd-sub',
+   'd-vol-tag','d-vol-sub','d-risk-list'].forEach(function(id){
+    var e=document.getElementById(id); if(e)e.innerHTML='';
+  });
+  var _instRows=document.getElementById('d-inst-rows');
+  if(_instRows) _instRows.innerHTML='<div style="font-size:11px;color:var(--text3)">載入中…</div>';
   document.getElementById('tfSegWrap').style.display='';
   loadDrawings(stock_id||id);
   loadChips(stock_id||id);
@@ -1647,69 +1669,77 @@ function renderAnalysisCards(d) {
   const inst = d.institutional || {};
   const risks= d.risk_factors  || [];
 
-  function dc(dir) {
-    if (!dir) return 'var(--text2)';
-    if (dir==='bullish'||dir==='slightly_bullish') return 'var(--green)';
-    if (dir==='bearish'||dir==='slightly_bearish') return 'var(--up)';
-    return 'var(--amber)';
+  function tagCls(dir) {
+    if (!dir) return 'neu';
+    if (dir === 'bullish' || dir === 'slightly_bullish') return 'bull';
+    if (dir === 'bearish' || dir === 'slightly_bearish') return 'bear';
+    return 'neu';
   }
-  function hdr(label, dot, extra='') {
-    return `<div class="deep-card-h"><div class="deep-card-h-dot" style="background:${dot}"></div>${label}${extra}</div>`;
-  }
-  function dtag(txt, cls) { return `<span class="dtag ${cls}">${txt}</span>`; }
-  function netStr(v) { return v!=null ? (v>0?'+':'')+v.toLocaleString()+'張' : '—'; }
-  function instRowColor(v) { return v>0?'var(--green)':v<0?'var(--up)':'var(--text3)'; }
+  function netStr(v) { return v != null ? (v > 0 ? '+' : '') + Number(v).toLocaleString() + '張' : '—'; }
+  function instCls(v) { return v > 0 ? 'buy' : v < 0 ? 'sell' : 'neu'; }
+  function set(id, html) { const el = document.getElementById(id); if (el) el.innerHTML = html; }
 
   // 1. K棒型態
-  const kC = dc(kbar.direction);
-  const streak = kbar.streak>1 ? `，連${kbar.streak_dir}K ${kbar.streak}日` : '';
-  document.getElementById('ds-kbar').innerHTML = hdr('K棒型態', kC)
-    + `<div style="font-size:13px;font-weight:600;color:${kC};margin-bottom:4px">${kbar.type||'—'}</div>`
-    + `<div style="font-size:12px;color:var(--text2);line-height:1.5">${kbar.meaning||''}${streak}</div>`
-    + (kbar.vol_note?`<div style="font-size:11px;color:${kC};margin-top:5px">${kbar.vol_note}</div>`:'');
+  const kCls = tagCls(kbar.direction);
+  const streak = kbar.streak > 1 ? `，連${kbar.streak_dir || ''}K ${kbar.streak}日` : '';
+  const kTagLbl = kbar.direction === 'bullish' ? '多方' : kbar.direction === 'bearish' ? '空方' : '中性';
+  set('d-kbar-tag',  `<span class="dtag ${kCls}">${kTagLbl}</span>`);
+  set('d-kbar-name', kbar.type || '—');
+  set('d-kbar-sub',  (kbar.meaning || '') + streak + (kbar.vol_note ? `　${kbar.vol_note}` : ''));
 
-  // 2. MA排列
-  const maC = dc(ma.direction);
-  document.getElementById('ds-ma').innerHTML = hdr('MA均線排列', maC)
-    + `<div style="font-size:12px;color:${maC};line-height:1.55;font-weight:500">${ma.text||'—'}</div>`;
+  // 2. MA均線排列
+  const maCls = tagCls(ma.direction);
+  const maLbl = ma.label || (maCls === 'bull' ? '多頭' : maCls === 'bear' ? '空頭' : '盤整');
+  set('d-ma-tag', `<span class="dtag ${maCls}">${maLbl}</span>`);
+  set('d-ma-sub', ma.text || '—');
 
   // 3. KD
-  const kdC = dc(kd.direction);
-  const kdTag = kd.golden_cross ? dtag('金叉','dtag-g') : kd.death_cross ? dtag('死叉','dtag-r') : '';
-  document.getElementById('ds-kd').innerHTML = hdr('KD隨機指標', kdC, kdTag)
-    + `<div style="font-size:12px;color:${kdC};line-height:1.55;font-weight:500">${kd.text||'—'}</div>`;
+  const kdCls = kd.golden_cross ? 'bull' : kd.death_cross ? 'bear' : tagCls(kd.direction);
+  const kdTagLbl = kd.golden_cross ? '金叉' : kd.death_cross ? '死叉' : (kd.zone || '—');
+  set('d-kd-tag',  `<span class="dtag ${kdCls}">${kdTagLbl}</span>`);
+  set('d-kd-nums', kd.k != null
+    ? `<div class="ind-num-item">K <span>${Number(kd.k).toFixed(1)}</span></div><div class="ind-num-item">D <span>${Number(kd.d).toFixed(1)}</span></div>`
+    : '');
+  set('d-kd-sub',  kd.text || '—');
 
   // 4. MACD
-  const macdC = dc(macd.direction);
-  document.getElementById('ds-macd').innerHTML = hdr('MACD動能', macdC)
-    + `<div style="font-size:12px;color:${macdC};line-height:1.55;font-weight:500">${macd.text||'—'}</div>`;
+  const macdCls = tagCls(macd.direction);
+  const macdLbl = macd.label || (macdCls === 'bull' ? '偏多' : macdCls === 'bear' ? '偏空' : '中性');
+  set('d-macd-tag',  `<span class="dtag ${macdCls}">${macdLbl}</span>`);
+  set('d-macd-nums', macd.dif != null
+    ? `<div class="ind-num-item">DIF <span>${Number(macd.dif).toFixed(2)}</span></div><div class="ind-num-item">DEA <span>${Number(macd.dea).toFixed(2)}</span></div>`
+    : '');
+  set('d-macd-sub', macd.text || '—');
 
-  // 5. 量能
-  const vr = vol.ratio||1;
-  const vC = vr>=1.5?'var(--green)':vr>=1.2?'var(--amber)':'var(--text2)';
-  document.getElementById('ds-vol').innerHTML = hdr('量能分析', vC)
-    + `<div style="font-size:12px;color:var(--text);line-height:1.55">${vol.text||'—'}</div>`;
+  // 5. 量能分析
+  const vr = vol.ratio || 1;
+  const vCls = vr >= 1.5 ? 'bull' : vr < 0.7 ? 'bear' : 'neu';
+  const vLbl = vol.label || (vr >= 1.5 ? '放量' : vr < 0.7 ? '縮量' : '平量');
+  set('d-vol-tag', `<span class="dtag ${vCls}">${vLbl}</span>`);
+  set('d-vol-sub', vol.text || '—');
 
-  // 6. 法人籌碼
-  const t5   = inst.total_5d||0;
-  const iC   = instRowColor(t5);
-  const buyTag = inst.consecutive_buy_days>=2 ? dtag(`連買${inst.consecutive_buy_days}日`,'dtag-g') : '';
+  // 6. 法人動向
   if (inst.summary) {
-    const f5 = inst.foreign_5d||0, i5 = inst.invest_5d||0, d5 = inst.dealer_5d||0;
-    document.getElementById('ds-inst').innerHTML = hdr('法人籌碼', iC, buyTag)
-      + `<div class="inst-row"><span class="inst-label">外資</span><span class="inst-val" style="color:${instRowColor(f5)}">${inst.foreign_dir||'—'} ${netStr(f5)}</span></div>`
-      + `<div class="inst-row"><span class="inst-label">投信</span><span class="inst-val" style="color:${instRowColor(i5)}">${inst.invest_dir||'—'} ${netStr(i5)}</span></div>`
-      + `<div class="inst-row"><span class="inst-label">自營</span><span class="inst-val" style="color:${instRowColor(d5)}">${d5>0?'買超':d5<0?'賣超':'持平'} ${netStr(d5)}</span></div>`;
+    const f5 = inst.foreign_5d || 0, i5 = inst.invest_5d || 0, d5 = inst.dealer_5d || 0;
+    const buyBadge = inst.consecutive_buy_days >= 2
+      ? `<span class="dtag bull" style="margin-bottom:6px">連買${inst.consecutive_buy_days}日</span>` : '';
+    set('d-inst-rows', buyBadge
+      + `<div class="inst-row"><span class="inst-lbl">外資（5日）</span><span class="inst-val ${instCls(f5)}">${inst.foreign_dir || '—'} ${netStr(f5)}</span></div>`
+      + `<div class="inst-row"><span class="inst-lbl">投信（5日）</span><span class="inst-val ${instCls(i5)}">${inst.invest_dir || '—'} ${netStr(i5)}</span></div>`
+      + `<div class="inst-row"><span class="inst-lbl">自營（5日）</span><span class="inst-val ${instCls(d5)}">${d5 > 0 ? '買超' : d5 < 0 ? '賣超' : '持平'} ${netStr(d5)}</span></div>`);
   } else {
-    document.getElementById('ds-inst').innerHTML = hdr('法人籌碼','var(--text3)')
-      + `<div style="font-size:12px;color:var(--text3)">資料更新中…</div>`;
+    set('d-inst-rows', `<div style="font-size:11px;color:var(--text3)">資料更新中…</div>`);
   }
 
   // 7. 風險提示
-  document.getElementById('ds-risk').innerHTML = hdr('個股化風險提示','var(--amber)')
-    + (risks.length?risks:['無明顯風險警示']).map(r=>`<div class="risk-item">${r}</div>`).join('');
+  const riskHtml = (risks.length ? risks : [{ text: '無明顯風險警示', level: 'low' }]).map(r => {
+    const dotCls = typeof r === 'object' ? (r.level === 'high' ? 'bad' : r.level === 'low' ? 'ok' : 'warn') : 'warn';
+    const txt    = typeof r === 'object' ? r.text : r;
+    return `<div class="risk-item"><div class="risk-dot ${dotCls}"></div><span>${txt}</span></div>`;
+  }).join('');
+  set('d-risk-list', riskHtml);
 
-  sec.style.display='';
+  sec.style.display = '';
 }
 
 async function doGenerateReport(){
