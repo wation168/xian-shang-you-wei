@@ -41,7 +41,7 @@ JWT_EXPIRE_DAYS = 30   # token 有效期
 ECPAY_MERCHANT_ID = os.environ.get("ECPAY_MERCHANT_ID", "3443173")
 ECPAY_HASH_KEY = os.environ.get("ECPAY_HASH_KEY", "")
 ECPAY_HASH_IV  = os.environ.get("ECPAY_HASH_IV", "")
-FRONTEND_URL   = os.environ.get("FRONTEND_URL", "https://stock-navigator.zeabur.app")
+FRONTEND_URL   = os.environ.get("FRONTEND_URL", "https://softglow-ai.com")
 BACKEND_URL    = os.environ.get("BACKEND_URL",  "https://stock-navigator-api.zeabur.app")
 
 # 寄信設定
@@ -379,40 +379,76 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
         df = df.set_index("Date").sort_index()
         df = df[["Open", "High", "Low", "Close", "Volume"]].astype(float)
 
-        # ── 盤中補今日 K 棒 ──
-        # 若今日是交易日且資料集尚無今日資料，用 tick_snapshot 補一筆
+        # ── 盤中補今日 K 棒（yfinance 主力，tick_snapshot 備援）──
         tz = ZoneInfo("Asia/Taipei")
         now_tw = datetime.now(tz)
         is_weekday = now_tw.weekday() < 5
         in_or_just_after = is_weekday and _dtime(9, 0) <= now_tw.time() <= _dtime(14, 30)
         today_ts = pd.Timestamp(today_str)
+
         if in_or_just_after:
+            _yf_ok = False
             try:
-                snap_url = (f"https://api.finmindtrade.com/api/v4/taiwan_stock_tick_snapshot"
-                            f"?data_id={code}&token={FINMIND_TOKEN}")
-                snap_req = _ur.Request(snap_url, headers={"User-Agent": "Mozilla/5.0"})
-                with _ur.urlopen(snap_req, timeout=6) as sr:
-                    snap = _j.loads(sr.read())
-                snap_rows = snap.get("data", [])
-                if snap_rows:
-                    r = snap_rows[0]
-                    cp = float(r.get("close") or r.get("price") or 0)
-                    op = float(r.get("open") or cp)
-                    hi = float(r.get("high") or cp)
-                    lo = float(r.get("low") or cp)
-                    vol = float(r.get("total_volume") or r.get("volume") or 0)
-                    if cp > 0:
-                        today_bar = pd.DataFrame(
-                            [[op, hi, lo, cp, vol]],
-                            index=[today_ts],
-                            columns=["Open", "High", "Low", "Close", "Volume"]
-                        )
-                        df = df[df.index != today_ts]
-                        df = pd.concat([df, today_bar])
-                        print(f"   FinMind 盤中補今日 K 棒：{code} close={cp}")
-            except Exception as _e:
-                if not (hasattr(_e, 'code') and _e.code == 400):
-                    print(f"   FinMind tick_snapshot 補棒失敗 {code}：{_e}")
+                import yfinance as _yf
+                _yf_sym = resolve_symbol(code)          # 2330.TW 或 2454.TWO
+                _tk = _yf.Ticker(_yf_sym)
+                _hist = _tk.history(period="2d", interval="1d", auto_adjust=True)
+                # TWSE 符號抓不到時嘗試 OTC
+                if _hist.empty and _yf_sym.endswith(".TW"):
+                    _tk = _yf.Ticker(code + ".TWO")
+                    _hist = _tk.history(period="2d", interval="1d", auto_adjust=True)
+                if not _hist.empty:
+                    _today_d = date.today()
+                    _mask = [idx.date() == _today_d for idx in _hist.index]
+                    _today_rows = _hist[_mask]
+                    if not _today_rows.empty:
+                        _row = _today_rows.iloc[-1]
+                        cp  = float(_row["Close"])
+                        op  = float(_row["Open"])
+                        hi  = float(_row["High"])
+                        lo  = float(_row["Low"])
+                        vol = float(_row.get("Volume", 0) or 0)
+                        if cp > 0:
+                            today_bar = pd.DataFrame(
+                                [[op, hi, lo, cp, vol]],
+                                index=[today_ts],
+                                columns=["Open", "High", "Low", "Close", "Volume"]
+                            )
+                            df = df[df.index != today_ts]
+                            df = pd.concat([df, today_bar])
+                            print(f"   yfinance 補今日 K 棒：{_yf_sym} close={cp:.2f}")
+                            _yf_ok = True
+            except Exception as _ye:
+                print(f"   yfinance 補棒失敗 {code}：{_ye}")
+
+            if not _yf_ok:
+                # fallback：FinMind tick_snapshot
+                try:
+                    snap_url = (f"https://api.finmindtrade.com/api/v4/taiwan_stock_tick_snapshot"
+                                f"?data_id={code}&token={FINMIND_TOKEN}")
+                    snap_req = _ur.Request(snap_url, headers={"User-Agent": "Mozilla/5.0"})
+                    with _ur.urlopen(snap_req, timeout=6) as sr:
+                        snap = _j.loads(sr.read())
+                    snap_rows = snap.get("data", [])
+                    if snap_rows:
+                        r = snap_rows[0]
+                        cp  = float(r.get("close") or r.get("price") or 0)
+                        op  = float(r.get("open") or cp)
+                        hi  = float(r.get("high") or cp)
+                        lo  = float(r.get("low") or cp)
+                        vol = float(r.get("total_volume") or r.get("volume") or 0)
+                        if cp > 0:
+                            today_bar = pd.DataFrame(
+                                [[op, hi, lo, cp, vol]],
+                                index=[today_ts],
+                                columns=["Open", "High", "Low", "Close", "Volume"]
+                            )
+                            df = df[df.index != today_ts]
+                            df = pd.concat([df, today_bar])
+                            print(f"   tick_snapshot(fallback) 補今日 K 棒：{code} close={cp}")
+                except Exception as _e:
+                    if not (hasattr(_e, 'code') and _e.code == 400):
+                        print(f"   tick_snapshot 補棒失敗 {code}：{_e}")
 
         # ── TWSE/TPEX 月報補今日 K 棒（上述來源均無資料時的最終 fallback）──
         if today_ts not in df.index:
@@ -1720,6 +1756,12 @@ def _db_init():
         print(f"   ✅ 管理員帳號已建立：{ADMIN_EMAIL}")
     else:
         print(f"   ✅ 管理員帳號已存在：{ADMIN_EMAIL}")
+    # 確保管理員維持 yearly 方案（舊帳號若為 free 則自動升級）
+    conn.execute(
+        "UPDATE members SET plan='yearly', expire_at=? WHERE email=? AND plan='free'",
+        (ADMIN_EXPIRE, ADMIN_EMAIL)
+    )
+    conn.commit()
 
     conn.close()
 
@@ -1891,7 +1933,7 @@ def debug_stock(stock_id: str):
     results = {}
     for sym in [symbol_tw, symbol_two]:
         try:
-            df = fetch_df(sym, "5d", "1d")
+            _, df = try_fetch(sym, "5d", "1d")
             results[sym] = {
                 "empty": df.empty,
                 "rows": len(df),
@@ -2554,6 +2596,23 @@ def get_quote(stock_id: str, user: dict = Depends(require_user)):
             if not (hasattr(_e, 'code') and _e.code == 400):
                 print(f"[QUOTE] tick_snapshot 失敗 {code}：{_e}")
 
+    # ── 2.5 yfinance fast_info（盤中備援，snap 失敗時）──
+    yf_rt_price = yf_rt_open = yf_rt_high = yf_rt_low = None
+    if snap_price is None and (in_session or just_after_close):
+        try:
+            import yfinance as _yf
+            _yf_sym = resolve_symbol(code)
+            _fi = _yf.Ticker(_yf_sym).fast_info
+            _lp = float(_fi.last_price or 0)
+            if _lp > 0:
+                yf_rt_price = _lp
+                yf_rt_open = float(_fi.open or _lp) or None
+                yf_rt_high = float(_fi.day_high or _lp) or None
+                yf_rt_low  = float(_fi.day_low  or _lp) or None
+                print(f"[QUOTE] {code} yfinance fast_info: price={yf_rt_price} h={yf_rt_high} l={yf_rt_low}")
+        except Exception as _ye:
+            print(f"[QUOTE] yfinance fast_info 失敗 {code}：{_ye}")
+
     # ── 2. TWSE（z 現價、y 昨收、OHLV 備用）──
     twse_data = None
     for ex in ("tse", "otc"):
@@ -2582,6 +2641,12 @@ def get_quote(stock_id: str, user: dict = Depends(require_user)):
     vol_twse  = _val("v")
     tick_time = _val("t") or ""
 
+    # debug: 印出 TWSE raw 欄位（輔助排查 z 欄位是否為空）
+    if code == "2330":
+        print(f"[QUOTE-DEBUG 2330] is_weekday={is_weekday} in_session={in_session} "
+              f"just_after={just_after_close} | twse z_raw={str(twse_data.get('z','-') if twse_data else 'N/A')} "
+              f"y={str(twse_data.get('y','-') if twse_data else 'N/A')} | snap_price={snap_price}")
+
     # ── 3. FinMind 今日收盤（snap 失敗 or 盤後 fallback）──
     finmind_close = None
     if snap_price is None:
@@ -2599,6 +2664,49 @@ def get_quote(stock_id: str, user: dict = Depends(require_user)):
         except Exception as _e:
             print(f"[QUOTE] FinMind 今日收盤失敗 {code}：{_e}")
 
+    # ── 4. TWSE / TPEX STOCK_DAY（盤後補今日收盤，前三者均無效時）──
+    stock_day_close = None
+    _today_obj = _date.today()
+    _is_after_close = is_weekday and now.time() >= dtime(13, 35)
+    if snap_price is None and finmind_close is None and not z and _is_after_close:
+        _roc_y   = _today_obj.year - 1911
+        _roc_date = f"{_roc_y}/{_today_obj.month:02d}/{_today_obj.day:02d}"
+        _yyyymmdd = _today_obj.strftime("%Y%m%d")
+        # TWSE（上市）
+        try:
+            _sd_url = (f"https://www.twse.com.tw/exchangeReport/STOCK_DAY"
+                       f"?response=json&date={_yyyymmdd}&stockNo={code}")
+            _sd_req = urllib.request.Request(_sd_url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(_sd_req, timeout=8) as _sd:
+                _sd_raw = _json.loads(_sd.read())
+            for _row in _sd_raw.get("data", []):
+                if str(_row[0]).strip() == _roc_date:
+                    _cp = str(_row[6]).replace(",", "").strip()
+                    if _cp not in ("--", "", "X"):
+                        stock_day_close = float(_cp)
+                    break
+        except Exception:
+            pass
+        # TPEX（上櫃），TWSE 失敗時再試
+        if not stock_day_close:
+            try:
+                _tpex_d = f"{_roc_y}/{_today_obj.month:02d}"
+                _tpex_url = (f"https://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info"
+                             f"/st43_result.php?l=zh-tw&d={_tpex_d}&stkno={code}")
+                _tpex_req = urllib.request.Request(_tpex_url, headers={"User-Agent": "Mozilla/5.0"})
+                with urllib.request.urlopen(_tpex_req, timeout=8) as _pr:
+                    _tpex_raw = _json.loads(_pr.read())
+                for _row in _tpex_raw.get("aaData", []):
+                    if str(_row[0]).strip() == _roc_date:
+                        _cp = str(_row[6]).replace(",", "").strip()
+                        if _cp not in ("--", "", "X"):
+                            stock_day_close = float(_cp)
+                        break
+            except Exception:
+                pass
+        if stock_day_close:
+            print(f"[QUOTE] {code} STOCK_DAY 補今日收盤：{stock_day_close}")
+
     # ── 決定現價與來源 ──
     if in_session or just_after_close:
         if snap_price:
@@ -2608,6 +2716,13 @@ def get_quote(stock_id: str, user: dict = Depends(require_user)):
             high_val = snap_high  or safe_float(high_twse)
             low_val  = snap_low   or safe_float(low_twse)
             vol_val  = int(snap_vol) if snap_vol else (int(float(vol_twse) * 1000) if vol_twse else None)
+        elif yf_rt_price:
+            price_val    = yf_rt_price
+            price_source = "yfinance_rt"
+            open_val = yf_rt_open or safe_float(open_twse)
+            high_val = yf_rt_high or safe_float(high_twse)
+            low_val  = yf_rt_low  or safe_float(low_twse)
+            vol_val  = int(float(vol_twse) * 1000) if vol_twse else None
         elif finmind_close:
             price_val    = finmind_close
             price_source = "finmind_close"
@@ -2633,10 +2748,16 @@ def get_quote(stock_id: str, user: dict = Depends(require_user)):
             price_val    = None
             price_source = "none"
             open_val = high_val = low_val = vol_val = None
-    else:
+    else:  # 盤後：finmind_close > twse_z > stock_day > twse_y（昨收）
         if finmind_close:
             price_val    = finmind_close
             price_source = "finmind_close"
+        elif z:  # TWSE MIS z 剛收盤後仍有效（約收盤後 30 分鐘內）
+            price_val    = safe_float(z)
+            price_source = "twse_z"
+        elif stock_day_close:  # TWSE/TPEX STOCK_DAY 月報 → 最可靠的盤後收盤
+            price_val    = stock_day_close
+            price_source = "stock_day"
         elif y:
             price_val    = safe_float(y)
             price_source = "twse_y"
@@ -2673,7 +2794,7 @@ def get_quote(stock_id: str, user: dict = Depends(require_user)):
         "low":          low_val,
         "volume":       vol_val,
         "time":         tick_time,
-        "is_trading":   bool((snap_price or z) and in_session),
+        "is_trading":   bool((snap_price or yf_rt_price or z) and in_session),
         "in_session":   in_session,
         "price_source": price_source,
         "price_note":   "以昨收價計算" if price_source == "twse_y" else None,
@@ -2810,6 +2931,142 @@ def admin_delete_member(req: _DeleteMemberReq, key: str = ""):
     conn.commit()
     conn.close()
     return {"ok": True, "deleted": email}
+
+@app.post("/admin/run-scan")
+def admin_run_scan(key: str = ""):
+    """手動觸發統合選股排程（後台執行，不等結果）"""
+    _check_admin(key)
+    import threading, sys as _sys
+    _picker_path = os.path.join(os.path.dirname(__file__), "stock_picker")
+    def _do():
+        try:
+            if _picker_path not in _sys.path:
+                _sys.path.insert(0, _picker_path)
+            from main_picker import run_unified_scan
+            run_unified_scan()
+            print("   ✅ 手動選股排程完成")
+        except Exception as e:
+            print(f"   ❌ 手動選股排程失敗：{e}")
+    threading.Thread(target=_do, daemon=True).start()
+    return {"ok": True, "message": "選股排程已觸發，後台執行中，約 5~10 分鐘完成"}
+
+
+class _BatchUpgradeReq(BaseModel):
+    emails: list
+    plan: str = "monthly"
+    days: int = 30
+
+
+@app.post("/admin/batch-upgrade")
+def admin_batch_upgrade(req: _BatchUpgradeReq, key: str = ""):
+    """批次升級免費會員（升級+寄通知信）"""
+    _check_admin(key)
+    from datetime import datetime, timedelta
+    plan_label = {"monthly": "月費方案", "quarterly": "季費方案", "yearly": "年費方案"}.get(req.plan, req.plan)
+    results = []
+    for raw_email in req.emails:
+        email = raw_email.strip().lower()
+        if not email:
+            continue
+        new_expire = (datetime.today() + timedelta(days=req.days)).strftime("%Y-%m-%d")
+        conn = _db_conn()
+        try:
+            row = conn.execute("SELECT id FROM members WHERE email=?", (email,)).fetchone()
+            if not row:
+                conn.close()
+                results.append({"email": email, "ok": False, "reason": "帳號不存在"})
+                continue
+            conn.execute(
+                "UPDATE members SET plan=?, expire_at=?, token_ver=token_ver+1 WHERE email=?",
+                (req.plan, new_expire, email)
+            )
+            conn.commit()
+        except Exception as e:
+            conn.close()
+            results.append({"email": email, "ok": False, "reason": str(e)})
+            continue
+        conn.close()
+        email_sent = False
+        try:
+            _send_email(email, "【線上有位】🎁 早鳥優惠！您的帳號已免費升級",
+                f"""<div style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px">
+                  <div style="text-align:center;margin-bottom:24px">
+                    <h1 style="font-size:24px;color:#1D9E75;margin:0">線上<span style="color:#333">有位</span></h1>
+                    <p style="color:#666;font-size:13px;margin:4px 0 0">台股技術分析輔助系統</p>
+                  </div>
+                  <div style="background:#f0fdf4;border-radius:12px;padding:24px;margin-bottom:20px;border:1px solid #86efac">
+                    <h2 style="margin:0 0 16px;font-size:18px;color:#166534">🎁 恭喜！您已獲得早鳥免費升級</h2>
+                    <p style="color:#555;margin:0 0 16px">感謝您支持線上有位！作為早期用戶，我們為您免費升級了付費方案，讓您體驗完整功能。</p>
+                    <table style="width:100%;border-collapse:collapse">
+                      <tr><td style="padding:8px 0;color:#888;font-size:13px;width:80px">方案</td><td style="padding:8px 0;font-weight:700;color:#333">{plan_label}</td></tr>
+                      <tr><td style="padding:8px 0;color:#888;font-size:13px">到期日</td><td style="padding:8px 0;font-weight:700;color:#333">{new_expire}</td></tr>
+                      <tr><td style="padding:8px 0;color:#888;font-size:13px">帳號</td><td style="padding:8px 0;font-weight:700;color:#333">{email}</td></tr>
+                    </table>
+                  </div>
+                  <div style="text-align:center;margin-bottom:20px">
+                    <a href="https://softglow-ai.com" style="background:#1D9E75;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px">立即登入使用</a>
+                  </div>
+                  <div style="border-top:1px solid #e5e7eb;padding-top:16px;text-align:center;color:#9ca3af;font-size:12px">
+                    <p style="margin:0">如有問題請聯繫：<a href="mailto:watione@yahoo.com.tw" style="color:#1D9E75">watione@yahoo.com.tw</a></p>
+                    <p style="margin:4px 0 0">線上有位 © 2026</p>
+                  </div>
+                </div>"""
+            )
+            email_sent = True
+        except Exception:
+            pass
+        results.append({"email": email, "ok": True, "expire_at": new_expire, "email_sent": email_sent})
+    return {"ok": True, "total": len(req.emails), "success": sum(1 for r in results if r.get("ok")), "results": results}
+
+
+_HOT_STOCKS = [
+    "2330","2317","2454","2308","2412","6505","2882","2881","2886","2891",
+    "2884","2892","2883","2885","2887","2888","2890","5880","2801","2002",
+    "1301","1303","1326","2303","2357","2382","2395","3034","3037","3045",
+    "4904","4938","5871","6415","6669","2610","2618","2615","2603","2609",
+    "1216","2912","2207","1101","1102","3008","6488","6770","3661",
+]
+
+
+@app.post("/admin/prebuild-reports")
+def admin_prebuild_reports(key: str = ""):
+    """批次預建熱門股報告頁（後台執行，SEO 用）"""
+    _check_admin(key)
+    import threading
+    def _do():
+        report_date = _taipei_today()
+        ok_cnt, fail_cnt = 0, 0
+        for sid in _HOT_STOCKS:
+            try:
+                conn = _db_conn()
+                cached = conn.execute(
+                    "SELECT id FROM stock_reports WHERE stock_id=? AND report_date=?",
+                    (sid, report_date)
+                ).fetchone()
+                conn.close()
+                if cached:
+                    ok_cnt += 1
+                    continue
+                d = _do_analyze(sid, "D", user=None)
+                stock_name = d.get("stock_name", sid)
+                news_items = _fetch_stock_news(sid)
+                html = _build_report_html(sid, stock_name, report_date, d, news_items)
+                conn = _db_conn()
+                conn.execute(
+                    "INSERT OR REPLACE INTO stock_reports (stock_id, report_date, stock_name, report_html) VALUES (?,?,?,?)",
+                    (sid, report_date, stock_name, html)
+                )
+                conn.commit()
+                conn.close()
+                ok_cnt += 1
+                print(f"   ✅ 預建報告：{sid}")
+            except Exception as e:
+                fail_cnt += 1
+                print(f"   ❌ 預建報告失敗 {sid}：{e}")
+        print(f"   ✅ 熱門報告預建完成，成功 {ok_cnt}，失敗 {fail_cnt}")
+    threading.Thread(target=_do, daemon=True).start()
+    return {"ok": True, "total": len(_HOT_STOCKS), "message": f"已啟動預建 {len(_HOT_STOCKS)} 支熱門股報告，後台處理中..."}
+
 
 def _record_visit(ip: str):
     today = _date_cls.today().isoformat()
@@ -3818,7 +4075,7 @@ async def webhook_ecpay(request: Request):
         <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:16px;margin:20px 0;text-align:center">
           <p style="margin:0 0 8px;font-weight:700;color:#166534">💡 升級年費方案，省更多！</p>
           <p style="margin:0 0 12px;font-size:13px;color:#15803d">年費 $3,688 = 月費 9.2 個月的價格，多送近 3 個月</p>
-          <a href="https://stock-navigator.zeabur.app/landing.html" style="background:#16a34a;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:700">立即升級年費</a>
+          <a href="https://softglow-ai.com/landing.html" style="background:#16a34a;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:700">立即升級年費</a>
         </div>"""
         _send_email(email, "【線上有位】升級成功！您的方案已開通",
             f"""<div style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px">
@@ -3836,7 +4093,7 @@ async def webhook_ecpay(request: Request):
                 </table>
               </div>
               <div style="text-align:center;margin-bottom:20px">
-                <a href="https://stock-navigator.zeabur.app" style="background:#1D9E75;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px">立即登入使用</a>
+                <a href="https://softglow-ai.com" style="background:#1D9E75;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px">立即登入使用</a>
               </div>
               {upgrade_ad}
               <div style="background:#fff8e1;border-radius:8px;padding:16px;margin-bottom:20px">
@@ -3888,7 +4145,7 @@ async def webhook_ecpay(request: Request):
                 <p style="margin:0;font-size:12px;color:#555">如忘記密碼，可至「我的」頁面更改密碼，或聯繫客服協助重設。</p>
               </div>
               <div style="text-align:center;margin-bottom:20px">
-                <a href="https://stock-navigator.zeabur.app" style="background:#1D9E75;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px">立即登入使用 →</a>
+                <a href="https://softglow-ai.com" style="background:#1D9E75;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px">立即登入使用 →</a>
               </div>
               <div style="background:#f8fafc;border-radius:8px;padding:16px;margin-bottom:16px">
                 <p style="margin:0 0 12px;font-weight:700;color:#333">🚀 您可以使用以下功能：</p>
@@ -3902,7 +4159,7 @@ async def webhook_ecpay(request: Request):
               <div style="background:#fff8e1;border-radius:8px;padding:16px;margin-bottom:16px">
                 <p style="margin:0 0 8px;font-weight:700;color:#92400e">💡 升級年費，省更多！</p>
                 <p style="margin:0 0 12px;font-size:13px;color:#78350f">年費 $3,688 相當於月費 9.2 個月，多享近 3 個月服務</p>
-                <a href="https://stock-navigator.zeabur.app/landing.html" style="background:#f59e0b;color:#fff;padding:8px 20px;border-radius:6px;text-decoration:none;font-weight:700;font-size:13px">了解年費方案</a>
+                <a href="https://softglow-ai.com/landing.html" style="background:#f59e0b;color:#fff;padding:8px 20px;border-radius:6px;text-decoration:none;font-weight:700;font-size:13px">了解年費方案</a>
               </div>
               <div style="background:#eff6ff;border-radius:8px;padding:16px;margin-bottom:20px">
                 <p style="margin:0 0 8px;font-weight:700;color:#1e40af">📢 推薦好友，一起分析台股</p>
