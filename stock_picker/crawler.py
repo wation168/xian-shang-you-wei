@@ -1,7 +1,8 @@
 """
 crawler.py — 資料爬取層
-1. 鉅亨 RSS：抓最新財經新聞，萃取出現的股票代號與題材關鍵字
-2. FinMind：拉近 60 日股價（算回檔幅度）＋近 20 日法人買賣超
+1. 鉅亨 RSS：抓近一週財經新聞，萃取出現的股票代號與題材關鍵字（不打 FinMind）
+2. TWSE STOCK_DAY_ALL：取上市股成交量前100（不打 FinMind）
+3. FinMind：僅用於最終候選股的技術分析（≤50 支）
 """
 
 import os
@@ -9,7 +10,7 @@ import re
 import json
 import time
 import urllib.request
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from xml.etree import ElementTree as ET
 
 
@@ -19,9 +20,11 @@ FINMIND_TOKEN = os.environ.get("FINMIND_TOKEN", "")
 # 鉅亨 RSS feeds
 # ──────────────────────────────────────────
 CNYES_FEEDS = [
-    "https://feeds.feedburner.com/cnyes",               # 頭條
-    "https://news.cnyes.com/rss/category/tw_stock",     # 台股
-    "https://news.cnyes.com/rss/category/fund",         # 產業
+    "https://feeds.feedburner.com/cnyes",                   # 頭條
+    "https://news.cnyes.com/rss/category/tw_stock",         # 台股
+    "https://news.cnyes.com/rss/category/fund",             # 產業基金
+    "https://news.cnyes.com/rss/category/tw_stock_news",    # 個股新聞
+    "https://news.cnyes.com/rss/category/industry",         # 產業
 ]
 
 # 股票代號正則（4~6碼數字，後接中文公司名 or 括號）
@@ -32,11 +35,14 @@ _SKIP_NUMS = {"2024", "2025", "2026", "1000", "5000", "10000",
               "100", "200", "500", "300", "400", "600", "700", "800", "900"}
 
 
-def fetch_cnyes_news(max_items: int = 80) -> list[dict]:
+def fetch_cnyes_news(max_items: int = 300, days: int = 7) -> list[dict]:
     """
-    爬取鉅亨 RSS，回傳新聞列表
+    爬取鉅亨 RSS，回傳近 days 天的新聞列表（預設近7天）
     每筆: {title, link, pub_date, codes: [股票代號...], keywords: [關鍵字...]}
     """
+    from email.utils import parsedate_to_datetime
+
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
     items = []
     seen_links = set()
 
@@ -57,6 +63,14 @@ def fetch_cnyes_news(max_items: int = 80) -> list[dict]:
                 desc  = (item.findtext("description") or "").strip()
                 if not title or link in seen_links:
                     continue
+                # 日期篩選：超過 days 天的略過
+                if pub:
+                    try:
+                        dt = parsedate_to_datetime(pub)
+                        if dt < cutoff:
+                            continue
+                    except Exception:
+                        pass
                 seen_links.add(link)
                 full_text = title + " " + desc
                 codes = _extract_codes(full_text)
@@ -73,7 +87,7 @@ def fetch_cnyes_news(max_items: int = 80) -> list[dict]:
         except Exception as e:
             print(f"[crawler] RSS {feed_url} 失敗：{e}")
 
-    print(f"[crawler] 鉅亨 RSS 共取得 {len(items)} 則新聞")
+    print(f"[crawler] 鉅亨 RSS 共取得 {len(items)} 則新聞（近{days}天）")
     return items
 
 
@@ -99,6 +113,107 @@ _KEYWORDS = [
 
 def _extract_keywords(title: str) -> list[str]:
     return [kw for kw in _KEYWORDS if kw in title]
+
+
+# ──────────────────────────────────────────
+# TWSE 成交量排行（不打 FinMind）
+# ──────────────────────────────────────────
+
+def fetch_twse_volume_top(n: int = 100) -> tuple[list[str], dict[str, str]]:
+    """
+    從 TWSE STOCK_DAY_ALL 取最近交易日成交量前 n 支上市股
+    回傳 (top_n_stock_ids, name_dict)  — 單次 HTTP 呼叫，不打 FinMind
+    """
+    today = date.today().strftime("%Y%m%d")
+    url = f"https://www.twse.com.tw/exchangeReport/STOCK_DAY_ALL?response=json&date={today}"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            data = json.loads(resp.read())
+
+        if data.get("stat") not in ("OK", "ok"):
+            print(f"[crawler] TWSE STOCK_DAY_ALL stat={data.get('stat')}，嘗試不帶日期")
+            # fallback：不帶 date 參數
+            url2 = "https://www.twse.com.tw/exchangeReport/STOCK_DAY_ALL?response=json"
+            req2 = urllib.request.Request(url2, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req2, timeout=12) as resp2:
+                data = json.loads(resp2.read())
+
+        rows = data.get("data", [])
+        name_dict: dict[str, str] = {}
+        volume_stocks: list[tuple[str, int]] = []
+
+        for row in rows:
+            if len(row) < 3:
+                continue
+            code = str(row[0]).strip()
+            name = str(row[1]).strip()
+            # 只取純 4 碼數字（上市普通股 + ETF，排除權證/特別股等）
+            if not re.match(r"^\d{4}$", code):
+                continue
+            try:
+                vol = int(str(row[2]).replace(",", ""))
+            except Exception:
+                continue
+            if vol <= 0:
+                continue
+            name_dict[code] = name
+            volume_stocks.append((code, vol))
+
+        volume_stocks.sort(key=lambda x: x[1], reverse=True)
+        top_ids = [s[0] for s in volume_stocks[:n]]
+        print(f"[crawler] TWSE 成交量排行：前{n}支（共{len(volume_stocks)}支上市股）")
+        return top_ids, name_dict
+
+    except Exception as e:
+        print(f"[crawler] fetch_twse_volume_top 失敗：{e}")
+        return [], {}
+
+
+def build_candidates(
+    news_codes: list[str],
+    volume_ids: list[str],
+    max_candidates: int = 50,
+) -> list[str]:
+    """
+    智慧合併新聞候選 + TWSE成交量排行，交集優先，聯集填滿，上限 max_candidates
+    優先順序：
+      1. 同時出現在新聞和成交量排行 → 最熱門
+      2. 只出現在新聞（按首次出現順序）
+      3. 只出現在成交量排行（按成交量排序）
+    """
+    volume_set = set(volume_ids)
+    news_set   = set(news_codes)
+    seen: set[str] = set()
+    result: list[str] = []
+
+    # Priority 1: 交集
+    for c in news_codes:
+        if c in volume_set and c not in seen:
+            seen.add(c)
+            result.append(c)
+
+    # Priority 2: 新聞專屬
+    for c in news_codes:
+        if c not in seen:
+            seen.add(c)
+            result.append(c)
+            if len(result) >= max_candidates:
+                break
+
+    # Priority 3: 成交量排行補位
+    if len(result) < max_candidates:
+        for c in volume_ids:
+            if c not in seen:
+                seen.add(c)
+                result.append(c)
+                if len(result) >= max_candidates:
+                    break
+
+    result = result[:max_candidates]
+    inter = sum(1 for c in result if c in volume_set and c in news_set)
+    print(f"[crawler] 候選清單：{len(result)} 支（交集{inter}，新聞{len(news_set)}，排行{len(volume_ids)}）")
+    return result
 
 
 # ──────────────────────────────────────────
@@ -191,6 +306,24 @@ def fetch_stock_name(stock_id: str) -> str:
     except Exception:
         pass
     return stock_id
+
+
+def get_all_tw_stocks() -> list[str]:
+    """取得全台上市（TWSE）及上櫃（OTC）股票代號列表"""
+    url = f"https://api.finmindtrade.com/api/v4/data?dataset=TaiwanStockInfo&token={FINMIND_TOKEN}"
+    try:
+        data = _finmind_request(url)
+        if data.get("status") != 200:
+            return []
+        return [
+            str(item["stock_id"])
+            for item in data.get("data", [])
+            if item.get("type", "").lower() in ("twse", "otc")
+            and item.get("stock_id")
+        ]
+    except Exception as e:
+        print(f"[crawler] get_all_tw_stocks 失敗：{e}")
+        return []
 
 
 if __name__ == "__main__":

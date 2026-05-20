@@ -31,8 +31,8 @@ logger = logging.getLogger(__name__)
 TZ = ZoneInfo("Asia/Taipei")
 
 # 每日執行時間（24小時制）
-UNIFIED_HOUR   = 15
-UNIFIED_MINUTE = 30   # 15:30，全台掃描 + 新聞選股合併執行
+UNIFIED_HOUR   = 16
+UNIFIED_MINUTE = 30   # 16:30，確保收盤後 FinMind 資料同步完畢
 
 
 def run_once():

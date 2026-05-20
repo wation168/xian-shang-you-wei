@@ -62,6 +62,15 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
 .result-box.success{color:var(--green)}
 .result-box.error{color:var(--up)}
 
+/* ── 選股結果列表 ── */
+.picks-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--bg);margin-bottom:6px;cursor:pointer;transition:background .15s;flex-wrap:wrap}
+.picks-item:hover{background:#e8e3d8}
+.picks-code{font-size:15px;font-weight:700;color:var(--text);min-width:44px}
+.picks-name{font-size:12px;color:var(--text3);flex:1}
+.picks-score{font-size:14px;font-weight:700;min-width:32px;text-align:right}
+.picks-sigs{display:flex;gap:4px;flex-wrap:wrap}
+.sig-tag{font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(29,158,117,.12);color:var(--green);font-weight:600}
+
 /* ── 會員卡片 ── */
 .mem-card{background:var(--bg);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;border:1px solid var(--border)}
 .mem-card:last-child{margin-bottom:0}
@@ -182,10 +191,7 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
           <span class="icon">🎁</span>早鳥批次升級
         </button>
         <button class="action-btn" onclick="showSection('prebuild')">
-          <span class="icon">📄</span>預建熱門報告
-        </button>
-        <button class="action-btn" id="runScanBtn" onclick="doRunScan(this)" style="background:#c53030;color:#fff">
-          <span class="icon">⚡</span>立即產生選股
+          <span class="icon">🔍</span>預建 SEO 選股
         </button>
       </div>
     </div>
@@ -268,12 +274,13 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
       <div class="result-box" id="earlybirdResult"></div>
     </div>
 
-    <!-- 預建熱門報告 -->
+    <!-- 預建 SEO 選股頁面 -->
     <div class="card" id="sec-prebuild" style="display:none">
-      <div class="card-title">📄 預建熱門股報告（SEO）</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6">讀取 sitemap.xml 的 49 支熱門代號，批次產生今日個股報告頁並存入資料庫，讓 Google 可以索引。後台執行，約 10~20 分鐘完成。</p>
-      <button class="inline-btn" onclick="doPrebuildReports(this)">🚀 開始預建</button>
-      <div class="result-box" id="prebuildResult" style="margin-top:10px"></div>
+      <div class="card-title">🔍 預建 SEO 選股頁面</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6">執行今日選股分析（鉅亨新聞 + TWSE 成交量前100取交集），結果自動同步至 <a href="https://stock-navigator-api.zeabur.app/picks" target="_blank" style="color:var(--green)">/picks</a> 頁供 Google 索引。約 1~2 分鐘完成。</p>
+      <button class="inline-btn" id="runPicksBtn" onclick="doRunPicks(this)">⚡ 執行選股並更新</button>
+      <div class="result-box" id="picksResult" style="margin-top:10px"></div>
+      <div id="picksStockList" style="margin-top:16px;display:none"></div>
     </div>
 
   </div>
@@ -283,6 +290,7 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
 
 <script>
 const API = 'https://stock-navigator-api.zeabur.app';
+const BACKEND_URL = API;
 const ADMIN_KEY = 'xyw2026-liankai-';
 const ADMIN_PWD = '630428';
 
@@ -455,19 +463,6 @@ async function quickReset(email){
 }
 
 // ── 備份 ──
-async function doRunScan(btn){
-  btn.disabled=true; btn.textContent='⏳ 產生中...';
-  try{
-    const r=await fetch(`${API}/admin/run-scan?key=${ADMIN_KEY}`,{method:'POST'});
-    const d=await r.json();
-    if(r.ok){ toast('✅ 選股排程已觸發，約 5~10 分鐘完成'); }
-    else{ toast('❌ 失敗：'+(d.detail||'未知錯誤')); }
-  }catch(e){
-    toast('❌ 連線失敗：'+e.message);
-  }finally{
-    setTimeout(()=>{ btn.disabled=false; btn.innerHTML='<span class="icon">⚡</span>立即產生選股'; },5000);
-  }
-}
 
 function doBackup(){
   const url=`${API}/admin/backup-db?key=${ADMIN_KEY}`;
@@ -680,8 +675,55 @@ async function doEarlyBirdUpgrade(){
   }
 }
 
-// ── 預建熱門股報告 ──
-async function doPrebuildReports(btn){
+// ── 預建 SEO 選股頁面 ──
+async function doRunPicks(btn){
+  btn.disabled = true;
+  btn.textContent = '⏳ 執行中...';
+  const res  = document.getElementById('picksResult');
+  const list = document.getElementById('picksStockList');
+  res.className = 'result-box show';
+  res.textContent = '選股分析進行中，約 1~2 分鐘...';
+  list.style.display = 'none';
+  const today = new Date(Date.now() + 8*3600000).toISOString().slice(0,10);
+  try{
+    const r = await fetch(`${API}/admin/run-scan?key=${ADMIN_KEY}`, {
+      method:'POST', signal: AbortSignal.timeout(180000)
+    });
+    const data = await r.json();
+    if(r.ok && Array.isArray(data.picks)){
+      if(data.picks.length){
+        res.textContent = `✅ 完成，共 ${data.picks.length} 支入選，/picks 頁已更新`;
+        res.className = 'result-box show success';
+        list.style.display = 'block';
+        list.innerHTML = data.picks.map(p=>{
+          const sc = p.score >= 80 ? '#16a34a' : p.score >= 65 ? '#d97706' : '#64748b';
+          const sigHtml = (p.signals||[]).map(s=>`<span class="sig-tag">${s}</span>`).join('');
+          return `<div class="picks-item" onclick="window.open('${BACKEND_URL}/report/${p.stock_id}-${today}','_blank')">
+            <span class="picks-code">${p.stock_id}</span>
+            <span class="picks-name">${p.stock_name||''}</span>
+            <span class="picks-score" style="color:${sc}">${p.score}</span>
+            <div class="picks-sigs">${sigHtml}</div>
+          </div>`;
+        }).join('');
+      } else {
+        res.textContent = '✅ 完成，今日無入選股票（市況不符篩選條件）';
+        res.className = 'result-box show';
+      }
+    } else {
+      res.textContent = '❌ 失敗：'+(data.detail||'未知錯誤');
+      res.className = 'result-box show error';
+    }
+  }catch(e){
+    res.textContent = '❌ 連線失敗或逾時（180s）：'+e.message;
+    res.className = 'result-box show error';
+  }finally{
+    btn.disabled = false;
+    btn.textContent = '⚡ 執行選股並更新';
+  }
+}
+
+// ── (已停用) 預建熱門股報告 ──
+async function _doPrebuildReports_unused(btn){
   if(!confirm('確定要預建 49 支熱門股的今日報告頁？後台執行約 10~20 分鐘。')) return;
   btn.disabled = true;
   btn.textContent = '⏳ 已觸發...';

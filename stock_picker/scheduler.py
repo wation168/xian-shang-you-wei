@@ -31,49 +31,19 @@ logger = logging.getLogger(__name__)
 TZ = ZoneInfo("Asia/Taipei")
 
 # 每日執行時間（24小時制）
-RUN_HOUR   = 14
-RUN_MINUTE = 35   # 14:35，確保盤後資料更新完畢
+UNIFIED_HOUR   = 16
+UNIFIED_MINUTE = 30   # 16:30，確保收盤後 FinMind 資料同步完畢
 
 
 def run_once():
-    """執行一次完整選股流程"""
+    """執行一次統合選股流程（全台掃描 + 新聞選股）"""
     logger.info("=" * 50)
-    logger.info("🔍 選股生成器 開始執行")
+    logger.info("🔍 統合選股 開始執行")
     logger.info("=" * 50)
     try:
-        # 動態 import，確保每次都重新載入最新狀態
-        from crawler import fetch_cnyes_news, fetch_stock_name
-        from finmind_filter import run_filter
-        from generator import run as generate_html
-
-        logger.info("[Step 1] 爬取鉅亨 RSS...")
-        news_list = fetch_cnyes_news(max_items=100)
-        all_codes = []
-        for n in news_list:
-            for c in n["codes"]:
-                if c not in all_codes:
-                    all_codes.append(c)
-        logger.info(f"  → 取得 {len(news_list)} 則新聞，{len(all_codes)} 個候選代號")
-
-        if not all_codes:
-            logger.warning("沒有找到任何股票代號，跳過")
-            return
-
-        logger.info("[Step 2] 數值篩選...")
-        filtered = run_filter(all_codes, news_list, max_results=20, delay=1.2)
-
-        if not filtered:
-            logger.warning("沒有股票通過篩選，跳過 HTML 產出")
-            return
-
-        logger.info("[Step 2.5] 補充股票名稱...")
-        for stock in filtered:
-            stock["name"] = fetch_stock_name(stock["stock_id"])
-
-        logger.info(f"[Step 3] Claude 分析 {len(filtered)} 檔...")
-        output_path = generate_html(filtered, api_delay=2.0)
-        logger.info(f"✅ 完成：{output_path}")
-
+        from main_picker import run_unified_scan
+        run_unified_scan()
+        logger.info("✅ 統合選股完成")
     except Exception as e:
         logger.error(f"❌ 執行失敗：{e}", exc_info=True)
 
@@ -90,7 +60,7 @@ def main():
         run_once()
         return
 
-    logger.info(f"🕐 排程器啟動，每日 {RUN_HOUR:02d}:{RUN_MINUTE:02d} 台北時間自動執行")
+    logger.info(f"🕐 排程器啟動，選股 {RUN_HOUR:02d}:{RUN_MINUTE:02d}、全台掃描 {SCAN_HOUR:02d}:{SCAN_MINUTE:02d}（台北時間）")
     logger.info("   按 Ctrl+C 停止")
 
     last_run_date = None
@@ -99,8 +69,8 @@ def main():
         now = datetime.now(TZ)
         today = now.date()
 
-        # 到了執行時間、是交易日、今天還沒跑過
-        if (now.hour == RUN_HOUR and now.minute == RUN_MINUTE
+        # 統合選股 15:30
+        if (now.hour == UNIFIED_HOUR and now.minute == UNIFIED_MINUTE
                 and is_trading_day(today)
                 and last_run_date != today):
             last_run_date = today

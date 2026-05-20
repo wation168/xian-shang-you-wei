@@ -91,6 +91,7 @@ IS_PROD = os.environ.get("ZEABUR_SERVICE_ID") is not None  # Zeabur 會自動注
 SEO_CACHE: dict = {
     "sitemap":  {"data": None, "expires": 0},
     "rankings": {"data": None, "expires": 0},
+    "picks":    {"data": None, "expires": 0},
 }
 
 
@@ -270,11 +271,12 @@ async def lifespan(app: FastAPI):
                 _alert_running = False
 
         _bg_scheduler = BackgroundScheduler(timezone="Asia/Taipei")
-        _bg_scheduler.add_job(_run_unified_scan_job,  "cron", hour=15, minute=30, day_of_week="mon-fri")
+        _bg_scheduler.add_job(_run_unified_scan_job,  "cron", hour=16, minute=30, day_of_week="mon-fri")
         _bg_scheduler.add_job(_run_expire_notice_job, "cron", hour=9,  minute=0)
         _bg_scheduler.add_job(_run_price_alert_job,   "cron", hour=15, minute=35, day_of_week="mon-fri")
+        _bg_scheduler.add_job(_clear_quote_cache,     "cron", hour=9,  minute=0,  day_of_week="mon-fri")
         _bg_scheduler.start()
-        print("   ✅ APScheduler 排程已啟動（統合選股 15:30、到價提醒 15:35、到期通知 09:00）")
+        print("   ✅ APScheduler 排程已啟動（統合選股 16:30、到價提醒 15:35、到期通知 09:00、報價快取清除 09:00）")
     except ImportError:
         print("   ⚠️ apscheduler 未安裝，選股排程請以 scheduler.py 獨立執行")
     except Exception as _sch_err:
@@ -2519,140 +2521,201 @@ def get_top_gainers(limit: int = 10):
     return {"date": "", "gainers": fallback}
 
 
+# ══════════════════════════════════════════════════════════
+# 即時報價快取
+# 盤中 09:00–13:30：15 分鐘過期（expires = timestamp）
+# 盤後 / 非交易時間：永久快取（expires = 0）
+# 每日 09:00 排程清除，確保開盤抓新價
+# ══════════════════════════════════════════════════════════
+_QUOTE_CACHE: dict = {}  # { "2330": {"data": {...}, "expires": float} }
+
+def _is_trading_session() -> bool:
+    """是否在盤中 09:00–13:30（台北時間，週一到週五）"""
+    from zoneinfo import ZoneInfo
+    from datetime import time as _t
+    now = datetime.now(ZoneInfo("Asia/Taipei"))
+    return now.weekday() < 5 and _t(9, 0) <= now.time() <= _t(13, 30)
+
+def _clear_quote_cache():
+    """清除所有即時報價快取（每日 09:00 由排程呼叫）"""
+    _QUOTE_CACHE.clear()
+    print("[QUOTE CACHE] 開盤清除快取完成")
+
+
 @app.get("/api/quote/live/{stock_id}")
 def get_quote_live(stock_id: str):
     """
-    TWSE MIS 即時報價 proxy（前端 CORS bypass，不需登入）
-    回傳 z/y/o/h/l/v/t 欄位
+    FinMind 即時報價 proxy（不需登入）
+    盤中：tick_snapshot（即時）
+    盤後/非交易日：TaiwanStockPrice 最新收盤
     """
     import urllib.request as _ur, json as _j
-    code = stock_id.strip().replace(".TW", "").replace(".TWO", "")
+    from datetime import timedelta as _td
+    from zoneinfo import ZoneInfo as _ZI
+
+    code  = stock_id.strip().replace(".TW", "").replace(".TWO", "")
+    tz    = _ZI("Asia/Taipei")
+    now_tw = datetime.now(tz)
+    today  = now_tw.strftime("%Y-%m-%d")
+    _h, _m = now_tw.hour, now_tw.minute
+    is_weekday = now_tw.weekday() < 5
+    in_session = is_weekday and (9, 0) <= (_h, _m) <= (13, 30)
 
     def _sf(v):
         try:
-            f = float(str(v or "").replace(",", ""))
+            f = float(v or 0)
             return f if f > 0 else None
         except Exception:
             return None
 
-    def _fetch(ex: str):
-        url = (f"https://mis.twse.com.tw/stock/api/getStockInfo.jsp"
-               f"?ex_ch={ex}_{code}.tw&json=1&delay=0")
-        req = _ur.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with _ur.urlopen(req, timeout=6) as r:
-            arr = _j.loads(r.read()).get("msgArray", [])
-            return arr[0] if arr else {}
+    empty = {"z": None, "y": None, "o": None, "h": None, "l": None, "v": None, "t": ""}
 
-    row = {}
-    try:
-        row = _fetch("tse")
-        print(f"[LIVE-TSE {code}] raw={dict(row)}")
-        if not _sf(row.get("z")):
-            otc_row = _fetch("otc")
-            print(f"[LIVE-OTC {code}] raw={dict(otc_row)}")
-            row = otc_row or row
-    except Exception as _e:
-        print(f"[LIVE-TSE {code}] 失敗：{_e}")
+    # ── 1. 盤中：tick_snapshot 即時快照 ──
+    if in_session:
         try:
-            row = _fetch("otc")
-            print(f"[LIVE-OTC {code}] raw={dict(row)}")
-        except Exception as _e2:
-            print(f"[LIVE-OTC {code}] 失敗：{_e2}")
+            snap_url = (f"https://api.finmindtrade.com/api/v4/taiwan_stock_tick_snapshot"
+                        f"?data_id={code}&token={FINMIND_TOKEN}")
+            snap_req = _ur.Request(snap_url, headers={"User-Agent": "Mozilla/5.0"})
+            with _ur.urlopen(snap_req, timeout=6) as sr:
+                snap = _j.loads(sr.read())
+            snap_rows = snap.get("data", [])
+            print(f"[LIVE {code}] tick_snapshot rows={len(snap_rows)}")
+            if snap_rows:
+                r  = snap_rows[0]
+                cp = _sf(r.get("close") or r.get("price"))
+                if cp:
+                    # 昨收：用 TaiwanStockPrice 補
+                    y_val = None
+                    try:
+                        start = (now_tw - _td(days=5)).strftime("%Y-%m-%d")
+                        day_url = (f"https://api.finmindtrade.com/api/v4/data"
+                                   f"?dataset=TaiwanStockPrice&data_id={code}"
+                                   f"&start_date={start}&token={FINMIND_TOKEN}")
+                        day_req = _ur.Request(day_url, headers={"User-Agent": "Mozilla/5.0"})
+                        with _ur.urlopen(day_req, timeout=6) as dr:
+                            day_data = _j.loads(dr.read())
+                        day_rows = day_data.get("data", [])
+                        if day_rows:
+                            y_val = _sf(day_rows[-1].get("close"))
+                    except Exception:
+                        pass
+                    result = {
+                        "z": cp,
+                        "y": y_val,
+                        "o": _sf(r.get("open")  or cp),
+                        "h": _sf(r.get("high")  or cp),
+                        "l": _sf(r.get("low")   or cp),
+                        "v": _sf(r.get("total_volume") or r.get("volume")),
+                        "t": today,
+                    }
+                    print(f"[LIVE {code}] snap z={cp} y={y_val}")
+                    return result
+        except Exception as _e:
+            if not (hasattr(_e, 'code') and getattr(_e, 'code', 0) == 400):
+                print(f"[LIVE {code}] tick_snapshot 失敗：{_e}")
 
-    result = {
-        "z": _sf(row.get("z")),
-        "y": _sf(row.get("y")),
-        "o": _sf(row.get("o")),
-        "h": _sf(row.get("h")),
-        "l": _sf(row.get("l")),
-        "v": _sf(row.get("v")),
-        "t": str(row.get("t", "") or "").strip(),
-    }
-    print(f"[LIVE {code}] → z={result['z']} y={result['y']}")
-    return result
+    # ── 2. 盤後 / 非交易日：TaiwanStockPrice 最新收盤 ──
+    try:
+        start = (now_tw - _td(days=5)).strftime("%Y-%m-%d")
+        url = (f"https://api.finmindtrade.com/api/v4/data"
+               f"?dataset=TaiwanStockPrice&data_id={code}"
+               f"&start_date={start}&token={FINMIND_TOKEN}")
+        req = _ur.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with _ur.urlopen(req, timeout=8) as r:
+            data = _j.loads(r.read())
+        rows = data.get("data", [])
+        print(f"[LIVE {code}] TaiwanStockPrice rows={len(rows)} today={today}")
+        if not rows:
+            return empty
+
+        latest   = rows[-1]
+        is_today = str(latest.get("date", ""))[:10] == today
+        prev     = rows[-2] if len(rows) >= 2 else None
+
+        z = _sf(latest.get("close")) if is_today else None
+        y = _sf(prev.get("close")) if prev else _sf(latest.get("close"))
+
+        result = {
+            "z": z,
+            "y": y,
+            "o": _sf(latest.get("open"))            if is_today else None,
+            "h": _sf(latest.get("max"))             if is_today else None,
+            "l": _sf(latest.get("min"))             if is_today else None,
+            "v": _sf(latest.get("Trading_Volume"))  if is_today else None,
+            "t": today if is_today else "",
+        }
+        print(f"[LIVE {code}] daily is_today={is_today} z={result['z']} y={result['y']}")
+        return result
+    except Exception as _e:
+        print(f"[LIVE {code}] TaiwanStockPrice 失敗：{_e}")
+        return empty
 
 
 @app.get("/api/quote/{stock_id}")
 def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
     """
     即時報價（公開 endpoint，不需登入）
-    盤中：tick_snapshot > Yahoo chart > TWSE z > FinMind 今日收盤
-    盤後：FinMind 今日收盤 > TWSE z > STOCK_DAY > TWSE y（昨收）
+    快取策略：
+      盤中 09:00–13:30 → 15 分鐘過期
+      盤後 / 非交易時間 → 永久快取（不刪除，收盤價就是收盤價）
+    每日 09:00 排程清除全部快取，確保開盤第一筆抓新價
+    來源優先順序：FinMind tick_snapshot → TWSE MIS z → FinMind TaiwanStockPrice
     """
-    import urllib.request, json as _json
-    from datetime import datetime, time as dtime, date as _date
-    from zoneinfo import ZoneInfo
+    import urllib.request as _ur, json as _json
 
-    code = stock_id.strip().replace(".TW", "").replace(".TWO", "")
+    code = stock_id.strip().replace(".TW", "").replace(".TWO", "").upper()
+    now_ts = _time_mod.time()
+    in_session = _is_trading_session()
 
-    tz = ZoneInfo("Asia/Taipei")
-    now = datetime.now(tz)
-    is_weekday = now.weekday() < 5
-    in_session       = is_weekday and dtime(9, 0)  <= now.time() <= dtime(13, 30)
-    just_after_close = is_weekday and dtime(13, 30) < now.time() <= dtime(14, 0)
+    # ── 查快取 ──
+    cached = _QUOTE_CACHE.get(code)
+    if cached:
+        exp = cached["expires"]
+        if exp == 0 or now_ts < exp:  # 0 = 永久
+            return cached["data"]
 
-    def _twse_fetch(ex: str):
-        url = (f"https://mis.twse.com.tw/stock/api/getStockInfo.jsp"
-               f"?ex_ch={ex}_{code}.tw&json=1&delay=0")
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=6) as resp:
-            return _json.loads(resp.read())
-
-    # ── 1. tick_snapshot（盤中 or 剛收盤 13:30–14:00）──
-    snap_price = snap_open = snap_high = snap_low = snap_vol = None
-    if in_session or just_after_close:
+    # ── 快取未命中，抓新資料 ──
+    def _sf(v):
         try:
-            snap_url = (f"https://api.finmindtrade.com/api/v4/taiwan_stock_tick_snapshot"
-                        f"?data_id={code}&token={FINMIND_TOKEN}")
-            snap_req = urllib.request.Request(snap_url, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(snap_req, timeout=6) as sr:
-                snap = _json.loads(sr.read())
-            snap_rows = snap.get("data", [])
-            if snap_rows:
-                r = snap_rows[0]
-                cp = float(r.get("close") or r.get("price") or 0)
-                if cp > 0:
-                    snap_price = cp
-                    snap_open  = float(r.get("open")  or cp) or None
-                    snap_high  = float(r.get("high")  or cp) or None
-                    snap_low   = float(r.get("low")   or cp) or None
-                    snap_vol   = float(r.get("total_volume") or r.get("volume") or 0) or None
-        except Exception as _e:
-            if not (hasattr(_e, 'code') and _e.code == 400):
-                print(f"[QUOTE] tick_snapshot 失敗 {code}：{_e}")
+            f = float(v or 0)
+            return f if f > 0 else None
+        except Exception:
+            return None
 
-    # ── 1.5 Yahoo Finance chart API（snap 失敗時備援）──
-    yf_price = yf_open = yf_high = yf_low = None
-    if snap_price is None and (in_session or just_after_close):
-        try:
-            _sym = resolve_symbol(code)
-            _yf_url = (f"https://query1.finance.yahoo.com/v8/finance/chart/{_sym}"
-                       f"?interval=1d&range=2d")
-            _yf_req = urllib.request.Request(_yf_url, headers={
-                "User-Agent": ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                               "AppleWebKit/537.36 (KHTML, like Gecko) "
-                               "Chrome/121.0.0.0 Safari/537.36"),
-                "Accept": "application/json",
-            })
-            with urllib.request.urlopen(_yf_req, timeout=8) as _yr:
-                _yd = _json.loads(_yr.read())
-            _ym = _yd.get("chart", {}).get("result", [{}])[0].get("meta", {})
-            _lp = float(_ym.get("regularMarketPrice") or 0)
-            if _lp > 0:
-                yf_price = _lp
-                yf_open  = float(_ym.get("regularMarketOpen")    or _lp) or None
-                yf_high  = float(_ym.get("regularMarketDayHigh") or _lp) or None
-                yf_low   = float(_ym.get("regularMarketDayLow")  or _lp) or None
-                print(f"[QUOTE] {code} Yahoo chart: price={yf_price} h={yf_high} l={yf_low}")
-        except Exception as _ye:
-            print(f"[QUOTE] Yahoo chart 失敗 {code}：{_ye}")
+    price_val = open_val = high_val = low_val = vol_val = y_val = None
+    price_source = "none"
 
-    # ── 2. TWSE MIS（z 現價、y 昨收、OHLV 備用）──
+    # 1. FinMind tick_snapshot（盤中最即時）
+    try:
+        snap_url = (f"https://api.finmindtrade.com/api/v4/taiwan_stock_tick_snapshot"
+                    f"?data_id={code}&token={FINMIND_TOKEN}")
+        snap_req = _ur.Request(snap_url, headers={"User-Agent": "Mozilla/5.0"})
+        with _ur.urlopen(snap_req, timeout=6) as sr:
+            snap = _json.loads(sr.read())
+        rows = snap.get("data", [])
+        if rows:
+            r = rows[0]
+            cp = _sf(r.get("close") or r.get("price"))
+            if cp:
+                price_val    = cp
+                open_val     = _sf(r.get("open")  or cp)
+                high_val     = _sf(r.get("high")  or cp)
+                low_val      = _sf(r.get("low")   or cp)
+                vol_val      = _sf(r.get("total_volume") or r.get("volume"))
+                price_source = "tick_snapshot"
+                print(f"[QUOTE] {code} tick_snapshot price={price_val}")
+    except Exception as _e:
+        print(f"[QUOTE] tick_snapshot 失敗 {code}：{_e}")
+
+    # 2. TWSE MIS（備援，同時取昨收 y）
     twse_data = None
     for ex in ("tse", "otc"):
         try:
-            resp = _twse_fetch(ex)
-            arr = resp.get("msgArray", [])
+            mis_url = (f"https://mis.twse.com.tw/stock/api/getStockInfo.jsp"
+                       f"?ex_ch={ex}_{code}.tw&json=1&delay=0")
+            mis_req = _ur.Request(mis_url, headers={"User-Agent": "Mozilla/5.0"})
+            with _ur.urlopen(mis_req, timeout=6) as resp:
+                arr = _json.loads(resp.read()).get("msgArray", [])
             if arr:
                 z_raw = str(arr[0].get("z", "-")).strip()
                 if z_raw not in ("-", ""):
@@ -2667,160 +2730,55 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
         v = str(twse_data.get(k, "-")).strip() if twse_data else "-"
         return None if v in ("-", "") else v
 
-    z         = _val("z")
-    y         = _val("y")
-    open_twse = _val("o")
-    high_twse = _val("h")
-    low_twse  = _val("l")
-    vol_twse  = _val("v")
-    tick_time = _val("t") or ""
+    y_val = _sf(_val("y"))  # 昨收，永遠從 TWSE 拿
 
-    # debug: 印出 TWSE raw 欄位（輔助排查 z 欄位是否為空）
-    if code == "2330":
-        print(f"[QUOTE-DEBUG 2330] is_weekday={is_weekday} in_session={in_session} "
-              f"just_after={just_after_close} | twse z_raw={str(twse_data.get('z','-') if twse_data else 'N/A')} "
-              f"y={str(twse_data.get('y','-') if twse_data else 'N/A')} | snap_price={snap_price}")
+    if price_val is None:
+        z = _sf(_val("z"))
+        if z:
+            price_val    = z
+            open_val     = _sf(_val("o"))
+            high_val     = _sf(_val("h"))
+            low_val      = _sf(_val("l"))
+            vol_raw      = _val("v")
+            vol_val      = int(float(vol_raw) * 1000) if vol_raw else None
+            price_source = "twse_z"
+            print(f"[QUOTE] {code} twse_z price={price_val}")
 
-    # ── 3. FinMind 今日收盤（snap 失敗 or 盤後 fallback）──
-    finmind_close = None
-    if snap_price is None:
+    # 3. FinMind TaiwanStockPrice（最終 fallback，盤後收盤價）
+    if price_val is None:
         try:
-            today_str = _date.today().strftime("%Y-%m-%d")
+            from datetime import date as _d, timedelta as _td
+            start = (_d.today() - _td(days=5)).strftime("%Y-%m-%d")
             fm_url = (f"https://api.finmindtrade.com/api/v4/data"
                       f"?dataset=TaiwanStockPrice&data_id={code}"
-                      f"&start_date={today_str}&end_date={today_str}&token={FINMIND_TOKEN}")
-            fm_req = urllib.request.Request(fm_url, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(fm_req, timeout=8) as fr:
-                fm_raw = _json.loads(fr.read())
-            fm_rows = fm_raw.get("data", [])
-            if fm_rows:
-                finmind_close = float(fm_rows[-1].get("close") or 0) or None
+                      f"&start_date={start}&token={FINMIND_TOKEN}")
+            fm_req = _ur.Request(fm_url, headers={"User-Agent": "Mozilla/5.0"})
+            with _ur.urlopen(fm_req, timeout=8) as r:
+                rows = _json.loads(r.read()).get("data", [])
+            if rows:
+                latest = rows[-1]
+                price_val    = _sf(latest.get("close"))
+                open_val     = _sf(latest.get("open"))
+                high_val     = _sf(latest.get("max"))
+                low_val      = _sf(latest.get("min"))
+                vol_val      = _sf(latest.get("Trading_Volume"))
+                if not y_val and len(rows) >= 2:
+                    y_val = _sf(rows[-2].get("close"))
+                price_source = "finmind_close"
+                print(f"[QUOTE] {code} finmind_close price={price_val}")
         except Exception as _e:
-            print(f"[QUOTE] FinMind 今日收盤失敗 {code}：{_e}")
+            print(f"[QUOTE] FinMind TaiwanStockPrice 失敗 {code}：{_e}")
 
-    # ── 4. TWSE / TPEX STOCK_DAY（盤後補今日收盤，前三者均無效時）──
-    stock_day_close = None
-    _today_obj = _date.today()
-    _is_after_close = is_weekday and now.time() >= dtime(13, 35)
-    if snap_price is None and finmind_close is None and not z and _is_after_close:
-        _roc_y    = _today_obj.year - 1911
-        _roc_date = f"{_roc_y}/{_today_obj.month:02d}/{_today_obj.day:02d}"
-        _yyyymmdd = _today_obj.strftime("%Y%m%d")
-        _is_otc   = _market_cache.get(code, "") in ("otc", "rotc")
-        if not _is_otc:
-            # 上市：TWSE STOCK_DAY
-            try:
-                _sd_url = (f"https://www.twse.com.tw/exchangeReport/STOCK_DAY"
-                           f"?response=json&date={_yyyymmdd}&stockNo={code}")
-                _sd_req = urllib.request.Request(_sd_url, headers={"User-Agent": "Mozilla/5.0"})
-                with urllib.request.urlopen(_sd_req, timeout=8) as _sd:
-                    _sd_raw = _json.loads(_sd.read())
-                for _row in _sd_raw.get("data", []):
-                    if str(_row[0]).strip() == _roc_date:
-                        _cp = str(_row[6]).replace(",", "").strip()
-                        if _cp not in ("--", "", "X"):
-                            stock_day_close = float(_cp)
-                        break
-            except Exception:
-                pass
-        else:
-            # 上櫃：TPEX st43
-            try:
-                _tpex_d = f"{_roc_y}/{_today_obj.month:02d}"
-                _tpex_url = (f"https://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info"
-                             f"/st43_result.php?l=zh-tw&d={_tpex_d}&stkno={code}")
-                _tpex_req = urllib.request.Request(_tpex_url, headers={"User-Agent": "Mozilla/5.0"})
-                with urllib.request.urlopen(_tpex_req, timeout=8) as _pr:
-                    _tpex_raw = _json.loads(_pr.read())
-                for _row in _tpex_raw.get("aaData", []):
-                    if str(_row[0]).strip() == _roc_date:
-                        _cp = str(_row[6]).replace(",", "").strip()
-                        if _cp not in ("--", "", "X"):
-                            stock_day_close = float(_cp)
-                        break
-            except Exception:
-                pass
-        if stock_day_close:
-            print(f"[QUOTE] {code} STOCK_DAY 補今日收盤：{stock_day_close}")
-
-    # ── 決定現價與來源 ──
-    if in_session or just_after_close:
-        if snap_price:  # FinMind tick_snapshot（最優先）
-            price_val    = snap_price
-            price_source = "tick_snapshot"
-            open_val = snap_open  or safe_float(open_twse)
-            high_val = snap_high  or safe_float(high_twse)
-            low_val  = snap_low   or safe_float(low_twse)
-            vol_val  = int(snap_vol) if snap_vol else (int(float(vol_twse) * 1000) if vol_twse else None)
-        elif yf_price:  # Yahoo Finance chart API（備援）
-            price_val    = yf_price
-            price_source = "yahoo_chart"
-            open_val = yf_open or safe_float(open_twse)
-            high_val = yf_high or safe_float(high_twse)
-            low_val  = yf_low  or safe_float(low_twse)
-            vol_val  = int(float(vol_twse) * 1000) if vol_twse else None
-        elif z:  # TWSE MIS z（有時為 "-"，第三選擇）
-            price_val    = safe_float(z)
-            price_source = "twse_z"
-            open_val = safe_float(open_twse)
-            high_val = safe_float(high_twse)
-            low_val  = safe_float(low_twse)
-            vol_val  = int(float(vol_twse) * 1000) if vol_twse else None
-        elif finmind_close:
-            price_val    = finmind_close
-            price_source = "finmind_close"
-            open_val = safe_float(open_twse)
-            high_val = safe_float(high_twse)
-            low_val  = safe_float(low_twse)
-            vol_val  = int(float(vol_twse) * 1000) if vol_twse else None
-        elif y:
-            price_val    = safe_float(y)
-            price_source = "twse_y"
-            open_val = safe_float(open_twse)
-            high_val = safe_float(high_twse)
-            low_val  = safe_float(low_twse)
-            vol_val  = int(float(vol_twse) * 1000) if vol_twse else None
-        else:
-            price_val    = None
-            price_source = "none"
-            open_val = high_val = low_val = vol_val = None
-    else:  # 盤後：finmind_close > twse_z > stock_day > twse_y（昨收）
-        if finmind_close:
-            price_val    = finmind_close
-            price_source = "finmind_close"
-        elif z:  # TWSE MIS z 剛收盤後仍有效（約收盤後 30 分鐘內）
-            price_val    = safe_float(z)
-            price_source = "twse_z"
-        elif stock_day_close:  # TWSE/TPEX STOCK_DAY 月報 → 最可靠的盤後收盤
-            price_val    = stock_day_close
-            price_source = "stock_day"
-        elif y:
-            price_val    = safe_float(y)
-            price_source = "twse_y"
-        else:
-            price_val    = None
-            price_source = "none"
-        open_val = safe_float(open_twse)
-        high_val = safe_float(high_twse)
-        low_val  = safe_float(low_twse)
-        vol_val  = int(float(vol_twse) * 1000) if vol_twse else None
-
-    # ── 漲跌幅（以昨收 y 為基準）──
+    # ── 漲跌幅（以昨收 y_val 為基準）──
     change = change_pct = None
-    ref = safe_float(y)
-    if price_val and ref:
+    if price_val and y_val:
         try:
-            change     = round(price_val - ref, 2)
-            change_pct = round(change / ref * 100, 2)
+            change     = round(price_val - y_val, 2)
+            change_pct = round(change / y_val * 100, 2)
         except Exception:
             pass
 
-    print(f"[QUOTE] {code} | {now.strftime('%Y-%m-%d %H:%M:%S %a')} "
-          f"| in_session={in_session} just_after={just_after_close} "
-          f"| snap={snap_price} z={z} y={y} fm_close={finmind_close} "
-          f"| price={price_val} source={price_source}")
-
-    return {
+    result = {
         "stock_id":     code,
         "price":        price_val,
         "change":       change,
@@ -2828,13 +2786,17 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
         "open":         open_val,
         "high":         high_val,
         "low":          low_val,
-        "volume":       vol_val,
-        "time":         tick_time,
-        "is_trading":   bool((snap_price or yf_price or z) and in_session),
+        "volume":       int(vol_val) if vol_val else None,
         "in_session":   in_session,
         "price_source": price_source,
-        "price_note":   "以昨收價計算" if price_source == "twse_y" else None,
+        "price_note":   None,
     }
+
+    # ── 寫快取（盤中 15 分，盤後永久）──
+    expires = (_time_mod.time() + 900) if in_session else 0
+    _QUOTE_CACHE[code] = {"data": result, "expires": expires}
+
+    return result
 
 
 
@@ -2970,21 +2932,21 @@ def admin_delete_member(req: _DeleteMemberReq, key: str = ""):
 
 @app.post("/admin/run-scan")
 def admin_run_scan(key: str = ""):
-    """手動觸發統合選股排程（後台執行，不等結果）"""
+    """手動觸發統合選股（同步執行，delay=0.3s，約 30~60s，回傳 picks list）"""
     _check_admin(key)
-    import threading, sys as _sys
+    import sys as _sys
     _picker_path = os.path.join(os.path.dirname(__file__), "stock_picker")
-    def _do():
-        try:
-            if _picker_path not in _sys.path:
-                _sys.path.insert(0, _picker_path)
-            from main_picker import run_unified_scan
-            run_unified_scan()
-            print("   ✅ 手動選股排程完成")
-        except Exception as e:
-            print(f"   ❌ 手動選股排程失敗：{e}")
-    threading.Thread(target=_do, daemon=True).start()
-    return {"ok": True, "message": "選股排程已觸發，後台執行中，約 5~10 分鐘完成"}
+    try:
+        if _picker_path not in _sys.path:
+            _sys.path.insert(0, _picker_path)
+        from main_picker import run_unified_scan
+        picks = run_unified_scan(delay=0.3)
+        SEO_CACHE["picks"]["data"] = None  # 清快取，讓 /picks 讀最新結果
+        print(f"   ✅ 手動選股完成，{len(picks)} 支入選")
+        return {"ok": True, "picks": picks, "count": len(picks)}
+    except Exception as e:
+        print(f"   ❌ 手動選股失敗：{e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 class _BatchUpgradeReq(BaseModel):
@@ -4931,8 +4893,155 @@ def get_report(slug: str):
 
 
 # ══════════════════════════════════════════════════════════
-# SEO：sitemap.xml + /rankings（Task 2）
+# SEO：/picks + /rankings + sitemap.xml
 # ══════════════════════════════════════════════════════════
+
+@app.get("/picks")
+def picks_page():
+    """每日精選台股 SSR 頁（公開，15分鐘快取）"""
+    import time as _tm, json as _jmod
+    from fastapi.responses import HTMLResponse
+
+    now = _tm.time()
+    c = SEO_CACHE["picks"]
+    if c["data"] and c["expires"] > now:
+        return HTMLResponse(c["data"])
+
+    picks_json = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                               "stock_picker", "output", "picks_data.json")
+    picks_data: dict = {}
+    if os.path.exists(picks_json):
+        try:
+            with open(picks_json, "r", encoding="utf-8") as _f:
+                picks_data = _jmod.load(_f)
+        except Exception:
+            pass
+
+    generated_at = picks_data.get("generated_at", "")
+    picks        = picks_data.get("picks", [])
+    date_str     = generated_at[:10] if generated_at else ""
+    count        = len(picks)
+
+    def _sig_color(sig: str) -> str:
+        if "金叉" in sig or "MA" in sig:  return ("#14532d", "#86efac")
+        if "MACD" in sig:                  return ("#1e3a5f", "#93c5fd")
+        if "量" in sig:                    return ("#3b1f6b", "#c4b5fd")
+        if "法人" in sig:                  return ("#1f3a2e", "#6ee7b7")
+        return ("#374151", "#d1d5db")
+
+    def _score_color(score: int) -> str:
+        if score >= 80: return "#16a34a"
+        if score >= 65: return "#d97706"
+        return "#64748b"
+
+    rows_html = ""
+    if picks:
+        for i, p in enumerate(picks, 1):
+            sid   = p.get("stock_id", "")
+            sname = p.get("stock_name", "")
+            score = p.get("score", 0)
+            sigs  = p.get("signals", [])
+            sc    = _score_color(score)
+            sig_tags = ""
+            for sg in sigs:
+                bg, fg = _sig_color(sg)
+                sig_tags += (f'<span style="font-size:10px;padding:2px 9px;border-radius:20px;'
+                             f'background:{bg};color:{fg};font-weight:600">{sg}</span> ')
+            rows_html += f"""
+<tr onclick="window.open('{BACKEND_URL}/report/{sid}-{date_str}','_blank')" style="cursor:pointer">
+  <td class="r-num">{i}</td>
+  <td class="r-stock">
+    <a href="{BACKEND_URL}/report/{sid}-{date_str}" target="_blank">{sid}</a>
+    <span class="r-name">{sname}</span>
+  </td>
+  <td style="text-align:right">
+    <span style="font-size:15px;font-weight:700;color:{sc}">{score}</span>
+  </td>
+  <td style="padding-right:14px">{sig_tags}</td>
+</tr>"""
+    else:
+        rows_html = '<tr><td colspan="4" style="text-align:center;color:#999;padding:32px">尚無選股資料，待每日 16:30 更新</td></tr>'
+
+    json_ld = _jmod.dumps({
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": f"台股精選名單 {date_str} — 線上有位",
+        "description": f"依均線金叉、KD指標、量能、MACD篩選的台股強勢候選，{date_str} 共 {count} 支",
+        "url": f"{BACKEND_URL}/picks",
+        "numberOfItems": count,
+        "itemListElement": [
+            {"@type": "ListItem", "position": i + 1,
+             "url": f"{BACKEND_URL}/report/{p['stock_id']}-{date_str}",
+             "name": f"{p['stock_id']} {p.get('stock_name','')}"}
+            for i, p in enumerate(picks)
+        ],
+    }, ensure_ascii=False)
+
+    html = f"""<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>每日精選台股 {date_str} — 線上有位</title>
+<meta name="description" content="線上有位每日精選台股，依均線金叉、KD指標、量能、MACD篩選強勢候選股。{date_str} 共 {count} 支入選。">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="{BACKEND_URL}/picks">
+<meta property="og:title" content="每日精選台股 {date_str} — 線上有位">
+<meta property="og:description" content="依均線金叉、KD指標、量能、MACD篩選強勢候選股，{date_str} 共 {count} 支入選">
+<meta property="og:url" content="{BACKEND_URL}/picks">
+<meta property="og:type" content="website">
+<script type="application/ld+json">{json_ld}</script>
+<style>
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{background:#f5f0e8;color:#333;font-family:-apple-system,'Noto Sans TC',sans-serif;min-height:100vh;padding:20px 16px 60px}}
+.wrap{{max-width:720px;margin:0 auto}}
+.back{{font-size:13px;color:#666;text-decoration:none;display:inline-block;margin-bottom:20px}}
+.back:hover{{color:#333}}
+h1{{font-size:22px;font-weight:700;margin-bottom:4px}}
+.sub{{font-size:13px;color:#888;margin-bottom:24px}}
+table{{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}}
+thead th{{padding:10px 12px;font-size:12px;color:#888;font-weight:600;text-align:left;border-bottom:1px solid #f0ebe0;background:#faf7f2}}
+tbody tr{{border-bottom:1px solid #f5f0ea;transition:background .12s}}
+tbody tr:last-child{{border-bottom:none}}
+tbody tr:hover{{background:#faf6ee}}
+td{{padding:12px 12px;vertical-align:middle}}
+.r-num{{color:#ccc;font-size:13px;width:30px;text-align:center;padding-left:8px}}
+.r-stock a{{font-size:15px;font-weight:700;color:#333;text-decoration:none}}
+.r-stock a:hover{{color:#555}}
+.r-name{{font-size:12px;color:#999;display:block;margin-top:2px}}
+.crit{{margin-top:24px;padding:14px 16px;background:#fff;border-radius:10px;font-size:12px;color:#888;line-height:1.8;box-shadow:0 1px 4px rgba(0,0,0,.04)}}
+.disclaimer{{margin-top:16px;font-size:11px;color:#bbb;line-height:1.8}}
+@media(max-width:480px){{td{{padding:10px 8px}}h1{{font-size:18px}}}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="{FRONTEND_URL}" class="back">← 線上有位</a>
+  <h1>📈 每日精選台股</h1>
+  <p class="sub">資料日期：{generated_at or "尚未產生"}・每日 16:30 更新・共 {count} 支入選</p>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>股票</th>
+        <th style="text-align:right">評分</th>
+        <th>技術訊號</th>
+      </tr>
+    </thead>
+    <tbody>{rows_html}</tbody>
+  </table>
+  <div class="crit">
+    <strong>篩選條件：</strong>
+    均線金叉（MA5穿MA20 或 MA20穿MA60）或 KD金叉 ＋ 量能放大（近5日均量 ≥ 20日均量×1.5）＋ MACD DIF &gt; 0
+  </div>
+  <p class="disclaimer">⚠️ 本頁面資料僅供參考，不構成任何買賣建議。投資有風險，請自行評估。資料來源：FinMind / TWSE</p>
+</div>
+</body>
+</html>"""
+
+    c["data"]    = html
+    c["expires"] = now + 900
+    return HTMLResponse(html)
 
 _SEO_HARDCODED_STOCKS = [
     "2330","2317","2454","2308","2412","6505","2882","2881","2886","2891",

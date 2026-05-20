@@ -1,9 +1,10 @@
 """
 generator.py — 產出層（v2 純規則）
-對篩選後的股票以規則文字生成分析，產出 HTML。
+對篩選後的股票以規則文字生成分析，產出 HTML + picks_data.json。
 """
 
 import os
+import json
 from datetime import datetime
 
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "output")
@@ -239,27 +240,70 @@ body{{background:#020817;color:#f1f5f9;font-family:-apple-system,BlinkMacSystemF
 # ──────────────────────────────────────────
 # 主流程
 # ──────────────────────────────────────────
-def generate_picks_html(filtered_stocks: list[dict]) -> str:
-    """規則式評分，產出 latest.html，回傳輸出路徑"""
+
+def _stock_signals(stock: dict) -> list[str]:
+    """從股票資料萃取技術訊號標籤"""
+    sigs = []
+    lbl = (stock.get("signal_label") or "").replace("✅ ", "").replace("⚠️ ", "")
+    if lbl:
+        sigs.append(lbl)
+    if stock.get("macd_dif", 0) > 0:
+        sigs.append("MACD多方")
+    vr = stock.get("vol_ratio", 0)
+    if vr >= 1.5:
+        sigs.append(f"量{vr:.1f}x")
+    cbd = stock.get("consecutive_buy_days", 0)
+    if cbd >= 2:
+        sigs.append(f"法人連買{cbd}日")
+    return sigs[:4]
+
+
+def generate_picks_html(filtered_stocks: list[dict]) -> tuple[str, list[dict]]:
+    """
+    規則式評分，產出 latest.html + picks_data.json
+    回傳 (輸出路徑, picks_list)
+    picks_list = [{"stock_id", "stock_name", "score", "signals"}, ...]
+    """
     stocks_with_eval = [(s, rule_evaluate(s)) for s in filtered_stocks]
     generated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    # 結構化 picks list（供 /admin/run-scan 和 /picks 端點使用）
+    picks_list = sorted(
+        [
+            {
+                "stock_id":   s["stock_id"],
+                "stock_name": s.get("name", ""),
+                "score":      e["score"],
+                "signals":    _stock_signals(s),
+            }
+            for s, e in stocks_with_eval
+            if not s.get("is_risk")
+        ],
+        key=lambda x: x["score"],
+        reverse=True,
+    )
+
     html = render_page(stocks_with_eval, generated_at)
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    filename = f"stock_picks_{datetime.now().strftime('%Y%m%d_%H%M')}.html"
-    filepath = os.path.join(OUTPUT_DIR, filename)
-    with open(filepath, "w", encoding="utf-8") as f:
-        f.write(html)
-    latest_path = os.path.join(OUTPUT_DIR, "latest.html")
-    with open(latest_path, "w", encoding="utf-8") as f:
-        f.write(html)
-    print(f"[generator] ✅ 選股輸出完成：{filepath}")
-    return filepath
+    filename  = f"stock_picks_{datetime.now().strftime('%Y%m%d_%H%M')}.html"
+    filepath  = os.path.join(OUTPUT_DIR, filename)
+    for path in (filepath, os.path.join(OUTPUT_DIR, "latest.html")):
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(html)
+
+    json_path = os.path.join(OUTPUT_DIR, "picks_data.json")
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump({"generated_at": generated_at, "picks": picks_list}, f, ensure_ascii=False)
+
+    print(f"[generator] ✅ 選股輸出完成：{filepath}（{len(picks_list)} 支入選）")
+    return filepath, picks_list
 
 
 def run(filtered_stocks: list[dict], api_delay: float = 0.0) -> str:
-    """向後相容介面，內部改用規則式評分"""
-    return generate_picks_html(filtered_stocks)
+    """向後相容介面，回傳輸出路徑"""
+    filepath, _ = generate_picks_html(filtered_stocks)
+    return filepath
 
 
 def generate_scan_result(stocks_data: list[dict]) -> str:
