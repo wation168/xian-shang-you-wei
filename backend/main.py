@@ -2546,15 +2546,20 @@ def get_quote_live(stock_id: str):
     row = {}
     try:
         row = _fetch("tse")
-        if not _sf(row.get("z")):          # z="-" → 試 OTC
-            row = _fetch("otc") or row
-    except Exception:
+        print(f"[LIVE-TSE {code}] raw={dict(row)}")
+        if not _sf(row.get("z")):
+            otc_row = _fetch("otc")
+            print(f"[LIVE-OTC {code}] raw={dict(otc_row)}")
+            row = otc_row or row
+    except Exception as _e:
+        print(f"[LIVE-TSE {code}] 失敗：{_e}")
         try:
             row = _fetch("otc")
-        except Exception:
-            pass
+            print(f"[LIVE-OTC {code}] raw={dict(row)}")
+        except Exception as _e2:
+            print(f"[LIVE-OTC {code}] 失敗：{_e2}")
 
-    return {
+    result = {
         "z": _sf(row.get("z")),
         "y": _sf(row.get("y")),
         "o": _sf(row.get("o")),
@@ -2563,6 +2568,8 @@ def get_quote_live(stock_id: str):
         "v": _sf(row.get("v")),
         "t": str(row.get("t", "") or "").strip(),
     }
+    print(f"[LIVE {code}] → z={result['z']} y={result['y']}")
+    return result
 
 
 @app.get("/api/quote/{stock_id}")
