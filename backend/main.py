@@ -379,7 +379,7 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
         df = df.set_index("Date").sort_index()
         df = df[["Open", "High", "Low", "Close", "Volume"]].astype(float)
 
-        # ── 盤中補今日 K 棒（yfinance 主力，tick_snapshot 備援）──
+        # ── 盤中補今日 K 棒（FinMind tick_snapshot）──
         tz = ZoneInfo("Asia/Taipei")
         now_tw = datetime.now(tz)
         is_weekday = now_tw.weekday() < 5
@@ -387,68 +387,32 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
         today_ts = pd.Timestamp(today_str)
 
         if in_or_just_after:
-            _yf_ok = False
             try:
-                import yfinance as _yf
-                _yf_sym = resolve_symbol(code)          # 2330.TW 或 2454.TWO
-                _tk = _yf.Ticker(_yf_sym)
-                _hist = _tk.history(period="2d", interval="1d", auto_adjust=True)
-                # TWSE 符號抓不到時嘗試 OTC
-                if _hist.empty and _yf_sym.endswith(".TW"):
-                    _tk = _yf.Ticker(code + ".TWO")
-                    _hist = _tk.history(period="2d", interval="1d", auto_adjust=True)
-                if not _hist.empty:
-                    _today_d = date.today()
-                    _mask = [idx.date() == _today_d for idx in _hist.index]
-                    _today_rows = _hist[_mask]
-                    if not _today_rows.empty:
-                        _row = _today_rows.iloc[-1]
-                        cp  = float(_row["Close"])
-                        op  = float(_row["Open"])
-                        hi  = float(_row["High"])
-                        lo  = float(_row["Low"])
-                        vol = float(_row.get("Volume", 0) or 0)
-                        if cp > 0:
-                            today_bar = pd.DataFrame(
-                                [[op, hi, lo, cp, vol]],
-                                index=[today_ts],
-                                columns=["Open", "High", "Low", "Close", "Volume"]
-                            )
-                            df = df[df.index != today_ts]
-                            df = pd.concat([df, today_bar])
-                            print(f"   yfinance 補今日 K 棒：{_yf_sym} close={cp:.2f}")
-                            _yf_ok = True
-            except Exception as _ye:
-                print(f"   yfinance 補棒失敗 {code}：{_ye}")
-
-            if not _yf_ok:
-                # fallback：FinMind tick_snapshot
-                try:
-                    snap_url = (f"https://api.finmindtrade.com/api/v4/taiwan_stock_tick_snapshot"
-                                f"?data_id={code}&token={FINMIND_TOKEN}")
-                    snap_req = _ur.Request(snap_url, headers={"User-Agent": "Mozilla/5.0"})
-                    with _ur.urlopen(snap_req, timeout=6) as sr:
-                        snap = _j.loads(sr.read())
-                    snap_rows = snap.get("data", [])
-                    if snap_rows:
-                        r = snap_rows[0]
-                        cp  = float(r.get("close") or r.get("price") or 0)
-                        op  = float(r.get("open") or cp)
-                        hi  = float(r.get("high") or cp)
-                        lo  = float(r.get("low") or cp)
-                        vol = float(r.get("total_volume") or r.get("volume") or 0)
-                        if cp > 0:
-                            today_bar = pd.DataFrame(
-                                [[op, hi, lo, cp, vol]],
-                                index=[today_ts],
-                                columns=["Open", "High", "Low", "Close", "Volume"]
-                            )
-                            df = df[df.index != today_ts]
-                            df = pd.concat([df, today_bar])
-                            print(f"   tick_snapshot(fallback) 補今日 K 棒：{code} close={cp}")
-                except Exception as _e:
-                    if not (hasattr(_e, 'code') and _e.code == 400):
-                        print(f"   tick_snapshot 補棒失敗 {code}：{_e}")
+                snap_url = (f"https://api.finmindtrade.com/api/v4/taiwan_stock_tick_snapshot"
+                            f"?data_id={code}&token={FINMIND_TOKEN}")
+                snap_req = _ur.Request(snap_url, headers={"User-Agent": "Mozilla/5.0"})
+                with _ur.urlopen(snap_req, timeout=6) as sr:
+                    snap = _j.loads(sr.read())
+                snap_rows = snap.get("data", [])
+                if snap_rows:
+                    r = snap_rows[0]
+                    cp  = float(r.get("close") or r.get("price") or 0)
+                    op  = float(r.get("open") or cp)
+                    hi  = float(r.get("high") or cp)
+                    lo  = float(r.get("low") or cp)
+                    vol = float(r.get("total_volume") or r.get("volume") or 0)
+                    if cp > 0:
+                        today_bar = pd.DataFrame(
+                            [[op, hi, lo, cp, vol]],
+                            index=[today_ts],
+                            columns=["Open", "High", "Low", "Close", "Volume"]
+                        )
+                        df = df[df.index != today_ts]
+                        df = pd.concat([df, today_bar])
+                        print(f"   tick_snapshot 補今日 K 棒：{code} close={cp}")
+            except Exception as _e:
+                if not (hasattr(_e, 'code') and _e.code == 400):
+                    print(f"   tick_snapshot 補棒失敗 {code}：{_e}")
 
         # ── TWSE/TPEX 月報補今日 K 棒（上述來源均無資料時的最終 fallback）──
         if today_ts not in df.index:
@@ -2596,24 +2560,7 @@ def get_quote(stock_id: str, user: dict = Depends(require_user)):
             if not (hasattr(_e, 'code') and _e.code == 400):
                 print(f"[QUOTE] tick_snapshot 失敗 {code}：{_e}")
 
-    # ── 2.5 yfinance fast_info（盤中備援，snap 失敗時）──
-    yf_rt_price = yf_rt_open = yf_rt_high = yf_rt_low = None
-    if snap_price is None and (in_session or just_after_close):
-        try:
-            import yfinance as _yf
-            _yf_sym = resolve_symbol(code)
-            _fi = _yf.Ticker(_yf_sym).fast_info
-            _lp = float(_fi.last_price or 0)
-            if _lp > 0:
-                yf_rt_price = _lp
-                yf_rt_open = float(_fi.open or _lp) or None
-                yf_rt_high = float(_fi.day_high or _lp) or None
-                yf_rt_low  = float(_fi.day_low  or _lp) or None
-                print(f"[QUOTE] {code} yfinance fast_info: price={yf_rt_price} h={yf_rt_high} l={yf_rt_low}")
-        except Exception as _ye:
-            print(f"[QUOTE] yfinance fast_info 失敗 {code}：{_ye}")
-
-    # ── 2. TWSE（z 現價、y 昨收、OHLV 備用）──
+    # ── 2. TWSE MIS（z 現價、y 昨收、OHLV 備用）──
     twse_data = None
     for ex in ("tse", "otc"):
         try:
@@ -2709,30 +2656,23 @@ def get_quote(stock_id: str, user: dict = Depends(require_user)):
 
     # ── 決定現價與來源 ──
     if in_session or just_after_close:
-        if snap_price:
+        if z:  # TWSE MIS 現價（主力）
+            price_val    = safe_float(z)
+            price_source = "twse_z"
+            open_val = safe_float(open_twse)
+            high_val = safe_float(high_twse)
+            low_val  = safe_float(low_twse)
+            vol_val  = int(float(vol_twse) * 1000) if vol_twse else None
+        elif snap_price:  # FinMind tick_snapshot（備援）
             price_val    = snap_price
             price_source = "tick_snapshot"
             open_val = snap_open  or safe_float(open_twse)
             high_val = snap_high  or safe_float(high_twse)
             low_val  = snap_low   or safe_float(low_twse)
             vol_val  = int(snap_vol) if snap_vol else (int(float(vol_twse) * 1000) if vol_twse else None)
-        elif yf_rt_price:
-            price_val    = yf_rt_price
-            price_source = "yfinance_rt"
-            open_val = yf_rt_open or safe_float(open_twse)
-            high_val = yf_rt_high or safe_float(high_twse)
-            low_val  = yf_rt_low  or safe_float(low_twse)
-            vol_val  = int(float(vol_twse) * 1000) if vol_twse else None
         elif finmind_close:
             price_val    = finmind_close
             price_source = "finmind_close"
-            open_val = safe_float(open_twse)
-            high_val = safe_float(high_twse)
-            low_val  = safe_float(low_twse)
-            vol_val  = int(float(vol_twse) * 1000) if vol_twse else None
-        elif z:
-            price_val    = safe_float(z)
-            price_source = "twse_z"
             open_val = safe_float(open_twse)
             high_val = safe_float(high_twse)
             low_val  = safe_float(low_twse)
@@ -2794,7 +2734,7 @@ def get_quote(stock_id: str, user: dict = Depends(require_user)):
         "low":          low_val,
         "volume":       vol_val,
         "time":         tick_time,
-        "is_trading":   bool((snap_price or yf_rt_price or z) and in_session),
+        "is_trading":   bool((z or snap_price) and in_session),
         "in_session":   in_session,
         "price_source": price_source,
         "price_note":   "以昨收價計算" if price_source == "twse_y" else None,
