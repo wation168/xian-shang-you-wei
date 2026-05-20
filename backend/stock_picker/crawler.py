@@ -123,7 +123,7 @@ def _extract_keywords(title: str) -> list[str]:
 # TWSE 成交量排行（不打 FinMind）
 # ──────────────────────────────────────────
 
-def fetch_twse_volume_top(n: int = 100) -> tuple[list[str], dict[str, str]]:
+def fetch_twse_volume_top(n: int = 30) -> tuple[list[str], dict[str, str]]:
     """
     從 TWSE STOCK_DAY_ALL 取最近交易日成交量前 n 支上市股
     回傳 (top_n_stock_ids, name_dict)  — 單次 HTTP 呼叫，不打 FinMind
