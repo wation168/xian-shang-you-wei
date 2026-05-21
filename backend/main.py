@@ -3028,6 +3028,10 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
         except Exception:
             pass
 
+    # A. 三層來源全失敗時，fallback 使用上一筆快取（如果有）
+    if price_val is None and code in _QUOTE_CACHE:
+        return _QUOTE_CACHE[code]["data"]
+
     result = {
         "stock_id":     code,
         "price":        price_val,
@@ -3039,11 +3043,12 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
         "volume":       int(vol_val) if vol_val else None,
         "in_session":   in_session,
         "price_source": price_source,
-        "price_note":   None,
+        # E. change/change_pct 為 null 時提示「盤後」，避免空白
+        "price_note":   None if (change is not None) else "盤後",
     }
 
-    # ── 寫快取（盤中 15 分，盤後永久）──
-    expires = (_time_mod.time() + 900) if in_session else 0
+    # D. 盤後快取改 6 小時過期（原永久），避免隔天顯示過時收盤價
+    expires = (_time_mod.time() + 900) if in_session else (_time_mod.time() + 21600)
     _QUOTE_CACHE[code] = {"data": result, "expires": expires}
 
     return result
@@ -4961,7 +4966,7 @@ a:hover{{text-decoration:underline}}
     fetch(API + "/api/quote/" + STOCK)
       .then(function(r){{ return r.json(); }})
       .then(function(d){{
-        if (!d.price) return;
+        if (d.price == null) return;  // B. 允許 price=0 也更新
         document.getElementById("livePrice").textContent = d.price;
         var chg = d.change, pct = d.change_pct;
         if (chg !== null && chg !== undefined && pct !== null && pct !== undefined){{
@@ -4970,12 +4975,14 @@ a:hover{{text-decoration:underline}}
           document.getElementById("liveChange").innerHTML =
             '<span style="color:' + color + '">' + sign + chg.toFixed(2) +
             ' (' + sign + pct.toFixed(2) + '%)</span>';
+        }} else if (d.price_note) {{
+          document.getElementById("liveChange").textContent = d.price_note;  // E.
         }}
         if (d.in_session){{
           setTimeout(fetchQuote, 15 * 60 * 1000);
         }}
       }})
-      .catch(function(){{}});
+      .catch(function(e){{ console.warn('[quote]', e); }});  // C.
   }}
   fetchQuote();
 }})();
