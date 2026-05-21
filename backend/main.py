@@ -1800,9 +1800,6 @@ def get_current_user(authorization: str | None = Header(default=None)) -> dict |
     conn.close()
     if not row or row["token_ver"] != payload.get("ver", 0):
         return None
-    # 帳號共享防護：session_id 不符代表已在其他裝置登入
-    if row["session_id"] and payload.get("sid") and row["session_id"] != payload.get("sid"):
-        return None
     return dict(row)
 
 def require_user(user: dict | None = Depends(get_current_user)):

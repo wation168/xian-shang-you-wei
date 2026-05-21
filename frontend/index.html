@@ -3111,7 +3111,7 @@ function attachDrawEvents(){
   }, {passive:false});
 }
 
-// 載入儲存的 API
+// 唯一的 DOMContentLoaded：先完成 auth 再做其他初始化，避免 race condition
 document.addEventListener('DOMContentLoaded', async ()=>{
   applyStoredTheme();
   buildMABody();
@@ -3119,14 +3119,48 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   attachDrawEvents();
   loadHotkeys();
   fetch(getAPI()+'/api/page-view',{method:'POST'}).catch(()=>{});
+
+  // Enter 鍵快捷
+  document.getElementById('loginPwd').addEventListener('keydown', e => {
+    if(e.key === 'Enter') doLogin();
+  });
+  document.getElementById('loginEmail').addEventListener('keydown', e => {
+    if(e.key === 'Enter') document.getElementById('loginPwd').focus();
+  });
+  document.getElementById('regPwd').addEventListener('keydown', e => {
+    if(e.key === 'Enter') document.getElementById('regPwd2').focus();
+  });
+  document.getElementById('regPwd2').addEventListener('keydown', e => {
+    if(e.key === 'Enter') doRegister();
+  });
+
+  // 手機鍵盤彈出時隱藏快捷股票列，收鍵盤後恢復
+  const _inp = document.getElementById('stockInput');
+  const _hk  = document.getElementById('hotkeysEl');
+  _inp.addEventListener('focus', () => {
+    if(_hk) _hk.style.display = 'none';
+    // iOS: 確保輸入框在視窗可見範圍內
+    setTimeout(() => { _inp.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, 150);
+  });
+  _inp.addEventListener('blur', () => {
+    if(_hk) _hk.style.display = '';
+  });
+
+  // 先完成 auth 初始化（await），確保 _authUser 已設定
+  await _initAuth();
+
+  // PWA 安裝提示
+  initPWA();
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  }
+
+  // 若 URL 帶 ?stock= 參數，auth 完成後直接分析
   const _stockParam=new URLSearchParams(location.search).get('stock');
   if(_stockParam){
-    console.log('[stock-param] 偵測到 ?stock=', _stockParam);
-    const _inp=document.getElementById('stockInput');
-    if(_inp) _inp.value=_stockParam.trim();
-    // 先完成 auth 初始化，確保 _authUser 已設定再分析（避免登入用戶被當訪客限制）
-    try{ await _initAuth(); }catch(e){ console.warn('[stock-param] _initAuth 失敗', e); }
-    console.log('[stock-param] 呼叫 analyzeStock(), user=', _authUser ? _authUser.email : 'guest');
+    console.log('[stock-param] 偵測到 ?stock=', _stockParam, 'user=', _authUser ? _authUser.email : 'guest');
+    const _stockInp=document.getElementById('stockInput');
+    if(_stockInp) _stockInp.value=_stockParam.trim();
     analyzeStock();
   }
 });
@@ -3199,11 +3233,9 @@ async function _initAuth(){
       _updateGuestUI();
     }
   } catch(e){
-    // 網路錯誤時不清除 token，避免離線或 API 暫時不通就被強制登出
+    // 網路錯誤時靜默保持現有登入狀態，不清除 token
     // 真正 401 已在 else 分支處理
     console.warn('auth check failed (network?), keeping token', e);
-    _authUser = null;
-    _updateGuestUI();
   }
 }
 
@@ -3558,40 +3590,6 @@ async function doLogout(){
   showPage('home');
 }
 
-// Enter 鍵登入
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('loginPwd').addEventListener('keydown', e => {
-    if(e.key === 'Enter') doLogin();
-  });
-  document.getElementById('loginEmail').addEventListener('keydown', e => {
-    if(e.key === 'Enter') document.getElementById('loginPwd').focus();
-  });
-  document.getElementById('regPwd').addEventListener('keydown', e => {
-    if(e.key === 'Enter') document.getElementById('regPwd2').focus();
-  });
-  document.getElementById('regPwd2').addEventListener('keydown', e => {
-    if(e.key === 'Enter') doRegister();
-  });
-  _initAuth();
-  // PWA 安裝提示
-  initPWA();
-  // 註冊 Service Worker（PWA + Web Push）
-  if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('/sw.js').catch(()=>{});
-  }
-
-  // 手機鍵盤彈出時隱藏快捷股票列，收鍵盤後恢復
-  const _inp = document.getElementById('stockInput');
-  const _hk  = document.getElementById('hotkeysEl');
-  _inp.addEventListener('focus', () => {
-    if(_hk) _hk.style.display = 'none';
-    // iOS: 確保輸入框在視窗可見範圍內
-    setTimeout(() => { _inp.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, 150);
-  });
-  _inp.addEventListener('blur', () => {
-    if(_hk) _hk.style.display = '';
-  });
-});
 
 // ══════════════════════════════════════
 // 管理員快速登入（點 logo 5次）
