@@ -33,9 +33,11 @@ FINMIND_TOKEN = os.environ.get("FINMIND_TOKEN", "")
 if not FINMIND_TOKEN:
     raise RuntimeError("❌ 請設定環境變數 FINMIND_TOKEN")
 
-# JWT 密鑰（請在 Zeabur 設定環境變數 JWT_SECRET）
+# JWT 密鑰（請在 Zeabur 設定環境變數 JWT_SECRET；每次重啟值相同，不影響 token 有效性）
 JWT_SECRET = os.environ.get("JWT_SECRET", "change-me-in-production-please")
-JWT_EXPIRE_DAYS = 30   # token 有效期
+JWT_EXPIRE_DAYS = 30   # token 有效期（30 天）
+if JWT_SECRET == "change-me-in-production-please":
+    print("⚠️  [JWT] 使用預設 JWT_SECRET，正式環境請設定 JWT_SECRET 環境變數！")
 
 # 綠界 Webhook 驗證用
 ECPAY_MERCHANT_ID = os.environ.get("ECPAY_MERCHANT_ID", "3443173")
@@ -2973,7 +2975,8 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
                     break
                 if not twse_data:
                     twse_data = arr[0]
-        except Exception:
+        except Exception as _mis_e:
+            print(f"[QUOTE] {code} TWSE MIS {ex}_ 呼叫失敗：{_mis_e}")
             continue
 
     def _val(k):
@@ -2992,6 +2995,11 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
         vol_val      = int(float(vol_raw) * 1000) if vol_raw else None
         price_source = "twse_z"
         print(f"[QUOTE] {code} twse_z price={price_val}")
+    elif in_session:
+        # 盤中拿不到 z：印出 TWSE 回傳的原始欄位，方便排查
+        z_raw_dbg = twse_data.get("z", "NO_FIELD") if twse_data else "NO_DATA"
+        n_dbg     = twse_data.get("n", "?")         if twse_data else "?"
+        print(f"[QUOTE] {code}（{n_dbg}）盤中 TWSE z='{z_raw_dbg}'，需走 FinMind 備援")
 
     # 2. FinMind tick_snapshot（備援，盤中即時，消耗額度）
     if price_val is None:

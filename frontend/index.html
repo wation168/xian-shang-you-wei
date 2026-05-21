@@ -3168,17 +3168,18 @@ function goPayFromApp(plan) {
 let _authUser = null;  // 目前登入的用戶資訊
 
 function _getToken(){ return localStorage.getItem('auth_token'); }
-function _setToken(t){ localStorage.setItem('auth_token', t); }
-function _clearToken(){ localStorage.removeItem('auth_token'); }
+function _setToken(t){ localStorage.setItem('auth_token', t); console.log('[auth] token 已寫入 localStorage，長度:', t ? t.length : 0); }
+function _clearToken(){ localStorage.removeItem('auth_token'); console.log('[auth] token 已從 localStorage 清除'); }
 
 function _authHeaders(){
   const t = _getToken();
   return t ? { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
 }
 
-// 啟動時自動驗證 token
+// 啟動時自動驗證 token（token 存於 localStorage，關閉瀏覽器不消失）
 async function _initAuth(){
   const token = _getToken();
+  console.log('[auth] _initAuth: localStorage token', token ? `存在（長度 ${token.length}）` : '不存在');
   if(!token){
     // 遊客：不強制登入，直接進入頁面
     _authUser = null;
