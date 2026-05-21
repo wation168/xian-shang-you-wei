@@ -2962,7 +2962,11 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
         try:
             mis_url = (f"https://mis.twse.com.tw/stock/api/getStockInfo.jsp"
                        f"?ex_ch={ex}_{code}.tw&json=1&delay=0")
-            mis_req = _ur.Request(mis_url, headers={"User-Agent": "Mozilla/5.0"})
+            mis_req = _ur.Request(mis_url, headers={
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                "Referer":    "https://mis.twse.com.tw/stock/index.jsp",
+                "Accept":     "application/json",
+            })
             with _ur.urlopen(mis_req, timeout=6) as resp:
                 arr = _json.loads(resp.read()).get("msgArray", [])
             if arr:
@@ -2997,8 +3001,10 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
         try:
             b_raw = _val("b")  # "32.2000_32.1500_..."
             a_raw = _val("a")  # "32.2500_32.3000_..."
-            b1 = float(b_raw.split("_")[0]) if b_raw else None
-            a1 = float(a_raw.split("_")[0]) if a_raw else None
+            _b0 = b_raw.split("_")[0].strip() if b_raw else ""
+            _a0 = a_raw.split("_")[0].strip() if a_raw else ""
+            b1 = float(_b0) if _b0 else None
+            a1 = float(_a0) if _a0 else None
             if b1 and a1:
                 price_val    = round((b1 + a1) / 2, 2)
                 open_val     = _sf(_val("o"))
@@ -3091,9 +3097,10 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
         "price_note":   None if (change is not None) else "盤後",
     }
 
-    # D. 盤後快取改 6 小時過期（原永久），避免隔天顯示過時收盤價
-    expires = (_time_mod.time() + 900) if in_session else (_time_mod.time() + 21600)
-    _QUOTE_CACHE[code] = {"data": result, "expires": expires}
+    # D. price=null 時不寫快取，避免短暫失敗鎖住 null 長達 15 分鐘
+    if price_val is not None:
+        expires = (_time_mod.time() + 900) if in_session else (_time_mod.time() + 21600)
+        _QUOTE_CACHE[code] = {"data": result, "expires": expires}
 
     return result
 
