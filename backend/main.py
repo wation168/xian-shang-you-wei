@@ -5781,12 +5781,12 @@ def sitemap():
     conn.close()
 
     locs = []
-    for u in [FRONTEND_URL + "/", FRONTEND_URL + "/landing.html", BACKEND_URL + "/rankings"]:
+    for u in [FRONTEND_URL + "/", FRONTEND_URL + "/landing.html", FRONTEND_URL + "/rankings"]:
         locs.append(f"  <url><loc>{u}</loc><changefreq>daily</changefreq><priority>0.8</priority></url>")
     for sid in _SEO_HARDCODED_STOCKS:
-        locs.append(f"  <url><loc>{BACKEND_URL}/report/{sid}</loc><changefreq>daily</changefreq><priority>0.6</priority></url>")
+        locs.append(f"  <url><loc>{FRONTEND_URL}/report/{sid}</loc><changefreq>daily</changefreq><priority>0.6</priority></url>")
     for r in reports:
-        locs.append(f"  <url><loc>{BACKEND_URL}/report/{r['stock_id']}-{r['report_date']}</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>")
+        locs.append(f"  <url><loc>{FRONTEND_URL}/report/{r['stock_id']}-{r['report_date']}</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>")
 
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     xml += "\n".join(locs) + "\n</urlset>"
