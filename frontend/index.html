@@ -904,7 +904,7 @@ document.querySelectorAll('#tfSeg .seg-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('#tfSeg .seg-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');currentTF=btn.dataset.tf;
-    if(C.bars.length)analyzeStock();
+    if(C.bars.length && _authReady)analyzeStock();
   });
 });
 document.getElementById('stockInput').addEventListener('keydown',e=>{
@@ -1397,8 +1397,8 @@ async function analyzeStock(){
   const enabled=maSettings.filter(m=>m.enabled&&m.n>0);
   const maParts=enabled.map((m,i)=>`ma${i+1}=${m.n}`).join('&');
   const url=`${getAPI()}/api/analyze/${id}?tf=${currentTF}&${maParts}`;
-  // 遊客第二次起：每日 1 次前端限制
-  if(!_authUser && localStorage.getItem('guest_visited')){
+  // 遊客第二次起：每日 1 次前端限制（有 token 就直接送，由後端決定）
+  if(!_getToken() && localStorage.getItem('guest_visited')){
     const _gk='guest_day_'+new Date().toISOString().slice(0,10);
     if(parseInt(localStorage.getItem(_gk)||'0',10)>=1){_showGuestLimitModal();return;}
   }
@@ -3148,6 +3148,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
   // 先完成 auth 初始化（await），確保 _authUser 已設定
   await _initAuth();
+  _authReady = true;
 
   // PWA 安裝提示
   initPWA();
@@ -3199,7 +3200,8 @@ function goPayFromApp(plan) {
 // ══════════════════════════════════════
 // 會員系統
 // ══════════════════════════════════════
-let _authUser = null;  // 目前登入的用戶資訊
+let _authUser = null;   // 目前登入的用戶資訊
+let _authReady = false; // DOMContentLoaded 的 _initAuth() 完成後才為 true
 
 function _getToken(){ return localStorage.getItem('auth_token'); }
 function _setToken(t){ localStorage.setItem('auth_token', t); console.log('[auth] token 已寫入 localStorage，長度:', t ? t.length : 0); }
@@ -3233,9 +3235,10 @@ async function _initAuth(){
       _updateGuestUI();
     }
   } catch(e){
-    // 網路錯誤時靜默保持現有登入狀態，不清除 token
-    // 真正 401 已在 else 分支處理
+    // 網路錯誤時不清除 token；若 localStorage 有 token 設暫態標記
+    // 讓 analyzeStock() 能正常送出請求，由後端 401 決定是否真的無效
     console.warn('auth check failed (network?), keeping token', e);
+    if(_getToken() && !_authUser) _authUser = { token_only: true };
   }
 }
 
