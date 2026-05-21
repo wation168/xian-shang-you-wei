@@ -1459,10 +1459,11 @@ async function analyzeStock(){
     });
     if(kr.ok){const kd=await kr.json();data.bars=kd.bars;data.tf=currentTF;}
   }catch(_ke){}
-  const _now=new Date();
+  const _now=new Date(Date.now()+8*3600000); // 固定 UTC+8 台灣時間，不依賴瀏覽器時區
   const _pad=n=>String(n).padStart(2,'0');
-  const _dtStr=`${_now.getFullYear()}/${_pad(_now.getMonth()+1)}/${_pad(_now.getDate())} ${_pad(_now.getHours())}:${_pad(_now.getMinutes())}`;
-  const _mktLabel=(_now.getHours()*60+_now.getMinutes()<13*60+30)?'盤中資料':'盤後資料';
+  const _dtStr=`${_now.getUTCFullYear()}/${_pad(_now.getUTCMonth()+1)}/${_pad(_now.getUTCDate())} ${_pad(_now.getUTCHours())}:${_pad(_now.getUTCMinutes())}`;
+  const _twMin=_now.getUTCHours()*60+_now.getUTCMinutes();
+  const _mktLabel=(_twMin>=9*60 && _twMin<13*60+30)?'盤中資料':'盤後資料';
   setSt(`✓ ${data.symbol}${data.stock_name?' '+data.stock_name:''} · ${_dtStr} ${_mktLabel}`,false);
   addHistory(id,data.stock_name||'',data.price,data.risk_level,data.risk_label,{
     conclusion: data.warning,
@@ -2547,17 +2548,18 @@ function updateQuoteUI(d){
     changeEl.textContent='';
   }
 
-  // LIVE 標記：盤中顯示，盤後隱藏
-  liveTag.style.display = d.is_trading ? 'inline' : 'none';
+  // LIVE 標記：盤中顯示，盤後隱藏（用 in_session，對應 /api/quote 回傳欄位）
+  liveTag.style.display = d.in_session ? 'inline' : 'none';
   const prevCloseTag = document.getElementById('quotePrevCloseTag');
   if(prevCloseTag) prevCloseTag.style.display = d.price_note ? 'inline' : 'none';
 
-  // statusBar 補充即時時間
-  if(d.is_trading && d.time){
-    const timeStr = d.time.length>=8 ? d.time.slice(0,8) : d.time;
+  // statusBar 補充台灣當前時間（/api/quote 不回傳 time 欄位，改用前端 UTC+8 時間）
+  if(d.in_session){
+    const _tw=new Date(Date.now()+8*3600000);
+    const _p=n=>String(n).padStart(2,'0');
+    const timeStr=`${_p(_tw.getUTCHours())}:${_p(_tw.getUTCMinutes())}:${_p(_tw.getUTCSeconds())}`;
     const statusEl=document.getElementById('statusBar');
     if(statusEl && !statusEl.innerHTML.includes('分析中')){
-      // 只更新尾部，不覆蓋主要訊息
       const base=statusEl.dataset.base||statusEl.innerHTML;
       statusEl.dataset.base=base;
       statusEl.innerHTML=`${base} <span style="color:var(--text3);font-size:10px">· 即時 ${timeStr}</span>`;
