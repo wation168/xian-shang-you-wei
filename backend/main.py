@@ -2907,9 +2907,9 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
     即時報價（公開 endpoint，不需登入）
     快取策略：
       盤中 09:00–13:30 → 15 分鐘過期
-      盤後 / 非交易時間 → 永久快取（不刪除，收盤價就是收盤價）
+      盤後 / 非交易時間 → 6 小時過期
     每日 09:00 排程清除全部快取，確保開盤第一筆抓新價
-    來源優先順序：FinMind tick_snapshot → TWSE MIS z → FinMind TaiwanStockPrice
+    來源優先順序：TWSE MIS z（完全免費）→ FinMind tick_snapshot → FinMind TaiwanStockPrice
     """
     import urllib.request as _ur, json as _json
 
@@ -2921,7 +2921,7 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
     cached = _QUOTE_CACHE.get(code)
     if cached:
         exp = cached["expires"]
-        if exp == 0 or now_ts < exp:  # 0 = 永久
+        if exp == 0 or now_ts < exp:
             return cached["data"]
 
     # ── 快取未命中，抓新資料 ──
@@ -2935,29 +2935,7 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
     price_val = open_val = high_val = low_val = vol_val = y_val = None
     price_source = "none"
 
-    # 1. FinMind tick_snapshot（盤中最即時）
-    try:
-        snap_url = (f"https://api.finmindtrade.com/api/v4/taiwan_stock_tick_snapshot"
-                    f"?data_id={code}&token={FINMIND_TOKEN}")
-        snap_req = _ur.Request(snap_url, headers={"User-Agent": "Mozilla/5.0"})
-        with _ur.urlopen(snap_req, timeout=6) as sr:
-            snap = _json.loads(sr.read())
-        rows = snap.get("data", [])
-        if rows:
-            r = rows[0]
-            cp = _sf(r.get("close") or r.get("price"))
-            if cp:
-                price_val    = cp
-                open_val     = _sf(r.get("open")  or cp)
-                high_val     = _sf(r.get("high")  or cp)
-                low_val      = _sf(r.get("low")   or cp)
-                vol_val      = _sf(r.get("total_volume") or r.get("volume"))
-                price_source = "tick_snapshot"
-                print(f"[QUOTE] {code} tick_snapshot price={price_val}")
-    except Exception as _e:
-        print(f"[QUOTE] tick_snapshot 失敗 {code}：{_e}")
-
-    # 2. TWSE MIS（備援，同時取昨收 y）
+    # 1. TWSE MIS（完全免費，先試 tse_ 再試 otc_）
     twse_data = None
     for ex in ("tse", "otc"):
         try:
@@ -2982,17 +2960,39 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
 
     y_val = _sf(_val("y"))  # 昨收，永遠從 TWSE 拿
 
+    z = _sf(_val("z"))
+    if z:
+        price_val    = z
+        open_val     = _sf(_val("o"))
+        high_val     = _sf(_val("h"))
+        low_val      = _sf(_val("l"))
+        vol_raw      = _val("v")
+        vol_val      = int(float(vol_raw) * 1000) if vol_raw else None
+        price_source = "twse_z"
+        print(f"[QUOTE] {code} twse_z price={price_val}")
+
+    # 2. FinMind tick_snapshot（備援，盤中即時，消耗額度）
     if price_val is None:
-        z = _sf(_val("z"))
-        if z:
-            price_val    = z
-            open_val     = _sf(_val("o"))
-            high_val     = _sf(_val("h"))
-            low_val      = _sf(_val("l"))
-            vol_raw      = _val("v")
-            vol_val      = int(float(vol_raw) * 1000) if vol_raw else None
-            price_source = "twse_z"
-            print(f"[QUOTE] {code} twse_z price={price_val}")
+        try:
+            snap_url = (f"https://api.finmindtrade.com/api/v4/taiwan_stock_tick_snapshot"
+                        f"?data_id={code}&token={FINMIND_TOKEN}")
+            snap_req = _ur.Request(snap_url, headers={"User-Agent": "Mozilla/5.0"})
+            with _ur.urlopen(snap_req, timeout=6) as sr:
+                snap = _json.loads(sr.read())
+            rows = snap.get("data", [])
+            if rows:
+                r = rows[0]
+                cp = _sf(r.get("close") or r.get("price"))
+                if cp:
+                    price_val    = cp
+                    open_val     = _sf(r.get("open")  or cp)
+                    high_val     = _sf(r.get("high")  or cp)
+                    low_val      = _sf(r.get("low")   or cp)
+                    vol_val      = _sf(r.get("total_volume") or r.get("volume"))
+                    price_source = "tick_snapshot"
+                    print(f"[QUOTE] {code} tick_snapshot price={price_val}")
+        except Exception as _e:
+            print(f"[QUOTE] tick_snapshot 失敗 {code}：{_e}")
 
     # 3. FinMind TaiwanStockPrice（最終 fallback，盤後收盤價）
     if price_val is None:
