@@ -24,6 +24,12 @@ import sqlite3, hashlib, hmac, secrets, time as _time_mod
 import json as _json_mod
 from datetime import datetime, timedelta, date as _date_cls
 import re as _re
+import ssl as _ssl
+
+# TWSE MIS 憑證缺少 Subject Key Identifier，Python 嚴格 SSL 會拒絕；共用一個 no-verify context
+_TWSE_SSL_CTX = _ssl.create_default_context()
+_TWSE_SSL_CTX.check_hostname = False
+_TWSE_SSL_CTX.verify_mode = _ssl.CERT_NONE
 
 
 # ══════════════════════════════════════════════════════════
@@ -2967,7 +2973,7 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
                 "Referer":    "https://mis.twse.com.tw/stock/index.jsp",
                 "Accept":     "application/json",
             })
-            with _ur.urlopen(mis_req, timeout=6) as resp:
+            with _ur.urlopen(mis_req, timeout=6, context=_TWSE_SSL_CTX) as resp:
                 arr = _json.loads(resp.read()).get("msgArray", [])
             if arr:
                 z_raw = str(arr[0].get("z", "-")).strip()
