@@ -1075,7 +1075,7 @@ async function _fetchWatchBatch(){
       for(const chunk of chunks){
         await Promise.all(chunk.map(async id=>{
           try{
-            const r=await fetch(`${base}/api/analyze/${id}?tf=D`,{signal:AbortSignal.timeout(8000),headers:_authHeaders?_authHeaders():{}});
+            const r=await fetch(`${base}/api/analyze/${id}`,{signal:AbortSignal.timeout(8000),headers:_authHeaders?_authHeaders():{}});
             if(r.ok) results[id]=await r.json();
           }catch{}
         }));
@@ -2494,7 +2494,7 @@ async function fetchAndUpdateQuote(stockId){
   if(!_inSession){ scheduleNext(stockId, false); return; }
 
   try{
-    const r = await fetch(`${getAPI()}/api/quote/live/${code}`, {signal:AbortSignal.timeout(8000)});
+    const r = await fetch(`${getAPI()}/api/quote/${code}`, {signal:AbortSignal.timeout(8000)});
     if(!r.ok){ scheduleNext(stockId, true); return; }
     const d = await r.json();
     console.log('[QUOTE-FRONT] live z=', d.z, 'y=', d.y);

@@ -3567,57 +3567,44 @@ def get_all_stock_info() -> list:
 def search_stock(q: str, limit: int = 10, user: dict = Depends(require_user)):
     """
     股票搜尋：支援代號（2330）或中文名稱（台積電、律勝）
-    回傳最多 limit 筆匹配結果
+    直接從啟動時載入的 _name_cache 記憶體搜尋，完全不打 FinMind
     """
     q = q.strip()
     if not q:
         return {"results": []}
 
-    all_stocks = get_all_stock_info()
-
-    # 先用 STOCK_NAMES 對照表補充（確保常用股都查得到）
-    static_map = {v: k for k, v in STOCK_NAMES.items()}  # 名稱 → 代號
-
-    results = []
     q_lower = q.lower()
+    results = []
+    seen: set = set()
 
-    # 1. 完全匹配代號（最高優先）
-    exact = [s for s in all_stocks
-             if str(s.get("stock_id","")).lower() == q_lower]
-
-    # 2. 代號前綴匹配（如輸入 "235"）
-    prefix_id = [s for s in all_stocks
-                 if str(s.get("stock_id","")).startswith(q)
-                 and str(s.get("stock_id","")).lower() != q_lower]
-
-    # 3. 名稱包含關鍵字
-    name_match = [s for s in all_stocks
-                  if q in str(s.get("stock_name",""))
-                  and str(s.get("stock_id","")).lower() != q_lower]
-
-    # 合併去重，只取4碼純數字股票（排除ETF代號過長）
-    seen = set()
-    for s in exact + prefix_id + name_match:
-        sid = str(s.get("stock_id",""))
+    def _add(sid: str, sname: str):
         if sid in seen:
-            continue
+            return
         if not sid.isdigit() or len(sid) not in (4, 5, 6):
-            continue
+            return
         seen.add(sid)
         results.append({
             "stock_id":   sid,
-            "stock_name": s.get("stock_name",""),
-            "type":       s.get("type",""),
+            "stock_name": sname,
+            "type":       _market_cache.get(sid, ""),
         })
-        if len(results) >= limit:
-            break
 
-    # fallback：若 FinMind 沒資料，用靜態對照表
-    if not results:
-        for name, sid in static_map.items():
-            if q in name or q in sid:
-                results.append({"stock_id": sid, "stock_name": name, "type": ""})
-        results = results[:limit]
+    # 1. 完全匹配代號（最高優先）
+    for sid, sname in _name_cache.items():
+        if sid.lower() == q_lower:
+            _add(sid, sname)
+
+    # 2. 代號前綴（如輸入 "235"）
+    for sid, sname in _name_cache.items():
+        if len(results) >= limit: break
+        if sid.startswith(q) and sid.lower() != q_lower:
+            _add(sid, sname)
+
+    # 3. 名稱包含關鍵字
+    for sid, sname in _name_cache.items():
+        if len(results) >= limit: break
+        if q in sname and sid.lower() != q_lower:
+            _add(sid, sname)
 
     return {"query": q, "results": results}
 
