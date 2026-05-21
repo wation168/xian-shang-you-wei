@@ -1011,29 +1011,85 @@ def detect_kline_patterns(closes, opens, highs, lows, volumes):
     n = len(closes)
     if n < 3:
         return "常態 K 線（無觸發極端型態）", 0.50
+
     c0, o0, h0, l0, v0 = closes[-1], opens[-1], highs[-1], lows[-1], volumes[-1]
-    body_size0    = abs(c0 - o0)
+    c1, o1, h1, l1     = closes[-2], opens[-2], highs[-2], lows[-2]
+    c2, o2, h2, l2     = closes[-3], opens[-3], highs[-3], lows[-3]
+
+    body0         = abs(c0 - o0)
+    body1         = abs(c1 - o1)
+    body2         = abs(c2 - o2)
     upper_shadow0 = h0 - max(c0, o0)
     lower_shadow0 = min(c0, o0) - l0
     range0        = max(h0 - l0, 0.001)
-    avg_vol       = sum(volumes[-6:-1]) / 5 if n >= 6 else (sum(volumes[:-1]) / max(len(volumes)-1, 1))
-    vol_surge     = v0 > avg_vol * 1.3
-    is_downtrend  = closes[-1] < closes[-5] if n >= 5 else False
-    is_uptrend    = closes[-1] > closes[-5] if n >= 5 else False
-    if vol_surge and (body_size0 >= range0 * 0.5) and (c0 > o0):
+    range1        = max(h1 - l1, 0.001)
+    range2        = max(h2 - l2, 0.001)
+
+    avg_vol      = sum(volumes[-6:-1]) / 5 if n >= 6 else (sum(volumes[:-1]) / max(len(volumes)-1, 1))
+    vol_surge    = v0 > avg_vol * 1.3
+    is_downtrend = closes[-1] < closes[-5] if n >= 5 else False
+    is_uptrend   = closes[-1] > closes[-5] if n >= 5 else False
+
+    # 1. 量增大紅棒 / 量增大黑棒（最優先）
+    if vol_surge and (body0 >= range0 * 0.5) and (c0 > o0):
         return "量增大紅棒（突破確認）", 0.62
-    if vol_surge and (body_size0 >= range0 * 0.5) and (c0 < o0):
+    if vol_surge and (body0 >= range0 * 0.5) and (c0 < o0):
         return "量增大黑棒（跌破確認）", 0.62
-    # 錘子線：下影線夠長（>=40%全幅）、下影線>=實體1.5倍、上影線短（<=20%全幅）
+
+    # 2. 連三紅 / 連三黑（三根連續同向收盤遞升/遞降）
+    if (c0 > o0) and (c1 > o1) and (c2 > o2) and c0 > c1 and c1 > c2:
+        return "連三紅（多頭強勢格局）", 0.60
+    if (c0 < o0) and (c1 < o1) and (c2 < o2) and c0 < c1 and c1 < c2:
+        return "連三黑（空頭強勢格局）", 0.60
+
+    # 3. 早晨之星（下跌後底部三根反轉：大黑→小實體→大紅）
+    if (is_downtrend
+            and c2 < o2 and body2 >= range2 * 0.4    # 第1棒：實體夠大的黑棒
+            and body1 <= range1 * 0.3                 # 第2棒（星）：小實體
+            and c0 > o0                                # 第3棒：紅棒
+            and c0 > (c2 + o2) / 2):                  # 第3棒收盤超過第1棒中點
+        return "早晨之星（底部反轉訊號）", 0.60
+
+    # 4. 黃昏之星（上漲後頂部三根反轉：大紅→小實體→大黑）
+    if (is_uptrend
+            and c2 > o2 and body2 >= range2 * 0.4    # 第1棒：實體夠大的紅棒
+            and body1 <= range1 * 0.3                 # 第2棒（星）：小實體
+            and c0 < o0                                # 第3棒：黑棒
+            and c0 < (c2 + o2) / 2):                  # 第3棒收盤低於第1棒中點
+        return "黃昏之星（頂部反轉訊號）", 0.60
+
+    # 5. 多頭吞噬（前黑棒被今紅棒完全吞噬，下跌趨勢中）
+    if (is_downtrend
+            and c1 < o1               # 前棒：黑
+            and c0 > o0               # 今棒：紅
+            and o0 <= c1              # 今開 ≤ 前收
+            and c0 >= o1):            # 今收 ≥ 前開（完全吞噬）
+        return "多頭吞噬（強力底部訊號）", 0.58
+
+    # 6. 空頭吞噬（前紅棒被今黑棒完全吞噬，上升趨勢中）
+    if (is_uptrend
+            and c1 > o1               # 前棒：紅
+            and c0 < o0               # 今棒：黑
+            and o0 >= c1              # 今開 ≥ 前收
+            and c0 <= o1):            # 今收 ≤ 前開（完全吞噬）
+        return "空頭吞噬（強力頂部訊號）", 0.58
+
+    # 7. 錘子線：下影線夠長（>=40%全幅）、下影線>=實體1.5倍、上影線短（<=20%全幅）
     if (is_downtrend and (lower_shadow0 >= range0 * 0.4)
-            and (lower_shadow0 >= body_size0 * 1.5)
+            and (lower_shadow0 >= body0 * 1.5)
             and (upper_shadow0 <= range0 * 0.2)):
         return "低檔錘子線（底部承接力道強）", 0.53
-    # 流星線：上影線夠長（>=40%全幅）、上影線>=實體1.5倍、下影線短（<=20%全幅）
+
+    # 8. 流星線：上影線夠長（>=40%全幅）、上影線>=實體1.5倍、下影線短（<=20%全幅）
     if (is_uptrend and (upper_shadow0 >= range0 * 0.4)
-            and (upper_shadow0 >= body_size0 * 1.5)
+            and (upper_shadow0 >= body0 * 1.5)
             and (lower_shadow0 <= range0 * 0.2)):
         return "高檔流星線（多頭上攻力竭）", 0.53
+
+    # 9. 十字星 Doji（實體 ≤ 全幅 10%，多空分歧）
+    if body0 <= range0 * 0.1:
+        return "十字星 Doji（多空分歧，等待方向確認）", 0.52
+
     return "常態 K 線（無觸發極端型態）", 0.50
 
 
@@ -4913,51 +4969,117 @@ def _fetch_stock_news(stock_id: str, max_results: int = 3) -> list:
 
 def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict,
                        news_items: list = None) -> str:
-    price      = d.get("price", 0)
-    trend      = d.get("trend", "盤整")
-    risk_level = d.get("risk_level", "medium")
-    risk_label = d.get("risk_label", "中風險")
-    support    = d.get("support", 0)
-    resistance = d.get("resistance", 0)
-    stop_loss  = d.get("stop_loss", 0)
-    rr_ratio   = d.get("risk_reward", 0)
-    kbar_pattern = d.get("kbar_pattern", "")
+    # ── 取欄位 ──
+    price         = d.get("price", 0)
+    trend         = d.get("trend", "盤整")
+    risk_level    = d.get("risk_level", "medium")
+    risk_label    = d.get("risk_label", "中風險")
+    support       = d.get("support", 0)
+    resistance    = d.get("resistance", 0)
+    stop_loss     = d.get("stop_loss", 0)
+    rr_ratio      = d.get("risk_reward", 0)
+    kbar_pattern  = d.get("kbar_pattern", "")
+    kbar_action   = d.get("kbar_action", "")
+    kbar_warning  = d.get("kbar_warning", "")
     kline_pattern = d.get("kline_pattern", "")
-    win_rate   = d.get("win_rate", 0.5)
-    supp_desc  = d.get("support_desc", "")
-    res_desc   = d.get("resistance_desc", "")
+    win_rate      = d.get("win_rate", 0.5)
+    supp_desc     = d.get("support_desc", "")
+    res_desc      = d.get("resistance_desc", "")
+    market        = _market_cache.get(stock_id, "")
+    market_label  = "上市" if market == "tse" else ("上櫃" if market == "otc" else "")
 
-    # 9 text rules
-    bullets = []
-    if trend == "上升趨勢":
-        bullets.append("均線三線多頭排列（MA5>MA20>MA60），中長期趨勢偏強，回測支撐是買點。")
-    elif trend == "下降趨勢":
-        bullets.append("均線三線空頭排列（MA5<MA20<MA60），技術結構偏弱，反彈壓力是出場點。")
-    else:
-        bullets.append("均線糾結，多空交戰，暫無明確方向，宜等待突破訊號。")
+    # 深度分析欄位
+    ma_alignment = d.get("ma_alignment") or {}
+    kd_status    = d.get("kd_status") or {}
+    macd_status  = d.get("macd_status") or {}
+    vol_analysis = d.get("vol_analysis") or {}
+    risk_factors = d.get("risk_factors") or []
 
-    if rr_ratio >= 2:
-        bullets.append(f"損益比 {rr_ratio:.2f}，風險報酬比良好，值得評估進場。")
-    elif rr_ratio >= 1:
-        bullets.append(f"損益比 {rr_ratio:.2f}，風險報酬尚可，需謹慎評估。")
-    else:
-        bullets.append(f"損益比 {rr_ratio:.2f}，風險大於報酬，不建議此位置進場。")
-
-    bullets.append(f"支撐位 {support}（{supp_desc}），壓力位 {resistance}（{res_desc}）。")
-    bullets.append(f"操作防守位 {stop_loss}，跌破需停損出場。")
-
-    if kbar_pattern:
-        bullets.append(f"最新K棒型態：{kbar_pattern}，操作方向參考型態訊號。")
-    if kline_pattern and "常態" not in kline_pattern:
-        bullets.append(f"K線大數據型態：{kline_pattern}（歷史勝率 {int(win_rate*100)}%）。")
-
+    # ── 色彩計算 ──
     risk_colors = {"low": "#3b82f6", "medium": "#fbbf24", "high": "#f87171"}
-    risk_color = risk_colors.get(risk_level, "#fbbf24")
+    risk_color  = risk_colors.get(risk_level, "#fbbf24")
+    ma_dir      = ma_alignment.get("direction", "neutral")
+    ma_text     = ma_alignment.get("text", trend)
+    ma_color    = "#4ade80" if ma_dir == "bullish" else ("#f87171" if ma_dir == "bearish" else "#fbbf24")
+    kd_dir      = kd_status.get("direction", "neutral")
+    kd_text     = kd_status.get("text", "")
+    kd_color    = "#4ade80" if kd_dir in ("bullish",) else ("#f87171" if kd_dir == "bearish" else "#fbbf24")
+    macd_dir    = macd_status.get("direction", "neutral")
+    macd_text   = macd_status.get("text", "")
+    macd_color  = {"bullish": "#4ade80", "slightly_bullish": "#86efac",
+                   "bearish": "#f87171", "slightly_bearish": "#fca5a5"}.get(macd_dir, "#8faabf")
+    vol_text    = vol_analysis.get("text", "")
+    rr_color    = "#4ade80" if rr_ratio >= 2 else ("#fbbf24" if rr_ratio >= 1 else "#f87171")
+    wr_pct      = int(win_rate * 100)
+    wr_color    = "#4ade80" if wr_pct >= 56 else ("#fbbf24" if wr_pct >= 52 else "#8faabf")
+    kp_bullish  = any(x in kline_pattern for x in ["多頭", "早晨", "錘子", "突破", "量增大紅", "連三紅"])
+    kp_bearish  = any(x in kline_pattern for x in ["空頭", "黃昏", "流星", "跌破", "量增大黑", "連三黑"])
+    kp_color    = "#4ade80" if kp_bullish else ("#f87171" if kp_bearish else "#fbbf24")
 
-    bullets_html = "".join(
-        f'<li style="padding:8px 0;border-bottom:1px solid #1e3a5a;font-size:14px;line-height:1.7;color:#e8e0d0">{b}</li>'
-        for b in bullets
+    # ── 距離 % ──
+    sup_dist  = round((price - support)    / price * 100, 1) if price and support    else 0
+    res_dist  = round((resistance - price) / price * 100, 1) if price and resistance else 0
+    stop_dist = round((price - stop_loss)  / price * 100, 1) if price and stop_loss  else 0
+
+    # ── 趨勢文字 ──
+    if trend == "上升趨勢":
+        trend_desc = "均線三線多頭排列，短均站在長均之上，回測均線是買點；趨勢未明確反轉前，以順勢操作為主。"
+    elif trend == "下降趨勢":
+        trend_desc = "均線三線空頭排列，短均在長均之下，反彈壓力明顯；逆勢做多風險較高，等待趨勢反轉再評估。"
+    else:
+        trend_desc = "均線糾結，多空交戰，方向未明；宜等待均線方向明確或突破關鍵位後再跟進。"
+
+    # ── 操作建議文字 ──
+    if kbar_action:
+        op_text = kbar_action
+    elif trend == "上升趨勢" and rr_ratio >= 2:
+        op_text = f"趨勢向上，損益比 {rr_ratio:.2f} 合理。可在支撐 {support} 附近設防守位 {stop_loss} 試多，目標壓力 {resistance}。"
+    elif trend == "下降趨勢" or rr_ratio < 1:
+        op_text = f"趨勢偏弱或損益比 {rr_ratio:.2f} 不理想，建議觀望。等待趨勢反轉訊號，跌破 {stop_loss} 嚴格停損。"
+    else:
+        op_text = f"趨勢盤整，等待方向確認。關注能否突破壓力 {resistance}，防守位 {stop_loss}，損益比 {rr_ratio:.2f}。"
+
+    # ── 預先組裝條件性 HTML 片段 ──
+    market_tag_html = (
+        f'<span class="tag" style="background:#1e3a5a;color:#8faabf;margin-left:6px">{market_label}</span>'
+        if market_label else ""
     )
+    kbar_tag_html = (
+        f'<div style="margin-bottom:10px"><span class="tag" style="background:#1e3a5a;color:#e8e0d0">{kbar_pattern}</span></div>'
+        if kbar_pattern else ""
+    )
+    kbar_warning_html = (
+        f'<div style="font-size:13px;color:#fbbf24;line-height:1.6;margin-bottom:10px">{kbar_warning}</div>'
+        if kbar_warning else ""
+    )
+    kbar_action_html = (
+        f'<div style="margin-top:10px;padding:10px;background:#0f1923;border-radius:8px;'
+        f'font-size:13px;color:#e8e0d0;line-height:1.6">{kbar_action}</div>'
+        if kbar_action else ""
+    )
+    kd_row_html = (
+        f'<div class="irow"><div class="idot" style="background:{kd_color}"></div>'
+        f'<div style="font-size:13px;line-height:1.6;color:#e8e0d0">'
+        f'<span style="color:#6b8fbf;font-size:11px">KD｜</span>{kd_text}</div></div>'
+        if kd_text else ""
+    )
+    macd_row_html = (
+        f'<div class="irow"><div class="idot" style="background:{macd_color}"></div>'
+        f'<div style="font-size:13px;line-height:1.6;color:#e8e0d0">'
+        f'<span style="color:#6b8fbf;font-size:11px">MACD｜</span>{macd_text}</div></div>'
+        if macd_text else ""
+    )
+    vol_row_html = (
+        f'<div class="irow" style="border-bottom:none"><div class="idot" style="background:#8faabf"></div>'
+        f'<div style="font-size:13px;line-height:1.6;color:#e8e0d0">'
+        f'<span style="color:#6b8fbf;font-size:11px">量能｜</span>{vol_text}</div></div>'
+        if vol_text else ""
+    )
+    risk_items_html = "".join(
+        f'<li style="padding:6px 0;border-bottom:1px solid #1e3a5a;font-size:13px;color:#e8e0d0;line-height:1.6">'
+        f'&#9651; {r}</li>'
+        for r in risk_factors
+    ) if risk_factors else '<li style="padding:6px 0;font-size:13px;color:#8faabf">無明顯技術面警示</li>'
 
     if news_items:
         news_rows = "".join(
@@ -4967,10 +5089,10 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
             for n in news_items
         )
         news_html = (
-            '<div class="card">'
-            '<div style="font-size:15px;font-weight:700;margin-bottom:12px;color:#3b82f6">相關新聞</div>'
+            '<section class="card">'
+            '<h2>相關新聞</h2>'
             f'<ul style="list-style:none">{news_rows}</ul>'
-            '</div>'
+            '</section>'
         )
     else:
         news_html = ""
@@ -4981,7 +5103,7 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
         "headline": f"{stock_id} {stock_name} 個股分析報告",
         "datePublished": report_date,
         "publisher": {"@type": "Organization", "name": "線上有位"},
-        "description": f"{stock_id} {stock_name} {report_date} 技術分析：{trend}，支撐 {support}，壓力 {resistance}",
+        "description": f"{stock_id} {stock_name} {report_date} 技術分析：{trend}，支撐 {support}，壓力 {resistance}，損益比 {rr_ratio:.2f}",
     }, ensure_ascii=False)
 
     return f"""<!DOCTYPE html>
@@ -5001,6 +5123,13 @@ body{{background:#0f1923;color:#e8e0d0;font-family:-apple-system,'Noto Sans TC',
 .container{{max-width:720px;margin:0 auto}}
 .card{{background:#1a2634;border-radius:14px;padding:20px;margin-bottom:16px}}
 .tag{{display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:8px}}
+.row{{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}}
+.stat{{background:#0f1923;border-radius:10px;padding:12px;flex:1;min-width:90px}}
+.stat-label{{font-size:11px;color:#6b8fbf;margin-bottom:4px}}
+.stat-value{{font-size:18px;font-weight:700}}
+.irow{{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid #1e3a5a}}
+.idot{{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}}
+h2{{font-size:15px;font-weight:700;margin-bottom:14px;color:#3b82f6}}
 a{{color:#3b82f6;text-decoration:none}}
 a:hover{{text-decoration:underline}}
 </style>
@@ -5008,45 +5137,120 @@ a:hover{{text-decoration:underline}}
 <body>
 <div class="container">
   <div style="margin-bottom:20px">
-    <a href="{FRONTEND_URL}" style="font-size:13px;color:#6b8fbf">← 線上有位</a>
+    <a href="{FRONTEND_URL}" style="font-size:13px;color:#6b8fbf">&#8592; 線上有位</a>
   </div>
-  <div class="card">
-    <span class="tag" style="background:{risk_color}22;color:{risk_color}">{risk_label}</span>
+
+  <!-- 1. 基本資訊 -->
+  <section class="card" id="basic-info">
+    <span class="tag" style="background:{risk_color}22;color:{risk_color}">{risk_label}</span>{market_tag_html}
     <div style="font-size:26px;font-weight:700;margin-bottom:4px">{stock_id} {stock_name}</div>
     <div style="font-size:13px;color:#8faabf;margin-bottom:16px">分析日期：{report_date}</div>
-    <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px">
-      <div>
-        <div style="font-size:11px;color:#6b8fbf;margin-bottom:2px">現價</div>
-        <div style="font-size:28px;font-weight:700" id="livePrice">{price}</div>
+    <div class="row">
+      <div class="stat">
+        <div class="stat-label">現價</div>
+        <div class="stat-value" id="livePrice">{price}</div>
         <div style="font-size:13px;margin-top:3px;min-height:18px" id="liveChange"></div>
       </div>
-      <div><div style="font-size:11px;color:#6b8fbf;margin-bottom:2px">趨勢</div><div style="font-size:20px;font-weight:700">{trend}</div></div>
-      <div><div style="font-size:11px;color:#6b8fbf;margin-bottom:2px">損益比</div><div style="font-size:20px;font-weight:700">{rr_ratio:.2f}</div></div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div style="background:#0f1923;border-radius:10px;padding:12px">
-        <div style="font-size:11px;color:#6b8fbf;margin-bottom:4px">支撐位</div>
-        <div style="font-size:18px;font-weight:700;color:#3b82f6">{support}</div>
-        <div style="font-size:11px;color:#6b8fbf;margin-top:2px">{supp_desc}</div>
+      <div class="stat">
+        <div class="stat-label">趨勢</div>
+        <div class="stat-value" style="font-size:15px;color:{ma_color}">{trend}</div>
       </div>
-      <div style="background:#0f1923;border-radius:10px;padding:12px">
-        <div style="font-size:11px;color:#6b8fbf;margin-bottom:4px">壓力位</div>
-        <div style="font-size:18px;font-weight:700;color:#fbbf24">{resistance}</div>
-        <div style="font-size:11px;color:#6b8fbf;margin-top:2px">{res_desc}</div>
+      <div class="stat">
+        <div class="stat-label">損益比</div>
+        <div class="stat-value" style="color:{rr_color}">{rr_ratio:.2f}</div>
       </div>
     </div>
-  </div>
-  <div class="card">
-    <div style="font-size:15px;font-weight:700;margin-bottom:12px;color:#3b82f6">技術分析摘要</div>
-    <ul style="list-style:none">{bullets_html}</ul>
-  </div>
+  </section>
+
+  <!-- 2. 技術位置 -->
+  <section class="card" id="tech-position">
+    <h2>技術位置</h2>
+    <div class="row">
+      <div class="stat">
+        <div class="stat-label">支撐位</div>
+        <div class="stat-value" style="color:#3b82f6">{support}</div>
+        <div style="font-size:11px;color:#6b8fbf;margin-top:2px">{supp_desc}，距現價 -{sup_dist}%</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">壓力位</div>
+        <div class="stat-value" style="color:#fbbf24">{resistance}</div>
+        <div style="font-size:11px;color:#6b8fbf;margin-top:2px">{res_desc}，距現價 +{res_dist}%</div>
+      </div>
+    </div>
+    <div style="background:#0f1923;border-radius:10px;padding:12px">
+      <div class="stat-label" style="margin-bottom:4px">操作防守位（停損線）</div>
+      <div style="font-size:18px;font-weight:700;color:#f87171">{stop_loss}</div>
+      <div style="font-size:11px;color:#6b8fbf;margin-top:2px">距現價 -{stop_dist}%，跌破需停損出場</div>
+    </div>
+  </section>
+
+  <!-- 3. 趨勢判斷 -->
+  <section class="card" id="trend-analysis">
+    <h2>趨勢判斷</h2>
+    <div class="irow">
+      <div class="idot" style="background:{ma_color}"></div>
+      <div style="font-size:13px;line-height:1.6;color:#e8e0d0">{ma_text}</div>
+    </div>
+    <div style="padding:10px 0 0;font-size:13px;line-height:1.7;color:#8faabf">{trend_desc}</div>
+  </section>
+
+  <!-- 4. K線型態 -->
+  <section class="card" id="kline-pattern">
+    <h2>K線型態</h2>
+    {kbar_tag_html}{kbar_warning_html}
+    <div class="irow" style="border-bottom:none">
+      <div class="idot" style="background:{kp_color}"></div>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:{kp_color};margin-bottom:2px">{kline_pattern or "常態 K 線"}</div>
+        <div style="font-size:12px;color:#6b8fbf">大數據歷史勝率 <span style="color:{wr_color};font-weight:700">{wr_pct}%</span></div>
+      </div>
+    </div>
+    {kbar_action_html}
+  </section>
+
+  <!-- 5. 動能指標 -->
+  <section class="card" id="momentum">
+    <h2>動能指標</h2>
+    {kd_row_html}{macd_row_html}{vol_row_html}
+  </section>
+
+  <!-- 6. 風險評估 -->
+  <section class="card" id="risk-assessment">
+    <h2>風險評估</h2>
+    <div class="row" style="margin-bottom:12px">
+      <div class="stat" style="flex:0 0 auto">
+        <div class="stat-label">風險等級</div>
+        <div class="stat-value" style="color:{risk_color}">{risk_label}</div>
+      </div>
+      <div class="stat" style="flex:0 0 auto">
+        <div class="stat-label">損益比</div>
+        <div class="stat-value" style="color:{rr_color}">{rr_ratio:.2f}</div>
+        <div style="font-size:11px;color:#6b8fbf;margin-top:2px">{"良好" if rr_ratio >= 2 else ("尚可" if rr_ratio >= 1 else "偏低")}</div>
+      </div>
+    </div>
+    <ul style="list-style:none">{risk_items_html}</ul>
+  </section>
+
+  <!-- 7. 操作建議 -->
+  <section class="card" id="operation-advice">
+    <h2>操作建議</h2>
+    <div style="font-size:14px;line-height:1.8;color:#e8e0d0;padding:12px;background:#0f1923;border-radius:10px">{op_text}</div>
+    <div style="margin-top:12px;display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:#6b8fbf">
+      <span>停損：<strong style="color:#f87171">{stop_loss}</strong></span>
+      <span>支撐：<strong style="color:#3b82f6">{support}</strong></span>
+      <span>壓力：<strong style="color:#fbbf24">{resistance}</strong></span>
+    </div>
+  </section>
+
   {news_html}
-  <div class="card" style="text-align:center">
+
+  <section class="card" style="text-align:center">
     <div style="font-size:14px;color:#8faabf;margin-bottom:12px">查看完整互動圖表與即時報價</div>
-    <a href="{FRONTEND_URL}?q={stock_id}" style="display:inline-block;background:#3b82f6;color:#fff;padding:12px 28px;border-radius:30px;font-weight:700;font-size:15px">前往線上有位 →</a>
-  </div>
+    <a href="{FRONTEND_URL}?q={stock_id}" style="display:inline-block;background:#3b82f6;color:#fff;padding:12px 28px;border-radius:30px;font-weight:700;font-size:15px">前往線上有位 &#8594;</a>
+  </section>
+
   <div style="font-size:11px;color:#4a6a8f;text-align:center;margin-top:16px;line-height:1.6">
-    ⚠️ 本報告僅供參考，不構成買賣建議。投資有風險，請自行評估。
+    &#9888; 本報告僅供參考，不構成買賣建議。投資有風險，請自行評估。
   </div>
 </div>
 <script>
@@ -5057,7 +5261,7 @@ a:hover{{text-decoration:underline}}
     fetch(API + "/api/quote/" + STOCK)
       .then(function(r){{ return r.json(); }})
       .then(function(d){{
-        if (d.price == null) return;  // B. 允許 price=0 也更新
+        if (d.price == null) return;
         document.getElementById("livePrice").textContent = d.price;
         var chg = d.change, pct = d.change_pct;
         if (chg !== null && chg !== undefined && pct !== null && pct !== undefined){{
@@ -5067,13 +5271,13 @@ a:hover{{text-decoration:underline}}
             '<span style="color:' + color + '">' + sign + chg.toFixed(2) +
             ' (' + sign + pct.toFixed(2) + '%)</span>';
         }} else if (d.price_note) {{
-          document.getElementById("liveChange").textContent = d.price_note;  // E.
+          document.getElementById("liveChange").textContent = d.price_note;
         }}
         if (d.in_session){{
           setTimeout(fetchQuote, 15 * 60 * 1000);
         }}
       }})
-      .catch(function(e){{ console.warn('[quote]', e); }});  // C.
+      .catch(function(e){{ console.warn('[quote]', e); }});
   }}
   fetchQuote();
 }})();
