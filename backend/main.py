@@ -4919,7 +4919,11 @@ a:hover{{text-decoration:underline}}
     <div style="font-size:26px;font-weight:700;margin-bottom:4px">{stock_id} {stock_name}</div>
     <div style="font-size:13px;color:#8faabf;margin-bottom:16px">分析日期：{report_date}</div>
     <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px">
-      <div><div style="font-size:11px;color:#6b8fbf;margin-bottom:2px">現價</div><div style="font-size:28px;font-weight:700">{price}</div></div>
+      <div>
+        <div style="font-size:11px;color:#6b8fbf;margin-bottom:2px">現價</div>
+        <div style="font-size:28px;font-weight:700" id="livePrice">{price}</div>
+        <div style="font-size:13px;margin-top:3px;min-height:18px" id="liveChange"></div>
+      </div>
       <div><div style="font-size:11px;color:#6b8fbf;margin-bottom:2px">趨勢</div><div style="font-size:20px;font-weight:700">{trend}</div></div>
       <div><div style="font-size:11px;color:#6b8fbf;margin-bottom:2px">損益比</div><div style="font-size:20px;font-weight:700">{rr_ratio:.2f}</div></div>
     </div>
@@ -4949,6 +4953,33 @@ a:hover{{text-decoration:underline}}
     ⚠️ 本報告僅供參考，不構成買賣建議。投資有風險，請自行評估。
   </div>
 </div>
+<script>
+(function(){{
+  var STOCK = "{stock_id}";
+  var API   = "{BACKEND_URL}";
+  function fetchQuote(){{
+    fetch(API + "/api/quote/" + STOCK)
+      .then(function(r){{ return r.json(); }})
+      .then(function(d){{
+        if (!d.price) return;
+        document.getElementById("livePrice").textContent = d.price;
+        var chg = d.change, pct = d.change_pct;
+        if (chg !== null && chg !== undefined && pct !== null && pct !== undefined){{
+          var sign  = chg >= 0 ? "+" : "";
+          var color = chg >= 0 ? "#4ade80" : "#f87171";
+          document.getElementById("liveChange").innerHTML =
+            '<span style="color:' + color + '">' + sign + chg.toFixed(2) +
+            ' (' + sign + pct.toFixed(2) + '%)</span>';
+        }}
+        if (d.in_session){{
+          setTimeout(fetchQuote, 15 * 60 * 1000);
+        }}
+      }})
+      .catch(function(){{}});
+  }}
+  fetchQuote();
+}})();
+</script>
 </body>
 </html>"""
 
