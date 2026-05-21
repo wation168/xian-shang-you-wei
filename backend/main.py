@@ -3007,11 +3007,24 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
         try:
             b_raw = _val("b")  # "32.2000_32.1500_..."
             a_raw = _val("a")  # "32.2500_32.3000_..."
-            _b0 = b_raw.split("_")[0].strip() if b_raw else ""
-            _a0 = a_raw.split("_")[0].strip() if a_raw else ""
-            b1 = float(_b0) if _b0 else None
-            a1 = float(_a0) if _a0 else None
-            if b1 and a1:
+            # 取第一檔：跳過 0.0000（漲停時市價單的 TWSE 編碼）
+            def _first_nonzero(raw):
+                if not raw:
+                    return None
+                for part in raw.split("_"):
+                    part = part.strip()
+                    if not part:
+                        continue
+                    try:
+                        v = float(part)
+                        if v > 0:
+                            return v
+                    except ValueError:
+                        pass
+                return None
+            b1 = _first_nonzero(b_raw)
+            a1 = _first_nonzero(a_raw)
+            if b1 is not None and a1 is not None:
                 price_val    = round((b1 + a1) / 2, 2)
                 open_val     = _sf(_val("o"))
                 high_val     = _sf(_val("h"))
@@ -3020,10 +3033,36 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
                 vol_val      = int(float(vol_raw) * 1000) if vol_raw else None
                 price_source = "twse_mid"
                 print(f"[QUOTE] {code} twse_mid b={b1} a={a1} mid={price_val}")
-            elif in_session:
-                z_raw_dbg = twse_data.get("z", "NO_FIELD") if twse_data else "NO_DATA"
-                n_dbg     = twse_data.get("n", "?")         if twse_data else "?"
-                print(f"[QUOTE] {code}（{n_dbg}）b/a 也無值 z='{z_raw_dbg}'，需走 FinMind 備援")
+            else:
+                # 漲停（a='-'）或跌停（b='-'）：用 u/w 欄位直接取極限價
+                u_val = _sf(_val("u"))  # 漲停參考價
+                w_val = _sf(_val("w"))  # 跌停參考價
+                h_val = _sf(_val("h"))
+                l_val = _sf(_val("l"))
+                if a1 is None and u_val and h_val and abs(h_val - u_val) < 0.01:
+                    # 漲停：委賣消失 + 今日最高 = 漲停價
+                    price_val    = u_val
+                    open_val     = _sf(_val("o"))
+                    high_val     = h_val
+                    low_val      = l_val
+                    vol_raw      = _val("v")
+                    vol_val      = int(float(vol_raw) * 1000) if vol_raw else None
+                    price_source = "twse_limit_up"
+                    print(f"[QUOTE] {code} 漲停 price={price_val}")
+                elif b1 is None and w_val and l_val and abs(l_val - w_val) < 0.01:
+                    # 跌停：委買消失 + 今日最低 = 跌停價
+                    price_val    = w_val
+                    open_val     = _sf(_val("o"))
+                    high_val     = h_val
+                    low_val      = l_val
+                    vol_raw      = _val("v")
+                    vol_val      = int(float(vol_raw) * 1000) if vol_raw else None
+                    price_source = "twse_limit_down"
+                    print(f"[QUOTE] {code} 跌停 price={price_val}")
+                elif in_session:
+                    z_raw_dbg = twse_data.get("z", "NO_FIELD") if twse_data else "NO_DATA"
+                    n_dbg     = twse_data.get("n", "?")         if twse_data else "?"
+                    print(f"[QUOTE] {code}（{n_dbg}）b/a 無有效值 z='{z_raw_dbg}'，需走 FinMind 備援")
         except Exception as _mid_e:
             print(f"[QUOTE] {code} twse_mid 計算失敗：{_mid_e}")
 
