@@ -1486,9 +1486,12 @@ const fmt=n=>(+n).toFixed(2);
 
 function _animateNumber(el, target, decimals, duration){
   if(!el) return;
+  // m-price 動畫版本號：updateQuoteUI 呼叫時遞增，RAF 偵測到不一致就停止
+  const ver = (el.id === 'm-price') ? ++_priceAnimVer : 0;
   const start = performance.now();
   const from = parseFloat(el.textContent) || 0;
   (function tick(now){
+    if(el.id === 'm-price' && ver !== _priceAnimVer) return;
     const p = Math.min((now-start)/duration, 1);
     const ease = 1 - Math.pow(1-p, 3);
     el.textContent = (from + (target-from)*ease).toFixed(decimals);
@@ -2461,6 +2464,7 @@ function stockRow(id,name){
 // ══════════════════════════════════════
 let _quoteTimer = null;
 let _quoteStockId = '';
+let _priceAnimVer = 0; // 取消進行中的 m-price _animateNumber 動畫用
 const QUOTE_INTERVAL = 30000; // 30秒
 
 async function startQuotePolling(stockId){
@@ -2527,8 +2531,10 @@ function updateQuoteUI(d){
   const liveTag = document.getElementById('quoteLiveTag');
   if(!priceEl || !d.price) return;
 
+  // 取消任何進行中的 m-price 動畫，確保即時價不被舊動畫覆蓋
+  _priceAnimVer++;
   // 現價：閃一下讓用戶感知到更新
-  const newPrice = d.price.toFixed(2);
+  const newPrice = (+d.price).toFixed(2);
   if(priceEl.textContent !== newPrice){
     priceEl.style.transition='opacity .15s';
     priceEl.style.opacity='0';
