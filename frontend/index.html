@@ -1404,6 +1404,14 @@ async function analyzeStock(){
   }
   setSt('<span class="spin"></span>分析中...',false);
   stopQuotePolling();  // 換股時停止舊輪詢
+  // 清空籌碼面板，避免換股後舊資料殘留
+  _chipsRawData = null;
+  _currentChipsStock = '';
+  document.getElementById('chipsSection').style.display = 'none';
+  document.getElementById('instSummary').innerHTML = '';
+  document.getElementById('marginSummary').innerHTML = '';
+  (function(){ const c=document.getElementById('instChart'); if(c){const ctx=c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height);} })();
+  (function(){ const c=document.getElementById('marginChart'); if(c){const ctx=c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height);} })();
   document.getElementById('resultEl').classList.remove('show');
   let data;
   try{
@@ -3190,8 +3198,9 @@ async function _initAuth(){
       _updateGuestUI();
     }
   } catch(e){
-    console.warn('auth check failed', e);
-    _clearToken();
+    // 網路錯誤時不清除 token，避免離線或 API 暫時不通就被強制登出
+    // 真正 401 已在 else 分支處理
+    console.warn('auth check failed (network?), keeping token', e);
     _authUser = null;
     _updateGuestUI();
   }
