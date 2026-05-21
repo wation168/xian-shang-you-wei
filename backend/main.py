@@ -89,9 +89,10 @@ IS_PROD = os.environ.get("ZEABUR_SERVICE_ID") is not None  # Zeabur 會自動注
 
 # In-memory SEO cache
 SEO_CACHE: dict = {
-    "sitemap":  {"data": None, "expires": 0},
-    "rankings": {"data": None, "expires": 0},
-    "picks":    {"data": None, "expires": 0},
+    "sitemap":    {"data": None, "expires": 0},
+    "rankings":   {"data": None, "expires": 0},
+    "picks":      {"data": None, "expires": 0},
+    "top_gainers": {"data": None, "expires": 0},
 }
 
 
@@ -2711,9 +2712,15 @@ def get_top_gainers(limit: int = 10):
     """
     當日（或最近交易日）漲幅前幾名
     用 FinMind TaiwanStockPrice 抓最新一日全市場資料
+    快取：15 分鐘（SEO_CACHE["top_gainers"]）
     """
     import urllib.request, json as _json
     from datetime import date, timedelta
+
+    # ── 15 分鐘快取 ──
+    _tg = SEO_CACHE["top_gainers"]
+    if _tg["data"] and _tg["expires"] > _time_mod.time():
+        return _tg["data"]
 
     # 往回找最近 5 個交易日，避免假日
     token = FINMIND_TOKEN
@@ -2753,7 +2760,9 @@ def get_top_gainers(limit: int = 10):
                 "close": r["close"],
                 "change_pct": r["change_pct"],
             } for r in top]
-            return {"date": target, "gainers": result}
+            payload = {"date": target, "gainers": result}
+            SEO_CACHE["top_gainers"] = {"data": payload, "expires": _time_mod.time() + 900}
+            return payload
         except Exception as e:
             print(f"top_gainers 嘗試 {target} 失敗：{e}")
             continue
@@ -2778,6 +2787,7 @@ def get_top_gainers(limit: int = 10):
 # 每日 09:00 排程清除，確保開盤抓新價
 # ══════════════════════════════════════════════════════════
 _QUOTE_CACHE: dict = {}  # { "2330": {"data": {...}, "expires": float} }
+_CHIPS_CACHE: dict = {}  # { "2330_20260521": {"data": {...}, "expires": float} }
 
 def _is_trading_session() -> bool:
     """是否在盤中 09:00–13:30（台北時間，週一到週五）"""
@@ -2811,12 +2821,24 @@ def get_quote_live(stock_id: str):
     is_weekday = now_tw.weekday() < 5
     in_session = is_weekday and (9, 0) <= (_h, _m) <= (13, 30)
 
+    # ── 共用 _QUOTE_CACHE（key 加 "_live" 與 /api/quote 格式區分）──
+    _live_key = code + "_live"
+    _now_ts = _time_mod.time()
+    _lc = _QUOTE_CACHE.get(_live_key)
+    if _lc and (_lc["expires"] == 0 or _now_ts < _lc["expires"]):
+        return _lc["data"]
+
     def _sf(v):
         try:
             f = float(v or 0)
             return f if f > 0 else None
         except Exception:
             return None
+
+    def _cache_live(result):
+        _exp = (_time_mod.time() + 900) if in_session else (_time_mod.time() + 21600)
+        _QUOTE_CACHE[_live_key] = {"data": result, "expires": _exp}
+        return result
 
     empty = {"z": None, "y": None, "o": None, "h": None, "l": None, "v": None, "t": ""}
 
@@ -2859,7 +2881,7 @@ def get_quote_live(stock_id: str):
                         "t": today,
                     }
                     print(f"[LIVE {code}] snap z={cp} y={y_val}")
-                    return result
+                    return _cache_live(result)
         except Exception as _e:
             if not (hasattr(_e, 'code') and getattr(_e, 'code', 0) == 400):
                 print(f"[LIVE {code}] tick_snapshot 失敗：{_e}")
@@ -2895,7 +2917,7 @@ def get_quote_live(stock_id: str):
             "t": today if is_today else "",
         }
         print(f"[LIVE {code}] daily is_today={is_today} z={result['z']} y={result['y']}")
-        return result
+        return _cache_live(result)
     except Exception as _e:
         print(f"[LIVE {code}] TaiwanStockPrice 失敗：{_e}")
         return empty
@@ -3800,9 +3822,16 @@ def get_chips(stock_id: str, days: int = 30, user: dict = Depends(require_user))
     """
     籌碼面：三大法人買賣超 + 融資融券
     回傳最近 N 天資料 + 統計摘要
+    快取：24 小時（key = stock_id + 日期，隔天自動換 key 失效）
     """
     from datetime import date, timedelta
     code = stock_id.strip().replace(".TW", "").replace(".TWO", "")
+    _today = date.today().strftime("%Y%m%d")
+    _chips_key = f"{code}_{_today}"
+    _cc = _CHIPS_CACHE.get(_chips_key)
+    if _cc and _cc["expires"] > _time_mod.time():
+        return _cc["data"]
+
     end   = date.today().strftime("%Y-%m-%d")
     start = (date.today() - timedelta(days=days + 10)).strftime("%Y-%m-%d")
 
@@ -3904,6 +3933,7 @@ def get_chips(stock_id: str, days: int = 30, user: dict = Depends(require_user))
 
     result["stock_id"] = code
     result["query_days"] = days
+    _CHIPS_CACHE[_chips_key] = {"data": result, "expires": _time_mod.time() + 86400}
     return result
 
 
