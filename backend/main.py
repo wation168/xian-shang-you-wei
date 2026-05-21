@@ -2995,11 +2995,28 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
         vol_val      = int(float(vol_raw) * 1000) if vol_raw else None
         price_source = "twse_z"
         print(f"[QUOTE] {code} twse_z price={price_val}")
-    elif in_session:
-        # 盤中拿不到 z：印出 TWSE 回傳的原始欄位，方便排查
-        z_raw_dbg = twse_data.get("z", "NO_FIELD") if twse_data else "NO_DATA"
-        n_dbg     = twse_data.get("n", "?")         if twse_data else "?"
-        print(f"[QUOTE] {code}（{n_dbg}）盤中 TWSE z='{z_raw_dbg}'，需走 FinMind 備援")
+    else:
+        # z="-" 時改用委買第一檔（b）與委賣第一檔（a）的中間價
+        try:
+            b_raw = _val("b")  # "32.2000_32.1500_..."
+            a_raw = _val("a")  # "32.2500_32.3000_..."
+            b1 = float(b_raw.split("_")[0]) if b_raw else None
+            a1 = float(a_raw.split("_")[0]) if a_raw else None
+            if b1 and a1:
+                price_val    = round((b1 + a1) / 2, 2)
+                open_val     = _sf(_val("o"))
+                high_val     = _sf(_val("h"))
+                low_val      = _sf(_val("l"))
+                vol_raw      = _val("v")
+                vol_val      = int(float(vol_raw) * 1000) if vol_raw else None
+                price_source = "twse_mid"
+                print(f"[QUOTE] {code} twse_mid b={b1} a={a1} mid={price_val}")
+            elif in_session:
+                z_raw_dbg = twse_data.get("z", "NO_FIELD") if twse_data else "NO_DATA"
+                n_dbg     = twse_data.get("n", "?")         if twse_data else "?"
+                print(f"[QUOTE] {code}（{n_dbg}）b/a 也無值 z='{z_raw_dbg}'，需走 FinMind 備援")
+        except Exception as _mid_e:
+            print(f"[QUOTE] {code} twse_mid 計算失敗：{_mid_e}")
 
     # 2. FinMind tick_snapshot（備援，盤中即時，消耗額度）
     if price_val is None:
