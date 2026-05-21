@@ -2497,16 +2497,15 @@ async function fetchAndUpdateQuote(stockId){
     const r = await fetch(`${getAPI()}/api/quote/${code}`, {signal:AbortSignal.timeout(8000)});
     if(!r.ok){ scheduleNext(stockId, true); return; }
     const d = await r.json();
-    console.log('[QUOTE-FRONT] live z=', d.z, 'y=', d.y);
+    console.log('[QUOTE-FRONT] price=', d.price, 'change=', d.change, 'change_pct=', d.change_pct);
 
-    if(d.z){
-      const change     = d.y!=null ? +(d.z-d.y).toFixed(2) : null;
-      const change_pct = (d.y&&change!=null) ? +(change/d.y*100).toFixed(2) : null;
+    if(d.price != null){
       updateQuoteUI({
-        price:d.z, change, change_pct,
-        is_trading:true, in_session:true,
-        time:d.t||'',
-        price_note:null,
+        price:      d.price,
+        change:     d.change     ?? null,
+        change_pct: d.change_pct ?? null,
+        in_session: d.in_session ?? true,
+        price_note: d.price_note ?? null,
       });
     }
     scheduleNext(stockId, true);
