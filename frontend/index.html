@@ -367,8 +367,18 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
   </div>
 
   <!-- 累計訪客計數器 -->
-  <div id="visitCountBar" style="display:none;text-align:center;font-size:11px;color:var(--text3);padding:4px 0;border-bottom:.5px solid var(--border)">
-    累計訪客 <span id="visitCountNum" style="font-weight:600;color:var(--text2)">—</span> 人
+  <div id="visitCountBar" style="display:none;background:#f0fdf4;border-bottom:1.5px solid #bbf7d0;padding:10px 16px">
+    <div style="display:flex;align-items:center;justify-content:center;gap:0;max-width:480px;margin:0 auto">
+      <div style="flex:1;text-align:center">
+        <div id="visitCountNum" style="font-size:26px;font-weight:700;color:#16a34a;line-height:1.1">—</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:2px">累計訪問</div>
+      </div>
+      <div style="width:1px;height:36px;background:#86efac;margin:0 8px"></div>
+      <div style="flex:1;text-align:center">
+        <div id="analyzeCountNum" style="font-size:26px;font-weight:700;color:#16a34a;line-height:1.1">—</div>
+        <div style="font-size:11px;color:#6b7280;margin-top:2px">累計分析</div>
+      </div>
+    </div>
   </div>
 
   <!-- 強勢股快捷列 -->
@@ -3166,9 +3176,11 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   loadHotkeys();
   fetch(getAPI()+'/api/page-view',{method:'POST'}).catch(()=>{});
   fetch(getAPI()+'/api/stats').then(r=>r.json()).then(d=>{
-    const n = d.visit_count || d.page_views || 0;
-    if(n > 0){
-      document.getElementById('visitCountNum').textContent = n.toLocaleString();
+    const v = d.visit_count || d.page_views || 0;
+    const a = d.analyze_count || 0;
+    if(v > 0 || a > 0){
+      document.getElementById('visitCountNum').textContent = v.toLocaleString();
+      document.getElementById('analyzeCountNum').textContent = a.toLocaleString();
       document.getElementById('visitCountBar').style.display = 'block';
     }
   }).catch(()=>{});

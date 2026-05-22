@@ -3353,6 +3353,7 @@ def admin_grant(key: str = "", email: str = "", plan: str = "monthly", days: int
                 </table>
               </div>
               {extra_html}
+              {_SOFTGLOW_AD}
               <div style="text-align:center;margin-bottom:20px">
                 <a href="{FRONTEND_URL}" style="background:#1D9E75;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px">立即登入使用</a>
               </div>
