@@ -413,6 +413,22 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
       </div>
     </div>
 
+    <!-- 融入式廣告版位（看盤護眼） -->
+    <div id="adBlock" style="display:none;margin:8px 0 12px;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;position:relative">
+      <div style="font-size:10px;color:var(--text3);font-weight:500;margin-bottom:8px;letter-spacing:.5px">看盤護眼小提醒</div>
+      <a href="https://watione1.guidemee.cc/products/Gct3MfMg" target="_blank" rel="noopener"
+         style="display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit">
+        <img src="https://watione1.guidemee.cc/tenancy/assets/oj9qkl/products/skSjmETidhxTjLNnLCeH5WdNNHM0YX-metaR2VtaW5pX0dlbmVyYXRlZF9JbWFnZV9vcTR5N3dvcTR5N3dvcTR5LnBuZw==-.png"
+             width="56" height="56" style="border-radius:8px;object-fit:cover;flex-shrink:0" loading="lazy" alt="晶。水漾葉黃素" />
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px">久盯螢幕？補充葉黃素</div>
+          <div style="font-size:11px;color:var(--text3);line-height:1.5">晶。水漾葉黃素，葉黃素＋蝦紅素，粉包隨身，每日一包輕鬆補充</div>
+        </div>
+        <div style="font-size:11px;font-weight:600;color:#1a73e8;white-space:nowrap;flex-shrink:0">了解更多 →</div>
+      </a>
+      <div style="font-size:10px;color:var(--text3);text-align:right;margin-top:5px">贊助</div>
+    </div>
+
     <!-- 指標卡 -->
     <div class="metrics">
       <div class="metric">
@@ -482,22 +498,6 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
         <div class="deep-card full" id="dcard-inst"><div class="deep-lbl">🏦 法人動向</div><div id="d-inst-rows"><div style="font-size:11px;color:var(--text3)">載入中…</div></div></div>
         <div class="deep-card full" id="dcard-risk"><div class="deep-lbl">⚡ 風險提示</div><div class="risk-items" id="d-risk-list"></div></div>
       </div>
-    </div>
-
-    <!-- 融入式廣告版位（看盤護眼） -->
-    <div id="adBlock" style="display:none;margin:8px 0 12px;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;position:relative">
-      <div style="font-size:10px;color:var(--text3);font-weight:500;margin-bottom:8px;letter-spacing:.5px">看盤護眼小提醒</div>
-      <a href="https://watione1.guidemee.cc/products/Gct3MfMg" target="_blank" rel="noopener"
-         style="display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit">
-        <img src="https://watione1.guidemee.cc/tenancy/assets/oj9qkl/products/skSjmETidhxTjLNnLCeH5WdNNHM0YX-metaR2VtaW5pX0dlbmVyYXRlZF9JbWFnZV9vcTR5N3dvcTR5N3dvcTR5LnBuZw==-.png"
-             width="56" height="56" style="border-radius:8px;object-fit:cover;flex-shrink:0" loading="lazy" alt="晶。水漾葉黃素" />
-        <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px">久盯螢幕？補充葉黃素</div>
-          <div style="font-size:11px;color:var(--text3);line-height:1.5">晶。水漾葉黃素，葉黃素＋蝦紅素，粉包隨身，每日一包輕鬆補充</div>
-        </div>
-        <div style="font-size:11px;font-weight:600;color:#1a73e8;white-space:nowrap;flex-shrink:0">了解更多 →</div>
-      </a>
-      <div style="font-size:10px;color:var(--text3);text-align:right;margin-top:5px">贊助</div>
     </div>
 
     <!-- 圖表 -->
@@ -3176,7 +3176,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   loadHotkeys();
   fetch(getAPI()+'/api/page-view',{method:'POST'}).catch(()=>{});
   fetch(getAPI()+'/api/stats').then(r=>r.json()).then(d=>{
-    const v = d.visit_count || d.page_views || 0;
+    const v = d.page_views || d.visit_count || 0;
     const a = d.analyze_count || 0;
     if(v > 0 || a > 0){
       document.getElementById('visitCountNum').textContent = v.toLocaleString();
@@ -3788,7 +3788,7 @@ function triggerPWAInstall(){
 async function showPicksPage(){
   const el = document.getElementById('pageContent');
   const overlay = document.getElementById('pageOverlay');
-  overlay.style.display = 'none';
+  overlay.style.display = 'block';
 
   el.innerHTML = `
     <div style="padding:8px 0 16px">
