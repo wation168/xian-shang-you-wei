@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-8MBD31GNL8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-8MBD31GNL8');
+</script>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>線上有位｜台股位置導航｜股票支撐壓力與防守位分析工具</title>
@@ -453,6 +461,23 @@ footer p{font-size:12px;color:rgba(255,255,255,.3);line-height:1.8}
     <input type="password" id="buyPassword" placeholder="請設定您的登入密碼"
       style="width:100%;padding:12px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:15px;outline:none;margin-bottom:6px"
       onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='#ddd'"/>
+    <div style="margin-bottom:12px">
+      <label style="display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px">電子發票載具 <span style="color:#e05555">*</span></label>
+      <div style="display:flex;gap:20px;margin-bottom:8px">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;font-weight:600">
+          <input type="radio" name="invoiceType" id="invPhone" value="phone" onchange="switchInvoice()" checked> 手機條碼
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;font-weight:600">
+          <input type="radio" name="invoiceType" id="invEmail" value="email" onchange="switchInvoice()"> Email 載具
+        </label>
+      </div>
+      <input type="text" id="invPhoneInput" placeholder="/XXXXXXX（斜線開頭共 8 碼）" maxlength="8"
+        style="width:100%;padding:12px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;outline:none;box-sizing:border-box"
+        onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='#ddd'"/>
+      <input type="email" id="invEmailInput" placeholder="name@example.com"
+        style="width:100%;padding:12px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;outline:none;box-sizing:border-box;display:none"
+        onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor='#ddd'"/>
+    </div>
     <div style="font-size:11px;color:#e05555;min-height:16px;margin-bottom:12px" id="buyErr"></div>
     <button id="buySubmitBtn" onclick="doCheckout()"
       style="width:100%;padding:14px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer">
@@ -532,6 +557,11 @@ function openBuy(plan){
   document.getElementById('buyErr').textContent = '';
   document.getElementById('buySubmitBtn').textContent = '前往付款 →';
   document.getElementById('buySubmitBtn').disabled = false;
+  document.getElementById('invPhone').checked = true;
+  document.getElementById('invPhoneInput').value = '';
+  document.getElementById('invPhoneInput').style.display = '';
+  document.getElementById('invEmailInput').value = '';
+  document.getElementById('invEmailInput').style.display = 'none';
   document.getElementById('buyModal').style.display = 'flex';
   document.body.style.overflow = 'hidden';
   setTimeout(()=>document.getElementById('buyEmail').focus(), 100);
@@ -539,6 +569,15 @@ function openBuy(plan){
 function closeBuy(){
   document.getElementById('buyModal').style.display = 'none';
   document.body.style.overflow = '';
+}
+
+function switchInvoice(){
+  const isPhone = document.getElementById('invPhone').checked;
+  document.getElementById('invPhoneInput').style.display = isPhone ? '' : 'none';
+  const emailInput = document.getElementById('invEmailInput');
+  emailInput.style.display = isPhone ? 'none' : '';
+  if(!isPhone && !emailInput.value)
+    emailInput.value = document.getElementById('buyEmail').value.trim().toLowerCase();
 }
 
 async function doCheckout(){
@@ -554,6 +593,21 @@ async function doCheckout(){
     errEl.textContent = '密碼至少需要 6 個字元';
     return;
   }
+  const invType = document.getElementById('invPhone').checked ? 'phone' : 'email';
+  let invCarrier = '';
+  if(invType === 'phone'){
+    invCarrier = document.getElementById('invPhoneInput').value.trim().toUpperCase();
+    if(!/^\/[A-Z0-9]{7}$/.test(invCarrier)){
+      errEl.textContent = '手機條碼格式錯誤（/XXXXXXX，斜線開頭共 8 碼大寫英數）';
+      return;
+    }
+  } else {
+    invCarrier = document.getElementById('invEmailInput').value.trim().toLowerCase();
+    if(!/^[^@]+@[^@]+\.[^@]+$/.test(invCarrier)){
+      errEl.textContent = '請輸入正確的 Email 載具';
+      return;
+    }
+  }
   errEl.textContent = '';
   btn.textContent = '處理中...';
   btn.disabled = true;
@@ -563,7 +617,7 @@ async function doCheckout(){
     const r = await fetch(`${API}/create_order`, {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ email, plan: _currentPlan, password })
+      body: JSON.stringify({ email, plan: _currentPlan, password, invoice_type: invType, invoice_carrier: invCarrier })
     });
     if(!r.ok){
       const data = await r.json();

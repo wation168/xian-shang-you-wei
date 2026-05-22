@@ -337,49 +337,139 @@ def _render_report(s: dict, e: dict) -> str:
 
 
 def render_card(stock: dict, eval_result: dict) -> str:
-    s     = stock
-    e     = eval_result
-    sid   = s["stock_id"]
-    score = e.get("score", 0)
-    color = score_color(score)
+    s   = stock
+    sid = s["stock_id"]
+    name  = s.get("name", "")
+    price = s.get("price", 0)
+    trend = s.get("trend", "盤整")
 
-    tags_html   = _card_tags(s)
-    headline    = _card_headline(s)
-    report_html = _render_report(s, e)
+    # 風險等級 badge
+    if trend == "上升":
+        risk_label, risk_color, risk_bg = "多頭", "#22c55e", "#14532d"
+    elif trend == "下降":
+        risk_label, risk_color, risk_bg = "空頭", "#ef4444", "#7f1d1d"
+    else:
+        risk_label, risk_color, risk_bg = "觀望", "#f59e0b", "#451a03"
+
+    # 支撐壓力
+    support    = s.get("support", round(price * 0.95, 2))
+    resistance = s.get("resistance", round(price * 1.05, 2))
+    chan_range  = resistance - support
+
+    # 軌道位置 0–100%
+    if chan_range > 0 and price > 0:
+        pos_pct = int(min(100, max(0, (price - support) / chan_range * 100)))
+    else:
+        pos_pct = 50
+    bar_filled = round(pos_pct / 10)
+    bar_html   = "█" * bar_filled + "░" * (10 - bar_filled)
+    pos_label  = "偏上" if pos_pct >= 70 else ("偏下" if pos_pct <= 30 else "中段")
+    pos_desc   = "靠近壓力位" if pos_pct >= 80 else ("靠近支撐位" if pos_pct <= 20 else "通道中段")
+    pos_color  = "#ef4444" if pos_pct >= 80 else ("#22c55e" if pos_pct <= 20 else "#94a3b8")
+
+    # K棒方向
+    streak = s.get("kbar_streak", 0)
+    if streak >= 2:
+        kbar_dir, kbar_color = f"連{streak}紅K", "#22c55e"
+    elif streak <= -2:
+        kbar_dir, kbar_color = f"連{abs(streak)}黑K", "#ef4444"
+    else:
+        kbar_dir, kbar_color = "整理中", "#94a3b8"
+
+    # 操作建議（短版）
+    rec_txt, rec_color = _trading_rec(s)
+    rec_icon = rec_txt[0] if rec_txt else ""
+    rec_core = rec_txt.split("：")[1].split("，")[0] if "：" in rec_txt else rec_txt[:18]
+
+    # K線型態
+    kline  = s.get("kline_pattern", "常態K線")
+    wr_pct = int(s.get("win_rate", 0.50) * 100)
+
+    # 防守位距現價 %
+    stop_dist = round((price - support) / price * 100, 1) if price > 0 else 0
+    rr        = s.get("rr_ratio", 0)
+    rr_txt    = f"  損益比 {rr}x" if rr else ""
+
+    # 趨勢
+    trend_c    = "#22c55e" if trend == "上升" else ("#ef4444" if trend == "下降" else "#94a3b8")
+    trend_desc = "MA5>MA20>MA60" if trend == "上升" else ("MA5<MA20<MA60" if trend == "下降" else "均線糾結")
+
+    stock_url  = f"{FRONTEND_URL}/?stock={sid}"
+    report_url = f"{FRONTEND_URL}/?stock={sid}&report=1"
+    name_esc   = name.replace("'", "\\'")
 
     return (
-        f'<div style="background:#0f172a;border:1px solid #1e293b;border-radius:16px;padding:20px;'
-        f'display:flex;flex-direction:column;gap:14px;position:relative;overflow:hidden;'
-        f'transition:border-color .2s"'
-        f' onmouseenter="this.style.borderColor=\'#334155\'" onmouseleave="this.style.borderColor=\'#1e293b\'">'
+        f'<div style="background:#0f172a;border:1px solid #1e293b;border-radius:16px;overflow:hidden;'
+        f'transition:border-color .2s" '
+        f'onmouseenter="this.style.borderColor=\'#334155\'" onmouseleave="this.style.borderColor=\'#1e293b\'">'
 
-        # 評分圓圈
-        f'<div style="position:absolute;top:16px;right:16px;width:52px;height:52px;border-radius:50%;'
-        f'background:conic-gradient({color} {score * 3.6}deg, #1e293b 0deg);'
-        f'display:flex;align-items:center;justify-content:center">'
-        f'<div style="width:40px;height:40px;border-radius:50%;background:#0f172a;'
-        f'display:flex;align-items:center;justify-content:center;'
-        f'font-size:13px;font-weight:700;color:{color}">{score}</div></div>'
+        # 標題列（點擊跳轉 /?stock=SID）
+        f'<div style="display:flex;align-items:center;gap:8px;padding:14px 16px 12px;'
+        f'cursor:pointer;border-bottom:1px solid #1e293b;background:#0a0f1e" '
+        f'onclick="window.top.location.href=\'{stock_url}\'">'
+        f'<span style="font-size:17px;font-weight:800;color:#f1f5f9">{sid}</span>'
+        f'<span style="font-size:13px;color:#64748b;flex:1">{name}</span>'
+        f'<button id="wpick-{sid}" '
+        f'onclick="event.stopPropagation();try{{window.parent.addWatch(\'{sid}\',\'{name_esc}\');'
+        f'this.textContent=\'✓ 已加入\';this.style.color=\'#22c55e\'}}catch(e){{}}" '
+        f'style="padding:3px 10px;background:#1e293b;border:1px solid #334155;border-radius:20px;'
+        f'color:#94a3b8;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap">+ 自選</button>'
+        f'<span style="padding:3px 10px;border-radius:20px;background:{risk_bg};color:{risk_color};'
+        f'font-size:11px;font-weight:700;white-space:nowrap">{risk_label}</span>'
+        f'</div>'
 
-        # 代號 + 名稱 + 標籤
-        f'<div style="padding-right:68px">'
-        f'<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">'
-        f'<span style="font-size:20px;font-weight:800;color:#f1f5f9">{sid}</span>'
-        f'<span style="font-size:13px;color:#64748b">{s.get("name", "")}</span></div>'
-        f'<div style="display:flex;gap:6px;flex-wrap:wrap">{tags_html}</div></div>'
+        # 卡片主體
+        f'<div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px">'
 
-        # 一句話摘要
-        f'<div style="font-size:13px;color:#cbd5e1;line-height:1.6;'
-        f'padding:10px 14px;background:#1e293b;border-radius:8px;'
-        f'border-left:3px solid {color}">{headline}</div>'
+        # 摘要一行
+        f'<div style="font-size:12px;padding:8px 12px;background:#0a0f1e;border-radius:8px;'
+        f'border-left:3px solid {rec_color};display:flex;gap:8px;flex-wrap:wrap;line-height:1.6">'
+        f'<span style="color:{pos_color}">{pos_desc}</span>'
+        f'<span style="color:#334155">|</span>'
+        f'<span style="color:{kbar_color}">{kbar_dir}</span>'
+        f'<span style="color:#334155">|</span>'
+        f'<span style="color:{rec_color}">{rec_icon} {rec_core}</span>'
+        f'</div>'
 
-        # 展開按鈕
-        f'<button id="btn-{sid}" class="btn-report"'
-        f' onclick="toggleReport(\'{sid}\')">📄 完整個股報告&nbsp;&nbsp;立即產出 →</button>'
+        # 條列資訊
+        f'<div style="display:flex;flex-direction:column">'
+        f'<div style="display:flex;justify-content:space-between;padding:6px 0;'
+        f'border-bottom:.5px solid #1e293b;font-size:12px">'
+        f'<span style="color:#64748b">K線型態</span>'
+        f'<span style="color:#a78bfa;font-weight:600">{kline}'
+        f'<span style="color:#475569;font-weight:400"> 勝率{wr_pct}%</span></span>'
+        f'</div>'
+        f'<div style="display:flex;justify-content:space-between;padding:6px 0;'
+        f'border-bottom:.5px solid #1e293b;font-size:12px">'
+        f'<span style="color:#64748b">防守位</span>'
+        f'<span style="color:#e2e8f0;font-weight:600">{support}'
+        f'<span style="color:#64748b;font-weight:400"> (-{stop_dist}%){rr_txt}</span></span>'
+        f'</div>'
+        f'<div style="display:flex;justify-content:space-between;padding:6px 0;'
+        f'border-bottom:.5px solid #1e293b;font-size:12px">'
+        f'<span style="color:#64748b">支撐 / 壓力</span>'
+        f'<span><span style="color:#22c55e;font-weight:600">{support}</span>'
+        f'<span style="color:#475569"> / </span>'
+        f'<span style="color:#f59e0b;font-weight:600">{resistance}</span></span>'
+        f'</div>'
+        f'<div style="display:flex;justify-content:space-between;padding:6px 0;'
+        f'border-bottom:.5px solid #1e293b;font-size:12px">'
+        f'<span style="color:#64748b">趨勢</span>'
+        f'<span style="color:{trend_c};font-weight:600">{trend}'
+        f'<span style="color:#475569;font-weight:400">（{trend_desc}）</span></span>'
+        f'</div>'
+        f'<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px">'
+        f'<span style="color:#64748b">軌道位置</span>'
+        f'<span style="color:#64748b;font-family:monospace;font-size:11px">{bar_html}'
+        f'<span style="font-family:inherit;color:#475569"> {pos_pct}% {pos_label}</span></span>'
+        f'</div>'
+        f'</div>'
 
-        # 展開內容
-        f'<div id="rpt-{sid}" style="display:none">{report_html}</div>'
+        # 完整個股報告按鈕
+        f'<button onclick="window.top.location.href=\'{report_url}\'" class="btn-report">'
+        f'📄 完整個股報告&nbsp;&nbsp;立即產出 →</button>'
 
+        f'</div>'
         f'</div>'
     )
 

@@ -41,7 +41,7 @@ if not FINMIND_TOKEN:
 
 # JWT 密鑰（請在 Zeabur 設定環境變數 JWT_SECRET；每次重啟值相同，不影響 token 有效性）
 JWT_SECRET = os.environ.get("JWT_SECRET", "change-me-in-production-please")
-JWT_EXPIRE_DAYS = 30   # token 有效期（30 天）
+JWT_EXPIRE_DAYS = 15   # token 有效期（15 天）
 if JWT_SECRET == "change-me-in-production-please":
     print("⚠️  [JWT] 使用預設 JWT_SECRET，正式環境請設定 JWT_SECRET 環境變數！")
 
@@ -1771,7 +1771,9 @@ def _db_init():
         ("members",   "referral_unlocked",       "INTEGER DEFAULT 0"),
         ("members",   "referral_expire_date",    "TEXT DEFAULT NULL"),
         ("members",   "referral_rewarded_count", "INTEGER DEFAULT 0"),
-        ("query_log", "report_count",             "INTEGER DEFAULT 0"),
+        ("query_log",       "report_count",    "INTEGER DEFAULT 0"),
+        ("pending_orders",  "invoice_type",    "TEXT DEFAULT NULL"),
+        ("pending_orders",  "invoice_carrier", "TEXT DEFAULT NULL"),
     ]
     for table, col, coldef in new_columns:
         try:
@@ -2014,6 +2016,35 @@ def get_kline(stock_id: str, tf: str = "D", user: dict = Depends(require_user)):
             "low": safe_float(row["Low"]),   "close": safe_float(row["Close"]),
             "volume": int(row["Volume"]) if not np.isnan(row["Volume"]) else 0,
         })
+
+    # 日K：若最後一根不是今日，嘗試從 _QUOTE_CACHE 補今日即時K棒
+    if tf.upper() == "D" and records:
+        from zoneinfo import ZoneInfo as _ZI
+        _tw_today = datetime.now(_ZI("Asia/Taipei")).strftime("%Y-%m-%d")
+        if records[-1]["date"] != _tw_today:
+            _code = stock_id.strip().upper().replace(".TW", "").replace(".TWO", "")
+            _qc = _QUOTE_CACHE.get(_code)
+            # 快取不存在或已過期，主動呼叫 get_quote() 取得即時報價
+            if not (_qc and (_qc["expires"] == 0 or _time_mod.time() < _qc["expires"])):
+                try:
+                    get_quote(_code, user=None)
+                    _qc = _QUOTE_CACHE.get(_code)
+                except Exception:
+                    _qc = None
+            if _qc and (_qc["expires"] == 0 or _time_mod.time() < _qc["expires"]):
+                _q = _qc["data"]
+                _c = _q.get("price")
+                _o = _q.get("open") or _c
+                _h = _q.get("high") or _c
+                _l = _q.get("low") or _c
+                _v = _q.get("volume") or 0
+                if _c:
+                    records.append({
+                        "date": _tw_today,
+                        "open": _o, "high": _h, "low": _l, "close": _c,
+                        "volume": int(_v) if _v else 0,
+                    })
+
     return {"symbol": symbol, "tf": tf, "count": len(records), "bars": records}
 
 
@@ -3393,6 +3424,15 @@ def admin_run_scan(key: str = ""):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.post("/admin/clear-cache")
+def admin_clear_cache(key: str = ""):
+    """清除 _analyze_cache（強制下次查詢重新抓 FinMind）"""
+    _check_admin(key)
+    n = len(_analyze_cache)
+    _analyze_cache.clear()
+    return {"cleared": n, "message": f"快取已清除（共 {n} 筆）"}
+
+
 class _BatchUpgradeReq(BaseModel):
     emails: list
     plan: str = "monthly"
@@ -4370,9 +4410,11 @@ async def create_order(request: Request):
     import urllib.parse, hashlib, time as _t
 
     body = await request.json()
-    email    = body.get("email", "").strip().lower()
-    plan     = body.get("plan", "quarterly")
-    password = body.get("password", "").strip()  # 用戶自設密碼
+    email            = body.get("email", "").strip().lower()
+    plan             = body.get("plan", "quarterly")
+    password         = body.get("password", "").strip()
+    invoice_type     = body.get("invoice_type", "").strip()
+    invoice_carrier  = body.get("invoice_carrier", "").strip()
 
     if not email or not _re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
         raise HTTPException(status_code=400, detail="Email 格式不正確")
@@ -4410,8 +4452,8 @@ async def create_order(request: Request):
         _po_conn = _db_conn()
         _po_conn.execute(
             "INSERT OR REPLACE INTO pending_orders "
-            "(merchant_trade_no, email, hashed_password, plan) VALUES (?, ?, ?, ?)",
-            (trade_no, email, _hash_pw(password), plan)
+            "(merchant_trade_no, email, hashed_password, plan, invoice_type, invoice_carrier) VALUES (?, ?, ?, ?, ?, ?)",
+            (trade_no, email, _hash_pw(password), plan, invoice_type, invoice_carrier)
         )
         _po_conn.commit()
         _po_conn.close()
@@ -4525,7 +4567,7 @@ async def webhook_ecpay(request: Request):
         "SELECT 1 FROM processed_orders WHERE merchant_trade_no=?", (trade_no_w,)
     ).fetchone()
     _po = _tmp.execute(
-        "SELECT hashed_password FROM pending_orders WHERE merchant_trade_no=?", (trade_no_w,)
+        "SELECT hashed_password, invoice_type, invoice_carrier FROM pending_orders WHERE merchant_trade_no=?", (trade_no_w,)
     ).fetchone()
     if _po:
         _tmp.execute("DELETE FROM pending_orders WHERE merchant_trade_no=?", (trade_no_w,))
@@ -4668,6 +4710,34 @@ async def webhook_ecpay(request: Request):
     _rec_conn.execute("INSERT OR IGNORE INTO processed_orders (merchant_trade_no) VALUES (?)", (trade_no_w,))
     _rec_conn.commit()
     _rec_conn.close()
+
+    # 寄管理員通知信
+    try:
+        _amt_map = {399: "月費方案", 999: "季費方案", 3688: "年費方案", 6: "測試方案"}
+        _amt_int = int(amount) if str(amount).isdigit() else 0
+        _plan_name = _amt_map.get(_amt_int, f"未知方案（NT${amount}）")
+        _inv_type = (_po["invoice_type"] or "") if _po else ""
+        _inv_carrier = (_po["invoice_carrier"] or "未提供") if _po else "未提供"
+        _inv_label = "手機條碼" if _inv_type == "phone" else ("Email 載具" if _inv_type == "email" else "未提供")
+        _pay_time = _taipei_now_str("%Y-%m-%d %H:%M:%S")
+        _send_email(
+            SMTP_USER,
+            "【線上有位】新訂單通知",
+            f"""<div style="font-family:-apple-system,sans-serif;max-width:480px;margin:0 auto;padding:24px">
+              <h2 style="color:#1D9E75;margin:0 0 16px">【線上有位】新訂單通知</h2>
+              <table style="width:100%;border-collapse:collapse;font-size:14px">
+                <tr><td style="padding:8px 0;color:#888;width:100px">付款時間</td><td style="padding:8px 0;font-weight:700">{_pay_time}</td></tr>
+                <tr><td style="padding:8px 0;color:#888">訂單編號</td><td style="padding:8px 0;font-weight:700">{trade_no_w}</td></tr>
+                <tr><td style="padding:8px 0;color:#888">付款金額</td><td style="padding:8px 0;font-weight:700">NT$ {amount}</td></tr>
+                <tr><td style="padding:8px 0;color:#888">用戶 Email</td><td style="padding:8px 0;font-weight:700">{email}</td></tr>
+                <tr><td style="padding:8px 0;color:#888">訂閱方案</td><td style="padding:8px 0;font-weight:700">{_plan_name}</td></tr>
+                <tr><td style="padding:8px 0;color:#888">發票類型</td><td style="padding:8px 0;font-weight:700">{_inv_label}</td></tr>
+                <tr><td style="padding:8px 0;color:#888">發票載具</td><td style="padding:8px 0;font-weight:700">{_inv_carrier}</td></tr>
+              </table>
+            </div>"""
+        )
+    except Exception as _ae:
+        print(f"   ⚠️ 管理員通知信失敗：{_ae}")
 
     print(f"   ✅ Webhook 處理完成：{email} → {plan} 到 {new_expire}")
     return JSONResponse(content="1|OK")
@@ -5109,6 +5179,14 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
     return f"""<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-8MBD31GNL8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+  gtag('config', 'G-8MBD31GNL8');
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{stock_id} {stock_name} 個股分析報告 {report_date} — 線上有位</title>
@@ -5522,7 +5600,16 @@ def report_generate(req: ReportReq, user: dict = Depends(require_user)):
     ).fetchone()
     conn.close()
     if cached:
-        return {"ok": True, "url": f"{BACKEND_URL}/report/{stock_id}-{report_date}"}
+        if 'id="basic-info"' in (cached["report_html"] or ""):
+            return {"ok": True, "url": f"{BACKEND_URL}/report/{stock_id}-{report_date}"}
+        # 舊格式（無七欄位）→ 刪除快取，強制重新生成
+        conn = _db_conn()
+        conn.execute(
+            "DELETE FROM stock_reports WHERE stock_id=? AND report_date=?",
+            (stock_id, report_date)
+        )
+        conn.commit()
+        conn.close()
 
     try:
         d = _do_analyze(stock_id, "D", user=None)
@@ -5571,7 +5658,15 @@ def get_report(slug: str):
     conn.close()
 
     if row:
-        return HTMLResponse(content=row["report_html"])
+        html = row["report_html"] or ""
+        if "G-8MBD31GNL8" not in html:
+            _ga = ('<!-- Google tag (gtag.js) -->'
+                   '<script async src="https://www.googletagmanager.com/gtag/js?id=G-8MBD31GNL8"></script>'
+                   '<script>window.dataLayer=window.dataLayer||[];'
+                   'function gtag(){dataLayer.push(arguments);}'
+                   "gtag('js',new Date());gtag('config','G-8MBD31GNL8');</script>")
+            html = html.replace("<head>", "<head>" + _ga, 1)
+        return HTMLResponse(content=html)
 
     # 即時產生
     try:
@@ -5899,6 +5994,14 @@ def rankings():
     html = f"""<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-8MBD31GNL8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+  gtag('config', 'G-8MBD31GNL8');
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>台股排行榜 漲幅/跌幅/成交量 Top 20 — 線上有位</title>

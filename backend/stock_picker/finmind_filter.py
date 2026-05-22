@@ -166,7 +166,7 @@ def analyze_stock(stock_id: str, news_list: list[dict] = []) -> dict | None:
     avg_vol_5  = sum(p["volume"] for p in prices[-5:]) / 5
     vol_ratio  = round(avg_vol_5 / avg_vol_20, 2) if avg_vol_20 > 0 else 0
 
-    if avg_vol_20 < CFG["min_avg_volume"]:
+    if avg_vol_20 / 1000 < CFG["min_avg_volume"]:
         return None
 
     # ── 均線趨勢 ──
@@ -272,7 +272,7 @@ def analyze_stock(stock_id: str, news_list: list[dict] = []) -> dict | None:
         f"MACD DIF={dif_t:.3f}（{macd_desc}）",
         f"KD: K={K_t:.1f} D={D_t:.1f}（{'金叉' if kd_cross else '未金叉'}）",
         f"法人連買 {consecutive_buy_days} 日，近5日 {inst_5d_total:+,} 張，近20日 {inst_20d_total:+,} 張",
-        f"現價 {price}，近5日均量 {round(avg_vol_5):,} 張",
+        f"現價 {price}，近5日均量 {round(avg_vol_5 / 1000):,} 張",
     ]
     if signal_label:
         score_factors.append(f"型態：{signal_label}")
@@ -293,8 +293,8 @@ def analyze_stock(stock_id: str, news_list: list[dict] = []) -> dict | None:
         "inst_invest_5d":       inst_invest_5d,
         "inst_dealer_5d":       inst_dealer_5d,
         "vol_ratio":            vol_ratio,
-        "avg_vol_5":            round(avg_vol_5),
-        "avg_vol_20":           round(avg_vol_20),
+        "avg_vol_5":            round(avg_vol_5 / 1000),
+        "avg_vol_20":           round(avg_vol_20 / 1000),
         "news":                 related_news[:5],
         "score_factors":        score_factors,
         "signal_label":         signal_label,

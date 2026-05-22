@@ -282,6 +282,7 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
       <div class="card-title">🔍 預建 SEO 選股頁面</div>
       <p style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6">執行今日選股分析（鉅亨新聞 + TWSE 成交量前100取交集），結果自動同步至 <a href="https://stock-navigator-api.zeabur.app/picks" target="_blank" style="color:var(--green)">/picks</a> 頁供 Google 索引。約 1~2 分鐘完成。</p>
       <button class="inline-btn" id="runPicksBtn" onclick="doRunPicks(this)">⚡ 執行選股並更新</button>
+      <button class="inline-btn" onclick="doClearCache(this)" style="margin-left:8px;background:#7f1d1d;border-color:#ef4444;color:#fca5a5">🗑️ 清除分析快取</button>
       <div class="result-box" id="picksResult" style="margin-top:10px"></div>
       <div id="picksStockList" style="margin-top:16px;display:none"></div>
     </div>
@@ -728,6 +729,21 @@ async function doRunPicks(btn){
   }finally{
     btn.disabled = false;
     btn.textContent = '⚡ 執行選股並更新';
+  }
+}
+
+async function doClearCache(btn){
+  btn.disabled = true;
+  btn.textContent = '⏳ 清除中...';
+  try{
+    const r = await fetch(`${API}/admin/clear-cache?key=${ADMIN_KEY}`, {method:'POST'});
+    const data = await r.json();
+    toast(r.ok ? data.message : '❌ '+(data.detail||'失敗'));
+  }catch(e){
+    toast('❌ 連線失敗：'+e.message);
+  }finally{
+    btn.disabled = false;
+    btn.textContent = '🗑️ 清除分析快取';
   }
 }
 

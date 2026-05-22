@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-8MBD31GNL8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-8MBD31GNL8');
+</script>
 <title>線上有位｜台股個股位置分析｜支撐壓力・損益比・K線型態</title>
 <meta name="description" content="輸入台股代號或股票名稱，立即查看支撐壓力、防守位、均線趨勢、K線型態與損益比，買股前先確認位置風險。">
 <meta name="robots" content="index, follow">
@@ -3168,13 +3176,17 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     navigator.serviceWorker.register('/sw.js').catch(()=>{});
   }
 
-  // 若 URL 帶 ?stock= 參數，auth 完成後直接分析
+  // 若 URL 帶 ?stock= 參數，auth 完成後直接分析；?report=1 則額外自動產出報告
   const _stockParam=new URLSearchParams(location.search).get('stock');
+  const _reportParam=new URLSearchParams(location.search).get('report');
   if(_stockParam){
     console.log('[stock-param] 偵測到 ?stock=', _stockParam, 'user=', _authUser ? _authUser.email : 'guest');
     const _stockInp=document.getElementById('stockInput');
     if(_stockInp) _stockInp.value=_stockParam.trim();
-    analyzeStock();
+    const _ap=analyzeStock();
+    if(_reportParam==='1'){
+      (_ap||Promise.resolve()).then(()=>setTimeout(doGenerateReport,800));
+    }
   }
 });
 
