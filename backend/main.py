@@ -3343,6 +3343,7 @@ def admin_grant(key: str = "", email: str = "", plan: str = "monthly", days: int
                 <h1 style="font-size:24px;color:#1D9E75;margin:0">線上<span style="color:#333">有位</span></h1>
                 <p style="color:#666;font-size:13px;margin:4px 0 0">台股技術分析輔助系統</p>
               </div>
+              {_SOFTGLOW_AD}
               <div style="background:#f0fdf4;border-radius:12px;padding:24px;margin-bottom:20px;border:1px solid #86efac">
                 <h2 style="margin:0 0 16px;font-size:18px;color:#166534">🎉 恭喜！升級成功</h2>
                 <p style="color:#555;margin:0 0 16px">您的付費方案已由管理員手動開通，立即登入即可使用。</p>
