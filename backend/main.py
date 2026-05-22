@@ -103,6 +103,9 @@ SEO_CACHE: dict = {
     "top_gainers": {"data": None, "expires": 0},
 }
 
+# 開盤熱門股快取（每日 09:15 更新）
+_OPENING_TOP20: dict = {"data": [], "updated_at": None}
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -196,13 +199,31 @@ async def lifespan(app: FastAPI):
                         continue
                     if delta == 3:
                         _send_email(m["email"], "【線上有位】訂閱即將到期",
-                            f'<p>您的訂閱將於 <b>{m["expire_at"]}</b> 到期（剩 3 天）。</p>'
-                            f'<p><a href="{FRONTEND_URL}/landing.html#pricing">立即續訂</a></p>')
+                            f'<div style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px">'
+                            f'<div style="text-align:center;margin-bottom:24px"><h1 style="font-size:24px;color:#1D9E75;margin:0">線上<span style="color:#333">有位</span></h1><p style="color:#666;font-size:13px;margin:4px 0 0">台股技術分析輔助系統</p></div>'
+                            + _SOFTGLOW_AD +
+                            f'<div style="background:#fff8e1;border-radius:12px;padding:24px;margin-bottom:20px;border:1px solid #fcd34d">'
+                            f'<h2 style="margin:0 0 12px;font-size:18px;color:#92400e">⏰ 訂閱即將到期</h2>'
+                            f'<p style="color:#555;margin:0 0 16px">您的訂閱將於 <b>{m["expire_at"]}</b> 到期（剩 3 天），請把握時間續訂，避免服務中斷。</p>'
+                            f'<a href="{FRONTEND_URL}/landing.html#pricing" style="background:#f59e0b;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:700">立即續訂</a></div>'
+                            + _SOFTGLOW_AD +
+                            f'<div style="border-top:1px solid #e5e7eb;padding-top:16px;text-align:center;color:#9ca3af;font-size:12px">'
+                            f'<p style="margin:0">如有問題請聯繫客服：<a href="mailto:watione@yahoo.com.tw" style="color:#1D9E75">watione@yahoo.com.tw</a></p>'
+                            f'<p style="margin:4px 0 0">線上有位 © 2026</p></div></div>')
                         _update_notice_date(m["email"], today_str)
                     elif delta == 0:
                         _send_email(m["email"], "【線上有位】訂閱已到期",
-                            f'<p>您的訂閱已於今日（{today_str}）到期。</p>'
-                            f'<p><a href="{FRONTEND_URL}/landing.html#pricing">立即續訂</a></p>')
+                            f'<div style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px">'
+                            f'<div style="text-align:center;margin-bottom:24px"><h1 style="font-size:24px;color:#1D9E75;margin:0">線上<span style="color:#333">有位</span></h1><p style="color:#666;font-size:13px;margin:4px 0 0">台股技術分析輔助系統</p></div>'
+                            + _SOFTGLOW_AD +
+                            f'<div style="background:#fef2f2;border-radius:12px;padding:24px;margin-bottom:20px;border:1px solid #fca5a5">'
+                            f'<h2 style="margin:0 0 12px;font-size:18px;color:#991b1b">📅 訂閱已到期</h2>'
+                            f'<p style="color:#555;margin:0 0 16px">您的訂閱已於今日（{today_str}）到期，部分功能已暫停。續訂後立即恢復所有功能。</p>'
+                            f'<a href="{FRONTEND_URL}/landing.html#pricing" style="background:#ef4444;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:700">立即續訂</a></div>'
+                            + _SOFTGLOW_AD +
+                            f'<div style="border-top:1px solid #e5e7eb;padding-top:16px;text-align:center;color:#9ca3af;font-size:12px">'
+                            f'<p style="margin:0">如有問題請聯繫客服：<a href="mailto:watione@yahoo.com.tw" style="color:#1D9E75">watione@yahoo.com.tw</a></p>'
+                            f'<p style="margin:4px 0 0">線上有位 © 2026</p></div></div>')
                         _update_notice_date(m["email"], today_str)
             except Exception as _e:
                 print(f"   ❌ 到期提醒排程執行失敗：{_e}")
@@ -210,14 +231,22 @@ async def lifespan(app: FastAPI):
                 _expire_running = False
 
 
-        def _run_price_alert_job():
+        def _run_intraday_alert_job():
             nonlocal _alert_running
             if _alert_running:
                 return
+            # 只在盤中 09:00–13:30 週一~五執行
+            import time as _time_alert
+            from datetime import datetime as _dtalert
+            from zoneinfo import ZoneInfo as _ZIa
+            _now_a = _dtalert.now(_ZIa("Asia/Taipei"))
+            if _now_a.weekday() >= 5:
+                return
+            _hm = _now_a.hour * 100 + _now_a.minute
+            if _hm < 900 or _hm > 1330:
+                return
             _alert_running = True
             try:
-                import urllib.request as _ureq2, json as _json2
-                from datetime import date as _date2, timedelta as _td2
                 conn = _db_conn()
                 alerts = conn.execute(
                     "SELECT * FROM price_alerts WHERE triggered=0"
@@ -225,23 +254,19 @@ async def lifespan(app: FastAPI):
                 conn.close()
                 if not alerts:
                     return
-                # 每股只查一次最新收盤價
+                # 每股只呼叫一次 get_quote（利用 _QUOTE_CACHE）
                 stock_prices: dict = {}
                 for _a in alerts:
                     sid = _a["stock_id"]
                     if sid in stock_prices:
                         continue
                     try:
-                        _start = (_date2.today() - _td2(days=5)).strftime("%Y-%m-%d")
-                        _end   = _date2.today().strftime("%Y-%m-%d")
-                        _url   = (f"https://api.finmindtrade.com/api/v4/data"
-                                  f"?dataset=TaiwanStockPrice&data_id={sid}"
-                                  f"&start_date={_start}&end_date={_end}&token={FINMIND_TOKEN}")
-                        _req = _ureq2.Request(_url, headers={"User-Agent": "Mozilla/5.0"})
-                        with _ureq2.urlopen(_req, timeout=8) as _resp:
-                            _d = _json2.loads(_resp.read())
-                        _rows = _d.get("data", [])
-                        stock_prices[sid] = float(_rows[-1]["close"]) if _rows else None
+                        _code = sid.strip().upper()
+                        _qc = _QUOTE_CACHE.get(_code)
+                        if not (_qc and (_qc["expires"] == 0 or _time_alert.time() < _qc["expires"])):
+                            get_quote(_code, user=None)
+                            _qc = _QUOTE_CACHE.get(_code)
+                        stock_prices[sid] = float(_qc["data"]["price"]) if (_qc and _qc["data"].get("price")) else None
                     except Exception:
                         stock_prices[sid] = None
                 conn = _db_conn()
@@ -275,17 +300,28 @@ async def lifespan(app: FastAPI):
                 conn.commit()
                 conn.close()
             except Exception as _e:
-                print(f"   ❌ 到價提醒排程執行失敗：{_e}")
+                print(f"   ❌ 盤中到價提醒排程執行失敗：{_e}")
             finally:
                 _alert_running = False
 
+        def _reset_alert_triggered():
+            try:
+                conn = _db_conn()
+                conn.execute("UPDATE price_alerts SET triggered=0, triggered_at=NULL WHERE triggered=1")
+                conn.commit()
+                conn.close()
+            except Exception as _e:
+                print(f"   ❌ 到價提醒重置失敗：{_e}")
+
         _bg_scheduler = BackgroundScheduler(timezone="Asia/Taipei")
-        _bg_scheduler.add_job(_run_unified_scan_job,  "cron", hour=16, minute=30, day_of_week="mon-fri")
-        _bg_scheduler.add_job(_run_expire_notice_job, "cron", hour=9,  minute=0)
-        _bg_scheduler.add_job(_run_price_alert_job,   "cron", hour=15, minute=35, day_of_week="mon-fri")
-        _bg_scheduler.add_job(_clear_quote_cache,     "cron", hour=9,  minute=0,  day_of_week="mon-fri")
+        _bg_scheduler.add_job(_run_unified_scan_job,    "cron",     hour=16, minute=30, day_of_week="mon-fri")
+        _bg_scheduler.add_job(_run_opening_scan_job,    "cron",     hour=9,  minute=15, day_of_week="mon-fri")
+        _bg_scheduler.add_job(_run_expire_notice_job,   "cron",     hour=9,  minute=0)
+        _bg_scheduler.add_job(_reset_alert_triggered,   "cron",     hour=9,  minute=0,  day_of_week="mon-fri")
+        _bg_scheduler.add_job(_run_intraday_alert_job,  "interval", minutes=5)
+        _bg_scheduler.add_job(_clear_quote_cache,       "cron",     hour=9,  minute=0,  day_of_week="mon-fri")
         _bg_scheduler.start()
-        print("   ✅ APScheduler 排程已啟動（統合選股 16:30、到價提醒 15:35、到期通知 09:00、報價快取清除 09:00）")
+        print("   ✅ APScheduler 排程已啟動（統合選股 16:30、開盤熱門股 09:15、盤中到價提醒每5分鐘、到期通知 09:00、報價快取清除 09:00）")
     except ImportError:
         print("   ⚠️ apscheduler 未安裝，選股排程請以 scheduler.py 獨立執行")
     except Exception as _sch_err:
@@ -2784,9 +2820,7 @@ def analyze(stock_id: str, tf: str = "D",
         conn.commit()
         conn.close()
 
-    # 記錄獨立訪客 + 累計分析次數
-    client_ip = request.client.host if request else "unknown"
-    _record_visit(client_ip)
+    # 累計分析次數
     _inc_counter("analyze_count")
 
     # 完成邀請制（首次查詢觸發）
@@ -3560,33 +3594,31 @@ def _inc_counter(key: str):
     conn.commit()
     conn.close()
 
-def _record_visit(ip: str):
-    today = _date_cls.today().isoformat()
-    conn = _db_conn()
-    conn.execute("INSERT OR IGNORE INTO visits (ip, date) VALUES (?, ?)", (ip, today))
-    conn.commit()
-    conn.close()
+def _record_visit():
+    _inc_counter("visit_count")
 
 @app.get("/api/stats")
 def api_stats():
     conn = _db_conn()
-    visit_count = conn.execute("SELECT COUNT(*) FROM visits").fetchone()[0]
     query_count = conn.execute("SELECT COALESCE(SUM(count), 0) FROM query_log").fetchone()[0]
-    row = conn.execute("SELECT value FROM counters WHERE key='page_views'").fetchone()
-    page_views = row[0] if row else 0
-    row2 = conn.execute("SELECT value FROM counters WHERE key='analyze_count'").fetchone()
-    analyze_count = row2[0] if row2 else 0
+    def _cval(key):
+        r = conn.execute("SELECT value FROM counters WHERE key=?", (key,)).fetchone()
+        return r[0] if r else 0
+    visit_count   = _cval("visit_count")
+    page_views    = _cval("page_views")
+    analyze_count = _cval("analyze_count")
     conn.close()
     return {
-        "visit_count": int(visit_count),
-        "query_count": int(query_count),
-        "page_views": int(page_views),
+        "visit_count":   int(visit_count),
+        "query_count":   int(query_count),
+        "page_views":    int(page_views),
         "analyze_count": int(analyze_count),
     }
 
 @app.post("/api/page-view")
 def api_page_view():
     _inc_counter("page_views")
+    _record_visit()
     return {"ok": True}
 
 @app.get("/")
@@ -4340,6 +4372,38 @@ def auth_change_password(req: ChangePasswordReq, user: dict = Depends(require_us
     return {"ok": True, "message": "密碼已更新，請重新登入"}
 
 
+# ── Soft Glow 產品推薦區塊（用於信件中，table 排版相容各郵件客戶端）──
+_SOFTGLOW_AD = (
+    '<div style="border-top:1px solid #e8f0ec;border-bottom:1px solid #e8f0ec;padding:16px 0;margin:16px 0">'
+    '<p style="text-align:center;font-size:10px;font-weight:700;letter-spacing:2px;color:#1D9E75;margin:0 0 12px;text-transform:uppercase">SOFT GLOW &middot; 緩光&nbsp;&nbsp;健康守護系列</p>'
+    '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse"><tr>'
+    '<td width="25%" style="text-align:center;padding:4px 2px">'
+    '<a href="https://watione1.guidemee.cc/products/yWh2aDIQ" style="text-decoration:none;color:#222">'
+    '<img src="https://watione1.guidemee.cc/tenancy/assets/oj9qkl/products/Oa9XaH7E5jgkNP7j2YkDaoFpLQPy7K-metaR2VtaW5pX0dlbmVyYXRlZF9JbWFnZV9xYjhoc3hxYjhoc3hxYjhoLnBuZw==-.png" width="80" height="80" style="border-radius:8px;object-fit:cover;display:block;margin:0 auto 6px" />'
+    '<p style="font-size:11px;margin:0 0 2px;font-weight:500">深海之源魚油</p>'
+    '<p style="font-size:10px;color:#16a34a;margin:0">Omega-3 84%</p></a></td>'
+    '<td width="25%" style="text-align:center;padding:4px 2px">'
+    '<a href="https://watione1.guidemee.cc/products/fjG6XpYz" style="text-decoration:none;color:#222">'
+    '<img src="https://watione1.guidemee.cc/tenancy/assets/oj9qkl/products/M9X1tgv26e2Lbxr0m4ckHaeIhrkGd3-metaR2VtaW5pX0dlbmVyYXRlZF9JbWFnZV9jNGVweGZjNGVweGZjNGVwLnBuZw==-.png" width="80" height="80" style="border-radius:8px;object-fit:cover;display:block;margin:0 auto 6px" />'
+    '<p style="font-size:11px;margin:0 0 2px;font-weight:500">雪肌彈力膠原</p>'
+    '<p style="font-size:10px;color:#db2777;margin:0">六大專利成分</p></a></td>'
+    '<td width="25%" style="text-align:center;padding:4px 2px">'
+    '<a href="https://watione1.guidemee.cc/products/BnlNTsYz" style="text-decoration:none;color:#222">'
+    '<img src="https://watione1.guidemee.cc/tenancy/assets/oj9qkl/products/zwfzYPbxjyLkS623gPq2IjdLgOVNLZ-metaR2VtaW5pX0dlbmVyYXRlZF9JbWFnZV9rMmpvZ29rMmpvZ29rMmpvLnBuZw==-.png" width="80" height="80" style="border-radius:8px;object-fit:cover;display:block;margin:0 auto 6px" />'
+    '<p style="font-size:11px;margin:0 0 2px;font-weight:500">纖體飲</p>'
+    '<p style="font-size:10px;color:#ea580c;margin:0">漢方配方</p></a></td>'
+    '<td width="25%" style="text-align:center;padding:4px 2px">'
+    '<a href="https://watione1.guidemee.cc/products/Gct3MfMg" style="text-decoration:none;color:#222">'
+    '<img src="https://watione1.guidemee.cc/tenancy/assets/oj9qkl/products/skSjmETidhxTjLNnLCeH5WdNNHM0YX-metaR2VtaW5pX0dlbmVyYXRlZF9JbWFnZV9vcTR5N3dvcTR5N3dvcTR5LnBuZw==-.png" width="80" height="80" style="border-radius:8px;object-fit:cover;display:block;margin:0 auto 6px" />'
+    '<p style="font-size:11px;margin:0 0 2px;font-weight:500">晶。水漾葉黃素</p>'
+    '<p style="font-size:10px;color:#7c3aed;margin:0">護眼配方</p></a></td>'
+    '</tr></table>'
+    '<p style="font-size:10px;color:#bbb;margin:12px 0 0;text-align:center">全館滿 2000 元免運 &middot; 新會員首購 95 折&nbsp;&nbsp;'
+    '<a href="https://watione1.guidemee.cc" style="color:#aaa">前往選購</a></p>'
+    '</div>'
+)
+
+
 def _send_email(to: str, subject: str, html: str):
     """寄送 HTML 信件，失敗只 log 不 raise"""
     import smtplib
@@ -4476,6 +4540,74 @@ async def create_order(request: Request):
 
     from fastapi.responses import HTMLResponse
     return HTMLResponse(content=form_html)
+
+
+def _fetch_opening_volume_top20() -> list:
+    """抓台股成交量前20名（TWSE STOCK_DAY_ALL，完全免費，不耗 FinMind 額度）
+    欄位：[代號, 名稱, 成交股數, 成交金額, 開盤, 最高, 最低, 收盤, 漲跌(+/-合一), 成交筆數]
+    """
+    import urllib.request as _ur2, json as _j2
+    url = "https://www.twse.com.tw/rwd/zh/afterTrading/STOCK_DAY_ALL?response=json"
+    req = _ur2.Request(url, headers={
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "Referer":    "https://www.twse.com.tw/",
+    })
+    with _ur2.urlopen(req, timeout=12, context=_TWSE_SSL_CTX) as r:
+        raw = _j2.loads(r.read())
+    rows = raw.get("data", [])
+    results = []
+    for row in rows:
+        try:
+            code = str(row[0]).strip()
+            name = str(row[1]).strip()
+            if not code.isdigit() or len(code) != 4:
+                continue
+            vol_str    = str(row[2]).replace(",", "")
+            close_str  = str(row[7]).replace(",", "")
+            change_str = str(row[8]).replace(",", "").strip()
+            if not vol_str or vol_str in ("--", "X", ""):
+                continue
+            vol    = int(float(vol_str)) // 1000       # 股 → 張
+            close  = float(close_str)  if close_str  not in ("--", "X", "") else 0
+            change = float(change_str) if change_str not in ("--", "X", "") else 0
+            prev   = close - change
+            change_pct = round(change / prev * 100, 2) if prev > 0 else 0
+            results.append({
+                "stock_id":   code,
+                "name":       name,
+                "volume":     vol,
+                "price":      close,
+                "change_pct": change_pct,
+            })
+        except Exception:
+            continue
+    results.sort(key=lambda x: x["volume"], reverse=True)
+    return results[:20]
+
+
+def _run_opening_scan_job():
+    """每個交易日 09:15 執行：更新開盤成交量前20名快取"""
+    from zoneinfo import ZoneInfo as _ZI2
+    now = datetime.now(_ZI2("Asia/Taipei"))
+    if now.weekday() >= 5:
+        return
+    try:
+        data = _fetch_opening_volume_top20()
+        _OPENING_TOP20["data"] = data
+        _OPENING_TOP20["updated_at"] = now.strftime("%Y-%m-%d %H:%M")
+        first = data[0]["stock_id"] if data else "N/A"
+        print(f"[OPENING_SCAN] 完成，{len(data)} 筆，量No.1={first}")
+    except Exception as _e:
+        print(f"[OPENING_SCAN] 失敗：{_e}")
+
+
+@app.get("/api/picks/opening")
+def get_opening_picks():
+    """開盤熱門股（成交量前20，無需登入）"""
+    return {
+        "data":       _OPENING_TOP20.get("data", []),
+        "updated_at": _OPENING_TOP20.get("updated_at"),
+    }
 
 
 @app.get("/api/picks/latest")
@@ -4616,6 +4748,7 @@ async def webhook_ecpay(request: Request):
                 <h1 style="font-size:24px;color:#1D9E75;margin:0">線上<span style="color:#333">有位</span></h1>
                 <p style="color:#666;font-size:13px;margin:4px 0 0">台股技術分析輔助系統</p>
               </div>
+              {_SOFTGLOW_AD}
               <div style="background:#f0fdf4;border-radius:12px;padding:24px;margin-bottom:20px;border:1px solid #86efac">
                 <h2 style="margin:0 0 16px;font-size:18px;color:#166534">🎉 升級成功！</h2>
                 <p style="color:#555;margin:0 0 16px">感謝您升級線上有位！您的付費方案已成功開通。</p>
@@ -4633,6 +4766,7 @@ async def webhook_ecpay(request: Request):
                 <p style="margin:0 0 8px;font-weight:700;color:#92400e">📢 廣告合作推薦</p>
                 <p style="margin:0;font-size:13px;color:#78350f">把線上有位推薦給朋友，讓更多人享受 AI 輔助的台股分析工具！分享您的使用心得，幫助我們持續優化服務。</p>
               </div>
+              {_SOFTGLOW_AD}
               <div style="border-top:1px solid #e5e7eb;padding-top:16px;text-align:center;color:#9ca3af;font-size:12px">
                 <p style="margin:0">如有問題請聯繫客服：<a href="mailto:watione@yahoo.com.tw" style="color:#1D9E75">watione@yahoo.com.tw</a></p>
                 <p style="margin:4px 0 0">線上有位 © 2026</p>
@@ -4664,6 +4798,7 @@ async def webhook_ecpay(request: Request):
                 <h1 style="font-size:24px;color:#1D9E75;margin:0">線上<span style="color:#333">有位</span></h1>
                 <p style="color:#666;font-size:13px;margin:4px 0 0">台股技術分析輔助系統</p>
               </div>
+              {_SOFTGLOW_AD}
               <div style="background:#f0fdf4;border-radius:12px;padding:24px;margin-bottom:20px;border:1px solid #86efac">
                 <h2 style="margin:0 0 16px;font-size:18px;color:#166534">🎉 歡迎加入線上有位！</h2>
                 <p style="color:#555;margin:0 0 16px">感謝您的訂閱！以下是您的帳號資訊，請妥善保管：</p>
@@ -4698,6 +4833,7 @@ async def webhook_ecpay(request: Request):
                 <p style="margin:0 0 8px;font-weight:700;color:#1e40af">📢 推薦好友，一起分析台股</p>
                 <p style="margin:0;font-size:13px;color:#1e3a8a">把線上有位分享給投資朋友，一起利用 AI 找到好的進場位置！</p>
               </div>
+              {_SOFTGLOW_AD}
               <div style="border-top:1px solid #e5e7eb;padding-top:16px;text-align:center;color:#9ca3af;font-size:12px">
                 <p style="margin:0">如有問題請聯繫客服：<a href="mailto:watione@yahoo.com.tw" style="color:#1D9E75">watione@yahoo.com.tw</a></p>
                 <p style="margin:4px 0 0">線上有位 © 2026</p>
@@ -5483,7 +5619,7 @@ class AlertReq(BaseModel):
 def get_alerts(user: dict = Depends(require_paid_user)):
     conn = _db_conn()
     rows = conn.execute(
-        "SELECT * FROM price_alerts WHERE user_email=? AND triggered=0 ORDER BY created_at DESC",
+        "SELECT * FROM price_alerts WHERE user_email=? ORDER BY created_at DESC",
         (user["email"],)
     ).fetchall()
     conn.close()
