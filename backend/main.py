@@ -3453,8 +3453,7 @@ def admin_clear_cache(key: str = ""):
 
 @app.get("/admin/run-opening-scan")
 async def admin_run_opening_scan(key: str = Query(...)):
-    if key != ADMIN_KEY:
-        raise HTTPException(status_code=403, detail="forbidden")
+    _check_admin(key)
     try:
         import asyncio as _asyncio
         await _asyncio.get_event_loop().run_in_executor(None, _fetch_opening_volume_top20)
