@@ -3451,6 +3451,18 @@ def admin_clear_cache(key: str = ""):
     return {"cleared": n, "message": f"快取已清除（共 {n} 筆）"}
 
 
+@app.post("/admin/run-opening-scan")
+async def admin_run_opening_scan(key: str = Query(...)):
+    if key != ADMIN_KEY:
+        raise HTTPException(status_code=403, detail="forbidden")
+    try:
+        import asyncio as _asyncio
+        await _asyncio.get_event_loop().run_in_executor(None, _fetch_opening_volume_top20)
+        return {"message": "開盤熱門股抓取完成"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 class _BatchUpgradeReq(BaseModel):
     emails: list
     plan: str = "monthly"

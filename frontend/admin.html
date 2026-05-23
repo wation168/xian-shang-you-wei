@@ -277,14 +277,13 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
       <div class="result-box" id="earlybirdResult"></div>
     </div>
 
-    <!-- 預建 SEO 選股頁面 -->
+    <!-- 開盤熱門股 -->
     <div class="card" id="sec-prebuild" style="display:none">
-      <div class="card-title">🔍 預建 SEO 選股頁面</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6">執行今日選股分析（鉅亨新聞 + TWSE 成交量前100取交集），結果自動同步至 <a href="https://stock-navigator-api.zeabur.app/picks" target="_blank" style="color:var(--green)">/picks</a> 頁供 Google 索引。約 1~2 分鐘完成。</p>
-      <button class="inline-btn" id="runPicksBtn" onclick="doRunPicks(this)">⚡ 執行選股並更新</button>
+      <div class="card-title">🔥 開盤熱門股</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6">手動觸發開盤熱門股抓取（TWSE 成交量前 20），自動更新至 /api/picks/opening。平日 09:15 自動執行。</p>
+      <button class="inline-btn" id="runOpeningBtn" onclick="doRunOpeningScan(this)">⚡ 立即抓取開盤熱門股</button>
       <button class="inline-btn" onclick="doClearCache(this)" style="margin-left:8px;background:#7f1d1d;border-color:#ef4444;color:#fca5a5">🗑️ 清除分析快取</button>
       <div class="result-box" id="picksResult" style="margin-top:10px"></div>
-      <div id="picksStockList" style="margin-top:16px;display:none"></div>
     </div>
 
   </div>
@@ -685,50 +684,31 @@ async function doEarlyBirdUpgrade(){
   }
 }
 
-// ── 預建 SEO 選股頁面 ──
-async function doRunPicks(btn){
+// ── 開盤熱門股手動觸發 ──
+async function doRunOpeningScan(btn){
   btn.disabled = true;
   btn.textContent = '⏳ 執行中...';
-  const res  = document.getElementById('picksResult');
-  const list = document.getElementById('picksStockList');
+  const res = document.getElementById('picksResult');
   res.className = 'result-box show';
-  res.textContent = '選股分析進行中，約 1~2 分鐘...';
-  list.style.display = 'none';
-  const today = new Date(Date.now() + 8*3600000).toISOString().slice(0,10);
+  res.textContent = '開盤熱門股抓取中...';
   try{
-    const r = await fetch(`${API}/admin/run-scan?key=${ADMIN_KEY}`, {
-      method:'POST', signal: AbortSignal.timeout(180000)
+    const r = await fetch(`${API}/admin/run-opening-scan?key=${ADMIN_KEY}`, {
+      method:'POST', signal: AbortSignal.timeout(60000)
     });
     const data = await r.json();
-    if(r.ok && Array.isArray(data.picks)){
-      if(data.picks.length){
-        res.textContent = `✅ 完成，共 ${data.picks.length} 支入選，/picks 頁已更新`;
-        res.className = 'result-box show success';
-        list.style.display = 'block';
-        list.innerHTML = data.picks.map(p=>{
-          const sc = p.score >= 80 ? '#16a34a' : p.score >= 65 ? '#d97706' : '#64748b';
-          const sigHtml = (p.signals||[]).map(s=>`<span class="sig-tag">${s}</span>`).join('');
-          return `<div class="picks-item" onclick="window.open('${BACKEND_URL}/report/${p.stock_id}-${today}','_blank')">
-            <span class="picks-code">${p.stock_id}</span>
-            <span class="picks-name">${p.stock_name||''}</span>
-            <span class="picks-score" style="color:${sc}">${p.score}</span>
-            <div class="picks-sigs">${sigHtml}</div>
-          </div>`;
-        }).join('');
-      } else {
-        res.textContent = '✅ 完成，今日無入選股票（市況不符篩選條件）';
-        res.className = 'result-box show';
-      }
+    if(r.ok){
+      res.textContent = `✅ ${data.message || '完成'}`;
+      res.className = 'result-box show success';
     } else {
       res.textContent = '❌ 失敗：'+(data.detail||'未知錯誤');
       res.className = 'result-box show error';
     }
   }catch(e){
-    res.textContent = '❌ 連線失敗或逾時（180s）：'+e.message;
+    res.textContent = '❌ 連線失敗或逾時：'+e.message;
     res.className = 'result-box show error';
   }finally{
     btn.disabled = false;
-    btn.textContent = '⚡ 執行選股並更新';
+    btn.textContent = '⚡ 立即抓取開盤熱門股';
   }
 }
 
