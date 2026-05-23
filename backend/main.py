@@ -1997,6 +1997,8 @@ def _inc_report_count(member_id: int):
 
 PERIOD_MAP = {"D": ("3y", "1d"), "W": ("5y", "1wk"), "M": ("10y", "1mo")}
 
+REPORT_INJECT = """<style>#reportShareBtn{position:fixed;bottom:80px;right:16px;z-index:1001;background:#1D9E75;color:#fff;border:none;border-radius:20px;padding:8px 16px;font-size:14px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2);font-family:inherit;}.report-ad-block{position:fixed;bottom:16px;right:16px;z-index:1000;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);max-width:300px;}.report-ad-icon{font-size:22px;flex-shrink:0;}.report-ad-text{flex:1;font-size:12px;line-height:1.5;}.report-ad-text strong{display:block;color:#111827;margin-bottom:2px;}.report-ad-text span{color:#6b7280;}.report-ad-btn{background:#1D9E75;color:#fff;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;white-space:nowrap;text-decoration:none;display:inline-block;}</style><button id="reportShareBtn" onclick="var url=window.location.href;var title=document.title||'線上有位個股報告';if(navigator.share){navigator.share({title:title,url:url});}else{navigator.clipboard.writeText(url).then(function(){var b=document.getElementById('reportShareBtn');b.textContent='✓ 已複製';setTimeout(function(){b.textContent='🔗 分享';},2000);});}">🔗 分享</button><div class="report-ad-block">  <div class="report-ad-icon">👁️</div>  <div class="report-ad-text">    <strong>長時間盯盤，眼睛需要保護</strong>    <span>Soft Glow 葉黃素｜護眼配方，盤中盤後都舒適</span>  </div>  <a class="report-ad-btn" href="https://softglow-ai.com/landing.html" target="_blank">了解更多</a></div>"""
+
 
 @app.get("/api/debug/{stock_id}")
 def debug_stock(stock_id: str):
@@ -4286,6 +4288,68 @@ def auth_login(req: LoginReq):
     }
 
 
+class GoogleLoginReq(BaseModel):
+    google_token: str
+
+
+@app.post("/auth/google")
+def auth_google(req: GoogleLoginReq):
+    try:
+        from google.oauth2 import id_token as _gid
+        from google.auth.transport import requests as _greq
+        _gcid = os.environ.get("GOOGLE_CLIENT_ID", "584257110691-jtn1tf282q4vsfn7c7vhp9c12m6ino1n.apps.googleusercontent.com")
+        idinfo = _gid.verify_oauth2_token(req.google_token, _greq.Request(), _gcid)
+    except Exception:
+        raise HTTPException(status_code=401, detail="Google token 驗證失敗，請重新登入")
+
+    email = idinfo.get("email", "").strip().lower()
+    if not email:
+        raise HTTPException(status_code=400, detail="無法取得 Google 帳號 Email")
+
+    conn = _db_conn()
+    blocked = conn.execute(
+        "SELECT email FROM blocked_users WHERE email=? AND block_type='login'", (email,)
+    ).fetchone()
+    if blocked:
+        conn.close()
+        raise HTTPException(status_code=403, detail="帳號已被停用，請聯絡客服")
+
+    row = conn.execute("SELECT * FROM members WHERE email=?", (email,)).fetchone()
+    if not row:
+        rand_pwd = secrets.token_urlsafe(16)
+        conn.execute(
+            "INSERT INTO members (email, password, plan) VALUES (?, ?, 'free')",
+            (email, _hash_pw(rand_pwd))
+        )
+        conn.commit()
+        _get_or_create_referral_code(email)
+        row = conn.execute("SELECT * FROM members WHERE email=?", (email,)).fetchone()
+
+    session_id = secrets.token_hex(16)
+    conn.execute(
+        "UPDATE members SET last_login=datetime('now','+8 hours'), session_id=? WHERE id=?",
+        (session_id, row["id"])
+    )
+    conn.commit()
+    conn.close()
+
+    payload = {
+        "sub": row["id"],
+        "email": email,
+        "plan": row["plan"],
+        "ver": row["token_ver"],
+        "sid": session_id,
+        "exp": _time_mod.time() + JWT_EXPIRE_DAYS * 86400,
+    }
+    token = _jwt_create(payload)
+    return {
+        "token": token,
+        "email": email,
+        "plan": row["plan"],
+        "expire_at": row["expire_at"],
+    }
+
+
 @app.get("/auth/me")
 def auth_me(user: dict = Depends(require_user)):
     today = _date_cls.today().isoformat()
@@ -5804,6 +5868,7 @@ def get_report(slug: str):
                    'function gtag(){dataLayer.push(arguments);}'
                    "gtag('js',new Date());gtag('config','G-8MBD31GNL8');</script>")
             html = html.replace("<head>", "<head>" + _ga, 1)
+        html = html.replace('</body>', REPORT_INJECT + '</body>', 1)
         return HTMLResponse(content=html)
 
     # 即時產生
@@ -5823,6 +5888,7 @@ def get_report(slug: str):
             pass
         finally:
             conn.close()
+        html = html.replace('</body>', REPORT_INJECT + '</body>', 1)
         return HTMLResponse(content=html)
     except Exception as e:
         raise HTTPException(status_code=404, detail=f"無法取得 {stock_id} 報告：{e}")

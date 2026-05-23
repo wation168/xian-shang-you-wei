@@ -11,7 +11,15 @@ main_picker.py — 一鍵執行：爬取 → 分析 → 輸出
 """
 
 import os
+import re
 import sys
+
+_ETF_NAME_KEYWORDS = ("ETF", "元大", "富邦", "國泰", "永豐", "中信", "群益", "凱基", "兆豐", "台灣50", "高股息")
+
+def _is_etf(stock_id: str, name: str) -> bool:
+    if re.search(r'[A-Za-z]', stock_id):
+        return True
+    return any(kw in name for kw in _ETF_NAME_KEYWORDS)
 
 
 def main():
@@ -33,6 +41,9 @@ def main():
     if not volume_ids:
         print("⚠️ TWSE 資料取得失敗，流程結束")
         sys.exit(0)
+    _before = len(volume_ids)
+    volume_ids = [sid for sid in volume_ids if not _is_etf(sid, name_dict.get(sid, ""))]
+    print(f"  → ETF 過濾：{_before} → {len(volume_ids)} 支")
     print(f"  → {volume_ids[:8]}{'...' if len(volume_ids)>8 else ''}")
 
     # ── Step 2：FinMind 技術分析（30 支）──
@@ -76,7 +87,9 @@ def run_unified_scan(delay: float = 1.0) -> list[dict]:
     if not volume_ids:
         print("[unified] ⚠️ TWSE 資料取得失敗，流程結束")
         return []
-    print(f"[unified]   → {len(volume_ids)} 支：{volume_ids[:6]}...")
+    _before = len(volume_ids)
+    volume_ids = [sid for sid in volume_ids if not _is_etf(sid, name_dict.get(sid, ""))]
+    print(f"[unified]   → ETF 過濾：{_before} → {len(volume_ids)} 支：{volume_ids[:6]}...")
 
     # Step 2: FinMind 技術分析（全部 30 支）
     print(f"[unified] Step 2: FinMind 技術分析（{len(volume_ids)} 支，delay={delay}s）...")

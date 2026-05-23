@@ -14,7 +14,15 @@ main_picker.py — 一鍵執行：爬取 → 篩選 → 分析 → 輸出
 """
 
 import os
+import re
 import sys
+
+_ETF_NAME_KEYWORDS = ("ETF", "元大", "富邦", "國泰", "永豐", "中信", "群益", "凱基", "兆豐", "台灣50", "高股息")
+
+def _is_etf(stock_id: str, name: str) -> bool:
+    if re.search(r'[A-Za-z]', stock_id):
+        return True
+    return any(kw in name for kw in _ETF_NAME_KEYWORDS)
 
 
 def main():
@@ -40,6 +48,9 @@ def main():
     # ── Step 2：TWSE 成交量排行前 100 ──
     print("\n[Step 2] 抓取 TWSE 成交量排行前 100（不打 FinMind）...")
     volume_ids, name_dict = fetch_twse_volume_top(100)
+    _before = len(volume_ids)
+    volume_ids = [sid for sid in volume_ids if not _is_etf(sid, name_dict.get(sid, ""))]
+    print(f"  → ETF 過濾：{_before} → {len(volume_ids)} 支")
 
     # ── Step 3：合併候選清單（≤50）──
     print("\n[Step 3] 合併候選清單...")
@@ -94,6 +105,9 @@ def run_unified_scan(delay: float = 1.0) -> list[dict]:
     # Step 2: TWSE 成交量排行前 100
     print("[unified] Step 2: TWSE 成交量排行（不打 FinMind）...")
     volume_ids, name_dict = fetch_twse_volume_top(100)
+    _before = len(volume_ids)
+    volume_ids = [sid for sid in volume_ids if not _is_etf(sid, name_dict.get(sid, ""))]
+    print(f"[unified]   → ETF 過濾：{_before} → {len(volume_ids)} 支")
 
     # Step 3: 合併候選（≤50）
     print("[unified] Step 3: 合併候選清單（≤50）...")

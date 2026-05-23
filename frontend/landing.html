@@ -132,6 +132,14 @@ footer p{font-size:12px;color:rgba(255,255,255,.3);line-height:1.8}
 .mistake-card{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
 .mistake-card.visible{opacity:1;transform:translateY(0)}
 .price-card:hover{transform:translateY(-6px);box-shadow:0 16px 48px rgba(0,0,0,.12)}
+@media(max-width:768px){
+  .product-cards-grid{grid-template-columns:repeat(2,1fr)!important;gap:10px!important}
+  .product-cards-grid a{padding:12px 10px!important;border-radius:12px!important}
+  .product-cards-grid a img{border-radius:8px!important;margin-bottom:8px!important}
+  .product-cards-grid a div:nth-child(3){font-size:12px!important}
+  .product-cards-grid a div:nth-child(4){font-size:11px!important}
+  .product-cards-grid a div:nth-child(5){font-size:10px!important}
+}
 @media(max-width:600px){
   nav{padding:0 16px}
   .hero{padding:80px 16px 40px}
@@ -206,7 +214,7 @@ footer p{font-size:12px;color:rgba(255,255,255,.3);line-height:1.8}
       <div style="font-size:11px;font-weight:600;letter-spacing:3px;color:#1D9E75;text-transform:uppercase;margin-bottom:8px">Soft Glow · 緩光</div>
       <div style="font-size:24px;font-weight:800;color:#1a1a18;letter-spacing:-.5px">健康守護系列</div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px">
+    <div class="product-cards-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:20px">
 
       <!-- 卡片1：深海之源魚油膠囊 -->
       <a href="https://watione1.guidemee.cc/products/yWh2aDIQ" target="_blank" rel="noopener"
@@ -606,6 +614,12 @@ footer p{font-size:12px;color:rgba(255,255,255,.3);line-height:1.8}
     <p style="font-size:11px;color:var(--text3);text-align:center;margin-top:12px">
       支援信用卡、ATM、超商代碼、ApplePay
     </p>
+    <div style="display:flex;align-items:center;gap:8px;margin:16px 0 10px">
+      <div style="flex:1;height:1px;background:#e5e7eb"></div>
+      <span style="font-size:11px;color:#aaa">已有帳號？</span>
+      <div style="flex:1;height:1px;background:#e5e7eb"></div>
+    </div>
+    <div id="googleSignInBtn" style="display:flex;justify-content:center;margin-top:4px"></div>
   </div>
 </div>
 
@@ -685,6 +699,7 @@ function openBuy(plan){
   document.getElementById('buyModal').style.display = 'flex';
   document.body.style.overflow = 'hidden';
   setTimeout(()=>document.getElementById('buyEmail').focus(), 100);
+  _initGoogleSignInLanding();
 }
 function closeBuy(){
   document.getElementById('buyModal').style.display = 'none';
@@ -964,6 +979,45 @@ document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
       }
     }
   ]
+}
+</script>
+<script src="https://accounts.google.com/gsi/client" async onload="_initGoogleSignInLanding()"></script>
+<script>
+const GOOGLE_CLIENT_ID_LANDING = '584257110691-jtn1tf282q4vsfn7c7vhp9c12m6ino1n.apps.googleusercontent.com';
+
+async function handleGoogleLoginLanding(response){
+  const errEl = document.getElementById('buyErr');
+  if(errEl) errEl.textContent = '';
+  try{
+    const r = await fetch(`${API}/auth/google`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({google_token: response.credential}),
+      signal: AbortSignal.timeout(10000)
+    });
+    const data = await r.json();
+    if(!r.ok){ if(errEl) errEl.textContent = data.detail || 'Google 登入失敗'; return; }
+    localStorage.setItem('auth_token', data.token);
+    closeBuy();
+    window.location.href = 'https://softglow-ai.com';
+  }catch(e){
+    if(errEl) errEl.textContent = '連線失敗，請稍後再試';
+  }
+}
+
+let _googleSignInLandingReady = false;
+function _initGoogleSignInLanding(){
+  if(typeof google === 'undefined' || !google.accounts) return;
+  if(!_googleSignInLandingReady){
+    _googleSignInLandingReady = true;
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID_LANDING,
+      callback: handleGoogleLoginLanding,
+    });
+  }
+  const btn = document.getElementById('googleSignInBtn');
+  if(btn && !btn.hasChildNodes())
+    google.accounts.id.renderButton(btn, {theme:'outline', size:'large', text:'signin_with', width:300});
 }
 </script>
 </body>

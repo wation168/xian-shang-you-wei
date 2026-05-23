@@ -307,6 +307,7 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
 .query-bar-fill{height:100%;background:var(--green);transition:width .3s}
 .query-bar-fill.full{background:#e05555}
 </style>
+<script src="https://accounts.google.com/gsi/client" async onload="_initGoogleSignIn()"></script>
 </head>
 <body>
 <div class="app">
@@ -393,7 +394,7 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
     <!-- 風險大卡 + 條列摘要 -->
     <div class="risk-card" id="riskCard">
       <div class="risk-top">
-        <div class="risk-stock" id="riskStock">—</div>
+        <div class="risk-stock" id="riskStock">—</div><button id="shareBtn" onclick="shareStock()" style="display:none;background:none;border:1.5px solid #2ecc71;border-radius:20px;color:#2ecc71;font-size:13px;padding:4px 12px;cursor:pointer;margin-left:8px;vertical-align:middle;">🔗 分享</button>
         <div style="display:flex;align-items:center;gap:8px">
           <button id="watchBtn" onclick="toggleWatch(C._currentId,C._currentName)"
             style="padding:4px 11px;border-radius:20px;border:.5px solid var(--border2);
@@ -754,6 +755,12 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
       <div style="text-align:center;margin-top:12px;font-size:12px">
         <a href="#" onclick="showForgotView();return false;" style="color:var(--text3);text-decoration:none">忘記密碼？</a>
       </div>
+      <div style="display:flex;align-items:center;gap:8px;margin:14px 0 8px">
+        <div style="flex:1;height:1px;background:var(--border2)"></div>
+        <span style="font-size:11px;color:var(--text3)">或</span>
+        <div style="flex:1;height:1px;background:var(--border2)"></div>
+      </div>
+      <div id="googleSignInBtn" style="display:flex;justify-content:center;margin-top:4px"></div>
     </div>
     <div id="forgotView" style="display:none">
       <div class="modal-title">重設密碼</div>
@@ -785,6 +792,12 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
       </div>
       <div class="modal-err" id="registerErr"></div>
       <button class="modal-btn" onclick="doRegister()">建立免費帳號</button>
+      <div style="display:flex;align-items:center;gap:8px;margin:14px 0 8px">
+        <div style="flex:1;height:1px;background:var(--border2)"></div>
+        <span style="font-size:11px;color:var(--text3)">或</span>
+        <div style="flex:1;height:1px;background:var(--border2)"></div>
+      </div>
+      <div id="googleSignInBtnReg" style="display:flex;justify-content:center;margin-top:4px"></div>
     </div>
   </div>
 </div>
@@ -1433,6 +1446,9 @@ function setSt(msg,err){const el=document.getElementById('statusBar');el.innerHT
 async function analyzeStock(){
   const raw=document.getElementById('stockInput').value.trim();
   if(!raw)return;
+  _lastReportUrl = null;
+  const shareBtn = document.getElementById('shareBtn');
+  if (shareBtn) shareBtn.style.display = 'none';
   const id=raw.replace(/\.(TW|TWO)$/i,'');
   const enabled=maSettings.filter(m=>m.enabled&&m.n>0);
   const url=`${getAPI()}/api/analyze/${id}`;
@@ -1680,6 +1696,7 @@ function renderResult(d,enabledMA){
   const inWatch=!!watchList.find(s=>s.id===C._currentId);
   updateWatchBtn(C._currentId,inWatch);
   document.getElementById('resultEl').className='result show';
+  if (shareBtn) shareBtn.style.display = 'inline-block';
   document.getElementById('adBlock').style.display='block';
   // 換股票時重置深度分析（避免舊資料殘留）
   const _dsSec=document.getElementById('deepSection'); if(_dsSec) _dsSec.style.display='none';
@@ -1817,10 +1834,29 @@ async function doGenerateReport(){
     });
     if(r.status===403){ document.getElementById('reportLimitModal').style.display='flex'; return; }
     const j=await r.json();
-    if(j.ok&&j.url){window.open(j.url,'_blank');}
+    if(j.ok&&j.url){_lastReportUrl=j.report_url||j.url||null;window.open(j.url,'_blank');}
     else{alert('報告產出失敗，請稍後再試');}
   }catch(e){alert('報告產出失敗');}
   finally{btn.disabled=false;btn.textContent='立即產出 →';}
+}
+
+function shareStock() {
+  const stockId = C._currentId || '';
+  const stockName = C._currentName || stockId;
+  const url = _lastReportUrl || ('https://softglow-ai.com/?stock=' + stockId);
+  const text = _lastReportUrl
+    ? '【線上有位】' + stockName + ' 個股深度報告'
+    : '【線上有位】' + stockName + ' 技術分析';
+  if (navigator.share) {
+    navigator.share({ title: text, url: url }).catch(function(){});
+  } else {
+    navigator.clipboard.writeText(url).then(function(){
+      const btn = document.getElementById('shareBtn');
+      const orig = btn.textContent;
+      btn.textContent = '✓ 已複製';
+      setTimeout(function(){ btn.textContent = orig; }, 2000);
+    });
+  }
 }
 
 function recalcMA(){
@@ -3271,11 +3307,59 @@ function goPayFromApp(plan) {
 // 會員系統
 // ══════════════════════════════════════
 let _authUser = null;   // 目前登入的用戶資訊
+let _lastReportUrl = null;
 let _authReady = false; // DOMContentLoaded 的 _initAuth() 完成後才為 true
+
+const GOOGLE_CLIENT_ID = '584257110691-jtn1tf282q4vsfn7c7vhp9c12m6ino1n.apps.googleusercontent.com';
 
 function _getToken(){ return localStorage.getItem('auth_token'); }
 function _setToken(t){ localStorage.setItem('auth_token', t); console.log('[auth] token 已寫入 localStorage，長度:', t ? t.length : 0); }
 function _clearToken(){ localStorage.removeItem('auth_token'); console.log('[auth] token 已從 localStorage 清除'); }
+
+async function handleGoogleLogin(response){
+  const errEl = document.getElementById('loginErr') || document.getElementById('registerErr');
+  try{
+    const r = await fetch(`${getAPI()}/auth/google`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({google_token: response.credential}),
+      signal: AbortSignal.timeout(10000)
+    });
+    const data = await r.json();
+    if(!r.ok){
+      const e = document.getElementById('loginErr') || document.getElementById('registerErr');
+      if(e) e.textContent = data.detail || 'Google 登入失敗';
+      return;
+    }
+    _setToken(data.token);
+    _authUser = data;
+    hideLoginModal();
+    _onLoginSuccess();
+    const me = await fetch(`${getAPI()}/auth/me`, {headers: _authHeaders()});
+    if(me.ok){ _authUser = await me.json(); _applyResultMasks(); }
+  }catch(e){
+    const el = document.getElementById('loginErr');
+    if(el) el.textContent = '連線失敗，請稍後再試';
+  }
+}
+
+let _googleSignInReady = false;
+function _initGoogleSignIn(){
+  if(typeof google === 'undefined' || !google.accounts) return;
+  if(!_googleSignInReady){
+    _googleSignInReady = true;
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleGoogleLogin,
+    });
+  }
+  const btn = document.getElementById('googleSignInBtn');
+  if(btn && !btn.hasChildNodes())
+    google.accounts.id.renderButton(btn, {theme:'outline', size:'large', text:'signin_with', width:300});
+  const btnReg = document.getElementById('googleSignInBtnReg');
+  if(btnReg && !btnReg.hasChildNodes())
+    google.accounts.id.renderButton(btnReg, {theme:'outline', size:'large', text:'signin_with', width:300});
+}
 
 function _authHeaders(){
   const t = _getToken();
@@ -3567,6 +3651,7 @@ function showLoginModal(){
   const errEl = document.getElementById('loginErr');
   errEl.textContent = ''; errEl.style.color = '';
   setTimeout(() => document.getElementById('loginEmail').focus(), 100);
+  _initGoogleSignIn();
 }
 
 function hideLoginModal(){
@@ -3784,67 +3869,37 @@ function triggerPWAInstall(){
 
 
 // ══════════════════════════════════════
-// 選股名單頁（開盤熱門股，所有人可見）
+// 選股名單頁（精選股，付費會員）
 // ══════════════════════════════════════
 async function showPicksPage(){
   const el = document.getElementById('pageContent');
   const overlay = document.getElementById('pageOverlay');
   overlay.style.display = 'block';
 
+  const token = _getToken();
+  if(!token){
+    el.innerHTML = `
+      <div style="padding:60px 0;text-align:center">
+        <div style="font-size:48px;margin-bottom:16px">🔍</div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:8px">登入後查看精選股</div>
+        <div style="font-size:13px;color:var(--text3);margin-bottom:24px;line-height:1.6">
+          付費會員可查看每日精選股名單
+        </div>
+        <button onclick="showLoginModal()" style="padding:12px 32px;background:var(--green);color:#fff;
+          border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;width:100%">
+          登入
+        </button>
+      </div>`;
+    return;
+  }
+
   el.innerHTML = `
     <div style="padding:8px 0 16px">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0 12px">
-        <div style="font-size:15px;font-weight:700;color:var(--text)">🔥 開盤熱門股</div>
-        <div id="openingUpdatedAt" style="font-size:10px;color:var(--text3)"></div>
-      </div>
-      <div id="openingList"><div style="padding:40px 0;text-align:center;color:var(--text3)">載入中...</div></div>
+      <div style="font-size:15px;font-weight:700;color:var(--text);padding:10px 0 12px">🔍 每日精選股</div>
+      <iframe src="${getAPI()}/api/picks/latest?token=${encodeURIComponent(token)}"
+        style="width:100%;height:calc(100vh - 160px);border:none;border-radius:10px;background:var(--bg2)"
+        loading="lazy"></iframe>
     </div>`;
-
-  try{
-    const r = await fetch(`${getAPI()}/api/picks/opening`, {signal: AbortSignal.timeout(10000)});
-    const d = await r.json();
-    const list = d.data || [];
-    const updatedAt = d.updated_at || null;
-
-    if(updatedAt){
-      document.getElementById('openingUpdatedAt').textContent = `更新：${updatedAt}`;
-    }
-
-    if(!list.length){
-      document.getElementById('openingList').innerHTML =
-        `<div style="padding:48px 0;text-align:center;color:var(--text3)">
-          <div style="font-size:32px;margin-bottom:12px">📊</div>
-          <div style="font-size:13px">今日開盤資料將於 09:15 後更新</div>
-        </div>`;
-      return;
-    }
-
-    document.getElementById('openingList').innerHTML = list.map((item, i) => {
-      const up = item.change_pct >= 0;
-      const pctColor = item.change_pct > 0 ? 'var(--dn)' : item.change_pct < 0 ? 'var(--up)' : 'var(--text3)';
-      const pctStr = item.change_pct > 0 ? `+${item.change_pct.toFixed(2)}%` : `${item.change_pct.toFixed(2)}%`;
-      const vol = item.volume.toLocaleString();
-      return `
-        <div onclick="qpAndHome('${item.stock_id}')"
-          style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;margin-bottom:6px;background:var(--bg2);cursor:pointer;active:opacity:.8">
-          <div style="width:22px;text-align:center;font-size:12px;font-weight:700;color:${i<3?'var(--green)':'var(--text3)'}">${i+1}</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:14px;font-weight:700;color:var(--text)">${item.stock_id} <span style="font-size:12px;font-weight:400;color:var(--text2)">${item.name}</span></div>
-            <div style="font-size:11px;color:var(--text3);margin-top:2px">成交量 ${vol} 張</div>
-          </div>
-          <div style="text-align:right;flex-shrink:0">
-            <div style="font-size:14px;font-weight:700;color:var(--text)">${item.price}</div>
-            <div style="font-size:11px;color:${pctColor};font-weight:600">${pctStr}</div>
-          </div>
-        </div>`;
-    }).join('');
-  }catch(e){
-    document.getElementById('openingList').innerHTML =
-      `<div style="padding:48px 0;text-align:center;color:var(--text3)">
-        <div style="font-size:32px;margin-bottom:12px">📅</div>
-        <div style="font-size:13px">今日開盤資料將於 09:15 後更新</div>
-      </div>`;
-  }
 }
 
 async function showMyPage(){
