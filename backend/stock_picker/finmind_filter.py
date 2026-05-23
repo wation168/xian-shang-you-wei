@@ -214,6 +214,21 @@ def analyze_stock(stock_id: str, news_list: list[dict] = []) -> dict | None:
     below = [x for x in s_candidates if x < price]
     support = round(max(below) if below else min(s_candidates), 2)
 
+    # ── 損益比 ──
+    if support and resistance and price > 0 and resistance > price:
+        risk   = price - support
+        reward = resistance - price
+        if risk > 0:
+            rr = round(reward / risk, 2)
+            if   rr >= 3:   rr_label = '極佳'
+            elif rr >= 2:   rr_label = '良好'
+            elif rr >= 1.5: rr_label = '尚可'
+            else:           rr_label = '偏低'
+        else:
+            rr, rr_label = 0, '無法計算'
+    else:
+        rr, rr_label = 0, '無法計算'
+
     # ── 法人買賣超 ──
     consecutive_buy_days = 0
     inst_5d_total        = 0
@@ -309,6 +324,8 @@ def analyze_stock(stock_id: str, news_list: list[dict] = []) -> dict | None:
         "resistance":           resistance,
         "target_price":         round(resistance + (resistance - support), 2),
         "support_too_close":    bool((price - support) / price < 0.02) if price > 0 else False,
+        "rr":                   rr,
+        "rr_label":             rr_label,
         "macd_desc":            macd_desc,
         "score":                score,
     }
