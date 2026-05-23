@@ -24,6 +24,32 @@ CFG = {
 # 技術指標計算
 # ──────────────────────────────────────────
 
+def _calc_recent_high(df, current_price, lookback=60):
+    try:
+        recent = df.tail(lookback)
+        highs_above = recent[recent['high'] > current_price]['high']
+        if len(highs_above) == 0:
+            return None
+        return round(float(highs_above.min()), 2)
+    except Exception:
+        return None
+
+def _calc_recent_low(df, current_price, lookback=60, min_distance=0.03):
+    try:
+        recent = df.tail(lookback)
+        low_vals = recent['low'].values
+        lows = []
+        for i in range(2, len(low_vals)-2):
+            if (low_vals[i] < low_vals[i-1] and low_vals[i] < low_vals[i-2] and
+                low_vals[i] < low_vals[i+1] and low_vals[i] < low_vals[i+2]):
+                lows.append(low_vals[i])
+        valid = [l for l in lows if l < current_price and (current_price - l) / current_price >= min_distance]
+        if not valid:
+            return None
+        return round(max(valid), 2)
+    except Exception:
+        return None
+
 def calc_kd(prices: list[dict], n: int = 9) -> tuple[float, float, float, float]:
     """
     計算隨機指標 KD（n 日 RSV，預設 9 日）
@@ -207,12 +233,17 @@ def analyze_stock(stock_id: str, news_list: list[dict] = []) -> dict | None:
     # ── 支撐壓力（近20日）──
     recent20 = prices[-20:]
     resistance = round(max(p["high"] for p in recent20), 2)
+    original_resistance = resistance
+    resistance = _calc_recent_high(df, current_price) or original_resistance
+    target_price = original_resistance if original_resistance != resistance else None
     lows_20    = [p["low"] for p in recent20]
     s_candidates = [ma20_t, min(lows_20)]
     if ma60_t:
         s_candidates.append(ma60_t)
     below = [x for x in s_candidates if x < price]
     support = round(max(below) if below else min(s_candidates), 2)
+    original_support = support
+    support = _calc_recent_low(df, current_price) or original_support
 
     # ── 損益比 ──
     if support and resistance and price > 0 and resistance > price:
