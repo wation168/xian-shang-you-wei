@@ -5791,7 +5791,7 @@ def get_report(slug: str):
         ).fetchone()
     conn.close()
 
-    if row and str((row.get('report_date') or ''))[:10] != report_date:
+    if row and str(row["report_date"] if "report_date" in row.keys() else '')[:10] != report_date:
         row = None  # 報告日期不符，強制重算
 
     if row:
