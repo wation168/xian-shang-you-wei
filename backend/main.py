@@ -433,6 +433,12 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
         in_or_just_after = is_weekday and _dtime(9, 0) <= now_tw.time() <= _dtime(14, 30)
         today_ts = pd.Timestamp(today_str)
 
+        # 非盤中時間，先把 FinMind 原始資料裡的今日那筆刪掉
+        _qt = _QUOTE_CACHE.get(code)
+        _in_session = bool(_qt and (_qt.get("data") or {}).get("in_session"))
+        if not _in_session:
+            df = df[df.index != today_ts]
+
         if in_or_just_after:
             try:
                 snap_url = (f"https://api.finmindtrade.com/api/v4/taiwan_stock_tick_snapshot"
