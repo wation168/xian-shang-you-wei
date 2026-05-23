@@ -448,7 +448,7 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
                     hi  = float(r.get("high") or cp)
                     lo  = float(r.get("low") or cp)
                     vol = float(r.get("total_volume") or r.get("volume") or 0)
-                    if cp > 0 and _is_trading_or_after():
+                    if _append_today and cp > 0:
                         today_bar = pd.DataFrame(
                             [[op, hi, lo, cp, vol]],
                             index=[today_ts],
@@ -489,7 +489,7 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
                             lo  = _parse_tw_num(row[5])
                             cp  = _parse_tw_num(row[6])
                             vol = _parse_tw_num(row[1])
-                            if cp > 0 and _is_trading_or_after():
+                            if _append_today and cp > 0:
                                 today_bar = pd.DataFrame(
                                     [[op, hi, lo, cp, vol]],
                                     index=[today_ts],
@@ -517,7 +517,7 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
                             lo  = _parse_tw_num(row[5])
                             cp  = _parse_tw_num(row[6])
                             vol = _parse_tw_num(row[1])
-                            if cp > 0 and _is_trading_or_after():
+                            if _append_today and cp > 0:
                                 today_bar = pd.DataFrame(
                                     [[op, hi, lo, cp, vol]],
                                     index=[today_ts],
@@ -2033,14 +2033,12 @@ def debug_stock(stock_id: str):
 
 @app.get("/api/kline/{stock_id}")
 def get_kline(stock_id: str, tf: str = "D", user: dict = Depends(require_user)):
-    def _is_trading_or_after(_now=None):
-        from zoneinfo import ZoneInfo
-        now = _now or datetime.now(ZoneInfo("Asia/Taipei"))
-        if now.weekday() >= 5:
-            return False
-        if now.hour < 9:
-            return False
-        return True
+    from zoneinfo import ZoneInfo
+    from datetime import datetime as _dt
+    _now_tp     = _dt.now(ZoneInfo("Asia/Taipei"))
+    _is_weekday = _now_tp.weekday() < 5
+    _is_open    = _now_tp.hour >= 9 and not (_now_tp.hour >= 13 and _now_tp.minute >= 31)
+    _append_today = _is_weekday and _is_open
 
     period, interval = PERIOD_MAP.get(tf.upper(), ("3y", "1d"))
     try:
