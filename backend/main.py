@@ -121,6 +121,22 @@ async def lifespan(app: FastAPI):
     _db_init()
     print(f"   ✅ 會員資料庫初始化完成（{DB_PATH}）")
 
+    # 啟動時恢復今日開盤熱門股
+    try:
+        import json as _json_op
+        _conn_op = _db_conn()
+        _row_op = _conn_op.execute(
+            "SELECT data, updated_at FROM opening_picks WHERE date=?",
+            (_taipei_today(),)
+        ).fetchone()
+        _conn_op.close()
+        if _row_op:
+            _OPENING_TOP20["data"] = _json_op.loads(_row_op["data"])
+            _OPENING_TOP20["updated_at"] = _row_op["updated_at"]
+            print(f"   ✅ 開盤熱門股已從DB恢復（{len(_OPENING_TOP20['data'])} 筆）")
+    except Exception as e:
+        print(f"   ⚠️ 開盤熱門股恢復失敗：{e}")
+
     # 啟動時主動載入 FinMind 全台股名稱快取，避免查詢時才抓造成延遲或亂碼
     try:
         import urllib.request as _ureq, json as _json
@@ -1788,6 +1804,11 @@ def _db_init():
         CREATE TABLE IF NOT EXISTS counters (
             key   TEXT PRIMARY KEY,
             value INTEGER DEFAULT 0
+        );
+        CREATE TABLE IF NOT EXISTS opening_picks (
+            date       TEXT PRIMARY KEY,
+            data       TEXT,
+            updated_at TEXT
         );
     """)
     conn.commit()
@@ -4652,6 +4673,14 @@ def _run_opening_scan_job():
         data = _fetch_opening_volume_top20()
         _OPENING_TOP20["data"] = data
         _OPENING_TOP20["updated_at"] = now.strftime("%Y-%m-%d %H:%M")
+        import json as _json_scan
+        _conn_scan = _db_conn()
+        _conn_scan.execute(
+            "INSERT OR REPLACE INTO opening_picks (date, data, updated_at) VALUES (?,?,?)",
+            (now.strftime("%Y-%m-%d"), _json_scan.dumps(data, ensure_ascii=False), now.strftime("%Y-%m-%d %H:%M"))
+        )
+        _conn_scan.commit()
+        _conn_scan.close()
         first = data[0]["stock_id"] if data else "N/A"
         print(f"[OPENING_SCAN] 完成，{len(data)} 筆，量No.1={first}")
     except Exception as _e:
