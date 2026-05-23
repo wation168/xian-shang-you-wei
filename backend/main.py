@@ -448,7 +448,7 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
                     hi  = float(r.get("high") or cp)
                     lo  = float(r.get("low") or cp)
                     vol = float(r.get("total_volume") or r.get("volume") or 0)
-                    if cp > 0:
+                    if cp > 0 and _is_trading_or_after():
                         today_bar = pd.DataFrame(
                             [[op, hi, lo, cp, vol]],
                             index=[today_ts],
@@ -489,7 +489,7 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
                             lo  = _parse_tw_num(row[5])
                             cp  = _parse_tw_num(row[6])
                             vol = _parse_tw_num(row[1])
-                            if cp > 0:
+                            if cp > 0 and _is_trading_or_after():
                                 today_bar = pd.DataFrame(
                                     [[op, hi, lo, cp, vol]],
                                     index=[today_ts],
@@ -517,7 +517,7 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
                             lo  = _parse_tw_num(row[5])
                             cp  = _parse_tw_num(row[6])
                             vol = _parse_tw_num(row[1])
-                            if cp > 0:
+                            if cp > 0 and _is_trading_or_after():
                                 today_bar = pd.DataFrame(
                                     [[op, hi, lo, cp, vol]],
                                     index=[today_ts],
@@ -2033,6 +2033,15 @@ def debug_stock(stock_id: str):
 
 @app.get("/api/kline/{stock_id}")
 def get_kline(stock_id: str, tf: str = "D", user: dict = Depends(require_user)):
+    def _is_trading_or_after(_now=None):
+        from zoneinfo import ZoneInfo
+        now = _now or datetime.now(ZoneInfo("Asia/Taipei"))
+        if now.weekday() >= 5:
+            return False
+        if now.hour < 9:
+            return False
+        return True
+
     period, interval = PERIOD_MAP.get(tf.upper(), ("3y", "1d"))
     try:
         symbol, df = try_fetch(stock_id, period, interval)
