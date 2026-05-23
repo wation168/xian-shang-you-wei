@@ -12,7 +12,7 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
 
 import os
 
-from fastapi import FastAPI, HTTPException, Depends, Header, Request
+from fastapi import FastAPI, HTTPException, Depends, Header, Request, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
 from contextlib import asynccontextmanager
