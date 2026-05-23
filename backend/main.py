@@ -151,28 +151,11 @@ async def lifespan(app: FastAPI):
     _bg_scheduler = None
     _picker_running  = False
     _expire_running  = False
-    _scan_running    = False
     _alert_running   = False
     try:
         from apscheduler.schedulers.background import BackgroundScheduler
         import sys as _sys
         _picker_path = os.path.join(os.path.dirname(__file__), "stock_picker")
-
-        def _run_unified_scan_job():
-            nonlocal _scan_running
-            if _scan_running:
-                print("   ⚠️ 統合選股排程已在執行中，跳過本次")
-                return
-            _scan_running = True
-            try:
-                if _picker_path not in _sys.path:
-                    _sys.path.insert(0, _picker_path)
-                from main_picker import run_unified_scan
-                run_unified_scan()
-            except Exception as _e:
-                print(f"   ❌ 統合選股排程執行失敗：{_e}")
-            finally:
-                _scan_running = False
 
         def _run_expire_notice_job():
             nonlocal _expire_running
@@ -314,14 +297,13 @@ async def lifespan(app: FastAPI):
                 print(f"   ❌ 到價提醒重置失敗：{_e}")
 
         _bg_scheduler = BackgroundScheduler(timezone="Asia/Taipei")
-        _bg_scheduler.add_job(_run_unified_scan_job,    "cron",     hour=16, minute=30, day_of_week="mon-fri")
         _bg_scheduler.add_job(_run_opening_scan_job,    "cron",     hour=9,  minute=15, day_of_week="mon-fri")
         _bg_scheduler.add_job(_run_expire_notice_job,   "cron",     hour=9,  minute=0)
         _bg_scheduler.add_job(_reset_alert_triggered,   "cron",     hour=9,  minute=0,  day_of_week="mon-fri")
         _bg_scheduler.add_job(_run_intraday_alert_job,  "interval", minutes=5)
         _bg_scheduler.add_job(_clear_quote_cache,       "cron",     hour=9,  minute=0,  day_of_week="mon-fri")
         _bg_scheduler.start()
-        print("   ✅ APScheduler 排程已啟動（統合選股 16:30、開盤熱門股 09:15、盤中到價提醒每5分鐘、到期通知 09:00、報價快取清除 09:00）")
+        print("   ✅ APScheduler 排程已啟動（開盤熱門股 09:15、盤中到價提醒每5分鐘、到期通知 09:00、報價快取清除 09:00）")
     except ImportError:
         print("   ⚠️ apscheduler 未安裝，選股排程請以 scheduler.py 獨立執行")
     except Exception as _sch_err:
@@ -3460,25 +3442,6 @@ def admin_delete_member(req: _DeleteMemberReq, key: str = ""):
     conn.close()
     return {"ok": True, "deleted": email}
 
-@app.post("/admin/run-scan")
-def admin_run_scan(key: str = ""):
-    """手動觸發統合選股（同步執行，delay=0.3s，約 30~60s，回傳 picks list）"""
-    _check_admin(key)
-    import sys as _sys
-    _picker_path = os.path.join(os.path.dirname(__file__), "stock_picker")
-    try:
-        if _picker_path not in _sys.path:
-            _sys.path.insert(0, _picker_path)
-        from main_picker import run_unified_scan
-        picks = run_unified_scan(delay=0.3)
-        SEO_CACHE["picks"]["data"] = None  # 清快取，讓 /picks 讀最新結果
-        print(f"   ✅ 手動選股完成，{len(picks)} 支入選")
-        return {"ok": True, "picks": picks, "count": len(picks)}
-    except Exception as e:
-        print(f"   ❌ 手動選股失敗：{e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
 @app.post("/admin/clear-cache")
 def admin_clear_cache(key: str = ""):
     """清除 _analyze_cache（強制下次查詢重新抓 FinMind）"""
@@ -4691,65 +4654,6 @@ def get_opening_picks():
         "data":       _OPENING_TOP20.get("data", []),
         "updated_at": _OPENING_TOP20.get("updated_at"),
     }
-
-
-@app.get("/api/picks/latest")
-def get_latest_picks(request: Request, token: str = "", user: dict | None = Depends(get_current_user)):
-    # 支援 ?token= query param（iframe 無法帶 Authorization header）
-    if not user and token:
-        payload = _jwt_verify(token)
-        if payload:
-            conn = _db_conn()
-            row = conn.execute("SELECT * FROM members WHERE id=?", (payload["sub"],)).fetchone()
-            conn.close()
-            if row and row["token_ver"] == payload.get("ver", 0):
-                user = dict(row)
-    if not user:
-        raise HTTPException(status_code=401, detail="請先登入")
-    """
-    選股名單：只有付費且有效的會員可以查看
-    回傳最新的 stock_picker/output/latest.html
-    """
-    from fastapi.responses import HTMLResponse
-    today = _date_cls.today().isoformat()
-    plan = user["plan"]
-    is_referral_unlocked = _is_referral_active(user)
-    # 免費用戶無法使用（邀請解鎖視為付費）
-    if plan == "free" and not is_referral_unlocked:
-        raise HTTPException(status_code=403, detail="此功能需要付費方案")
-    # 訂閱已到期
-    if not is_referral_unlocked and user["expire_at"] and user["expire_at"] < today:
-        raise HTTPException(status_code=403, detail="訂閱已到期，請續費後繼續使用")
-
-    candidates = [
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), "stock_picker", "output", "latest.html"),
-        "/app/stock_picker/output/latest.html",
-    ]
-    for path in candidates:
-        if os.path.exists(path):
-            with open(path, encoding="utf-8") as f:
-                return HTMLResponse(content=f.read())
-
-    # 尚無資料
-    placeholder = """<!DOCTYPE html>
-<html lang="zh-TW">
-<head><meta charset="UTF-8">
-<style>
-body{font-family:-apple-system,sans-serif;background:#020817;color:#f1f5f9;
-     display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
-.box{text-align:center;padding:40px 20px}
-.icon{font-size:48px;margin-bottom:16px}
-.title{font-size:18px;font-weight:700;margin-bottom:8px}
-.desc{font-size:13px;color:#64748b;line-height:1.6}
-</style></head>
-<body>
-<div class="box">
-  <div class="icon">🔍</div>
-  <div class="title">選股名單尚未產生</div>
-  <div class="desc">每個交易日 14:35 自動更新<br>請明日再回來查看</div>
-</div>
-</body></html>"""
-    return HTMLResponse(content=placeholder)
 
 
 @app.post("/webhook/ecpay")

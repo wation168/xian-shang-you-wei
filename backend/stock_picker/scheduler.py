@@ -30,24 +30,6 @@ logger = logging.getLogger(__name__)
 
 TZ = ZoneInfo("Asia/Taipei")
 
-# 每日執行時間（24小時制）
-UNIFIED_HOUR   = 16
-UNIFIED_MINUTE = 30   # 16:30，確保收盤後 FinMind 資料同步完畢
-
-
-def run_once():
-    """執行一次統合選股流程（全台掃描 + 新聞選股）"""
-    logger.info("=" * 50)
-    logger.info("🔍 統合選股 開始執行")
-    logger.info("=" * 50)
-    try:
-        from main_picker import run_unified_scan
-        run_unified_scan()
-        logger.info("✅ 統合選股完成")
-    except Exception as e:
-        logger.error(f"❌ 執行失敗：{e}", exc_info=True)
-
-
 def is_trading_day(d: date) -> bool:
     """簡單判斷是否為交易日（週一~五，不含國定假日）"""
     # 只排週末，國定假日需要自行維護或查 API
@@ -55,28 +37,11 @@ def is_trading_day(d: date) -> bool:
 
 
 def main():
-    # --now 參數：立刻執行一次
-    if "--now" in sys.argv:
-        run_once()
-        return
-
-    logger.info(f"🕐 排程器啟動，選股 {RUN_HOUR:02d}:{RUN_MINUTE:02d}、全台掃描 {SCAN_HOUR:02d}:{SCAN_MINUTE:02d}（台北時間）")
+    logger.info("🕐 排程器啟動（台北時間）")
     logger.info("   按 Ctrl+C 停止")
 
-    last_run_date = None
-
     while True:
-        now = datetime.now(TZ)
-        today = now.date()
-
-        # 統合選股 15:30
-        if (now.hour == UNIFIED_HOUR and now.minute == UNIFIED_MINUTE
-                and is_trading_day(today)
-                and last_run_date != today):
-            last_run_date = today
-            run_once()
-
-        # 每 30 秒檢查一次
+        # 每 30 秒檢查一次（目前無排程任務）
         time.sleep(30)
 
 
