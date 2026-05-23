@@ -3451,7 +3451,7 @@ def admin_clear_cache(key: str = ""):
     return {"cleared": n, "message": f"快取已清除（共 {n} 筆）"}
 
 
-@app.post("/admin/run-opening-scan")
+@app.get("/admin/run-opening-scan")
 async def admin_run_opening_scan(key: str = Query(...)):
     if key != ADMIN_KEY:
         raise HTTPException(status_code=403, detail="forbidden")
@@ -5787,10 +5787,13 @@ def get_report(slug: str):
     ).fetchone()
     if not row:
         row = conn.execute(
-            "SELECT report_html FROM stock_reports WHERE stock_id=? ORDER BY created_at DESC LIMIT 1",
+            "SELECT report_html, report_date FROM stock_reports WHERE stock_id=? ORDER BY created_at DESC LIMIT 1",
             (stock_id,)
         ).fetchone()
     conn.close()
+
+    if row and str((row.get('report_date') or ''))[:10] != report_date:
+        row = None  # 報告日期不符，強制重算
 
     if row:
         html = row["report_html"] or ""
