@@ -1575,6 +1575,7 @@ function renderPositionBar(d){
 function renderResult(d,enabledMA){
   const{price,support,support_desc,resistance,resistance_desc,
         trend,pattern,pattern_sub,stop_loss,target1,target2,risk_reward,
+        target_price,
         risk_level,risk_label,summary,channel,
         buy_signals,sell_signals,buy_stops,bars,symbol,stock_name,stock_id,tf,
         breakout_idx,breakdown_idx,breakout_stale,breakdown_stale,
@@ -1680,6 +1681,7 @@ function renderResult(d,enabledMA){
   const tfL={D:'日K',W:'週K',M:'月K'}[tf]||'日K';
   document.getElementById('chartName').textContent=`${stockLabel} · ${tfL}`;
   C.bars=bars;C.support=support;C.resistance=resistance;
+  C.targetPrice=target_price||null;
   C.buyIdx=buy_signals;C.sellIdx=sell_signals;
   C.buyStops=buy_stops||[];C.channel=channel||null;
   C.breakoutIdx=(breakout_idx!=null)?breakout_idx:null;
@@ -1959,14 +1961,14 @@ function drawChart(){
   // 趨勢軌道（已移除自動畫線，改用手繪工具）
 
   // 支撐壓力
-  const hline=(price,col,lbl,key)=>{
+  const hline=(price,col,lbl,key,fullTag)=>{
     if(!isVis(key))return;const y=py(price);
     kCtx.save();
     kCtx.setLineDash([6,4]);kCtx.strokeStyle=col;kCtx.lineWidth=1.8;
     kCtx.beginPath();kCtx.moveTo(PL,y);kCtx.lineTo(W-PR,y);kCtx.stroke();
     kCtx.setLineDash([]);
     // 標籤底色
-    const tag=`${lbl} ${price.toFixed(0)}`;
+    const tag=fullTag||`${lbl} ${price.toFixed(0)}`;
     kCtx.font='bold 10px sans-serif';
     const tw=kCtx.measureText(tag).width+8;
     kCtx.fillStyle=col;
@@ -1979,7 +1981,23 @@ function drawChart(){
     kCtx.restore();
   };
   hline(C.support,'rgba(26,143,94,.9)','支',  'sup');
-  hline(C.resistance,'rgba(214,59,59,.9)','壓','res');
+  hline(C.resistance,'rgba(214,59,59,.9)','壓','res',`壓 ${C.resistance}`);
+  if(C.targetPrice && C.targetPrice !== C.resistance && C.targetPrice > C.bars[C.bars.length-1]?.close){
+    const tp=C.targetPrice,tpy=py(tp);
+    kCtx.save();
+    kCtx.setLineDash([5,4]);kCtx.strokeStyle='rgba(251,146,60,.85)';kCtx.lineWidth=1.5;
+    kCtx.beginPath();kCtx.moveTo(PL,tpy);kCtx.lineTo(W-PR,tpy);kCtx.stroke();
+    kCtx.setLineDash([]);
+    const tag2=`滿足點 ${tp}`;
+    kCtx.font='bold 10px sans-serif';
+    const tw2=kCtx.measureText(tag2).width+8;
+    kCtx.fillStyle='rgba(251,146,60,.85)';
+    kCtx.beginPath();
+    if(kCtx.roundRect)kCtx.roundRect(W-PR+2,tpy-8,tw2,16,3);else kCtx.rect(W-PR+2,tpy-8,tw2,16);
+    kCtx.fill();
+    kCtx.fillStyle='#fff';kCtx.textAlign='left';kCtx.fillText(tag2,W-PR+6,tpy+4);
+    kCtx.restore();
+  }
 
   // 均線
   C.maArrays.forEach(m=>{

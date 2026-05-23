@@ -307,6 +307,9 @@ def analyze_stock(stock_id: str, news_list: list[dict] = []) -> dict | None:
         "kbar_streak":          kbar_streak,
         "support":              support,
         "resistance":           resistance,
+        "target_price":         round(resistance + (resistance - support), 2),
+        "support_too_close":    bool((price - support) / price < 0.02) if price > 0 else False,
+        "macd_desc":            macd_desc,
         "score":                score,
     }
 

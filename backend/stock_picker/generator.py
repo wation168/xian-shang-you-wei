@@ -176,6 +176,24 @@ def _trading_rec(s: dict) -> tuple[str, str]:
     sig   = s.get("signal_label", "")
     kd_k  = s.get("kd_k", 50)
 
+    price     = s.get("price", 0)
+    risk      = s.get("risk_level", "")
+    macd_desc = s.get("macd_desc", "")
+    macd_bearish = "DEA下方" in macd_desc or "死叉" in macd_desc
+    support      = s.get("support", price * 0.95 if price > 0 else 0)
+    support_far  = (price - support) / price > 0.10 if price > 0 else False
+    stop_loss    = s.get("stop_loss", round(price * 0.95, 2) if price > 0 else 0)
+    rr           = s.get("rr", 0)
+    rr_label     = s.get("rr_label", "無法計算")
+
+    if risk == "高風險":
+        rr_note = f"（損益比 {rr_label}，高風險，需謹慎）" if rr >= 2 else ""
+        return (f"風險偏高，建議觀望為主。若堅持操作，需嚴守防守位 {stop_loss}，輕倉試探，勿重押。{rr_note}", "#ef4444")
+    if macd_bearish:
+        return (f"MACD 動能轉弱，建議等待確認訊號再進場，勿追高。現守防守位 {stop_loss}。", "#f59e0b")
+    if support_far:
+        return (f"支撐距現價較遠，停損空間偏大，建議縮減部位或等回測支撐再評估。防守位 {stop_loss}。", "#f59e0b")
+
     if trend == "上升" and cbd >= 3 and dif > 0:
         return "✅ 做多：法人連買+多頭趨勢+MACD正值，三重確認，可考慮分批進場", "#22c55e"
     if trend == "上升" and "金叉" in sig:
@@ -252,6 +270,16 @@ def _render_report(s: dict, e: dict) -> str:
     # 支撐壓力
     support    = s.get("support", round(price * 0.95, 2))
     resistance = s.get("resistance", round(price * 1.05, 2))
+    target_price      = s.get("target_price")
+    support_too_close = s.get("support_too_close", False)
+    target_note_html = (
+        f'<div style="font-size:11px;color:#fb923c;margin-top:2px">📍 預估滿足點：{target_price}（軌道目標）</div>'
+        if target_price and target_price != resistance else ""
+    )
+    support_close_html = (
+        '<div style="font-size:11px;color:#fbbf24;margin-top:2px">⚠️ 支撐貼近現價，操作空間極小</div>'
+        if support_too_close else ""
+    )
     sup_note_parts = []
     if ma20: sup_note_parts.append(f"MA20:{ma20}")
     if ma60: sup_note_parts.append(f"MA60:{ma60}")
@@ -320,8 +348,10 @@ def _render_report(s: dict, e: dict) -> str:
         f'<span class="rpt-val">{price}</span></div>'
         f'<div class="rpt-row"><span class="rpt-label">支撐</span>'
         f'<span style="font-weight:600;color:#22c55e">{support}</span></div>'
+        f'{support_close_html}'
         f'<div class="rpt-row"><span class="rpt-label">壓力</span>'
         f'<span style="font-weight:600;color:#f59e0b">{resistance}</span></div>'
+        f'{target_note_html}'
         f'<div style="font-size:11px;color:#475569;margin-top:4px">{sup_note}</div>'
         f'</div>'
 
