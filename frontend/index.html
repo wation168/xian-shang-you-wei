@@ -81,8 +81,186 @@
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 .app{max-width:600px;margin:0 auto;padding:0 0 calc(70px + var(--safe-bottom)) 0}
 
-/* ── 頂部導航 ── */
+/* ── 手機版 topbar（預設 sticky）── */
 .topbar{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:.5px solid var(--border);padding:10px 16px 8px;display:flex;align-items:center;gap:10px}
+
+/* ══ 電腦版三欄版面 ══ */
+@media(min-width:1024px){
+  /* 隱藏底部導航 */
+  .bottom-nav{display:none!important}
+
+  /* 全頁高度鎖定 */
+  html,body{height:100%;overflow:hidden}
+
+  /* 頂部導航 — 全寬固定，三段式 */
+  .topbar{
+    position:fixed;top:0;left:0;right:0;
+    z-index:200;
+    padding:0 24px;
+    display:grid;
+    grid-template-columns:240px 1fr auto;
+    gap:16px;
+    align-items:center;
+    border-bottom:.5px solid var(--border);
+    background:var(--bg);
+    height:56px;
+    box-sizing:border-box;
+  }
+  .logo{font-size:20px}
+  .search-wrap{max-width:none}
+
+  /* 電腦版計數器顯示 */
+  #desktopCounters{display:flex!important}
+  #visitCountBar{display:none!important}
+
+  /* .app 在電腦版變三欄 Grid */
+  .app{
+    max-width:100%;
+    margin:0;
+    padding:0;
+    display:grid;
+    grid-template-columns:240px 1fr 220px;
+    grid-template-rows:1fr;
+    height:calc(100vh - 56px);
+    margin-top:56px;
+    overflow:hidden;
+    position:relative;
+  }
+
+  /* 左欄：精選股側邊欄（grid 第1欄） */
+  #desktopSidebar{
+    grid-column:1;
+    grid-row:1;
+    border-right:.5px solid var(--border);
+    overflow-y:auto;
+    background:var(--bg);
+    padding:0;
+    min-height:0;
+  }
+  #desktopSidebar::-webkit-scrollbar{width:4px}
+  #desktopSidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+  .desktop-sidebar-title{
+    font-size:10px;font-weight:700;letter-spacing:1px;
+    text-transform:uppercase;color:var(--text3);
+    padding:12px 16px 10px;border-bottom:.5px solid var(--border);
+    position:sticky;top:0;background:var(--bg);z-index:10;
+  }
+
+  /* 精選股項目 */
+  .desktop-pick-item{
+    display:flex;align-items:center;gap:8px;
+    padding:9px 14px;cursor:pointer;
+    border-bottom:.5px solid var(--border);
+    transition:background .12s;
+  }
+  .desktop-pick-item:hover{background:var(--bg2)}
+  .dpi-rank{font-size:10px;color:var(--text3);font-family:var(--mono);min-width:18px;font-weight:700}
+  .dpi-info{flex:1;min-width:0}
+  .dpi-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dpi-id{font-size:10px;color:var(--text3);font-family:var(--mono)}
+  .dpi-price{font-size:12px;font-weight:700;color:var(--text);font-family:var(--mono);white-space:nowrap}
+  .dpi-chg{font-size:11px;font-weight:700;font-family:var(--mono);white-space:nowrap}
+  .dpi-chg.up{color:var(--up)}
+  .dpi-chg.dn{color:var(--dn)}
+
+  /* 中欄：主分析區（grid 第2欄） */
+  #desktopMain{
+    grid-column:2;
+    grid-row:1;
+    overflow-y:auto;
+    background:var(--bg);
+    min-height:0;
+    position:relative;
+  }
+  #desktopMain::-webkit-scrollbar{width:4px}
+  #desktopMain::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+  #desktopMain .hotkeys{padding:8px 20px}
+  #desktopMain .status{padding:4px 20px}
+  #desktopMain .result{padding:0 20px}
+
+  /* 電腦版中欄 TAB 列 */
+  #desktopTabBar{
+    display:flex;align-items:center;gap:0;
+    border-bottom:.5px solid var(--border);
+    background:var(--bg);
+    padding:0 20px;
+    position:sticky;top:0;z-index:95;
+  }
+  .desktop-tab-btn{
+    padding:12px 18px;font-size:13px;font-weight:600;
+    border:none;background:none;cursor:pointer;
+    color:var(--text3);border-bottom:2px solid transparent;
+    margin-bottom:-1px;transition:color .15s;white-space:nowrap;
+  }
+  .desktop-tab-btn.active{color:var(--green);border-bottom-color:var(--green)}
+
+  /* 電腦版 pageOverlay：底部不留手機 nav 空間，不蓋 TAB 列 */
+  #pageOverlay{
+    bottom:0 !important;
+    z-index:90;
+  }
+
+  /* 右欄：廣告 + 分享（grid 第3欄） */
+  #desktopRightCol{
+    grid-column:3;
+    grid-row:1;
+    border-left:.5px solid var(--border);
+    overflow-y:auto;
+    background:var(--bg2);
+    padding:16px 14px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    min-height:0;
+  }
+  #desktopRightCol::-webkit-scrollbar{width:4px}
+  #desktopRightCol::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+  /* 右欄：廣告卡 */
+  .desktop-ad-box{
+    background:var(--bg);border:.5px solid var(--border);
+    border-radius:12px;padding:12px;
+  }
+  .desktop-ad-label{font-size:10px;color:var(--text3);font-weight:600;margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase}
+
+  /* 右欄：分享卡 */
+  .desktop-share-box{
+    background:var(--bg);border:.5px solid var(--border);
+    border-radius:12px;padding:14px;
+  }
+  .desktop-share-title{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:10px;letter-spacing:.3px}
+  .desktop-share-btn{
+    display:flex;align-items:center;gap:8px;
+    width:100%;padding:8px 12px;border-radius:8px;
+    border:.5px solid var(--border2);background:var(--bg2);
+    color:var(--text);font-size:12px;cursor:pointer;
+    margin-bottom:6px;transition:background .12s;text-align:left;
+  }
+  .desktop-share-btn:last-child{margin-bottom:0}
+  .desktop-share-btn:hover{background:var(--bg3)}
+
+  /* 右側按鈕尺寸 */
+  #topIntroBtn,#topLoginBtn{font-size:11px!important}
+
+  /* 電腦版：pageOverlay 改在 desktopMain 內部，不蓋 TAB 列 */
+  #pageOverlay{
+    position:absolute;
+    top:45px;
+    left:0;right:0;bottom:0;
+    z-index:50;
+  }
+
+  /* 電腦版：chart-box 不超出 desktopMain */
+  .chart-box{margin-bottom:0}
+
+  /* 電腦版 topbar 計數器加粗顯眼 */
+  #desktopVisitNum,#desktopAnalyzeNum{
+    font-size:14px!important;font-weight:700!important;color:var(--green)!important;
+  }
+  #desktopCounters span{font-size:13px!important;color:var(--text2)!important}
+}
+
+/* ── 頂部導航 ── */
 .logo{font-size:18px;font-weight:700;letter-spacing:-.5px;flex-shrink:0}
 .logo em{color:var(--green);font-style:normal}
 .search-wrap{flex:1;display:flex;gap:6px;align-items:center}
@@ -310,9 +488,8 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
 <script src="https://accounts.google.com/gsi/client" async onload="_initGoogleSignIn()"></script>
 </head>
 <body>
-<div class="app">
 
-<!-- ── 新手導覽 Tour ── -->
+<!-- ── 新手導覽 Tour（fixed，移出 .app）── -->
 <div id="tourOverlay" style="display:none;position:fixed;inset:0;z-index:999;pointer-events:none">
   <div id="tourBox" style="
     position:fixed;bottom:80px;left:16px;right:16px;
@@ -339,7 +516,7 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
   <div style="position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:-1"></div>
 </div>
 
-<!-- ── PWA 安裝提示 ── -->
+<!-- ── PWA 安裝提示（fixed，移出 .app）── -->
 <div id="pwaBanner" style="display:none;position:fixed;top:68px;left:16px;right:16px;z-index:90;
   background:var(--green);border-radius:12px;padding:12px 16px;
   display:none;align-items:center;gap:10px;box-shadow:0 4px 16px rgba(29,158,117,.4);
@@ -351,35 +528,64 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
   <button onclick="dismissPWA()" style="border:none;background:rgba(255,255,255,.2);color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer">知道了</button>
 </div>
 
-  <!-- 頂部搜尋 -->
-  <div class="topbar">
-    <div class="logo" id="logoEl" onclick="adminTap()" style="cursor:default">線上<em>有位</em></div>
-    <div class="search-wrap">
-      <div class="search-box">
-        <input type="text" id="stockInput" placeholder="輸入股票代號或名稱，如：2330 或 台積電" inputmode="text" autocomplete="off"/>
-        <div class="search-dropdown" id="searchDropdown"></div>
-      </div>
-      <button class="btn-analyze" onclick="analyzeStock()">分析</button>
+<!-- 頂部搜尋（移出 .app，獨立於三欄之外）-->
+<div class="topbar">
+  <div class="logo" id="logoEl" onclick="adminTap()" style="cursor:default">線上<em>有位</em></div>
+  <div class="search-wrap">
+    <div class="search-box">
+      <input type="text" id="stockInput" placeholder="輸入股票代號或名稱，如：2330 或 台積電" inputmode="text" autocomplete="off"/>
+      <div class="search-dropdown" id="searchDropdown"></div>
     </div>
-    <div style="display:flex;gap:6px;flex-shrink:0;margin-left:4px;align-items:center">
-      <a href="/landing.html" style="font-size:11px;color:var(--text3);text-decoration:none;padding:4px 8px;border-radius:6px;border:.5px solid var(--border2);white-space:nowrap">介紹頁</a>
-      <button id="topLoginBtn" onclick="showLoginModal()" style="font-size:11px;background:var(--green);color:#fff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;white-space:nowrap">登入</button>
+    <button class="btn-analyze" onclick="analyzeStock()">分析</button>
+  </div>
+  <div style="display:flex;gap:6px;flex-shrink:0;margin-left:4px;align-items:center">
+    <!-- 電腦版計數器 -->
+    <div id="desktopCounters" style="display:none;align-items:center;gap:10px;margin-right:8px">
+      <span style="font-size:12px;color:var(--text3)">訪客 <strong id="desktopVisitNum" style="color:var(--text);font-size:14px">—</strong></span>
+      <span style="font-size:12px;color:var(--text3)">分析 <strong id="desktopAnalyzeNum" style="color:var(--green);font-size:14px">—</strong></span>
+    </div>
+    <a href="/landing.html" id="topIntroBtn" style="font-size:11px;color:var(--text3);text-decoration:none;padding:4px 8px;border-radius:6px;border:.5px solid var(--border2);white-space:nowrap">介紹頁</a>
+    <button onclick="cycleTheme()" id="themeToggleBtn" title="切換主題" style="font-size:14px;background:none;border:.5px solid var(--border2);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--text)">🌓</button>
+    <button id="topLoginBtn" onclick="showLoginModal()" style="font-size:11px;background:var(--green);color:#fff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;white-space:nowrap">登入</button>
+  </div>
+</div>
+
+<!-- 累計訪客計數器（手機版，topbar 下方）-->
+<div id="visitCountBar" style="display:none;background:#f0fdf4;border-bottom:1.5px solid #bbf7d0;padding:10px 16px">
+  <div style="display:flex;align-items:center;justify-content:center;gap:0;max-width:480px;margin:0 auto">
+    <div style="flex:1;text-align:center">
+      <div id="visitCountNum" style="font-size:26px;font-weight:700;color:#16a34a;line-height:1.1">—</div>
+      <div style="font-size:11px;color:#6b7280;margin-top:2px">累計訪問</div>
+    </div>
+    <div style="width:1px;height:36px;background:#86efac;margin:0 8px"></div>
+    <div style="flex:1;text-align:center">
+      <div id="analyzeCountNum" style="font-size:26px;font-weight:700;color:#16a34a;line-height:1.1">—</div>
+      <div style="font-size:11px;color:#6b7280;margin-top:2px">累計分析</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 主容器：手機版為單欄，電腦版為三欄 Grid ══ -->
+<div class="app">
+
+  <!-- 電腦版左欄：精選股側邊欄 -->
+  <div id="desktopSidebar">
+    <div class="desktop-sidebar-title">🔍 今日精選股</div>
+    <div id="desktopPicksList">
+      <div style="padding:16px;font-size:12px;color:var(--text3)">載入中…</div>
     </div>
   </div>
 
-  <!-- 累計訪客計數器 -->
-  <div id="visitCountBar" style="display:none;background:#f0fdf4;border-bottom:1.5px solid #bbf7d0;padding:10px 16px">
-    <div style="display:flex;align-items:center;justify-content:center;gap:0;max-width:480px;margin:0 auto">
-      <div style="flex:1;text-align:center">
-        <div id="visitCountNum" style="font-size:26px;font-weight:700;color:#16a34a;line-height:1.1">—</div>
-        <div style="font-size:11px;color:#6b7280;margin-top:2px">累計訪問</div>
-      </div>
-      <div style="width:1px;height:36px;background:#86efac;margin:0 8px"></div>
-      <div style="flex:1;text-align:center">
-        <div id="analyzeCountNum" style="font-size:26px;font-weight:700;color:#16a34a;line-height:1.1">—</div>
-        <div style="font-size:11px;color:#6b7280;margin-top:2px">累計分析</div>
-      </div>
-    </div>
+  <!-- 電腦版中欄（包住分析主內容） -->
+  <div id="desktopMain">
+
+  <!-- 電腦版 TAB 列 -->
+  <div id="desktopTabBar">
+    <button class="desktop-tab-btn active" onclick="showPage('home')" data-page="home">📊 分析</button>
+    <button class="desktop-tab-btn" onclick="showPage('watch')" data-page="watch">⭐ 自選</button>
+    <button class="desktop-tab-btn" onclick="showPage('picks')" data-page="picks">🔥 精選股</button>
+    <button class="desktop-tab-btn" onclick="showPage('history')" data-page="history">📋 歷史</button>
+    <button class="desktop-tab-btn" onclick="showPage('my')" data-page="my">👤 我的</button>
   </div>
 
   <!-- 強勢股快捷列 -->
@@ -409,6 +615,7 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
         <div>
           <div style="font-size:14px;font-weight:700;color:#1e3a5f">📄 完整個股報告</div>
           <div style="font-size:11px;color:#6b7280;margin-top:2px">含新聞題材、支撐壓力、操作建議</div>
+          <div style="font-size:11px;color:#f59e0b;margin-top:4px">📌 分析以最新 K 線為基準，收盤後 K 線確定分析最準確。產出報告後快取當日，如需更新請重新產出。</div>
         </div>
         <button id="reportBtn" data-sid="" style="background:#3b82f6;color:#fff;border:none;border-radius:20px;padding:6px 16px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;pointer-events:none">立即產出 →</button>
       </div>
@@ -427,7 +634,7 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
         </div>
         <div style="font-size:11px;font-weight:600;color:#1a73e8;white-space:nowrap;flex-shrink:0">了解更多 →</div>
       </a>
-      <div style="font-size:10px;color:var(--text3);text-align:right;margin-top:5px">贊助</div>
+      <div style="font-size:10px;color:var(--text3);text-align:right;margin-top:5px">精選好物</div>
     </div>
 
     <!-- 指標卡 -->
@@ -663,8 +870,44 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
         </div>
       </div>
     </div>
-  </div>
-</div>
+  </div><!-- /.result -->
+
+  </div><!-- /#desktopMain 中欄結束 -->
+
+  <!-- 電腦版右欄：廣告 + 分享 -->
+  <div id="desktopRightCol">
+
+    <!-- 廣告卡 -->
+    <div class="desktop-ad-box">
+      <div class="desktop-ad-label">精選好物</div>
+      <a href="https://watione1.guidemee.cc/products/Gct3MfMg" target="_blank" rel="noopener"
+         style="display:flex;gap:10px;align-items:center;text-decoration:none;color:inherit">
+        <img src="https://watione1.guidemee.cc/tenancy/assets/oj9qkl/products/skSjmETidhxTjLNnLCeH5WdNNHM0YX-metaR2VtaW5pX0dlbmVyYXRlZF9JbWFnZV9vcTR5N3dvcTR5N3dvcTR5LnBuZw==-.png"
+             width="48" height="48" style="border-radius:8px;object-fit:cover;flex-shrink:0" loading="lazy" alt="晶。水漾葉黃素"/>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">久盯螢幕？補充葉黃素</div>
+          <div style="font-size:11px;color:var(--text3);line-height:1.4">晶。水漾葉黃素，每日一包</div>
+          <div style="font-size:11px;font-weight:600;color:#1a73e8;margin-top:4px">了解更多 →</div>
+        </div>
+      </a>
+    </div>
+
+    <!-- 分享卡 -->
+    <div class="desktop-share-box" id="desktopShareBox" style="display:none">
+      <div class="desktop-share-title">🔗 分享這支股票</div>
+      <button class="desktop-share-btn" onclick="shareStock()">🔗 複製分享連結</button>
+      <button class="desktop-share-btn" onclick="_shareToLine()">💬 分享到 LINE</button>
+      <button class="desktop-share-btn" onclick="_shareToFB()">📘 分享到 Facebook</button>
+    </div>
+
+    <!-- 分析前提示 -->
+    <div id="desktopSharePlaceholder" style="text-align:center;padding:20px 0;color:var(--text3);font-size:12px;line-height:1.8">
+      輸入股票代號<br>查看分析後<br>可一鍵分享
+    </div>
+
+  </div><!-- /#desktopRightCol 右欄結束 -->
+
+</div><!-- /.app -->
 
 
 <!-- 登入 Modal -->
@@ -1041,21 +1284,25 @@ document.getElementById('countInput').addEventListener('change',e=>{
 // ══════════════════════════════════════
 function showPage(page){
   document.querySelectorAll('.nav-btn').forEach((b,i)=>b.classList.toggle('active',['home','watch','history','picks','my'][i]===page));
+  // 電腦版 TAB 同步
+  document.querySelectorAll('.desktop-tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
   const overlay=document.getElementById('pageOverlay');
   if(page==='home'){
     overlay.style.display='none';
-  }else if(page==='watch'){
+  }else{
+    // 電腦版：overlay top 從 TAB 列底部開始，不蓋住 TAB
+    const tabBar=document.getElementById('desktopTabBar');
+    if(tabBar && window.innerWidth>=1024){
+      const rect=tabBar.getBoundingClientRect();
+      overlay.style.top=rect.bottom+'px';
+      overlay.style.left=rect.left+'px';
+      overlay.style.right=(window.innerWidth - rect.right)+'px';
+    }
     overlay.style.display='block';
-    showWatchList();
-  }else if(page==='history'){
-    overlay.style.display='block';
-    showHistory();
-  }else if(page==='picks'){
-    overlay.style.display='block';
-    showPicksPage();
-  }else if(page==='my'){
-    overlay.style.display='block';
-    showMyPage();
+    if(page==='watch') showWatchList();
+    else if(page==='history') showHistory();
+    else if(page==='picks') showPicksPage();
+    else if(page==='my') showMyPage();
   }
 }
 function openDrawer(){
@@ -1303,7 +1550,7 @@ function qpAndHome(id){
   showPage('home');
   window.scrollTo(0,0);
   document.getElementById('stockInput').value=id;
-  analyzeStock();
+  setTimeout(()=>analyzeStock(), 80);
 }
 
 // ══════════════════════════════════════
@@ -1861,6 +2108,83 @@ function shareStock() {
   }
 }
 
+// ── 電腦版分享函數 ──────────────────────────────────────
+function _shareToLine(){
+  const stockId = C._currentId || '';
+  const url = _lastReportUrl || ('https://softglow-ai.com/?stock=' + stockId);
+  window.open('https://social-plugins.line.me/lineit/share?url=' + encodeURIComponent(url), '_blank');
+}
+function _shareToFB(){
+  const stockId = C._currentId || '';
+  const url = _lastReportUrl || ('https://softglow-ai.com/?stock=' + stockId);
+  window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url), '_blank');
+}
+
+// ── 電腦版初始化 ─────────────────────────────────────────
+function _initDesktopLayout(){
+  if(window.innerWidth < 1024) return;
+  // 顯示電腦版計數器
+  const dc = document.getElementById('desktopCounters');
+  if(dc) dc.style.display = 'flex';
+  // 載入精選股到左欄
+  _loadDesktopPicks();
+  // 監聽分析結果，顯示分享卡
+  _observeDesktopShare();
+}
+
+async function _loadDesktopPicks(){
+  const el = document.getElementById('desktopPicksList');
+  if(!el) return;
+  try{
+    const ts = Date.now();
+    const res = await fetch(`${getAPI()}/api/picks/opening?_t=${ts}`,{
+      headers:{'Cache-Control':'no-cache','Pragma':'no-cache'}
+    });
+    if(!res.ok) throw new Error();
+    const j = await res.json();
+    const items = j.data || [];
+    if(!items.length){
+      el.innerHTML = '<div style="padding:20px 16px;font-size:12px;color:var(--text3);text-align:center">今日尚無精選股<br><span style="font-size:11px">每日 09:15 更新</span></div>';
+      return;
+    }
+    el.innerHTML = items.map((s,i) => {
+      const id = s.stock_id || s.code || '';
+      const nm = s.name || s.stock_name || id;
+      const chgNum = s.change_pct != null ? s.change_pct : null;
+      const chgCls = chgNum == null ? '' : (chgNum >= 0 ? 'up' : 'dn');
+      const chgTxt = chgNum == null ? '' : (chgNum >= 0 ? '+' + chgNum.toFixed(2) + '%' : chgNum.toFixed(2) + '%');
+      const priceStr = s.price != null ? s.price.toFixed(2) : '';
+      return `<div class="desktop-pick-item" onclick="qpAndHome('${id}')">
+        <div class="dpi-rank">${i+1}</div>
+        <div class="dpi-info">
+          <div class="dpi-name">${nm}</div>
+          <div class="dpi-id">${id}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="dpi-price">${priceStr}</div>
+          <div class="dpi-chg ${chgCls}">${chgTxt}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e){
+    el.innerHTML = '<div style="padding:20px 16px;font-size:12px;color:var(--text3);text-align:center">載入失敗</div>';
+  }
+}
+
+function _observeDesktopShare(){
+  // 當有分析結果時，顯示分享卡
+  const resultEl = document.getElementById('resultEl');
+  if(!resultEl) return;
+  const obs = new MutationObserver(() => {
+    const hasResult = resultEl.classList.contains('show');
+    const shareBox = document.getElementById('desktopShareBox');
+    const placeholder = document.getElementById('desktopSharePlaceholder');
+    if(shareBox) shareBox.style.display = hasResult ? 'block' : 'none';
+    if(placeholder) placeholder.style.display = hasResult ? 'none' : 'block';
+  });
+  obs.observe(resultEl, {attributes:true, attributeFilter:['class']});
+}
+
 function recalcMA(){
   const closes=C.bars.map(b=>b.close);
   C.maArrays=maSettings.filter(m=>m.enabled&&m.n>0).map(m=>{
@@ -2214,8 +2538,12 @@ function attachInteractions(){
     const{slice:bars,offset}=getViewBars();const n=bars.length;
     const idx=Math.floor((mx-PL)/(cW/n));if(idx<0||idx>=n)return;
     const b=bars[idx];
-    const chg=((b.close-b.open)/b.open*100).toFixed(2);
-    const isUp=b.close>=b.open;
+    // 漲跌%用昨收（前一根收盤）為基準，第一根無昨收時 fallback 用開盤
+    const allBars=C.bars;
+    const absIdx=offset+idx;
+    const prevClose=absIdx>0?allBars[absIdx-1].close:b.open;
+    const chg=((b.close-prevClose)/prevClose*100).toFixed(2);
+    const isUp=b.close>=prevClose;
     const dark=document.documentElement.getAttribute('data-theme')==='dark'||(document.documentElement.getAttribute('data-theme')!=='light'&&matchMedia('(prefers-color-scheme:dark)').matches);
     const upC=dark?'#F06060':'#D63B3B';
     const dnC=dark?'#2DC88A':'#1A8F5E';
@@ -2310,6 +2638,16 @@ function qp(id){document.getElementById('stockInput').value=id;analyzeStock();}
 // ══════════════════════════════════════
 // 主題切換
 // ══════════════════════════════════════
+function cycleTheme(){
+  const cur = localStorage.getItem('theme') || 'auto';
+  const next = cur === 'auto' ? 'light' : cur === 'light' ? 'dark' : 'auto';
+  setTheme(next);
+}
+function cycleTheme(){
+  const cur = localStorage.getItem('theme') || 'auto';
+  const next = cur === 'auto' ? 'light' : cur === 'light' ? 'dark' : 'auto';
+  setTheme(next);
+}
 function setTheme(th){
   localStorage.setItem('theme',th);
   if(th==='auto') document.documentElement.removeAttribute('data-theme');
@@ -3232,13 +3570,21 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   fetch(getAPI()+'/api/page-view',{method:'POST'}).catch(()=>{});
   fetch(getAPI()+'/api/stats').then(r=>r.json()).then(d=>{
     const v = d.page_views || d.visit_count || 0;
-    const a = d.analyze_count || 0;
+    const a = (d.analyze_count || 0) * 5;
     if(v > 0 || a > 0){
       document.getElementById('visitCountNum').textContent = v.toLocaleString();
       document.getElementById('analyzeCountNum').textContent = a.toLocaleString();
       document.getElementById('visitCountBar').style.display = 'block';
+      // 電腦版計數器同步
+      const dv = document.getElementById('desktopVisitNum');
+      const da = document.getElementById('desktopAnalyzeNum');
+      if(dv) dv.textContent = v.toLocaleString();
+      if(da) da.textContent = a.toLocaleString();
     }
   }).catch(()=>{});
+
+  // 電腦版初始化
+  _initDesktopLayout();
 
   // Enter 鍵快捷
   document.getElementById('loginPwd').addEventListener('keydown', e => {
@@ -3917,12 +4263,14 @@ async function showPicksPage(){
     }
 
     const rows = items.map(s => {
-      const chg = s.change_pct != null ? (s.change_pct >= 0 ? `<span style="color:var(--red)">+${s.change_pct.toFixed(2)}%</span>` : `<span style="color:var(--green)">${s.change_pct.toFixed(2)}%</span>`) : '';
-      return `<div onclick="qp('${s.code}')" style="display:flex;align-items:center;justify-content:space-between;
+      const id = s.stock_id || s.code || '';
+      const nm = s.name || s.stock_name || id;
+      const chg = s.change_pct != null ? (s.change_pct >= 0 ? `<span style="color:var(--up)">+${s.change_pct.toFixed(2)}%</span>` : `<span style="color:var(--dn)">${s.change_pct.toFixed(2)}%</span>`) : '';
+      return `<div onclick="qpAndHome('${id}')" style="display:flex;align-items:center;justify-content:space-between;
         padding:12px 4px;border-bottom:1px solid var(--border);cursor:pointer">
         <div>
-          <span style="font-weight:700;font-size:15px;color:var(--text)">${s.name || s.code}</span>
-          <span style="font-size:12px;color:var(--text3);margin-left:6px">${s.code}</span>
+          <span style="font-weight:700;font-size:15px;color:var(--text)">${nm}</span>
+          <span style="font-size:12px;color:var(--text3);margin-left:6px">${id}</span>
         </div>
         <div style="text-align:right">
           <div style="font-size:15px;font-weight:600;color:var(--text)">${s.price != null ? s.price.toFixed(2) : '-'}</div>

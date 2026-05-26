@@ -219,6 +219,13 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
         </div>
         <button class="inline-btn" onclick="doGrant()">開通</button>
       </div>
+      <div class="form-row">
+        <div class="field">
+          <label>補天數（延長現有到期日，不重設密碼）</label>
+          <input type="number" id="grantExtendDays" placeholder="例如 60" min="1" style="width:120px"/>
+        </div>
+        <button class="inline-btn" onclick="doExtend()">延長</button>
+      </div>
       <div class="result-box" id="grantResult"></div>
     </div>
 
@@ -423,6 +430,28 @@ async function doGrant(){
     if(!r.ok){res.textContent='失敗：'+(data.detail||'未知錯誤');res.className='result-box show error';return;}
     const pwd=data.password||data.temp_password||'（請查看後端回傳）';
     res.textContent=`✅ 開通成功！\n帳號：${email}\n密碼：${pwd}\n方案：${plan}（${days}天）\n\n請將帳號密碼傳給對方。`;
+    res.className='result-box show success';
+    loadStats();
+  }catch(e){
+    res.textContent='連線失敗，請確認後端是否正常';
+    res.className='result-box show error';
+  }
+}
+
+// ── 延長到期日 ──
+async function doExtend(){
+  const email=document.getElementById('grantEmail').value.trim();
+  const days=parseInt(document.getElementById('grantExtendDays').value);
+  const res=document.getElementById('grantResult');
+  if(!email){res.textContent='請輸入 Email';res.className='result-box show error';return;}
+  if(!days||days<1){res.textContent='請輸入有效天數';res.className='result-box show error';return;}
+  res.textContent='延長中...';res.className='result-box show';
+  try{
+    // 用 quarterly + 指定 days 延長，不重設密碼（grant 會從現有到期日往後加）
+    const r=await fetch(`${API}/admin/grant?key=${ADMIN_KEY}&email=${encodeURIComponent(email)}&plan=quarterly&days=${days}`,{method:'POST'});
+    const data=await r.json();
+    if(!r.ok){res.textContent='失敗：'+(data.detail||'未知錯誤');res.className='result-box show error';return;}
+    res.textContent=`✅ 延長成功！\n帳號：${email}\n延長：${days} 天\n新到期日：${data.expire_at||'請至會員列表確認'}`;
     res.className='result-box show success';
     loadStats();
   }catch(e){

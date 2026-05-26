@@ -314,6 +314,7 @@ async def lifespan(app: FastAPI):
 
         _bg_scheduler = BackgroundScheduler(timezone="Asia/Taipei")
         _bg_scheduler.add_job(_run_opening_scan_job,    "cron",     hour=9,  minute=15, day_of_week="mon-fri")
+        _bg_scheduler.add_job(_run_opening_scan_job,    "cron",     hour=13, minute=45, day_of_week="mon-fri")  # 收盤後更新今日收盤價
         _bg_scheduler.add_job(_run_expire_notice_job,   "cron",     hour=9,  minute=0)
         _bg_scheduler.add_job(_reset_alert_triggered,   "cron",     hour=9,  minute=0,  day_of_week="mon-fri")
         _bg_scheduler.add_job(_run_intraday_alert_job,  "interval", minutes=5)
@@ -431,10 +432,12 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
         in_or_just_after = is_weekday and _dtime(9, 0) <= now_tw.time() <= _dtime(14, 30)
         today_ts = pd.Timestamp(today_str)
 
-        # 非盤中時間，先把 FinMind 原始資料裡的今日那筆刪掉
+        # 盤前（09:00 以前）才刪今日那筆，避免補入假資料
+        # 盤中或盤後保留 FinMind 原始收盤價，不刪除
         _qt = _QUOTE_CACHE.get(code)
         _in_session = bool(_qt and (_qt.get("data") or {}).get("in_session"))
-        if not _in_session:
+        _is_pre_market = now_tw.time() < _dtime(9, 0)
+        if _is_pre_market:
             df = df[df.index != today_ts]
 
         if in_or_just_after:
@@ -1560,43 +1563,99 @@ def calc_gann_filtered(closes, highs, lows, volumes, ma_period=20):
     return buys[-3:], sells[-3:], stops[-3:]
 
 
-def detect_gann_recross(closes, highs, lows, volumes, ma_period=20, lookback=5):
+def detect_gann_recross(closes, highs, lows, volumes, ma_period=20, max_bars=2):
     """
-    葛蘭碧站回訊號：
-    條件：前N根內曾跌破均線，最新收盤站回均線之上
-    回傳：(訊號是否成立, 均線值, 均線名稱, 防守建議)
+    葛蘭碧八大法則買點偵測（買1/2/3/4合併版）
+    時效限制：訊號觸發根起 ≤ max_bars 根內有效（預設2根）
+    MA60 額外條件：MA20 必須在 MA60 上方（多頭排列）
+
+    買1/4：收盤從均線下方穿越到上方（站回/超跌反彈），觸發根起 ≤2根
+    買2  ：收盤在均線上方，低點曾觸碰均線 ±1% 後反彈，觸發根起 ≤2根
+    買3  ：收盤連續在均線上方，低點最近一次接近均線後止跌向上，觸發根起 ≤2根
+
+    回傳：(訊號是否成立, 均線值, 均線名稱, 防守建議, 買點類型描述)
     """
     n = len(closes)
-    if n < ma_period + lookback + 1:
-        return False, None, None, None
+    if n < ma_period + 5:
+        return False, None, None, None, None
 
     ma = np.full(n, np.nan)
     for i in range(ma_period - 1, n):
         ma[i] = closes[i - ma_period + 1: i + 1].mean()
 
-    curr_close = closes[-1]
-    curr_ma    = ma[-1]
+    curr_ma = ma[-1]
     if np.isnan(curr_ma):
-        return False, None, None, None
+        return False, None, None, None, None
 
-    # 現在要站上均線
-    if curr_close <= curr_ma:
-        return False, None, None, None
+    # MA60 額外條件：需要 MA20 在 MA60 上方
+    if ma_period == 60:
+        ma20 = np.full(n, np.nan)
+        for i in range(19, n):
+            ma20[i] = closes[i - 19: i + 1].mean()
+        if np.isnan(ma20[-1]) or ma20[-1] <= ma[-1]:
+            return False, None, None, None, None
 
-    # 往前 lookback 根內，至少有一根收在均線下方（曾跌破）
-    had_below = any(
-        not np.isnan(ma[-(lookback + 1 + j)]) and closes[-(lookback + 1 + j)] < ma[-(lookback + 1 + j)]
-        for j in range(lookback)
-    )
-    if not had_below:
-        return False, None, None, None
-
-    # 均線方向：水平或向上才算有效站回（下降趨勢中的反彈不算）
-    ma_slope_ok = ma[-1] >= ma[-(min(5, n))]  # 近5根均線不往下
+    # 均線方向：水平或向上才算有效（下降趨勢中的反彈不算）
+    ma_slope_ok = ma[-1] >= ma[-(min(5, n))]
+    if not ma_slope_ok:
+        return False, None, None, None, None
 
     name = f"MA{ma_period}"
-    stop = round(float(curr_ma) * 0.985, 2)   # 防守位：均線下 1.5%
-    return True, round(float(curr_ma), 2), name, stop
+    stop = round(float(curr_ma) * 0.985, 2)
+
+    TOUCH_BAND = 0.01   # 買2/3：低點距均線 ±1% 算觸碰
+
+    # ── 買1/4：找最近一次「從下方穿越到上方」的觸發根 ──
+    # 往回掃，找 closes[i-1] < ma[i-1] 且 closes[i] > ma[i] 的最近那根
+    trigger_b1 = None
+    for i in range(n - 1, ma_period, -1):
+        if np.isnan(ma[i]) or np.isnan(ma[i - 1]):
+            continue
+        if closes[i - 1] < ma[i - 1] and closes[i] > ma[i]:
+            trigger_b1 = i
+            break
+    if trigger_b1 is not None and (n - 1 - trigger_b1) <= max_bars:
+        buy_type = "買1（站回均線）" if ma[-1] >= ma[-(min(5, n))] else "買4（超跌反彈）"
+        return True, round(float(curr_ma), 2), name, stop, buy_type
+
+    # ── 買2：收盤在均線上方，低點觸碰均線後反彈 ──
+    # 找最近一次 closes[i] > ma[i] 且 lows[i] <= ma[i] * (1 + TOUCH_BAND) 的那根
+    trigger_b2 = None
+    for i in range(n - 1, ma_period, -1):
+        if np.isnan(ma[i]):
+            continue
+        if closes[i] > ma[i] and lows[i] <= ma[i] * (1 + TOUCH_BAND):
+            # 確認前一根也在均線上方（不是剛穿越，那是買1）
+            if not np.isnan(ma[i - 1]) and closes[i - 1] > ma[i - 1]:
+                trigger_b2 = i
+                break
+    if trigger_b2 is not None and (n - 1 - trigger_b2) <= max_bars:
+        return True, round(float(curr_ma), 2), name, stop, "買2（回測不破）"
+
+    # ── 買3：連續在均線上方，最近低點接近均線後止跌 ──
+    # 條件：最近5根收盤都在均線上方，且其中有一根低點接近均線，且最新根收盤 > 前一根收盤
+    if n >= ma_period + 5:
+        recent_5_above = all(
+            not np.isnan(ma[-(j + 1)]) and closes[-(j + 1)] > ma[-(j + 1)]
+            for j in range(5)
+        )
+        had_touch = any(
+            not np.isnan(ma[-(j + 1)]) and lows[-(j + 1)] <= ma[-(j + 1)] * (1 + TOUCH_BAND)
+            for j in range(1, 6)
+        )
+        price_rising = closes[-1] > closes[-2]
+        if recent_5_above and had_touch and price_rising:
+            # 找觸碰那根當觸發根
+            trigger_b3 = None
+            for j in range(1, 6):
+                i = n - 1 - j
+                if not np.isnan(ma[i]) and lows[i] <= ma[i] * (1 + TOUCH_BAND):
+                    trigger_b3 = i
+                    break
+            if trigger_b3 is not None and (n - 1 - trigger_b3) <= max_bars:
+                return True, round(float(curr_ma), 2), name, stop, "買3（上方止跌）"
+
+    return False, None, None, None, None
 
 
 def calc_breakout_signals(closes, highs, lows, volumes, support, resistance):
@@ -2015,7 +2074,7 @@ def _inc_report_count(member_id: int):
 
 PERIOD_MAP = {"D": ("3y", "1d"), "W": ("5y", "1wk"), "M": ("10y", "1mo")}
 
-REPORT_INJECT = """<style>#reportShareBtn{position:fixed;top:16px;right:16px;z-index:1001;background:#1D9E75;color:#fff;border:none;border-radius:20px;padding:8px 16px;font-size:14px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2);font-family:inherit;}.report-ad-block{position:static;margin:28px auto;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);max-width:300px;}.report-ad-icon{font-size:22px;flex-shrink:0;}.report-ad-text{flex:1;font-size:12px;line-height:1.5;}.report-ad-text strong{display:block;color:#111827;margin-bottom:2px;}.report-ad-text span{color:#6b7280;}.report-ad-btn{background:#1D9E75;color:#fff;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;white-space:nowrap;text-decoration:none;display:inline-block;}</style><button id="reportShareBtn" onclick="var url=window.location.href;var title=document.title||'線上有位個股報告';if(navigator.share){navigator.share({title:title,url:url});}else{navigator.clipboard.writeText(url).then(function(){var b=document.getElementById('reportShareBtn');b.textContent='✓ 已複製';setTimeout(function(){b.textContent='🔗 分享';},2000);});}">🔗 分享</button><div class="report-ad-block">  <img src="https://watione1.guidemee.cc/tenancy/assets/oj9qkl/products/skSjmETidhxTjLNnLCeH5WdNNHM0YX-metaR2VtaW5pX0dlbmVyYXRlZF9JbWFnZV9vcTR5N3dvcTR5N3dvcTR5LnBuZw==-.png" style="width:64px;height:64px;object-fit:cover;border-radius:8px;flex-shrink:0;" alt="水漾葉黃素">  <div class="report-ad-text">    <strong>長時間盯盤，眼睛需要保護</strong>    <span>Soft Glow 葉黃素｜護眼配方，盤中盤後都舒適</span>  </div>  <a class="report-ad-btn" href="https://watione1.guidemee.cc/products/Gct3MfMg?path=7" target="_blank">了解更多</a></div>"""
+REPORT_INJECT = """<style>#reportShareBtn{position:fixed;top:16px;right:16px;z-index:1001;background:#1D9E75;color:#fff;border:none;border-radius:20px;padding:8px 16px;font-size:14px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.2);font-family:inherit;}</style><button id="reportShareBtn" onclick="var url=window.location.href;var title=document.title||'線上有位個股報告';if(navigator.share){navigator.share({title:title,url:url});}else{navigator.clipboard.writeText(url).then(function(){var b=document.getElementById('reportShareBtn');b.textContent='✓ 已複製';setTimeout(function(){b.textContent='🔗 分享';},2000);});}">🔗 分享</button><div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:8px 14px;margin:12px 0;font-size:12px;color:#92400e">📌 分析以最新 K 線為基準，收盤後 K 線確定分析最準確。報告快取當日，如需最新分析請回主頁重新產出。</div>"""
 
 
 @app.get("/api/debug/{stock_id}")
@@ -2240,8 +2299,8 @@ def _macd_status_desc(macd_line, macd_sig, macd_hist) -> dict:
 
 
 def _vol_analysis_desc(volumes, closes, opens) -> dict:
-    """分析近5日 vs 20日量能"""
-    vols = [float(v) for v in volumes if v > 0]
+    """分析近5日 vs 20日量能（Trading_Volume 單位為股，除以1000轉換為張）"""
+    vols = [float(v) / 1000 for v in volumes if v > 0]
     if len(vols) < 20:
         return {"text": "量能資料不足", "ratio": 1.0, "avg_5": 0, "avg_20": 0}
     avg_5  = sum(vols[-5:]) / 5
@@ -2360,6 +2419,23 @@ def _do_analyze(stock_id: str, tf: str = "D",
     volumes    = df["Volume"].values.astype(float)
     price      = round(float(closes[-1]), 2)
 
+    # 用即時報價覆蓋現價（盤中 09:00~13:30 或盤後 13:30~隔天09:00 才覆蓋，盤前不動）
+    _now_tp = datetime.now(__import__("zoneinfo").ZoneInfo("Asia/Taipei"))
+    _is_market_open_or_after = (_now_tp.weekday() < 5 and _now_tp.hour >= 9)
+    if _is_market_open_or_after:
+        _sid = stock_id.strip().upper()
+        _qc = _QUOTE_CACHE.get(_sid)
+        if not _qc or _qc.get("expires", 0) < _time_mod.time():
+            try:
+                get_quote(_sid, user=None)
+                _qc = _QUOTE_CACHE.get(_sid)
+            except Exception:
+                _qc = None
+        if _qc and _qc.get("data", {}).get("price"):
+            _live_price = float(_qc["data"]["price"])
+            if _live_price > 0:
+                price = round(_live_price, 2)
+
     # 股名
     stock_name = get_stock_name(symbol)
 
@@ -2468,13 +2544,21 @@ def _do_analyze(stock_id: str, tf: str = "D",
             alt_res = round(float(alt_val), 2)
             alt_res_desc = f"轉折高點（{len(highs) - 1 - alt_i}根前）"
         else:
-            # fallback：軌道上緣估算或歷史高點
+            # fallback：軌道上緣估算 → 波段等幅推算（創新高時無前高可用）
             if channel and channel.get("target1") and channel["target1"] > price * (1 + MIN_RES_DIST):
                 alt_res = round(float(channel["target1"]), 2)
                 alt_res_desc = "軌道目標價"
             else:
-                alt_res = round(float(highs[:-1].max()), 2)
-                alt_res_desc = "歷史高點（備援）"
+                # 波段等幅投影：(近60根高點 - 近60根低點) + 近60根高點
+                _swing_high = float(highs[-60:].max()) if len(highs) >= 60 else float(highs.max())
+                _swing_low  = float(lows[-60:].min())  if len(lows)  >= 60 else float(lows.min())
+                _swing_proj = round(_swing_high + (_swing_high - _swing_low), 2)
+                if _swing_proj > price * (1 + MIN_RES_DIST):
+                    alt_res = _swing_proj
+                    alt_res_desc = "波段等幅目標（突破後推算）"
+                else:
+                    alt_res = round(float(highs[:-1].max()), 2)
+                    alt_res_desc = "歷史高點（備援）"
 
         if alt_res and alt_res != resistance:
             resistance = alt_res
@@ -2494,15 +2578,15 @@ def _do_analyze(stock_id: str, tf: str = "D",
     ma20_arr = calc_ma(closes, 20)
     buy_idx, sell_idx, buy_stops = calc_gann_filtered(closes, highs, lows, volumes, 20)
 
-    # 葛蘭碧站回偵測（跌破後站回 MA20 / MA60）
-    gann_ma20_signal, gann_ma20_val, gann_ma20_name, gann_ma20_stop = detect_gann_recross(closes, highs, lows, volumes, 20)
-    gann_ma60_signal, gann_ma60_val, gann_ma60_name, gann_ma60_stop = detect_gann_recross(closes, highs, lows, volumes, 60)
-    # 優先用 MA60 站回（較強訊號），其次 MA20
+    # 葛蘭碧買點偵測（買1/2/3/4，MA20 / MA60，≤2根時效）
+    gann_ma20_signal, gann_ma20_val, gann_ma20_name, gann_ma20_stop, gann_ma20_type = detect_gann_recross(closes, highs, lows, volumes, 20)
+    gann_ma60_signal, gann_ma60_val, gann_ma60_name, gann_ma60_stop, gann_ma60_type = detect_gann_recross(closes, highs, lows, volumes, 60)
+    # 優先用 MA60（需 MA20 在 MA60 上方），其次 MA20
     gann_recross = None
     if gann_ma60_signal:
-        gann_recross = {"ma": gann_ma60_name, "val": gann_ma60_val, "stop": gann_ma60_stop}
+        gann_recross = {"ma": gann_ma60_name, "val": gann_ma60_val, "stop": gann_ma60_stop, "type": gann_ma60_type}
     elif gann_ma20_signal:
-        gann_recross = {"ma": gann_ma20_name, "val": gann_ma20_val, "stop": gann_ma20_stop}
+        gann_recross = {"ma": gann_ma20_name, "val": gann_ma20_val, "stop": gann_ma20_stop, "type": gann_ma20_type}
 
     # 突破壓力 / 跌破支撐訊號
     breakout_idx, breakdown_idx, breakout_stale, breakdown_stale = calc_breakout_signals(
@@ -2651,16 +2735,17 @@ def _do_analyze(stock_id: str, tf: str = "D",
         else:
             conclusion = f"{ch_sup_desc}，相對低風險觀察位。操作：等明天出現止跌K棒確認守住後可設防守位 {stop_loss} 試多，目標壓力 {resistance}"
     elif gann_recross:
-        # 葛蘭碧站回訊號
-        ma_name = gann_recross["ma"]
-        ma_val  = gann_recross["val"]
-        g_stop  = gann_recross["stop"]
+        # 葛蘭碧買點訊號（含買點類型）
+        ma_name  = gann_recross["ma"]
+        ma_val   = gann_recross["val"]
+        g_stop   = gann_recross["stop"]
+        buy_type = gann_recross.get("type", "葛蘭碧買點")
         if kbar_bullish:
-            conclusion = f"跌破後站回 {ma_name}（{ma_val}），出現多頭K棒（{kbar_pattern}）。葛蘭碧買點確認，操作：可設防守位 {g_stop}（{ma_name} 下方）試多，目標壓力 {resistance}"
+            conclusion = f"{buy_type}：{ma_name}（{ma_val}），出現多頭K棒（{kbar_pattern}）。操作：可設防守位 {g_stop}（{ma_name} 下方）試多，目標壓力 {resistance}"
         elif kbar_bearish:
-            conclusion = f"跌破後站回 {ma_name}（{ma_val}），但出現空頭K棒（{kbar_pattern}），站回力道存疑。操作：等明天確認站穩 {ma_name} 再進場，防守位 {g_stop}"
+            conclusion = f"{buy_type}：{ma_name}（{ma_val}），但出現空頭K棒（{kbar_pattern}），力道存疑。操作：等明天確認站穩 {ma_name} 再進場，防守位 {g_stop}"
         else:
-            conclusion = f"跌破後站回 {ma_name}（{ma_val}），葛蘭碧潛在買點。操作：明天若確認站穩 {ma_name} 可設防守位 {g_stop} 試多，目標壓力 {resistance}"
+            conclusion = f"{buy_type}：{ma_name}（{ma_val}），潛在買點。操作：明天若確認站穩 {ma_name} 可設防守位 {g_stop} 試多，目標壓力 {resistance}"
     elif near_res:
         if kbar_bullish:
             conclusion = f"靠近壓力 {resistance}，出現多頭K棒（{kbar_pattern}）。操作：{kbar_action or f'等放量突破 {resistance} 再追，未突破先觀望，停損 {stop_loss}'}"
@@ -4660,7 +4745,31 @@ def _fetch_opening_volume_top20() -> list:
         except Exception:
             continue
     results.sort(key=lambda x: x["volume"], reverse=True)
-    return results[:20]
+    top20 = results[:20]
+
+    # 補即時價（走 FinMind，與個股分析同源，不走被擋的 MIS）
+    for item in top20:
+        try:
+            _c = item["stock_id"]
+            _qc = _QUOTE_CACHE.get(_c)
+            if not (_qc and _qc.get("data", {}).get("price") and _time_mod.time() < _qc.get("expires", 0)):
+                try:
+                    get_quote(_c, user=None)
+                    _qc = _QUOTE_CACHE.get(_c)
+                except Exception:
+                    _qc = None
+            if _qc and _qc.get("data", {}).get("price"):
+                _p = float(_qc["data"]["price"])
+                _chg = float(_qc["data"].get("change", 0))
+                _prev = _p - _chg
+                if _p > 0:
+                    item["price"] = round(_p, 2)
+                    if _prev > 0:
+                        item["change_pct"] = round(_chg / _prev * 100, 2)
+        except Exception:
+            pass
+
+    return top20
 
 
 def _run_opening_scan_job():
@@ -4689,11 +4798,42 @@ def _run_opening_scan_job():
 
 @app.get("/api/picks/opening")
 def get_opening_picks():
-    """開盤熱門股（成交量前20，無需登入）"""
-    return {
-        "data":       _OPENING_TOP20.get("data", []),
-        "updated_at": _OPENING_TOP20.get("updated_at"),
-    }
+    """開盤熱門股（成交量前20，無需登入）
+    盤中補即時報價，盤後補當日收盤價，都用 MIS API。
+    """
+    import urllib.request as _urq, json as _jq
+    base_data = _OPENING_TOP20.get("data", [])
+    updated_at = _OPENING_TOP20.get("updated_at")
+
+    if not base_data:
+        return {"data": base_data, "updated_at": updated_at}
+
+    enriched = []
+    for item in base_data:
+        code = item.get("stock_id", "")
+        new_item = dict(item)
+        try:
+            # 先查 _QUOTE_CACHE（個股分析同源，不走被擋的 MIS）
+            _qc = _QUOTE_CACHE.get(code)
+            if not (_qc and _qc.get("data", {}).get("price") and _time_mod.time() < _qc.get("expires", 0)):
+                # 快取沒有，呼叫 get_quote 補抓（走 FinMind tick_snapshot）
+                try:
+                    get_quote(code, user=None)
+                    _qc = _QUOTE_CACHE.get(code)
+                except Exception:
+                    _qc = None
+            if _qc and _qc.get("data", {}).get("price"):
+                _p   = float(_qc["data"]["price"])
+                _chg = float(_qc["data"].get("change", 0))
+                _prev = _p - _chg
+                if _p > 0:
+                    new_item["price"] = round(_p, 2)
+                    new_item["change_pct"] = round(_chg / _prev * 100, 2) if _prev > 0 else 0
+        except Exception:
+            pass
+        enriched.append(new_item)
+
+    return {"data": enriched, "updated_at": updated_at}
 
 
 @app.post("/webhook/ecpay")
@@ -4790,7 +4930,7 @@ async def webhook_ecpay(request: Request):
               </div>
               {upgrade_ad}
               <div style="background:#fff8e1;border-radius:8px;padding:16px;margin-bottom:20px">
-                <p style="margin:0 0 8px;font-weight:700;color:#92400e">📢 廣告合作推薦</p>
+                <p style="margin:0 0 8px;font-weight:700;color:#92400e">✨ 精選好物推薦</p>
                 <p style="margin:0;font-size:13px;color:#78350f">把線上有位推薦給朋友，讓更多人享受 AI 輔助的台股分析工具！分享您的使用心得，幫助我們持續優化服務。</p>
               </div>
               {_SOFTGLOW_AD}
@@ -5272,13 +5412,22 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
     else:
         op_text = f"趨勢盤整，等待方向確認。關注能否突破壓力 {resistance}，防守位 {stop_loss}，損益比 {rr_ratio:.2f}。"
 
-    # ── 預先組裝條件性 HTML 片段 ──
+    # kbar tag 顏色：依多頭/空頭/中性
+    _kbar_bullish_keys = ["錘頭","多頭吞噬","早晨之星","三紅兵","穿刺線","大紅棒"]
+    _kbar_bearish_keys = ["射擊之星","空頭吞噬","黃昏之星","三烏鴉","烏雲蓋頂","大黑棒"]
+    if any(k in (kbar_pattern or "") for k in _kbar_bullish_keys):
+        _kbar_tag_bg, _kbar_tag_color = "#166534", "#bbf7d0"   # 深綠底＋淺綠字
+    elif any(k in (kbar_pattern or "") for k in _kbar_bearish_keys):
+        _kbar_tag_bg, _kbar_tag_color = "#7f1d1d", "#fecaca"   # 深紅底＋淺紅字
+    else:
+        _kbar_tag_bg, _kbar_tag_color = "#374151", "#e5e7eb"   # 深灰底＋淺灰字
+
     market_tag_html = (
-        f'<span class="tag" style="background:#1e3a5a;color:#8faabf;margin-left:6px">{market_label}</span>'
+        f'<span class="tag" style="background:#1e3a5a;color:var(--text3);margin-left:6px">{market_label}</span>'
         if market_label else ""
     )
     kbar_tag_html = (
-        f'<div style="margin-bottom:10px"><span class="tag" style="background:#1e3a5a;color:#e8e0d0">{kbar_pattern}</span></div>'
+        f'<div style="margin-bottom:10px"><span class="tag" style="background:{_kbar_tag_bg};color:{_kbar_tag_color}">{kbar_pattern}</span></div>'
         if kbar_pattern else ""
     )
     kbar_warning_html = (
@@ -5286,37 +5435,37 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
         if kbar_warning else ""
     )
     kbar_action_html = (
-        f'<div style="margin-top:10px;padding:10px;background:#0f1923;border-radius:8px;'
-        f'font-size:13px;color:#e8e0d0;line-height:1.6">{kbar_action}</div>'
+        f'<div style="margin-top:10px;padding:10px;background:var(--stat-bg);border-radius:8px;'
+        f'font-size:13px;color:var(--text);line-height:1.6">{kbar_action}</div>'
         if kbar_action else ""
     )
     kd_row_html = (
         f'<div class="irow"><div class="idot" style="background:{kd_color}"></div>'
-        f'<div style="font-size:13px;line-height:1.6;color:#e8e0d0">'
-        f'<span style="color:#6b8fbf;font-size:11px">KD｜</span>{kd_text}</div></div>'
+        f'<div style="font-size:13px;line-height:1.6;color:var(--text)">'
+        f'<span style="color:var(--text3);font-size:11px">KD｜</span>{kd_text}</div></div>'
         if kd_text else ""
     )
     macd_row_html = (
         f'<div class="irow"><div class="idot" style="background:{macd_color}"></div>'
-        f'<div style="font-size:13px;line-height:1.6;color:#e8e0d0">'
-        f'<span style="color:#6b8fbf;font-size:11px">MACD｜</span>{macd_text}</div></div>'
+        f'<div style="font-size:13px;line-height:1.6;color:var(--text)">'
+        f'<span style="color:var(--text3);font-size:11px">MACD｜</span>{macd_text}</div></div>'
         if macd_text else ""
     )
     vol_row_html = (
         f'<div class="irow" style="border-bottom:none"><div class="idot" style="background:#8faabf"></div>'
-        f'<div style="font-size:13px;line-height:1.6;color:#e8e0d0">'
-        f'<span style="color:#6b8fbf;font-size:11px">量能｜</span>{vol_text}</div></div>'
+        f'<div style="font-size:13px;line-height:1.6;color:var(--text)">'
+        f'<span style="color:var(--text3);font-size:11px">量能｜</span>{vol_text}</div></div>'
         if vol_text else ""
     )
     risk_items_html = "".join(
-        f'<li style="padding:6px 0;border-bottom:1px solid #1e3a5a;font-size:13px;color:#e8e0d0;line-height:1.6">'
+        f'<li style="padding:6px 0;border-bottom:1px solid var(--irow-border);font-size:13px;color:var(--text);line-height:1.6">'
         f'&#9651; {r}</li>'
         for r in risk_factors
-    ) if risk_factors else '<li style="padding:6px 0;font-size:13px;color:#8faabf">無明顯技術面警示</li>'
+    ) if risk_factors else '<li style="padding:6px 0;font-size:13px;color:var(--text3)">無明顯技術面警示</li>'
 
     if news_items:
         news_rows = "".join(
-            f'<li style="padding:8px 0;border-bottom:1px solid #1e3a5a">'
+            f'<li style="padding:8px 0;border-bottom:1px solid var(--irow-border)">'
             f'<a href="{n["link"]}" target="_blank" rel="noopener" '
             f'style="color:#3b82f6;font-size:13px;line-height:1.6">{n["title"]}</a></li>'
             for n in news_items
@@ -5360,32 +5509,88 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
 <script type="application/ld+json">{json_ld}</script>
 <style>
 *{{box-sizing:border-box;margin:0;padding:0}}
-body{{background:#0f1923;color:#e8e0d0;font-family:-apple-system,'Noto Sans TC',sans-serif;min-height:100vh;padding:24px 16px 48px}}
+:root{{
+  --bg:#f5f0e8;--bg2:#ede8df;--bg3:#e6dfd4;
+  --card:#fff;--border:#d6cfc4;
+  --text:#1a1a1a;--text2:#374151;--text3:#6b7280;
+  --accent:#1D9E75;--blue:#3b82f6;
+  --stat-bg:#f0ebe2;--irow-border:#e0d9d0;
+  --h2:#1D9E75;
+}}
+@media(prefers-color-scheme:dark){{
+  :root:not([data-theme="light"]){{
+    --bg:#0f1923;--bg2:#1a2634;--bg3:#1e3a5a;
+    --card:#1a2634;--border:#1e3a5a;
+    --text:#e8e0d0;--text2:#c8c0b0;--text3:#8faabf;
+    --accent:#1D9E75;--blue:#3b82f6;
+    --stat-bg:#0f1923;--irow-border:#1e3a5a;
+    --h2:#3b82f6;
+  }}
+}}
+:root[data-theme="dark"]{{
+  --bg:#0f1923;--bg2:#1a2634;--bg3:#1e3a5a;
+  --card:#1a2634;--border:#1e3a5a;
+  --text:#e8e0d0;--text2:#c8c0b0;--text3:#8faabf;
+  --accent:#1D9E75;--blue:#3b82f6;
+  --stat-bg:#0f1923;--irow-border:#1e3a5a;
+  --h2:#3b82f6;
+}}
+body{{background:var(--bg);color:var(--text);font-family:-apple-system,'Noto Sans TC',sans-serif;min-height:100vh;padding:24px 16px 48px}}
 .container{{max-width:720px;margin:0 auto}}
-.card{{background:#1a2634;border-radius:14px;padding:20px;margin-bottom:16px}}
+.card{{background:var(--card);border-radius:14px;padding:20px;margin-bottom:16px;border:1px solid var(--border)}}
 .tag{{display:inline-block;padding:3px 12px;border-radius:20px;font-size:12px;font-weight:700;margin-bottom:8px}}
 .row{{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}}
-.stat{{background:#0f1923;border-radius:10px;padding:12px;flex:1;min-width:90px}}
-.stat-label{{font-size:11px;color:#6b8fbf;margin-bottom:4px}}
+.stat{{background:var(--stat-bg);border-radius:10px;padding:12px;flex:1;min-width:90px}}
+.stat-label{{font-size:11px;color:var(--text3);margin-bottom:4px}}
 .stat-value{{font-size:18px;font-weight:700}}
-.irow{{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid #1e3a5a}}
+.irow{{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--irow-border)}}
 .idot{{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}}
-h2{{font-size:15px;font-weight:700;margin-bottom:14px;color:#3b82f6}}
-a{{color:#3b82f6;text-decoration:none}}
+h2{{font-size:15px;font-weight:700;margin-bottom:14px;color:var(--h2)}}
+a{{color:var(--blue);text-decoration:none}}
 a:hover{{text-decoration:underline}}
+/* 廣告4格 */
+.ad-grid{{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:24px auto;max-width:720px}}
+@media(min-width:600px){{.ad-grid{{grid-template-columns:repeat(4,1fr)}}}}
+.ad-card{{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .15s}}
+.ad-card:hover{{transform:translateY(-2px)}}
+.ad-card img{{width:100%;aspect-ratio:1;object-fit:cover}}
+.ad-card-body{{padding:8px 10px 10px}}
+.ad-card-tag{{font-size:10px;font-weight:700;color:var(--accent);margin-bottom:4px}}
+.ad-card-name{{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px}}
+.ad-card-desc{{font-size:11px;color:var(--text3);line-height:1.4}}
+/* 亮暗切換鍵 */
+#themeBtn{{position:fixed;top:14px;right:14px;z-index:999;background:var(--card);border:1px solid var(--border);border-radius:50%;width:36px;height:36px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15);transition:background .2s}}
 </style>
 </head>
 <body>
+<button id="themeBtn" onclick="toggleTheme()" title="切換主題">🌓</button>
+<script>
+(function(){{
+  var t=localStorage.getItem('report-theme');
+  if(t) document.documentElement.setAttribute('data-theme',t);
+}})();
+function toggleTheme(){{
+  var r=document.documentElement;
+  var cur=r.getAttribute('data-theme');
+  var sys=window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+  var next;
+  if(!cur) next=(sys==='dark'?'light':'dark');
+  else if(cur==='dark') next='light';
+  else next='dark';
+  r.setAttribute('data-theme',next);
+  localStorage.setItem('report-theme',next);
+}}
+</script>
 <div class="container">
   <div style="margin-bottom:20px">
-    <a href="{FRONTEND_URL}" style="font-size:13px;color:#6b8fbf">&#8592; 線上有位</a>
+    <a href="{FRONTEND_URL}" style="font-size:13px;color:var(--text3)">&#8592; 線上有位</a>
   </div>
 
   <!-- 1. 基本資訊 -->
   <section class="card" id="basic-info">
     <span class="tag" style="background:{risk_color}22;color:{risk_color}">{risk_label}</span>{market_tag_html}
     <div style="font-size:26px;font-weight:700;margin-bottom:4px">{stock_id} {stock_name}</div>
-    <div style="font-size:13px;color:#8faabf;margin-bottom:16px">分析日期：{report_date}</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:16px">分析日期：{report_date}</div>
     <div class="row">
       <div class="stat">
         <div class="stat-label">現價</div>
@@ -5410,18 +5615,18 @@ a:hover{{text-decoration:underline}}
       <div class="stat">
         <div class="stat-label">支撐位</div>
         <div class="stat-value" style="color:#3b82f6">{support}</div>
-        <div style="font-size:11px;color:#6b8fbf;margin-top:2px">{supp_desc}，距現價 -{sup_dist}%</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">{supp_desc}，距現價 -{sup_dist}%</div>
       </div>
       <div class="stat">
         <div class="stat-label">壓力位</div>
         <div class="stat-value" style="color:#fbbf24">{resistance}</div>
-        <div style="font-size:11px;color:#6b8fbf;margin-top:2px">{res_desc}，距現價 +{res_dist}%</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">{res_desc}，距現價 +{res_dist}%</div>
       </div>
     </div>
-    <div style="background:#0f1923;border-radius:10px;padding:12px">
+    <div style="background:var(--stat-bg);border-radius:10px;padding:12px">
       <div class="stat-label" style="margin-bottom:4px">操作防守位（停損線）</div>
       <div style="font-size:18px;font-weight:700;color:#f87171">{stop_loss}</div>
-      <div style="font-size:11px;color:#6b8fbf;margin-top:2px">距現價 -{stop_dist}%，跌破需停損出場</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px">距現價 -{stop_dist}%，跌破需停損出場</div>
     </div>
   </section>
 
@@ -5430,9 +5635,9 @@ a:hover{{text-decoration:underline}}
     <h2>趨勢判斷</h2>
     <div class="irow">
       <div class="idot" style="background:{ma_color}"></div>
-      <div style="font-size:13px;line-height:1.6;color:#e8e0d0">{ma_text}</div>
+      <div style="font-size:13px;line-height:1.6;color:var(--text)">{ma_text}</div>
     </div>
-    <div style="padding:10px 0 0;font-size:13px;line-height:1.7;color:#8faabf">{trend_desc}</div>
+    <div style="padding:10px 0 0;font-size:13px;line-height:1.7;color:var(--text3)">{trend_desc}</div>
   </section>
 
   <!-- 4. K線型態 -->
@@ -5443,7 +5648,7 @@ a:hover{{text-decoration:underline}}
       <div class="idot" style="background:{kp_color}"></div>
       <div>
         <div style="font-size:14px;font-weight:600;color:{kp_color};margin-bottom:2px">{kline_pattern or "常態 K 線"}</div>
-        <div style="font-size:12px;color:#6b8fbf">大數據歷史勝率 <span style="color:{wr_color};font-weight:700">{wr_pct}%</span></div>
+        <div style="font-size:12px;color:var(--text3)">大數據歷史勝率 <span style="color:{wr_color};font-weight:700">{wr_pct}%</span></div>
       </div>
     </div>
     {kbar_action_html}
@@ -5466,7 +5671,7 @@ a:hover{{text-decoration:underline}}
       <div class="stat" style="flex:0 0 auto">
         <div class="stat-label">損益比</div>
         <div class="stat-value" style="color:{rr_color}">{rr_ratio:.2f}</div>
-        <div style="font-size:11px;color:#6b8fbf;margin-top:2px">{"良好" if rr_ratio >= 2 else ("尚可" if rr_ratio >= 1 else "偏低")}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">{"良好" if rr_ratio >= 2 else ("尚可" if rr_ratio >= 1 else "偏低")}</div>
       </div>
     </div>
     <ul style="list-style:none">{risk_items_html}</ul>
@@ -5475,8 +5680,8 @@ a:hover{{text-decoration:underline}}
   <!-- 7. 操作建議 -->
   <section class="card" id="operation-advice">
     <h2>操作建議</h2>
-    <div style="font-size:14px;line-height:1.8;color:#e8e0d0;padding:12px;background:#0f1923;border-radius:10px">{op_text}</div>
-    <div style="margin-top:12px;display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:#6b8fbf">
+    <div style="font-size:14px;line-height:1.8;color:var(--text);padding:12px;background:var(--stat-bg);border-radius:10px">{op_text}</div>
+    <div style="margin-top:12px;display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--text3)">
       <span>停損：<strong style="color:#f87171">{stop_loss}</strong></span>
       <span>支撐：<strong style="color:#3b82f6">{support}</strong></span>
       <span>壓力：<strong style="color:#fbbf24">{resistance}</strong></span>
@@ -5486,11 +5691,49 @@ a:hover{{text-decoration:underline}}
   {news_html}
 
   <section class="card" style="text-align:center">
-    <div style="font-size:14px;color:#8faabf;margin-bottom:12px">查看完整互動圖表與即時報價</div>
+    <div style="font-size:14px;color:var(--text3);margin-bottom:12px">查看完整互動圖表與即時報價</div>
     <a href="{FRONTEND_URL}?q={stock_id}" style="display:inline-block;background:#3b82f6;color:#fff;padding:12px 28px;border-radius:30px;font-weight:700;font-size:15px">前往線上有位 &#8594;</a>
   </section>
 
-  <div style="font-size:11px;color:#4a6a8f;text-align:center;margin-top:16px;line-height:1.6">
+  <!-- 4格精選好物 -->
+  <div style="font-size:11px;color:var(--text3);text-align:center;margin-bottom:8px;letter-spacing:.5px">✨ 精選好物 · SOFT GLOW 緩光健康系列</div>
+  <div class="ad-grid">
+    <a class="ad-card" href="https://watione1.guidemee.cc/products/yWh2aDIQ" target="_blank" rel="noopener" style="text-decoration:none">
+      <img src="https://watione1.guidemee.cc/tenancy/assets/oj9qkl/products/Oa9XaH7E5jgkNP7j2YkDaoFpLQPy7K-metaR2VtaW5pX0dlbmVyYXRlZF9JbWFnZV9xYjhoc3hxYjhoc3hxYjhoLnBuZw==-.png" alt="深海之源魚油膠囊" loading="lazy">
+      <div class="ad-card-body">
+        <div class="ad-card-tag" style="color:#16a34a">Omega-3 84%</div>
+        <div class="ad-card-name">深海之源魚油膠囊</div>
+        <div class="ad-card-desc">rTG型態高吸收，IFOS 五星認證</div>
+      </div>
+    </a>
+    <a class="ad-card" href="https://watione1.guidemee.cc/products/fjG6XpYz" target="_blank" rel="noopener" style="text-decoration:none">
+      <img src="https://watione1.guidemee.cc/tenancy/assets/oj9qkl/products/M9X1tgv26e2Lbxr0m4ckHaeIhrkGd3-metaR2VtaW5pX0dlbmVyYXRlZF9JbWFnZV9jNGVweGZjNGVweGZjNGVwLnBuZw==-.png" alt="雪肌彈力膠原蛋白" loading="lazy">
+      <div class="ad-card-body">
+        <div class="ad-card-tag" style="color:#db2777">六大專利成分</div>
+        <div class="ad-card-name">雪肌彈力膠原蛋白</div>
+        <div class="ad-card-desc">由內透亮，醫美指定使用</div>
+      </div>
+    </a>
+    <a class="ad-card" href="https://watione1.guidemee.cc/products/BnlNTsYz" target="_blank" rel="noopener" style="text-decoration:none">
+      <img src="https://watione1.guidemee.cc/tenancy/assets/oj9qkl/products/zwfzYPbxjyLkS623gPq2IjdLgOVNLZ-metaR2VtaW5pX0dlbmVyYXRlZF9JbWFnZV9rMmpvZ29rMmpvZ29rMmpvLnBuZw==-.png" alt="纖體飲" loading="lazy">
+      <div class="ad-card-body">
+        <div class="ad-card-tag" style="color:#ea580c">漢方配方</div>
+        <div class="ad-card-name">纖體飲</div>
+        <div class="ad-card-desc">溫和調整體態，讓身體慢慢順</div>
+      </div>
+    </a>
+    <a class="ad-card" href="https://watione1.guidemee.cc/products/Gct3MfMg" target="_blank" rel="noopener" style="text-decoration:none">
+      <img src="https://watione1.guidemee.cc/tenancy/assets/oj9qkl/products/skSjmETidhxTjLNnLCeH5WdNNHM0YX-metaR2VtaW5pX0dlbmVyYXRlZF9JbWFnZV9vcTR5N3dvcTR5N3dvcTR5LnBuZw==-.png" alt="晶。水漾葉黃素" loading="lazy">
+      <div class="ad-card-body">
+        <div class="ad-card-tag" style="color:#7c3aed">護眼配方</div>
+        <div class="ad-card-name">晶。水漾葉黃素</div>
+        <div class="ad-card-desc">葉黃素＋蝦紅素，適合久盯螢幕族</div>
+      </div>
+    </a>
+  </div>
+  <div style="font-size:11px;color:var(--text3);text-align:center;margin-bottom:16px">全館滿 2000 元免運 · 新會員首購 95 折</div>
+
+  <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:8px;line-height:1.6">
     &#9888; 本報告僅供參考，不構成買賣建議。投資有風險，請自行評估。
   </div>
 </div>
