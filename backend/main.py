@@ -23,6 +23,7 @@ from scipy.signal import argrelextrema
 import sqlite3, hashlib, hmac, secrets, time as _time_mod
 import json as _json_mod
 from datetime import datetime, timedelta, date as _date_cls
+from zoneinfo import ZoneInfo
 import re as _re
 import ssl as _ssl
 
@@ -312,15 +313,117 @@ async def lifespan(app: FastAPI):
             except Exception as _e:
                 print(f"   ❌ 到價提醒重置失敗：{_e}")
 
+        def _run_補單_job():
+            """每日 08:00 掃 pending_orders，用 QueryTradeInfo 補查付款狀態，確認付款成功就補開通"""
+            import urllib.request as _ur2, urllib.parse as _up2, hashlib as _hl2, time as _t2
+            import datetime as _dt2
+            print("   [補單] 開始掃描 pending_orders...")
+            try:
+                from zoneinfo import ZoneInfo as _ZI2
+                _now = datetime.now(_ZI2("Asia/Taipei"))
+                _cutoff = (_now - _dt2.timedelta(hours=24)).strftime("%Y-%m-%d %H:%M:%S")
+                conn = _db_conn()
+                rows = conn.execute(
+                    "SELECT merchant_trade_no, email, plan, created_at FROM pending_orders ORDER BY created_at DESC"
+                ).fetchall()
+                conn.execute("DELETE FROM pending_orders WHERE created_at <= ?", (_cutoff,))
+                conn.commit()
+                conn.close()
+                print(f"   [補單] 共 {len(rows)} 筆待確認")
+                for row in rows:
+                    trade_no = row["merchant_trade_no"]
+                    email    = row["email"]
+                    plan     = row["plan"] or "monthly"
+                    try:
+                        # 先確認是否已處理過
+                        _tc = _db_conn()
+                        _already = _tc.execute(
+                            "SELECT 1 FROM processed_orders WHERE merchant_trade_no=?", (trade_no,)
+                        ).fetchone()
+                        _tc.close()
+                        if _already:
+                            print(f"   [補單] {trade_no} 已處理過，跳過")
+                            continue
+                        # 呼叫綠界 QueryTradeInfo
+                        _ts = int(_t2.time())
+                        _params = {
+                            "MerchantID":      ECPAY_MERCHANT_ID,
+                            "MerchantTradeNo": trade_no,
+                            "TimeStamp":       str(_ts),
+                        }
+                        _sorted = sorted(_params.items(), key=lambda x: x[0].lower())
+                        _raw = "&".join(f"{k}={v}" for k, v in _sorted)
+                        _raw = f"HashKey={ECPAY_HASH_KEY}&{_raw}&HashIV={ECPAY_HASH_IV}"
+                        _raw = _up2.quote_plus(_raw).lower()
+                        _mac = _hl2.sha256(_raw.encode()).hexdigest().upper()
+                        _params["CheckMacValue"] = _mac
+                        _body = _up2.urlencode(_params).encode()
+                        _req = _ur2.Request(
+                            "https://payment.ecpay.com.tw/Cashier/QueryTradeInfo/V5",
+                            data=_body,
+                            headers={"Content-Type": "application/x-www-form-urlencoded"},
+                        )
+                        with _ur2.urlopen(_req, timeout=10) as _r:
+                            _resp = dict(_up2.parse_qsl(_r.read().decode()))
+                        _rtn = _resp.get("RtnCode", "0")
+                        print(f"   [補單] {trade_no} email={email} RtnCode={_rtn}")
+                        if _rtn != "1":
+                            continue
+                        # 付款成功 → 補開通
+                        _days  = _plan_days(plan)
+                        _plan2 = "yearly" if _days >= 365 else ("quarterly" if _days >= 90 else "monthly")
+                        from zoneinfo import ZoneInfo as _ZI3
+                        _expire = (datetime.now(_ZI3("Asia/Taipei")) + _dt2.timedelta(days=_days)).strftime("%Y-%m-%d")
+                        _conn2 = _db_conn()
+                        _existing = _conn2.execute("SELECT id FROM members WHERE email=?", (email,)).fetchone()
+                        if _existing:
+                            _conn2.execute(
+                                "UPDATE members SET plan=?, expire_at=?, is_active=1 WHERE email=?",
+                                (_plan2, _expire, email)
+                            )
+                        else:
+                            _conn2.execute(
+                                "INSERT INTO members (email, password, plan, expire_at) VALUES (?,?,?,?)",
+                                (email, _hash_pw(__import__("secrets").token_urlsafe(8)), _plan2, _expire)
+                            )
+                        _conn2.execute(
+                            "INSERT OR IGNORE INTO processed_orders (merchant_trade_no) VALUES (?)", (trade_no,)
+                        )
+                        _conn2.execute("DELETE FROM pending_orders WHERE merchant_trade_no=?", (trade_no,))
+                        _conn2.commit()
+                        _conn2.close()
+                        print(f"   [補單] ✅ 補開通成功：{email} → {_plan2} 到 {_expire}")
+                        try:
+                            _send_email(
+                                SMTP_USER,
+                                "【線上有位】補單通知",
+                                f"<div style='font-family:sans-serif;padding:24px'>"
+                                f"<h3 style='color:#e67e22'>【線上有位】補單通知</h3>"
+                                f"<p>以下訂單 webhook 未即時觸發，已由每日補單排程自動開通：</p>"
+                                f"<table style='font-size:14px'>"
+                                f"<tr><td style='color:#888;padding:4px 8px'>Email</td><td style='padding:4px 8px'>{email}</td></tr>"
+                                f"<tr><td style='color:#888;padding:4px 8px'>訂單號</td><td style='padding:4px 8px'>{trade_no}</td></tr>"
+                                f"<tr><td style='color:#888;padding:4px 8px'>方案</td><td style='padding:4px 8px'>{_plan2}</td></tr>"
+                                f"<tr><td style='color:#888;padding:4px 8px'>到期日</td><td style='padding:4px 8px'>{_expire}</td></tr>"
+                                f"</table></div>"
+                            )
+                        except Exception:
+                            pass
+                    except Exception as _e:
+                        print(f"   [補單] ❌ {trade_no} 查詢失敗：{_e}")
+            except Exception as _e:
+                print(f"   [補單] ❌ 排程失敗：{_e}")
+
         _bg_scheduler = BackgroundScheduler(timezone="Asia/Taipei")
-        _bg_scheduler.add_job(_run_opening_scan_job,    "cron",     hour=9,  minute=15, day_of_week="mon-fri")
+        _bg_scheduler.add_job(_run_opening_scan_job,    "cron",     hour=9,  minute=6,  day_of_week="mon-fri")
         _bg_scheduler.add_job(_run_opening_scan_job,    "cron",     hour=13, minute=45, day_of_week="mon-fri")  # 收盤後更新今日收盤價
         _bg_scheduler.add_job(_run_expire_notice_job,   "cron",     hour=9,  minute=0)
         _bg_scheduler.add_job(_reset_alert_triggered,   "cron",     hour=9,  minute=0,  day_of_week="mon-fri")
         _bg_scheduler.add_job(_run_intraday_alert_job,  "interval", minutes=5)
         _bg_scheduler.add_job(_clear_quote_cache,       "cron",     hour=9,  minute=0,  day_of_week="mon-fri")
+        _bg_scheduler.add_job(_run_補單_job,            "cron",     hour=8,  minute=0)
         _bg_scheduler.start()
-        print("   ✅ APScheduler 排程已啟動（開盤熱門股 09:15、盤中到價提醒每5分鐘、到期通知 09:00、報價快取清除 09:00）")
+        print("   ✅ APScheduler 排程已啟動（開盤熱門股 09:06、盤中到價提醒每5分鐘、到期通知 09:00、報價快取清除 09:00、補單 08:00）")
     except ImportError:
         print("   ⚠️ apscheduler 未安裝，選股排程請以 scheduler.py 獨立執行")
     except Exception as _sch_err:
@@ -1723,18 +1826,34 @@ def calc_breakout_signals(closes, highs, lows, volumes, support, resistance):
 import time as _time
 _analyze_cache: dict = {}   # key: "{stock_id}_{tf}_{YYYYMMDD}" → {"ts": float, "data": dict}
 
-_ANALYZE_CACHE_TTL = 86400  # key 含日期，當天只打一次 FinMind，隔天 key 不同自動失效
+def _get_analyze_cache_ttl() -> int:
+    """動態快取 TTL：盤中 15 分鐘，盤後到隔天 09:00 台北時間"""
+    from zoneinfo import ZoneInfo
+    import datetime as _dt
+    now = datetime.now(ZoneInfo("Asia/Taipei"))
+    weekday = now.weekday()  # 0=週一, 6=週日
+    hour = now.hour + now.minute / 60
+    is_trading = weekday < 5 and 9.0 <= hour < 13.5
+    if is_trading:
+        return 900  # 盤中 15 分鐘
+    # 盤後：計算到隔天 09:00（跳過週末）
+    next_open = now.replace(hour=9, minute=0, second=0, microsecond=0)
+    if hour >= 9:
+        next_open += _dt.timedelta(days=1)
+    while next_open.weekday() >= 5:
+        next_open += _dt.timedelta(days=1)
+    return max(60, int((next_open - now).total_seconds()))
 
 def _cache_get(key: str):
     entry = _analyze_cache.get(key)
-    if entry and (_time.time() - entry["ts"]) < _ANALYZE_CACHE_TTL:
+    if entry and (_time.time() - entry["ts"]) < _get_analyze_cache_ttl():
         return entry["data"]
     return None
 
 def _cache_set(key: str, data: dict):
     _analyze_cache[key] = {"ts": _time.time(), "data": data}
     if len(_analyze_cache) > 200:
-        cutoff = _time.time() - _ANALYZE_CACHE_TTL
+        cutoff = _time.time() - _get_analyze_cache_ttl()
         expired = [k for k, v in _analyze_cache.items() if v["ts"] < cutoff]
         for k in expired:
             _analyze_cache.pop(k, None)
@@ -2395,6 +2514,24 @@ def _do_analyze(stock_id: str, tf: str = "D",
     _cache_key = f"{stock_id.strip().upper()}_{tf.upper()}_{_taipei_today().replace('-', '')}"
     cached = _cache_get(_cache_key)
     if cached:
+        # 盤中即使快取命中，仍用最新報價覆蓋 price/change/change_pct
+        # 避免 _analyze_cache 15 分鐘內鎖住舊成交價
+        if _is_trading_session():
+            _sid_c = stock_id.strip().upper()
+            _qc_c  = _QUOTE_CACHE.get(_sid_c)
+            if not _qc_c or _qc_c.get("expires", 0) < _time_mod.time():
+                try:
+                    get_quote(_sid_c, user=None)
+                    _qc_c = _QUOTE_CACHE.get(_sid_c)
+                except Exception:
+                    _qc_c = None
+            if _qc_c and _qc_c.get("data", {}).get("price"):
+                _live = float(_qc_c["data"]["price"])
+                if _live > 0:
+                    cached = dict(cached)
+                    cached["price"]      = round(_live, 2)
+                    cached["change"]     = _qc_c["data"].get("change")
+                    cached["change_pct"] = _qc_c["data"].get("change_pct")
         return cached
 
     period, interval = PERIOD_MAP.get(tf.upper(), ("3y", "1d"))
@@ -2419,22 +2556,19 @@ def _do_analyze(stock_id: str, tf: str = "D",
     volumes    = df["Volume"].values.astype(float)
     price      = round(float(closes[-1]), 2)
 
-    # 用即時報價覆蓋現價（盤中 09:00~13:30 或盤後 13:30~隔天09:00 才覆蓋，盤前不動）
-    _now_tp = datetime.now(__import__("zoneinfo").ZoneInfo("Asia/Taipei"))
-    _is_market_open_or_after = (_now_tp.weekday() < 5 and _now_tp.hour >= 9)
-    if _is_market_open_or_after:
-        _sid = stock_id.strip().upper()
-        _qc = _QUOTE_CACHE.get(_sid)
-        if not _qc or _qc.get("expires", 0) < _time_mod.time():
-            try:
-                get_quote(_sid, user=None)
-                _qc = _QUOTE_CACHE.get(_sid)
-            except Exception:
-                _qc = None
-        if _qc and _qc.get("data", {}).get("price"):
-            _live_price = float(_qc["data"]["price"])
-            if _live_price > 0:
-                price = round(_live_price, 2)
+    # 一律用即時報價覆蓋現價（FinMind 最新成交價/收盤價，避免 Yahoo K 線延遲導致現價過期）
+    _sid = stock_id.strip().upper()
+    _qc = _QUOTE_CACHE.get(_sid)
+    if not _qc or _qc.get("expires", 0) < _time_mod.time():
+        try:
+            get_quote(_sid, user=None)
+            _qc = _QUOTE_CACHE.get(_sid)
+        except Exception:
+            _qc = None
+    if _qc and _qc.get("data", {}).get("price"):
+        _live_price = float(_qc["data"]["price"])
+        if _live_price > 0:
+            price = round(_live_price, 2)
 
     # 股名
     stock_name = get_stock_name(symbol)
@@ -3320,8 +3454,10 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
     # 3. FinMind TaiwanStockPrice（最終 fallback，盤後收盤價）
     if price_val is None:
         try:
+            from zoneinfo import ZoneInfo as _ZI
             from datetime import date as _d, timedelta as _td
-            start = (_d.today() - _td(days=5)).strftime("%Y-%m-%d")
+            _tw_today = datetime.now(_ZI("Asia/Taipei")).date()
+            start = (_tw_today - _td(days=5)).strftime("%Y-%m-%d")
             fm_url = (f"https://api.finmindtrade.com/api/v4/data"
                       f"?dataset=TaiwanStockPrice&data_id={code}"
                       f"&start_date={start}&token={FINMIND_TOKEN}")
@@ -3439,7 +3575,8 @@ def admin_grant(key: str = "", email: str = "", plan: str = "monthly", days: int
         raise HTTPException(status_code=400, detail="請填 email")
 
     from datetime import date, timedelta, datetime
-    new_expire = (datetime.today() + timedelta(days=days)).strftime("%Y-%m-%d")
+    from zoneinfo import ZoneInfo
+    new_expire = (datetime.now(ZoneInfo("Asia/Taipei")) + timedelta(days=days)).strftime("%Y-%m-%d")
 
     plan_label = {"monthly": "月費方案", "quarterly": "季費方案", "yearly": "年費方案", "free": "免費方案"}.get(plan, plan)
 
@@ -3503,8 +3640,8 @@ def admin_grant(key: str = "", email: str = "", plan: str = "monthly", days: int
 
 
 @app.post("/admin/reset-password")
-def admin_reset_password(key: str = "", email: str = ""):
-    """重設某用戶密碼，回傳新密碼"""
+def admin_reset_password(key: str = "", email: str = "", new_password: str = ""):
+    """重設某用戶密碼，可指定新密碼或自動產生"""
     _check_admin(key)
     email = email.strip().lower()
     conn = _db_conn()
@@ -3512,7 +3649,7 @@ def admin_reset_password(key: str = "", email: str = ""):
     if not row:
         conn.close()
         raise HTTPException(status_code=404, detail="找不到此用戶")
-    new_pw = secrets.token_urlsafe(8)
+    new_pw = new_password.strip() if new_password.strip() else secrets.token_urlsafe(8)
     conn.execute(
         "UPDATE members SET password=?, token_ver=token_ver+1 WHERE email=?",
         (_hash_pw(new_pw), email)
@@ -3585,7 +3722,7 @@ def admin_batch_upgrade(req: _BatchUpgradeReq, key: str = ""):
         email = raw_email.strip().lower()
         if not email:
             continue
-        new_expire = (datetime.today() + timedelta(days=req.days)).strftime("%Y-%m-%d")
+        new_expire = (datetime.now(ZoneInfo("Asia/Taipei")) + timedelta(days=req.days)).strftime("%Y-%m-%d")
         conn = _db_conn()
         try:
             row = conn.execute("SELECT id FROM members WHERE email=?", (email,)).fetchone()
@@ -3724,7 +3861,8 @@ def api_page_view():
 
 @app.get("/")
 def root():
-    return {"status": "ok", "app": "線上有位 API", "version": "1.3.0"}
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/picks")
 
 
 # ── 批次分析端點（關注頁用）──
@@ -4467,7 +4605,7 @@ def auth_me(user: dict = Depends(require_user)):
     is_expiring_soon = False
     if user["expire_at"] and plan != "free":
         try:
-            delta = (datetime.fromisoformat(user["expire_at"]) - datetime.today()).days
+            delta = (datetime.fromisoformat(user["expire_at"]) - datetime.now(ZoneInfo("Asia/Taipei")).replace(tzinfo=None)).days
             days_left = max(0, delta)
             is_expiring_soon = 0 <= days_left <= 3
         except Exception:
@@ -4942,7 +5080,7 @@ async def webhook_ecpay(request: Request):
         )
     else:
         # 新用戶：hashed_password 已從 pending_orders 取出（或隨機備用）
-        new_expire = (datetime.today() + timedelta(days=days)).strftime("%Y-%m-%d")
+        new_expire = (datetime.now(ZoneInfo("Asia/Taipei")) + timedelta(days=days)).strftime("%Y-%m-%d")
         try:
             conn.execute(
                 "INSERT INTO members (email, password, plan, expire_at) VALUES (?, ?, ?, ?)",
@@ -6211,6 +6349,7 @@ def picks_page():
 <meta property="og:url" content="{BACKEND_URL}/picks">
 <meta property="og:type" content="website">
 <script type="application/ld+json">{json_ld}</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739" crossorigin="anonymous"></script>
 <style>
 *{{box-sizing:border-box;margin:0;padding:0}}
 body{{background:#f5f0e8;color:#333;font-family:-apple-system,'Noto Sans TC',sans-serif;min-height:100vh;padding:20px 16px 60px}}
@@ -6254,6 +6393,14 @@ td{{padding:12px 12px;vertical-align:middle}}
     <strong>篩選條件：</strong>
     均線金叉（MA5穿MA20 或 MA20穿MA60）或 KD金叉 ＋ 量能放大（近5日均量 ≥ 20日均量×1.5）＋ MACD DIF &gt; 0
   </div>
+  <!-- AdSense 廣告 -->
+  <ins class="adsbygoogle"
+       style="display:block;margin:24px 0"
+       data-ad-client="ca-pub-1768270548115739"
+       data-ad-slot="auto"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
   <p class="disclaimer">⚠️ 本頁面資料僅供參考，不構成任何買賣建議。投資有風險，請自行評估。資料來源：FinMind / TWSE</p>
 </div>
 </body>
@@ -6418,6 +6565,7 @@ def rankings():
 <title>台股排行榜 漲幅/跌幅/成交量 Top 20 — 線上有位</title>
 <meta name="description" content="台股今日漲幅榜、跌幅榜、成交量榜 Top 20，資料來源 FinMind，每15分鐘更新">
 <script type="application/ld+json">{json_ld}</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739" crossorigin="anonymous"></script>
 <style>
 *{{box-sizing:border-box;margin:0;padding:0}}
 body{{background:#f5f0e8;color:#333;font-family:-apple-system,'Noto Sans TC',sans-serif;min-height:100vh;padding:20px 16px 60px}}
@@ -6484,6 +6632,14 @@ td{{padding:11px 12px;vertical-align:middle}}
     </table>
   </div>
   <p class="disclaimer">⚠️ 本頁面資料僅供參考，不構成任何買賣建議。投資有風險，請自行評估。<br>資料來源：FinMind</p>
+  <!-- AdSense 廣告 -->
+  <ins class="adsbygoogle"
+       style="display:block;margin:24px 0"
+       data-ad-client="ca-pub-1768270548115739"
+       data-ad-slot="auto"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
 </div>
 <script>
 function showTab(name,btn){{
