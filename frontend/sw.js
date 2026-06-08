@@ -3,10 +3,14 @@ self.addEventListener('push', function(event) {
   try { data = event.data.json(); } catch(e) {}
   const title   = data.title || '線上有位';
   const options = {
-    body:  data.body || '',
-    icon:  '/icon-192.png',
-    badge: '/icon-192.png',
-    data:  { url: data.url || '/' },
+    body:    data.body || '',
+    icon:    '/icon-192.png',
+    badge:   '/icon-192.png',
+    data:    { url: data.url || '/' },
+    silent:  false,
+    vibrate: [200, 100, 200],
+    tag:     data.tag || 'price-alert',
+    renotify: true,
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });
