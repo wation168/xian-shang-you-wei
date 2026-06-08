@@ -386,30 +386,106 @@ async function loadMembers(){
     const planMap={free:'免費',monthly:'月費',quarterly:'季費',yearly:'年費',test:'測試'};
     const fmtDate=s=>{if(!s)return'—';return String(s).slice(0,10);};
     const fmtDT=s=>{if(!s)return'—';return String(s).slice(0,16).replace('T',' ');};
-    el.innerHTML=members.map(m=>{
-      const isPaid=m.plan!=='free'&&m.is_active;
-      const isExpired=m.plan!=='free'&&!m.is_active;
-      const statusClass=isExpired?'status-expired':isPaid?'status-active':'status-free';
-      const statusLabel=isExpired?'已到期':isPaid?'付費中':'免費';
-      const planLabel=planMap[m.plan]||m.plan;
-      return `<div class="mem-card">
-        <div class="mem-head">
-          <span class="mem-id">#${m.id||'—'}</span>
-          <span class="mem-email">${m.email}</span>
-          <span class="mem-status ${statusClass}">${statusLabel}</span>
+    const renderList=(list)=>{
+      el.innerHTML=`
+        <div class="search-row" style="margin-bottom:12px">
+          <input id="memSearch" placeholder="🔍 搜尋 Email..." oninput="filterMembers()" style="width:100%;padding:9px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;outline:none"/>
         </div>
-        <div class="mem-meta">
-          <span>方案：${planLabel}</span>
-          <span>到期：${fmtDate(m.expire_at)}</span>
-          <span>建立：${fmtDate(m.created_at)}</span>
-          <span>登入：${fmtDT(m.last_login)}</span>
-        </div>
-        <div class="mem-actions">
-          <button class="mem-btn" onclick="quickReset('${m.email}')">🔐 重設密碼</button>
-          <button class="mem-btn danger" onclick="doDelete('${m.email}')">🗑 刪除</button>
-        </div>
-      </div>`;
-    }).join('');
+        <div id="memList">`+list.map(m=>{
+        const isPaid=m.plan!=='free'&&m.is_active;
+        const isExpired=m.plan!=='free'&&!m.is_active;
+        const statusClass=isExpired?'status-expired':isPaid?'status-active':'status-free';
+        const statusLabel=isExpired?'已到期':isPaid?'付費中':'免費';
+        const planLabel=planMap[m.plan]||m.plan;
+        return `<div class="mem-card" data-email="${m.email}">
+          <div class="mem-head">
+            <span class="mem-id">#${m.id||'—'}</span>
+            <span class="mem-email">${m.email}</span>
+            <span class="mem-status ${statusClass}">${statusLabel}</span>
+          </div>
+          <div class="mem-meta">
+            <span>方案：${planLabel}</span>
+            <span>到期：${fmtDate(m.expire_at)}</span>
+            <span>建立：${fmtDate(m.created_at)}</span>
+            <span>登入：${fmtDT(m.last_login)}</span>
+          </div>
+          <div class="mem-actions">
+            <button class="mem-btn" onclick="togglePwdBox('${m.email}')">🔐 改密碼</button>
+            <button class="mem-btn danger" onclick="doDelete('${m.email}')">🗑 刪除</button>
+          </div>
+          <div id="pwd-box-${m.email.replace(/[@.]/g,'-')}" style="display:none;margin-top:8px;display:none">
+            <div style="display:flex;gap:6px;align-items:center">
+              <input id="pwd-input-${m.email.replace(/[@.]/g,'-')}" type="text" placeholder="輸入新密碼（留空則自動產生）" style="flex:1;padding:8px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--bg);color:var(--text);font-size:13px;outline:none"/>
+              <button class="inline-btn" onclick="doChangePwd('${m.email}')">確認</button>
+            </div>
+            <div id="pwd-result-${m.email.replace(/[@.]/g,'-')}" style="margin-top:6px;font-size:13px"></div>
+          </div>
+        </div>`;
+      }).join('')+`</div>`;
+    };
+    window._allMembers=members;
+    window.filterMembers=function(){
+      const q=document.getElementById('memSearch').value.trim().toLowerCase();
+      const filtered=q?window._allMembers.filter(m=>m.email.toLowerCase().includes(q)):window._allMembers;
+      document.getElementById('memList').innerHTML=filtered.map(m=>{
+        const isPaid=m.plan!=='free'&&m.is_active;
+        const isExpired=m.plan!=='free'&&!m.is_active;
+        const statusClass=isExpired?'status-expired':isPaid?'status-active':'status-free';
+        const statusLabel=isExpired?'已到期':isPaid?'付費中':'免費';
+        const planLabel=planMap[m.plan]||m.plan;
+        return `<div class="mem-card" data-email="${m.email}">
+          <div class="mem-head">
+            <span class="mem-id">#${m.id||'—'}</span>
+            <span class="mem-email">${m.email}</span>
+            <span class="mem-status ${statusClass}">${statusLabel}</span>
+          </div>
+          <div class="mem-meta">
+            <span>方案：${planLabel}</span>
+            <span>到期：${fmtDate(m.expire_at)}</span>
+            <span>建立：${fmtDate(m.created_at)}</span>
+            <span>登入：${fmtDT(m.last_login)}</span>
+          </div>
+          <div class="mem-actions">
+            <button class="mem-btn" onclick="togglePwdBox('${m.email}')">🔐 改密碼</button>
+            <button class="mem-btn danger" onclick="doDelete('${m.email}')">🗑 刪除</button>
+          </div>
+          <div id="pwd-box-${m.email.replace(/[@.]/g,'-')}" style="display:none">
+            <div style="display:flex;gap:6px;align-items:center;margin-top:8px">
+              <input id="pwd-input-${m.email.replace(/[@.]/g,'-')}" type="text" placeholder="輸入新密碼（留空則自動產生）" style="flex:1;padding:8px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--bg);color:var(--text);font-size:13px;outline:none"/>
+              <button class="inline-btn" onclick="doChangePwd('${m.email}')">確認</button>
+            </div>
+            <div id="pwd-result-${m.email.replace(/[@.]/g,'-')}" style="margin-top:6px;font-size:13px"></div>
+          </div>
+        </div>`;
+      }).join('');
+    };
+    window.togglePwdBox=function(email){
+      const key=email.replace(/[@.]/g,'-');
+      const box=document.getElementById('pwd-box-'+key);
+      box.style.display=box.style.display==='none'?'block':'none';
+    };
+    window.doChangePwd=async function(email){
+      const key=email.replace(/[@.]/g,'-');
+      const inp=document.getElementById('pwd-input-'+key);
+      const res=document.getElementById('pwd-result-'+key);
+      const newPwd=inp.value.trim();
+      res.textContent='處理中...';
+      try{
+        const url=newPwd
+          ?`${API}/admin/reset-password?key=${ADMIN_KEY}&email=${encodeURIComponent(email)}&new_password=${encodeURIComponent(newPwd)}`
+          :`${API}/admin/reset-password?key=${ADMIN_KEY}&email=${encodeURIComponent(email)}`;
+        const r=await fetch(url,{method:'POST'});
+        const d=await r.json();
+        if(d.new_password){
+          res.innerHTML=`<span style="color:var(--green)">✅ 密碼已更新：<b>${d.new_password}</b></span>`;
+        } else {
+          res.innerHTML=`<span style="color:var(--green)">✅ ${d.message||'密碼已更新'}</span>`;
+        }
+      }catch(e){
+        res.innerHTML=`<span style="color:var(--up)">❌ 失敗</span>`;
+      }
+    };
+    renderList(members);
   }catch(e){
     el.innerHTML='<div style="color:var(--up);font-size:13px">載入失敗，請確認後端連線</div>';
   }
