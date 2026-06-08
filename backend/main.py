@@ -6655,3 +6655,339 @@ function showTab(name,btn){{
     c["data"] = html
     c["expires"] = now + 900
     return HTMLResponse(html)
+
+
+# ─────────────────────────────────────────────
+# 定期定額：產生授權網址
+# ─────────────────────────────────────────────
+@app.post("/create_order_recurring")
+async def create_order_recurring(request: Request):
+    """
+    前端呼叫此端點，產生綠界定期定額授權頁面（首次刷卡授權）
+    Body: { email, plan, password }
+    plan: monthly / quarterly / yearly
+    """
+    import urllib.parse, hashlib, time as _t
+
+    body = await request.json()
+    email    = body.get("email", "").strip().lower()
+    plan     = body.get("plan", "monthly")
+    password = body.get("password", "").strip()
+
+    if not email or not _re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
+        raise HTTPException(status_code=400, detail="Email 格式不正確")
+
+    plan_info = {
+        "monthly":   {"name": "線上有位月費訂閱", "amount": 399,  "days": 30,  "freq": "Monthly",   "exec_times": 99},
+        "quarterly": {"name": "線上有位季費訂閱", "amount": 999,  "days": 90,  "freq": "Quarterly",  "exec_times": 99},
+        "yearly":    {"name": "線上有位年費訂閱", "amount": 3688, "days": 365, "freq": "Annually",   "exec_times": 99},
+    }
+    if plan not in plan_info:
+        raise HTTPException(status_code=400, detail="無效方案")
+
+    info = plan_info[plan]
+    trade_no = f"XYWR{int(_t.time())}{secrets.token_hex(3).upper()}"
+
+    # 首次扣款日期（今天）
+    from zoneinfo import ZoneInfo
+    today_str = datetime.now(ZoneInfo("Asia/Taipei")).strftime("%Y/%m/%d")
+
+    params = {
+        "MerchantID":          ECPAY_MERCHANT_ID,
+        "MerchantTradeNo":     trade_no,
+        "MerchantTradeDate":   _taipei_now_str("%Y/%m/%d %H:%M:%S"),
+        "ServerURL":           f"{BACKEND_URL}/webhook/ecpay_recurring",
+        "ClientBackURL":       f"{FRONTEND_URL}/landing.html?pay=done",
+        "TotalAmount":         str(info["amount"]),
+        "TradeDesc":           urllib.parse.quote("線上有位定期訂閱"),
+        "ItemName":            info["name"],
+        "PeriodAmount":        str(info["amount"]),
+        "PeriodType":          info["freq"],
+        "Frequency":           "1",
+        "ExecTimes":           str(info["exec_times"]),
+        "PeriodReturnURL":     f"{BACKEND_URL}/webhook/ecpay_recurring",
+        "CustomField1":        email,
+    }
+
+    # 暫存密碼
+    if password and len(password) >= 6:
+        _po_conn = _db_conn()
+        _po_conn.execute(
+            "INSERT OR REPLACE INTO pending_orders "
+            "(merchant_trade_no, email, hashed_password, plan, invoice_type, invoice_carrier) VALUES (?, ?, ?, ?, ?, ?)",
+            (trade_no, email, _hash_pw(password), plan, "", "")
+        )
+        _po_conn.commit()
+        _po_conn.close()
+
+    # CheckMacValue
+    sorted_params = sorted(params.items(), key=lambda x: x[0].lower())
+    raw = "&".join(f"{k}={v}" for k, v in sorted_params)
+    raw = f"HashKey={ECPAY_HASH_KEY}&{raw}&HashIV={ECPAY_HASH_IV}"
+    raw = urllib.parse.quote_plus(raw).lower()
+    check_mac = hashlib.sha256(raw.encode()).hexdigest().upper()
+    params["CheckMacValue"] = check_mac
+
+    form_html = f"""<!DOCTYPE html><html><body>
+<form id="f" method="POST" action="https://payment.ecpay.com.tw/Cashier/CreditCheckOut">
+{''.join(f'<input type="hidden" name="{k}" value="{v}"/>' for k,v in params.items())}
+</form>
+<script>document.getElementById('f').submit();</script>
+</body></html>"""
+
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(content=form_html)
+
+
+# ─────────────────────────────────────────────
+# 定期定額：定期扣款 Webhook（每期自動續約）
+# ─────────────────────────────────────────────
+@app.post("/webhook/ecpay_recurring")
+async def webhook_ecpay_recurring(request: Request):
+    """
+    綠界每期扣款成功後打過來，自動幫會員延長到期日
+    """
+    body = await request.form()
+    params = dict(body)
+    print(f"[定期定額 Webhook] {params}")
+
+    if params.get("MerchantID") != ECPAY_MERCHANT_ID:
+        print(f"[定期定額] ❌ MerchantID 不符")
+        return JSONResponse(content="0|Error")
+
+    rtn_code = params.get("RtnCode", "0")
+    if rtn_code != "1":
+        print(f"[定期定額] 非成功狀態 RtnCode={rtn_code}，略過")
+        return JSONResponse(content="1|OK")
+
+    email      = params.get("CustomField1", "").strip().lower()
+    trade_no_w = params.get("MerchantTradeNo", "")
+    exec_log   = params.get("ExecLog", "")        # 第幾次扣款
+    amount     = params.get("Amount", "0")
+    item_name  = params.get("ItemName", "")
+
+    if not email:
+        print("[定期定額] ❌ email 為空")
+        return JSONResponse(content="1|OK")
+
+    # 冪等保護
+    _tmp = _db_conn()
+    _already = _tmp.execute(
+        "SELECT 1 FROM processed_orders WHERE merchant_trade_no=?",
+        (f"R_{trade_no_w}_{exec_log}",)
+    ).fetchone()
+    _po = _tmp.execute(
+        "SELECT hashed_password FROM pending_orders WHERE merchant_trade_no=?", (trade_no_w,)
+    ).fetchone()
+    _tmp.close()
+
+    if _already:
+        print(f"[定期定額] ⚠️ 重複 Webhook {trade_no_w} exec={exec_log}")
+        return JSONResponse(content="1|OK")
+
+    # 判斷天數
+    days = _plan_days(item_name)
+    plan = "yearly" if days >= 365 else ("quarterly" if days >= 90 else "monthly")
+    plan_label = {"monthly": "月費方案", "quarterly": "季費方案", "yearly": "年費方案"}.get(plan, plan)
+
+    conn = _db_conn()
+    row = conn.execute("SELECT * FROM members WHERE email=?", (email,)).fetchone()
+
+    if row:
+        # 既有會員：延長到期日
+        current_expire = row["expire_at"] or _date_cls.today().isoformat()
+        base = max(current_expire, _date_cls.today().isoformat())
+        new_expire = (datetime.fromisoformat(base) + timedelta(days=days)).strftime("%Y-%m-%d")
+        conn.execute(
+            "UPDATE members SET plan=?, expire_at=?, token_ver=token_ver+1 WHERE email=?",
+            (plan, new_expire, email)
+        )
+        conn.commit()
+        conn.close()
+        # 寄續約通知信
+        _send_email(email, "【線上有位】自動續約成功",
+            f"""<div style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px">
+              <h1 style="font-size:24px;color:#1D9E75;margin:0 0 8px">線上<span style="color:#333">有位</span></h1>
+              <p style="color:#666;font-size:13px;margin:0 0 24px">台股技術分析輔助系統</p>
+              <div style="background:#f0fdf4;border-radius:12px;padding:24px;border:1px solid #86efac">
+                <h2 style="margin:0 0 16px;color:#166534">✅ 自動續約成功</h2>
+                <p style="color:#555;margin:0 0 16px">您的{plan_label}已自動續約，感謝您持續支持！</p>
+                <table style="width:100%;border-collapse:collapse">
+                  <tr><td style="padding:8px 0;color:#888;font-size:13px">方案</td><td style="padding:8px 0;font-weight:700">{plan_label}</td></tr>
+                  <tr><td style="padding:8px 0;color:#888;font-size:13px">扣款金額</td><td style="padding:8px 0;font-weight:700">NT${amount}</td></tr>
+                  <tr><td style="padding:8px 0;color:#888;font-size:13px">新到期日</td><td style="padding:8px 0;font-weight:700">{new_expire}</td></tr>
+                </table>
+              </div>
+              <div style="margin-top:24px;text-align:center">
+                <a href="https://softglow-ai.com" style="background:#1D9E75;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:700">立即使用</a>
+              </div>
+              <p style="margin-top:24px;font-size:12px;color:#9ca3af;text-align:center">如需取消訂閱，請聯繫客服：watione@yahoo.com.tw</p>
+            </div>"""
+        )
+    else:
+        # 首次授權成功（第一期）：建立帳號
+        hashed_password = _po["hashed_password"] if _po else _hash_pw(secrets.token_urlsafe(8))
+        new_expire = (datetime.now(ZoneInfo("Asia/Taipei")) + timedelta(days=days)).strftime("%Y-%m-%d")
+        try:
+            conn.execute(
+                "INSERT INTO members (email, password, plan, expire_at) VALUES (?, ?, ?, ?)",
+                (email, hashed_password, plan, new_expire)
+            )
+            conn.commit()
+        except Exception as e:
+            print(f"[定期定額] 建立帳號失敗: {e}")
+            conn.close()
+            return JSONResponse(content="1|OK")
+        conn.close()
+        _send_email(email, "【線上有位】歡迎！您的帳號已開通（定期訂閱）",
+            f"""<div style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px">
+              <h1 style="font-size:24px;color:#1D9E75;margin:0 0 8px">線上<span style="color:#333">有位</span></h1>
+              <div style="background:#f0fdf4;border-radius:12px;padding:24px;border:1px solid #86efac;margin-top:16px">
+                <h2 style="margin:0 0 16px;color:#166534">🎉 帳號已開通（定期訂閱）</h2>
+                <table style="width:100%;border-collapse:collapse">
+                  <tr><td style="padding:8px 0;color:#888;font-size:13px">帳號</td><td style="padding:8px 0;font-weight:700">{email}</td></tr>
+                  <tr><td style="padding:8px 0;color:#888;font-size:13px">密碼</td><td style="padding:8px 0;font-weight:700">您訂購時自行設定的密碼</td></tr>
+                  <tr><td style="padding:8px 0;color:#888;font-size:13px">方案</td><td style="padding:8px 0;font-weight:700">{plan_label}</td></tr>
+                  <tr><td style="padding:8px 0;color:#888;font-size:13px">到期日</td><td style="padding:8px 0;font-weight:700">{new_expire}</td></tr>
+                </table>
+              </div>
+              <div style="margin-top:24px;text-align:center">
+                <a href="https://softglow-ai.com" style="background:#1D9E75;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:700">立即登入使用</a>
+              </div>
+            </div>"""
+        )
+
+    # 記錄已處理
+    _rec = _db_conn()
+    _rec.execute("INSERT OR IGNORE INTO processed_orders (merchant_trade_no) VALUES (?)",
+                 (f"R_{trade_no_w}_{exec_log}",))
+    _rec.commit()
+    _rec.close()
+
+    # 管理員通知
+    try:
+        _send_email("watione@yahoo.com.tw", f"【定期定額】{email} 扣款成功 NT${amount}",
+            f"<p>定期定額扣款成功</p><p>Email: {email}<br>方案: {plan_label}<br>金額: NT${amount}<br>次數: {exec_log}</p>")
+    except Exception:
+        pass
+
+    return JSONResponse(content="1|OK")
+
+
+# ─────────────────────────────────────────────
+# 取消定期定額
+# ─────────────────────────────────────────────
+@app.post("/cancel_recurring")
+async def cancel_recurring(request: Request):
+    """
+    用戶登入後呼叫，取消綠界定期定額
+    需要 Authorization: Bearer <token>
+    """
+    import urllib.parse, hashlib
+
+    # 驗證登入
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="請先登入")
+    token = auth_header[7:]
+
+    # 從 token 取出 email（沿用現有 JWT 驗證邏輯）
+    try:
+        payload = _jwt_verify(token)
+        if not payload:
+            raise ValueError("invalid")
+        email = payload.get("sub", "").strip().lower()
+    except Exception:
+        raise HTTPException(status_code=401, detail="登入已過期，請重新登入")
+
+    if not email:
+        raise HTTPException(status_code=401, detail="無效 token")
+
+    # 從 DB 找最近一筆定期定額訂單編號
+    conn = _db_conn()
+    row = conn.execute(
+        "SELECT merchant_trade_no FROM processed_orders "
+        "WHERE merchant_trade_no LIKE 'XYWR%' "
+        "ORDER BY rowid DESC LIMIT 1"
+    ).fetchone()
+
+    # 也從 members 查，確認是付費用戶
+    member = conn.execute("SELECT * FROM members WHERE email=?", (email,)).fetchone()
+    conn.close()
+
+    if not member or member["plan"] == "free" or not member["is_active"]:
+        raise HTTPException(status_code=400, detail="您目前沒有有效的定期訂閱")
+
+    # 找該 email 的定期定額訂單
+    conn2 = _db_conn()
+    row2 = conn2.execute(
+        "SELECT merchant_trade_no FROM processed_orders "
+        "WHERE merchant_trade_no LIKE 'XYWR%' AND merchant_trade_no IN ("
+        "  SELECT DISTINCT SUBSTR(merchant_trade_no, 1, INSTR(merchant_trade_no||'_','_')-1) "
+        "  FROM processed_orders WHERE merchant_trade_no LIKE 'R_XYWR%'"
+        ") ORDER BY rowid DESC LIMIT 1"
+    ).fetchone()
+    conn2.close()
+
+    # 直接用 email 找 pending_orders 或 processed_orders 裡的 XYWR 訂單
+    conn3 = _db_conn()
+    row3 = conn3.execute(
+        "SELECT merchant_trade_no FROM pending_orders WHERE email=? AND merchant_trade_no LIKE 'XYWR%' ORDER BY rowid DESC LIMIT 1",
+        (email,)
+    ).fetchone()
+    conn3.close()
+
+    merchant_trade_no = (row3["merchant_trade_no"] if row3 else None)
+
+    if not merchant_trade_no:
+        # 找不到訂單號，引導客服處理
+        raise HTTPException(status_code=400, detail="找不到定期訂閱訂單，請聯繫客服 watione@yahoo.com.tw 協助取消")
+
+    # 呼叫綠界 CreditCardPeriodAction API 終止
+    action_params = {
+        "MerchantID":      ECPAY_MERCHANT_ID,
+        "MerchantTradeNo": merchant_trade_no,
+        "Action":          "Cancel",
+    }
+    sorted_p = sorted(action_params.items(), key=lambda x: x[0].lower())
+    raw = "&".join(f"{k}={v}" for k, v in sorted_p)
+    raw = f"HashKey={ECPAY_HASH_KEY}&{raw}&HashIV={ECPAY_HASH_IV}"
+    raw = urllib.parse.quote_plus(raw).lower()
+    check_mac = hashlib.sha256(raw.encode()).hexdigest().upper()
+    action_params["CheckMacValue"] = check_mac
+
+    import httpx
+    try:
+        async with httpx.AsyncClient(timeout=15) as client:
+            resp = await client.post(
+                "https://payment.ecpay.com.tw/Cashier/CreditCardPeriodAction",
+                data=action_params
+            )
+        result = resp.text
+        print(f"[取消定期定額] {email} 結果: {result}")
+        if "RtnCode=1" in result or "OK" in result.upper():
+            _send_email(email, "【線上有位】定期訂閱已取消",
+                f"""<div style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px">
+                  <h1 style="font-size:24px;color:#1D9E75;margin:0 0 8px">線上<span style="color:#333">有位</span></h1>
+                  <div style="background:#fef2f2;border-radius:12px;padding:24px;border:1px solid #fca5a5;margin-top:16px">
+                    <h2 style="margin:0 0 12px;color:#991b1b">已取消定期訂閱</h2>
+                    <p style="color:#555;margin:0 0 12px">您的定期訂閱已成功取消，不會再自動扣款。</p>
+                    <p style="color:#555;margin:0;font-size:13px">本期剩餘天數（至 {member['expire_at']}）仍可繼續使用。</p>
+                  </div>
+                  <p style="margin-top:24px;font-size:13px;color:#9ca3af;text-align:center">
+                    如有問題請聯繫客服：watione@yahoo.com.tw
+                  </p>
+                </div>"""
+            )
+            # 管理員通知
+            try:
+                _send_email("watione@yahoo.com.tw", f"【取消訂閱】{email}",
+                    f"<p>{email} 已取消定期訂閱</p><p>到期日：{member['expire_at']}</p>")
+            except Exception:
+                pass
+            return JSONResponse(content={"ok": True, "msg": "已成功取消定期訂閱"})
+        else:
+            print(f"[取消定期定額] 綠界回應異常: {result}")
+            raise HTTPException(status_code=500, detail="取消失敗，請聯繫客服 watione@yahoo.com.tw")
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=500, detail="連線綠界逾時，請稍後再試")

@@ -3892,7 +3892,7 @@ async function doUpgrade(plan, btn){
   btn.disabled = true;
   btn.textContent = '建立訂單中…';
   try{
-    const r = await fetch(`${getAPI()}/create_order`, {
+    const r = await fetch(`${getAPI()}/create_order_recurring`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: _authUser.email, plan, password: '' }),
@@ -3911,6 +3911,33 @@ async function doUpgrade(plan, btn){
     alert('連線失敗，請稍後再試');
   } finally {
     btn.innerHTML = origInner; btn.disabled = false;
+  }
+}
+
+async function doCancelRecurring(btn){
+  if(!_authUser) return;
+  if(!confirm('確定要取消定期訂閱嗎？\n\n取消後本期剩餘天數仍可繼續使用，到期後不再自動續扣。')) return;
+  const origText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '處理中…';
+  try{
+    const token = localStorage.getItem('xyw_token');
+    const r = await fetch(`${getAPI()}/cancel_recurring`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      signal: AbortSignal.timeout(15000)
+    });
+    const data = await r.json();
+    if(r.ok){
+      alert('✅ 已成功取消定期訂閱。\n本期剩餘天數仍可繼續使用。');
+      btn.style.display = 'none';
+    } else {
+      alert(data.detail || '取消失敗，請聯繫客服 watione@yahoo.com.tw');
+      btn.disabled = false; btn.textContent = origText;
+    }
+  } catch(e){
+    alert('連線失敗，請聯繫客服 watione@yahoo.com.tw');
+    btn.disabled = false; btn.textContent = origText;
   }
 }
 
@@ -4517,6 +4544,7 @@ async function showMyPage(){
         <div style="font-size:13px;font-weight:600;margin-bottom:10px">帳號設定</div>
         <button onclick="openChangePwdModal()" style="width:100%;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left">🔐 更改密碼</button>
         <button onclick="showPushGuideModal()" style="width:100%;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left;margin-top:6px">🔔 通知與聲音設定</button>
+        ${isPaid ? `<button onclick="doCancelRecurring(this)" style="width:100%;padding:10px;background:transparent;color:#e05555;border:1px solid #e05555;border-radius:8px;font-size:13px;cursor:pointer;text-align:left;margin-top:6px">❌ 取消定期訂閱</button>` : ''}
         <button onclick="doLogout()" style="width:100%;padding:10px;background:transparent;color:#e05555;border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left;margin-top:6px">登出</button>
       </div>
       <div class="member-card" style="margin-top:0">
