@@ -714,6 +714,7 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
         <div class="deep-card" id="dcard-macd"><div class="deep-lbl">📈 MACD</div><div id="d-macd-tag"></div><div class="ind-nums" id="d-macd-nums"></div><div class="deep-sub" id="d-macd-sub"></div></div>
         <div class="deep-card full" id="dcard-vol"><div class="deep-lbl">🔊 量能分析</div><div id="d-vol-tag"></div><div class="deep-sub" id="d-vol-sub"></div></div>
         <div class="deep-card full" id="dcard-inst"><div class="deep-lbl">🏦 法人動向</div><div id="d-inst-rows"><div style="font-size:11px;color:var(--text3)">載入中…</div></div></div>
+        <div class="deep-card full" id="dcard-fund"><div class="deep-lbl">📊 基本面</div><div id="d-fund-rows"><div style="font-size:11px;color:var(--text3)">載入中…</div></div></div>
         <div class="deep-card full" id="dcard-risk"><div class="deep-lbl">⚡ 風險提示</div><div class="risk-items" id="d-risk-list"></div></div>
       </div>
     </div>
@@ -2084,7 +2085,44 @@ function renderAnalysisCards(d) {
     set('d-inst-rows', `<div style="font-size:11px;color:var(--text3)">資料更新中…</div>`);
   }
 
-  // 7. 風險提示
+  // 7. 基本面
+  const per = d.per, pbr = d.pbr, dy = d.dividend_yield, eps = d.eps_ttm, yoy = d.eps_yoy;
+  const hasAnyFund = per || pbr || dy || eps !== null && eps !== undefined;
+  if (hasAnyFund) {
+    const dyColor = dy >= 5 ? 'var(--up)' : dy >= 3 ? 'var(--amber)' : 'var(--text2)';
+    const epsColor = eps > 0 ? '#4ade80' : eps < 0 ? 'var(--up)' : 'var(--text2)';
+    const yoyColor = yoy > 20 ? '#4ade80' : yoy > 0 ? 'var(--amber)' : yoy < 0 ? 'var(--up)' : 'var(--text2)';
+    const yoyStr = yoy !== null && yoy !== undefined
+      ? `<span style="font-size:11px;color:${yoyColor};font-weight:600">YoY ${yoy > 0 ? '+' : ''}${yoy}%</span>`
+      : '';
+    set('d-fund-rows',
+      `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">
+        <div style="text-align:center">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:3px">本益比 PER</div>
+          <div style="font-size:16px;font-weight:700;color:var(--text)">${per ? per + 'x' : '—'}</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:3px">殖利率</div>
+          <div style="font-size:16px;font-weight:700;color:${dy ? dyColor : 'var(--text3)'}">${dy ? dy + '%' : '—'}</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:3px">股價淨值比</div>
+          <div style="font-size:16px;font-weight:700;color:var(--text)">${pbr ? pbr + 'x' : '—'}</div>
+        </div>
+      </div>
+      <div style="background:var(--bg);border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:3px">近四季累計 EPS</div>
+          <div style="font-size:20px;font-weight:800;color:${epsColor}">${eps !== null && eps !== undefined ? '$' + eps : '—'}</div>
+        </div>
+        <div style="text-align:right">${yoyStr}</div>
+      </div>`
+    );
+  } else {
+    set('d-fund-rows', `<div style="font-size:11px;color:var(--text3)">資料更新中…</div>`);
+  }
+
+  // 8. 風險提示
   const riskHtml = (risks.length ? risks : [{ text: '無明顯風險警示', level: 'low' }]).map(r => {
     const dotCls = typeof r === 'object' ? (r.level === 'high' ? 'bad' : r.level === 'low' ? 'ok' : 'warn') : 'warn';
     const txt    = typeof r === 'object' ? r.text : r;
@@ -4202,6 +4240,33 @@ let VAPID_PUBLIC_KEY = '';
   } catch(e){}
 })();
 
+async function saveNickname(){
+  const inp = document.getElementById('nicknameInput');
+  const msg = document.getElementById('nicknameMsg');
+  if(!inp || !msg) return;
+  const val = inp.value.trim();
+  if(!val){ msg.style.color='#f87171'; msg.textContent='請輸入暱稱'; return; }
+  try{
+    const r = await fetch(getAPI()+'/auth/nickname', {
+      method:'POST',
+      headers:{'Content-Type':'application/json', ..._authHeaders()},
+      body: JSON.stringify({nickname: val})
+    });
+    const d = await r.json();
+    if(d.ok){
+      localStorage.setItem('nickname', d.nickname);
+      msg.style.color='var(--green)';
+      msg.textContent='✅ 儲存成功，聊天室將使用新名稱';
+    } else {
+      msg.style.color='#f87171';
+      msg.textContent='❌ '+(d.detail||'儲存失敗');
+    }
+  } catch(e){
+    msg.style.color='#f87171';
+    msg.textContent='❌ 網路錯誤';
+  }
+}
+
 async function doLogout(){
   try{
     await fetch(`${getAPI()}/auth/logout`, { method: 'POST', headers: _authHeaders() });
@@ -4352,12 +4417,29 @@ async function showPicksPage(){
     const items = j.data || [];
     const updatedAt = j.updated_at ? `<div style="font-size:11px;color:var(--text3);margin-bottom:12px">更新時間：${j.updated_at}</div>` : '';
 
+    const deepBanner = `
+      <div onclick="window.open('${getAPI()}/deep-analysis','_blank')"
+        style="background:linear-gradient(135deg,#1a3a2a 0%,#0f2d1f 100%);border-radius:12px;padding:14px 16px;margin-bottom:14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border:1.5px solid #2d6a4f;box-shadow:0 2px 12px rgba(29,158,117,0.18)">
+        <div>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="font-size:15px;font-weight:800;color:#4ade80">🔬 每日深度選股</span>
+            <span style="background:#1D9E75;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;letter-spacing:0.5px">NEW</span>
+          </div>
+          <div style="font-size:11px;color:#86efac">KD金叉＋MACD增強＋量能放大　含法人籌碼與券商分點</div>
+          <div style="font-size:10px;color:#4ade80;margin-top:3px;opacity:0.7">每個交易日 17:00 更新</div>
+        </div>
+        <div style="font-size:20px;color:#4ade80;font-weight:700">›</div>
+      </div>`;
+
     if (!items.length) {
       el.innerHTML = `
-        <div style="padding:60px 0;text-align:center">
-          <div style="font-size:40px;margin-bottom:12px">🔍</div>
-          <div style="font-size:15px;font-weight:700;margin-bottom:8px">今日尚無開盤熱門股</div>
-          <div style="font-size:13px;color:var(--text3)">每個交易日 09:06 自動更新</div>
+        <div style="padding:8px 0 16px">
+          ${deepBanner}
+          <div style="padding:40px 0;text-align:center">
+            <div style="font-size:40px;margin-bottom:12px">🔍</div>
+            <div style="font-size:15px;font-weight:700;margin-bottom:8px">今日尚無開盤熱門股</div>
+            <div style="font-size:13px;color:var(--text3)">每個交易日 09:06 自動更新</div>
+          </div>
         </div>`;
       return;
     }
@@ -4383,18 +4465,7 @@ async function showPicksPage(){
       <div style="padding:8px 0 16px">
         <div style="font-size:15px;font-weight:700;color:var(--text);padding:10px 0 4px">🔥 開盤熱門股</div>
         ${updatedAt}
-        <div onclick="window.open('${getAPI()}/deep-analysis','_blank')"
-          style="background:linear-gradient(135deg,#1a3a2a 0%,#0f2d1f 100%);border-radius:12px;padding:14px 16px;margin-bottom:14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border:1.5px solid #2d6a4f;box-shadow:0 2px 12px rgba(29,158,117,0.18)">
-          <div>
-            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-              <span style="font-size:15px;font-weight:800;color:#4ade80">🔬 每日深度選股</span>
-              <span style="background:#1D9E75;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;letter-spacing:0.5px">NEW</span>
-            </div>
-            <div style="font-size:11px;color:#86efac">KD金叉＋MACD增強＋量能放大　含法人籌碼與券商分點</div>
-            <div style="font-size:10px;color:#4ade80;margin-top:3px;opacity:0.7">每個交易日 17:00 更新</div>
-          </div>
-          <div style="font-size:20px;color:#4ade80;font-weight:700">›</div>
-        </div>
+        ${deepBanner}
         ${rows}
       </div>`;
   } catch(e) {
@@ -4857,6 +4928,15 @@ async function showMyPage(){
       </div>
       <div class="member-card" style="margin-top:0">
         <div style="font-size:13px;font-weight:600;margin-bottom:10px">帳號設定</div>
+        <div style="margin-bottom:10px">
+          <div style="font-size:12px;color:var(--text3);margin-bottom:6px">💬 聊天室顯示名稱</div>
+          <div style="display:flex;gap:6px">
+            <input id="nicknameInput" type="text" maxlength="16" placeholder="最多 16 字" value="${u.nickname||''}"
+              style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);outline:none">
+            <button onclick="saveNickname()" style="padding:8px 14px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap">儲存</button>
+          </div>
+          <div id="nicknameMsg" style="font-size:11px;min-height:16px;margin-top:4px"></div>
+        </div>
         <button onclick="openChangePwdModal()" style="width:100%;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left">🔐 更改密碼</button>
         <button onclick="showPushGuideModal()" style="width:100%;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left;margin-top:6px">🔔 通知與聲音設定</button>
         ${isPaid && u.is_recurring ? `<button onclick="doCancelRecurring(this)" style="width:100%;padding:10px;background:transparent;color:#e05555;border:1px solid #e05555;border-radius:8px;font-size:13px;cursor:pointer;text-align:left;margin-top:6px">❌ 取消定期訂閱</button>` : ''}
@@ -5051,240 +5131,13 @@ async function doChangePassword(){
 
 </script>
 
-<!-- ===== 全站聊天室 ===== -->
-<div id="chat-root"></div>
+<!-- ===== 聊天室入口按鈕 ===== -->
 <style>
-#chat-root *{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif}
-#chat-float{position:fixed;bottom:18px;right:16px;z-index:9999;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
-#chat-stream{display:flex;flex-direction:column;align-items:flex-end;gap:5px;max-width:220px}
-.cb{display:flex;flex-direction:column;align-items:flex-end;gap:2px;animation:cb-in .45s cubic-bezier(.22,1,.36,1) both}
-@keyframes cb-in{from{opacity:0;transform:translateY(14px) scale(.94)}to{opacity:1;transform:translateY(0) scale(1)}}
-.cb.cb-out{animation:cb-out .4s ease forwards}
-@keyframes cb-out{to{opacity:0;transform:translateY(-10px)}}
-.cb-meta{display:flex;align-items:center;gap:3px}
-.cb-name{font-size:10px}
-.cb-pro{font-size:9px;padding:1px 5px;border-radius:20px;font-weight:500}
-.cb-tag{font-size:10px;font-weight:500}
-.cb-pill{padding:6px 11px;border-radius:16px;font-size:11px;line-height:1.45;max-width:210px;word-break:break-all}
-.cb-time{font-size:9px}
-.cb-me .cb-pill{color:#fff}
-#chat-fab-row{display:flex;align-items:center;gap:7px}
-#chat-online{display:flex;align-items:center;gap:3px;border-radius:20px;padding:3px 9px;font-size:10px}
-#chat-online-dot{width:6px;height:6px;border-radius:50%}
-#chat-fab{width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px}
-#chat-panel{border-radius:14px;padding:8px 10px;width:218px;display:none}
-#chat-emoji-picker{border-radius:10px;padding:6px;margin-bottom:5px;display:none;flex-wrap:wrap;gap:4px}
-.chat-ep{font-size:15px;cursor:pointer;padding:2px 3px;border-radius:4px}
-#chat-inp-stock{width:100%;border-radius:8px;padding:4px 9px;font-size:10px;outline:none;margin-bottom:5px}
-#chat-inp-row{display:flex;gap:4px;align-items:center}
-#chat-inp-msg{flex:1;border-radius:16px;padding:6px 10px;font-size:11px;outline:none}
-#chat-emoji-btn{width:26px;height:26px;border-radius:50%;border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-#chat-send{width:26px;height:26px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-#chat-send svg{width:12px;height:12px}
-#chat-toggle{background:none;border:none;cursor:pointer;font-size:11px;color:inherit;padding:2px 4px}
-#chat-float[data-theme=girly] #chat-online{background:rgba(26,10,46,.85);border:.5px solid rgba(216,180,254,.2)}
-#chat-float[data-theme=girly] #chat-online-dot{background:#f472b6;box-shadow:0 0 5px #f472b6}
-#chat-float[data-theme=girly] #chat-online-cnt{color:#c084e0}
-#chat-float[data-theme=girly] #chat-fab{background:linear-gradient(135deg,#db2777,#7c3aed);color:#fff}
-#chat-float[data-theme=girly] #chat-panel{background:rgba(26,10,46,.95);border:.5px solid rgba(216,180,254,.18)}
-#chat-float[data-theme=girly] #chat-emoji-picker{background:rgba(26,10,46,.95);border:.5px solid rgba(216,180,254,.18)}
-#chat-float[data-theme=girly] #chat-inp-stock,#chat-float[data-theme=girly] #chat-inp-msg{background:rgba(255,255,255,.06);border:.5px solid rgba(216,180,254,.15);color:#f3e8ff}
-#chat-float[data-theme=girly] #chat-inp-stock::placeholder,#chat-float[data-theme=girly] #chat-inp-msg::placeholder{color:#7c4b9e}
-#chat-float[data-theme=girly] #chat-emoji-btn{background:rgba(255,255,255,.08)}
-#chat-float[data-theme=girly] #chat-send{background:linear-gradient(135deg,#db2777,#7c3aed)}
-#chat-float[data-theme=girly] .cb-name{color:#c084e0}
-#chat-float[data-theme=girly] .cb-pro{background:rgba(236,72,153,.18);color:#f9a8d4;border:.5px solid rgba(236,72,153,.3)}
-#chat-float[data-theme=girly] .cb-tag{color:#e879f9}
-#chat-float[data-theme=girly] .cb-pill{background:rgba(26,10,46,.8);border:.5px solid rgba(216,180,254,.2);color:#f3e8ff}
-#chat-float[data-theme=girly] .cb-me .cb-pill{background:linear-gradient(135deg,rgba(219,39,119,.55),rgba(147,51,234,.5));border:.5px solid rgba(249,168,212,.3)}
-#chat-float[data-theme=girly] .cb-time{color:#7c4b9e}
-#chat-float[data-theme=dark] #chat-online{background:rgba(6,13,26,.9);border:.5px solid #1e3a5f}
-#chat-float[data-theme=dark] #chat-online-dot{background:#4ade80;box-shadow:0 0 5px #4ade80}
-#chat-float[data-theme=dark] #chat-online-cnt{color:#6b8aad}
-#chat-float[data-theme=dark] #chat-fab{background:#1d4ed8;color:#fff}
-#chat-float[data-theme=dark] #chat-panel{background:rgba(6,13,26,.97);border:.5px solid #1e3a5f}
-#chat-float[data-theme=dark] #chat-emoji-picker{background:rgba(6,13,26,.97);border:.5px solid #1e3a5f}
-#chat-float[data-theme=dark] #chat-inp-stock,#chat-float[data-theme=dark] #chat-inp-msg{background:rgba(15,31,53,.8);border:.5px solid #1e3a5f;color:#e2eaf5}
-#chat-float[data-theme=dark] #chat-inp-stock::placeholder,#chat-float[data-theme=dark] #chat-inp-msg::placeholder{color:#3a5270}
-#chat-float[data-theme=dark] #chat-emoji-btn{background:rgba(15,31,53,.8);border:.5px solid #1e3a5f}
-#chat-float[data-theme=dark] #chat-send{background:#1d4ed8}
-#chat-float[data-theme=dark] .cb-name{color:#6b8aad}
-#chat-float[data-theme=dark] .cb-pro{background:rgba(37,99,235,.2);color:#93c5fd;border-radius:4px}
-#chat-float[data-theme=dark] .cb-tag{color:#60a5fa}
-#chat-float[data-theme=dark] .cb-pill{background:rgba(15,31,53,.9);border:.5px solid #1e3a5f;color:#e2eaf5}
-#chat-float[data-theme=dark] .cb-me .cb-pill{background:rgba(37,99,235,.6);border:.5px solid rgba(96,165,250,.3)}
-#chat-float[data-theme=dark] .cb-time{color:#3a5270}
-#chat-float[data-theme=light] #chat-online{background:#fff;border:.5px solid #b8cfe8}
-#chat-float[data-theme=light] #chat-online-dot{background:#16a34a}
-#chat-float[data-theme=light] #chat-online-cnt{color:#4a6080}
-#chat-float[data-theme=light] #chat-fab{background:#2563eb;color:#fff}
-#chat-float[data-theme=light] #chat-panel{background:#fff;border:.5px solid #b8cfe8}
-#chat-float[data-theme=light] #chat-emoji-picker{background:#fff;border:.5px solid #b8cfe8}
-#chat-float[data-theme=light] #chat-inp-stock,#chat-float[data-theme=light] #chat-inp-msg{background:#f0f4f8;border:.5px solid #b8cfe8;color:#0f2744}
-#chat-float[data-theme=light] #chat-inp-stock::placeholder,#chat-float[data-theme=light] #chat-inp-msg::placeholder{color:#8aaac8}
-#chat-float[data-theme=light] #chat-emoji-btn{background:#f0f4f8;border:.5px solid #b8cfe8}
-#chat-float[data-theme=light] #chat-send{background:#2563eb}
-#chat-float[data-theme=light] .cb-name{color:#4a6080}
-#chat-float[data-theme=light] .cb-pro{background:#dbeafe;color:#1d4ed8;border-radius:4px}
-#chat-float[data-theme=light] .cb-tag{color:#2563eb}
-#chat-float[data-theme=light] .cb-pill{background:#fff;border:.5px solid #b8cfe8;color:#0f2744}
-#chat-float[data-theme=light] .cb-me .cb-pill{background:#2563eb}
-#chat-float[data-theme=light] .cb-time{color:#8aaac8}
+#chat-entry-btn{position:fixed;bottom:72px;right:16px;z-index:9999;background:linear-gradient(135deg,#db2777,#7c3aed);color:#fff;border:none;border-radius:24px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(124,58,237,.4);display:flex;align-items:center;gap:6px;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif}
+#chat-entry-btn:hover{opacity:.9;transform:translateY(-1px)}
 </style>
-<script>
-(function(){
-  var BACKEND = 'wss://api.softglow-ai.com';
-  var EMOJIS = ['📈','📉','🚀','💰','🔥','💎','👍','😂','😱','🙏','⚠️','✅','❌','👀','💪'];
-  var THEMES = ['girly','dark','light'];
-  var THEME_LABELS = {girly:'🌸',dark:'🌙',light:'☀️'};
-  var ws = null;
-  var myTheme = localStorage.getItem('chat_theme') || 'girly';
-  var chatVisible = localStorage.getItem('chat_visible') !== 'false';
-  var myName = '訪客';
-  var myPaid = false;
-
-  try {
-    var token = localStorage.getItem('token') || '';
-    if(token){
-      var payload = JSON.parse(atob(token.split('.')[1]));
-      myName = (payload.sub || '').split('@')[0] || '訪客';
-    }
-  } catch(e){}
-
-  var root = document.getElementById('chat-root');
-  var themeButtons = THEMES.map(function(t){
-    return '<button onclick="window._chatSetTheme(\''+t+'\')" style="background:none;border:none;cursor:pointer;font-size:13px;opacity:'+(t===myTheme?1:.4)+'" id="chat-thm-'+t+'">'+THEME_LABELS[t]+'</button>';
-  }).join('');
-  var emojiSpans = EMOJIS.map(function(e){ return '<span class="chat-ep">'+e+'</span>'; }).join('');
-
-  root.innerHTML = '<div id="chat-float" data-theme="'+myTheme+'">'
-    + '<div id="chat-stream"></div>'
-    + '<div id="chat-fab-row">'
-    +   '<button id="chat-toggle" title="關閉">✕</button>'
-    +   '<div id="chat-online"><div id="chat-online-dot"></div><span id="chat-online-cnt">0 在線</span></div>'
-    +   '<button id="chat-fab">💬</button>'
-    + '</div>'
-    + '<div id="chat-panel">'
-    +   '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
-    +     '<span style="font-size:10px;opacity:.6">線上有位 討論室</span>'
-    +     '<div style="display:flex;gap:4px">'+themeButtons+'</div>'
-    +   '</div>'
-    +   '<div id="chat-emoji-picker">'+emojiSpans+'</div>'
-    +   '<input id="chat-inp-stock" type="text" placeholder="# 股票代號（選填）" maxlength="6"/>'
-    +   '<div id="chat-inp-row">'
-    +     '<button id="chat-emoji-btn">😊</button>'
-    +     '<input id="chat-inp-msg" type="text" placeholder="說點什麼..." maxlength="100"/>'
-    +     '<button id="chat-send"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>'
-    +   '</div>'
-    + '</div>'
-    + '</div>';
-
-  window._chatSetTheme = function(t){
-    myTheme = t;
-    localStorage.setItem('chat_theme', t);
-    document.getElementById('chat-float').setAttribute('data-theme', t);
-    THEMES.forEach(function(th){
-      var b = document.getElementById('chat-thm-'+th);
-      if(b) b.style.opacity = th===t ? 1 : .4;
-    });
-  };
-
-  function applyVisible(){
-    var stream = document.getElementById('chat-stream');
-    var online = document.getElementById('chat-online');
-    var fab = document.getElementById('chat-fab');
-    var tog = document.getElementById('chat-toggle');
-    if(chatVisible){
-      stream.style.display='flex'; online.style.display='flex'; fab.style.display='flex';
-      tog.title='關閉聊天室'; tog.style.opacity='.5';
-    } else {
-      stream.style.display='none'; online.style.display='none'; fab.style.display='none';
-      document.getElementById('chat-panel').style.display='none';
-      tog.title='開啟聊天室'; tog.style.opacity='1';
-    }
-  }
-
-  document.getElementById('chat-toggle').addEventListener('click', function(){
-    chatVisible = !chatVisible;
-    localStorage.setItem('chat_visible', String(chatVisible));
-    applyVisible();
-  });
-  applyVisible();
-
-  document.getElementById('chat-fab').addEventListener('click', function(){
-    var p = document.getElementById('chat-panel');
-    p.style.display = (p.style.display==='none'||!p.style.display) ? 'block' : 'none';
-  });
-
-  document.getElementById('chat-emoji-btn').addEventListener('click', function(){
-    var ep = document.getElementById('chat-emoji-picker');
-    ep.style.display = ep.style.display==='flex' ? 'none' : 'flex';
-  });
-
-  document.querySelectorAll('.chat-ep').forEach(function(e){
-    e.addEventListener('click', function(){
-      document.getElementById('chat-inp-msg').value += e.textContent;
-      document.getElementById('chat-emoji-picker').style.display='none';
-    });
-  });
-
-  function sendMsg(){
-    var msg = document.getElementById('chat-inp-msg').value.trim();
-    var stock = document.getElementById('chat-inp-stock').value.trim();
-    if(!msg || !ws || ws.readyState!==1) return;
-    ws.send(JSON.stringify({message:msg, stock_tag:stock}));
-    document.getElementById('chat-inp-msg').value='';
-    document.getElementById('chat-emoji-picker').style.display='none';
-  }
-  document.getElementById('chat-send').addEventListener('click', sendMsg);
-  document.getElementById('chat-inp-msg').addEventListener('keydown', function(e){ if(e.key==='Enter') sendMsg(); });
-
-  function addBubble(data, isMe){
-    var stream = document.getElementById('chat-stream');
-    var bw = document.createElement('div');
-    bw.className = 'cb' + (isMe?' cb-me':'');
-    var meta = '';
-    if(!isMe){
-      meta = '<div class="cb-meta">'
-        + '<span class="cb-name">'+data.username+'</span>'
-        + (data.is_paid ? '<span class="cb-pro">VIP</span>' : '')
-        + (data.stock_tag ? '<span class="cb-tag">#'+data.stock_tag+'</span>' : '')
-        + '</div>';
-    }
-    bw.innerHTML = meta
-      + '<div class="cb-pill">'+data.message+'</div>'
-      + '<div class="cb-time">'+data.created_at+'</div>';
-    stream.appendChild(bw);
-    if(stream.children.length > 5){
-      var old = stream.children[0];
-      old.classList.add('cb-out');
-      setTimeout(function(){ if(old.parentNode) old.parentNode.removeChild(old); }, 400);
-    }
-  }
-
-  function connect(){
-    var token = localStorage.getItem('token') || '';
-    var url = BACKEND+'/ws/chat'+(token?'?token='+token:'');
-    ws = new WebSocket(url);
-    ws.onmessage = function(e){
-      try {
-        var d = JSON.parse(e.data);
-        if(d.type==='online'){
-          document.getElementById('chat-online-cnt').textContent = d.count+' 在線';
-        } else if(d.type==='message'){
-          var isMe = d.username===myName && myName!=='訪客';
-          addBubble(d, isMe);
-        }
-      } catch(err){}
-    };
-    ws.onclose = function(){ setTimeout(connect, 3000); };
-    ws.onerror = function(){ ws.close(); };
-  }
-
-  connect();
-})();
-</script>
-<!-- ===== 全站聊天室 END ===== -->
+<a id="chat-entry-btn" href="/chat.html" target="_self">💬 聊天室</a>
+<!-- ===== 聊天室入口按鈕 END ===== -->
 
 </body>
 </html>

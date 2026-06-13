@@ -1,13 +1,16 @@
 """
-finmind_filter.py — 數值分析層（SEO 熱門股模式）
+finmind_filter.py — 數值篩選層
+輸入：股票代號列表（從新聞萃取）
+輸出：通過篩選的個股，依加分排序，上限 30 支（SEO 熱門股曝光用）
 
-輸入：TWSE 成交量前 30 支（已為主流股，無需交集篩選）
-基本門檻（排除資料不足）：
-  - FinMind 至少 26 筆日 K
+保留門檻：
+  - 最低均量 1000 張
   - 最低股價 $10
-  - 均量 >= 1000 張
 
-輸出：對全部通過門檻的股票做技術分析，依 20 日均量降序排列
+加分規則：
+  +2  有題材新聞
+  +2  法人連續買超 ≥ 3 日
+  +1  法人近日有買超（< 3 日）
 """
 
 from crawler import fetch_price_history, fetch_institutional
@@ -15,378 +18,416 @@ import time
 
 
 CFG = {
-    "min_avg_volume": 1000,
-    "min_price":      10.0,
+    "min_avg_volume": 1000,   # 最低均量（張）
+    "min_price":      10.0,   # 最低股價
 }
 
+MAX_RESULTS = 30
 
-# ──────────────────────────────────────────
-# 技術指標計算
-# ──────────────────────────────────────────
 
-def _calc_recent_high(df, current_price, lookback=60):
-    try:
-        recent = df.tail(lookback)
-        highs_above = recent[recent['high'] > current_price]['high']
-        if len(highs_above) == 0:
-            return None
-        return round(float(highs_above.min()), 2)
-    except Exception:
-        return None
+def _score(result: dict) -> int:
+    s = 0
+    if result["news"]:
+        s += 2
+    if result["consecutive_buy_days"] >= 3:
+        s += 2
+    elif result["consecutive_buy_days"] >= 1:
+        s += 1
+    return s
 
-def _calc_recent_low(df, current_price, lookback=60, min_distance=0.03):
-    try:
-        recent = df.tail(lookback)
-        low_vals = recent['low'].values
-        lows = []
-        for i in range(2, len(low_vals)-2):
-            if (low_vals[i] < low_vals[i-1] and low_vals[i] < low_vals[i-2] and
-                low_vals[i] < low_vals[i+1] and low_vals[i] < low_vals[i+2]):
-                lows.append(low_vals[i])
-        valid = [l for l in lows if l < current_price and (current_price - l) / current_price >= min_distance]
-        if not valid:
-            return None
-        return round(max(valid), 2)
-    except Exception:
-        return None
 
-def calc_kd(prices: list[dict], n: int = 9) -> tuple[float, float, float, float]:
+def analyze_stock(stock_id: str, news_list: list[dict]) -> dict | None:
     """
-    計算隨機指標 KD（n 日 RSV，預設 9 日）
-    回傳 (K今, D今, K昨, D昨)；資料不足時回傳 (50, 50, 50, 50)
+    對單一股票做量化分析，回傳指標 dict 或 None（不符合基本門檻）
     """
-    if len(prices) < n + 1:
-        return 50.0, 50.0, 50.0, 50.0
+    related_news = [
+        {"title": n["title"], "link": n["link"], "keywords": n["keywords"]}
+        for n in news_list
+        if stock_id in n["codes"] and n["title"]
+    ]
 
-    K, D = 67.0, 67.0
-    K_prev, D_prev = 67.0, 67.0
-
-    for i in range(n - 1, len(prices)):
-        window = prices[i - n + 1: i + 1]
-        high9  = max(p["high"] for p in window)
-        low9   = min(p["low"]  for p in window)
-        close  = prices[i]["close"]
-        rsv    = (close - low9) / (high9 - low9) * 100 if high9 != low9 else 50.0
-        K_prev, D_prev = K, D
-        K = K * 2 / 3 + rsv / 3
-        D = D * 2 / 3 + K   / 3
-
-    return K, D, K_prev, D_prev
-
-
-def calc_macd(closes: list[float]) -> tuple[float, float, float]:
-    """
-    計算 MACD DIF（EMA12-EMA26）與 DEA（EMA9 of DIF）
-    回傳 (DIF今, DIF昨, DEA今)；資料不足時回傳 (0.0, 0.0, 0.0)
-    """
-    if len(closes) < 27:
-        return 0.0, 0.0, 0.0
-
-    def _ema_series(data: list[float], period: int) -> list[float]:
-        k    = 2 / (period + 1)
-        seed = sum(data[:period]) / period
-        out  = [seed]
-        for p in data[period:]:
-            seed = p * k + seed * (1 - k)
-            out.append(seed)
-        return out
-
-    ema12 = _ema_series(closes, 12)
-    ema26 = _ema_series(closes, 26)
-    dif   = [a - b for a, b in zip(ema12[-len(ema26):], ema26)]
-
-    if len(dif) < 2:
-        v = dif[-1] if dif else 0.0
-        return v, 0.0, v
-    dea_t = _ema_series(dif, 9)[-1] if len(dif) >= 9 else dif[-1]
-    return dif[-1], dif[-2], round(dea_t, 3)
-
-
-# ──────────────────────────────────────────
-# K 線型態偵測
-# ──────────────────────────────────────────
-
-def detect_kline_patterns(closes, opens, highs, lows, volumes):
-    """偵測最新 K 線型態，回傳 (型態標籤, 勝率)"""
-    n = len(closes)
-    if n < 3:
-        return "常態 K 線（無觸發極端型態）", 0.50
-    c0, o0, h0, l0, v0 = closes[-1], opens[-1], highs[-1], lows[-1], volumes[-1]
-    body_size0    = abs(c0 - o0)
-    upper_shadow0 = h0 - max(c0, o0)
-    lower_shadow0 = min(c0, o0) - l0
-    range0        = max(h0 - l0, 0.001)
-    avg_vol       = sum(volumes[-6:-1]) / 5 if n >= 6 else (sum(volumes[:-1]) / max(len(volumes) - 1, 1))
-    vol_surge     = v0 > avg_vol * 1.3
-    is_downtrend  = closes[-1] < closes[-5] if n >= 5 else False
-    is_uptrend    = closes[-1] > closes[-5] if n >= 5 else False
-    if vol_surge and (body_size0 >= range0 * 0.5) and (c0 > o0):
-        return "量增大紅棒（突破確認）", 0.62
-    if vol_surge and (body_size0 >= range0 * 0.5) and (c0 < o0):
-        return "量增大黑棒（跌破確認）", 0.62
-    if (is_downtrend and (lower_shadow0 >= range0 * 0.4)
-            and (lower_shadow0 >= body_size0 * 1.5)
-            and (upper_shadow0 <= range0 * 0.2)):
-        return "低檔錘子線（底部承接力道強）", 0.53
-    if (is_uptrend and (upper_shadow0 >= range0 * 0.4)
-            and (upper_shadow0 >= body_size0 * 1.5)
-            and (lower_shadow0 <= range0 * 0.2)):
-        return "高檔流星線（多頭上攻力竭）", 0.53
-    return "常態 K 線（無觸發極端型態）", 0.50
-
-
-# ──────────────────────────────────────────
-# 主篩選函數
-# ──────────────────────────────────────────
-
-def analyze_stock(stock_id: str, news_list: list[dict] = []) -> dict | None:
-    """
-    對單一股票計算技術指標，回傳 dict 或 None（資料不足/未達門檻）。
-    """
-    # ── 股價資料（拉 90 日曆天 ≈ 60~65 交易日，支援 MA60+KD+MACD）──
-    prices = fetch_price_history(stock_id, days=90)
-    if len(prices) < 26:
+    prices = fetch_price_history(stock_id, days=30)
+    if len(prices) < 10:
         return None
 
     price = prices[-1]["close"]
     if price < CFG["min_price"]:
         return None
 
-    closes = [p["close"] for p in prices]
-    m      = len(closes)
-
-    if m < 21:
+    vols = [p["volume"] for p in prices if p["volume"] > 0]
+    avg_vol_20 = sum(vols) / len(vols) if vols else 0
+    if avg_vol_20 < CFG["min_avg_volume"]:
         return None
 
-    # ── MA 計算 ──
-    ma5_t  = sum(closes[-5:])    / 5
-    ma5_y  = sum(closes[-6:-1])  / 5
-    ma20_t = sum(closes[-20:])   / 20
-    ma20_y = sum(closes[-21:-1]) / 20
+    avg_vol_5 = sum(p["volume"] for p in prices[-5:]) / 5
 
-    if m >= 61:
-        ma60_t = sum(closes[-60:])   / 60
-        ma60_y = sum(closes[-61:-1]) / 60
-    else:
-        ma60_t = ma60_y = None
-
-    # 均線金叉
-    ma5_20_cross  = (ma5_t > ma20_t) and (ma5_y <= ma20_y)
-    ma20_60_cross = (ma60_t is not None
-                     and ma20_t > ma60_t and ma20_y <= ma60_y)
-    ma_cross      = ma5_20_cross or ma20_60_cross
-
-    # ── KD ──
-    K_t, D_t, K_y, D_y = calc_kd(prices)
-    kd_cross = (K_t > D_t) and (K_y <= D_y) and (K_t < 80)
-
-    # ── MACD ──
-    dif_t, dif_y, dea_t = calc_macd(closes)
-    macd_cross_zero   = (dif_y < 0) and (dif_t > 0)   # 由負轉正
-    macd_pass         = dif_t > 0                       # 含上穿0軸
-    macd_pass_relaxed = dif_t > -0.5
-
-    # ── 量能 ──
-    vols       = [p["volume"] for p in prices if p["volume"] > 0]
-    avg_vol_20 = sum(vols[-20:]) / min(20, len(vols)) if vols else 0
-    avg_vol_5  = sum(p["volume"] for p in prices[-5:]) / 5
-    vol_ratio  = round(avg_vol_5 / avg_vol_20, 2) if avg_vol_20 > 0 else 0
-
-    if avg_vol_20 / 1000 < CFG["min_avg_volume"]:
-        return None
-
-    # ── 均線趨勢 ──
-    if ma60_t is not None:
-        if ma5_t > ma20_t > ma60_t:
-            trend = "上升"
-        elif ma5_t < ma20_t < ma60_t:
-            trend = "下降"
-        else:
-            trend = "盤整"
-    else:
-        trend = "上升" if ma5_t > ma20_t else ("下降" if ma5_t < ma20_t else "盤整")
-
-    # ── 新聞（加分用）──
-    related_news = []
-    for n in news_list:
-        if stock_id in n["codes"] and n["title"]:
-            related_news.append({
-                "title":    n["title"],
-                "link":     n["link"],
-                "keywords": n["keywords"],
-            })
-    has_news = bool(related_news)
-
-    # ── K棒連K方向 ──
-    kbar_streak = 0
-    for _p in reversed(prices):
-        _c, _o = _p["close"], _p["open"]
-        if kbar_streak == 0:
-            kbar_streak = 1 if _c >= _o else -1
-        elif kbar_streak > 0 and _c >= _o:
-            kbar_streak += 1
-        elif kbar_streak < 0 and _c < _o:
-            kbar_streak -= 1
-        else:
-            break
-
-    # ── 支撐壓力（近20日）──
-    recent20 = prices[-20:]
-    resistance = round(max(p["high"] for p in recent20), 2)
-    original_resistance = resistance
-    resistance = _calc_recent_high(df, current_price) or original_resistance
-    target_price = original_resistance if original_resistance != resistance else None
-    lows_20    = [p["low"] for p in recent20]
-    s_candidates = [ma20_t, min(lows_20)]
-    if ma60_t:
-        s_candidates.append(ma60_t)
-    below = [x for x in s_candidates if x < price]
-    support = round(max(below) if below else min(s_candidates), 2)
-    original_support = support
-    support = _calc_recent_low(df, current_price) or original_support
-
-    # ── 損益比 ──
-    if support and resistance and price > 0 and resistance > price:
-        risk   = price - support
-        reward = resistance - price
-        if risk > 0:
-            rr = round(reward / risk, 2)
-            if   rr >= 3:   rr_label = '極佳'
-            elif rr >= 2:   rr_label = '良好'
-            elif rr >= 1.5: rr_label = '尚可'
-            else:           rr_label = '偏低'
-        else:
-            rr, rr_label = 0, '無法計算'
-    else:
-        rr, rr_label = 0, '無法計算'
-
-    # ── 法人買賣超 ──
-    consecutive_buy_days = 0
-    inst_5d_total        = 0
-    inst_20d_total       = 0
-    inst_foreign_5d      = 0
-    inst_invest_5d       = 0
-    inst_dealer_5d       = 0
     inst = fetch_institutional(stock_id, days=20)
-    if inst:
+    if not inst:
+        consecutive_buy_days = 0
+        inst_5d_total  = 0
+        inst_20d_total = 0
+    else:
+        consecutive_buy_days = 0
         for row in reversed(inst):
             if row["total"] > 0:
                 consecutive_buy_days += 1
             else:
                 break
-        inst_5d        = inst[-5:]
-        inst_5d_total  = sum(r["total"]              for r in inst_5d)
-        inst_20d_total = sum(r["total"]              for r in inst)
-        inst_foreign_5d = sum(r.get("foreign", 0)   for r in inst_5d)
-        inst_invest_5d  = sum(r.get("invest",  0)   for r in inst_5d)
-        inst_dealer_5d  = sum(r.get("dealer",  0)   for r in inst_5d)
-
-    # ── 評分 ──
-    score = 0
-    if has_news:                    score += 2
-    if consecutive_buy_days >= 3:   score += 2
-    elif consecutive_buy_days >= 1: score += 1
-    if kd_cross:                    score += 1
-    if ma_cross:                    score += 1
-
-    # ── 信號標籤 ──
-    if ma5_20_cross and ma20_60_cross:
-        signal_label = "✅ 雙均線金叉"
-    elif ma5_20_cross:
-        signal_label = "✅ MA5穿MA20金叉"
-    elif ma20_60_cross:
-        signal_label = "✅ MA20穿MA60金叉"
-    elif kd_cross:
-        signal_label = f"✅ KD金叉（K={K_t:.1f}）"
-    else:
-        signal_label = ""
-
-    # ── K 線型態 ──
-    kline_pattern, win_rate = detect_kline_patterns(
-        closes,
-        [p["open"]   for p in prices],
-        [p["high"]   for p in prices],
-        [p["low"]    for p in prices],
-        [p["volume"] for p in prices],
-    )
+        inst_5d_total  = sum(r["total"] for r in inst[-5:])
+        inst_20d_total = sum(r["total"] for r in inst)
 
     kws = list({kw for n in related_news for kw in n["keywords"]})
-    macd_desc = "上穿0軸" if macd_cross_zero else ("0軸以上" if dif_t > 0 else "0軸以下")
     score_factors = [
-        f"鉅亨題材新聞 {len(related_news)} 則" + (f"，關鍵字：{', '.join(kws[:5])}" if kws else ""),
-        f"量能：近5日均量是20日均量的 {vol_ratio}x",
-        f"MACD DIF={dif_t:.3f}（{macd_desc}）",
-        f"KD: K={K_t:.1f} D={D_t:.1f}（{'金叉' if kd_cross else '未金叉'}）",
-        f"法人連買 {consecutive_buy_days} 日，近5日 {inst_5d_total:+,} 張，近20日 {inst_20d_total:+,} 張",
-        f"現價 {price}，近5日均量 {round(avg_vol_5 / 1000):,} 張",
+        f"題材新聞 {len(related_news)} 則，關鍵字：{', '.join(kws[:5]) if kws else '無'}",
+        f"法人連續買超 {consecutive_buy_days} 天，近5日 {inst_5d_total:+,} 張，近20日 {inst_20d_total:+,} 張",
+        f"近5日均量 {round(avg_vol_5):,} 張，近20日均量 {round(avg_vol_20):,} 張",
+        f"現價 {price}",
     ]
-    if signal_label:
-        score_factors.append(f"型態：{signal_label}")
 
-    return {
+    result = {
         "stock_id":             stock_id,
         "price":                price,
-        "ma5":                  round(ma5_t, 2),
-        "ma20":                 round(ma20_t, 2),
-        "ma60":                 round(ma60_t, 2) if ma60_t else None,
-        "kd_k":                 round(K_t, 1),
-        "kd_d":                 round(D_t, 1),
-        "kd_cross":             kd_cross,
         "consecutive_buy_days": consecutive_buy_days,
         "inst_5d_total":        inst_5d_total,
         "inst_20d_total":       inst_20d_total,
-        "inst_foreign_5d":      inst_foreign_5d,
-        "inst_invest_5d":       inst_invest_5d,
-        "inst_dealer_5d":       inst_dealer_5d,
-        "vol_ratio":            vol_ratio,
-        "avg_vol_5":            round(avg_vol_5 / 1000),
-        "avg_vol_20":           round(avg_vol_20 / 1000),
+        "avg_vol_5":            round(avg_vol_5),
+        "avg_vol_20":           round(avg_vol_20),
         "news":                 related_news[:5],
         "score_factors":        score_factors,
-        "signal_label":         signal_label,
-        "is_risk":              False,
-        "kline_pattern":        kline_pattern,
-        "win_rate":             win_rate,
-        "trend":                trend,
-        "macd_dif":             round(dif_t, 3),
-        "macd_dea":             round(dea_t, 3),
-        "kbar_streak":          kbar_streak,
-        "support":              support,
-        "resistance":           resistance,
-        "target_price":         round(resistance + (resistance - support), 2),
-        "support_too_close":    bool((price - support) / price < 0.02) if price > 0 else False,
-        "rr":                   rr,
-        "rr_label":             rr_label,
-        "macd_desc":            macd_desc,
-        "score":                score,
     }
+    result["score"] = _score(result)
+    return result
 
 
-def run_filter(candidate_ids: list[str], news_list: list[dict] = [],
-               max_results: int = 30, delay: float = 1.0) -> list[dict]:
+def run_filter(candidate_ids: list[str], news_list: list[dict],
+               max_results: int = MAX_RESULTS, delay: float = 1.0) -> list[dict]:
     """
-    對候選代號逐一做 FinMind 技術分析，通過基本門檻（價格/均量/資料量）後
-    依 20 日均量降序排列（SEO 熱門股模式：保留主流大量股的自然排序）。
+    對候選代號列表逐一篩選，依加分排序後回傳前 max_results 支
     """
     passed = []
     total = len(candidate_ids)
-    print(f"[filter] 開始分析 {total} 檔（SEO 熱門股模式，依成交量排序）...")
+    print(f"[filter] 開始篩選 {total} 檔候選股票...")
 
     for i, sid in enumerate(candidate_ids, 1):
         print(f"[filter] ({i}/{total}) {sid} ...", end=" ", flush=True)
-        r = analyze_stock(sid, news_list)
-        if r:
-            passed.append(r)
-            print(f"✓（均量={r['avg_vol_20']:,}張，法人連買 {r['consecutive_buy_days']}日）")
+        result = analyze_stock(sid, news_list)
+        if result:
+            print(f"✓ 通過（分數 {result['score']}，"
+                  f"法人連買 {result['consecutive_buy_days']}日，"
+                  f"新聞 {len(result['news'])} 則）")
+            passed.append(result)
         else:
-            print("✗ 資料不足或未達門檻")
+            print("✗ 未通過")
         if i < total:
             time.sleep(delay)
 
-    passed.sort(key=lambda x: x["avg_vol_20"], reverse=True)
-    result = passed[:max_results]
-    print(f"[filter] 分析完畢：{len(result)} 支（共 {total} 檔候選）")
+    passed.sort(key=lambda x: x["score"], reverse=True)
+    print(f"[filter] 篩選完畢，通過 {len(passed)}/{total} 檔，取前 {max_results} 支")
+    return passed[:max_results]
+
+
+# ──────────────────────────────────────────
+# 深度選股分析（每日17:00）
+# 篩選條件：KD金叉 + MACD動能軸上增強 + 量能≥1.5倍
+# ──────────────────────────────────────────
+
+def _calc_kd(prices: list[dict], n: int = 9) -> tuple[float, float, str]:
+    """計算 KD 值，回傳 (K, D, signal)"""
+    if len(prices) < n + 1:
+        return 50.0, 50.0, "neutral"
+    closes = [p["close"] for p in prices]
+    highs  = [p["high"]  for p in prices]
+    lows   = [p["low"]   for p in prices]
+
+    K, D = 50.0, 50.0
+    for i in range(n - 1, len(prices)):
+        period_high = max(highs[i - n + 1:i + 1])
+        period_low  = min(lows[i  - n + 1:i + 1])
+        rsv = (closes[i] - period_low) / (period_high - period_low) * 100 if period_high != period_low else 50
+        K = K * 2 / 3 + rsv / 3
+        D = D * 2 / 3 + K / 3
+
+    # 前一根的 K D
+    K_prev, D_prev = 50.0, 50.0
+    if len(prices) >= n + 2:
+        for i in range(n - 1, len(prices) - 1):
+            period_high = max(highs[i - n + 1:i + 1])
+            period_low  = min(lows[i  - n + 1:i + 1])
+            rsv = (closes[i] - period_low) / (period_high - period_low) * 100 if period_high != period_low else 50
+            K_prev = K_prev * 2 / 3 + rsv / 3
+            D_prev = D_prev * 2 / 3 + K_prev / 3
+
+    # 金叉：K 由下往上穿越 D
+    if K > D and K_prev <= D_prev:
+        signal = "golden_cross"
+    elif K > D:
+        signal = "bullish"
+    elif K < D:
+        signal = "bearish"
+    else:
+        signal = "neutral"
+
+    return round(K, 2), round(D, 2), signal
+
+
+def _calc_macd(prices: list[dict]) -> tuple[float, float, float, str]:
+    """計算 MACD，回傳 (DIF, DEA, hist, signal)"""
+    closes = [p["close"] for p in prices]
+    if len(closes) < 35:
+        return 0.0, 0.0, 0.0, "neutral"
+
+    def ema(data, period):
+        k = 2 / (period + 1)
+        result = [data[0]]
+        for v in data[1:]:
+            result.append(v * k + result[-1] * (1 - k))
+        return result
+
+    ema12 = ema(closes, 12)
+    ema26 = ema(closes, 26)
+    dif = [e12 - e26 for e12, e26 in zip(ema12, ema26)]
+    dea = ema(dif, 9)
+    hist = [(d - e) * 2 for d, e in zip(dif, dea)]
+
+    cur_dif  = round(dif[-1],  3)
+    cur_dea  = round(dea[-1],  3)
+    cur_hist = round(hist[-1], 3)
+    prev_hist = hist[-2] if len(hist) > 1 else 0
+
+    if cur_dif > 0 and cur_dif > cur_dea and cur_hist > prev_hist:
+        signal = "strong_bullish"   # 軸上且動能增強
+    elif cur_dif > 0 and cur_dif > cur_dea:
+        signal = "bullish"
+    elif cur_dif > -0.5:
+        signal = "weak"
+    else:
+        signal = "bearish"
+
+    return cur_dif, cur_dea, cur_hist, signal
+
+
+def _calc_ma_trend(prices: list[dict]) -> str:
+    """回傳均線排列：bullish / bearish / mixed"""
+    closes = [p["close"] for p in prices]
+    if len(closes) < 60:
+        return "mixed"
+    ma5  = sum(closes[-5:])  / 5
+    ma20 = sum(closes[-20:]) / 20
+    ma60 = sum(closes[-60:]) / 60
+    if ma5 > ma20 > ma60:
+        return "bullish"
+    elif ma5 < ma20 < ma60:
+        return "bearish"
+    return "mixed"
+
+
+def _calc_vol_ratio(prices: list[dict]) -> float:
+    """近5日均量 / 近20日均量"""
+    vols = [p["volume"] for p in prices if p["volume"] > 0]
+    if len(vols) < 20:
+        return 0.0
+    avg5  = sum(vols[-5:]) / 5
+    avg20 = sum(vols[-20:]) / 20
+    return round(avg5 / avg20, 2) if avg20 > 0 else 0.0
+
+
+def _fetch_fundamentals(stock_id: str, token: str = "") -> dict:
+    """
+    抓取個股基本面資料：本益比、殖利率、近四季EPS
+    失敗回傳空值，不影響主流程
+    """
+    import requests
+    from datetime import datetime, timedelta
+
+    BASE = "https://api.finmindtrade.com/api/v4/data"
+    headers = {"Authorization": f"Bearer {token}"} if token else {}
+    today = datetime.now().strftime("%Y-%m-%d")
+    one_year_ago = (datetime.now() - timedelta(days=400)).strftime("%Y-%m-%d")
+    two_year_ago = (datetime.now() - timedelta(days=730)).strftime("%Y-%m-%d")
+
+    result = {
+        "per": None,          # 本益比
+        "pbr": None,          # 股價淨值比
+        "dividend_yield": None,  # 殖利率 %
+        "eps_ttm": None,      # 近四季累計EPS
+        "eps_yoy": None,      # EPS YoY 成長率 %
+    }
+
+    try:
+        # ① 本益比、殖利率、PBR — 全部從 TaiwanStockPER 拿
+        r = requests.get(BASE, headers=headers, params={
+            "dataset": "TaiwanStockPER",
+            "data_id": stock_id,
+            "start_date": (datetime.now() - timedelta(days=10)).strftime("%Y-%m-%d"),
+            "token": token,
+        }, timeout=8)
+        data = r.json().get("data", [])
+        if data:
+            latest = data[-1]
+            result["per"] = round(float(latest.get("PER", 0) or 0), 1) or None
+            result["pbr"] = round(float(latest.get("PBR", 0) or 0), 2) or None
+            result["dividend_yield"] = round(float(latest.get("dividend_yield", 0) or 0), 2) or None
+    except Exception:
+        pass
+
+    try:
+        # ② 近四季 EPS
+        r = requests.get(BASE, headers=headers, params={
+            "dataset": "TaiwanStockFinancialStatements",
+            "data_id": stock_id,
+            "start_date": two_year_ago,
+            "token": token,
+        }, timeout=8)
+        rows = r.json().get("data", [])
+        # 找 EPS 欄位
+        eps_rows = [row for row in rows if row.get("type") == "EPS" or
+                    "每股" in str(row.get("type", "")) and "盈餘" in str(row.get("type", ""))]
+        if not eps_rows:
+            # 嘗試另一個欄位名
+            eps_rows = [row for row in rows
+                        if str(row.get("origin_name", "")).startswith("基本每股盈餘")]
+        if len(eps_rows) >= 4:
+            eps_vals = [float(row.get("value", 0) or 0) for row in eps_rows[-8:]]
+            # 近四季
+            ttm = round(sum(eps_vals[-4:]), 2)
+            # 前四季
+            if len(eps_vals) >= 8:
+                prev_ttm = sum(eps_vals[-8:-4])
+                yoy = round((ttm - prev_ttm) / abs(prev_ttm) * 100, 1) if prev_ttm else None
+            else:
+                yoy = None
+            result["eps_ttm"] = ttm
+            result["eps_yoy"] = yoy
+    except Exception:
+        pass
+
     return result
+
+
+def deep_analyze_stock(stock_id: str, stock_name: str = "", finmind_token: str = "") -> dict | None:
+    """
+    深度分析單一股票
+    篩選條件：KD金叉 + MACD軸上動能增強 + 量能≥1.5倍
+    回傳完整分析 dict 或 None（不符合條件）
+    """
+    from crawler import fetch_twse_institutional, fetch_twse_broker_top
+
+    prices = fetch_price_history(stock_id, days=90)
+    if len(prices) < 30:
+        return None
+
+    price = prices[-1]["close"]
+    if price < 10:
+        return None
+
+    # ① 技術指標
+    K, D, kd_signal    = _calc_kd(prices)
+    dif, dea, hist, macd_signal = _calc_macd(prices)
+    ma_trend            = _calc_ma_trend(prices)
+    vol_ratio           = _calc_vol_ratio(prices)
+
+    # 篩選條件
+    kd_ok   = kd_signal == "golden_cross"
+    macd_ok = macd_signal in ("strong_bullish", "bullish")
+    vol_ok  = vol_ratio >= 1.5
+
+    if not (kd_ok and macd_ok and vol_ok):
+        return None
+
+    # ② 法人籌碼（TWSE T86）
+    inst = fetch_twse_institutional(stock_id, days=3)
+    time.sleep(0.5)
+
+    # ③ 券商分點（TWSE TWT84U）
+    broker = fetch_twse_broker_top(stock_id, top_n=15)
+    time.sleep(0.5)
+
+    # ④ 均線數值
+    closes = [p["close"] for p in prices]
+    ma5  = round(sum(closes[-5:])  / 5,  2)
+    ma20 = round(sum(closes[-20:]) / 20, 2)
+    ma60 = round(sum(closes[-60:]) / 60, 2) if len(closes) >= 60 else None
+
+    # ⑤ 支撐壓力（近60日高低點，排除最後一根避免壓力=現價）
+    _ref = prices[-60:-1] if len(prices) >= 61 else prices[:-1]
+    if not _ref:
+        _ref = prices
+    recent_high = max(p["high"] for p in _ref)
+    recent_low  = min(p["low"]  for p in _ref)
+    resistance  = round(recent_high, 2)
+    support     = round(recent_low,  2)
+    rr_ratio    = round((resistance - price) / (price - support), 2) if price > support and resistance > price else 0
+
+    vols = [p["volume"] for p in prices if p["volume"] > 0]
+    avg_vol_5  = round(sum(vols[-5:])  / 5)
+    avg_vol_20 = round(sum(vols[-20:]) / 20)
+
+    prev_close = prices[-2]["close"] if len(prices) >= 2 else price
+    change     = round(price - prev_close, 2)
+    change_pct = round(change / prev_close * 100, 2) if prev_close else 0.0
+
+    # ⑥ 基本面（本益比、殖利率、近四季EPS）
+    fund = _fetch_fundamentals(stock_id, token=finmind_token)
+
+    return {
+        "stock_id":   stock_id,
+        "stock_name": stock_name or stock_id,
+        "price":      price,
+        "prev_close": prev_close,
+        "change":     change,
+        "change_pct": change_pct,
+        "date":       prices[-1]["date"],
+        # 技術面
+        "K": K, "D": D, "kd_signal": kd_signal,
+        "dif": dif, "dea": dea, "hist": hist, "macd_signal": macd_signal,
+        "ma_trend": ma_trend,
+        "ma5": ma5, "ma20": ma20, "ma60": ma60,
+        "vol_ratio":  vol_ratio,
+        "avg_vol_5":  avg_vol_5,
+        "avg_vol_20": avg_vol_20,
+        # 支撐壓力
+        "support":    support,
+        "resistance": resistance,
+        "rr_ratio":   rr_ratio,
+        # 法人
+        "inst": inst,
+        # 券商分點
+        "broker": broker,
+        # 基本面
+        "per":            fund.get("per"),
+        "pbr":            fund.get("pbr"),
+        "dividend_yield": fund.get("dividend_yield"),
+        "eps_ttm":        fund.get("eps_ttm"),
+        "eps_yoy":        fund.get("eps_yoy"),
+    }
+
+
+def run_deep_scan(candidate_ids: list[str], name_dict: dict = None,
+                  delay: float = 1.2, finmind_token: str = "") -> list[dict]:
+    """
+    批次執行深度選股，回傳通過篩選的股票列表
+    """
+    name_dict = name_dict or {}
+    results = []
+    total = len(candidate_ids)
+    print(f"[deep_scan] 開始深度掃描 {total} 檔...")
+
+    for i, sid in enumerate(candidate_ids, 1):
+        print(f"[deep_scan] ({i}/{total}) {sid} ...", end=" ", flush=True)
+        try:
+            r = deep_analyze_stock(sid, name_dict.get(sid, ""), finmind_token=finmind_token)
+            if r:
+                results.append(r)
+                print(f"✓ 通過（KD金叉 K={r['K']} D={r['D']}，量比={r['vol_ratio']}）")
+            else:
+                print("✗ 未通過")
+        except Exception as e:
+            print(f"✗ 錯誤：{e}")
+        if i < total:
+            time.sleep(delay)
+
+    print(f"[deep_scan] 完成，通過 {len(results)}/{total} 檔")
+    return results
 
 
 if __name__ == "__main__":

@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>即時看盤｜線上有位</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --bg:#ffffff;--bg2:#f2f1ec;--bg3:#e6e5df;
+  --text:#1a1a18;--text2:#4a4948;--text3:#888780;
+  --border:rgba(0,0,0,.1);--border2:rgba(0,0,0,.2);
+  --up:#D63B3B;--up-l:rgba(214,59,59,.1);
+  --dn:#1A8F5E;--dn-l:rgba(26,143,94,.1);
+  --green:#1D9E75;--radius:10px;--radius-lg:14px;
+}
+:root[data-theme="dark"]{
+  --bg:#141412;--bg2:#1e1e1b;--bg3:#282824;
+  --text:#eae9e3;--text2:#a0a099;--text3:#666560;
+  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.16);
+  --up:#F06060;--up-l:rgba(240,96,96,.12);
+  --dn:#2DC88A;--dn-l:rgba(45,200,138,.12);
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme]){
+    --bg:#141412;--bg2:#1e1e1b;--bg3:#282824;
+    --text:#eae9e3;--text2:#a0a099;--text3:#666560;
+    --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.16);
+    --up:#F06060;--up-l:rgba(240,96,96,.12);
+    --dn:#2DC88A;--dn-l:rgba(45,200,138,.12);
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif}
+.topbar{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:.5px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:12px}
+.topbar-logo{font-size:16px;font-weight:700;color:var(--green);text-decoration:none}
+.topbar-title{font-size:14px;color:var(--text2)}
+.topbar-back{font-size:13px;color:var(--text3);text-decoration:none;margin-left:auto;display:flex;align-items:center;gap:4px}
+.layout{display:flex;height:calc(100vh - 49px)}
+
+/* 左側自選清單 */
+.sidebar{width:170px;flex-shrink:0;border-right:.5px solid var(--border);background:var(--bg);overflow-y:auto;display:flex;flex-direction:column}
+.sidebar-hdr{padding:10px 12px 6px;font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;border-bottom:.5px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sidebar-add{font-size:18px;color:var(--green);cursor:pointer;line-height:1;background:none;border:none}
+.watch-item{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;cursor:pointer;border-bottom:.5px solid var(--border);transition:background .12s}
+.watch-item:hover{background:var(--bg2)}
+.watch-item.active{background:var(--bg2);border-left:2px solid var(--up)}
+.wi-left .wi-name{font-size:13px;font-weight:600;color:var(--text)}
+.wi-left .wi-code{font-size:11px;color:var(--text3);margin-top:1px}
+.wi-right{text-align:right}
+.wi-price{font-size:13px;font-weight:600}
+.wi-chg{font-size:11px;margin-top:1px}
+.wi-del{display:none;background:none;border:none;color:var(--text3);font-size:14px;cursor:pointer;padding:0 4px}
+.watch-item:hover .wi-del{display:block}
+
+/* 搜尋彈窗 */
+.add-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center}
+.add-modal.open{display:flex}
+.add-box{background:var(--bg);border-radius:var(--radius-lg);padding:20px;width:300px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.add-box input{width:100%;padding:10px 12px;border:.5px solid var(--border2);border-radius:var(--radius);background:var(--bg2);color:var(--text);font-size:14px;outline:none;margin-bottom:10px}
+.add-box input:focus{border-color:var(--green)}
+.add-btn{width:100%;padding:10px;background:var(--green);color:#fff;border:none;border-radius:var(--radius);font-size:14px;cursor:pointer}
+.add-cancel{width:100%;padding:8px;background:none;color:var(--text3);border:none;font-size:13px;cursor:pointer;margin-top:6px}
+
+/* 主區域 */
+.main{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text3);gap:10px;font-size:14px}
+
+/* 報價區 */
+.quote-card{background:var(--bg2);border-radius:var(--radius-lg);padding:14px 16px}
+.q-header{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.q-name{font-size:20px;font-weight:700;color:var(--text)}
+.q-code{font-size:13px;color:var(--text3)}
+.q-price{font-size:28px;font-weight:700}
+.q-chg{font-size:15px;font-weight:600}
+.q-ycls{font-size:12px;color:var(--text3);margin-left:auto}
+.q-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.q-stat{background:var(--bg);border-radius:var(--radius);padding:8px 10px}
+.q-stat-label{font-size:10px;color:var(--text3);margin-bottom:3px}
+.q-stat-val{font-size:13px;font-weight:600}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:20px;margin-left:8px}
+.badge-live{background:var(--dn-l);color:var(--dn)}
+.badge-closed{background:var(--bg3);color:var(--text3)}
+
+/* 圖表區 */
+.chart-card{background:var(--bg2);border-radius:var(--radius-lg);padding:14px 16px}
+.chart-label{font-size:11px;color:var(--text3);margin-bottom:4px}
+.chart-wrap{position:relative;height:160px}
+.vol-wrap{position:relative;height:60px;margin-top:4px}
+
+/* 五檔＋成交 */
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.panel{background:var(--bg2);border-radius:var(--radius-lg);padding:14px 16px}
+.panel-title{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.refresh-txt{font-size:11px;color:var(--text3);font-weight:400}
+
+/* 五檔 */
+.book-grid{display:grid;grid-template-columns:1fr 72px 1fr;gap:0;font-size:12px}
+.book-hdr{font-size:10px;color:var(--text3);text-align:center;padding:0 0 6px;border-bottom:.5px solid var(--border)}
+.book-hdr:first-child{text-align:left}
+.book-hdr:last-child{text-align:right}
+.book-row{display:contents}
+.book-buy{padding:5px 0;color:var(--up);font-weight:600}
+.book-price{padding:5px 0;text-align:center;color:var(--text2)}
+.book-sell{padding:5px 0;text-align:right;color:var(--dn);font-weight:600}
+.book-mid-buy{padding:6px 0;color:var(--up);font-weight:700;font-size:13px}
+.book-mid-price{padding:6px 0;text-align:center;font-weight:700;font-size:15px}
+.book-mid-sep{border-top:.5px solid var(--border2);border-bottom:.5px solid var(--border2);margin:2px 0}
+.book-total{display:flex;justify-content:space-between;font-size:11px;margin-top:8px;padding-top:8px;border-top:.5px solid var(--border)}
+.book-bar{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:4px}
+.bar-bg{height:3px;background:var(--bg3);border-radius:2px}
+.bar-b{height:3px;border-radius:2px;background:var(--up);transform-origin:right}
+.bar-s{height:3px;border-radius:2px;background:var(--dn);margin-left:auto}
+
+/* 成交明細 */
+.tick-table{width:100%;border-collapse:collapse;font-size:12px}
+.tick-table th{color:var(--text3);font-weight:500;padding:3px 0;text-align:right;border-bottom:.5px solid var(--border);font-size:10px}
+.tick-table th:first-child{text-align:left}
+.tick-table td{padding:5px 0;text-align:right;border-bottom:.5px solid var(--border)}
+.tick-table td:first-child{text-align:left;color:var(--text3)}
+.tick-body tr:first-child td{font-weight:600}
+
+.up{color:var(--up)}
+.dn{color:var(--dn)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="/" class="topbar-logo">線上有位</a>
+  <span class="topbar-title">即時看盤</span>
+  <span id="sessionBadge" class="badge badge-closed">● 盤後</span>
+  <a href="/" class="topbar-back">← 返回分析</a>
+</div>
+
+<div class="layout">
+  <!-- 左側自選清單 -->
+  <div class="sidebar">
+    <div class="sidebar-hdr">
+      自選股
+      <button class="sidebar-add" onclick="openAdd()" title="新增">＋</button>
+    </div>
+    <div id="watchList"></div>
+  </div>
+
+  <!-- 主區域 -->
+  <div class="main" id="main">
+    <div class="empty-state" id="emptyState">
+      <div style="font-size:32px">📈</div>
+      <div>點左側「＋」新增自選股</div>
+    </div>
+  </div>
+</div>
+
+<!-- 新增彈窗 -->
+<div class="add-modal" id="addModal">
+  <div class="add-box">
+    <div style="font-size:15px;font-weight:700;margin-bottom:12px">新增自選股</div>
+    <input id="addInput" placeholder="輸入股號，如 2330" maxlength="10">
+    <button class="add-btn" onclick="doAdd()">新增</button>
+    <button class="add-cancel" onclick="closeAdd()">取消</button>
+  </div>
+</div>
+
+<script>
+const API_BASE = 'https://stock-navigator-api.zeabur.app';
+const TWSE_SSL = true;
+
+// ── 狀態 ──
+let watchList = JSON.parse(localStorage.getItem('rt_watchlist') || '[]');
+let currentSid = null;
+let priceChart = null, volChart = null;
+let pollTimer = null;
+let priceHistory = {};   // {sid: [{t, p, v}]}
+
+// ── 盤中判斷 ──
+function isSession(){
+  const now = new Date();
+  const d = now.getDay();
+  if(d===0||d===6) return false;
+  const h = now.getHours(), m = now.getMinutes();
+  const mins = h*60+m;
+  return mins >= 9*60 && mins <= 13*60+30;
+}
+
+// ── 本地儲存 ──
+function saveList(){ localStorage.setItem('rt_watchlist', JSON.stringify(watchList)); }
+
+// ── 渲染自選清單 ──
+function renderList(){
+  const el = document.getElementById('watchList');
+  if(!watchList.length){ el.innerHTML = '<div style="padding:16px 12px;font-size:12px;color:var(--text3);text-align:center">尚無自選股</div>'; return; }
+  el.innerHTML = watchList.map(s => `
+    <div class="watch-item${s.sid===currentSid?' active':''}" onclick="selectStock('${s.sid}')">
+      <div class="wi-left">
+        <div class="wi-name">${s.name||s.sid}</div>
+        <div class="wi-code">${s.sid}</div>
+      </div>
+      <div class="wi-right">
+        <div class="wi-price ${s.chg>0?'up':s.chg<0?'dn':''}" id="wp_${s.sid}">${s.price||'—'}</div>
+        <div class="wi-chg ${s.chg>0?'up':s.chg<0?'dn':''}" id="wc_${s.sid}">${s.chg!=null?(s.chg>0?'+':'')+s.chg+'%':'—'}</div>
+      </div>
+      <button class="wi-del" onclick="event.stopPropagation();delStock('${s.sid}')">✕</button>
+    </div>`).join('');
+}
+
+// ── 選股 ──
+function selectStock(sid){
+  currentSid = sid;
+  renderList();
+  document.getElementById('emptyState') && (document.getElementById('emptyState').style.display='none');
+  renderMain();
+  startPoll();
+}
+
+// ── 刪除 ──
+function delStock(sid){
+  watchList = watchList.filter(s=>s.sid!==sid);
+  saveList();
+  if(currentSid===sid){
+    currentSid = watchList.length ? watchList[0].sid : null;
+    stopPoll();
+  }
+  renderList();
+  if(currentSid) selectStock(currentSid);
+  else { document.getElementById('main').innerHTML = '<div class="empty-state" id="emptyState"><div style="font-size:32px">📈</div><div>點左側「＋」新增自選股</div></div>'; }
+}
+
+// ── 新增彈窗 ──
+function openAdd(){
+  document.getElementById('addModal').classList.add('open');
+  setTimeout(()=>document.getElementById('addInput').focus(),100);
+}
+function closeAdd(){
+  document.getElementById('addModal').classList.remove('open');
+  document.getElementById('addInput').value='';
+}
+document.getElementById('addInput').addEventListener('keydown', e=>{ if(e.key==='Enter') doAdd(); if(e.key==='Escape') closeAdd(); });
+
+async function doAdd(){
+  const val = document.getElementById('addInput').value.trim();
+  if(!val) return;
+  if(watchList.find(s=>s.sid===val)){ closeAdd(); selectStock(val); return; }
+  // 先查股名
+  let name = '';
+  try{
+    const r = await fetch(`${API_BASE}/api/realtime/${val}`);
+    const d = await r.json();
+    if(d.ok && d.data) name = d.data.n || '';
+  }catch(e){}
+  watchList.push({sid:val, name, price:null, chg:null});
+  saveList();
+  renderList();
+  closeAdd();
+  selectStock(val);
+}
+
+// ── 渲染主區域骨架 ──
+function renderMain(){
+  const s = watchList.find(w=>w.sid===currentSid);
+  if(!s) return;
+  document.getElementById('main').innerHTML = `
+    <div class="quote-card">
+      <div class="q-header">
+        <span class="q-name" id="qName">${s.name||s.sid}</span>
+        <span class="q-code" id="qCode">${s.sid}</span>
+        <span class="q-price up" id="qPrice">—</span>
+        <span class="q-chg up" id="qChg"></span>
+        <span class="q-ycls" id="qYcls"></span>
+      </div>
+      <div class="q-stats">
+        <div class="q-stat"><div class="q-stat-label">開盤</div><div class="q-stat-val up" id="qOpen">—</div></div>
+        <div class="q-stat"><div class="q-stat-label">最高</div><div class="q-stat-val up" id="qHigh">—</div></div>
+        <div class="q-stat"><div class="q-stat-label">最低</div><div class="q-stat-val dn" id="qLow">—</div></div>
+        <div class="q-stat"><div class="q-stat-label">成交量</div><div class="q-stat-val" id="qVol">—</div></div>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-label">今日走勢</div>
+      <div class="chart-wrap"><canvas id="priceCanvas" role="img" aria-label="今日走勢圖">今日走勢</canvas></div>
+      <div class="chart-label" style="margin-top:6px">量能（張）</div>
+      <div class="vol-wrap"><canvas id="volCanvas" role="img" aria-label="今日量能">今日量能</canvas></div>
+    </div>
+    <div class="bottom-grid">
+      <div class="panel">
+        <div class="panel-title">委買 / 委賣五檔 <span class="refresh-txt" id="bookTime">—</span></div>
+        <div id="bookArea"><div style="color:var(--text3);font-size:12px;text-align:center;padding:20px 0">載入中...</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">成交明細 <span class="refresh-txt" id="tickTime">—</span></div>
+        <table class="tick-table">
+          <thead><tr><th>時間</th><th>成交</th><th>買</th><th>賣</th><th>量</th></tr></thead>
+          <tbody id="tickBody" class="tick-body"><tr><td colspan="5" style="text-align:center;color:var(--text3);padding:16px 0">載入中...</td></tr></tbody>
+        </table>
+      </div>
+    </div>`;
+  initCharts();
+}
+
+// ── 初始化圖表 ──
+function initCharts(){
+  if(priceChart){ priceChart.destroy(); priceChart=null; }
+  if(volChart){ volChart.destroy(); volChart=null; }
+  const isDark = document.documentElement.getAttribute('data-theme')==='dark' || (!document.documentElement.hasAttribute('data-theme') && matchMedia('(prefers-color-scheme:dark)').matches);
+  const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+  const upColor = isDark ? '#F06060' : '#D63B3B';
+
+  priceChart = new Chart(document.getElementById('priceCanvas'),{
+    type:'line',
+    data:{labels:[],datasets:[{data:[],borderColor:upColor,borderWidth:1.5,pointRadius:0,fill:true,backgroundColor:isDark?'rgba(240,96,96,0.08)':'rgba(214,59,59,0.06)',tension:0.2}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false}},
+      scales:{x:{display:false,grid:{display:false}},y:{position:'right',grid:{color:gridColor},ticks:{color:'#888',font:{size:10},maxTicksLimit:4}}}}
+  });
+
+  volChart = new Chart(document.getElementById('volCanvas'),{
+    type:'bar',
+    data:{labels:[],datasets:[{data:[],backgroundColor:[],borderWidth:0,borderRadius:1}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:'#888',font:{size:9},maxTicksLimit:8,maxRotation:0},grid:{color:gridColor}},y:{position:'right',grid:{color:gridColor},ticks:{color:'#888',font:{size:9},maxTicksLimit:3}}}}
+  });
+}
+
+// ── 更新圖表 ──
+function updateCharts(sid){
+  const hist = priceHistory[sid] || [];
+  if(!hist.length || !priceChart || !volChart) return;
+  const isDark = document.documentElement.getAttribute('data-theme')==='dark' || (!document.documentElement.hasAttribute('data-theme') && matchMedia('(prefers-color-scheme:dark)').matches);
+  const upColor = isDark ? '#F06060' : '#D63B3B';
+  const dnColor = isDark ? '#2DC88A' : '#1A8F5E';
+
+  priceChart.data.labels = hist.map(h=>h.t);
+  priceChart.data.datasets[0].data = hist.map(h=>h.p);
+  priceChart.data.datasets[0].borderColor = upColor;
+  priceChart.update('none');
+
+  volChart.data.labels = hist.map(h=>h.t);
+  volChart.data.datasets[0].data = hist.map(h=>h.v||0);
+  volChart.data.datasets[0].backgroundColor = hist.map((h,i)=> i===0?upColor : (h.p>=(hist[i-1]?.p||h.p)?upColor:dnColor));
+  volChart.update('none');
+}
+
+// ── 透過後端 proxy 抓報價（繞過 CORS）──
+async function fetchQuote(sid){
+  try{
+    const r = await fetch(`${API_BASE}/api/realtime/${sid}`);
+    const d = await r.json();
+    if(d.ok && d.data) return d.data;
+  }catch(e){ console.warn('[fetchQuote]', e); }
+  return null;
+}
+
+// ── 更新報價顯示 ──
+function applyQuote(q, sid){
+  if(!q) return;
+  const z = parseFloat(q.z)||0;
+  const y = parseFloat(q.y)||0;
+  const chgVal = y>0 ? +(((z-y)/y)*100).toFixed(2) : 0;
+  const chgAbs = y>0 ? +(z-y).toFixed(2) : 0;
+  const sign = chgVal>=0 ? '+' : '';
+  const cls = chgVal>0?'up':chgVal<0?'dn':'';
+
+  // 更新自選清單
+  const ws = watchList.find(w=>w.sid===sid);
+  if(ws){ ws.name=q.n||sid; ws.price=z||y; ws.chg=chgVal; saveList(); }
+  const wpEl = document.getElementById(`wp_${sid}`);
+  const wcEl = document.getElementById(`wc_${sid}`);
+  if(wpEl){ wpEl.textContent=z||y||'—'; wpEl.className=`wi-price ${cls}`; }
+  if(wcEl){ wcEl.textContent=z?`${sign}${chgVal}%`:'—'; wcEl.className=`wi-chg ${cls}`; }
+
+  if(sid!==currentSid) return;
+
+  // 更新主區域
+  const setEl = (id,val,c='')=>{ const e=document.getElementById(id); if(e){e.textContent=val;if(c)e.className=c;} };
+  setEl('qName', q.n||sid);
+  setEl('qCode', sid);
+  setEl('qPrice', z||y||'—', `q-price ${cls}`);
+  setEl('qChg', z ? `▲ ${chgAbs} (${sign}${chgVal}%)` : '盤後', `q-chg ${cls}`);
+  setEl('qYcls', `昨收 ${y||'—'}`);
+  setEl('qOpen', q.o||'—');
+  setEl('qHigh', q.h||'—');
+  setEl('qLow',  q.l||'—');
+  setEl('qVol',  q.v ? (+q.v).toLocaleString()+'張' : '—');
+
+  // 記錄歷史（盤中才記）
+  if(isSession() && z>0){
+    const now = new Date();
+    const t = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+    if(!priceHistory[sid]) priceHistory[sid]=[];
+    const hist = priceHistory[sid];
+    const tv = parseFloat(q.tv)||0;
+    if(!hist.length || hist[hist.length-1].t!==t){
+      hist.push({t, p:z, v:tv});
+      if(hist.length>80) hist.shift();
+    } else {
+      hist[hist.length-1].p=z;
+      hist[hist.length-1].v=tv;
+    }
+    updateCharts(sid);
+  }
+
+  // 五檔
+  renderBook(q);
+
+  // 成交明細
+  renderTicks(q);
+}
+
+// ── 五檔 ──
+function renderBook(q){
+  const ba = document.getElementById('bookArea');
+  if(!ba) return;
+  const bPrices = (q.b||'').split('_').filter(Boolean);
+  const bVols   = (q.g||'').split('_').filter(Boolean);
+  const aPrices = (q.a||'').split('_').filter(Boolean);
+  const aVols   = (q.f||'').split('_').filter(Boolean);
+  const z = parseFloat(q.z)||parseFloat(q.y)||0;
+  const totalB = bVols.reduce((s,v)=>s+(+v||0),0);
+  const totalA = aVols.reduce((s,v)=>s+(+v||0),0);
+  const pct = totalB+totalA>0 ? Math.round(totalB/(totalB+totalA)*100) : 50;
+
+  let rows = '';
+  for(let i=4;i>=0;i--){
+    rows += `<div class="book-buy">${bVols[i]?+bVols[i]+'張':''}</div>
+             <div class="book-price">${bPrices[i]||''}</div>
+             <div class="book-sell"></div>`;
+  }
+  rows += `<div class="book-mid-sep" style="grid-column:1/-1;margin:2px 0"></div>
+           <div class="book-mid-buy"></div>
+           <div class="book-mid-price ${z>parseFloat(q.y)?'up':z<parseFloat(q.y)?'dn':''}">${z||q.y||'—'}</div>
+           <div></div>
+           <div class="book-mid-sep" style="grid-column:1/-1;margin:2px 0"></div>`;
+  for(let i=0;i<5;i++){
+    rows += `<div class="book-buy"></div>
+             <div class="book-price">${aPrices[i]||''}</div>
+             <div class="book-sell">${aVols[i]?+aVols[i]+'張':''}</div>`;
+  }
+
+  const now = new Date();
+  const tstr = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  document.getElementById('bookTime').textContent = tstr;
+
+  ba.innerHTML = `
+    <div class="book-grid">
+      <div class="book-hdr up">委買</div><div class="book-hdr">價格</div><div class="book-hdr dn" style="text-align:right">委賣</div>
+      ${rows}
+    </div>
+    <div class="book-total">
+      <span class="up">委買 ${totalB}張</span>
+      <span class="dn">委賣 ${totalA}張</span>
+    </div>
+    <div class="book-bar">
+      <div class="bar-bg"><div class="bar-b" style="width:${pct}%"></div></div>
+      <div class="bar-bg"><div class="bar-s" style="width:${100-pct}%"></div></div>
+    </div>`;
+}
+
+// ── 成交明細（從 TWSE ct 欄位解析）──
+function renderTicks(q){
+  const tb = document.getElementById('tickBody');
+  if(!tb) return;
+  const cts = (q.ct||'').split('_').filter(Boolean);
+  if(!cts.length){ tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:12px 0">暫無成交資料</td></tr>'; return; }
+  const y = parseFloat(q.y)||0;
+  const rows = cts.slice(-15).reverse().map((ct,i)=>{
+    const parts = ct.split('/');
+    const time=parts[0]||'', price=parseFloat(parts[1]||0), vol=parts[2]||'';
+    const cls = price>y?'up':price<y?'dn':'';
+    const z = parseFloat(q.z)||0;
+    const bpArr = (q.b||'').split('_');
+    const apArr = (q.a||'').split('_');
+    return `<tr><td>${time}</td><td class="${cls}">${price||'—'}</td><td class="up">${bpArr[0]||'—'}</td><td class="dn">${apArr[0]||'—'}</td><td>${vol}</td></tr>`;
+  }).join('');
+  tb.innerHTML = rows;
+  const now = new Date();
+  const tstr = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  document.getElementById('tickTime').textContent = tstr;
+}
+
+// ── Poll ──
+async function poll(){
+  if(!currentSid) return;
+  // 同時抓所有自選股報價（更新側邊欄）
+  for(const w of watchList){
+    const q = await fetchQuote(w.sid);
+    applyQuote(q, w.sid);
+  }
+}
+
+function startPoll(){
+  stopPoll();
+  poll();
+  pollTimer = setInterval(poll, 5000);
+}
+function stopPoll(){
+  if(pollTimer){ clearInterval(pollTimer); pollTimer=null; }
+}
+
+// ── 盤中狀態badge ──
+function updateBadge(){
+  const el = document.getElementById('sessionBadge');
+  if(isSession()){ el.textContent='● 盤中'; el.className='badge badge-live'; }
+  else { el.textContent='● 盤後'; el.className='badge badge-closed'; }
+}
+
+// ── 初始化 ──
+async function fillMissingNames(){
+  let changed = false;
+  for(const w of watchList){
+    if(!w.name){
+      try{
+        const r = await fetch(`${API_BASE}/api/realtime/${w.sid}`);
+        const d = await r.json();
+        if(d.ok && d.data && d.data.n){ w.name = d.data.n; changed = true; }
+      }catch(e){}
+    }
+  }
+  if(changed){ saveList(); renderList(); }
+}
+
+function init(){
+  updateBadge();
+  setInterval(updateBadge, 30000);
+  renderList();
+  if(watchList.length){
+    currentSid = watchList[0].sid;
+    renderList();
+    document.getElementById('emptyState') && (document.getElementById('emptyState').remove());
+    renderMain();
+    startPoll();
+    fillMissingNames();
+  }
+}
+
+// 套用 theme（與主站同步）
+const savedTheme = localStorage.getItem('theme');
+if(savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+
+init();
+</script>
+</body>
+</html>

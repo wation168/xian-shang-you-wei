@@ -8,7 +8,6 @@ crawler.py — 資料爬取層
 import os
 import re
 import json
-import ssl
 import time
 import urllib.request
 from datetime import date, datetime, timedelta, timezone
@@ -17,18 +16,15 @@ from xml.etree import ElementTree as ET
 
 FINMIND_TOKEN = os.environ.get("FINMIND_TOKEN", "")
 
-# SSL context 供 TWSE 使用（TWSE 憑證缺少 Subject Key Identifier，無法通過預設驗證）
-_TWSE_SSL_CTX = ssl.create_default_context()
-_TWSE_SSL_CTX.check_hostname = False
-_TWSE_SSL_CTX.verify_mode = ssl.CERT_NONE
-
 # ──────────────────────────────────────────
-# 財經新聞 RSS feeds
+# 鉅亨 RSS feeds
 # ──────────────────────────────────────────
 CNYES_FEEDS = [
-    "https://feeds.feedburner.com/cnyes",                   # 鉅亨頭條
-    "https://tw.stock.yahoo.com/rss",                       # Yahoo 台股
-    "https://money.udn.com/rssfeed/news/1001/5590",         # 經濟日報個股
+    "https://feeds.feedburner.com/cnyes",                   # 頭條
+    "https://news.cnyes.com/rss/category/tw_stock",         # 台股
+    "https://news.cnyes.com/rss/category/fund",             # 產業基金
+    "https://news.cnyes.com/rss/category/tw_stock_news",    # 個股新聞
+    "https://news.cnyes.com/rss/category/industry",         # 產業
 ]
 
 # 股票代號正則（4~6碼數字，後接中文公司名 or 括號）
@@ -41,56 +37,43 @@ _SKIP_NUMS = {"2024", "2025", "2026", "1000", "5000", "10000",
 
 def fetch_cnyes_news(max_items: int = 300, days: int = 7) -> list[dict]:
     """
-    爬取鉅亨 RSS，回傳近 days 天的新聞列表（預設近7天）
+    使用 FinMind TaiwanStockNews 抓近 days 天的新聞列表
     每筆: {title, link, pub_date, codes: [股票代號...], keywords: [關鍵字...]}
     """
-    from email.utils import parsedate_to_datetime
-
-    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+    import json as _json
+    start_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
     items = []
-    seen_links = set()
-
-    for feed_url in CNYES_FEEDS:
-        try:
-            req = urllib.request.Request(
-                feed_url, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                xml = resp.read()
-            root = ET.fromstring(xml)
-            channel = root.find("channel")
-            if channel is None:
+    seen_titles = set()
+    try:
+        url = (
+            f"https://api.finmindtrade.com/api/v4/data"
+            f"?dataset=TaiwanStockNews&start_date={start_date}"
+            f"&token={FINMIND_TOKEN}"
+        )
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            raw = _json.loads(resp.read())
+        for n in raw.get("data", []):
+            title = (n.get("title") or "").strip()
+            if not title or title in seen_titles:
                 continue
-            for item in channel.findall("item"):
-                title = (item.findtext("title") or "").strip()
-                link  = (item.findtext("link")  or "").strip()
-                pub   = (item.findtext("pubDate") or "").strip()
-                desc  = (item.findtext("description") or "").strip()
-                if not title or link in seen_links:
-                    continue
-                # 日期篩選：超過 days 天的略過
-                if pub:
-                    try:
-                        dt = parsedate_to_datetime(pub)
-                        if dt < cutoff:
-                            continue
-                    except Exception:
-                        pass
-                seen_links.add(link)
-                full_text = title + " " + desc
-                codes = _extract_codes(full_text)
-                keywords = _extract_keywords(title)
-                items.append({
-                    "title":    title,
-                    "link":     link,
-                    "pub_date": pub,
-                    "codes":    codes,
-                    "keywords": keywords,
-                })
-                if len(items) >= max_items:
-                    break
-        except Exception as e:
-            print(f"[crawler] RSS {feed_url} 失敗：{e}")
-
+            seen_titles.add(title)
+            stock_id = str(n.get("stock_id") or "")
+            link = n.get("link") or n.get("url") or ""
+            pub_date = n.get("date") or ""
+            codes = [stock_id] if stock_id and stock_id.isdigit() else _extract_codes(title)
+            keywords = _extract_keywords(title)
+            items.append({
+                "title":    title,
+                "link":     link,
+                "pub_date": pub_date,
+                "codes":    codes,
+                "keywords": keywords,
+            })
+            if len(items) >= max_items:
+                break
+    except Exception as e:
+        print(f"[crawler] FinMind 新聞抓取失敗：{e}")
     print(f"[crawler] 鉅亨 RSS 共取得 {len(items)} 則新聞（近{days}天）")
     return items
 
@@ -123,7 +106,7 @@ def _extract_keywords(title: str) -> list[str]:
 # TWSE 成交量排行（不打 FinMind）
 # ──────────────────────────────────────────
 
-def fetch_twse_volume_top(n: int = 30) -> tuple[list[str], dict[str, str]]:
+def fetch_twse_volume_top(n: int = 100) -> tuple[list[str], dict[str, str]]:
     """
     從 TWSE STOCK_DAY_ALL 取最近交易日成交量前 n 支上市股
     回傳 (top_n_stock_ids, name_dict)  — 單次 HTTP 呼叫，不打 FinMind
@@ -132,7 +115,7 @@ def fetch_twse_volume_top(n: int = 30) -> tuple[list[str], dict[str, str]]:
     url = f"https://www.twse.com.tw/exchangeReport/STOCK_DAY_ALL?response=json&date={today}"
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=12, context=_TWSE_SSL_CTX) as resp:
+        with urllib.request.urlopen(req, timeout=12) as resp:
             data = json.loads(resp.read())
 
         if data.get("stat") not in ("OK", "ok"):
@@ -140,7 +123,7 @@ def fetch_twse_volume_top(n: int = 30) -> tuple[list[str], dict[str, str]]:
             # fallback：不帶 date 參數
             url2 = "https://www.twse.com.tw/exchangeReport/STOCK_DAY_ALL?response=json"
             req2 = urllib.request.Request(url2, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(req2, timeout=12, context=_TWSE_SSL_CTX) as resp2:
+            with urllib.request.urlopen(req2, timeout=12) as resp2:
                 data = json.loads(resp2.read())
 
         rows = data.get("data", [])
@@ -278,8 +261,7 @@ def fetch_institutional(stock_id: str, days: int = 25) -> list[dict]:
         for r in data.get("data", []):
             d    = r.get("date", "")[:10]
             name = r.get("name", "")
-            # FinMind 回傳單位為股，除以 1000 換算成張
-            net  = (int(r.get("buy", 0) or 0) - int(r.get("sell", 0) or 0)) // 1000
+            net  = int(r.get("buy", 0) or 0) - int(r.get("sell", 0) or 0)
             if d not in daily:
                 daily[d] = {"foreign": 0, "invest": 0, "dealer": 0}
             if "外資" in name or "Foreign" in name:
@@ -329,6 +311,146 @@ def get_all_tw_stocks() -> list[str]:
     except Exception as e:
         print(f"[crawler] get_all_tw_stocks 失敗：{e}")
         return []
+
+
+# ──────────────────────────────────────────
+# TWSE 三大法人買賣超（T86）— 免費，不需 token
+# ──────────────────────────────────────────
+
+def fetch_twse_institutional(stock_id: str, days: int = 3) -> dict:
+    """
+    從 TWSE T86 抓近 days 個交易日的三大法人買賣超
+    回傳 {
+        foreign_3d: int,   # 外資近3日合計（張）
+        invest_3d:  int,   # 投信近3日合計（張）
+        dealer_3d:  int,   # 自營近3日合計（張）
+        total_3d:   int,   # 合計
+        rows: [...]        # 原始每日明細
+    }
+    """
+    results = {"foreign_3d": 0, "invest_3d": 0, "dealer_3d": 0, "total_3d": 0, "rows": []}
+    today = date.today()
+    days_checked = 0
+    days_collected = 0
+
+    while days_checked < 10 and days_collected < days:
+        d = today - timedelta(days=days_checked)
+        days_checked += 1
+        # 跳過週末
+        if d.weekday() >= 5:
+            continue
+        date_str = d.strftime("%Y%m%d")
+        url = f"https://www.twse.com.tw/fund/T86?response=json&date={date_str}&selectType=ALLBUT0999"
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=12) as resp:
+                data = json.loads(resp.read())
+            if data.get("stat") not in ("OK", "ok"):
+                continue
+            rows = data.get("data", [])
+            for row in rows:
+                if not row or str(row[0]).strip() != stock_id:
+                    continue
+                # 欄位：證券代號,證券名稱,外資買進,外資賣出,外資買賣超,投信買進,投信賣出,投信買賣超,自營買進,自營賣出,自營買賣超,...
+                try:
+                    def _parse(v):
+                        return int(str(v).replace(",", "").replace("+", "") or 0)
+                    foreign = _parse(row[4]) if len(row) > 4 else 0
+                    invest  = _parse(row[7]) if len(row) > 7 else 0
+                    dealer  = _parse(row[10]) if len(row) > 10 else 0
+                    results["foreign_3d"] += foreign
+                    results["invest_3d"]  += invest
+                    results["dealer_3d"]  += dealer
+                    results["total_3d"]   += foreign + invest + dealer
+                    results["rows"].append({
+                        "date": d.strftime("%Y-%m-%d"),
+                        "foreign": foreign,
+                        "invest": invest,
+                        "dealer": dealer,
+                    })
+                    days_collected += 1
+                except Exception:
+                    pass
+                break
+            time.sleep(0.5)
+        except Exception as e:
+            print(f"[crawler] TWSE T86 {date_str} 失敗：{e}")
+            time.sleep(1)
+
+    return results
+
+
+# ──────────────────────────────────────────
+# TWSE 個股券商分點進出（TWT84U）— 免費，不需 token
+# ──────────────────────────────────────────
+
+def fetch_twse_broker_top(stock_id: str, top_n: int = 15) -> dict:
+    """
+    從 TWSE TWT84U 抓最近交易日個股券商分點買賣明細
+    回傳 {
+        date: str,
+        buyers:  [{broker, buy_vol}, ...],   # 買方前N大（張）
+        sellers: [{broker, sell_vol}, ...],  # 賣方前N大（張）
+    }
+    """
+    empty = {"date": "", "buyers": [], "sellers": []}
+    today = date.today()
+
+    # 往前找最多7個交易日，直到拿到有效資料
+    for i in range(7):
+        d = today - timedelta(days=i)
+        if d.weekday() >= 5:  # 跳過週末
+            continue
+        date_str = d.strftime("%Y%m%d")
+        url = f"https://www.twse.com.tw/fund/TWT84U?response=json&date={date_str}&stockNo={stock_id}"
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=12) as resp:
+                data = json.loads(resp.read())
+
+            if data.get("stat") not in ("OK", "ok"):
+                time.sleep(0.3)
+                continue
+
+            rows = data.get("data", [])
+            if not rows:
+                time.sleep(0.3)
+                continue
+
+            buyers, sellers = [], []
+            for row in rows:
+                if len(row) < 6:
+                    continue
+                try:
+                    def _vol(v):
+                        v = str(v).replace(",", "").replace("+", "").strip()
+                        return int(v) if v else 0
+                    # TWT84U 欄位：買方代號, 買方名稱, 買進股數, 賣方代號, 賣方名稱, 賣出股數
+                    # 股數 → 張數（÷1000）
+                    broker_buy  = str(row[1]).strip()
+                    buy_vol     = _vol(row[2]) // 1000
+                    broker_sell = str(row[4]).strip()
+                    sell_vol    = _vol(row[5]) // 1000
+                    if broker_buy and buy_vol > 0:
+                        buyers.append({"broker": broker_buy, "buy_vol": buy_vol})
+                    if broker_sell and sell_vol > 0:
+                        sellers.append({"broker": broker_sell, "sell_vol": sell_vol})
+                except Exception:
+                    continue
+
+            buyers.sort(key=lambda x: x["buy_vol"], reverse=True)
+            sellers.sort(key=lambda x: x["sell_vol"], reverse=True)
+
+            return {
+                "date":    d.strftime("%Y-%m-%d"),
+                "buyers":  buyers[:top_n],
+                "sellers": sellers[:top_n],
+            }
+        except Exception as e:
+            print(f"[crawler] TWSE TWT84U {date_str} 失敗：{e}")
+            time.sleep(0.5)
+
+    return empty
 
 
 if __name__ == "__main__":

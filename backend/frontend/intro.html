@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>線上有位 功能介紹</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;background:#0a0a12;overflow:hidden;font-family:-apple-system,'Noto Sans TC',sans-serif}
+#stage{width:100vw;height:100dvh;position:relative;overflow:hidden;cursor:pointer}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:clamp(24px,6vw,48px) clamp(20px,5vw,40px);opacity:0;transform:translateY(20px);transition:opacity .4s ease,transform .4s ease;pointer-events:none}
+.slide.active{opacity:1;transform:translateY(0);pointer-events:auto}
+.slide.exit{opacity:0;transform:translateY(-20px)}
+.tag{font-size:clamp(10px,2.5vw,13px);font-weight:700;letter-spacing:2px;border-radius:20px;padding:5px 14px;margin-bottom:clamp(12px,3vw,20px);text-transform:uppercase;display:inline-block}
+.tg{background:rgba(0,229,160,.15);color:#00e5a0;border:1px solid rgba(0,229,160,.2)}
+.tp{background:rgba(168,85,247,.15);color:#a855f7;border:1px solid rgba(168,85,247,.2)}
+.tb{background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.2)}
+.to{background:rgba(249,115,22,.15);color:#fb923c;border:1px solid rgba(249,115,22,.2)}
+.tk{background:rgba(236,72,153,.15);color:#f472b6;border:1px solid rgba(236,72,153,.2)}
+h2{font-size:clamp(18px,5vw,28px);font-weight:900;color:#f0eeff;text-align:center;line-height:1.25;letter-spacing:-.5px;margin-bottom:clamp(8px,2vw,14px)}
+p{font-size:clamp(12px,3vw,15px);color:#a89fc0;text-align:center;line-height:1.7}
+p strong{color:#f0eeff}
+.sub{font-size:clamp(10px,2.5vw,12px);color:#5a5470;text-align:center;margin-top:8px}
+.card{background:#16162a;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:clamp(10px,2.5vw,16px) clamp(12px,3vw,18px);width:100%;margin:clamp(8px,2vw,14px) 0}
+.row{display:flex;justify-content:space-between;align-items:center;padding:clamp(5px,1.5vw,8px) 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.row:last-child{border-bottom:none}
+.rl{font-size:clamp(11px,2.8vw,13px);color:#5a5470}
+.rv{font-size:clamp(11px,2.8vw,13px);font-weight:700;color:#f0eeff}
+.rv.g{color:#00e5a0}.rv.r{color:#f87171}.rv.o{color:#fb923c}
+.conc{background:rgba(0,229,160,.06);border-left:3px solid #00e5a0;border-radius:0 10px 10px 0;padding:clamp(8px,2vw,12px) clamp(10px,2.5vw,14px);font-size:clamp(11px,2.8vw,13px);color:#d0fdf0;line-height:1.6;margin-bottom:clamp(8px,2vw,12px);text-align:left}
+.at{font-size:clamp(10px,2.5vw,11px);color:#00e5a0;font-weight:700;margin-bottom:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(6px,1.5vw,10px);width:100%;margin:clamp(8px,2vw,14px) 0}
+.gi{background:#16162a;border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:clamp(10px,2.5vw,14px) 8px;text-align:center}
+.gi-ico{font-size:clamp(20px,5vw,26px);margin-bottom:clamp(4px,1vw,8px)}
+.gi-name{font-size:clamp(11px,2.8vw,13px);color:#a89fc0;font-weight:600;line-height:1.3}
+.gi-desc{font-size:clamp(10px,2.5vw,11px);color:#5a5470;margin-top:3px}
+.prow{display:flex;align-items:center;justify-content:space-between;padding:clamp(6px,1.5vw,9px) 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.prow:last-child{border-bottom:none}
+.pn{font-size:clamp(11px,2.8vw,13px);color:#5a5470;width:18px}
+.pname{font-size:clamp(12px,3vw,14px);font-weight:600;color:#f0eeff;flex:1;margin:0 8px}
+.pcode{font-size:clamp(10px,2.5vw,11px);color:#5a5470}
+.pup{font-size:clamp(11px,2.8vw,13px);font-weight:700;color:#4ade80}
+.pdn{font-size:clamp(11px,2.8vw,13px);font-weight:700;color:#f87171}
+.deep-banner{background:rgba(0,229,160,.06);border:1px solid rgba(0,229,160,.18);border-radius:12px;padding:clamp(9px,2vw,13px) clamp(12px,3vw,16px);width:100%;margin:8px 0;display:flex;align-items:center;gap:10px}
+.deep-t{font-size:clamp(11px,2.8vw,13px);font-weight:700;color:#00e5a0;margin-bottom:3px}
+.deep-s{font-size:clamp(10px,2.5vw,11px);color:#5a5470}
+.alert-item{background:#16162a;border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:clamp(9px,2vw,12px) clamp(10px,2.5vw,14px);width:100%;margin:5px 0;display:flex;align-items:center;gap:10px}
+.alert-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.alert-info{flex:1}
+.alert-stock{font-size:clamp(12px,3vw,14px);font-weight:700;color:#f0eeff}
+.alert-detail{font-size:clamp(10px,2.5vw,11px);color:#5a5470;margin-top:2px}
+.chat-wrap{background:#0d0d1a;border-radius:14px;padding:clamp(10px,2.5vw,14px);width:100%;margin:10px 0;display:flex;flex-direction:column;gap:8px}
+.cbub{padding:clamp(7px,2vw,10px) clamp(10px,2.5vw,14px);border-radius:16px;font-size:clamp(11px,2.8vw,13px);max-width:82%;line-height:1.55}
+.cother{background:rgba(30,12,56,.9);border:1px solid rgba(216,180,254,.12);color:#f0e6ff;align-self:flex-start;border-bottom-left-radius:3px}
+.cme{background:#7c3aed;color:#fff;align-self:flex-end;border-bottom-right-radius:3px}
+.ctag{font-size:clamp(10px,2.5vw,11px);color:#e879f9;font-weight:700;margin-bottom:3px}
+.health-row{display:flex;align-items:center;gap:8px;padding:clamp(6px,1.5vw,8px) 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.health-row:last-child{border-bottom:none}
+.hname{font-size:clamp(12px,3vw,13px);font-weight:600;color:#f0eeff;flex:1}
+.hbar{flex:1;height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}
+.hfill{height:100%;border-radius:3px}
+.prog{position:absolute;bottom:0;left:0;width:100%;height:3px;background:rgba(255,255,255,.06)}
+.prog-fill{height:100%;background:#00e5a0;transition:width .1s linear}
+.slide-num{position:absolute;top:clamp(12px,3vw,20px);right:clamp(14px,3.5vw,24px);font-size:clamp(10px,2.5vw,12px);color:#5a5470;font-weight:600}
+.tap-hint{position:absolute;bottom:clamp(18px,4vw,28px);left:50%;transform:translateX(-50%);font-size:clamp(10px,2.5vw,12px);color:#3a3060;white-space:nowrap}
+.warn{font-size:clamp(9px,2.3vw,11px);color:#3a3060;text-align:center;margin-top:10px;line-height:1.6;max-width:300px}
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <div class="slide active" id="s0">
+    <div class="tag tp">台股分析工具</div>
+    <h2 style="font-size:clamp(28px,8vw,52px);letter-spacing:-2px">線上有位</h2>
+    <p style="margin-top:8px">輸入代號，5 秒看懂<strong>現在的位置</strong><br>全台 1,700+ 支個股全覆蓋</p>
+    <div style="display:flex;gap:8px;margin-top:18px;flex-wrap:wrap;justify-content:center">
+      <span style="font-size:clamp(10px,2.5vw,12px);color:#5a5470;background:#16162a;border-radius:20px;padding:4px 12px">📍 位置導航</span>
+      <span style="font-size:clamp(10px,2.5vw,12px);color:#5a5470;background:#16162a;border-radius:20px;padding:4px 12px">📊 損益比</span>
+      <span style="font-size:clamp(10px,2.5vw,12px);color:#5a5470;background:#16162a;border-radius:20px;padding:4px 12px">🔬 深度選股</span>
+      <span style="font-size:clamp(10px,2.5vw,12px);color:#5a5470;background:#16162a;border-radius:20px;padding:4px 12px">💼 持股健檢</span>
+    </div>
+    <div class="sub" style="margin-top:18px">softglow-ai.com</div>
+  </div>
+
+  <div class="slide" id="s1">
+    <div class="tag tg">位置導航</div>
+    <h2>現在在低風險區<br>還是高風險區？</h2>
+    <div class="card">
+      <div class="at">→ 系統結論</div>
+      <div class="conc">靠近支撐 2277，確認守住可考慮進場。防守位 2178，等支撐確認再評估。</div>
+      <div class="row"><span class="rl">現價</span><span class="rv">2,310</span></div>
+      <div class="row"><span class="rl">支撐區</span><span class="rv g">2,277</span></div>
+      <div class="row"><span class="rl">壓力區</span><span class="rv r">2,440</span></div>
+      <div class="row"><span class="rl">防守位</span><span class="rv o">2,178</span></div>
+    </div>
+    <p style="font-size:clamp(11px,2.8vw,13px)">支撐壓力自動計算，停損一眼看出</p>
+  </div>
+
+  <div class="slide" id="s2">
+    <div class="tag tg">一句話結論</div>
+    <h2>不懂技術分析<br>也看得懂</h2>
+    <div class="card">
+      <div class="row"><span class="rl">K線型態</span><span class="rv">常態 K 棒</span></div>
+      <div class="row"><span class="rl">趨勢</span><span class="rv g">上升趨勢</span></div>
+      <div class="row"><span class="rl">型態</span><span class="rv">支撐整理</span></div>
+      <div class="row"><span class="rl">軌道位置</span><span class="rv">中段區</span></div>
+      <div class="row"><span class="rl">距支撐</span><span class="rv o">-4.5%</span></div>
+    </div>
+    <p style="font-size:clamp(11px,2.8vw,13px)">整合所有指標，直接給操作方向</p>
+  </div>
+
+  <div class="slide" id="s3">
+    <div class="tag tp">損益比計算</div>
+    <h2>這筆交易<br>值不值得做？</h2>
+    <div class="card">
+      <div class="row"><span class="rl">潛在獲利空間</span><span class="rv g">+5.6%</span></div>
+      <div class="row"><span class="rl">潛在虧損</span><span class="rv r">-5.7%</span></div>
+      <div class="row"><span class="rl">損益比</span><span class="rv o">0.99</span></div>
+    </div>
+    <div style="background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.18);border-radius:10px;padding:10px 14px;width:100%;text-align:center">
+      <span style="font-size:clamp(11px,2.8vw,13px);color:#fca5a5">⚠ 風險大於報酬，不建議此位置進場</span>
+    </div>
+    <p style="font-size:clamp(11px,2.8vw,13px);margin-top:10px">數字說話，不再靠感覺下注</p>
+  </div>
+
+  <div class="slide" id="s4">
+    <div class="tag tb">K棒型態辨識</div>
+    <h2>型態自動辨識<br>直接給操作建議</h2>
+    <div class="grid2">
+      <div class="gi"><div class="gi-ico">🕯️</div><div class="gi-name">長紅棒</div><div class="gi-desc">多頭強力</div></div>
+      <div class="gi"><div class="gi-ico">🔨</div><div class="gi-name">錘子線</div><div class="gi-desc">底部反轉</div></div>
+      <div class="gi"><div class="gi-ico">⭐</div><div class="gi-name">射擊之星</div><div class="gi-desc">頭部訊號</div></div>
+      <div class="gi"><div class="gi-ico">☁️</div><div class="gi-name">烏雲蓋頂</div><div class="gi-desc">空頭轉折</div></div>
+    </div>
+    <p style="font-size:clamp(11px,2.8vw,13px)">不需要背型態，系統自動辨識並給建議</p>
+  </div>
+
+  <div class="slide" id="s5">
+    <div class="tag to">籌碼面分析</div>
+    <h2>法人在買還是賣<br>一眼看出</h2>
+    <div class="card">
+      <div class="row"><span class="rl">外資</span><span class="rv g">+12,450 張</span></div>
+      <div class="row"><span class="rl">投信</span><span class="rv g">+3,280 張</span></div>
+      <div class="row"><span class="rl">自營商</span><span class="rv r">-880 張</span></div>
+      <div class="row"><span class="rl">融資餘額</span><span class="rv">42,300 張</span></div>
+      <div class="row"><span class="rl">融券餘額</span><span class="rv">1,240 張</span></div>
+    </div>
+    <p style="font-size:clamp(11px,2.8vw,13px)">三大法人動向，不再被主力倒貨</p>
+  </div>
+
+  <div class="slide" id="s6">
+    <div class="tag tg">同族群連動</div>
+    <h2>查一檔<br>看整個族群</h2>
+    <div class="card">
+      <div class="row"><span class="rl" style="color:#a855f7;font-weight:700">半導體族群</span><span class="rv g">整體偏強</span></div>
+      <div class="row"><span class="rl">台積電 2330</span><span class="rv g">+1.2%</span></div>
+      <div class="row"><span class="rl">聯電 2303</span><span class="rv g">+6.8%</span></div>
+      <div class="row"><span class="rl">南亞科 2408</span><span class="rv g">+10.0%</span></div>
+      <div class="row"><span class="rl">華邦電 2344</span><span class="rv g">+9.9%</span></div>
+    </div>
+    <p style="font-size:clamp(11px,2.8vw,13px)">掌握類股輪動，找更好的進場時機</p>
+  </div>
+
+  <div class="slide" id="s7">
+    <div class="tag to">開盤熱門股</div>
+    <h2>09:15 自動更新<br>開盤量能前 20 名</h2>
+    <div class="card" style="padding:clamp(9px,2vw,13px) clamp(11px,2.5vw,15px)">
+      <div class="prow"><span class="pn">1</span><span class="pname">南亞科 <span class="pcode">2408</span></span><span class="pup">+10.00%</span></div>
+      <div class="prow"><span class="pn">2</span><span class="pname">華邦電 <span class="pcode">2344</span></span><span class="pup">+9.90%</span></div>
+      <div class="prow"><span class="pn">3</span><span class="pname">聯電 <span class="pcode">2303</span></span><span class="pup">+6.80%</span></div>
+      <div class="prow"><span class="pn">4</span><span class="pname">廣達 <span class="pcode">2382</span></span><span class="pup">+3.40%</span></div>
+      <div class="prow"><span class="pn">5</span><span class="pname">鴻海 <span class="pcode">2317</span></span><span class="pdn">-0.77%</span></div>
+    </div>
+    <p style="font-size:clamp(11px,2.8vw,13px)">開盤前掌握市場焦點</p>
+  </div>
+
+  <div class="slide" id="s8">
+    <div class="tag tg">每日深度選股</div>
+    <h2>收盤後自動產出<br>選股名單</h2>
+    <div class="deep-banner">
+      <span style="font-size:clamp(18px,4.5vw,24px)">🔬</span>
+      <div>
+        <div class="deep-t">每日深度選股 · 17:00 更新</div>
+        <div class="deep-s">KD金叉 + MACD動能 + 量能放大 1.5倍</div>
+      </div>
+    </div>
+    <div class="card" style="padding:clamp(9px,2vw,13px) clamp(11px,2.5vw,15px)">
+      <div class="row"><span class="rl">外資買超</span><span class="rv g">+8,200 張</span></div>
+      <div class="row"><span class="rl">投信買超</span><span class="rv g">+2,100 張</span></div>
+      <div class="row"><span class="rl">主力券商</span><span class="rv g">前 15 大顯示</span></div>
+      <div class="row"><span class="rl">距低點</span><span class="rv o">+8.3%</span></div>
+    </div>
+    <p style="font-size:clamp(11px,2.8vw,13px)">法人籌碼＋券商分點，比傳統選股更深</p>
+  </div>
+
+  <div class="slide" id="s9">
+    <div class="tag tb">到價即時提醒</div>
+    <h2>不用一直盯盤<br>到價自動通知</h2>
+    <div style="width:100%;font-size:clamp(10px,2.5vw,11px);color:#5a5470;text-align:center;margin-bottom:6px">盤中每 5 分鐘偵測一次</div>
+    <div class="alert-item">
+      <div class="alert-dot" style="background:#4ade80"></div>
+      <div class="alert-info">
+        <div class="alert-stock">2330 台積電</div>
+        <div class="alert-detail">漲至 2,400 · 目前 2,310 · 監控中</div>
+      </div>
+    </div>
+    <div class="alert-item">
+      <div class="alert-dot" style="background:#f87171"></div>
+      <div class="alert-info">
+        <div class="alert-stock">2454 聯發科</div>
+        <div class="alert-detail">跌至 980 · 目前 1,020 · 監控中</div>
+      </div>
+    </div>
+    <p style="font-size:clamp(11px,2.8vw,13px);margin-top:10px">觸發時立即寄 Email，解放你的注意力</p>
+  </div>
+
+  <div class="slide" id="s10">
+    <div class="tag tk">持股健檢</div>
+    <h2>手上哪支最強<br>哪支最弱？</h2>
+    <div class="card">
+      <div class="health-row">
+        <div class="hname">台積電 <span style="font-size:clamp(10px,2.5vw,11px);color:#4ade80">+12.3%</span></div>
+        <div class="hbar"><div class="hfill" style="width:90%;background:#4ade80"></div></div>
+        <div style="font-size:clamp(11px,2.8vw,12px);color:#4ade80;font-weight:700;min-width:28px;text-align:right">強</div>
+      </div>
+      <div class="health-row">
+        <div class="hname">廣達 <span style="font-size:clamp(10px,2.5vw,11px);color:#fb923c">+5.1%</span></div>
+        <div class="hbar"><div class="hfill" style="width:58%;background:#fb923c"></div></div>
+        <div style="font-size:clamp(11px,2.8vw,12px);color:#fb923c;font-weight:700;min-width:28px;text-align:right">中</div>
+      </div>
+      <div class="health-row">
+        <div class="hname">鴻海 <span style="font-size:clamp(10px,2.5vw,11px);color:#f87171">-3.2%</span></div>
+        <div class="hbar"><div class="hfill" style="width:22%;background:#f87171"></div></div>
+        <div style="font-size:clamp(11px,2.8vw,12px);color:#f87171;font-weight:700;min-width:28px;text-align:right">弱</div>
+      </div>
+    </div>
+    <p style="font-size:clamp(11px,2.8vw,13px)">記錄成本，系統自動排出強弱<br>決定留倉或換股</p>
+  </div>
+
+  <div class="slide" id="s11">
+    <div class="tag tk">即時聊天室</div>
+    <h2>跟股友一起看盤<br>即時討論</h2>
+    <div class="chat-wrap">
+      <div class="cbub cother"><div class="ctag">#2330</div>台積電今天跌到支撐了嗎？</div>
+      <div class="cbub cother">看起來回到 20 日線附近</div>
+      <div class="cbub cme">剛查了，損益比 2.8，可考慮 📈</div>
+      <div class="cbub cother">感謝！我也去查看看 🙏</div>
+    </div>
+    <p style="font-size:clamp(11px,2.8vw,13px)">附帶股票代號，點標籤直接跳報告頁</p>
+  </div>
+
+  <div class="slide" id="s12">
+    <div class="tag tg">個股深度報告</div>
+    <h2>七大欄位完整分析<br>獨立頁面可分享</h2>
+    <div class="grid2">
+      <div class="gi"><div class="gi-ico">📰</div><div class="gi-name">新聞題材</div></div>
+      <div class="gi"><div class="gi-ico">📍</div><div class="gi-name">技術位置</div></div>
+      <div class="gi"><div class="gi-ico">📈</div><div class="gi-name">趨勢判斷</div></div>
+      <div class="gi"><div class="gi-ico">🕯️</div><div class="gi-name">K線分析</div></div>
+      <div class="gi"><div class="gi-ico">⚡</div><div class="gi-name">動能評估</div></div>
+      <div class="gi"><div class="gi-ico">🎯</div><div class="gi-name">操作建議</div></div>
+    </div>
+    <p style="font-size:clamp(11px,2.8vw,13px)">softglow-ai.com/report/2330<br>全台 1,700+ 支，Google 可搜尋</p>
+  </div>
+
+  <div class="slide" id="s13">
+    <div class="tag tg">全部功能</div>
+    <div class="grid2" style="margin:8px 0">
+      <div class="gi"><div class="gi-ico">📍</div><div class="gi-name">位置導航</div></div>
+      <div class="gi"><div class="gi-ico">⚡</div><div class="gi-name">一句話結論</div></div>
+      <div class="gi"><div class="gi-ico">📊</div><div class="gi-name">損益比</div></div>
+      <div class="gi"><div class="gi-ico">🕯️</div><div class="gi-name">K棒辨識</div></div>
+      <div class="gi"><div class="gi-ico">🏦</div><div class="gi-name">法人籌碼</div></div>
+      <div class="gi"><div class="gi-ico">🔗</div><div class="gi-name">族群連動</div></div>
+      <div class="gi"><div class="gi-ico">🔥</div><div class="gi-name">開盤熱門</div></div>
+      <div class="gi"><div class="gi-ico">🔬</div><div class="gi-name">深度選股</div></div>
+      <div class="gi"><div class="gi-ico">🔔</div><div class="gi-name">到價提醒</div></div>
+      <div class="gi"><div class="gi-ico">💼</div><div class="gi-name">持股健檢</div></div>
+      <div class="gi"><div class="gi-ico">💬</div><div class="gi-name">聊天室</div></div>
+      <div class="gi"><div class="gi-ico">📄</div><div class="gi-name">深度報告</div></div>
+    </div>
+    <div class="sub">softglow-ai.com · 手機電腦均可使用</div>
+    <p class="warn">⚠ 本工具僅供技術分析參考，不構成投資建議，投資有風險請自行判斷</p>
+  </div>
+
+  <div class="slide-num" id="snum">1 / 14</div>
+  <div class="tap-hint" id="tapHint">點擊畫面切換</div>
+  <div class="prog"><div class="prog-fill" id="pf" style="width:0%"></div></div>
+</div>
+
+<script>
+const N=14,DUR=2200;
+let cur=0,auto=false,timer=null;
+function go(n){
+  const ss=document.querySelectorAll('.slide');
+  ss[cur].classList.remove('active');
+  ss[cur].classList.add('exit');
+  const p=cur;
+  setTimeout(()=>ss[p].classList.remove('exit'),400);
+  cur=(n+N)%N;
+  ss[cur].classList.add('active');
+  document.getElementById('snum').textContent=(cur+1)+' / '+N;
+  document.getElementById('tapHint').textContent=cur===N-1?'點擊重新播放':'點擊畫面切換';
+  resetProg();
+}
+function next(){go(cur+1);}
+function resetProg(){
+  clearInterval(timer);
+  const f=document.getElementById('pf');
+  f.style.transition='none';f.style.width='0%';
+  if(auto){
+    setTimeout(()=>{f.style.transition='width '+DUR+'ms linear';f.style.width='100%';},30);
+    timer=setInterval(next,DUR);
+  }
+}
+document.getElementById('stage').addEventListener('click',function(){
+  next();
+  if(auto){clearInterval(timer);resetProg();}
+});
+auto=true;resetProg();
+</script>
+</body>
+</html>

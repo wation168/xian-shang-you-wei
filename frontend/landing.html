@@ -294,6 +294,8 @@ footer p{font-size:12px;color:rgba(255,255,255,.3);line-height:1.8}
       <div class="feature-card reveal"><div class="feature-icon">🔥</div><div style="display:inline-block;font-size:10px;font-weight:600;background:#E1F5EE;color:#0F6E56;border-radius:20px;padding:2px 8px;margin-bottom:6px;">NEW</div><h3>開盤熱門股</h3><p>每日 09:15 自動更新，抓開盤量能前 20 名，快速掌握當日市場焦點。</p></div>
       <div class="feature-card reveal"><div class="feature-icon">🔔</div><div style="display:inline-block;font-size:10px;font-weight:600;background:#E1F5EE;color:#0F6E56;border-radius:20px;padding:2px 8px;margin-bottom:6px;">NEW</div><h3>到價即時提醒</h3><p>盤中每 5 分鐘自動偵測，股價達到目標立刻寄 Email 通知，不用一直盯盤。</p></div>
       <div class="feature-card reveal"><div class="feature-icon">📄</div><div style="display:inline-block;font-size:10px;font-weight:600;background:#E1F5EE;color:#0F6E56;border-radius:20px;padding:2px 8px;margin-bottom:6px;">NEW</div><h3>個股深度報告</h3><p>七大欄位完整分析：基本資訊、技術位置、趨勢、K線、動能、風險、操作建議，一鍵產出。</p></div>
+      <div class="feature-card reveal"><div class="feature-icon">🔬</div><div style="display:inline-block;font-size:10px;font-weight:600;background:#E1F5EE;color:#0F6E56;border-radius:20px;padding:2px 8px;margin-bottom:6px;">NEW</div><h3>每日深度選股</h3><p>每日17:00自動產出，KD金叉＋MACD動能增強＋量能放大1.5倍，附法人籌碼（外資/投信/自營）與券商分點買賣前15大，比傳統選股更深更準。</p></div>
+      <div class="feature-card reveal"><div class="feature-icon">💼</div><div style="display:inline-block;font-size:10px;font-weight:600;background:#E1F5EE;color:#0F6E56;border-radius:20px;padding:2px 8px;margin-bottom:6px;">NEW</div><h3>持股健檢</h3><p>記錄你的持股成本，系統自動計算損益、分析技術位置（支撐/壓力/中段），並排出你手上哪支股票最強、哪支最弱，幫你決定留倉或換股。</p></div>
     </div>
     <p style="text-align:center;font-size:13px;color:var(--text3);margin-top:32px">涵蓋上市上櫃全台股票 · 查詢即時更新 · 日K、週K、月K切換</p>
   </div>
@@ -398,6 +400,8 @@ footer p{font-size:12px;color:rgba(255,255,255,.3);line-height:1.8}
           <li>支撐壓力 + 損益比分析</li>
           <li>籌碼面 + 族群分析</li>
           <li>每日精選選股名單</li>
+          <li>🔬 每日深度選股（法人籌碼＋券商分點）</li>
+          <li>💼 持股健檢（損益＋強弱排行）</li>
           <li>全台股掃描（風險分級）</li>
           <li>到價推播提醒</li>
         </ul>
@@ -414,6 +418,8 @@ footer p{font-size:12px;color:rgba(255,255,255,.3);line-height:1.8}
           <li>支撐壓力 + 損益比分析</li>
           <li>籌碼面 + 族群分析</li>
           <li>每日精選選股名單</li>
+          <li>🔬 每日深度選股（法人籌碼＋券商分點）</li>
+          <li>💼 持股健檢（損益＋強弱排行）</li>
           <li>全台股掃描（風險分級）</li>
           <li>到價推播提醒</li>
         </ul>
@@ -430,6 +436,8 @@ footer p{font-size:12px;color:rgba(255,255,255,.3);line-height:1.8}
           <li>支撐壓力 + 損益比分析</li>
           <li>籌碼面 + 族群分析</li>
           <li>每日精選選股名單</li>
+          <li>🔬 每日深度選股（法人籌碼＋券商分點）</li>
+          <li>💼 持股健檢（損益＋強弱排行）</li>
           <li>全台股掃描（風險分級）</li>
           <li>到價推播提醒</li>
         </ul>
@@ -449,6 +457,8 @@ footer p{font-size:12px;color:rgba(255,255,255,.3);line-height:1.8}
           <li>支撐壓力 + 損益比分析</li>
           <li>籌碼面 + 族群分析</li>
           <li>每日精選選股名單</li>
+          <li>🔬 每日深度選股（法人籌碼＋券商分點）</li>
+          <li>💼 持股健檢（損益＋強弱排行）</li>
           <li>全台股掃描（風險分級）</li>
           <li>到價推播提醒</li>
         </ul>
@@ -633,7 +643,7 @@ footer p{font-size:12px;color:rgba(255,255,255,.3);line-height:1.8}
 
 <script>
 document.documentElement.classList.add('js-anim');
-const API = 'https://stock-navigator-api.zeabur.app';
+const API = 'https://api.softglow-ai.com';
 
 function _animateCount(el, target, duration){
   if(!el || target <= 0){ if(el) el.textContent = target.toLocaleString(); return; }
@@ -761,9 +771,16 @@ async function doCheckout(){
       btn.disabled = false;
       return;
     }
-    // 後端回傳 HTML，直接寫入 document 讓 form 自動提交跳轉綠界
+    // 後端回傳 HTML，解析後取出 form 手動 submit 跳轉綠界
     const html = await r.text();
-    document.open(); document.write(html); document.close();
+    const _doc = new DOMParser().parseFromString(html, 'text/html');
+    const _form = _doc.querySelector('form');
+    if(_form){
+      document.body.appendChild(_form);
+      _form.submit();
+    } else {
+      document.open(); document.write(html); document.close();
+    }
   }catch(e){
     errEl.textContent = '連線失敗，請稍後再試';
     btn.textContent = '前往付款 →';
@@ -1018,6 +1035,46 @@ function _initGoogleSignInLanding(){
   const btn = document.getElementById('googleSignInBtn');
   if(btn && !btn.hasChildNodes())
     google.accounts.id.renderButton(btn, {theme:'outline', size:'large', text:'signin_with', width:300});
+}
+</script>
+<!-- 開發測試區（隱藏，僅 #dev-test 可見） -->
+<div id="dev-test-block" style="display:none;position:fixed;bottom:16px;right:16px;z-index:9999;background:#1a1a1a;border:1px solid #333;border-radius:10px;padding:14px 18px;font-family:monospace;font-size:12px;color:#aaa;min-width:220px;box-shadow:0 4px 20px rgba(0,0,0,0.5)">
+  <div style="color:#4ade80;font-weight:700;margin-bottom:8px">🧪 DEV TEST</div>
+  <div style="margin-bottom:6px;color:#888;font-size:11px">$6/天 定期定額（最多5次）</div>
+  <input id="dev-email" placeholder="email" style="width:100%;padding:5px 8px;background:#2a2a2a;border:1px solid #444;border-radius:5px;color:#eee;font-size:12px;margin-bottom:5px">
+  <input id="dev-pw" placeholder="密碼（6碼以上）" type="password" style="width:100%;padding:5px 8px;background:#2a2a2a;border:1px solid #444;border-radius:5px;color:#eee;font-size:12px;margin-bottom:8px">
+  <button onclick="_devTestOrder()" style="width:100%;padding:6px;background:#1D9E75;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:12px;font-weight:700">建立測試訂單</button>
+  <div id="dev-msg" style="margin-top:6px;font-size:11px;color:#f87171"></div>
+</div>
+<script>
+(function(){
+  if(location.hash === '#dev-test'){
+    document.getElementById('dev-test-block').style.display = 'block';
+  }
+})();
+async function _devTestOrder(){
+  const email = document.getElementById('dev-email').value.trim();
+  const pw    = document.getElementById('dev-pw').value.trim();
+  const msg   = document.getElementById('dev-msg');
+  if(!email || !pw){ msg.textContent='請填 email 和密碼'; return; }
+  msg.style.color='#86efac'; msg.textContent='建立中...';
+  try{
+    const API = (typeof getAPI === 'function') ? getAPI() : 'https://api.softglow-ai.com';
+    const r = await fetch(`${API}/create_order_recurring`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email, password: pw, plan:'daily_test'})
+    });
+    if(!r.ok){ const d=await r.json(); msg.style.color='#f87171'; msg.textContent=d.detail||'失敗'; return; }
+    msg.style.color='#86efac'; msg.textContent='跳轉綠界...';
+    const html = await r.text();
+    const _doc = new DOMParser().parseFromString(html, 'text/html');
+    const _form = _doc.querySelector('form');
+    if(_form){ document.body.appendChild(_form); _form.submit(); }
+    else { document.open(); document.write(html); document.close(); }
+  }catch(e){
+    msg.style.color='#f87171'; msg.textContent='連線失敗';
+  }
 }
 </script>
 </body>
