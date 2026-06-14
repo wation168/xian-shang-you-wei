@@ -70,8 +70,8 @@ VAPID_PUBLIC_KEY  = os.environ.get("VAPID_PUBLIC_KEY",  "")
 VAPID_SUBJECT     = os.environ.get("VAPID_SUBJECT", f"mailto:{os.environ.get('SMTP_FROM','admin@example.com')}")
 
 # Threads OAuth
-THREADS_APP_ID     = os.environ.get("THREADS_APP_ID",     "1347163707376531")
-THREADS_APP_SECRET = os.environ.get("THREADS_APP_SECRET", "f108f2cde420ddc09b46de90beee4f3f")
+THREADS_APP_ID     = os.environ.get("THREADS_APP_ID",     "1011864388160019")
+THREADS_APP_SECRET = os.environ.get("THREADS_APP_SECRET", "0af6b8665441f7940a5f4d0edbc7fe42")
 THREADS_REDIRECT_URI = os.environ.get("THREADS_REDIRECT_URI", "https://api.softglow-ai.com/auth/threads/callback")
 THREADS_SCOPE      = "threads_basic,threads_content_publish"
 
