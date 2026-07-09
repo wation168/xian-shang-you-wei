@@ -609,7 +609,16 @@ async def serve_blog_locale_index(locale: str):
     return JSONResponse({"detail": "Not Found"}, status_code=404)
 
 # ---- Tools 路由 ----
-_TOOLS_LOCALES = ("en","ja","ko","es","pt","id","vi","th","de")
+_TOOLS_LOCALES = ("en","ja","ko","es","pt","id","de","fr","zh-CN")
+
+@app.get("/tools/tools.css", include_in_schema=False)
+async def serve_tools_css():
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "tools", "tools.css")
+    if _os.path.isfile(path):
+        return FileResponse(path, media_type="text/css")
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
 
 @app.get("/tools/{filename}.html", include_in_schema=False)
 async def serve_tools_html(filename: str):
@@ -644,14 +653,10 @@ async def serve_tools_locale_html(locale: str, filename: str):
 @app.get("/tools/{locale}", include_in_schema=False)
 @app.get("/tools/{locale}/", include_in_schema=False)
 async def serve_tools_locale_index(locale: str):
-    from fastapi.responses import FileResponse
-    import os as _os
+    from fastapi.responses import RedirectResponse
     if locale not in _TOOLS_LOCALES:
         return JSONResponse({"detail": "Not Found"}, status_code=404)
-    path = _os.path.join(_FRONTEND_DIR, "tools", locale, "index.html")
-    if _os.path.isfile(path):
-        return FileResponse(path)
-    return JSONResponse({"detail": "Not Found"}, status_code=404)
+    return RedirectResponse(url="/tools/", status_code=301)
 
 @app.get("/{filename}.html", include_in_schema=False)
 async def serve_html(filename: str):
