@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>企业估值计算器 - 快速评估公司价值</title>
+<meta name="description" content="免费企业估值工具,支持收入倍数法和DCF折现现金流分析,帮助您准确评估公司价值">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/zh-CN/valuation-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/valuation-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/valuation-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/valuation-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/valuation-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/valuation-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/valuation-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/valuation-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/valuation-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/valuation-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/valuation-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/valuation-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "企业估值计算器", "url": "https://softglow-ai.com/tools/zh-CN/valuation-calculator.html", "description": "免费企业估值工具,支持收入倍数法和DCF折现现金流分析,帮助您准确评估公司价值", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "收入倍数法和DCF法哪种更准确?", "acceptedAnswer": {"@type": "Answer", "text": "两种方法各有优缺点。收入倍数法简单快速,适合初步评估;DCF法更全面深入,考虑长期现金流,但需要更多假设。最佳实践是结合两种方法,用DCF法的结果验证倍数法,或找出合理的估值范围。"}}, {"@type": "Question", "name": "折现率(WACC)应该如何确定?", "acceptedAnswer": {"@type": "Answer", "text": "WACC取决于企业的风险水平和资本结构。低风险成熟企业通常为8-10%,高风险初创企业可能达到15-20%。计算公式为:WACC=(权益成本×权益比例)+(债务成本×债务比例×(1-税率))。可参考同行业平均水平调整。"}}, {"@type": "Question", "name": "终端增长率应该设定为多少?", "acceptedAnswer": {"@type": "Answer", "text": "终端增长率应接近或低于长期经济增速,通常设定为2-3%。不应超过GDP增速,否则假设企业永远增长速度超过经济增速,不符合经济规律。对于成熟市场可设2%,新兴市场可设3%。"}}, {"@type": "Question", "name": "如何选择合适的收入倍数?", "acceptedAnswer": {"@type": "Answer", "text": "收入倍数因行业而异。可查阅行业研究报告或参考可比公司的倍数水平。同时要考虑企业的特殊情况:增长率高可使用较高倍数,竞争优势强可提高倍数,风险大则应降低倍数。一般科技3-8倍,消费2-5倍,工业1-3倍。"}}, {"@type": "Question", "name": "这个计算器能否用于融资或交易估值?", "acceptedAnswer": {"@type": "Answer", "text": "本计算器提供的是初步参考估值,不能直接用于融资、融资或并购交易。正式交易需要由专业估值机构进行详细尽职调查,评估企业资产、负债、知识产权、市场前景等因素。建议咨询财务顾问获取正式评估报告。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/zh-CN/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 企业估值计算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>企业估值计算器</h1>
+    <p class="calc-subtitle">使用收入倍数法或折现现金流分析法评估您的企业价值</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="annualRevenue">年度收入</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="annualRevenue" placeholder="500000"  step="1"></div>
+</div>
+  <small class="input-help">输入公司过去12个月的总收入</small>
+<div class="input-group">
+  <label for="valuationMethod">估值方法</label>
+  <div class="input-row"><input type="text" id="valuationMethod" value="multiple"></div>
+</div>
+  <small class="input-help">选择收入倍数法或折现现金流(DCF)法进行估值</small>
+<div class="input-group">
+  <label for="revenueMultiple">收入倍数(倍数法)</label>
+  <div class="input-row"><input type="number" id="revenueMultiple" placeholder="3.5"  step="0.1"><span class="input-suffix">倍</span></div>
+</div>
+  <small class="input-help">输入适用于您行业的收入倍数系数</small>
+<div class="input-group">
+  <label for="netIncome">年度净利润(DCF法)</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="netIncome" placeholder="100000"  step="1"></div>
+</div>
+  <small class="input-help">输入公司年度净利润(税后收入)</small>
+<div class="input-group">
+  <label for="growthRate">预期年增长率</label>
+  <div class="input-row"><input type="number" id="growthRate" placeholder="10"  step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">输入公司预期的年平均增长百分比</small>
+<div class="input-group">
+  <label for="discountRate">折现率(加权平均资本成本)</label>
+  <div class="input-row"><input type="number" id="discountRate" placeholder="10"  step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">输入加权平均资本成本,通常为8-12%</small>
+<div class="input-group">
+  <label for="projectionYears">预测期(年)</label>
+  <div class="input-row"><input type="number" id="projectionYears" placeholder="5"  value="5" step="1"><span class="input-suffix">年</span></div>
+</div>
+  <small class="input-help">输入用于现金流预测的年数,通常为5年</small>
+<div class="input-group">
+  <label for="terminalGrowth">终端增长率</label>
+  <div class="input-row"><input type="number" id="terminalGrowth" placeholder="2"  value="2" step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">输入预测期后的永续增长率,通常为2-3%</small></div>
+    <button class="btn-calc" onclick="calculate()">计算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">企业估值结果</span><span class="result-value" id="businessValuation">—</span></div>
+<div class="result-item"><span class="result-label">使用的估值方法</span><span class="result-value" id="valuationMethod">—</span></div>
+<div class="result-item"><span class="result-label">DCF分析要素</span><span class="result-value" id="dcfBreakdown">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>这代表什么？</strong> 估值结果显示您企业的预计价值。收入倍数法通过将年收入乘以行业倍数得出,DCF法则基于未来现金流的现值计算。选择与您企业情况最相符的方法进行参考。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 打印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>企业估值方法介绍</h2><p>企业估值是确定公司经济价值的重要过程,对融资、收购、投资决策至关重要。本计算器提供两种主流估值方法:收入倍数法和折现现金流(DCF)法。收入倍数法简单易用,适合快速评估;DCF法更加深入,考虑长期增长潜力。</p><h2>收入倍数法(相对估值)</h2><p>收入倍数法通过将企业年度收入乘以行业平均倍数得出企业价值。不同行业的倍数差异较大:科技企业通常为3-8倍,制造业为1-3倍,服务业为2-5倍。这种方法优点是快速简洁,缺点是忽视企业特定的财务状况和增长前景。</p><h2>折现现金流法(DCF)</h2><p>DCF法基于企业未来现金流的现值原理。首先预测未来5年的年度现金流,然后用折现率(加权平均资本成本)将其折现到现值。添加终端价值(使用永续增长率计算),最后得出企业总价值。这种方法更科学,但需要对企业未来发展做出合理预测。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>关键参数解释</h2><p>年度收入是指过去12个月的总销售收益。年度净利润是税后利润。预期年增长率应基于历史数据和行业前景。折现率(WACC)反映资金成本,一般在8-12%之间。终端增长率通常设定为2-3%,不应超过长期GDP增速。</p><h2>如何选择估值方法</h2><p>对于成熟稳定的企业,收入倍数法足以满足基本评估需求。对于快速增长的初创企业或需要精准评估的重大决策,应采用DCF法。最好的做法是同时使用两种方法,比较结果以获得合理的估值范围。</p><h2>注意事项</h2><p>本计算器提供的估值仅供参考,不构成投资或商业建议。实际估值需考虑企业特定的市场地位、竞争优势、管理团队、知识产权等无形资产。建议咨询专业的财务顾问或估值师进行正式评估。数据质量直接影响估值准确度,确保输入数据的真实性和完整性至关重要。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸阅读</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常见问题</h2><div class="faq-item"><div class="faq-q">收入倍数法和DCF法哪种更准确?</div><div class="faq-a">两种方法各有优缺点。收入倍数法简单快速,适合初步评估;DCF法更全面深入,考虑长期现金流,但需要更多假设。最佳实践是结合两种方法,用DCF法的结果验证倍数法,或找出合理的估值范围。</div></div>
+  <div class="faq-item"><div class="faq-q">折现率(WACC)应该如何确定?</div><div class="faq-a">WACC取决于企业的风险水平和资本结构。低风险成熟企业通常为8-10%,高风险初创企业可能达到15-20%。计算公式为:WACC=(权益成本×权益比例)+(债务成本×债务比例×(1-税率))。可参考同行业平均水平调整。</div></div>
+  <div class="faq-item"><div class="faq-q">终端增长率应该设定为多少?</div><div class="faq-a">终端增长率应接近或低于长期经济增速,通常设定为2-3%。不应超过GDP增速,否则假设企业永远增长速度超过经济增速,不符合经济规律。对于成熟市场可设2%,新兴市场可设3%。</div></div>
+  <div class="faq-item"><div class="faq-q">如何选择合适的收入倍数?</div><div class="faq-a">收入倍数因行业而异。可查阅行业研究报告或参考可比公司的倍数水平。同时要考虑企业的特殊情况:增长率高可使用较高倍数,竞争优势强可提高倍数,风险大则应降低倍数。一般科技3-8倍,消费2-5倍,工业1-3倍。</div></div>
+  <div class="faq-item"><div class="faq-q">这个计算器能否用于融资或交易估值?</div><div class="faq-a">本计算器提供的是初步参考估值,不能直接用于融资、融资或并购交易。正式交易需要由专业估值机构进行详细尽职调查,评估企业资产、负债、知识产权、市场前景等因素。建议咨询财务顾问获取正式评估报告。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/zh-CN/compound-interest.html">复利计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/roi-calculator.html">投资回报率 (ROI) 计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/risk-reward.html">风险收益比计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/position-size.html">头寸规模计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stop-loss.html">止损计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dividend-yield.html">股息收益率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/pe-ratio.html">市盈率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dca-calculator.html">定期定额投资计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/cagr.html">复合年增长率(CAGR)计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/margin-calculator.html">保证金计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stock-gain-loss.html">股票盈亏计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/break-even.html">损益平衡点计算器</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/valuation-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/valuation-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/valuation-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/valuation-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/valuation-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/valuation-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/valuation-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/valuation-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/valuation-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/valuation-calculator.html" class="lang-btn active">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相关工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const annualRevenue = parseFloat(document.getElementById('annualRevenue').value);
+  const method = document.getElementById('valuationMethod').value;
+  const revenueMultiple = parseFloat(document.getElementById('revenueMultiple').value);
+  const netIncome = parseFloat(document.getElementById('netIncome').value);
+  const growthRate = parseFloat(document.getElementById('growthRate').value) / 100;
+  const discountRate = parseFloat(document.getElementById('discountRate').value) / 100;
+  const projectionYears = parseInt(document.getElementById('projectionYears').value);
+  const terminalGrowth = parseFloat(document.getElementById('terminalGrowth').value) / 100;
+
+  if (!annualRevenue || annualRevenue <= 0) {
+    alert('Please enter a valid annual revenue');
+    return;
+  }
+
+  let valuation = 0;
+  let methodLabel = '';
+  let breakdown = '';
+
+  if (method === 'multiple') {
+    if (!revenueMultiple || revenueMultiple <= 0) {
+      alert('Please enter a valid revenue multiple for this method');
+      return;
+    }
+    valuation = annualRevenue * revenueMultiple;
+    methodLabel = 'Revenue Multiple Method';
+    breakdown = 'Revenue: ' + annualRevenue.toLocaleString('en-US', {style: 'currency', currency: 'USD'}) + ' × Multiple: ' + revenueMultiple.toFixed(1) + 'x';
+  } else if (method === 'dcf') {
+    if (!netIncome || netIncome <= 0) {
+      alert('Please enter valid net income for DCF calculation');
+      return;
+    }
+
+    let presentValue = 0;
+    let yearDetails = [];
+
+    for (let year = 1; year <= projectionYears; year++) {
+      const projectedCashFlow = netIncome * Math.pow(1 + growthRate, year);
+      const discountedCashFlow = projectedCashFlow / Math.pow(1 + discountRate, year);
+      presentValue += discountedCashFlow;
+      yearDetails.push('Year ' + year + ': ' + discountedCashFlow.toLocaleString('en-US', {style: 'currency', currency: 'USD', maximumFractionDigits: 0}));
+    }
+
+    const terminalValue = (netIncome * Math.pow(1 + growthRate, projectionYears) * (1 + terminalGrowth)) / (discountRate - terminalGrowth);
+    const discountedTerminalValue = terminalValue / Math.pow(1 + discountRate, projectionYears);
+
+    valuation = presentValue + discountedTerminalValue;
+    methodLabel = 'Discounted Cash Flow (DCF) Method';
+    breakdown = yearDetails.slice(0, 3).join(' | ') + (projectionYears > 3 ? '...' : '') + ' | Terminal Value: ' + discountedTerminalValue.toLocaleString('en-US', {style: 'currency', currency: 'USD', maximumFractionDigits: 0});
+  }
+
+  document.getElementById('businessValuation').textContent = valuation.toLocaleString('en-US', {style: 'currency', currency: 'USD', maximumFractionDigits: 0});
+  document.getElementById('valuationMethod').textContent = methodLabel;
+  document.getElementById('dcfBreakdown').textContent = breakdown;
+
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已复制！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-CN|valuation-calculator|2026-07-09 -->

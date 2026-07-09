@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VAT & Sales Tax Calculator - Instant Tax Computation</title>
+<meta name="description" content="Free VAT and sales tax calculator. Compute tax amounts, total prices, and effective tax rates instantly. Perfect for businesses and consumers.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/en/vat-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/vat-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/vat-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/vat-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/vat-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/vat-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/vat-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/vat-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/vat-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/vat-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/vat-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/vat-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "VAT & Sales Tax Calculator", "url": "https://softglow-ai.com/tools/en/vat-calculator.html", "description": "Free VAT and sales tax calculator. Compute tax amounts, total prices, and effective tax rates instantly. Perfect for businesses and consumers.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is the difference between VAT and sales tax?", "acceptedAnswer": {"@type": "Answer", "text": "VAT (Value Added Tax) is primarily used in Europe and is calculated and collected at each stage of production and distribution. Sales tax is typically used in the Americas and is calculated only at the final point of sale. Both ultimately tax the end consumer, but the collection mechanisms differ."}}, {"@type": "Question", "name": "How do I calculate the net price if I only know the total price?", "acceptedAnswer": {"@type": "Answer", "text": "To find the net price from a total price, divide the total by (1 + tax rate as a decimal). For example, if the total is £120 with 20% tax, the net price is £120 ÷ 1.20 = £100."}}, {"@type": "Question", "name": "Why do different products have different VAT rates?", "acceptedAnswer": {"@type": "Answer", "text": "Tax authorities apply different rates to different goods and services based on policy priorities. Essential items like food and medicines often have lower or zero rates, while luxury items have standard or higher rates. This helps make basic necessities more affordable while generating revenue from non-essentials."}}, {"@type": "Question", "name": "Do I need to pay VAT on all purchases?", "acceptedAnswer": {"@type": "Answer", "text": "No, VAT thresholds and exemptions vary by country. Some items are VAT-exempt (like most foods in the UK), while services may have different treatment. Additionally, businesses below the VAT registration threshold don't collect VAT. Always check your local tax authority's rules."}}, {"@type": "Question", "name": "Can I reclaim VAT as a business?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, registered VAT businesses can typically reclaim VAT paid on business purchases and expenses. This is called input tax recovery. However, you must keep proper documentation and follow your tax authority's procedures. Personal purchases cannot be reclaimed."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/en/">Tools</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/en/">Tools</a> > VAT & Sales Tax Calculator</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>VAT & Sales Tax Calculator</h1>
+    <p class="calc-subtitle">Calculate tax amounts and total prices with VAT rates</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="netPrice">Net Price (before tax)</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="netPrice" placeholder="100.00"  value="100.00" step="0.01"></div>
+</div>
+  <small class="input-help">Enter the price before any tax or VAT is applied</small>
+<div class="input-group">
+  <label for="taxRate">VAT/Tax Rate</label>
+  <div class="input-row"><input type="number" id="taxRate" placeholder="20"  value="20" step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">Enter the VAT or sales tax rate as a percentage</small></div>
+    <button class="btn-calc" onclick="calculate()">Calculate</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">Tax Amount</span><span class="result-value" id="taxAmount">—</span></div>
+<div class="result-highlight"><span class="result-label">Total Price (including tax)</span><span class="result-value" id="totalPrice">—</span></div>
+<div class="result-item"><span class="result-label">Tax Rate Applied</span><span class="result-value" id="taxPercentage">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>What does this mean?</strong> The Tax Amount shows how much VAT or sales tax is added to your net price. The Total Price (including tax) is your final amount to pay. The Tax Rate Applied confirms the percentage used in the calculation.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Print</button>
+        <button onclick="shareResult()">&#x1f4e4; Share</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>Understanding VAT and Sales Tax</h2><p>Value Added Tax (VAT) and sales tax are consumption taxes added to the purchase price of goods and services. In the UK and most of Europe, VAT is a standard tax applied at various rates depending on the product category. In the United States and many other countries, sales tax serves a similar purpose. This calculator helps you quickly determine the exact tax amount and final price you'll pay.</p><h2>How to Use This Calculator</h2><p>Using our VAT and sales tax calculator is straightforward. First, enter the net price (the price before tax) in the first field. This is the base amount on which the tax will be calculated. Then, input the applicable VAT or tax rate as a percentage in the second field. Common rates include 20% in the UK, 19% in Germany, or varying rates in the US depending on your state. Once you've entered both values, the calculator instantly computes three important figures for you.</p><h2>Interpreting Your Results</h2><p>The calculator provides three key outputs. The Tax Amount shows exactly how much tax will be added to your purchase in pounds sterling. The Total Price (including tax) is what you'll actually pay at checkout. The Tax Rate Applied confirms the percentage you entered, ensuring accuracy. For example, if you have a £100.00 net price with a 20% VAT rate, you'll see a £20.00 tax amount and a £120.00 total price.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Common VAT Rates by Country</h2><p>Different countries and regions apply different VAT or sales tax rates. The United Kingdom uses a standard rate of 20%, with reduced rates of 5% for certain items and 0% for essential goods. The European Union has a standard VAT rate ranging from 17% to 27%, with most countries using rates between 19% and 23%. In the United States, sales tax varies by state, ranging from 0% in some states to over 10% in others. Canada applies a federal GST of 5%, with additional provincial sales taxes. Understanding your local tax rate is essential for accurate price calculations.</p><h2>Business and Personal Uses</h2><p>This calculator serves both business and personal purposes. For businesses, it's essential for invoicing, pricing strategies, and financial reporting. E-commerce businesses must display prices with and without tax for customer transparency. For personal shoppers, it helps understand the true cost of purchases and budget accordingly. Accountants and bookkeepers use similar calculations constantly when reconciling invoices and managing tax obligations.</p><h2>Tax Planning and Compliance</h2><p>Accurate tax calculation is crucial for compliance with tax authorities. Businesses must register for VAT if their turnover exceeds the threshold set by their country's tax authority. Proper calculation ensures you're not overcharging customers or underreporting tax obligations. This calculator provides a reliable tool for ensuring consistency and accuracy in all tax-related computations, whether for individual transactions or broader financial planning.</article>
+  <div class="blog-section"><h3>&#x1f4da; Related Articles</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>FAQ</h2><div class="faq-item"><div class="faq-q">What is the difference between VAT and sales tax?</div><div class="faq-a">VAT (Value Added Tax) is primarily used in Europe and is calculated and collected at each stage of production and distribution. Sales tax is typically used in the Americas and is calculated only at the final point of sale. Both ultimately tax the end consumer, but the collection mechanisms differ.</div></div>
+  <div class="faq-item"><div class="faq-q">How do I calculate the net price if I only know the total price?</div><div class="faq-a">To find the net price from a total price, divide the total by (1 + tax rate as a decimal). For example, if the total is £120 with 20% tax, the net price is £120 ÷ 1.20 = £100.</div></div>
+  <div class="faq-item"><div class="faq-q">Why do different products have different VAT rates?</div><div class="faq-a">Tax authorities apply different rates to different goods and services based on policy priorities. Essential items like food and medicines often have lower or zero rates, while luxury items have standard or higher rates. This helps make basic necessities more affordable while generating revenue from non-essentials.</div></div>
+  <div class="faq-item"><div class="faq-q">Do I need to pay VAT on all purchases?</div><div class="faq-a">No, VAT thresholds and exemptions vary by country. Some items are VAT-exempt (like most foods in the UK), while services may have different treatment. Additionally, businesses below the VAT registration threshold don't collect VAT. Always check your local tax authority's rules.</div></div>
+  <div class="faq-item"><div class="faq-q">Can I reclaim VAT as a business?</div><div class="faq-a">Yes, registered VAT businesses can typically reclaim VAT paid on business purchases and expenses. This is called input tax recovery. However, you must keep proper documentation and follow your tax authority's procedures. Personal purchases cannot be reclaimed.</div></div></section>
+  <div class="more-tools"><h3>More Tools</h3><div class="tools-grid"><a class="tool-pill" href="/tools/en/capital-gains-tax.html">Capital Gains Tax Calculator</a>
+      <a class="tool-pill" href="/tools/en/effective-tax-rate.html">Effective Tax Rate Calculator</a>
+      <a class="tool-pill" href="/tools/en/bonus-tax.html">Bonus Tax Calculator</a>
+      <a class="tool-pill" href="/tools/en/self-employment-tax.html">Self Employment Tax</a>
+      <a class="tool-pill" href="/tools/en/tax-bracket.html">Tax Bracket</a>
+      <a class="tool-pill" href="/tools/en/income-tax.html">Income Tax Calculator</a>
+      <a class="tool-pill" href="/tools/en/payroll-tax.html">Payroll Tax Calculator</a>
+      <a class="tool-pill" href="/tools/en/sales-tax.html">Sales Tax</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/vat-calculator.html" class="lang-btn active">English</a>
+    <a href="/tools/vat-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/vat-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/vat-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/vat-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/vat-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/vat-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/vat-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/vat-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/vat-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Related Tools</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const netPriceInput = document.getElementById('netPrice');
+  const taxRateInput = document.getElementById('taxRate');
+  const taxAmountResult = document.getElementById('taxAmount');
+  const totalPriceResult = document.getElementById('totalPrice');
+  const taxPercentageResult = document.getElementById('taxPercentage');
+  const resultsDiv = document.getElementById('results');
+
+  const netPrice = parseFloat(netPriceInput.value);
+  const taxRate = parseFloat(taxRateInput.value);
+
+  if (isNaN(netPrice) || netPrice < 0 || isNaN(taxRate) || taxRate < 0) {
+    alert('Please enter valid positive numbers for price and tax rate');
+    return;
+  }
+
+  const taxAmount = netPrice * (taxRate / 100);
+  const totalPrice = netPrice + taxAmount;
+
+  taxAmountResult.textContent = '£' + taxAmount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  totalPriceResult.textContent = '£' + totalPrice.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  taxPercentageResult.textContent = taxRate.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
+
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copied!';setTimeout(function(){b.textContent='Share'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|en|vat-calculator|2026-07-09 -->

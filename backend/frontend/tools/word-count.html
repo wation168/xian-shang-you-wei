@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>字數計算器 - 免費在線文本分析工具</title>
+<meta name="description" content="快速計算文章、文本的字數、字符數、句子數和段落數。支持包含和排除空格的字符統計，幫助您了解內容長度。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/word-count.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/word-count.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/word-count.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/word-count.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/word-count.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/word-count.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/word-count.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/word-count.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/word-count.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/word-count.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/word-count.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/word-count.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "字數計算器", "url": "https://softglow-ai.com/tools/word-count.html", "description": "快速計算文章、文本的字數、字符數、句子數和段落數。支持包含和排除空格的字符統計，幫助您了解內容長度。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "字數計算器如何計算字數？", "acceptedAnswer": {"@type": "Answer", "text": "計算器通過識別由空格或標點符號分隔的單詞來計算字數。每個分離的詞彙單位都被計為一個字。對於中文文本，它計算的是詞語的個數而不是字符個數。"}}, {"@type": "Question", "name": "包含和不包含空格的字符數有什麼區別？", "acceptedAnswer": {"@type": "Answer", "text": "包含空格的字符數統計了文本中的所有字符，包括句子之間的空格。不包含空格的字符數則只統計實際的字符內容。這對於了解文本的實際內容長度很有用。"}}, {"@type": "Question", "name": "閱讀時間是如何計算的？", "acceptedAnswer": {"@type": "Answer", "text": "閱讀時間基於平均每分鐘200-250字的閱讀速度計算。它將總字數除以平均閱讀速度，得出以分鐘為單位的閱讀時間估計值。實際閱讀時間可能因個人而異。"}}, {"@type": "Question", "name": "這個工具可以分析多長的文本？", "acceptedAnswer": {"@type": "Answer", "text": "字數計算器可以處理幾乎任何長度的文本，從短句到整部書籍都沒有問題。它能夠快速處理大量內容，並即時提供統計結果，性能穩定可靠。"}}, {"@type": "Question", "name": "我的文本數據會被保存嗎？", "acceptedAnswer": {"@type": "Answer", "text": "不會。所有分析都在您的本地瀏覽器中進行，文本內容不會被上傳到任何服務器或被保存。您的隱私和數據安全完全得到保護。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 字數計算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>字數計算器</h1>
+    <p class="calc-subtitle">即時計算文本中的字數、字符和句子數</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="textInput">輸入您的文本</label>
+  <div class="input-row"><input type="textarea" id="textInput" placeholder="在此粘貼或輸入您的文本以進行分析..."  step="1"></div>
+</div>
+  <small class="input-help">粘貼或輸入您要分析的文本內容</small></div>
+    <button class="btn-calc" onclick="calculate()">計算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">總字數</span><span class="result-value" id="wordCount">—</span></div>
+<div class="result-item"><span class="result-label">總字符數（包含空格）</span><span class="result-value" id="characterCount">—</span></div>
+<div class="result-item"><span class="result-label">總字符數（不包含空格）</span><span class="result-value" id="characterCountNoSpaces">—</span></div>
+<div class="result-item"><span class="result-label">總句子數</span><span class="result-value" id="sentenceCount">—</span></div>
+<div class="result-item"><span class="result-label">總段落數</span><span class="result-value" id="paragraphCount">—</span></div>
+<div class="result-item"><span class="result-label">平均字長</span><span class="result-value" id="averageWordLength">—</span></div>
+<div class="result-item"><span class="result-label">閱讀時間</span><span class="result-value" id="readingTime">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> 此計算器為您提供文本的詳細統計信息。「總字數」表示文本中的字詞總數，「字符數」可幫助您了解內容的詳細程度。「閱讀時間」基於平均閱讀速度計算，幫助您評估內容的長度。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 列印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什麼是字數計算器？</h2><p>字數計算器是一款功能強大的在線工具，可以立即分析您輸入的任何文本。它能夠計算字數、字符數、句子數、段落數等多項指標，幫助您全面了解文本的統計信息。無論您是學生、作家、編輯還是內容創作者，這個工具都能為您節省寶貴的時間。</p><h2>主要功能特性</h2><p>本計算器提供7項重要的統計指標：總字數用於了解內容的規模，字符統計分為包含和不包含空格兩種方式，句子和段落計數幫助您分析文本結構，平均字長顯示用詞的複雜程度，閱讀時間估計則基於標準的每分鐘200-250字的閱讀速度計算。這些數據對於內容優化、論文檢查和文案撰寫都非常有用。</p><h2>如何使用字數計算器</h2><p>使用方法非常簡單：只需在輸入框中粘貼或輸入您的文本內容，計算器會自動實時更新所有統計數據。您可以隨時修改文本，結果會立即反映變化。這使得它成為進行文本編輯和優化時的理想助手。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>應用場景</h2><p>字數計算器在多個場景中都能派上用場。學生可以用它檢查論文是否符合字數要求，作家可以追蹤每日寫作進度，編輯可以確保文章符合出版標準，內容營銷人員可以優化SEO文章長度，社交媒體管理者可以規劃帖子內容，教師可以設定和檢查作業要求。</p><h2>理解閱讀時間計算</h2><p>閱讀時間的計算基於成人平均每分鐘閱讀200-250字的速度。此估計值可能因讀者的閱讀能力、文本複雜度和語言特性而異。中文文本通常需要更多時間閱讀，因為每個字都包含豐富的信息。這個估計幫助內容創作者了解受眾需要花費多少時間來消費他們的內容。</p><h2>提高寫作效率</h2><p>使用字數計算器可以幫助您設定明確的寫作目標。例如，如果您需要寫一篇1000字的文章，計算器可以幫助您追蹤進度。同時，平均字長指標可以幫助您評估用詞是否過於複雜，從而改進文章的可讀性。定期檢查這些統計數據是成為更高效寫手的關鍵。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">字數計算器如何計算字數？</div><div class="faq-a">計算器通過識別由空格或標點符號分隔的單詞來計算字數。每個分離的詞彙單位都被計為一個字。對於中文文本，它計算的是詞語的個數而不是字符個數。</div></div>
+  <div class="faq-item"><div class="faq-q">包含和不包含空格的字符數有什麼區別？</div><div class="faq-a">包含空格的字符數統計了文本中的所有字符，包括句子之間的空格。不包含空格的字符數則只統計實際的字符內容。這對於了解文本的實際內容長度很有用。</div></div>
+  <div class="faq-item"><div class="faq-q">閱讀時間是如何計算的？</div><div class="faq-a">閱讀時間基於平均每分鐘200-250字的閱讀速度計算。它將總字數除以平均閱讀速度，得出以分鐘為單位的閱讀時間估計值。實際閱讀時間可能因個人而異。</div></div>
+  <div class="faq-item"><div class="faq-q">這個工具可以分析多長的文本？</div><div class="faq-a">字數計算器可以處理幾乎任何長度的文本，從短句到整部書籍都沒有問題。它能夠快速處理大量內容，並即時提供統計結果，性能穩定可靠。</div></div>
+  <div class="faq-item"><div class="faq-q">我的文本數據會被保存嗎？</div><div class="faq-a">不會。所有分析都在您的本地瀏覽器中進行，文本內容不會被上傳到任何服務器或被保存。您的隱私和數據安全完全得到保護。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/roi-calculator.html">ROI 計算機</a>
+      <a class="tool-pill" href="/tools/risk-reward.html">風險報酬計算機</a>
+      <a class="tool-pill" href="/tools/position-size.html">部位規模計算器</a>
+      <a class="tool-pill" href="/tools/stop-loss.html">停損計算機</a>
+      <a class="tool-pill" href="/tools/dividend-yield.html">股息收益率計算機</a>
+      <a class="tool-pill" href="/tools/pe-ratio.html">本益比計算機</a>
+      <a class="tool-pill" href="/tools/dca-calculator.html">定期定額投資計算機</a>
+      <a class="tool-pill" href="/tools/cagr.html">年複合成長率計算器</a>
+      <a class="tool-pill" href="/tools/margin-calculator.html">保證金計算器</a>
+      <a class="tool-pill" href="/tools/stock-gain-loss.html">股票損益計算機</a>
+      <a class="tool-pill" href="/tools/break-even.html">損益平衡點計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/word-count.html" class="lang-btn">English</a>
+    <a href="/tools/word-count.html" class="lang-btn active">繁體中文</a>
+    <a href="/tools/ja/word-count.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/word-count.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/word-count.html" class="lang-btn">Français</a>
+    <a href="/tools/es/word-count.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/word-count.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/word-count.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/word-count.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/word-count.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const textInput = document.getElementById('textInput');
+  const text = textInput.value;
+  
+  if (!text || text.trim().length === 0) {
+    alert('Please enter some text to analyze');
+    return;
+  }
+  
+  const trimmedText = text.trim();
+  
+  // Word count
+  const words = trimmedText.split(/\s+/).filter(word => word.length > 0);
+  const wordCount = words.length;
+  
+  // Character count (with spaces)
+  const characterCount = text.length;
+  
+  // Character count (without spaces)
+  const characterCountNoSpaces = text.replace(/\s/g, '').length;
+  
+  // Sentence count - split by period, exclamation, question mark
+  const sentences = trimmedText.split(/[.!?]+/).filter(sentence => sentence.trim().length > 0);
+  const sentenceCount = sentences.length;
+  
+  // Paragraph count - split by double newline or single newline
+  const paragraphs = trimmedText.split(/\n\n+|\n/).filter(para => para.trim().length > 0);
+  const paragraphCount = paragraphs.length;
+  
+  // Average word length
+  const averageWordLength = wordCount > 0 ? (characterCountNoSpaces / wordCount).toFixed(2) : 0;
+  
+  // Reading time (average reading speed is 200 words per minute)
+  const readingTime = wordCount > 0 ? Math.ceil(wordCount / 200) : 0;
+  
+  // Display results
+  document.getElementById('wordCount').textContent = wordCount.toLocaleString();
+  document.getElementById('characterCount').textContent = characterCount.toLocaleString();
+  document.getElementById('characterCountNoSpaces').textContent = characterCountNoSpaces.toLocaleString();
+  document.getElementById('sentenceCount').textContent = sentenceCount.toLocaleString();
+  document.getElementById('paragraphCount').textContent = paragraphCount.toLocaleString();
+  document.getElementById('averageWordLength').textContent = averageWordLength;
+  document.getElementById('readingTime').textContent = readingTime;
+  
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-TW|word-count|2026-07-09 -->

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>レシピスケーラー - 材料を自動計算</title>
+<meta name="description" content="レシピの材料をサービング数に合わせて自動計算。簡単に料理の量を調整できるツール。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/recipe-scaler.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/recipe-scaler.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/recipe-scaler.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/recipe-scaler.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/recipe-scaler.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/recipe-scaler.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/recipe-scaler.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/recipe-scaler.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/recipe-scaler.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/recipe-scaler.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/recipe-scaler.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/recipe-scaler.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "レシピスケーラー", "url": "https://softglow-ai.com/tools/ja/recipe-scaler.html", "description": "レシピの材料をサービング数に合わせて自動計算。簡単に料理の量を調整できるツール。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "小数点が出た場合はどうすればいいですか?", "acceptedAnswer": {"@type": "Answer", "text": "小数点が出た場合は、実際の計量に合わせて四捨五入してください。例えば0.5個は半分、0.25個は1/4と考えることができます。料理によって調整が必要な場合もあります。"}}, {"@type": "Question", "name": "元のレシピのサービング数がわかりません", "acceptedAnswer": {"@type": "Answer", "text": "レシピ本やWebサイトを確認すれば、通常は冒頭に記載されています。わからない場合は、一般的なサービング数（2人前、4人前など）を推測して使用してください。"}}, {"@type": "Question", "name": "大きく材料を増やす場合、味が変わりませんか?", "acceptedAnswer": {"@type": "Answer", "text": "塩やスパイスなどの調味料は、単純な比例計算では不十分な場合があります。調理の途中で味見をして、適宜調整することをお勧めします。"}}, {"@type": "Question", "name": "減らす場合と増やす場合で計算方法は違いますか?", "acceptedAnswer": {"@type": "Answer", "text": "計算方法は同じです。増やす場合も減らす場合も、同じ比例計算の公式を使用します。ツールが自動的に正確な量を計算してくれます。"}}, {"@type": "Question", "name": "複数の材料を一度に調整できますか?", "acceptedAnswer": {"@type": "Answer", "text": "このツールは1つの材料ずつの計算です。レシピの全ての材料を調整する場合は、各材料ごとにツールを使用してください。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > レシピスケーラー</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>レシピスケーラー</h1>
+    <p class="calc-subtitle">任意のサービング数に合わせてレシピの材料を即座に調整</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="originalIngredient">元の材料の量</label>
+  <div class="input-row"><input type="number" id="originalIngredient" placeholder="2.5"  step="0.01"></div>
+</div>
+  <small class="input-help">調整したい材料の元の量を入力してください</small>
+<div class="input-group">
+  <label for="originalServings">元のサービング数</label>
+  <div class="input-row"><input type="number" id="originalServings" placeholder="4"  step="1"><span class="input-suffix">人前</span></div>
+</div>
+  <small class="input-help">元のレシピのサービング数を入力してください</small>
+<div class="input-group">
+  <label for="newServings">希望する新しいサービング数</label>
+  <div class="input-row"><input type="number" id="newServings" placeholder="6"  step="1"><span class="input-suffix">人前</span></div>
+</div>
+  <small class="input-help">作りたい新しいサービング数を入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">調整後の材料の量</span><span class="result-value" id="scaledAmount">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 計算結果は、希望するサービング数に合わせて調整された材料の量を表示します。この値を使用して、レシピを正確な人数分に変更することができます。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>レシピスケーラーの使い方</h2><p>レシピスケーラーは、任意のサービング数に合わせてレシピの材料を自動計算するツールです。元の材料の量、元のサービング数、希望する新しいサービング数を入力するだけで、必要な材料の正確な量を計算できます。</p><h2>基本的な計算方法</h2><p>このツールは比例計算を使用します。計算式は「(新しいサービング数 ÷ 元のサービング数) × 元の材料の量」となります。例えば、4人前のレシピを6人前にする場合、(6 ÷ 4) × 材料の量で新しい量が求められます。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>使用例</h2><p>オムライスのレシピで、卵2個が4人前の場合を考えます。6人前にしたい場合、(6 ÷ 4) × 2 = 3個となります。このように簡単に材料の量を調整できます。</p><h2>小数点への対応</h2><p>計算結果が小数点となることがあります。小さじや大さじなどの計量単位に変換する際は、小数点以下を四捨五入してご使用ください。例えば、0.5個は「半分」と読み替えることもできます。</p><h2>複数材料への活用</h2><p>各材料ごとにこのツールを使用することで、全ての材料を一括で調整できます。レシピ全体の材料を効率的にスケーリングして、完璧な分量でお料理をお作りください。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">小数点が出た場合はどうすればいいですか?</div><div class="faq-a">小数点が出た場合は、実際の計量に合わせて四捨五入してください。例えば0.5個は半分、0.25個は1/4と考えることができます。料理によって調整が必要な場合もあります。</div></div>
+  <div class="faq-item"><div class="faq-q">元のレシピのサービング数がわかりません</div><div class="faq-a">レシピ本やWebサイトを確認すれば、通常は冒頭に記載されています。わからない場合は、一般的なサービング数（2人前、4人前など）を推測して使用してください。</div></div>
+  <div class="faq-item"><div class="faq-q">大きく材料を増やす場合、味が変わりませんか?</div><div class="faq-a">塩やスパイスなどの調味料は、単純な比例計算では不十分な場合があります。調理の途中で味見をして、適宜調整することをお勧めします。</div></div>
+  <div class="faq-item"><div class="faq-q">減らす場合と増やす場合で計算方法は違いますか?</div><div class="faq-a">計算方法は同じです。増やす場合も減らす場合も、同じ比例計算の公式を使用します。ツールが自動的に正確な量を計算してくれます。</div></div>
+  <div class="faq-item"><div class="faq-q">複数の材料を一度に調整できますか?</div><div class="faq-a">このツールは1つの材料ずつの計算です。レシピの全ての材料を調整する場合は、各材料ごとにツールを使用してください。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">Roi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">Risk Reward</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">ポジションサイズ計算機</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">P/Eレシオ計算機</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">証拠金計算機</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/recipe-scaler.html" class="lang-btn">English</a>
+    <a href="/tools/recipe-scaler.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/recipe-scaler.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/recipe-scaler.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/recipe-scaler.html" class="lang-btn">Français</a>
+    <a href="/tools/es/recipe-scaler.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/recipe-scaler.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/recipe-scaler.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/recipe-scaler.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/recipe-scaler.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const originalIngredient = parseFloat(document.getElementById('originalIngredient').value);
+  const originalServings = parseFloat(document.getElementById('originalServings').value);
+  const newServings = parseFloat(document.getElementById('newServings').value);
+  
+  if (!originalIngredient || !originalServings || !newServings) {
+    alert('Please fill in all fields with valid numbers');
+    return;
+  }
+  
+  if (originalServings <= 0 || newServings <= 0) {
+    alert('Servings must be greater than zero');
+    return;
+  }
+  
+  const scaledAmount = originalIngredient * (newServings / originalServings);
+  
+  document.getElementById('scaledAmount').textContent = scaledAmount.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 3
+  });
+  
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|recipe-scaler|2026-07-09 -->

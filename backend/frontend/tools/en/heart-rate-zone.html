@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heart Rate Zone Calculator - Find Your Training Zones</title>
+<meta name="description" content="Calculate your maximum heart rate and training zones by age. Optimize your workouts with personalized heart rate targets for aerobic and anaerobic training.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/en/heart-rate-zone.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/heart-rate-zone.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/heart-rate-zone.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/heart-rate-zone.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/heart-rate-zone.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/heart-rate-zone.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/heart-rate-zone.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/heart-rate-zone.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/heart-rate-zone.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/heart-rate-zone.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/heart-rate-zone.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/heart-rate-zone.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Heart Rate Zone Calculator", "url": "https://softglow-ai.com/tools/en/heart-rate-zone.html", "description": "Calculate your maximum heart rate and training zones by age. Optimize your workouts with personalized heart rate targets for aerobic and anaerobic training.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Why is my actual maximum heart rate different from the calculated value?", "acceptedAnswer": {"@type": "Answer", "text": "The age-predicted formula (220 - Age) is an estimate that works well for many people but has limitations. Individual variation can be ±10-20 bpm due to genetics, fitness level, cardiovascular health, and other factors. For the most accurate maximum heart rate, conduct a maximal exercise test under professional supervision."}}, {"@type": "Question", "name": "How do I know if I'm training in the correct zone?", "acceptedAnswer": {"@type": "Answer", "text": "Use a heart rate monitor (chest strap or fitness watch) to track your beats per minute during exercise. Alternatively, use the 'talk test'—in the aerobic zone, you should be able to speak in short sentences but not sing. In higher zones, speaking becomes difficult or impossible."}}, {"@type": "Question", "name": "Can I improve my fitness by only training in high-intensity zones?", "acceptedAnswer": {"@type": "Answer", "text": "No. While high-intensity training is effective, exclusive reliance on it increases injury risk and leads to overtraining. A balanced approach with 70-80% low-intensity and 20-30% high-intensity training produces better long-term results and sustainability."}}, {"@type": "Question", "name": "Should I adjust my zones based on my resting heart rate?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, the Karvonen formula uses resting heart rate for more personalized zones: Target HR = ((Max HR - Resting HR) × Intensity %) + Resting HR. This method accounts for individual fitness differences and provides a more accurate reflection of training intensity than simple percentage calculations."}}, {"@type": "Question", "name": "How often should I retest my maximum heart rate?", "acceptedAnswer": {"@type": "Answer", "text": "If using the age-predicted formula, you don't need to retest—it updates automatically as you age. However, if your fitness level changes dramatically or you want accuracy, conduct a maximal effort test every 1-2 years. Always consult a healthcare provider before conducting high-intensity fitness tests."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/en/">Tools</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/en/">Tools</a> > Heart Rate Zone Calculator</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Heart Rate Zone Calculator</h1>
+    <p class="calc-subtitle">Discover your optimal training heart rate zones based on age</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="userAge">Your Age</label>
+  <div class="input-row"><input type="number" id="userAge" placeholder="Enter your age"  step="1"><span class="input-suffix">years</span></div>
+</div>
+  <small class="input-help">Enter your current age in years to calculate your maximum heart rate</small>
+<div class="input-group">
+  <label for="zonePercentage">Training Zone (%)</label>
+  <div class="input-row"><input type="number" id="zonePercentage" placeholder="50-100"  value="75" step="1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">Select or enter the training intensity percentage (50-100%) for your target zone</small></div>
+    <button class="btn-calc" onclick="calculate()">Calculate</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Maximum Heart Rate (MHR)</span><span class="result-value" id="maxHeartRate">—</span></div>
+<div class="result-highlight"><span class="result-label">Target Heart Rate (Zone)</span><span class="result-value" id="targetHeartRate">—</span></div>
+<div class="result-item"><span class="result-label">Warm-up Zone (50-60%)</span><span class="result-value" id="warmupZone">—</span></div>
+<div class="result-item"><span class="result-label">Aerobic Zone (60-70%)</span><span class="result-value" id="aerobicZone">—</span></div>
+<div class="result-item"><span class="result-label">Anaerobic Zone (80-90%)</span><span class="result-value" id="anaerobicZone">—</span></div>
+<div class="result-item"><span class="result-label">Maximum Effort Zone (90-100%)</span><span class="result-value" id="maxEffortZone">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>What does this mean?</strong> Your Maximum Heart Rate (MHR) is the highest number of beats per minute your heart can achieve during maximum effort. The Target Heart Rate shows your goal zone based on your selected intensity percentage. Train within the Warm-up, Aerobic, Anaerobic, or Maximum Effort zones depending on your fitness goals and workout type.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Print</button>
+        <button onclick="shareResult()">&#x1f4e4; Share</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>Understanding Heart Rate Training Zones</h2><p>Heart rate training zones are essential tools for optimizing your fitness regimen and ensuring you're working at the right intensity for your goals. By training within specific heart rate ranges, you can maximize calorie burn, improve cardiovascular health, and achieve better results from your exercise routine. This calculator uses the age-predicted maximum heart rate formula to determine your personalized training zones.</p><h2>The Maximum Heart Rate Formula</h2><p>The most commonly used method to estimate your maximum heart rate (MHR) is the age-predicted formula: MHR = 220 - Age. While this formula provides a good general estimate, individual variations exist due to genetics, fitness level, and other factors. Your actual maximum heart rate may vary by 10-20 beats per minute from the predicted value. If you've had your maximum heart rate tested through a stress test or sports science facility, use that value instead of the estimated one.</p><h2>Understanding Each Training Zone</h2><p>The Warm-up Zone (50-60% of MHR) is ideal for beginners and recovery days. Training in this zone helps prepare your body for more intense exercise and promotes active recovery between hard workouts. The Aerobic Zone (60-70% of MHR) is the sweet spot for building endurance and improving cardiovascular fitness. Most steady-state cardio exercise falls within this range, and you should be able to hold a conversation while exercising here. The Anaerobic Zone (80-90% of MHR) is for high-intensity interval training and tempo work. Exercise in this zone builds speed and power but is unsustainable for long periods. Finally, the Maximum Effort Zone (90-100% of MHR) is reserved for all-out sprinting and maximum intensity efforts, lasting only seconds to a few minutes.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Choosing the Right Zone for Your Goals</h2><p>Your training zone selection depends entirely on your fitness objectives. For weight loss and fat burning, aim for 60-75% of your MHR, which maximizes calorie expenditure while remaining sustainable. For building aerobic capacity and endurance, spend most of your training time at 60-70% MHR. Athletes looking to improve speed and power should incorporate regular sessions in the 80-90% range. Remember that variety is crucial—mixing different intensity zones prevents adaptation and keeps your workouts effective.</p><h2>Training Frequency and Recovery</h2><p>It's important not to spend all your training time in the highest zones. A balanced approach typically involves 70-80% of your weekly training at lower intensities (50-70% MHR) and only 20-30% at higher intensities. This structure, sometimes called the 80/20 rule, promotes sustainable progress while minimizing injury risk and overtraining. Always include proper warm-up and cool-down periods, and allow at least one rest day per week for recovery.</p><h2>Individual Variation and Factors</h2><p>Several factors can affect your actual heart rate training zones beyond your age. Fitness level, resting heart rate, medications, stress levels, and altitude all influence your performance at specific heart rate levels. Athletes with lower resting heart rates may be more efficient than predicted by age alone. If you're new to heart rate training, consider getting a baseline fitness assessment to understand your personal response to exercise intensity. This personalized approach yields better results than relying solely on age-predicted calculations.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Related Articles</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>FAQ</h2><div class="faq-item"><div class="faq-q">Why is my actual maximum heart rate different from the calculated value?</div><div class="faq-a">The age-predicted formula (220 - Age) is an estimate that works well for many people but has limitations. Individual variation can be ±10-20 bpm due to genetics, fitness level, cardiovascular health, and other factors. For the most accurate maximum heart rate, conduct a maximal exercise test under professional supervision.</div></div>
+  <div class="faq-item"><div class="faq-q">How do I know if I'm training in the correct zone?</div><div class="faq-a">Use a heart rate monitor (chest strap or fitness watch) to track your beats per minute during exercise. Alternatively, use the 'talk test'—in the aerobic zone, you should be able to speak in short sentences but not sing. In higher zones, speaking becomes difficult or impossible.</div></div>
+  <div class="faq-item"><div class="faq-q">Can I improve my fitness by only training in high-intensity zones?</div><div class="faq-a">No. While high-intensity training is effective, exclusive reliance on it increases injury risk and leads to overtraining. A balanced approach with 70-80% low-intensity and 20-30% high-intensity training produces better long-term results and sustainability.</div></div>
+  <div class="faq-item"><div class="faq-q">Should I adjust my zones based on my resting heart rate?</div><div class="faq-a">Yes, the Karvonen formula uses resting heart rate for more personalized zones: Target HR = ((Max HR - Resting HR) × Intensity %) + Resting HR. This method accounts for individual fitness differences and provides a more accurate reflection of training intensity than simple percentage calculations.</div></div>
+  <div class="faq-item"><div class="faq-q">How often should I retest my maximum heart rate?</div><div class="faq-a">If using the age-predicted formula, you don't need to retest—it updates automatically as you age. However, if your fitness level changes dramatically or you want accuracy, conduct a maximal effort test every 1-2 years. Always consult a healthcare provider before conducting high-intensity fitness tests.</div></div></section>
+  <div class="more-tools"><h3>More Tools</h3><div class="tools-grid"><a class="tool-pill" href="/tools/en/bmi-calculator.html">BMI Calculator</a>
+      <a class="tool-pill" href="/tools/en/bmr-calculator.html">BMR Calculator</a>
+      <a class="tool-pill" href="/tools/en/body-fat-calculator.html">Body Fat Calculator</a>
+      <a class="tool-pill" href="/tools/en/calorie-calculator.html">Calorie Calculator</a>
+      <a class="tool-pill" href="/tools/en/macro-calculator.html">Macro Calculator</a>
+      <a class="tool-pill" href="/tools/en/protein-intake.html">Protein Intake</a>
+      <a class="tool-pill" href="/tools/en/blood-pressure-chart.html">Blood Pressure Checker</a>
+      <a class="tool-pill" href="/tools/en/baby-growth.html">Baby Growth Percentile Calculator</a>
+      <a class="tool-pill" href="/tools/en/bac-calculator.html">BAC Calculator</a>
+      <a class="tool-pill" href="/tools/en/caffeine-calculator.html">Caffeine Intake Calculator</a>
+      <a class="tool-pill" href="/tools/en/hydration-calculator.html">Hydration Calculator</a>
+      <a class="tool-pill" href="/tools/en/sleep-calculator.html">Sleep Cycle Calculator</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/heart-rate-zone.html" class="lang-btn active">English</a>
+    <a href="/tools/heart-rate-zone.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/heart-rate-zone.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/heart-rate-zone.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/heart-rate-zone.html" class="lang-btn">Français</a>
+    <a href="/tools/es/heart-rate-zone.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/heart-rate-zone.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/heart-rate-zone.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/heart-rate-zone.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/heart-rate-zone.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Related Tools</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const ageInput = document.getElementById('userAge');
+  const zoneInput = document.getElementById('zonePercentage');
+  
+  if (!ageInput.value || !zoneInput.value) {
+    alert('Please enter your age and select a training zone');
+    return;
+  }
+  
+  const age = parseFloat(ageInput.value);
+  const zonePercent = parseFloat(zoneInput.value);
+  
+  if (age < 1 || age > 120) {
+    alert('Please enter a valid age between 1 and 120');
+    return;
+  }
+  
+  if (zonePercent < 0 || zonePercent > 100) {
+    alert('Please enter a zone percentage between 0 and 100');
+    return;
+  }
+  
+  const maxHR = 220 - age;
+  const targetHR = Math.round(maxHR * (zonePercent / 100));
+  const warmup = Math.round(maxHR * 0.55);
+  const aerobic = Math.round(maxHR * 0.65);
+  const anaerobic = Math.round(maxHR * 0.85);
+  const maxEffort = Math.round(maxHR * 0.95);
+  
+  document.getElementById('maxHeartRate').textContent = maxHR.toLocaleString('en-US');
+  document.getElementById('targetHeartRate').textContent = targetHR.toLocaleString('en-US');
+  document.getElementById('warmupZone').textContent = warmup.toLocaleString('en-US');
+  document.getElementById('aerobicZone').textContent = aerobic.toLocaleString('en-US');
+  document.getElementById('anaerobicZone').textContent = anaerobic.toLocaleString('en-US');
+  document.getElementById('maxEffortZone').textContent = maxEffort.toLocaleString('en-US');
+  
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copied!';setTimeout(function(){b.textContent='Share'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|en|heart-rate-zone|2026-07-09 -->

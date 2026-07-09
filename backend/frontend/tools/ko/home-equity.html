@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>주택 담보 가치 계산기 - 집값 순자산 계산</title>
+<meta name="description" content="현재 주택 시장가와 남은 모기지 잔액으로 주택 담보 가치와 담보율을 정확히 계산하세요.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ko/home-equity.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/home-equity.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/home-equity.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/home-equity.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/home-equity.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/home-equity.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/home-equity.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/home-equity.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/home-equity.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/home-equity.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/home-equity.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/home-equity.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "주택 담보 가치 계산기", "url": "https://softglow-ai.com/tools/ko/home-equity.html", "description": "현재 주택 시장가와 남은 모기지 잔액으로 주택 담보 가치와 담보율을 정확히 계산하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "주택 담보 가치와 주택 순자산의 차이가 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "이 두 용어는 같은 의미로 사용됩니다. 모두 주택 시장가에서 남은 모기지를 뺀 금액을 나타냅니다."}}, {"@type": "Question", "name": "LTV가 80% 이상이면 어떻게 되나요?", "acceptedAnswer": {"@type": "Answer", "text": "LTV가 80% 이상일 경우, 모기지 보험(PMI) 가입이 필요할 수 있으며 대출 조건이 덜 유리할 수 있습니다."}}, {"@type": "Question", "name": "주택 가격이 떨어지면 담보 가치도 감소하나요?", "acceptedAnswer": {"@type": "Answer", "text": "네, 주택 시장가가 감소하면 담보 가치도 함께 감소합니다. 극단적인 경우 담보 가치가 음수가 될 수도 있습니다."}}, {"@type": "Question", "name": "주택 담보 대출을 받을 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "네, 충분한 담보 가치가 있으면 주택담보대출(HELOC) 또는 주택담보 신용 한도를 이용할 수 있습니다."}}, {"@type": "Question", "name": "이 계산기는 얼마나 자주 업데이트해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "최소 연 1회, 이상적으로는 분기마다 주택 시장가와 모기지 잔액을 확인하여 업데이트하는 것을 권장합니다."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ko/">도구</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 주택 담보 가치 계산기</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>주택 담보 가치 계산기</h1>
+    <p class="calc-subtitle">현재 집값에서 실제로 소유한 부분이 얼마나 되는지 즉시 계산하세요</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="marketValue">현재 주택 시장가</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="marketValue" placeholder="350000"  step="1000"></div>
+</div>
+  <small class="input-help">현재 주택의 예상 시장가치를 입력하세요</small>
+<div class="input-group">
+  <label for="mortgageBalance">남은 모기지 잔액</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="mortgageBalance" placeholder="250000"  step="1000"></div>
+</div>
+  <small class="input-help">남은 대출금액 잔액을 입력하세요</small></div>
+    <button class="btn-calc" onclick="calculate()">계산하기</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">주택 담보 가치</span><span class="result-value" id="equityAmount">—</span></div>
+<div class="result-highlight"><span class="result-label">주택가 대비 담보 가치 비율</span><span class="result-value" id="equityPercent">—</span></div>
+<div class="result-item"><span class="result-label">대출가치비율(LTV)</span><span class="result-value" id="loanToValue">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>이것은 무엇을 의미합니까?</strong> 주택 담보 가치는 집값에서 모기지 잔액을 뺀 순자산입니다. 담보 가치 비율이 높을수록 주택에 대한 소유권이 많다는 의미이며, LTV 비율이 낮을수록 대출금이 적다는 것을 나타냅니다.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 인쇄</button>
+        <button onclick="shareResult()">&#x1f4e4; 공유</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>주택 담보 가치란 무엇인가요?</h2><p>주택 담보 가치(Home Equity)는 주택의 현재 시장가에서 남은 모기지 잔액을 뺀 금액입니다. 이는 주택 소유자가 실제로 소유하고 있는 순자산을 나타내며, 주택담보대출이나 재정적 결정을 할 때 중요한 지표입니다.</p><h2>주택 담보 가치 계산 방법</h2><p>계산은 간단합니다: 주택 담보 가치 = 현재 주택 시장가 - 남은 모기지 잔액. 예를 들어 현재 주택 시장가가 £350,000이고 남은 모기지가 £250,000이라면, 주택 담보 가치는 £100,000입니다.</p><h2>담보 가치 비율의 의미</h2><p>담보 가치 비율은 주택 전체 가치 중 자신이 소유한 부분의 비율을 백분율로 나타냅니다. 비율이 높을수록 주택에 대한 소유권이 크다는 뜻입니다. 위의 예에서 담보 가치 비율은 약 28.6%입니다.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>대출가치비율(LTV) 이해하기</h2><p>LTV는 주택 시장가에 대한 모기지 잔액의 비율입니다. LTV가 낮을수록 대출 위험이 낮고 금융기관에서 유리한 대출 조건을 받을 가능성이 높습니다. 위의 예에서 LTV는 약 71.4%입니다.</p><h2>주택 담보 가치를 높이는 방법</h2><p>주택 담보 가치를 증가시키려면 모기지 상환을 빠르게 진행하거나 주택 개선 공사로 시장가를 높일 수 있습니다. 또한 시간이 지나면서 주택 가격이 상승하면 자동으로 담보 가치도 증가합니다.</p><h2>언제 이 계산이 필요한가요?</h2><p>주택 담보 대출, 리파이낸싱, 주택담보 신용 한도(HELOC) 신청, 또는 자산 상황을 파악할 때 이 계산이 유용합니다. 정기적으로 계산하면 재정 계획을 효과적으로 수립할 수 있습니다.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 관련 기사</h3><div class="blog-grid"><a class="blog-card" href="/blog/ko/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ko/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ko/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>자주 묻는 질문</h2><div class="faq-item"><div class="faq-q">주택 담보 가치와 주택 순자산의 차이가 무엇인가요?</div><div class="faq-a">이 두 용어는 같은 의미로 사용됩니다. 모두 주택 시장가에서 남은 모기지를 뺀 금액을 나타냅니다.</div></div>
+  <div class="faq-item"><div class="faq-q">LTV가 80% 이상이면 어떻게 되나요?</div><div class="faq-a">LTV가 80% 이상일 경우, 모기지 보험(PMI) 가입이 필요할 수 있으며 대출 조건이 덜 유리할 수 있습니다.</div></div>
+  <div class="faq-item"><div class="faq-q">주택 가격이 떨어지면 담보 가치도 감소하나요?</div><div class="faq-a">네, 주택 시장가가 감소하면 담보 가치도 함께 감소합니다. 극단적인 경우 담보 가치가 음수가 될 수도 있습니다.</div></div>
+  <div class="faq-item"><div class="faq-q">주택 담보 대출을 받을 수 있나요?</div><div class="faq-a">네, 충분한 담보 가치가 있으면 주택담보대출(HELOC) 또는 주택담보 신용 한도를 이용할 수 있습니다.</div></div>
+  <div class="faq-item"><div class="faq-q">이 계산기는 얼마나 자주 업데이트해야 하나요?</div><div class="faq-a">최소 연 1회, 이상적으로는 분기마다 주택 시장가와 모기지 잔액을 확인하여 업데이트하는 것을 권장합니다.</div></div></section>
+  <div class="more-tools"><h3>더 많은 도구</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ko/compound-interest.html">복리 이자 계산기</a>
+      <a class="tool-pill" href="/tools/ko/roi-calculator.html">ROI 계산기</a>
+      <a class="tool-pill" href="/tools/ko/risk-reward.html">위험-수익 계산기</a>
+      <a class="tool-pill" href="/tools/ko/position-size.html">포지션 크기 계산기</a>
+      <a class="tool-pill" href="/tools/ko/stop-loss.html">손절매 계산기</a>
+      <a class="tool-pill" href="/tools/ko/dividend-yield.html">배당 수익률 계산기</a>
+      <a class="tool-pill" href="/tools/ko/pe-ratio.html">P/E 비율 계산기</a>
+      <a class="tool-pill" href="/tools/ko/dca-calculator.html">DCA 계산기</a>
+      <a class="tool-pill" href="/tools/ko/cagr.html">CAGR 계산기</a>
+      <a class="tool-pill" href="/tools/ko/margin-calculator.html">마진 계산기</a>
+      <a class="tool-pill" href="/tools/ko/stock-gain-loss.html">주식 수익/손실 계산기</a>
+      <a class="tool-pill" href="/tools/ko/break-even.html">손익분기점 계산기</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/home-equity.html" class="lang-btn">English</a>
+    <a href="/tools/home-equity.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/home-equity.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/home-equity.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/home-equity.html" class="lang-btn">Français</a>
+    <a href="/tools/es/home-equity.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/home-equity.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/home-equity.html" class="lang-btn active">한국어</a>
+    <a href="/tools/id/home-equity.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/home-equity.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>관련 계산기</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const marketValueInput = document.getElementById('marketValue');
+  const mortgageBalanceInput = document.getElementById('mortgageBalance');
+  
+  if (!marketValueInput.value || !mortgageBalanceInput.value) {
+    alert('Please enter both the current market value and mortgage balance');
+    return;
+  }
+  
+  const marketValue = parseFloat(marketValueInput.value);
+  const mortgageBalance = parseFloat(mortgageBalanceInput.value);
+  
+  if (marketValue <= 0 || mortgageBalance < 0) {
+    alert('Please enter valid positive numbers');
+    return;
+  }
+  
+  if (mortgageBalance > marketValue) {
+    alert('Mortgage balance cannot exceed home market value');
+    return;
+  }
+  
+  const equity = marketValue - mortgageBalance;
+  const equityPercentage = (equity / marketValue) * 100;
+  const ltv = (mortgageBalance / marketValue) * 100;
+  
+  document.getElementById('equityAmount').textContent = equity.toLocaleString('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  document.getElementById('equityPercent').textContent = equityPercentage.toFixed(2);
+  document.getElementById('loanToValue').textContent = ltv.toFixed(2);
+  
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='복사됨!';setTimeout(function(){b.textContent='공유'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ko|home-equity|2026-07-09 -->

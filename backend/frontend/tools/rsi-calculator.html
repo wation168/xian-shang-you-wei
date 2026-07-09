@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSI 相對強度指數計算器 - 技術分析工具</title>
+<meta name="description" content="免費 RSI 計算器，快速計算相對強度指數。輸入收盤價和週期，獲得市場條件分析和交易訊號。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/rsi-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/rsi-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/rsi-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/rsi-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/rsi-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/rsi-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/rsi-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/rsi-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/rsi-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/rsi-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/rsi-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/rsi-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "RSI 計算器", "url": "https://softglow-ai.com/tools/rsi-calculator.html", "description": "免費 RSI 計算器，快速計算相對強度指數。輸入收盤價和週期，獲得市場條件分析和交易訊號。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "RSI 的標準週期是多少天？", "acceptedAnswer": {"@type": "Answer", "text": "RSI 的標準週期是 14 天，這是韋爾斯·懷爾德斯原始設定的參數。不過交易者也常使用 9 天或 21 天等其他週期，短週期的 RSI 會更敏感，長週期的 RSI 會更平穩。"}}, {"@type": "Question", "name": "RSI 超過 70 或低於 30 就一定要交易嗎？", "acceptedAnswer": {"@type": "Answer", "text": "不一定。RSI 超買（>70）或超賣（<30）只是提供一個潛在的交易訊號，但不是絕對的買賣點。在強勢趨勢中，RSI 可能長期保持在極端水平。應結合價格形態、支撐阻力位和其他指標確認。"}}, {"@type": "Question", "name": "RSI 與 MACD 有什麼區別？", "acceptedAnswer": {"@type": "Answer", "text": "RSI 是動量振盪器，主要衡量價格變動的速度和幅度。MACD 是趨勢跟蹤指標，通過移動平均線的交叉來識別趨勢方向。兩者各有優勢，可結合使用以獲得更全面的分析。"}}, {"@type": "Question", "name": "如何利用 RSI 的背離來預測趨勢反轉？", "acceptedAnswer": {"@type": "Answer", "text": "背離是指價格創新高但 RSI 沒有創新高（或價格創新低但 RSI 沒有創新低）的現象。這通常預示趨勢力量減弱，可能發生反轉。這是 RSI 最強大的訊號之一。"}}, {"@type": "Question", "name": "在不同的時間框架上應該使用不同的 RSI 設置嗎？", "acceptedAnswer": {"@type": "Answer", "text": "是的。短時間框架（如 5 分鐘）可使用較短的週期（如 7 天）以提高敏感度；長時間框架（如日線、週線）可使用標準的 14 天週期。這樣能使 RSI 訊號與時間框架更加匹配。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > RSI 計算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>RSI 計算器</h1>
+    <p class="calc-subtitle">計算相對強度指數用於技術分析和交易訊號</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="closingPrices">收盤價（逗號分隔）</label>
+  <div class="input-row"><input type="text" id="closingPrices" placeholder="100, 102, 101, 103, 105, 104, 106"  step="0.01"></div>
+</div>
+  <small class="input-help">輸入一系列收盤價格，用逗號分隔各個數值</small>
+<div class="input-group">
+  <label for="period">RSI 週期（天數）</label>
+  <div class="input-row"><input type="number" id="period" placeholder="14"  value="14" step="1"><span class="input-suffix">天</span></div>
+</div>
+  <small class="input-help">輸入 RSI 計算週期，通常使用 14 天作為標準週期</small></div>
+    <button class="btn-calc" onclick="calculate()">計算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">RSI 值</span><span class="result-value" id="rsiValue">—</span></div>
+<div class="result-item"><span class="result-label">市場條件</span><span class="result-value" id="rsiCondition">—</span></div>
+<div class="result-item"><span class="result-label">平均漲幅</span><span class="result-value" id="avgGain">—</span></div>
+<div class="result-item"><span class="result-label">平均跌幅</span><span class="result-value" id="avgLoss">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> RSI 值介於 0 至 100 之間。RSI 高於 70 通常表示超買狀態，可能預示價格回調；RSI 低於 30 表示超賣狀態，可能預示價格反彈。平均漲幅和平均跌幅顯示指定週期內的價格動能。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 列印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什麼是相對強度指數（RSI）？</h2><p>相對強度指數（Relative Strength Index, RSI）是由韋爾斯·懷爾德斯開發的技術動量指標，用於衡量股票或其他資產價格變動的速度和幅度。RSI 在 0 至 100 之間波動，是技術分析師最常用的工具之一。</p><h2>RSI 的計算原理</h2><p>RSI 通過比較一定時期內平均漲幅與平均跌幅來計算。標準的 RSI 週期為 14 天，計算公式為：RS = 平均漲幅 / 平均跌幅，然後 RSI = 100 - (100 / (1 + RS))。這個指標能有效反映市場買賣力量的對比。</p><h2>RSI 數值的解讀</h2><p>RSI 數值通常分為三個區域：當 RSI 高於 70 時，市場處於超買狀態，可能預示價格即將回調或反轉下跌；當 RSI 低於 30 時，市場處於超賣狀態，可能預示價格即將反彈或反轉上漲；當 RSI 介於 30 至 70 之間時，市場處於相對平衡狀態。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>交易訊號應用</h2><p>投資者可以利用 RSI 生成交易訊號。典型應用包括：當 RSI 從超賣區（低於 30）向上突破時買入；當 RSI 從超買區（高於 70）向下跌破時賣出；觀察 RSI 與價格的背離現象以預測趨勢反轉。</p><h2>RSI 的優勢與局限</h2><p>RSI 的主要優勢是計算簡單、訊號清晰、適用於各種時間框架。然而，RSI 在強烈的單邊趨勢中可能長期保持極端數值，容易產生虛假訊號。因此應結合其他技術指標和基本面分析使用。</p><h2>最佳實踐建議</h2><p>在使用 RSI 時，建議結合價格走勢、交易量和其他技術指標進行綜合分析。同時要注意不同市場和不同資產的 RSI 特性可能有所不同，需要根據實際情況調整超買超賣的閾值。定期檢驗策略的有效性並持續優化。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/candlestick-patterns.html">Candlestick Patterns<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/support-resistance.html">Support & Resistance<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/moving-average-guide.html">Moving Average Guide<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">RSI 的標準週期是多少天？</div><div class="faq-a">RSI 的標準週期是 14 天，這是韋爾斯·懷爾德斯原始設定的參數。不過交易者也常使用 9 天或 21 天等其他週期，短週期的 RSI 會更敏感，長週期的 RSI 會更平穩。</div></div>
+  <div class="faq-item"><div class="faq-q">RSI 超過 70 或低於 30 就一定要交易嗎？</div><div class="faq-a">不一定。RSI 超買（>70）或超賣（<30）只是提供一個潛在的交易訊號，但不是絕對的買賣點。在強勢趨勢中，RSI 可能長期保持在極端水平。應結合價格形態、支撐阻力位和其他指標確認。</div></div>
+  <div class="faq-item"><div class="faq-q">RSI 與 MACD 有什麼區別？</div><div class="faq-a">RSI 是動量振盪器，主要衡量價格變動的速度和幅度。MACD 是趨勢跟蹤指標，通過移動平均線的交叉來識別趨勢方向。兩者各有優勢，可結合使用以獲得更全面的分析。</div></div>
+  <div class="faq-item"><div class="faq-q">如何利用 RSI 的背離來預測趨勢反轉？</div><div class="faq-a">背離是指價格創新高但 RSI 沒有創新高（或價格創新低但 RSI 沒有創新低）的現象。這通常預示趨勢力量減弱，可能發生反轉。這是 RSI 最強大的訊號之一。</div></div>
+  <div class="faq-item"><div class="faq-q">在不同的時間框架上應該使用不同的 RSI 設置嗎？</div><div class="faq-a">是的。短時間框架（如 5 分鐘）可使用較短的週期（如 7 天）以提高敏感度；長時間框架（如日線、週線）可使用標準的 14 天週期。這樣能使 RSI 訊號與時間框架更加匹配。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/fibonacci-retracement.html">斐波那契回調計算器</a>
+      <a class="tool-pill" href="/tools/pivot-point.html">樞紐點計算器</a>
+      <a class="tool-pill" href="/tools/macd-calculator.html">MACD 計算器</a>
+      <a class="tool-pill" href="/tools/bollinger-bands.html">布林帶計算器</a>
+      <a class="tool-pill" href="/tools/atr-calculator.html">ATR計算器</a>
+      <a class="tool-pill" href="/tools/ma-crossover.html">移動平均線交叉計算器</a>
+      <a class="tool-pill" href="/tools/candlestick-identifier.html">K線型態識別器</a>
+      <a class="tool-pill" href="/tools/support-resistance.html">支撐與阻力計算器</a>
+      <a class="tool-pill" href="/tools/pip-value.html">點值計算機</a>
+      <a class="tool-pill" href="/tools/options-profit.html">期權損益計算器</a>
+      <a class="tool-pill" href="/tools/stock-split.html">股票分割計算器</a>
+      <a class="tool-pill" href="/tools/trading-fee.html">交易手續費計算器</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/rsi-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/rsi-calculator.html" class="lang-btn active">繁體中文</a>
+    <a href="/tools/ja/rsi-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/rsi-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/rsi-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/rsi-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/rsi-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/rsi-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/rsi-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/rsi-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const closingPricesInput = document.getElementById('closingPrices').value.trim();
+  const periodInput = document.getElementById('period').value.trim();
+  
+  if (!closingPricesInput || !periodInput) {
+    alert('Please enter closing prices and RSI period');
+    return;
+  }
+  
+  const prices = closingPricesInput.split(',').map(p => parseFloat(p.trim()));
+  const period = parseInt(periodInput);
+  
+  if (prices.length < period + 1 || prices.some(isNaN)) {
+    alert('Please enter valid prices. You need at least ' + (period + 1) + ' prices.');
+    return;
+  }
+  
+  const changes = [];
+  for (let i = 1; i < prices.length; i++) {
+    changes.push(prices[i] - prices[i - 1]);
+  }
+  
+  let gainSum = 0;
+  let lossSum = 0;
+  
+  for (let i = 0; i < period; i++) {
+    if (changes[i] > 0) {
+      gainSum += changes[i];
+    } else {
+      lossSum += Math.abs(changes[i]);
+    }
+  }
+  
+  let avgGain = gainSum / period;
+  let avgLoss = lossSum / period;
+  
+  for (let i = period; i < changes.length; i++) {
+    if (changes[i] > 0) {
+      avgGain = (avgGain * (period - 1) + changes[i]) / period;
+      avgLoss = (avgLoss * (period - 1)) / period;
+    } else {
+      avgGain = (avgGain * (period - 1)) / period;
+      avgLoss = (avgLoss * (period - 1) + Math.abs(changes[i])) / period;
+    }
+  }
+  
+  let rsi;
+  if (avgLoss === 0) {
+    rsi = avgGain === 0 ? 50 : 100;
+  } else {
+    const rs = avgGain / avgLoss;
+    rsi = 100 - (100 / (1 + rs));
+  }
+  
+  let condition = '';
+  if (rsi >= 70) {
+    condition = 'Overbought - Consider selling';
+  } else if (rsi <= 30) {
+    condition = 'Oversold - Consider buying';
+  } else {
+    condition = 'Neutral - Monitor for signals';
+  }
+  
+  document.getElementById('rsiValue').textContent = rsi.toFixed(2);
+  document.getElementById('rsiCondition').textContent = condition;
+  document.getElementById('avgGain').textContent = avgGain.toFixed(4);
+  document.getElementById('avgLoss').textContent = avgLoss.toFixed(4);
+  
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-TW|rsi-calculator|2026-07-09 -->

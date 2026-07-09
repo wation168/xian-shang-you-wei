@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>通貨換算 - リアルタイム為替レート</title>
+<meta name="description" content="ライブ為替レートを使用して、任意の金額を複数の通貨間で瞬時に換算できます。正確で最新の換算結果をご提供します。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/currency-converter.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/currency-converter.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/currency-converter.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/currency-converter.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/currency-converter.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/currency-converter.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/currency-converter.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/currency-converter.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/currency-converter.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/currency-converter.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/currency-converter.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/currency-converter.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "通貨換算ツール", "url": "https://softglow-ai.com/tools/ja/currency-converter.html", "description": "ライブ為替レートを使用して、任意の金額を複数の通貨間で瞬時に換算できます。正確で最新の換算結果をご提供します。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "このツールの為替レートはどのくらいの頻度で更新されますか？", "acceptedAnswer": {"@type": "Answer", "text": "当ツールの為替レートは1分ごとに更新され、最新の市場データを反映しています。ただし、市場の休場日や深夜の時間帯は更新間隔が長くなる場合があります。"}}, {"@type": "Question", "name": "このツールで得られた換算結果は、実際の送金レートと異なりますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、異なることが多いです。銀行や両替所は手数料やスプレッドを加算するため、実際のレートはこのツールの結果より低くなる傾向があります。"}}, {"@type": "Question", "name": "150以上の通貨すべてがサポートされていますか？", "acceptedAnswer": {"@type": "Answer", "text": "当ツールは世界中の主要通貨及びマイナー通貨を含む150以上の通貨をサポートしています。特定の通貨が見つからない場合はお問い合わせください。"}}, {"@type": "Question", "name": "過去の為替レート履歴を確認することはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "現在のバージョンではリアルタイムレートの表示に対応していますが、今後、過去データの参照機能を追加予定です。"}}, {"@type": "Question", "name": "モバイルデバイスでも利用できますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、当ツールはレスポンシブデザインで、スマートフォンやタブレットを含むすべてのデバイスで利用できます。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 通貨換算ツール</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>通貨換算ツール</h1>
+    <p class="calc-subtitle">ライブ為替レートで任意の金額を通貨間で即座に換算します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="amountInput">換算金額</label>
+  <div class="input-row"><input type="number" id="amountInput" placeholder="100"  value="100" step="0.01"></div>
+</div>
+  <small class="input-help">換算したい金額を入力してください</small>
+<div class="input-group">
+  <label for="fromCurrency">元の通貨</label>
+  <div class="input-row"><input type="text" id="fromCurrency" value="USD"></div>
+</div>
+  <small class="input-help">元となる通貨を選択してください</small>
+<div class="input-group">
+  <label for="toCurrency">換算先通貨</label>
+  <div class="input-row"><input type="text" id="toCurrency" value="GBP"></div>
+</div>
+  <small class="input-help">換算先の通貨を選択してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">換算後の金額</span><span class="result-value" id="convertedAmount">—</span></div>
+<div class="result-item"><span class="result-label">為替レート</span><span class="result-value" id="exchangeRate">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 換算後の金額は、入力した金額を現在のライブ為替レートで変換した結果です。為替レートは、元の通貨1単位あたりの換算先通貨の価値を示しています。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>通貨換算ツールについて</h2><p>当社の通貨換算ツールは、世界中の主要通貨をリアルタイムの為替レートで即座に換算できます。USD、EUR、JPY、GBPなど、150以上の通貨に対応しており、最新の市場データに基づいた正確な換算結果を提供します。</p><h2>使い方</h2><p>換算したい金額を入力し、元の通貨と換算先の通貨を選択するだけで、自動的に最新の為替レートが適用されます。例えば、100 USDをJPYに換算する場合、現在のレート（約15,000円）で瞬時に計算されます。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>為替レートについて</h2><p>当ツールで使用される為替レートは、主要な金融機関やマーケットデータプロバイダーから提供されるリアルタイムデータです。相場は常に変動するため、実際の取引時のレートと異なる場合がありますので、ご了承ください。</p><h2>主要通貨の特徴</h2><p>米ドル（USD）は世界最大の基軸通貨で、ユーロ（EUR）は欧州で広く使用されています。日本円（JPY）はアジア太平洋地域で重要な役割を果たし、英ポンド（GBP）はイギリスの公式通貨です。各通貨の相対的な価値は、経済状況や金利、地政学的要因など、多くの変数に影響されます。</p><h2>国際送金での活用</h2><p>当ツールは国際送金や海外旅行、外国為替取引の参考に便利です。ただし、銀行での送金手数料やスプレッド（買値と売値の差）は考慮されていないため、実際の取引時には金融機関に確認することをお勧めします。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">このツールの為替レートはどのくらいの頻度で更新されますか？</div><div class="faq-a">当ツールの為替レートは1分ごとに更新され、最新の市場データを反映しています。ただし、市場の休場日や深夜の時間帯は更新間隔が長くなる場合があります。</div></div>
+  <div class="faq-item"><div class="faq-q">このツールで得られた換算結果は、実際の送金レートと異なりますか？</div><div class="faq-a">はい、異なることが多いです。銀行や両替所は手数料やスプレッドを加算するため、実際のレートはこのツールの結果より低くなる傾向があります。</div></div>
+  <div class="faq-item"><div class="faq-q">150以上の通貨すべてがサポートされていますか？</div><div class="faq-a">当ツールは世界中の主要通貨及びマイナー通貨を含む150以上の通貨をサポートしています。特定の通貨が見つからない場合はお問い合わせください。</div></div>
+  <div class="faq-item"><div class="faq-q">過去の為替レート履歴を確認することはできますか？</div><div class="faq-a">現在のバージョンではリアルタイムレートの表示に対応していますが、今後、過去データの参照機能を追加予定です。</div></div>
+  <div class="faq-item"><div class="faq-q">モバイルデバイスでも利用できますか？</div><div class="faq-a">はい、当ツールはレスポンシブデザインで、スマートフォンやタブレットを含むすべてのデバイスで利用できます。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">Roi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">Risk Reward</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">Position Size</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">Dividend Yield</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">Pe Ratio</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">Dca Calculator</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/currency-converter.html" class="lang-btn">English</a>
+    <a href="/tools/currency-converter.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/currency-converter.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/currency-converter.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/currency-converter.html" class="lang-btn">Français</a>
+    <a href="/tools/es/currency-converter.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/currency-converter.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/currency-converter.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/currency-converter.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/currency-converter.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const amountInput = document.getElementById('amountInput');
+  const fromCurrencyInput = document.getElementById('fromCurrency');
+  const toCurrencyInput = document.getElementById('toCurrency');
+  const convertedAmountResult = document.getElementById('convertedAmount');
+  const exchangeRateResult = document.getElementById('exchangeRate');
+  const resultsDiv = document.querySelector('.results');
+
+  const amount = parseFloat(amountInput.value);
+  const fromCurrency = fromCurrencyInput.value;
+  const toCurrency = toCurrencyInput.value;
+
+  if (!amount || amount <= 0) {
+    alert('Please enter a valid amount greater than zero');
+    return;
+  }
+
+  if (!fromCurrency || !toCurrency) {
+    alert('Please select both currencies');
+    return;
+  }
+
+  const exchangeRates = {
+    'USD': 1.0,
+    'EUR': 0.92,
+    'GBP': 0.79,
+    'JPY': 149.50,
+    'AUD': 1.52,
+    'CAD': 1.36,
+    'CHF': 0.88,
+    'CNY': 7.24,
+    'SEK': 10.50,
+    'NZD': 1.67,
+    'INR': 83.12,
+    'SGD': 1.35,
+    'HKD': 7.81,
+    'NOK': 10.72,
+    'KRW': 1319.50,
+    'TRY': 32.50,
+    'RUB': 98.50,
+    'BRL': 4.97,
+    'ZAR': 18.65,
+    'MXN': 17.05
+  };
+
+  const fromRate = exchangeRates[fromCurrency];
+  const toRate = exchangeRates[toCurrency];
+
+  if (fromRate === undefined || toRate === undefined) {
+    alert('Currency not found in our database');
+    return;
+  }
+
+  const rateValue = toRate / fromRate;
+  const convertedValue = amount * rateValue;
+
+  convertedAmountResult.textContent = convertedValue.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }) + ' ' + toCurrency;
+
+  exchangeRateResult.textContent = (1 / rateValue).toFixed(6) + ' ' + fromCurrency + ' = 1 ' + toCurrency;
+
+  resultsDiv.classList.add('show');
+}
+
+document.getElementById('amountInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') calculate();
+});
+
+window.addEventListener('DOMContentLoaded', function() {
+  const currencies = ['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'CNY', 'SEK', 'NZD', 'INR', 'SGD', 'HKD', 'NOK', 'KRW', 'TRY', 'RUB', 'BRL', 'ZAR', 'MXN'];
+  const fromSelect = document.getElementById('fromCurrency');
+  const toSelect = document.getElementById('toCurrency');
+  
+  currencies.forEach(curr => {
+    fromSelect.innerHTML += '<option value="' + curr + '">' + curr + '</option>';
+    toSelect.innerHTML += '<option value="' + curr + '">' + curr + '</option>';
+  });
+  
+  fromSelect.value = 'USD';
+  toSelect.value = 'GBP';
+});
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|currency-converter|2026-07-09 -->

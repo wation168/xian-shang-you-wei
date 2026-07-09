@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>株式希薄化計算機 - 所有権低下を即座に計算</title>
+<meta name="description" content="資金調達による株式希薄化を計算します。現在の所有率と新規資金の希薄化率を入力するだけで、新しい所有率と失われる所有権を確認できます。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/equity-dilution.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/equity-dilution.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/equity-dilution.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/equity-dilution.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/equity-dilution.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/equity-dilution.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/equity-dilution.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/equity-dilution.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/equity-dilution.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/equity-dilution.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/equity-dilution.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/equity-dilution.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "株式希薄化計算機", "url": "https://softglow-ai.com/tools/ja/equity-dilution.html", "description": "資金調達による株式希薄化を計算します。現在の所有率と新規資金の希薄化率を入力するだけで、新しい所有率と失われる所有権を確認できます。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "株式希薄化とは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "株式希薄化とは、新しい株式が発行される際に、既存株主の所有権パーセンテージが低下する現象です。企業が新規資金を調達するために新しい株式を発行すると、既存株主の相対的な所有権が減少します。"}}, {"@type": "Question", "name": "希薄化はなぜ発生するのですか？", "acceptedAnswer": {"@type": "Answer", "text": "希薄化は主に新規資金調達時に発生します。投資家が企業に資金を提供する代わりに、新しい株式を受け取ります。その結果、既存株主が所有する株式の割合が全体に占める比率が低下するため、希薄化が生じます。"}}, {"@type": "Question", "name": "複数の資金調達ラウンドでの希薄化を計算する方法は？", "acceptedAnswer": {"@type": "Answer", "text": "複数ラウンドでの希薄化は、各ラウンドの希薄化率を順次適用して計算します。例えば、最初のラウンド後の所有権に次のラウンドの希薄化率を適用します。全ラウンドを考慮して最終的な所有権を算出してください。"}}, {"@type": "Question", "name": "希薄化が常に悪いことですか？", "acceptedAnswer": {"@type": "Answer", "text": "必ずしもそうではありません。新規資金調達により企業が成長し、全体的な価値が大幅に増加する場合、希薄化により所有権パーセンテージは低下しても、株式の実際の価値は増加する可能性があります。"}}, {"@type": "Question", "name": "希薄化を完全に避けることはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "外部から資金を調達する際に完全に希薄化を避けることは難しいです。しかし、借入金、内部資金、または優先株式の交渉などの方法により、希薄化の程度を最小限に抑えることはできます。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 株式希薄化計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>株式希薄化計算機</h1>
+    <p class="calc-subtitle">資金調達ラウンドがあなたの所有権をどのように減らすかを計算します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="oldOwnership">現在の所有権パーセンテージ</label>
+  <div class="input-row"><input type="number" id="oldOwnership" placeholder="25"  step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">資金調達前のあなたの現在の所有権パーセンテージを入力してください</small>
+<div class="input-group">
+  <label for="dilutionPercent">希薄化パーセンテージ（新規資金調達）</label>
+  <div class="input-row"><input type="number" id="dilutionPercent" placeholder="20"  step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">新規資金調達により生じる希薄化パーセンテージを入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">新しい所有権パーセンテージ</span><span class="result-value" id="newOwnership">—</span></div>
+<div class="result-item"><span class="result-label">失われた所有権</span><span class="result-value" id="ownershipLoss">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 新しい所有権パーセンテージは、資金調達後のあなたの希薄化された所有権を示しています。失われた所有権は、新規資金調達により失った所有権のパーセンテージです。この計算により、資金調達がどの程度あなたの所有権を減らすかが明確になります。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>株式希薄化とは何か</h2><p>株式希薄化は、企業が新しい株式を発行する際に、既存の株主の所有権パーセンテージが低下する現象です。新規資金調達ラウンドでは、投資家に新しい株式が発行され、これにより既存株主の所有権が薄まります。例えば、あなたが企業の25%を所有していて、新規資金調達により20%の希薄化が発生した場合、あなたの新しい所有権は20%に低下します。</p><h2>希薄化計算の仕組み</h2><p>希薄化は通常、新規資金調達ラウンドの規模に基づいて計算されます。計算式は以下の通りです：新しい所有権 = 現在の所有権 × (1 - 希薄化率)。この公式により、資金調達後のあなたの正確な所有権パーセンテージが導き出されます。失われた所有権は、現在の所有権から新しい所有権を引いた値です。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>複数ラウンドでの累積効果</h2><p>企業が複数の資金調達ラウンドを経験する場合、希薄化は累積します。各ラウンドで新しい株式が発行されるため、既存株主の所有権は段階的に減少します。例えば、最初のラウンドで20%希薄化し、その後のラウンドで15%希薄化した場合、複数回の希薄化を計算して最終的な所有権を決定する必要があります。</p><h2>希薄化を最小限に抑える戦略</h2><p>起業家や既存株主は、希薄化の影響を最小限に抑えるために、いくつかの戦略を採用できます。優先株式の交渉、役員オプション池の慎重な管理、および資本構成の計画が重要です。また、新規資金調達ラウンドの前に詳細な財務予測を行うことで、必要な資金規模を正確に把握し、不要な過度な希薄化を回避できます。</p><h2>希薄化が長期的な影響に与える影響</h2><p>株式希薄化は単なる数値の変化ではなく、企業の成長と価値創造に深い影響を持ちます。一時的には所有権が低下しますが、新規資金調達により企業が成長し、価値が大幅に増加する場合、希薄化後の株式の価値は希薄化前の株式の価値を上回る可能性があります。したがって、希薄化率だけでなく、企業の成長見通しと投資家の期待を総合的に評価することが重要です。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">株式希薄化とは何ですか？</div><div class="faq-a">株式希薄化とは、新しい株式が発行される際に、既存株主の所有権パーセンテージが低下する現象です。企業が新規資金を調達するために新しい株式を発行すると、既存株主の相対的な所有権が減少します。</div></div>
+  <div class="faq-item"><div class="faq-q">希薄化はなぜ発生するのですか？</div><div class="faq-a">希薄化は主に新規資金調達時に発生します。投資家が企業に資金を提供する代わりに、新しい株式を受け取ります。その結果、既存株主が所有する株式の割合が全体に占める比率が低下するため、希薄化が生じます。</div></div>
+  <div class="faq-item"><div class="faq-q">複数の資金調達ラウンドでの希薄化を計算する方法は？</div><div class="faq-a">複数ラウンドでの希薄化は、各ラウンドの希薄化率を順次適用して計算します。例えば、最初のラウンド後の所有権に次のラウンドの希薄化率を適用します。全ラウンドを考慮して最終的な所有権を算出してください。</div></div>
+  <div class="faq-item"><div class="faq-q">希薄化が常に悪いことですか？</div><div class="faq-a">必ずしもそうではありません。新規資金調達により企業が成長し、全体的な価値が大幅に増加する場合、希薄化により所有権パーセンテージは低下しても、株式の実際の価値は増加する可能性があります。</div></div>
+  <div class="faq-item"><div class="faq-q">希薄化を完全に避けることはできますか？</div><div class="faq-a">外部から資金を調達する際に完全に希薄化を避けることは難しいです。しかし、借入金、内部資金、または優先株式の交渉などの方法により、希薄化の程度を最小限に抑えることはできます。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">Roi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">Risk Reward</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">Position Size</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">Pe Ratio</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/equity-dilution.html" class="lang-btn">English</a>
+    <a href="/tools/equity-dilution.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/equity-dilution.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/equity-dilution.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/equity-dilution.html" class="lang-btn">Français</a>
+    <a href="/tools/es/equity-dilution.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/equity-dilution.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/equity-dilution.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/equity-dilution.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/equity-dilution.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const oldOwnershipInput = document.getElementById('oldOwnership');
+  const dilutionPercentInput = document.getElementById('dilutionPercent');
+  const newOwnershipResult = document.getElementById('newOwnership');
+  const ownershipLossResult = document.getElementById('ownershipLoss');
+  const resultsDiv = document.getElementById('results');
+
+  if (!oldOwnershipInput.value || !dilutionPercentInput.value) {
+    alert('Please enter both your current ownership percentage and the dilution percentage.');
+    return;
+  }
+
+  const oldOwnership = parseFloat(oldOwnershipInput.value);
+  const dilutionPercent = parseFloat(dilutionPercentInput.value);
+
+  if (oldOwnership < 0 || oldOwnership > 100 || dilutionPercent < 0 || dilutionPercent > 100) {
+    alert('Please enter values between 0 and 100.');
+    return;
+  }
+
+  const newOwnership = oldOwnership * (1 - dilutionPercent / 100);
+  const ownershipLoss = oldOwnership - newOwnership;
+
+  newOwnershipResult.textContent = newOwnership.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+  ownershipLossResult.textContent = ownershipLoss.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|equity-dilution|2026-07-09 -->

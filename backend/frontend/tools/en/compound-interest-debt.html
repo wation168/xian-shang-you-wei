@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Debt Interest Calculator - Compound Interest Tool</title>
+<meta name="description" content="Calculate total debt owed with compound interest. Enter principal, annual rate, and time period to see total amount and interest charged.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/en/compound-interest-debt.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/compound-interest-debt.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/compound-interest-debt.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/compound-interest-debt.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/compound-interest-debt.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/compound-interest-debt.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/compound-interest-debt.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/compound-interest-debt.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/compound-interest-debt.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/compound-interest-debt.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/compound-interest-debt.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/compound-interest-debt.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Debt Interest Calculator", "url": "https://softglow-ai.com/tools/en/compound-interest-debt.html", "description": "Calculate total debt owed with compound interest. Enter principal, annual rate, and time period to see total amount and interest charged.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is compound interest?", "acceptedAnswer": {"@type": "Answer", "text": "Compound interest is interest calculated on both the original principal and accumulated interest from previous periods. This causes debt to grow faster than simple interest, where interest is only calculated on the principal amount."}}, {"@type": "Question", "name": "How often is interest compounded?", "acceptedAnswer": {"@type": "Answer", "text": "This calculator assumes annual compounding, meaning interest is calculated and added to the debt once per year. Some loans compound monthly or daily, which would result in higher total interest charges."}}, {"@type": "Question", "name": "Can I use this for credit card debt?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, this calculator works for credit card debt. However, credit cards typically compound interest monthly rather than annually. For more accurate results with credit cards, divide your annual rate by 12 and multiply the time period by 12."}}, {"@type": "Question", "name": "How can I reduce the total interest paid?", "acceptedAnswer": {"@type": "Answer", "text": "You can reduce total interest by paying off debt faster (shorter time period), negotiating a lower interest rate, or making additional principal payments beyond minimum payments. Each strategy decreases the amount on which interest is calculated."}}, {"@type": "Question", "name": "What does 'Interest as % of Principal' mean?", "acceptedAnswer": {"@type": "Answer", "text": "This shows the total interest charged as a percentage of your original debt amount. For example, if you borrow £10,000 and pay £1,000 in interest, the interest as % of principal is 10%. This helps you quickly understand the relative cost of borrowing."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/en/">Tools</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/en/">Tools</a> > Debt Interest Calculator</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Debt Interest Calculator</h1>
+    <p class="calc-subtitle">Calculate total debt amount with compound interest over time</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="principal_amount">Principal Amount (Initial Debt)</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="principal_amount" placeholder="10000"  step="0.01"></div>
+</div>
+  <small class="input-help">Enter the initial amount of debt in pounds sterling</small>
+<div class="input-group">
+  <label for="interest_rate">Annual Interest Rate</label>
+  <div class="input-row"><input type="number" id="interest_rate" placeholder="5.5"  step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">Enter the annual interest rate as a percentage (e.g., 5.5)</small>
+<div class="input-group">
+  <label for="time_period">Time Period</label>
+  <div class="input-row"><input type="number" id="time_period" placeholder="3"  step="0.1"><span class="input-suffix">£</span></div>
+</div>
+  <small class="input-help">Enter the number of years over which the debt accrues interest</small></div>
+    <button class="btn-calc" onclick="calculate()">Calculate</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Total Amount Owed</span><span class="result-value" id="total_amount">—</span></div>
+<div class="result-item"><span class="result-label">Total Interest Charged</span><span class="result-value" id="interest_charged">—</span></div>
+<div class="result-item"><span class="result-label">Interest as % of Principal</span><span class="result-value" id="interest_percentage">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>What does this mean?</strong> The Total Amount Owed shows the complete sum you must repay after interest accrues. Total Interest Charged displays how much interest accumulated over the period. Interest as % of Principal shows the interest cost relative to your original debt amount.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Print</button>
+        <button onclick="shareResult()">&#x1f4e4; Share</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>Understanding Debt Interest Calculations</h2><p>When you borrow money, lenders charge interest as compensation for lending you funds. Understanding how compound interest works is essential for managing debt effectively. This calculator helps you determine the true cost of borrowing by showing you exactly how much interest will accumulate over your specified time period.</p><h2>How Compound Interest Works</h2><p>Compound interest is calculated on both the principal amount and previously accumulated interest. This means your debt grows exponentially rather than linearly. For example, with a £10,000 loan at 5.5% annual interest over 3 years, you'll owe more than simply calculating 5.5% × 3 years. Each year, interest is calculated on the growing balance, resulting in higher total interest charges.</p><h2>Components of Debt Calculation</h2><p>The principal amount is your initial debt—the money you originally borrowed. The annual interest rate is the percentage charged each year by your lender. The time period is how long the debt accrues interest before repayment. Together, these three factors determine your total obligation. A higher interest rate or longer time period significantly increases the total amount owed.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Real-World Application</h2><p>This calculator is particularly useful for personal loans, credit cards, mortgages, and other debt instruments. By entering different scenarios, you can see how paying off debt faster or negotiating better interest rates impacts your financial obligations. For instance, reducing a loan term from 5 years to 3 years dramatically decreases total interest paid, even at the same interest rate.</p><h2>Why Interest Matters</h2><p>The interest charged represents the cost of borrowing money. It's crucial to understand this cost when taking on debt. A seemingly small interest rate difference—such as 5% versus 5.5%—can result in hundreds of pounds in additional charges over several years. Using this calculator helps you make informed borrowing decisions and compare different loan offers.</p><h2>Strategies for Managing Debt</h2><p>Once you understand your total debt amount, you can develop strategies to minimize interest payments. Making additional principal payments reduces the amount on which interest is calculated. Refinancing to a lower interest rate saves money over time. This calculator helps you evaluate these options by showing the impact of different principal amounts and interest rates on your total financial obligation.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Related Articles</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>FAQ</h2><div class="faq-item"><div class="faq-q">What is compound interest?</div><div class="faq-a">Compound interest is interest calculated on both the original principal and accumulated interest from previous periods. This causes debt to grow faster than simple interest, where interest is only calculated on the principal amount.</div></div>
+  <div class="faq-item"><div class="faq-q">How often is interest compounded?</div><div class="faq-a">This calculator assumes annual compounding, meaning interest is calculated and added to the debt once per year. Some loans compound monthly or daily, which would result in higher total interest charges.</div></div>
+  <div class="faq-item"><div class="faq-q">Can I use this for credit card debt?</div><div class="faq-a">Yes, this calculator works for credit card debt. However, credit cards typically compound interest monthly rather than annually. For more accurate results with credit cards, divide your annual rate by 12 and multiply the time period by 12.</div></div>
+  <div class="faq-item"><div class="faq-q">How can I reduce the total interest paid?</div><div class="faq-a">You can reduce total interest by paying off debt faster (shorter time period), negotiating a lower interest rate, or making additional principal payments beyond minimum payments. Each strategy decreases the amount on which interest is calculated.</div></div>
+  <div class="faq-item"><div class="faq-q">What does 'Interest as % of Principal' mean?</div><div class="faq-a">This shows the total interest charged as a percentage of your original debt amount. For example, if you borrow £10,000 and pay £1,000 in interest, the interest as % of principal is 10%. This helps you quickly understand the relative cost of borrowing.</div></div></section>
+  <div class="more-tools"><h3>More Tools</h3><div class="tools-grid"><a class="tool-pill" href="/tools/en/compound-interest.html">Compound Interest Calculator</a>
+      <a class="tool-pill" href="/tools/en/roi-calculator.html">ROI Calculator</a>
+      <a class="tool-pill" href="/tools/en/risk-reward.html">Risk Reward Calculator</a>
+      <a class="tool-pill" href="/tools/en/position-size.html">Position Size Calculator</a>
+      <a class="tool-pill" href="/tools/en/stop-loss.html">Stop Loss Calculator</a>
+      <a class="tool-pill" href="/tools/en/dividend-yield.html">Dividend Yield Calculator</a>
+      <a class="tool-pill" href="/tools/en/pe-ratio.html">P/E Ratio Calculator</a>
+      <a class="tool-pill" href="/tools/en/dca-calculator.html">DCA Calculator</a>
+      <a class="tool-pill" href="/tools/en/cagr.html">CAGR Calculator</a>
+      <a class="tool-pill" href="/tools/en/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/en/stock-gain-loss.html">Stock Gain/Loss Calculator</a>
+      <a class="tool-pill" href="/tools/en/break-even.html">Break Even Calculator</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/compound-interest-debt.html" class="lang-btn active">English</a>
+    <a href="/tools/compound-interest-debt.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/compound-interest-debt.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/compound-interest-debt.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/compound-interest-debt.html" class="lang-btn">Français</a>
+    <a href="/tools/es/compound-interest-debt.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/compound-interest-debt.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/compound-interest-debt.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/compound-interest-debt.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/compound-interest-debt.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Related Tools</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const principal = parseFloat(document.getElementById('principal_amount').value);
+  const rate = parseFloat(document.getElementById('interest_rate').value);
+  const time = parseFloat(document.getElementById('time_period').value);
+
+  if (isNaN(principal) || isNaN(rate) || isNaN(time) || principal <= 0 || rate < 0 || time <= 0) {
+    alert('Please enter valid positive numbers for all fields');
+    return;
+  }
+
+  const rateDecimal = rate / 100;
+  const total = principal * Math.pow(1 + rateDecimal, time);
+  const interestCharged = total - principal;
+  const interestPercentage = (interestCharged / principal) * 100;
+
+  document.getElementById('total_amount').textContent = '£' + total.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('interest_charged').textContent = '£' + interestCharged.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('interest_percentage').textContent = interestPercentage.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '%';
+
+  document.getElementById('results_container').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copied!';setTimeout(function(){b.textContent='Share'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|en|compound-interest-debt|2026-07-09 -->

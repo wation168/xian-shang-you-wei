@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>食材原価計算機 - レストラン価格戦略ツール</title>
+<meta name="description" content="食材原価率と利益マージンを簡単に計算できます。レストランの価格設定戦略を最適化するための便利なツールです。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/food-cost.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/food-cost.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/food-cost.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/food-cost.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/food-cost.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/food-cost.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/food-cost.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/food-cost.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/food-cost.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/food-cost.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/food-cost.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/food-cost.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "食材原価計算機", "url": "https://softglow-ai.com/tools/ja/food-cost.html", "description": "食材原価率と利益マージンを簡単に計算できます。レストランの価格設定戦略を最適化するための便利なツールです。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "理想的な食材原価率はどのくらいですか？", "acceptedAnswer": {"@type": "Answer", "text": "レストラン業界では、食材原価率が25～35%の範囲が一般的に理想的とされています。ただし、業態や立地によって異なるため、競合店を参考にしながら調整してください。"}}, {"@type": "Question", "name": "食材原価率が高い場合はどうすればよいですか？", "acceptedAnswer": {"@type": "Answer", "text": "販売価格を上げるか、より安価で同等品質の食材を探すことを検討してください。また、メニューから低利益の料理を削除することも選択肢です。"}}, {"@type": "Question", "name": "利益マージンと利益率の違いは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "利益マージンは実際の利益額（£単位）で、利益率はその利益が販売価格に占める割合（パーセンテージ）です。どちらも重要な指標です。"}}, {"@type": "Question", "name": "季節による食材価格変動にどう対応すべきですか？", "acceptedAnswer": {"@type": "Answer", "text": "季節ごとにこの計算機を使用して再計算し、必要に応じてメニュー価格を調整してください。季節メニューの導入も効果的です。"}}, {"@type": "Question", "name": "複数の料理の収益性を比較するにはどうすればよいですか？", "acceptedAnswer": {"@type": "Answer", "text": "各料理についてこの計算機を使用して計算結果を比較してください。利益率が高い料理をプロモーションし、低い料理の改善または削除を検討してください。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 食材原価計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>食材原価計算機</h1>
+    <p class="calc-subtitle">食材原価率を計算してレストランの価格戦略を最適化しましょう</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="foodCost">食材原価</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="foodCost" placeholder="25.50"  step="0.01"></div>
+</div>
+  <small class="input-help">料理の食材にかかった原価を入力してください</small>
+<div class="input-group">
+  <label for="sellingPrice">販売価格</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="sellingPrice" placeholder="85.00"  step="0.01"></div>
+</div>
+  <small class="input-help">顧客に販売する価格を入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">食材原価率</span><span class="result-value" id="foodCostPercent">—</span></div>
+<div class="result-item"><span class="result-label">利益マージン</span><span class="result-value" id="profitMargin">—</span></div>
+<div class="result-item"><span class="result-label">利益率</span><span class="result-value" id="profitPercent">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 食材原価率は販売価格に占める原価の割合を示します。利益マージンは販売価格から原価を引いた金額で、利益率は利益が販売価格に占める割合です。これらの指標を参考に、メニューの価格設定を調整できます。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>食材原価計算機について</h2><p>食材原価計算機は、レストランやカフェの経営者向けに設計された便利なツールです。このツールを使用することで、各料理の食材にかかった原価と販売価格から、正確な原価率と利益率を素早く計算できます。</p><h2>食材原価率とは</h2><p>食材原価率は、販売価格に占める食材原価の割合を示す重要な指標です。一般的に、レストラン業界では食材原価率が25～35%の範囲が理想的とされています。この率が高すぎると利益が減少し、低すぎると品質が低下する可能性があります。</p><h2>利益マージンの重要性</h2><p>利益マージンは、販売価格から食材原価を差し引いた実際の利益額です。これは人件費、家賃、光熱費などの運営経費をカバーするために必要な金額です。適切な利益マージンを確保することで、持続可能なビジネス運営が可能になります。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>利益率の活用</h2><p>利益率は利益が販売価格に占める割合で、パーセンテージで表示されます。この数値が高いほど、各販売から得られる利益が大きいことを意味します。複数の料理を比較する際に便利な指標です。</p><h2>価格設定戦略の最適化</h2><p>これらの計算結果を使用して、メニューの価格設定を戦略的に調整できます。原価率が高い料理は価格を上げるか、より安い食材を使用することを検討してください。競合他社の価格と市場需要も考慮に入れましょう。</p><h2>定期的な見直しの重要性</h2><p>食材の仕入れ価格は季節や市場の変動により変わります。定期的にこの計算機を使用して、各料理の収益性を見直し、必要に応じて価格やメニューを調整することをお勧めします。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">理想的な食材原価率はどのくらいですか？</div><div class="faq-a">レストラン業界では、食材原価率が25～35%の範囲が一般的に理想的とされています。ただし、業態や立地によって異なるため、競合店を参考にしながら調整してください。</div></div>
+  <div class="faq-item"><div class="faq-q">食材原価率が高い場合はどうすればよいですか？</div><div class="faq-a">販売価格を上げるか、より安価で同等品質の食材を探すことを検討してください。また、メニューから低利益の料理を削除することも選択肢です。</div></div>
+  <div class="faq-item"><div class="faq-q">利益マージンと利益率の違いは何ですか？</div><div class="faq-a">利益マージンは実際の利益額（£単位）で、利益率はその利益が販売価格に占める割合（パーセンテージ）です。どちらも重要な指標です。</div></div>
+  <div class="faq-item"><div class="faq-q">季節による食材価格変動にどう対応すべきですか？</div><div class="faq-a">季節ごとにこの計算機を使用して再計算し、必要に応じてメニュー価格を調整してください。季節メニューの導入も効果的です。</div></div>
+  <div class="faq-item"><div class="faq-q">複数の料理の収益性を比較するにはどうすればよいですか？</div><div class="faq-a">各料理についてこの計算機を使用して計算結果を比較してください。利益率が高い料理をプロモーションし、低い料理の改善または削除を検討してください。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">Roi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">Risk Reward</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">Position Size</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">Pe Ratio</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/food-cost.html" class="lang-btn">English</a>
+    <a href="/tools/food-cost.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/food-cost.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/food-cost.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/food-cost.html" class="lang-btn">Français</a>
+    <a href="/tools/es/food-cost.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/food-cost.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/food-cost.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/food-cost.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/food-cost.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() { const foodCostInput = document.getElementById('foodCost'); const sellingPriceInput = document.getElementById('sellingPrice'); if (!foodCostInput.value || !sellingPriceInput.value) { alert('Please enter both food cost and selling price'); return; } const foodCost = parseFloat(foodCostInput.value); const sellingPrice = parseFloat(sellingPriceInput.value); if (foodCost < 0 || sellingPrice < 0) { alert('Values cannot be negative'); return; } if (sellingPrice === 0) { alert('Selling price cannot be zero'); return; } const foodCostPercent = (foodCost / sellingPrice) * 100; const profitMargin = sellingPrice - foodCost; const profitPercent = ((sellingPrice - foodCost) / sellingPrice) * 100; document.getElementById('foodCostPercent').textContent = foodCostPercent.toFixed(2); document.getElementById('profitMargin').textContent = profitMargin.toFixed(2); document.getElementById('profitPercent').textContent = profitPercent.toFixed(2); document.getElementById('results').classList.add('show'); }
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|food-cost|2026-07-09 -->

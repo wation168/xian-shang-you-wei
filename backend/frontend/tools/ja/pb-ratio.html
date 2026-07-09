@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PBレシオ計算機 - 株価純資産倍率を計算</title>
+<meta name="description" content="現在の株価と1株当たり純資産から株価純資産倍率(PB倍率)を計算します。株式の割安・割高判定に活用できます。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/pb-ratio.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/pb-ratio.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/pb-ratio.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/pb-ratio.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/pb-ratio.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/pb-ratio.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/pb-ratio.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/pb-ratio.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/pb-ratio.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/pb-ratio.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/pb-ratio.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/pb-ratio.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "PBレシオ計算機", "url": "https://softglow-ai.com/tools/ja/pb-ratio.html", "description": "現在の株価と1株当たり純資産から株価純資産倍率(PB倍率)を計算します。株式の割安・割高判定に活用できます。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "PB倍率が1倍の場合はどういう意味ですか?", "acceptedAnswer": {"@type": "Answer", "text": "PB倍率が1倍の場合、株価と1株当たり純資産が等しいことを意味します。企業の資産価値と市場評価が一致している状態です。"}}, {"@type": "Question", "name": "PB倍率が低いほど良い投資先ですか?", "acceptedAnswer": {"@type": "Answer", "text": "必ずしもそうとは限りません。PB倍率が低い理由が、企業の業績不振や経営リスクにある場合もあります。他の指標と組み合わせた総合的な判断が必要です。"}}, {"@type": "Question", "name": "PB倍率はどのくらいの頻度で確認すべきですか?", "acceptedAnswer": {"@type": "Answer", "text": "定期的に確認することをお勧めします。企業の業績変化や市場環境の変動によってPB倍率は変わるため、定期的にモニタリングすることが大切です。"}}, {"@type": "Question", "name": "マイナスのPB倍率が表示される場合は?", "acceptedAnswer": {"@type": "Answer", "text": "1株当たり純資産がマイナス(負債が資産を上回っている)場合、PB倍率がマイナスになります。この場合、企業の経営状況が深刻である可能性があります。"}}, {"@type": "Question", "name": "PB倍率とPERの違いは何ですか?", "acceptedAnswer": {"@type": "Answer", "text": "PB倍率は資産価値に基づいた評価指標、PERは利益に基づいた評価指標です。資産価値を重視する場合はPB倍率、収益性を重視する場合はPERを参考にします。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > PBレシオ計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>PBレシオ計算機</h1>
+    <p class="calc-subtitle">株式の株価純資産倍率を計算して、株式評価を分析します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="stockPrice">現在の株価</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="stockPrice" placeholder="50.00"  step="0.01"></div>
+</div>
+  <small class="input-help">現在の市場における株式の価格を入力してください</small>
+<div class="input-group">
+  <label for="bookValue">1株当たり純資産</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="bookValue" placeholder="25.00"  step="0.01"></div>
+</div>
+  <small class="input-help">企業の純資産を発行済み株式数で割った1株当たりの価値を入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">株価純資産倍率(PB倍率)</span><span class="result-value" id="pbRatioResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> PB倍率が1倍以下の場合、株価が純資産より低く評価されている可能性があります。PB倍率が高いほど市場が企業の成長性に期待していることを示します。業種や企業の成長段階によって適切な水準は異なるため、同業他社との比較が重要です。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>株価純資産倍率(PB倍率)とは</h2><p>PB倍率(Price-to-Book Ratio)は、株式の現在価格が企業の1株当たり純資産の何倍になっているかを示す指標です。企業の資産価値に対して、市場がどの程度の価値を付けているかを評価するために使用されます。</p><h2>PB倍率の計算方法</h2><p>PB倍率 = 現在の株価 ÷ 1株当たり純資産で計算されます。例えば、株価が50円で1株当たり純資産が25円の場合、PB倍率は2.0倍となります。</p><h2>PB倍率の解釈</h2><p>PB倍率が1倍未満の場合、株価が企業の純資産を下回っており、理論上は割安と考えられます。1倍を超える場合は、市場が企業の将来成長性や収益性に期待していることを示唆しています。ただし、業種によって平均的なPB倍率は大きく異なります。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>PB倍率の活用上の注意</h2><p>PB倍率が低いからといって必ず優良株とは限りません。赤字経営や経営危機の企業の場合、見かけ上PB倍率が低くなることもあります。また、純資産額の算出方法や会計基準によって数値が変わる可能性があります。</p><h2>他の指標との組み合わせ</h2><p>PB倍率だけでなく、PER(株価収益率)、ROE(自己資本利益率)などの指標と組み合わせて分析することで、より正確な株式評価ができます。複数の指標を総合的に判断することが重要です。</p><h2>業種別の平均PB倍率</h2><p>銀行や保険などの金融業は1～2倍程度、製造業は1～3倍程度が一般的です。成長企業やテクノロジー企業は3倍以上になることも多くあります。同じ業種内での比較が、適切な評価判断につながります。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">PB倍率が1倍の場合はどういう意味ですか?</div><div class="faq-a">PB倍率が1倍の場合、株価と1株当たり純資産が等しいことを意味します。企業の資産価値と市場評価が一致している状態です。</div></div>
+  <div class="faq-item"><div class="faq-q">PB倍率が低いほど良い投資先ですか?</div><div class="faq-a">必ずしもそうとは限りません。PB倍率が低い理由が、企業の業績不振や経営リスクにある場合もあります。他の指標と組み合わせた総合的な判断が必要です。</div></div>
+  <div class="faq-item"><div class="faq-q">PB倍率はどのくらいの頻度で確認すべきですか?</div><div class="faq-a">定期的に確認することをお勧めします。企業の業績変化や市場環境の変動によってPB倍率は変わるため、定期的にモニタリングすることが大切です。</div></div>
+  <div class="faq-item"><div class="faq-q">マイナスのPB倍率が表示される場合は?</div><div class="faq-a">1株当たり純資産がマイナス(負債が資産を上回っている)場合、PB倍率がマイナスになります。この場合、企業の経営状況が深刻である可能性があります。</div></div>
+  <div class="faq-item"><div class="faq-q">PB倍率とPERの違いは何ですか?</div><div class="faq-a">PB倍率は資産価値に基づいた評価指標、PERは利益に基づいた評価指標です。資産価値を重視する場合はPB倍率、収益性を重視する場合はPERを参考にします。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">Roi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">Risk Reward</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">Position Size</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">Pe Ratio</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">証拠金計算機</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/pb-ratio.html" class="lang-btn">English</a>
+    <a href="/tools/pb-ratio.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/pb-ratio.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/pb-ratio.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/pb-ratio.html" class="lang-btn">Français</a>
+    <a href="/tools/es/pb-ratio.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/pb-ratio.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/pb-ratio.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/pb-ratio.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/pb-ratio.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const stockPriceInput = document.getElementById('stockPrice').value.trim();
+  const bookValueInput = document.getElementById('bookValue').value.trim();
+  
+  if (!stockPriceInput || !bookValueInput) {
+    alert('Please enter both stock price and book value per share');
+    return;
+  }
+  
+  const stockPrice = parseFloat(stockPriceInput);
+  const bookValue = parseFloat(bookValueInput);
+  
+  if (isNaN(stockPrice) || isNaN(bookPrice) || stockPrice <= 0 || bookValue <= 0) {
+    alert('Please enter valid positive numbers');
+    return;
+  }
+  
+  const pbRatio = stockPrice / bookValue;
+  
+  document.getElementById('pbRatioResult').textContent = pbRatio.toFixed(2);
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|pb-ratio|2026-07-09 -->

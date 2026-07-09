@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>線形回帰計算機 - 最適な直線を求める</title>
+<meta name="description" content="2つのデータセットから線形回帰の傾きと切片を計算します。相関係数とR二乗値も取得できます。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/regression-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/regression-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/regression-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/regression-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/regression-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/regression-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/regression-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/regression-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/regression-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/regression-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/regression-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/regression-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "線形回帰計算機", "url": "https://softglow-ai.com/tools/ja/regression-calculator.html", "description": "2つのデータセットから線形回帰の傾きと切片を計算します。相関係数とR二乗値も取得できます。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "線形回帰計算機の使い方は？", "acceptedAnswer": {"@type": "Answer", "text": "X値とY値をカンマで区切って入力し、計算ボタンをクリックするだけです。2つのデータセットは同じ数の値を持つ必要があります。"}}, {"@type": "Question", "name": "相関係数（R）とR²の違いは？", "acceptedAnswer": {"@type": "Answer", "text": "相関係数（R）は-1から1の範囲で直線的な関係の強さと方向を示します。R²はRを二乗した値で、0から1の範囲で、データの変動がどの程度説明されるかを示します。"}}, {"@type": "Question", "name": "R²が低い場合はどうすればいい？", "acceptedAnswer": {"@type": "Answer", "text": "R²が低い場合、データが線形関係ではなく、他の要因が影響している可能性があります。データの視覚化やより複雑なモデルの使用を検討してください。"}}, {"@type": "Question", "name": "負の傾きは何を意味しますか？", "acceptedAnswer": {"@type": "Answer", "text": "負の傾きは、Xが増加するとYが減少する負の相関があることを示します。例えば、気温が上がると暖房費が減少するような関係です。"}}, {"@type": "Question", "name": "最小限必要なデータ数は？", "acceptedAnswer": {"@type": "Answer", "text": "線形回帰を実行するには、最低2つのデータポイントが必要です。ただし、信頼性の高い結果を得るには、最低でも10～30個のデータポイントを推奨します。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 線形回帰計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>線形回帰計算機</h1>
+    <p class="calc-subtitle">y = mx + b の公式を使用して最適な直線を計算します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="xValues">X値（カンマ区切り）</label>
+  <div class="input-row"><input type="text" id="xValues" placeholder="1, 2, 3, 4, 5"  step="1"></div>
+</div>
+  <small class="input-help">分析するX軸のデータを入力してください。複数の値はカンマで区切ってください。</small>
+<div class="input-group">
+  <label for="yValues">Y値（カンマ区切り）</label>
+  <div class="input-row"><input type="text" id="yValues" placeholder="2, 4, 5, 4, 6"  step="1"></div>
+</div>
+  <small class="input-help">分析するY軸のデータを入力してください。X値と同じ数だけ入力する必要があります。</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">傾き（m）</span><span class="result-value" id="slopeResult">—</span></div>
+<div class="result-highlight"><span class="result-label">Y切片（b）</span><span class="result-value" id="interceptResult">—</span></div>
+<div class="result-highlight"><span class="result-label">回帰方程式</span><span class="result-value" id="equationResult">—</span></div>
+<div class="result-item"><span class="result-label">相関係数（R）</span><span class="result-value" id="correlationResult">—</span></div>
+<div class="result-item"><span class="result-label">R二乗（R²）</span><span class="result-value" id="rSquaredResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 傾き（m）は直線がどれだけ急かを示し、Y切片（b）はY軸との交点を示します。相関係数（R）はデータの関連性を-1から1の範囲で示し、R²は回帰線がデータをどの程度説明できるかを示します。R²が1に近いほど、フィットが良いことを意味します。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>線形回帰とは</h2><p>線形回帰は、2つの変数間の関係を最適な直線で表す統計手法です。y = mx + bの公式で、mは傾き、bはY切片を表します。この計算機は、データセットに最も適した直線を自動的に求めます。</p><h2>傾きと切片の理解</h2><p>傾き（m）は、Xが1増加したときにYがどれだけ変化するかを示します。正の傾きは正の相関を、負の傾きは負の相関を表します。Y切片（b）は、X = 0のときのY値です。</p><h2>相関係数の意味</h2><p>相関係数（R）は-1から1の範囲の値で、データセットの直線性を示します。Rが1に近いと強い正の相関、-1に近いと強い負の相関があります。0に近いと相関がほぼないことを示します。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>R二乗値の解釈</h2><p>R²（決定係数）は、Y値の変動がどのくらい回帰線で説明されるかを示します。0から1の範囲で、1に近いほどモデルのフィットが良いことを意味します。例えば、R² = 0.85は、全分散の85%が説明されることを示します。</p><h2>使用例</h2><p>例えば、営業努力と売上の関係を分析する場合、営業担当者の活動時間（X値）と売上高（Y値）を入力することで、営業努力が売上にどれだけ影響するかを定量的に把握できます。</p><h2>注意点</h2><p>線形回帰は2つの変数間の直線関係を仮定しています。データが非線形な関係を持つ場合、この分析では正確な結果が得られない可能性があります。また、外れ値の影響を受けやすいため、結果の解釈には注意が必要です。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">線形回帰計算機の使い方は？</div><div class="faq-a">X値とY値をカンマで区切って入力し、計算ボタンをクリックするだけです。2つのデータセットは同じ数の値を持つ必要があります。</div></div>
+  <div class="faq-item"><div class="faq-q">相関係数（R）とR²の違いは？</div><div class="faq-a">相関係数（R）は-1から1の範囲で直線的な関係の強さと方向を示します。R²はRを二乗した値で、0から1の範囲で、データの変動がどの程度説明されるかを示します。</div></div>
+  <div class="faq-item"><div class="faq-q">R²が低い場合はどうすればいい？</div><div class="faq-a">R²が低い場合、データが線形関係ではなく、他の要因が影響している可能性があります。データの視覚化やより複雑なモデルの使用を検討してください。</div></div>
+  <div class="faq-item"><div class="faq-q">負の傾きは何を意味しますか？</div><div class="faq-a">負の傾きは、Xが増加するとYが減少する負の相関があることを示します。例えば、気温が上がると暖房費が減少するような関係です。</div></div>
+  <div class="faq-item"><div class="faq-q">最小限必要なデータ数は？</div><div class="faq-a">線形回帰を実行するには、最低2つのデータポイントが必要です。ただし、信頼性の高い結果を得るには、最低でも10～30個のデータポイントを推奨します。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">Roi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">Risk Reward</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">ポジションサイズ計算機</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">P/Eレシオ計算機</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">証拠金計算機</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/regression-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/regression-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/regression-calculator.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/regression-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/regression-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/regression-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/regression-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/regression-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/regression-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/regression-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const xInput = document.getElementById('xValues').value.trim();
+  const yInput = document.getElementById('yValues').value.trim();
+  
+  if (!xInput || !yInput) {
+    alert('Please enter both X and Y values');
+    return;
+  }
+  
+  const xValues = xInput.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+  const yValues = yInput.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+  
+  if (xValues.length === 0 || yValues.length === 0) {
+    alert('Please enter valid numeric values');
+    return;
+  }
+  
+  if (xValues.length !== yValues.length) {
+    alert('X and Y must have the same number of values');
+    return;
+  }
+  
+  if (xValues.length < 2) {
+    alert('Please enter at least 2 data points');
+    return;
+  }
+  
+  const n = xValues.length;
+  const sumX = xValues.reduce((a, b) => a + b, 0);
+  const sumY = yValues.reduce((a, b) => a + b, 0);
+  const sumXY = xValues.reduce((sum, x, i) => sum + x * yValues[i], 0);
+  const sumX2 = xValues.reduce((sum, x) => sum + x * x, 0);
+  const sumY2 = yValues.reduce((sum, y) => sum + y * y, 0);
+  
+  const meanX = sumX / n;
+  const meanY = sumY / n;
+  
+  const numerator = n * sumXY - sumX * sumY;
+  const denominator = n * sumX2 - sumX * sumX;
+  
+  if (denominator === 0) {
+    alert('Cannot calculate regression with these values');
+    return;
+  }
+  
+  const slope = numerator / denominator;
+  const intercept = meanY - slope * meanX;
+  
+  const rNumerator = numerator;
+  const rDenominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+  const correlation = rDenominator === 0 ? 0 : rNumerator / rDenominator;
+  const rSquared = correlation * correlation;
+  
+  const slopeFormatted = slope.toFixed(4);
+  const interceptFormatted = intercept.toFixed(4);
+  const equationText = `y = ${slopeFormatted}x + ${interceptFormatted}`;
+  const correlationFormatted = correlation.toFixed(4);
+  const rSquaredFormatted = rSquared.toFixed(4);
+  
+  document.getElementById('slopeResult').textContent = slopeFormatted;
+  document.getElementById('interceptResult').textContent = interceptFormatted;
+  document.getElementById('equationResult').textContent = equationText;
+  document.getElementById('correlationResult').textContent = correlationFormatted;
+  document.getElementById('rSquaredResult').textContent = rSquaredFormatted;
+  
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|regression-calculator|2026-07-09 -->

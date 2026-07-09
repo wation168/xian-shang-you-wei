@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculateur de Points Pivots - Support et Résistance</title>
+<meta name="description" content="Calculez les points pivots et les niveaux de support/résistance pour vos analyses techniques de trading.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/fr/pivot-point.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/pivot-point.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/pivot-point.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/pivot-point.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/pivot-point.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/pivot-point.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/pivot-point.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/pivot-point.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/pivot-point.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/pivot-point.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/pivot-point.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/pivot-point.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculateur de Points Pivots", "url": "https://softglow-ai.com/tools/fr/pivot-point.html", "description": "Calculez les points pivots et les niveaux de support/résistance pour vos analyses techniques de trading.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "fr"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Quelle période de temps dois-je utiliser pour calculer les points pivots ?", "acceptedAnswer": {"@type": "Answer", "text": "Les points pivots sont généralement calculés sur la base des données de trading du jour précédent pour les traders intrajournaliers, ou sur la base de la semaine précédente pour les traders de swing. Certains traders utilisent également des données mensuelles. La période dépend de votre horizon de trading."}}, {"@type": "Question", "name": "Les points pivots fonctionnent-ils sur tous les marchés ?", "acceptedAnswer": {"@type": "Answer", "text": "Oui, les points pivots peuvent être appliqués à tous les marchés - actions, devises, matières premières, cryptomonnaies. Cependant, leur efficacité peut varier selon la volatilité du marché et les conditions de liquidité."}}, {"@type": "Question", "name": "Quel est le niveau le plus important : R1, R2, S1 ou S2 ?", "acceptedAnswer": {"@type": "Answer", "text": "Le point pivot (PP) lui-même est souvent le niveau le plus important car il représente le point d'équilibre. R1 et S1 sont généralement plus significatifs que R2 et S2, mais tous les niveaux sont importants à surveiller."}}, {"@type": "Question", "name": "Comment puis-je utiliser les points pivots avec d'autres indicateurs ?", "acceptedAnswer": {"@type": "Answer", "text": "Combinez les points pivots avec des indicateurs de momentum comme le RSI ou le MACD pour confirmer les signaux. Utilisez-les également avec les moyennes mobiles pour identifier la direction de la tendance principale."}}, {"@type": "Question", "name": "Y a-t-il d'autres méthodes de calcul des points pivots ?", "acceptedAnswer": {"@type": "Answer", "text": "Oui, il existe plusieurs variantes comme la méthode Woodie, la méthode Fibonacci, et la méthode DeMark. Chacune utilise des formules légèrement différentes et peut donner des résultats différents selon le marché."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/fr/">Outils</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/fr/">Outils</a> > Calculateur de Points Pivots</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Calculateur de Points Pivots</h1>
+    <p class="calc-subtitle">Calculez les niveaux de support et de résistance à partir des prix haut, bas et de clôture</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="highPrice">Prix Haut</label>
+  <div class="input-row"><span class="input-prefix">€</span><input type="number" id="highPrice" placeholder="Entrez le prix le plus élevé"  step="0.01"></div>
+</div>
+  <small class="input-help">Le prix le plus élevé atteint pendant la période de trading</small>
+<div class="input-group">
+  <label for="lowPrice">Prix Bas</label>
+  <div class="input-row"><span class="input-prefix">€</span><input type="number" id="lowPrice" placeholder="Entrez le prix le plus bas"  step="0.01"></div>
+</div>
+  <small class="input-help">Le prix le plus bas atteint pendant la période de trading</small>
+<div class="input-group">
+  <label for="closePrice">Prix de Clôture</label>
+  <div class="input-row"><span class="input-prefix">€</span><input type="number" id="closePrice" placeholder="Entrez le prix de clôture"  step="0.01"></div>
+</div>
+  <small class="input-help">Le prix de fermeture à la fin de la période de trading</small></div>
+    <button class="btn-calc" onclick="calculate()">Calculer</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Point Pivot (PP)</span><span class="result-value" id="pivotPoint">—</span></div>
+<div class="result-item"><span class="result-label">Résistance 1 (R1)</span><span class="result-value" id="resistance1">—</span></div>
+<div class="result-item"><span class="result-label">Support 1 (S1)</span><span class="result-value" id="support1">—</span></div>
+<div class="result-item"><span class="result-label">Résistance 2 (R2)</span><span class="result-value" id="resistance2">—</span></div>
+<div class="result-item"><span class="result-label">Support 2 (S2)</span><span class="result-value" id="support2">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>Qu'est-ce que cela signifie ?</strong> Le point pivot (PP) représente le niveau central de prix autour duquel le marché devrait osciller. Les niveaux de résistance (R1, R2) indiquent où le prix pourrait rencontrer une pression vendeuse, tandis que les niveaux de support (S1, S2) représentent les zones où les acheteurs pourraient intervenir.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Imprimer</button>
+        <button onclick="shareResult()">&#x1f4e4; Partager</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>Qu'est-ce qu'un Calculateur de Points Pivots ?</h2><p>Le calculateur de points pivots est un outil d'analyse technique essentiel pour les traders. Il utilise les prix hauts, bas et de clôture d'une période précédente pour déterminer les niveaux clés où le prix pourrait rencontrer du support ou de la résistance. Les points pivots sont largement utilisés sur les marchés des devises, des actions et des matières premières pour identifier les points d'entrée et de sortie potentiels.</p><h2>Comment Fonctionnent les Points Pivots ?</h2><p>La méthode classique de calcul des points pivots utilise une formule simple mais puissante. Le point pivot central (PP) est calculé en prenant la moyenne des prix haut, bas et de clôture. À partir de ce pivot central, on dérive deux niveaux de résistance (R1 et R2) et deux niveaux de support (S1 et S2). Ces niveaux forment une structure de support/résistance qui aide les traders à anticiper les mouvements de prix et à gérer leur risque efficacement.</p><h2>Interprétation des Résultats</h2><p>Le point pivot (PP) agit comme un niveau de pivot principal. Si le prix ouvre au-dessus du PP, cela suggère généralement une tendance haussière, tandis qu'une ouverture en dessous indique une tendance baissière. Les résistances R1 et R2 représentent des niveaux où le prix pourrait rencontrer une pression vendeuse, avec R2 étant un niveau de résistance plus fort. De même, S1 et S2 sont des niveaux de support successifs où les acheteurs pourraient intervenir pour soutenir le prix.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Utilisation Pratique pour le Trading</h2><p>Les traders utilisent les points pivots pour plusieurs stratégies. Certains cherchent à vendre à proximité des niveaux de résistance et à acheter près des niveaux de support. D'autres utilisent les points pivots comme confirmations supplémentaires pour leurs stratégies de trading existantes. Les breakouts au-delà de R2 ou en dessous de S2 peuvent indiquer des mouvements de prix significatifs.</p><h2>Avantages de l'Analyse par Points Pivots</h2><p>L'un des principaux avantages des points pivots est leur simplicité et leur efficacité. Contrairement à d'autres indicateurs techniques complexes, les points pivots sont directs à calculer et à interpréter. Ils fournissent une structure claire de niveaux clés sans nécessiter de paramètres supplémentaires. Ils sont également objectifs, basés uniquement sur les données de prix passées, ce qui les rend utiles pour tous les traders, indépendamment de leur style ou de leur expérience.</p><h2>Limitations et Considérations</h2><p>Bien que les points pivots soient utiles, ils ne devraient pas être utilisés isolément. Le marché est complexe et influencé par de nombreux facteurs externes. Les points pivots fonctionnent mieux lorsqu'ils sont combinés avec d'autres outils d'analyse technique comme les moyennes mobiles, l'analyse de volume ou les indicateurs de momentum. Il est également important de considérer le contexte du marché, les annonces économiques et les événements géopolitiques qui pourraient affecter les mouvements de prix.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Articles connexes</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/candlestick-patterns.html">Candlestick Patterns<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/support-resistance.html">Support & Resistance<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/moving-average-guide.html">Moving Average Guide<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>Questions fréquentes</h2><div class="faq-item"><div class="faq-q">Quelle période de temps dois-je utiliser pour calculer les points pivots ?</div><div class="faq-a">Les points pivots sont généralement calculés sur la base des données de trading du jour précédent pour les traders intrajournaliers, ou sur la base de la semaine précédente pour les traders de swing. Certains traders utilisent également des données mensuelles. La période dépend de votre horizon de trading.</div></div>
+  <div class="faq-item"><div class="faq-q">Les points pivots fonctionnent-ils sur tous les marchés ?</div><div class="faq-a">Oui, les points pivots peuvent être appliqués à tous les marchés - actions, devises, matières premières, cryptomonnaies. Cependant, leur efficacité peut varier selon la volatilité du marché et les conditions de liquidité.</div></div>
+  <div class="faq-item"><div class="faq-q">Quel est le niveau le plus important : R1, R2, S1 ou S2 ?</div><div class="faq-a">Le point pivot (PP) lui-même est souvent le niveau le plus important car il représente le point d'équilibre. R1 et S1 sont généralement plus significatifs que R2 et S2, mais tous les niveaux sont importants à surveiller.</div></div>
+  <div class="faq-item"><div class="faq-q">Comment puis-je utiliser les points pivots avec d'autres indicateurs ?</div><div class="faq-a">Combinez les points pivots avec des indicateurs de momentum comme le RSI ou le MACD pour confirmer les signaux. Utilisez-les également avec les moyennes mobiles pour identifier la direction de la tendance principale.</div></div>
+  <div class="faq-item"><div class="faq-q">Y a-t-il d'autres méthodes de calcul des points pivots ?</div><div class="faq-a">Oui, il existe plusieurs variantes comme la méthode Woodie, la méthode Fibonacci, et la méthode DeMark. Chacune utilise des formules légèrement différentes et peut donner des résultats différents selon le marché.</div></div></section>
+  <div class="more-tools"><h3>Plus d'outils</h3><div class="tools-grid"><a class="tool-pill" href="/tools/fr/fibonacci-retracement.html">Calculatrice de Retracement Fibonacci</a>
+      <a class="tool-pill" href="/tools/fr/rsi-calculator.html">Calculateur RSI</a>
+      <a class="tool-pill" href="/tools/fr/macd-calculator.html">Calculatrice MACD</a>
+      <a class="tool-pill" href="/tools/fr/bollinger-bands.html">Calculatrice des Bandes de Bollinger</a>
+      <a class="tool-pill" href="/tools/fr/atr-calculator.html">Calculatrice ATR</a>
+      <a class="tool-pill" href="/tools/fr/ma-crossover.html">Calculatrice de Croisement de Moyennes Mobiles</a>
+      <a class="tool-pill" href="/tools/fr/candlestick-identifier.html">Identificateur de Motifs Chandelier</a>
+      <a class="tool-pill" href="/tools/fr/support-resistance.html">Calculateur de Support et Résistance</a>
+      <a class="tool-pill" href="/tools/fr/pip-value.html">Calculatrice de Valeur de Pip</a>
+      <a class="tool-pill" href="/tools/fr/options-profit.html">Calculatrice de Profit sur Options</a>
+      <a class="tool-pill" href="/tools/fr/stock-split.html">Calculatrice de Division d'Actions</a>
+      <a class="tool-pill" href="/tools/fr/trading-fee.html">Calculatrice de Frais de Trading</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/pivot-point.html" class="lang-btn">English</a>
+    <a href="/tools/pivot-point.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/pivot-point.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/pivot-point.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/pivot-point.html" class="lang-btn active">Français</a>
+    <a href="/tools/es/pivot-point.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/pivot-point.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/pivot-point.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/pivot-point.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/pivot-point.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Outils connexes</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const highPrice = parseFloat(document.getElementById('highPrice').value);
+  const lowPrice = parseFloat(document.getElementById('lowPrice').value);
+  const closePrice = parseFloat(document.getElementById('closePrice').value);
+
+  if (isNaN(highPrice) || isNaN(lowPrice) || isNaN(closePrice)) {
+    alert('Please enter valid numbers for all fields');
+    return;
+  }
+
+  if (highPrice < lowPrice) {
+    alert('High price must be greater than or equal to low price');
+    return;
+  }
+
+  if (highPrice < closePrice || lowPrice > closePrice) {
+    alert('Close price must be between high and low prices');
+    return;
+  }
+
+  const pp = (highPrice + lowPrice + closePrice) / 3;
+  const r1 = (2 * pp) - lowPrice;
+  const s1 = (2 * pp) - highPrice;
+  const r2 = pp + (highPrice - lowPrice);
+  const s2 = pp - (highPrice - lowPrice);
+
+  document.getElementById('pivotPoint').textContent = '$' + pp.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('resistance1').textContent = '$' + r1.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('support1').textContent = '$' + s1.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('resistance2').textContent = '$' + r2.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('support2').textContent = '$' + s2.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copié !';setTimeout(function(){b.textContent='Partager'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|fr|pivot-point|2026-07-09 -->

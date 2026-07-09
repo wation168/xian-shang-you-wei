@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>営業日計算機 - ビジネス日数を簡単計算</title>
+<meta name="description" content="2つの日付間の営業日数を自動計算。週末と祝日を除外した正確な営業日数がわかります。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/work-days.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/work-days.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/work-days.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/work-days.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/work-days.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/work-days.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/work-days.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/work-days.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/work-days.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/work-days.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/work-days.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/work-days.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "営業日計算機", "url": "https://softglow-ai.com/tools/ja/work-days.html", "description": "2つの日付間の営業日数を自動計算。週末と祝日を除外した正確な営業日数がわかります。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "営業日と暦日の違いは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "暦日は日付表示上のすべての日を数えたものです。営業日は暦日から週末（土日）と祝日を除いたビジネス実務に充てられる日数を指します。"}}, {"@type": "Question", "name": "祝日を複数登録する場合はどうすればいいですか？", "acceptedAnswer": {"@type": "Answer", "text": "祝日欄に複数の日付を登録する場合は、YYYY-MM-DD形式で1行に1つの日付を入力してください。改行で区切られた各行が個別の祝日として認識されます。"}}, {"@type": "Question", "name": "土曜日を営業日として計算したい場合はどうすればいいですか？", "acceptedAnswer": {"@type": "Answer", "text": "現在のこのツールは土日を固定で週末として計算しています。特別な営業形態の場合は、営業日数を手動で調整するか、祝日欄で該当日を指定してください。"}}, {"@type": "Question", "name": "計算に年号は関係ありますか？", "acceptedAnswer": {"@type": "Answer", "text": "このツールはグレゴリオ暦に基づいて計算を行うため、和暦（令和など）の入力は対応していません。必ず西暦（2025年など）をYYYY-MM-DD形式で入力してください。"}}, {"@type": "Question", "name": "開始日と終了日が同じ日の場合、営業日数は1日と計算されますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、開始日と終了日の両方を含めて計算するため、同じ日の場合は1営業日として計算されます。ただし、その日が週末や祝日の場合は営業日数は0日になります。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 営業日計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>営業日計算機</h1>
+    <p class="calc-subtitle">2つの日付間の営業日数を計算します。週末と祝日を除外</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="startDate">開始日</label>
+  <div class="input-row"><input type="date" id="startDate" placeholder="2025-01-01"  value="2025-01-01" step="1"></div>
+</div>
+  <small class="input-help">計算を開始する日付をYYYY-MM-DD形式で入力してください</small>
+<div class="input-group">
+  <label for="endDate">終了日</label>
+  <div class="input-row"><input type="date" id="endDate" placeholder="2025-12-31"  value="2025-12-31" step="1"></div>
+</div>
+  <small class="input-help">計算を終了する日付をYYYY-MM-DD形式で入力してください</small>
+<div class="input-group">
+  <label for="holidays">祝日（1行に1つの日付）</label>
+  <div class="input-row"><input type="textarea" id="holidays" placeholder="2025-01-01
+2025-04-25
+2025-12-25"  value="2025-01-01
+2025-04-25
+2025-12-25
+2025-12-26" step="1"></div>
+</div>
+  <small class="input-help">除外する祝日をYYYY-MM-DD形式で1行に1つずつ入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">合計暦日数</span><span class="result-value" id="totalDays">—</span></div>
+<div class="result-item"><span class="result-label">週末日数</span><span class="result-value" id="weekendDays">—</span></div>
+<div class="result-item"><span class="result-label">祝日日数</span><span class="result-value" id="holidayDays">—</span></div>
+<div class="result-highlight"><span class="result-label">営業日数</span><span class="result-value" id="workingDays">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 結果は指定した期間の日数を4つのカテゴリに分類しています。合計暦日数から週末日数と祝日日数を除いた営業日数が、実際に業務に使える日数となります。プロジェクト管理や納期計算に活用できます。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>営業日計算機について</h2><p>営業日計算機は、2つの日付間のビジネス日数を正確に計算するツールです。週末（土日）と指定した祝日を自動的に除外し、実際に業務に使える日数を算出します。プロジェクト管理、納期設定、リソース計画など、ビジネスシーンで活躍します。</p><h2>計算方法</h2><p>このツールは入力された開始日と終了日の間にある全ての日を計算し、そこから土曜日と日曜日、さらに指定した祝日を除いた営業日数を算出します。会計年度の営業日数確認や、プロジェクトの実行日数見積もりに最適です。</p><h2>祝日の設定方法</h2><p>祝日欄にはYYYY-MM-DD形式（例：2025-01-01）で日付を入力します。複数の祝日を指定する場合は、1行に1つの日付を入力してください。年末年始、ゴールデンウィーク、お盆休暇など、企業の休業日を設定できます。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>ビジネスでの活用例</h2><p>営業日計算機は、納期管理、プロジェクト進捗確認、営業目標の日数配分、有給休暇の管理など、様々なビジネスシーンで活用できます。正確な営業日数を把握することで、より現実的なスケジュール立案が可能になります。</p><h2>カレンダーと営業日</h2><p>カレンダー上の日数と営業日数は異なります。このツールを使用することで、実際に業務に充てられる日数を正確に把握し、効率的なプロジェクト管理を実現できます。</p><h2>注意事項</h2><p>計算結果は開始日と終了日を含みます。祝日として登録した日付が計算から除外されるため、企業固有の休業日設定に対応しています。正確な営業日数を得るため、祝日の設定漏れにご注意ください。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">営業日と暦日の違いは何ですか？</div><div class="faq-a">暦日は日付表示上のすべての日を数えたものです。営業日は暦日から週末（土日）と祝日を除いたビジネス実務に充てられる日数を指します。</div></div>
+  <div class="faq-item"><div class="faq-q">祝日を複数登録する場合はどうすればいいですか？</div><div class="faq-a">祝日欄に複数の日付を登録する場合は、YYYY-MM-DD形式で1行に1つの日付を入力してください。改行で区切られた各行が個別の祝日として認識されます。</div></div>
+  <div class="faq-item"><div class="faq-q">土曜日を営業日として計算したい場合はどうすればいいですか？</div><div class="faq-a">現在のこのツールは土日を固定で週末として計算しています。特別な営業形態の場合は、営業日数を手動で調整するか、祝日欄で該当日を指定してください。</div></div>
+  <div class="faq-item"><div class="faq-q">計算に年号は関係ありますか？</div><div class="faq-a">このツールはグレゴリオ暦に基づいて計算を行うため、和暦（令和など）の入力は対応していません。必ず西暦（2025年など）をYYYY-MM-DD形式で入力してください。</div></div>
+  <div class="faq-item"><div class="faq-q">開始日と終了日が同じ日の場合、営業日数は1日と計算されますか？</div><div class="faq-a">はい、開始日と終了日の両方を含めて計算するため、同じ日の場合は1営業日として計算されます。ただし、その日が週末や祝日の場合は営業日数は0日になります。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">ROI計算機</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">リスク・リワード計算機</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">ポジションサイズ計算機</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">ストップロス計算機</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">P/Eレシオ計算機</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">証拠金計算機</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">株式利益損失計算機</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/work-days.html" class="lang-btn">English</a>
+    <a href="/tools/work-days.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/work-days.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/work-days.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/work-days.html" class="lang-btn">Français</a>
+    <a href="/tools/es/work-days.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/work-days.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/work-days.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/work-days.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/work-days.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const startDateInput = document.getElementById('startDate').value;
+  const endDateInput = document.getElementById('endDate').value;
+  const holidaysInput = document.getElementById('holidays').value;
+
+  if (!startDateInput || !endDateInput) {
+    alert('Please enter both start and end dates.');
+    return;
+  }
+
+  const startDate = new Date(startDateInput);
+  const endDate = new Date(endDateInput);
+
+  if (startDate > endDate) {
+    alert('Start date must be before or equal to end date.');
+    return;
+  }
+
+  const holidayDates = holidaysInput
+    .trim()
+    .split('\n')
+    .map(d => d.trim())
+    .filter(d => d.length > 0)
+    .map(d => new Date(d));
+
+  let currentDate = new Date(startDate);
+  let workingDays = 0;
+  let weekendDays = 0;
+  let holidayCount = 0;
+
+  while (currentDate <= endDate) {
+    const dayOfWeek = currentDate.getDay();
+    const dateString = currentDate.toISOString().split('T')[0];
+    const isHoliday = holidayDates.some(h => h.toISOString().split('T')[0] === dateString);
+
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      weekendDays++;
+    } else if (isHoliday) {
+      holidayCount++;
+    } else {
+      workingDays++;
+    }
+
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  const totalDays = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+
+  document.getElementById('totalDays').textContent = totalDays.toLocaleString('en-GB');
+  document.getElementById('weekendDays').textContent = weekendDays.toLocaleString('en-GB');
+  document.getElementById('holidayDays').textContent = holidayCount.toLocaleString('en-GB');
+  document.getElementById('workingDays').textContent = workingDays.toLocaleString('en-GB');
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|work-days|2026-07-09 -->

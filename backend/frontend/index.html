@@ -92,11 +92,18 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 
 /* ── 手機版 topbar（預設 sticky）── */
 .topbar{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:.5px solid var(--border);padding:10px 16px 8px;display:flex;align-items:center;gap:10px}
+/* 手機版隱藏工具/文章/介紹頁/主題按鈕，讓搜尋列有足夠空間 */
+@media(max-width:1023px){
+  #topNavLinks{display:none!important}
+  #themeToggleBtn{display:none!important}
+}
+
+/* 全螢幕隱藏 TAB 列（底部導覽已涵蓋所有尺寸） */
+#desktopTabBar{display:none!important}
 
 /* ══ 電腦版三欄版面 ══ */
 @media(min-width:1024px){
-  /* 隱藏底部導航 */
-  .bottom-nav{display:none!important}
+  /* 桌面也顯示底部導覽（不再隱藏） */
 
   /* 全頁高度鎖定 */
   html,body{height:100%;overflow:hidden}
@@ -130,7 +137,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
     display:grid;
     grid-template-columns:240px 1fr 220px;
     grid-template-rows:1fr;
-    height:calc(100vh - 56px);
+    height:calc(100vh - 56px - 56px);
     margin-top:56px;
     overflow:hidden;
     position:relative;
@@ -251,12 +258,15 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
   /* 右側按鈕尺寸 */
   #topIntroBtn,#topLoginBtn{font-size:11px!important}
 
-  /* 電腦版：pageOverlay 改在 desktopMain 內部，不蓋 TAB 列 */
+  /* 電腦版：pageOverlay 改在 desktopMain 內部 */
   #pageOverlay{
     position:absolute;
-    top:45px;
+    top:0;
     left:0;right:0;bottom:0;
     z-index:50;
+  }
+  #pageOverlay > div {
+    padding-top: 12px;
   }
 
   /* 電腦版：chart-box 不超出 desktopMain */
@@ -323,6 +333,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .summary-list li .dot{width:4px;height:4px;border-radius:50%;background:var(--text3);margin-top:7px;flex-shrink:0}
 .summary-list li.hi .dot{background:var(--up)}
 .summary-list li.md .dot{background:var(--amber)}
+.summary-list li.conclusion{font-size:14px;font-weight:700;color:var(--text);background:rgba(37,99,235,.08);border-radius:8px;padding:8px 10px;border-left:3px solid var(--blue,#3b82f6)}
+.summary-list li.conclusion .dot{display:none}
 .summary-list li.action{font-size:13px;font-weight:500;color:var(--text);padding-top:2px}
 .summary-list li.action .dot{display:none}
 /* K棒方向色 */
@@ -553,7 +565,12 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
       <span style="font-size:12px;color:var(--text3)">訪客 <strong id="desktopVisitNum" style="color:var(--text);font-size:14px">—</strong></span>
       <span style="font-size:12px;color:var(--text3)">分析 <strong id="desktopAnalyzeNum" style="color:var(--green);font-size:14px">—</strong></span>
     </div>
-    <a href="/landing.html" id="topIntroBtn" style="font-size:11px;color:var(--text3);text-decoration:none;padding:4px 8px;border-radius:6px;border:.5px solid var(--border2);white-space:nowrap">介紹頁</a>
+    <div id="topNavLinks" style="display:flex;gap:6px;align-items:center">
+      <a href="/" style="font-size:11px;color:var(--text3);text-decoration:none;padding:4px 8px;border-radius:6px;border:.5px solid var(--border2);white-space:nowrap">首頁</a>
+      <a href="/tools/" style="font-size:11px;color:var(--text3);text-decoration:none;padding:4px 8px;border-radius:6px;border:.5px solid var(--border2);white-space:nowrap">工具</a>
+      <a href="/blog/" style="font-size:11px;color:var(--text3);text-decoration:none;padding:4px 8px;border-radius:6px;border:.5px solid var(--border2);white-space:nowrap">文章</a>
+      <a href="/stock/landing" id="topIntroBtn" style="font-size:11px;color:var(--text3);text-decoration:none;padding:4px 8px;border-radius:6px;border:.5px solid var(--border2);white-space:nowrap">介紹頁</a>
+    </div>
     <button onclick="cycleTheme()" id="themeToggleBtn" title="切換主題" style="font-size:14px;background:none;border:.5px solid var(--border2);border-radius:6px;padding:4px 8px;cursor:pointer;color:var(--text)">🌓</button>
     <button id="topLoginBtn" onclick="showLoginModal()" style="font-size:11px;background:var(--green);color:#fff;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;white-space:nowrap">登入</button>
   </div>
@@ -593,8 +610,8 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
     <button class="desktop-tab-btn active" onclick="showPage('home')" data-page="home">📊 分析</button>
     <button class="desktop-tab-btn" onclick="showPage('watch')" data-page="watch">⭐ 自選</button>
     <button class="desktop-tab-btn" onclick="showPage('picks')" data-page="picks">🔥 精選股</button>
-    <button class="desktop-tab-btn" onclick="showPage('history')" data-page="history">📋 歷史</button>
     <button class="desktop-tab-btn" onclick="showPage('portfolio')" data-page="portfolio">💼 持股健檢</button>
+    <button class="desktop-tab-btn" onclick="showPage('forum')" data-page="forum">💬 討論</button>
     <button class="desktop-tab-btn" onclick="showPage('my')" data-page="my">👤 我的</button>
   </div>
 
@@ -714,7 +731,6 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
         <div class="deep-card" id="dcard-macd"><div class="deep-lbl">📈 MACD</div><div id="d-macd-tag"></div><div class="ind-nums" id="d-macd-nums"></div><div class="deep-sub" id="d-macd-sub"></div></div>
         <div class="deep-card full" id="dcard-vol"><div class="deep-lbl">🔊 量能分析</div><div id="d-vol-tag"></div><div class="deep-sub" id="d-vol-sub"></div></div>
         <div class="deep-card full" id="dcard-inst"><div class="deep-lbl">🏦 法人動向</div><div id="d-inst-rows"><div style="font-size:11px;color:var(--text3)">載入中…</div></div></div>
-        <div class="deep-card full" id="dcard-fund"><div class="deep-lbl">📊 基本面</div><div id="d-fund-rows"><div style="font-size:11px;color:var(--text3)">載入中…</div></div></div>
         <div class="deep-card full" id="dcard-risk"><div class="deep-lbl">⚡ 風險提示</div><div class="risk-items" id="d-risk-list"></div></div>
       </div>
     </div>
@@ -797,6 +813,8 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
       <div class="chart-wrap">
         <canvas class="kc" id="kChart" height="260" aria-label="K線圖"></canvas>
         <canvas class="draw-layer" id="drawLayer" height="260"></canvas>
+        <!-- U2: 回到最新 K 棒按鈕 -->
+        <button id="chartLatestBtn" onclick="C.viewEnd=0;drawChart();this.style.display='none'" style="display:none;position:absolute;bottom:8px;right:8px;background:var(--green);color:#fff;border:none;border-radius:16px;padding:4px 12px;font-size:11px;font-weight:600;cursor:pointer;z-index:10;opacity:.9">最新 →</button>
       </div>
       <canvas class="kc" id="volChart" height="60" style="margin-top:2px" aria-label="量圖"></canvas>
 
@@ -830,6 +848,12 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
     </div>
 
     <div class="disc">本系統僅提供技術分析輔助，不構成任何投資建議或獲利保證。投資有風險，請自行判斷。資料來源：FinMind / TWSE，盤後更新。</div>
+
+    <!-- U5: 圖表下方第二個報告入口 -->
+    <div id="reportCta2" onclick="doGenerateReport()" style="display:none;margin:8px 0;background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:1px solid #bfdbfe;border-radius:10px;padding:14px 16px;cursor:pointer;text-align:center">
+      <div style="font-size:15px;font-weight:700;color:#1e3a5f">📄 產出今日完整報告</div>
+      <div style="font-size:11px;color:#6b7280;margin-top:4px">含新聞題材・支撐壓力・操作建議・K棒型態勝率</div>
+    </div>
 
     <!-- 籌碼面（摺疊） -->
     <div id="chipsSection" style="display:none;margin-top:4px">
@@ -1079,7 +1103,7 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
     <div id="upgradeEmail" style="text-align:center;font-size:13px;color:var(--green);margin-bottom:16px"></div>
     <p style="font-size:13px;color:var(--text3);margin-bottom:16px;text-align:center">付款完成後系統自動升級，無需重新登入</p>
     <div style="display:flex;flex-direction:column;gap:10px">
-      <button onclick="doUpgrade('monthly',this)" style="width:100%;padding:12px;background:var(--bg3);color:var(--text);border:none;border-radius:10px;font-size:14px;cursor:pointer;text-align:left">月費方案 <span style="float:right;color:var(--green);font-weight:700">$399／月</span></button>
+      <button onclick="doUpgrade('monthly',this)" style="width:100%;padding:12px;background:var(--bg3);color:var(--text);border:none;border-radius:10px;font-size:14px;cursor:pointer;text-align:left">月費方案 <span style="float:right;color:var(--green);font-weight:700">$499／月</span></button>
       <button onclick="doUpgrade('quarterly',this)" style="width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:14px;cursor:pointer;text-align:left;font-weight:600">季費方案 <span style="float:right">$999／季 ⭐</span></button>
       <button onclick="doUpgrade('yearly',this)" style="width:100%;padding:12px;background:var(--bg3);color:var(--text);border:none;border-radius:10px;font-size:14px;cursor:pointer;text-align:left">年費方案 <span style="float:right;color:var(--green);font-weight:700">$3,688／年</span></button>
     </div>
@@ -1129,14 +1153,11 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
   <button class="nav-btn" onclick="showPage('watch')">
     <div class="nav-icon">🔥</div>關注
   </button>
-  <button class="nav-btn" onclick="showPage('history')">
-    <div class="nav-icon">📈</div>戰績
-  </button>
   <button class="nav-btn" onclick="showPage('picks')">
     <div class="nav-icon">🔍</div>選股
   </button>
-  <button class="nav-btn" onclick="showPage('portfolio')">
-    <div class="nav-icon">💼</div>持股
+  <button class="nav-btn" onclick="showPage('forum')">
+    <div class="nav-icon">💬</div>討論
   </button>
   <button class="nav-btn" onclick="showPage('my')">
     <div class="nav-icon">👤</div>我的
@@ -1145,7 +1166,7 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
 
 <!-- 自選 / 紀錄 獨立頁面（不覆蓋分析結果）-->
 <div id="pageOverlay" style="display:none;position:fixed;inset:0 0 calc(56px + var(--safe-bottom)) 0;background:var(--bg);overflow-y:auto;z-index:90">
-  <div style="max-width:600px;margin:0 auto;padding:12px 16px">
+  <div style="max-width:600px;margin:0 auto;padding:60px 16px 12px">
     <div id="pageContent"></div>
   </div>
 </div>
@@ -1260,6 +1281,28 @@ function closeDropdown(){
   const dd=document.getElementById('searchDropdown');
   dd.classList.remove('open');dd.innerHTML='';
 }
+// U7: focus 時顯示最近查詢紀錄
+document.getElementById('stockInput').addEventListener('focus',e=>{
+  const q=e.target.value.trim();
+  if(q) return; // 已有輸入就不顯示
+  if(!historyList || !historyList.length) return;
+  const dd=document.getElementById('searchDropdown');
+  const recent=historyList.slice(0,5);
+  dd.innerHTML='<div style="padding:6px 14px;font-size:10px;color:var(--text3);font-weight:600">最近查詢</div>'+
+    recent.map(s=>`
+      <div class="search-item" data-id="${s.id}">
+        <span class="sid">${s.id}</span>
+        <span class="sname">${s.name||''}</span>
+        <span class="stype" style="font-size:10px;color:var(--text3)">🕐</span>
+      </div>`).join('');
+  dd.querySelectorAll('.search-item').forEach(item=>{
+    item.addEventListener('click',()=>{
+      document.getElementById('stockInput').value=item.dataset.id;
+      closeDropdown();analyzeStock();
+    });
+  });
+  dd.classList.add('open');
+});
 document.getElementById('stockInput').addEventListener('input',e=>{
   clearTimeout(_searchTimer);
   const q=e.target.value.trim();
@@ -1310,26 +1353,27 @@ document.getElementById('countInput').addEventListener('change',e=>{
 // 底部導航
 // ══════════════════════════════════════
 function showPage(page){
-  document.querySelectorAll('.nav-btn').forEach((b,i)=>b.classList.toggle('active',['home','watch','history','picks','portfolio','my'][i]===page));
-  // 電腦版 TAB 同步
-  document.querySelectorAll('.desktop-tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+  document.querySelectorAll('.nav-btn').forEach((b,i)=>b.classList.toggle('active',['home','watch','picks','forum','my'][i]===page));
   const overlay=document.getElementById('pageOverlay');
   if(page==='home'){
     overlay.style.display='none';
   }else{
-    // 電腦版：overlay top 從 TAB 列底部開始，不蓋住 TAB
-    const tabBar=document.getElementById('desktopTabBar');
-    if(tabBar && window.innerWidth>=1024){
-      const rect=tabBar.getBoundingClientRect();
-      overlay.style.top=rect.bottom+'px';
-      overlay.style.left=rect.left+'px';
-      overlay.style.right=(window.innerWidth - rect.right)+'px';
+    // 電腦版：overlay 定位在 desktopMain 內
+    if(window.innerWidth>=1024){
+      const main=document.getElementById('desktopMain');
+      if(main){
+        const rect=main.getBoundingClientRect();
+        overlay.style.top=rect.top+'px';
+        overlay.style.left=rect.left+'px';
+        overlay.style.right=(window.innerWidth - rect.right)+'px';
+      }
     }
     overlay.style.display='block';
-    if(page==='watch') showWatchList();
+    if(page==='watch') showWatchListWithTabs();
     else if(page==='history') showHistory();
     else if(page==='picks') showPicksPage();
     else if(page==='portfolio') showPortfolioPage();
+    else if(page==='forum') showForumPage();
     else if(page==='my') showMyPage();
   }
 }
@@ -1371,9 +1415,16 @@ function _renderWatchSkeleton(el){
     <div style="height:12px;width:70%;background:var(--border);border-radius:4px"></div>
   </div>`;
   el.innerHTML=`
-    <div style="padding:4px 0 16px;display:flex;justify-content:space-between;align-items:center">
+    <div style="padding:4px 0 8px;display:flex;justify-content:space-between;align-items:center">
       <div style="font-size:16px;font-weight:700">🔥 今日關注</div>
       <div style="font-size:11px;color:var(--text3)" id="watchUpdateTime">更新中...</div>
+    </div>
+    <!-- U4: 排序按鈕 -->
+    <div style="display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap">
+      <button onclick="_sortWatch('group')" class="watch-sort-btn" style="padding:3px 10px;border-radius:12px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:10px;cursor:pointer">分組</button>
+      <button onclick="_sortWatch('rr')" class="watch-sort-btn" style="padding:3px 10px;border-radius:12px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:10px;cursor:pointer">損益比↓</button>
+      <button onclick="_sortWatch('risk')" class="watch-sort-btn" style="padding:3px 10px;border-radius:12px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:10px;cursor:pointer">風險↓</button>
+      <button onclick="_sortWatch('sup')" class="watch-sort-btn" style="padding:3px 10px;border-radius:12px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:10px;cursor:pointer">距支撐↓</button>
     </div>
     <div id="watchGroups">${skeletonCard.repeat(Math.min(watchList.length,4))}</div>`;
 }
@@ -1422,6 +1473,21 @@ function _getRiskColor(level){
   if(level==='高風險') return 'var(--up)';
   if(level==='留意風險') return '#f59e0b';
   return 'var(--green)';
+}
+
+// U4: 自選股排序
+let _watchSortMode = 'group';
+function _sortWatch(mode){
+  _watchSortMode = mode;
+  document.querySelectorAll('.watch-sort-btn').forEach(b=>{
+    b.style.background = b.textContent.includes(
+      mode==='group'?'分組':mode==='rr'?'損益比':mode==='risk'?'風險':'距支撐'
+    ) ? 'var(--green)' : 'var(--bg2)';
+    b.style.color = b.textContent.includes(
+      mode==='group'?'分組':mode==='rr'?'損益比':mode==='risk'?'風險':'距支撐'
+    ) ? '#fff' : 'var(--text2)';
+  });
+  if(_watchCache) _renderWatchGroups(_watchCache);
 }
 
 function _getRiskBg(level){
@@ -1709,6 +1775,320 @@ function addHistory(id,name,price,risk,riskLabel,extra){
 }
 
 // ══════════════════════════════════════
+// 自選頁內頁 tab（自選 / 戰績）
+// ══════════════════════════════════════
+let _watchInnerTab = 'watch'; // 'watch' | 'history'
+
+function showWatchListWithTabs(){
+  const el = document.getElementById('pageContent');
+  el.innerHTML = `
+    <div style="display:flex;border-bottom:.5px solid var(--border);margin-bottom:12px">
+      <button onclick="_switchWatchTab('watch')" id="wtab-watch"
+        style="flex:1;padding:8px;font-size:13px;border:none;background:none;cursor:pointer;border-bottom:2px solid var(--green);color:var(--green);font-weight:600">
+        ⭐ 自選股
+      </button>
+      <button onclick="_switchWatchTab('history')" id="wtab-history"
+        style="flex:1;padding:8px;font-size:13px;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;color:var(--text3)">
+        📈 戰績日誌
+      </button>
+    </div>
+    <div id="watchInnerContent"></div>`;
+  _watchInnerTab = 'watch';
+  _renderWatchInner();
+}
+
+function _switchWatchTab(tab){
+  _watchInnerTab = tab;
+  document.getElementById('wtab-watch').style.borderBottomColor = tab==='watch' ? 'var(--green)' : 'transparent';
+  document.getElementById('wtab-watch').style.color = tab==='watch' ? 'var(--green)' : 'var(--text3)';
+  document.getElementById('wtab-watch').style.fontWeight = tab==='watch' ? '600' : '400';
+  document.getElementById('wtab-history').style.borderBottomColor = tab==='history' ? 'var(--green)' : 'transparent';
+  document.getElementById('wtab-history').style.color = tab==='history' ? 'var(--green)' : 'var(--text3)';
+  document.getElementById('wtab-history').style.fontWeight = tab==='history' ? '600' : '400';
+  _renderWatchInner();
+}
+
+function _renderWatchInner(){
+  const container = document.getElementById('watchInnerContent');
+  if(!container) return;
+  if(_watchInnerTab === 'watch'){
+    // 把原本 showWatchList 的內容塞進去
+    if(!watchList.length){
+      container.innerHTML=`<div style="padding:60px 0;text-align:center;color:var(--text3)">
+        <div style="font-size:36px;margin-bottom:12px">🔥</div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:6px">關注清單是空的</div>
+        <div style="font-size:13px;margin-bottom:10px">分析股票後按「加入自選」</div>
+      </div>`;
+      return;
+    }
+    _renderWatchSkeleton({innerHTML:'',appendChild:()=>{}});
+    document.getElementById('pageContent').querySelector('#watchGroups') && _fetchWatchBatch();
+    // 直接呼叫原本邏輯
+    showWatchList();
+  } else {
+    showHistory();
+  }
+}
+
+// ══════════════════════════════════════
+// 留言板
+// ══════════════════════════════════════
+let _forumPage = 1;
+let _forumStock = '';
+let _forumNickname = localStorage.getItem('forumNickname') || '';
+
+async function showForumPage(stockFilter){
+  _forumPage = 1;
+  _forumStock = stockFilter || '';
+  const el = document.getElementById('pageContent');
+  el.innerHTML = `
+    <div style="padding:4px 0 12px;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:16px;font-weight:700">💬 股票討論區</div>
+      <button onclick="_forumNewPost()" style="padding:6px 14px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">+ 發表</button>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+      <input id="forumStockFilter" placeholder="篩選股票代號（如 2330）"
+        value="${_forumStock}"
+        style="flex:1;min-width:120px;padding:7px 10px;border:.5px solid var(--border2);border-radius:8px;font-size:13px;background:var(--bg2);color:var(--text);outline:none"
+        onkeydown="if(event.key==='Enter'){_forumApplyFilter()}">
+      <button onclick="_forumApplyFilter()" style="padding:7px 14px;border:.5px solid var(--border2);background:var(--bg2);color:var(--text);border-radius:8px;font-size:13px;cursor:pointer">搜尋</button>
+      ${_forumStock?`<button onclick="showForumPage('')" style="padding:7px 10px;border:.5px solid var(--border2);background:var(--bg2);color:var(--text3);border-radius:8px;font-size:13px;cursor:pointer">✕ 清除</button>`:''}
+    </div>
+    <div id="forumList"><div style="text-align:center;padding:40px 0;color:var(--text3)">載入中...</div></div>
+    <div id="forumPager" style="display:flex;gap:8px;justify-content:center;padding:12px 0"></div>`;
+  await _forumLoadPosts();
+}
+
+function _forumApplyFilter(){
+  const v = (document.getElementById('forumStockFilter')?.value || '').trim().toUpperCase();
+  showForumPage(v);
+}
+
+async function _forumLoadPosts(){
+  const base = getAPI();
+  const token = _getToken();
+  const headers = token ? {Authorization:'Bearer '+token} : {};
+  try{
+    const r = await fetch(`${base}/forum/posts?stock_code=${encodeURIComponent(_forumStock)}&page=${_forumPage}`, {headers});
+    const data = await r.json();
+    _forumRenderList(data);
+  }catch(e){
+    document.getElementById('forumList').innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text3)">載入失敗，請稍後再試</div>';
+  }
+}
+
+function _forumRenderList(data){
+  const el = document.getElementById('forumList');
+  if(!data.posts?.length){
+    el.innerHTML = `<div style="text-align:center;padding:60px 0;color:var(--text3)">
+      <div style="font-size:32px;margin-bottom:12px">💬</div>
+      <div style="font-size:14px">還沒有討論，來發第一篇！</div>
+    </div>`;
+    return;
+  }
+  el.innerHTML = data.posts.map(p=>`
+    <div onclick="_forumOpenPost(${p.id})" style="background:var(--bg2);border-radius:12px;padding:14px 16px;margin-bottom:8px;cursor:pointer">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--text2);flex-shrink:0">${(p.nickname||'?').slice(0,2)}</div>
+        <span style="font-size:12px;color:var(--text3)">${p.nickname}</span>
+        ${p.stock_code?`<span style="font-size:11px;padding:1px 7px;border-radius:10px;background:#E6F1FB;color:#185FA5;font-weight:600">$${p.stock_code}</span>`:''}
+        <span style="font-size:11px;color:var(--text3);margin-left:auto">${p.created_at}</span>
+      </div>
+      <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:${data.is_paid&&p.content?'6px':'0'}">${p.title}</div>
+      ${data.is_paid&&p.content?`<div style="font-size:12px;color:var(--text3);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${p.content}</div>`:''}
+      ${!data.is_paid?`<div style="font-size:11px;color:var(--text3);margin-top:4px;display:flex;align-items:center;gap:4px"><span>🔒</span>加入會員查看完整內容</div>`:''}
+      <div style="font-size:11px;color:var(--text3);margin-top:6px">💬 ${p.comment_count} 則留言</div>
+    </div>`).join('');
+
+  // 分頁
+  const pager = document.getElementById('forumPager');
+  const total = data.total || 0;
+  const totalPages = Math.ceil(total / 20);
+  if(totalPages > 1){
+    let html = '';
+    if(_forumPage > 1) html += `<button onclick="_forumChangePage(${_forumPage-1})" style="padding:6px 12px;border:.5px solid var(--border2);background:var(--bg2);color:var(--text);border-radius:8px;font-size:12px;cursor:pointer">上一頁</button>`;
+    html += `<span style="font-size:12px;color:var(--text3);padding:6px 4px">${_forumPage} / ${totalPages}</span>`;
+    if(_forumPage < totalPages) html += `<button onclick="_forumChangePage(${_forumPage+1})" style="padding:6px 12px;border:.5px solid var(--border2);background:var(--bg2);color:var(--text);border-radius:8px;font-size:12px;cursor:pointer">下一頁</button>`;
+    pager.innerHTML = html;
+  }
+}
+
+async function _forumChangePage(p){
+  _forumPage = p;
+  document.getElementById('forumList').innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text3)">載入中...</div>';
+  await _forumLoadPosts();
+  document.getElementById('pageOverlay').scrollTop = 0;
+}
+
+async function _forumOpenPost(postId){
+  const base = getAPI();
+  const token = _getToken();
+  if(!token){
+    showLoginModal();
+    return;
+  }
+  const headers = {Authorization:'Bearer '+token};
+  const el = document.getElementById('pageContent');
+  el.innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--text3)">載入中...</div>`;
+  try{
+    const r = await fetch(`${base}/forum/posts/${postId}`, {headers});
+    if(r.status===403){
+      el.innerHTML = `<div style="text-align:center;padding:60px 0;color:var(--text3)">
+        <div style="font-size:32px;margin-bottom:12px">🔒</div>
+        <div style="font-size:14px;margin-bottom:16px">需要付費會員才能查看內容</div>
+        <button onclick="showPage('my')" style="padding:10px 24px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">升級會員</button>
+        <br><br><button onclick="showForumPage('${_forumStock}')" style="font-size:13px;color:var(--text3);background:none;border:none;cursor:pointer">← 返回討論區</button>
+      </div>`;
+      return;
+    }
+    const data = await r.json();
+    const p = data.post;
+    const comments = data.comments || [];
+    el.innerHTML = `
+      <div style="margin-bottom:16px">
+        <button onclick="showForumPage('${_forumStock}')" style="font-size:13px;color:var(--text3);background:none;border:none;cursor:pointer;padding:0 0 8px 0">← 返回討論區</button>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+          ${p.stock_code?`<span style="font-size:12px;padding:2px 8px;border-radius:10px;background:#E6F1FB;color:#185FA5;font-weight:600">$${p.stock_code}</span>`:''}
+          <span style="font-size:12px;color:var(--text3)">${p.nickname}</span>
+          <span style="font-size:11px;color:var(--text3);margin-left:auto">${p.created_at}</span>
+        </div>
+        <div style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:10px">${p.title}</div>
+        <div style="font-size:14px;color:var(--text2);line-height:1.7;background:var(--bg2);border-radius:10px;padding:14px 16px">${p.content.replace(/\n/g,'<br>')}</div>
+      </div>
+      <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px">💬 留言 (${comments.length})</div>
+      <div id="commentList">${comments.map(c=>`
+        <div style="background:var(--bg2);border-radius:10px;padding:12px 14px;margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+            <span style="font-size:12px;font-weight:600;color:var(--text2)">${c.nickname}</span>
+            <span style="font-size:11px;color:var(--text3)">${c.created_at}</span>
+          </div>
+          <div style="font-size:13px;color:var(--text);line-height:1.6">${c.content.replace(/\n/g,'<br>')}</div>
+        </div>`).join('')}
+      </div>
+      <div style="margin-top:12px;background:var(--bg2);border-radius:12px;padding:14px 16px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px">新增留言</div>
+        <input id="commentNick" placeholder="暱稱" maxlength="20" value="${_forumNickname}"
+          style="width:100%;padding:8px 10px;border:.5px solid var(--border2);border-radius:8px;font-size:13px;background:var(--bg);color:var(--text);outline:none;margin-bottom:8px">
+        <textarea id="commentContent" placeholder="說說你的看法..." rows="3" maxlength="1000"
+          style="width:100%;padding:8px 10px;border:.5px solid var(--border2);border-radius:8px;font-size:13px;background:var(--bg);color:var(--text);outline:none;resize:vertical;font-family:inherit"></textarea>
+        <button onclick="_forumSubmitComment(${postId})" style="margin-top:8px;padding:9px 20px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">送出留言</button>
+      </div>`;
+  }catch(e){
+    el.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text3)">載入失敗，請稍後再試</div>';
+  }
+}
+
+async function _forumSubmitComment(postId){
+  const nickname = (document.getElementById('commentNick')?.value||'').trim();
+  const content = (document.getElementById('commentContent')?.value||'').trim();
+  if(!nickname){ alert('請填寫暱稱'); return; }
+  if(!content){ alert('留言不能為空'); return; }
+  _forumNickname = nickname;
+  localStorage.setItem('forumNickname', nickname);
+  const base = getAPI();
+  const token = _getToken();
+  if(!token){ showLoginModal(); return; }
+  try{
+    const r = await fetch(`${base}/forum/posts/${postId}/comments`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify({nickname, content})
+    });
+    if(r.ok){
+      await _forumOpenPost(postId);
+    }else{
+      const e = await r.json();
+      alert(e.detail||'送出失敗');
+    }
+  }catch(e){ alert('網路錯誤，請稍後再試'); }
+}
+
+function _forumNewPost(){
+  if(!_authUser){ showLoginModal(); return; }
+  const el = document.getElementById('pageContent');
+  el.innerHTML = `
+    <div style="margin-bottom:16px">
+      <button onclick="showForumPage('${_forumStock}')" style="font-size:13px;color:var(--text3);background:none;border:none;cursor:pointer;padding:0 0 8px 0">← 返回討論區</button>
+      <div style="font-size:16px;font-weight:700;margin-bottom:16px">✏️ 發表新主題</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">暱稱 *</div>
+        <input id="postNick" maxlength="20" value="${_forumNickname}" placeholder="你的暱稱"
+          style="width:100%;padding:9px 12px;border:.5px solid var(--border2);border-radius:8px;font-size:13px;background:var(--bg2);color:var(--text);outline:none">
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">股票代號（選填）</div>
+        <input id="postStock" maxlength="10" value="${_forumStock}" placeholder="如 2330"
+          style="width:100%;padding:9px 12px;border:.5px solid var(--border2);border-radius:8px;font-size:13px;background:var(--bg2);color:var(--text);outline:none">
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">標題 *</div>
+        <input id="postTitle" maxlength="100" placeholder="討論主題"
+          style="width:100%;padding:9px 12px;border:.5px solid var(--border2);border-radius:8px;font-size:13px;background:var(--bg2);color:var(--text);outline:none">
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">內容 *</div>
+        <textarea id="postContent" maxlength="2000" rows="6" placeholder="詳細說明你的看法..."
+          style="width:100%;padding:9px 12px;border:.5px solid var(--border2);border-radius:8px;font-size:13px;background:var(--bg2);color:var(--text);outline:none;resize:vertical;font-family:inherit"></textarea>
+      </div>
+      <button onclick="_forumSubmitPost()" style="padding:12px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">發表主題</button>
+    </div>`;
+}
+
+async function _forumSubmitPost(){
+  const nickname = (document.getElementById('postNick')?.value||'').trim();
+  const title = (document.getElementById('postTitle')?.value||'').trim();
+  const content = (document.getElementById('postContent')?.value||'').trim();
+  const stock_code = (document.getElementById('postStock')?.value||'').trim().toUpperCase();
+  if(!nickname){ alert('請填寫暱稱'); return; }
+  if(!title){ alert('請填寫標題'); return; }
+  if(!content){ alert('請填寫內容'); return; }
+  _forumNickname = nickname;
+  localStorage.setItem('forumNickname', nickname);
+  const base = getAPI();
+  const token = _getToken();
+  if(!token){ showLoginModal(); return; }
+  try{
+    const r = await fetch(`${base}/forum/posts`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify({nickname, title, content, stock_code})
+    });
+    if(r.ok){
+      showForumPage(stock_code);
+    }else{
+      const e = await r.json();
+      alert(e.detail||'發表失敗');
+    }
+  }catch(e){ alert('網路錯誤，請稍後再試'); }
+}
+
+// 分析完成後檢查是否有該股討論
+async function _checkForumDiscussion(stockCode){
+  if(!stockCode) return;
+  try{
+    const base = getAPI();
+    const r = await fetch(`${base}/forum/stock-discussion-count?codes=${stockCode}`);
+    const data = await r.json();
+    const count = data.counts?.[stockCode.toUpperCase()];
+    if(count){
+      // 在分析結果上方插入提示
+      const resultEl = document.getElementById('resultEl');
+      if(!resultEl) return;
+      const existing = document.getElementById('forumHint');
+      if(existing) existing.remove();
+      const hint = document.createElement('div');
+      hint.id = 'forumHint';
+      hint.style.cssText = 'background:#E1F5EE;border-radius:10px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer';
+      hint.innerHTML = `<span style="font-size:13px;color:#0F6E56">💬 $${stockCode.toUpperCase()} 有 ${count} 則討論</span><span style="font-size:12px;color:#1D9E75;font-weight:600">查看 →</span>`;
+      hint.onclick = ()=>{ showPage('forum'); showForumPage(stockCode.toUpperCase()); };
+      resultEl.parentNode.insertBefore(hint, resultEl);
+    }
+  }catch(e){}
+}
+
+// ══════════════════════════════════════
 // API
 // ══════════════════════════════════════
 function getAPI(){
@@ -1805,6 +2185,7 @@ async function analyzeStock(){
   });
   renderHotkeys();
   renderResult(data,enabled);
+  _checkForumDiscussion(id);
   // 第一次分析完才顯示新手導覽
   setTimeout(startTour, 800);
 }
@@ -1975,6 +2356,9 @@ function renderResult(d,enabledMA){
   document.getElementById('resultEl').className='result show';
   if (shareBtn) shareBtn.style.display = 'inline-block';
   document.getElementById('adBlock').style.display='block';
+  // U5: 圖表下方報告入口
+  const _rptCta2=document.getElementById('reportCta2');
+  if(_rptCta2) _rptCta2.style.display='block';
   // 換股票時重置深度分析（避免舊資料殘留）
   const _dsSec=document.getElementById('deepSection'); if(_dsSec) _dsSec.style.display='none';
   ['d-kbar-tag','d-kbar-name','d-kbar-sub','d-ma-tag','d-ma-sub',
@@ -2085,44 +2469,7 @@ function renderAnalysisCards(d) {
     set('d-inst-rows', `<div style="font-size:11px;color:var(--text3)">資料更新中…</div>`);
   }
 
-  // 7. 基本面
-  const per = d.per, pbr = d.pbr, dy = d.dividend_yield, eps = d.eps_ttm, yoy = d.eps_yoy;
-  const hasAnyFund = per || pbr || dy || eps !== null && eps !== undefined;
-  if (hasAnyFund) {
-    const dyColor = dy >= 5 ? 'var(--up)' : dy >= 3 ? 'var(--amber)' : 'var(--text2)';
-    const epsColor = eps > 0 ? '#4ade80' : eps < 0 ? 'var(--up)' : 'var(--text2)';
-    const yoyColor = yoy > 20 ? '#4ade80' : yoy > 0 ? 'var(--amber)' : yoy < 0 ? 'var(--up)' : 'var(--text2)';
-    const yoyStr = yoy !== null && yoy !== undefined
-      ? `<span style="font-size:11px;color:${yoyColor};font-weight:600">YoY ${yoy > 0 ? '+' : ''}${yoy}%</span>`
-      : '';
-    set('d-fund-rows',
-      `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">
-        <div style="text-align:center">
-          <div style="font-size:10px;color:var(--text3);margin-bottom:3px">本益比 PER</div>
-          <div style="font-size:16px;font-weight:700;color:var(--text)">${per ? per + 'x' : '—'}</div>
-        </div>
-        <div style="text-align:center">
-          <div style="font-size:10px;color:var(--text3);margin-bottom:3px">殖利率</div>
-          <div style="font-size:16px;font-weight:700;color:${dy ? dyColor : 'var(--text3)'}">${dy ? dy + '%' : '—'}</div>
-        </div>
-        <div style="text-align:center">
-          <div style="font-size:10px;color:var(--text3);margin-bottom:3px">股價淨值比</div>
-          <div style="font-size:16px;font-weight:700;color:var(--text)">${pbr ? pbr + 'x' : '—'}</div>
-        </div>
-      </div>
-      <div style="background:var(--bg);border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between">
-        <div>
-          <div style="font-size:10px;color:var(--text3);margin-bottom:3px">近四季累計 EPS</div>
-          <div style="font-size:20px;font-weight:800;color:${epsColor}">${eps !== null && eps !== undefined ? '$' + eps : '—'}</div>
-        </div>
-        <div style="text-align:right">${yoyStr}</div>
-      </div>`
-    );
-  } else {
-    set('d-fund-rows', `<div style="font-size:11px;color:var(--text3)">資料更新中…</div>`);
-  }
-
-  // 8. 風險提示
+  // 7. 風險提示
   const riskHtml = (risks.length ? risks : [{ text: '無明顯風險警示', level: 'low' }]).map(r => {
     const dotCls = typeof r === 'object' ? (r.level === 'high' ? 'bad' : r.level === 'low' ? 'ok' : 'warn') : 'warn';
     const txt    = typeof r === 'object' ? r.text : r;
@@ -2311,6 +2658,9 @@ function getViewBars(){
 
 function drawChart(){
   if(!C.bars.length)return;
+  // U2: 顯示/隱藏「回到最新」按鈕
+  const _latBtn=document.getElementById('chartLatestBtn');
+  if(_latBtn) _latBtn.style.display=C.viewEnd>0?'block':'none';
   const{start,end,slice:bars,offset}=getViewBars();
   const kCv=document.getElementById('kChart'),vCv=document.getElementById('volChart');
   const dpr=window.devicePixelRatio||1;
@@ -4240,33 +4590,6 @@ let VAPID_PUBLIC_KEY = '';
   } catch(e){}
 })();
 
-async function saveNickname(){
-  const inp = document.getElementById('nicknameInput');
-  const msg = document.getElementById('nicknameMsg');
-  if(!inp || !msg) return;
-  const val = inp.value.trim();
-  if(!val){ msg.style.color='#f87171'; msg.textContent='請輸入暱稱'; return; }
-  try{
-    const r = await fetch(getAPI()+'/auth/nickname', {
-      method:'POST',
-      headers:{'Content-Type':'application/json', ..._authHeaders()},
-      body: JSON.stringify({nickname: val})
-    });
-    const d = await r.json();
-    if(d.ok){
-      localStorage.setItem('nickname', d.nickname);
-      msg.style.color='var(--green)';
-      msg.textContent='✅ 儲存成功，聊天室將使用新名稱';
-    } else {
-      msg.style.color='#f87171';
-      msg.textContent='❌ '+(d.detail||'儲存失敗');
-    }
-  } catch(e){
-    msg.style.color='#f87171';
-    msg.textContent='❌ 網路錯誤';
-  }
-}
-
 async function doLogout(){
   try{
     await fetch(`${getAPI()}/auth/logout`, { method: 'POST', headers: _authHeaders() });
@@ -4417,7 +4740,7 @@ async function showPicksPage(){
     const items = j.data || [];
     const updatedAt = j.updated_at ? `<div style="font-size:11px;color:var(--text3);margin-bottom:12px">更新時間：${j.updated_at}</div>` : '';
 
-    const deepBanner = `
+    const deepCard = `
       <div onclick="window.open('${getAPI()}/deep-analysis','_blank')"
         style="background:linear-gradient(135deg,#1a3a2a 0%,#0f2d1f 100%);border-radius:12px;padding:14px 16px;margin-bottom:14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border:1.5px solid #2d6a4f;box-shadow:0 2px 12px rgba(29,158,117,0.18)">
         <div>
@@ -4434,7 +4757,7 @@ async function showPicksPage(){
     if (!items.length) {
       el.innerHTML = `
         <div style="padding:8px 0 16px">
-          ${deepBanner}
+          ${deepCard}
           <div style="padding:40px 0;text-align:center">
             <div style="font-size:40px;margin-bottom:12px">🔍</div>
             <div style="font-size:15px;font-weight:700;margin-bottom:8px">今日尚無開盤熱門股</div>
@@ -4465,7 +4788,7 @@ async function showPicksPage(){
       <div style="padding:8px 0 16px">
         <div style="font-size:15px;font-weight:700;color:var(--text);padding:10px 0 4px">🔥 開盤熱門股</div>
         ${updatedAt}
-        ${deepBanner}
+        ${deepCard}
         ${rows}
       </div>`;
   } catch(e) {
@@ -4780,7 +5103,7 @@ async function showMyPage(){
           border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:12px;display:block;width:100%">
           登入
         </button>
-        <button onclick="window.open('https://softglow-ai.com/landing.html#pricing','_blank')"
+        <button onclick="window.open('https://softglow-ai.com/stock/landing#pricing','_blank')"
           style="padding:12px 32px;background:var(--bg3);color:var(--text);
           border:none;border-radius:10px;font-size:14px;cursor:pointer;width:100%">
           了解付費方案
@@ -4845,7 +5168,7 @@ async function showMyPage(){
       <div style="background:var(--bg2);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px">
         <div style="font-weight:700;margin-bottom:10px;font-size:14px">🚀 升級付費方案</div>
         <div style="display:flex;flex-direction:column;gap:8px">
-          <button onclick="doUpgrade('monthly',this)" style="width:100%;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left">月費方案 <span style="float:right;color:var(--green);font-weight:700">$399／月</span></button>
+          <button onclick="doUpgrade('monthly',this)" style="width:100%;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left">月費方案 <span style="float:right;color:var(--green);font-weight:700">$499／月</span></button>
           <button onclick="doUpgrade('quarterly',this)" style="width:100%;padding:10px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left;font-weight:600">季費方案 <span style="float:right">$999／季 ⭐</span></button>
           <button onclick="doUpgrade('yearly',this)" style="width:100%;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left">年費方案 <span style="float:right;color:var(--green);font-weight:700">$3,688／年</span></button>
         </div>
@@ -4928,14 +5251,14 @@ async function showMyPage(){
       </div>
       <div class="member-card" style="margin-top:0">
         <div style="font-size:13px;font-weight:600;margin-bottom:10px">帳號設定</div>
-        <div style="margin-bottom:10px">
-          <div style="font-size:12px;color:var(--text3);margin-bottom:6px">💬 聊天室顯示名稱</div>
-          <div style="display:flex;gap:6px">
-            <input id="nicknameInput" type="text" maxlength="16" placeholder="最多 16 字" value="${u.nickname||''}"
-              style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--text);outline:none">
-            <button onclick="saveNickname()" style="padding:8px 14px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap">儲存</button>
+        <!-- U6: 手機版主題切換 -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:6px">
+          <span style="font-size:13px;color:var(--text)">🎨 顯示主題</span>
+          <div style="display:flex;border:1px solid var(--border2);border-radius:20px;overflow:hidden">
+            <button onclick="setTheme('auto')" class="theme-my-btn" data-th="auto" style="padding:4px 10px;border:none;background:transparent;color:var(--text2);font-size:11px;cursor:pointer">自動</button>
+            <button onclick="setTheme('light')" class="theme-my-btn" data-th="light" style="padding:4px 10px;border:none;background:transparent;color:var(--text2);font-size:11px;cursor:pointer">亮</button>
+            <button onclick="setTheme('dark')" class="theme-my-btn" data-th="dark" style="padding:4px 10px;border:none;background:transparent;color:var(--text2);font-size:11px;cursor:pointer">暗</button>
           </div>
-          <div id="nicknameMsg" style="font-size:11px;min-height:16px;margin-top:4px"></div>
         </div>
         <button onclick="openChangePwdModal()" style="width:100%;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left">🔐 更改密碼</button>
         <button onclick="showPushGuideModal()" style="width:100%;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left;margin-top:6px">🔔 通知與聲音設定</button>
@@ -5131,13 +5454,240 @@ async function doChangePassword(){
 
 </script>
 
-<!-- ===== 聊天室入口按鈕 ===== -->
+<!-- ===== 全站聊天室 ===== -->
+<div id="chat-root"></div>
 <style>
-#chat-entry-btn{position:fixed;bottom:72px;right:16px;z-index:9999;background:linear-gradient(135deg,#db2777,#7c3aed);color:#fff;border:none;border-radius:24px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(124,58,237,.4);display:flex;align-items:center;gap:6px;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif}
-#chat-entry-btn:hover{opacity:.9;transform:translateY(-1px)}
+#chat-root *{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif}
+#chat-float{position:fixed;bottom:calc(64px + env(safe-area-inset-bottom,0px));right:16px;z-index:9999;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+#chat-stream{display:flex;flex-direction:column;align-items:flex-end;gap:5px;max-width:220px}
+.cb{display:flex;flex-direction:column;align-items:flex-end;gap:2px;animation:cb-in .45s cubic-bezier(.22,1,.36,1) both}
+@keyframes cb-in{from{opacity:0;transform:translateY(14px) scale(.94)}to{opacity:1;transform:translateY(0) scale(1)}}
+.cb.cb-out{animation:cb-out .4s ease forwards}
+@keyframes cb-out{to{opacity:0;transform:translateY(-10px)}}
+.cb-meta{display:flex;align-items:center;gap:3px}
+.cb-name{font-size:10px}
+.cb-pro{font-size:9px;padding:1px 5px;border-radius:20px;font-weight:500}
+.cb-tag{font-size:10px;font-weight:500}
+.cb-pill{padding:6px 11px;border-radius:16px;font-size:11px;line-height:1.45;max-width:210px;word-break:break-all}
+.cb-time{font-size:9px}
+.cb-me .cb-pill{color:#fff}
+#chat-fab-row{display:flex;align-items:center;gap:7px}
+#chat-online{display:flex;align-items:center;gap:3px;border-radius:20px;padding:3px 9px;font-size:10px}
+#chat-online-dot{width:6px;height:6px;border-radius:50%}
+#chat-fab{width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px}
+#chat-panel{border-radius:14px;padding:8px 10px;width:218px;display:none}
+#chat-emoji-picker{border-radius:10px;padding:6px;margin-bottom:5px;display:none;flex-wrap:wrap;gap:4px}
+.chat-ep{font-size:15px;cursor:pointer;padding:2px 3px;border-radius:4px}
+#chat-inp-stock{width:100%;border-radius:8px;padding:4px 9px;font-size:10px;outline:none;margin-bottom:5px}
+#chat-inp-row{display:flex;gap:4px;align-items:center}
+#chat-inp-msg{flex:1;border-radius:16px;padding:6px 10px;font-size:11px;outline:none}
+#chat-emoji-btn{width:26px;height:26px;border-radius:50%;border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#chat-send{width:26px;height:26px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#chat-send svg{width:12px;height:12px}
+#chat-toggle{background:none;border:none;cursor:pointer;font-size:11px;color:inherit;padding:2px 4px}
+#chat-float[data-theme=girly] #chat-online{background:rgba(26,10,46,.85);border:.5px solid rgba(216,180,254,.2)}
+#chat-float[data-theme=girly] #chat-online-dot{background:#f472b6;box-shadow:0 0 5px #f472b6}
+#chat-float[data-theme=girly] #chat-online-cnt{color:#c084e0}
+#chat-float[data-theme=girly] #chat-fab{background:linear-gradient(135deg,#db2777,#7c3aed);color:#fff}
+#chat-float[data-theme=girly] #chat-panel{background:rgba(26,10,46,.95);border:.5px solid rgba(216,180,254,.18)}
+#chat-float[data-theme=girly] #chat-emoji-picker{background:rgba(26,10,46,.95);border:.5px solid rgba(216,180,254,.18)}
+#chat-float[data-theme=girly] #chat-inp-stock,#chat-float[data-theme=girly] #chat-inp-msg{background:rgba(255,255,255,.06);border:.5px solid rgba(216,180,254,.15);color:#f3e8ff}
+#chat-float[data-theme=girly] #chat-inp-stock::placeholder,#chat-float[data-theme=girly] #chat-inp-msg::placeholder{color:#7c4b9e}
+#chat-float[data-theme=girly] #chat-emoji-btn{background:rgba(255,255,255,.08)}
+#chat-float[data-theme=girly] #chat-send{background:linear-gradient(135deg,#db2777,#7c3aed)}
+#chat-float[data-theme=girly] .cb-name{color:#c084e0}
+#chat-float[data-theme=girly] .cb-pro{background:rgba(236,72,153,.18);color:#f9a8d4;border:.5px solid rgba(236,72,153,.3)}
+#chat-float[data-theme=girly] .cb-tag{color:#e879f9}
+#chat-float[data-theme=girly] .cb-pill{background:rgba(26,10,46,.8);border:.5px solid rgba(216,180,254,.2);color:#f3e8ff}
+#chat-float[data-theme=girly] .cb-me .cb-pill{background:linear-gradient(135deg,rgba(219,39,119,.55),rgba(147,51,234,.5));border:.5px solid rgba(249,168,212,.3)}
+#chat-float[data-theme=girly] .cb-time{color:#7c4b9e}
+#chat-float[data-theme=dark] #chat-online{background:rgba(6,13,26,.9);border:.5px solid #1e3a5f}
+#chat-float[data-theme=dark] #chat-online-dot{background:#4ade80;box-shadow:0 0 5px #4ade80}
+#chat-float[data-theme=dark] #chat-online-cnt{color:#6b8aad}
+#chat-float[data-theme=dark] #chat-fab{background:#1d4ed8;color:#fff}
+#chat-float[data-theme=dark] #chat-panel{background:rgba(6,13,26,.97);border:.5px solid #1e3a5f}
+#chat-float[data-theme=dark] #chat-emoji-picker{background:rgba(6,13,26,.97);border:.5px solid #1e3a5f}
+#chat-float[data-theme=dark] #chat-inp-stock,#chat-float[data-theme=dark] #chat-inp-msg{background:rgba(15,31,53,.8);border:.5px solid #1e3a5f;color:#e2eaf5}
+#chat-float[data-theme=dark] #chat-inp-stock::placeholder,#chat-float[data-theme=dark] #chat-inp-msg::placeholder{color:#3a5270}
+#chat-float[data-theme=dark] #chat-emoji-btn{background:rgba(15,31,53,.8);border:.5px solid #1e3a5f}
+#chat-float[data-theme=dark] #chat-send{background:#1d4ed8}
+#chat-float[data-theme=dark] .cb-name{color:#6b8aad}
+#chat-float[data-theme=dark] .cb-pro{background:rgba(37,99,235,.2);color:#93c5fd;border-radius:4px}
+#chat-float[data-theme=dark] .cb-tag{color:#60a5fa}
+#chat-float[data-theme=dark] .cb-pill{background:rgba(15,31,53,.9);border:.5px solid #1e3a5f;color:#e2eaf5}
+#chat-float[data-theme=dark] .cb-me .cb-pill{background:rgba(37,99,235,.6);border:.5px solid rgba(96,165,250,.3)}
+#chat-float[data-theme=dark] .cb-time{color:#3a5270}
+#chat-float[data-theme=light] #chat-online{background:#fff;border:.5px solid #b8cfe8}
+#chat-float[data-theme=light] #chat-online-dot{background:#16a34a}
+#chat-float[data-theme=light] #chat-online-cnt{color:#4a6080}
+#chat-float[data-theme=light] #chat-fab{background:#2563eb;color:#fff}
+#chat-float[data-theme=light] #chat-panel{background:#fff;border:.5px solid #b8cfe8}
+#chat-float[data-theme=light] #chat-emoji-picker{background:#fff;border:.5px solid #b8cfe8}
+#chat-float[data-theme=light] #chat-inp-stock,#chat-float[data-theme=light] #chat-inp-msg{background:#f0f4f8;border:.5px solid #b8cfe8;color:#0f2744}
+#chat-float[data-theme=light] #chat-inp-stock::placeholder,#chat-float[data-theme=light] #chat-inp-msg::placeholder{color:#8aaac8}
+#chat-float[data-theme=light] #chat-emoji-btn{background:#f0f4f8;border:.5px solid #b8cfe8}
+#chat-float[data-theme=light] #chat-send{background:#2563eb}
+#chat-float[data-theme=light] .cb-name{color:#4a6080}
+#chat-float[data-theme=light] .cb-pro{background:#dbeafe;color:#1d4ed8;border-radius:4px}
+#chat-float[data-theme=light] .cb-tag{color:#2563eb}
+#chat-float[data-theme=light] .cb-pill{background:#fff;border:.5px solid #b8cfe8;color:#0f2744}
+#chat-float[data-theme=light] .cb-me .cb-pill{background:#2563eb}
+#chat-float[data-theme=light] .cb-time{color:#8aaac8}
 </style>
-<a id="chat-entry-btn" href="/chat.html" target="_self">💬 聊天室</a>
-<!-- ===== 聊天室入口按鈕 END ===== -->
+<script>
+(function(){
+  var BACKEND = 'wss://api.softglow-ai.com';
+  var EMOJIS = ['📈','📉','🚀','💰','🔥','💎','👍','😂','😱','🙏','⚠️','✅','❌','👀','💪'];
+  var THEMES = ['girly','dark','light'];
+  var THEME_LABELS = {girly:'🌸',dark:'🌙',light:'☀️'};
+  var ws = null;
+  var myTheme = localStorage.getItem('chat_theme') || 'girly';
+  var chatVisible = localStorage.getItem('chat_visible') !== 'false';
+  var myName = '訪客';
+  var myPaid = false;
+
+  try {
+    var token = localStorage.getItem('token') || '';
+    if(token){
+      var payload = JSON.parse(atob(token.split('.')[1]));
+      myName = (payload.sub || '').split('@')[0] || '訪客';
+    }
+  } catch(e){}
+
+  var root = document.getElementById('chat-root');
+  var themeButtons = THEMES.map(function(t){
+    return '<button onclick="window._chatSetTheme(\''+t+'\')" style="background:none;border:none;cursor:pointer;font-size:13px;opacity:'+(t===myTheme?1:.4)+'" id="chat-thm-'+t+'">'+THEME_LABELS[t]+'</button>';
+  }).join('');
+  var emojiSpans = EMOJIS.map(function(e){ return '<span class="chat-ep">'+e+'</span>'; }).join('');
+
+  root.innerHTML = '<div id="chat-float" data-theme="'+myTheme+'">'
+    + '<div id="chat-stream"></div>'
+    + '<div id="chat-fab-row">'
+    +   '<button id="chat-toggle" title="關閉">✕</button>'
+    +   '<div id="chat-online"><div id="chat-online-dot"></div><span id="chat-online-cnt">0 在線</span></div>'
+    +   '<button id="chat-fab">💬</button>'
+    + '</div>'
+    + '<div id="chat-panel">'
+    +   '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+    +     '<span style="font-size:10px;opacity:.6">線上有位 討論室</span>'
+    +     '<div style="display:flex;gap:4px">'+themeButtons+'</div>'
+    +   '</div>'
+    +   '<div id="chat-emoji-picker">'+emojiSpans+'</div>'
+    +   '<input id="chat-inp-stock" type="text" placeholder="# 股票代號（選填）" maxlength="6"/>'
+    +   '<div id="chat-inp-row">'
+    +     '<button id="chat-emoji-btn">😊</button>'
+    +     '<input id="chat-inp-msg" type="text" placeholder="說點什麼..." maxlength="100"/>'
+    +     '<button id="chat-send"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>'
+    +   '</div>'
+    + '</div>'
+    + '</div>';
+
+  window._chatSetTheme = function(t){
+    myTheme = t;
+    localStorage.setItem('chat_theme', t);
+    document.getElementById('chat-float').setAttribute('data-theme', t);
+    THEMES.forEach(function(th){
+      var b = document.getElementById('chat-thm-'+th);
+      if(b) b.style.opacity = th===t ? 1 : .4;
+    });
+  };
+
+  function applyVisible(){
+    var stream = document.getElementById('chat-stream');
+    var online = document.getElementById('chat-online');
+    var fab = document.getElementById('chat-fab');
+    var tog = document.getElementById('chat-toggle');
+    if(chatVisible){
+      stream.style.display='flex'; online.style.display='flex'; fab.style.display='flex';
+      tog.title='關閉聊天室'; tog.style.opacity='.5';
+    } else {
+      stream.style.display='none'; online.style.display='none'; fab.style.display='none';
+      document.getElementById('chat-panel').style.display='none';
+      tog.title='開啟聊天室'; tog.style.opacity='1';
+    }
+  }
+
+  document.getElementById('chat-toggle').addEventListener('click', function(){
+    chatVisible = !chatVisible;
+    localStorage.setItem('chat_visible', String(chatVisible));
+    applyVisible();
+  });
+  applyVisible();
+
+  document.getElementById('chat-fab').addEventListener('click', function(){
+    var p = document.getElementById('chat-panel');
+    p.style.display = (p.style.display==='none'||!p.style.display) ? 'block' : 'none';
+  });
+
+  document.getElementById('chat-emoji-btn').addEventListener('click', function(){
+    var ep = document.getElementById('chat-emoji-picker');
+    ep.style.display = ep.style.display==='flex' ? 'none' : 'flex';
+  });
+
+  document.querySelectorAll('.chat-ep').forEach(function(e){
+    e.addEventListener('click', function(){
+      document.getElementById('chat-inp-msg').value += e.textContent;
+      document.getElementById('chat-emoji-picker').style.display='none';
+    });
+  });
+
+  function sendMsg(){
+    var msg = document.getElementById('chat-inp-msg').value.trim();
+    var stock = document.getElementById('chat-inp-stock').value.trim();
+    if(!msg || !ws || ws.readyState!==1) return;
+    ws.send(JSON.stringify({message:msg, stock_tag:stock}));
+    document.getElementById('chat-inp-msg').value='';
+    document.getElementById('chat-emoji-picker').style.display='none';
+  }
+  document.getElementById('chat-send').addEventListener('click', sendMsg);
+  document.getElementById('chat-inp-msg').addEventListener('keydown', function(e){ if(e.key==='Enter') sendMsg(); });
+
+  function addBubble(data, isMe){
+    var stream = document.getElementById('chat-stream');
+    var bw = document.createElement('div');
+    bw.className = 'cb' + (isMe?' cb-me':'');
+    var meta = '';
+    if(!isMe){
+      meta = '<div class="cb-meta">'
+        + '<span class="cb-name">'+data.username+'</span>'
+        + (data.is_paid ? '<span class="cb-pro">VIP</span>' : '')
+        + (data.stock_tag ? '<span class="cb-tag">#'+data.stock_tag+'</span>' : '')
+        + '</div>';
+    }
+    bw.innerHTML = meta
+      + '<div class="cb-pill">'+data.message+'</div>'
+      + '<div class="cb-time">'+data.created_at+'</div>';
+    stream.appendChild(bw);
+    if(stream.children.length > 5){
+      var old = stream.children[0];
+      old.classList.add('cb-out');
+      setTimeout(function(){ if(old.parentNode) old.parentNode.removeChild(old); }, 400);
+    }
+  }
+
+  function connect(){
+    var token = localStorage.getItem('token') || '';
+    var url = BACKEND+'/ws/chat'+(token?'?token='+token:'');
+    ws = new WebSocket(url);
+    ws.onmessage = function(e){
+      try {
+        var d = JSON.parse(e.data);
+        if(d.type==='online'){
+          document.getElementById('chat-online-cnt').textContent = d.count+' 在線';
+        } else if(d.type==='message'){
+          var isMe = d.username===myName && myName!=='訪客';
+          addBubble(d, isMe);
+        }
+      } catch(err){}
+    };
+    ws.onclose = function(){ setTimeout(connect, 3000); };
+    ws.onerror = function(){ ws.close(); };
+  }
+
+  connect();
+})();
+</script>
+<!-- ===== 全站聊天室 END ===== -->
 
 </body>
 </html>

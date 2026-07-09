@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>鉄筋計算機 - 数量と重量の自動計算</title>
+<meta name="description" content="建設プロジェクト向けの鉄筋計算機。構造物の全長、間隔、直径から必要な鉄筋の本数、総長、総重量を即座に算出できます。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/rebar-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/rebar-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/rebar-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/rebar-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/rebar-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/rebar-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/rebar-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/rebar-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/rebar-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/rebar-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/rebar-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/rebar-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "鉄筋計算機", "url": "https://softglow-ai.com/tools/ja/rebar-calculator.html", "description": "建設プロジェクト向けの鉄筋計算機。構造物の全長、間隔、直径から必要な鉄筋の本数、総長、総重量を即座に算出できます。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "鉄筋の間隔はどのように測定しますか？", "acceptedAnswer": {"@type": "Answer", "text": "鉄筋の間隔は、隣接する2本の鉄筋の中心線間距離です。通常、建築基準法や設計図書に間隔が指定されます。一般的には150mm～300mm程度です。"}}, {"@type": "Question", "name": "鉄筋の重量計算に使用される密度は何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "本計算機では、鉄筋の標準密度として7,850 kg/m³を使用しています。これは一般的な炭素鋼鉄筋の密度です。"}}, {"@type": "Question", "name": "異なる直径の鉄筋が混在する場合はどうしますか？", "acceptedAnswer": {"@type": "Answer", "text": "異なる直径の鉄筋が使用される場合は、直径ごとに計算を分け、結果を合算してください。本計算機は単一の直径に対応しています。"}}, {"@type": "Question", "name": "鉄筋の発注時に余裕を考慮すべきですか？", "acceptedAnswer": {"@type": "Answer", "text": "はい。一般的に計算値の5～10%の余裕を加えて発注します。これにより、施工時の破損や廃棄物に対応でき、工事の遅延を防げます。"}}, {"@type": "Question", "name": "メートル当たりの重量は何に使用しますか？", "acceptedAnswer": {"@type": "Answer", "text": "メートル当たりの重量は、鉄筋の規格確認や品質管理に用いられます。納入された鉄筋の総重量を測定し、計算値と照合することで、数量の適正性を検証できます。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 鉄筋計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>鉄筋計算機</h1>
+    <p class="calc-subtitle">建設プロジェクトの鉄筋数量と重量を計算</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="totalLength">構造物の全長</label>
+  <div class="input-row"><input type="number" id="totalLength" placeholder="100"  step="0.1"><span class="input-suffix">メートル</span></div>
+</div>
+  <small class="input-help">建設構造物の総延長を入力してください</small>
+<div class="input-group">
+  <label for="spacing">鉄筋間隔</label>
+  <div class="input-row"><input type="number" id="spacing" placeholder="0.15"  step="0.01"><span class="input-suffix">メートル</span></div>
+</div>
+  <small class="input-help">鉄筋同士の間隔を入力してください</small>
+<div class="input-group">
+  <label for="barDiameter">鉄筋直径</label>
+  <div class="input-row"><input type="number" id="barDiameter" placeholder="16"  step="1"><span class="input-suffix">mm</span></div>
+</div>
+  <small class="input-help">鉄筋の直径をmm単位で入力してください</small>
+<div class="input-group">
+  <label for="barsRequired">鉄筋ラインの本数</label>
+  <div class="input-row"><input type="number" id="barsRequired" placeholder="2"  step="1"><span class="input-suffix">本</span></div>
+</div>
+  <small class="input-help">配置する鉄筋ラインの本数を入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">総鉄筋本数</span><span class="result-value" id="totalBars">—</span></div>
+<div class="result-item"><span class="result-label">総鉄筋長</span><span class="result-value" id="totalBarLength">—</span></div>
+<div class="result-highlight"><span class="result-label">鉄筋の総重量</span><span class="result-value" id="totalWeight">—</span></div>
+<div class="result-item"><span class="result-label">メートル当たりの重量</span><span class="result-value" id="weightPerMeter">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 計算結果から、必要な鉄筋の総本数、全体の長さ、総重量、およびメートル当たりの重量が得られます。これらの数値を用いて、材料発注量と工事費の見積もりを正確に行うことができます。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>鉄筋計算機について</h2><p>建設プロジェクトにおいて、鉄筋の正確な数量把握は工事の成功に不可欠です。本計算機は、構造物の全長、鉄筋の間隔、直径、配置ラインの本数を入力するだけで、必要な鉄筋の本数、総長、総重量を自動計算します。</p><h2>計算方法</h2><p>鉄筋本数は構造物の全長を間隔で割り、ラインの本数を乗じて算出します。総鉄筋長は本数に各鉄筋の長さを乗じた値です。総重量は鉄筋の直径と長さに基づいて計算され、標準的な鉄筋の密度（7,850 kg/m³）を使用しています。</p><h2>入力項目の説明</h2><p>構造物の全長は基礎や梁などの全体寸法、鉄筋間隔は通常150mm～300mm、直径は6mm～40mm程度が一般的です。ラインの本数は主筋と配力筋などの配置層数を指します。正確な入力により、発注数量の誤差を最小化できます。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>材料発注への応用</h2><p>計算結果の総重量を基に、鉄筋の購入数量を決定します。通常、鉄筋は束売りされるため、計算値に余裕を加えて発注することが推奨されます。また、運搬や施工時の破損対応として、5～10%の余裕量を確保することが一般的です。</p><h2>品質管理と検査</h2><p>施工時には、計算値と実際の配置を照合し、間隔、本数、直径が仕様通りであることを確認します。特に構造体の安全性に直結するため、鉄筋の規格、本数、配置位置の検査は厳格に実施する必要があります。</p><h2>経済性の評価</h2><p>正確な鉄筋量の計算により、過剰購買を防ぎ、プロジェクト全体の建設費を適切に管理できます。本計算機を活用して、材料費の最適化と工程管理の効率化を実現してください。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">鉄筋の間隔はどのように測定しますか？</div><div class="faq-a">鉄筋の間隔は、隣接する2本の鉄筋の中心線間距離です。通常、建築基準法や設計図書に間隔が指定されます。一般的には150mm～300mm程度です。</div></div>
+  <div class="faq-item"><div class="faq-q">鉄筋の重量計算に使用される密度は何ですか？</div><div class="faq-a">本計算機では、鉄筋の標準密度として7,850 kg/m³を使用しています。これは一般的な炭素鋼鉄筋の密度です。</div></div>
+  <div class="faq-item"><div class="faq-q">異なる直径の鉄筋が混在する場合はどうしますか？</div><div class="faq-a">異なる直径の鉄筋が使用される場合は、直径ごとに計算を分け、結果を合算してください。本計算機は単一の直径に対応しています。</div></div>
+  <div class="faq-item"><div class="faq-q">鉄筋の発注時に余裕を考慮すべきですか？</div><div class="faq-a">はい。一般的に計算値の5～10%の余裕を加えて発注します。これにより、施工時の破損や廃棄物に対応でき、工事の遅延を防げます。</div></div>
+  <div class="faq-item"><div class="faq-q">メートル当たりの重量は何に使用しますか？</div><div class="faq-a">メートル当たりの重量は、鉄筋の規格確認や品質管理に用いられます。納入された鉄筋の総重量を測定し、計算値と照合することで、数量の適正性を検証できます。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">Roi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">Risk Reward</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">ポジションサイズ計算機</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">P/Eレシオ計算機</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">証拠金計算機</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/rebar-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/rebar-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/rebar-calculator.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/rebar-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/rebar-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/rebar-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/rebar-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/rebar-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/rebar-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/rebar-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const totalLengthInput = document.getElementById('totalLength');
+  const spacingInput = document.getElementById('spacing');
+  const barDiameterInput = document.getElementById('barDiameter');
+  const barsRequiredInput = document.getElementById('barsRequired');
+
+  if (!totalLengthInput.value || !spacingInput.value || !barDiameterInput.value || !barsRequiredInput.value) {
+    alert('Please fill in all fields');
+    return;
+  }
+
+  const totalLength = parseFloat(totalLengthInput.value);
+  const spacing = parseFloat(spacingInput.value);
+  const barDiameter = parseFloat(barDiameterInput.value);
+  const barsRequired = parseFloat(barsRequiredInput.value);
+
+  if (totalLength <= 0 || spacing <= 0 || barDiameter <= 0 || barsRequired <= 0) {
+    alert('Please enter valid positive numbers');
+    return;
+  }
+
+  const barsPerLine = Math.ceil(totalLength / spacing) + 1;
+  const totalBars = barsPerLine * barsRequired;
+  const totalBarLength = totalBars * totalLength;
+
+  const weightPerMeterTable = {
+    6: 0.222,
+    8: 0.395,
+    10: 0.617,
+    12: 0.888,
+    14: 1.21,
+    16: 1.58,
+    18: 2.0,
+    20: 2.47,
+    22: 2.98,
+    25: 3.86,
+    28: 4.83,
+    32: 6.31,
+    36: 7.99,
+    40: 9.87
+  };
+
+  const weightPerMeter = weightPerMeterTable[barDiameter] || (barDiameter * barDiameter * 0.00617);
+  const totalWeight = totalBarLength * weightPerMeter;
+
+  document.getElementById('totalBars').textContent = totalBars.toLocaleString('en-US', {maximumFractionDigits: 0});
+  document.getElementById('totalBarLength').textContent = totalBarLength.toLocaleString('en-US', {maximumFractionDigits: 2});
+  document.getElementById('totalWeight').textContent = totalWeight.toLocaleString('en-US', {maximumFractionDigits: 2});
+  document.getElementById('weightPerMeter').textContent = weightPerMeter.toLocaleString('en-US', {maximumFractionDigits: 3});
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|rebar-calculator|2026-07-09 -->

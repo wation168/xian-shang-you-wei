@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>标准差计算器 - 在线数据统计分析工具</title>
+<meta name="description" content="免费标准差计算器，快速计算数据的平均值、方差和标准差。支持样本和总体数据分析。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/zh-CN/standard-deviation.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/standard-deviation.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/standard-deviation.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/standard-deviation.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/standard-deviation.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/standard-deviation.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/standard-deviation.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/standard-deviation.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/standard-deviation.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/standard-deviation.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/standard-deviation.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/standard-deviation.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "标准差计算器", "url": "https://softglow-ai.com/tools/zh-CN/standard-deviation.html", "description": "免费标准差计算器，快速计算数据的平均值、方差和标准差。支持样本和总体数据分析。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "标准差和方差有什么区别？", "acceptedAnswer": {"@type": "Answer", "text": "方差是偏差平方的平均值，单位为原单位的平方；标准差是方差的平方根，与原数据单位相同。标准差更直观易懂，因为它用与数据相同的单位表示。"}}, {"@type": "Question", "name": "什么时候使用样本标准差，什么时候使用总体标准差？", "acceptedAnswer": {"@type": "Answer", "text": "当数据代表整个总体时使用总体标准差；当数据只是总体的一部分样本时使用样本标准差。在大多数实际情况下，我们处理的是样本数据，因此通常使用样本标准差。"}}, {"@type": "Question", "name": "标准差为0意味着什么？", "acceptedAnswer": {"@type": "Answer", "text": "标准差为0表示所有数据值都相同，即数据集中完全没有变异或离散。这种情况在实际应用中较为罕见。"}}, {"@type": "Question", "name": "如何使用这个计算器？", "acceptedAnswer": {"@type": "Answer", "text": "在第一个输入框中输入你的数据值，用逗号分隔（如：10, 20, 30, 40, 50）；在第二个下拉菜单中选择数据类型（样本或总体）；点击计算按钮即可获得结果。"}}, {"@type": "Question", "name": "标准差的单位是什么？", "acceptedAnswer": {"@type": "Answer", "text": "标准差的单位与原始数据的单位相同。例如，如果数据是以厘米为单位的身高，那么标准差也是以厘米为单位。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/zh-CN/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 标准差计算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>标准差计算器</h1>
+    <p class="calc-subtitle">精确计算数据的离散程度和变异性</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="dataInput">输入数据值</label>
+  <div class="input-row"><input type="text" id="dataInput" placeholder="例如：10, 20, 30, 40, 50"  step="1"></div>
+</div>
+  <small class="input-help">输入多个数值，用逗号分隔</small>
+<div class="input-group">
+  <label for="samplePopulation">数据集类型</label>
+  <div class="input-row"><input type="text" id="samplePopulation" placeholder="样本或总体"  value="sample" step="1"></div>
+</div>
+  <small class="input-help">选择数据是样本还是总体数据</small></div>
+    <button class="btn-calc" onclick="calculate()">计算</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">平均值（均值）</span><span class="result-value" id="meanResult">—</span></div>
+<div class="result-item"><span class="result-label">方差</span><span class="result-value" id="varianceResult">—</span></div>
+<div class="result-highlight"><span class="result-label">标准差（σ）</span><span class="result-value" id="stdDevResult">—</span></div>
+<div class="result-item"><span class="result-label">数值个数</span><span class="result-value" id="countResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>这代表什么？</strong> 平均值表示数据的中心位置；方差和标准差衡量数据的离散程度，标准差越大表示数据波动越大。标准差是方差的平方根，用同一单位表示数据的变异性。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 打印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什么是标准差？</h2><p>标准差（Standard Deviation，σ）是统计学中衡量数据离散程度的关键指标。它表示数据集中各数值与平均值的平均偏离程度。标准差越小，说明数据越集中；标准差越大，说明数据越分散。</p><h2>样本标准差与总体标准差的区别</h2><p>样本标准差用于分析数据样本，计算公式中分母为 n-1（贝塞尔校正）；总体标准差用于分析全部数据，计算公式中分母为 n。在实际应用中，大多数情况下我们处理的是样本数据，因此使用样本标准差。</p><h2>标准差的计算步骤</h2><p>首先计算数据的平均值（均值）；其次计算每个数据与平均值的偏差平方；然后求偏差平方的平均值（即方差）；最后对方差开平方根得到标准差。这个过程完全自动化，我们的计算器可以瞬间得出结果。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>标准差的实际应用</h2><p>标准差广泛应用于金融风险评估、产品质量控制、科学研究数据分析等领域。例如，在投资理财中，标准差用来衡量资产收益率的波动性；在制造业中，标准差用来评估产品规格的一致性和稳定性。</p><h2>如何解读结果</h2><p>计算结果包括四个关键指标：平均值反映数据的集中趋势；方差是偏差平方的平均值，单位为原单位的平方；标准差是方差的平方根，与原数据单位相同；数值个数显示参与计算的数据总数。通过对比标准差，可以快速判断不同数据集的稳定性。</p><h2>标准差的统计意义</h2><p>在正态分布中，数据在平均值±1个标准差范围内的概率约为68.3%，在±2个标准差范围内的概率约为95.4%，在±3个标准差范围内的概率约为99.7%。这被称为三-西格玛法则，是质量控制和风险管理的重要工具。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸阅读</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常见问题</h2><div class="faq-item"><div class="faq-q">标准差和方差有什么区别？</div><div class="faq-a">方差是偏差平方的平均值，单位为原单位的平方；标准差是方差的平方根，与原数据单位相同。标准差更直观易懂，因为它用与数据相同的单位表示。</div></div>
+  <div class="faq-item"><div class="faq-q">什么时候使用样本标准差，什么时候使用总体标准差？</div><div class="faq-a">当数据代表整个总体时使用总体标准差；当数据只是总体的一部分样本时使用样本标准差。在大多数实际情况下，我们处理的是样本数据，因此通常使用样本标准差。</div></div>
+  <div class="faq-item"><div class="faq-q">标准差为0意味着什么？</div><div class="faq-a">标准差为0表示所有数据值都相同，即数据集中完全没有变异或离散。这种情况在实际应用中较为罕见。</div></div>
+  <div class="faq-item"><div class="faq-q">如何使用这个计算器？</div><div class="faq-a">在第一个输入框中输入你的数据值，用逗号分隔（如：10, 20, 30, 40, 50）；在第二个下拉菜单中选择数据类型（样本或总体）；点击计算按钮即可获得结果。</div></div>
+  <div class="faq-item"><div class="faq-q">标准差的单位是什么？</div><div class="faq-a">标准差的单位与原始数据的单位相同。例如，如果数据是以厘米为单位的身高，那么标准差也是以厘米为单位。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/zh-CN/compound-interest.html">复利计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/roi-calculator.html">投资回报率 (ROI) 计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/risk-reward.html">风险收益比计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/position-size.html">头寸规模计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stop-loss.html">止损计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dividend-yield.html">股息收益率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/pe-ratio.html">市盈率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dca-calculator.html">定期定额投资计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/cagr.html">复合年增长率(CAGR)计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/margin-calculator.html">保证金计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stock-gain-loss.html">股票盈亏计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/break-even.html">损益平衡点计算器</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/standard-deviation.html" class="lang-btn">English</a>
+    <a href="/tools/standard-deviation.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/standard-deviation.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/standard-deviation.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/standard-deviation.html" class="lang-btn">Français</a>
+    <a href="/tools/es/standard-deviation.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/standard-deviation.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/standard-deviation.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/standard-deviation.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/standard-deviation.html" class="lang-btn active">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相关工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const dataInput = document.getElementById('dataInput').value.trim();
+  const samplePopulation = document.getElementById('samplePopulation').value.toLowerCase().trim();
+  
+  if (!dataInput) {
+    alert('Please enter at least one data value');
+    return;
+  }
+  
+  const values = dataInput.split(',').map(v => {
+    const num = parseFloat(v.trim());
+    return isNaN(num) ? null : num;
+  }).filter(v => v !== null);
+  
+  if (values.length === 0) {
+    alert('No valid numbers found. Please enter numeric values separated by commas.');
+    return;
+  }
+  
+  if (values.length === 1) {
+    alert('Please enter at least 2 values to calculate standard deviation');
+    return;
+  }
+  
+  const n = values.length;
+  const mean = values.reduce((a, b) => a + b, 0) / n;
+  
+  const squaredDiffs = values.map(v => Math.pow(v - mean, 2));
+  const sumSquaredDiffs = squaredDiffs.reduce((a, b) => a + b, 0);
+  
+  let divisor = n;
+  if (samplePopulation === 'sample' || samplePopulation === 's') {
+    divisor = n - 1;
+  }
+  
+  const variance = sumSquaredDiffs / divisor;
+  const stdDev = Math.sqrt(variance);
+  
+  document.getElementById('meanResult').textContent = mean.toLocaleString('en-US', {maximumFractionDigits: 4, minimumFractionDigits: 2});
+  document.getElementById('varianceResult').textContent = variance.toLocaleString('en-US', {maximumFractionDigits: 4, minimumFractionDigits: 2});
+  document.getElementById('stdDevResult').textContent = stdDev.toLocaleString('en-US', {maximumFractionDigits: 4, minimumFractionDigits: 2});
+  document.getElementById('countResult').textContent = n;
+  
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已复制！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-CN|standard-deviation|2026-07-09 -->

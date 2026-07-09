@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>キャップレート計算機 - 不動産投資収益率</title>
+<meta name="description" content="不動産投資物件のキャップレートを簡単計算。純営業利益と物件価値から収益性を即座に算出できます。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/cap-rate.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/cap-rate.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/cap-rate.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/cap-rate.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/cap-rate.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/cap-rate.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/cap-rate.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/cap-rate.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/cap-rate.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/cap-rate.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/cap-rate.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/cap-rate.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "キャップレート計算機", "url": "https://softglow-ai.com/tools/ja/cap-rate.html", "description": "不動産投資物件のキャップレートを簡単計算。純営業利益と物件価値から収益性を即座に算出できます。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "キャップレートとは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "キャップレートは、不動産物件の購入価格に対する年間純営業利益の比率です。不動産投資の収益性を評価するための重要な指標で、計算式は「NOI ÷ 物件価値 × 100」です。"}}, {"@type": "Question", "name": "良いキャップレートの目安は何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "適切なキャップレートは市場や地域によって異なります。一般的に、都市部では4-6%が目安とされていますが、地域によっては6-10%以上の場合もあります。同じエリアの物件と比較することが重要です。"}}, {"@type": "Question", "name": "高いキャップレートが常に良いのですか？", "acceptedAnswer": {"@type": "Answer", "text": "必ずしもそうではありません。高いキャップレートはより高いリスクを示している場合があります。物件の状態、立地、テナント情報など、他の要因も総合的に評価して判断する必要があります。"}}, {"@type": "Question", "name": "NOIを計算するにはどうすればよいですか？", "acceptedAnswer": {"@type": "Answer", "text": "NOI = 総賃貸収入 - 運営経費です。運営経費には、管理費、保険料、固定資産税、メンテナンス費などが含まれます。資本的支出（リノベーション費など）は含めません。"}}, {"@type": "Question", "name": "キャップレート計算機はどのように使用しますか？", "acceptedAnswer": {"@type": "Answer", "text": "年間の純営業利益と物件の現在価値（購入価格）を入力するだけで、自動的にキャップレートが計算されます。複数の物件を比較する際は、各物件の情報を順に入力してください。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > キャップレート計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>キャップレート計算機</h1>
+    <p class="calc-subtitle">不動産投資物件のキャップレートを即座に計算します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="netOperatingIncome">純営業利益(NOI)</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="netOperatingIncome" placeholder="50000"  step="1"></div>
+</div>
+  <small class="input-help">年間の純営業利益（税金と資本的支出を除いた営業収益）を入力してください</small>
+<div class="input-group">
+  <label for="propertyValue">物件価値</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="propertyValue" placeholder="500000"  step="1"></div>
+</div>
+  <small class="input-help">不動産物件の現在の市場価値または購入価格を入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">キャップレート</span><span class="result-value" id="capRateResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> キャップレートは、物件価値に対する純営業利益の比率をパーセンテージで示します。一般的に、キャップレートが高いほど投資利回りが良いとされています。市場平均や同様の物件と比較して、投資判断の参考にしてください。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>キャップレートについて</h2><p>キャップレート（Cap Rate）は、不動産投資の最も重要な指標の一つです。物件の年間純営業利益を購入価格で割ることで、その物件がどの程度の収益性を持つかを判断できます。例えば、購入価格が500,000ドルで年間NOIが50,000ドルの場合、キャップレートは10%となります。</p><h2>キャップレートの計算方法</h2><p>キャップレート = 純営業利益 ÷ 物件価値 × 100。この計算式は単純ですが、不動産投資家にとって物件の真の価値を理解するのに役立ちます。NOIには家賃収入から運営経費（管理費、税金、保険、メンテナンス費など）を差し引いた額が含まれます。</p><h2>適切なキャップレートの範囲</h2><p>キャップレートの適切な範囲は市場や地域によって異なります。一般的に、都市部では4-6%、郊外では6-10%、農村部ではそれ以上となることがあります。高いキャップレートはリスクが高い可能性も示しているため、市場平均と比較して判断することが重要です。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>投資判断への活用</h2><p>キャップレートは複数の物件を比較する際に有用です。同じエリアの物件であれば、キャップレートが高い物件の方がより良い投資機会である可能性があります。ただし、キャップレートだけでなく、物件の立地、管理状況、将来の値上がり可能性なども考慮する必要があります。</p><h2>キャップレート計算機の利用方法</h2><p>純営業利益と物件価値を入力するだけで、自動的にキャップレートが計算されます。複数の物件を比較したい場合は、各物件の情報を順に入力して、投資判断の参考にしてください。</p><h2>リスク評価とキャップレート</h2><p>キャップレートが高い物件は通常、より高いリスクを伴う場合があります。新規投資家は市場平均より大きく異なる数値には注意が必要です。長期的な投資収益を見込む場合、持続可能なNOI水準の物件を選択することが重要です。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">キャップレートとは何ですか？</div><div class="faq-a">キャップレートは、不動産物件の購入価格に対する年間純営業利益の比率です。不動産投資の収益性を評価するための重要な指標で、計算式は「NOI ÷ 物件価値 × 100」です。</div></div>
+  <div class="faq-item"><div class="faq-q">良いキャップレートの目安は何ですか？</div><div class="faq-a">適切なキャップレートは市場や地域によって異なります。一般的に、都市部では4-6%が目安とされていますが、地域によっては6-10%以上の場合もあります。同じエリアの物件と比較することが重要です。</div></div>
+  <div class="faq-item"><div class="faq-q">高いキャップレートが常に良いのですか？</div><div class="faq-a">必ずしもそうではありません。高いキャップレートはより高いリスクを示している場合があります。物件の状態、立地、テナント情報など、他の要因も総合的に評価して判断する必要があります。</div></div>
+  <div class="faq-item"><div class="faq-q">NOIを計算するにはどうすればよいですか？</div><div class="faq-a">NOI = 総賃貸収入 - 運営経費です。運営経費には、管理費、保険料、固定資産税、メンテナンス費などが含まれます。資本的支出（リノベーション費など）は含めません。</div></div>
+  <div class="faq-item"><div class="faq-q">キャップレート計算機はどのように使用しますか？</div><div class="faq-a">年間の純営業利益と物件の現在価値（購入価格）を入力するだけで、自動的にキャップレートが計算されます。複数の物件を比較する際は、各物件の情報を順に入力してください。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/mortgage.html">Mortgage</a>
+      <a class="tool-pill" href="/tools/ja/down-payment.html">Down Payment</a>
+      <a class="tool-pill" href="/tools/ja/refinance-calc.html">Refinance Calc</a>
+      <a class="tool-pill" href="/tools/ja/home-affordability.html">Home Affordability</a>
+      <a class="tool-pill" href="/tools/ja/rent-vs-buy.html">Rent Vs Buy</a>
+      <a class="tool-pill" href="/tools/ja/cash-on-cash.html">Cash On Cash</a>
+      <a class="tool-pill" href="/tools/ja/property-tax.html">Property Tax</a>
+      <a class="tool-pill" href="/tools/ja/stamp-duty.html">Stamp Duty</a>
+      <a class="tool-pill" href="/tools/ja/heloc-calculator.html">Heloc Calculator</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/cap-rate.html" class="lang-btn">English</a>
+    <a href="/tools/cap-rate.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/cap-rate.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/cap-rate.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/cap-rate.html" class="lang-btn">Français</a>
+    <a href="/tools/es/cap-rate.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/cap-rate.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/cap-rate.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/cap-rate.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/cap-rate.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const noiInput = document.getElementById('netOperatingIncome');
+  const propertyValueInput = document.getElementById('propertyValue');
+  const capRateResult = document.getElementById('capRateResult');
+  const resultsDiv = document.getElementById('results');
+  
+  const noi = parseFloat(noiInput.value);
+  const propertyValue = parseFloat(propertyValueInput.value);
+  
+  if (!noiInput.value || !propertyValueInput.value) {
+    alert('Please enter both Net Operating Income and Property Value');
+    return;
+  }
+  
+  if (noi < 0 || propertyValue <= 0) {
+    alert('Please enter valid positive numbers');
+    return;
+  }
+  
+  const capRate = (noi / propertyValue) * 100;
+  
+  capRateResult.textContent = capRate.toFixed(2);
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|cap-rate|2026-07-09 -->

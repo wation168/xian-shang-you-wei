@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>単利計算機 - 利息を簡単計算</title>
+<meta name="description" content="元金、年利率、期間を入力するだけで、得られる利息と総額を簡単に計算できます。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/simple-interest.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/simple-interest.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/simple-interest.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/simple-interest.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/simple-interest.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/simple-interest.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/simple-interest.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/simple-interest.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/simple-interest.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/simple-interest.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/simple-interest.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/simple-interest.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "単利計算機", "url": "https://softglow-ai.com/tools/ja/simple-interest.html", "description": "元金、年利率、期間を入力するだけで、得られる利息と総額を簡単に計算できます。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "単利と複利の違いは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "単利は元金に対してのみ利息が計算される方式です。複利は利息に対しても利息がつき、時間とともに資産がより速く増えます。長期投資では複利の効果がより顕著になります。"}}, {"@type": "Question", "name": "月利息はどのように計算されていますか？", "acceptedAnswer": {"@type": "Answer", "text": "月利息は、年間に得られる利息を12ヶ月で割って計算されます。例えば、年利息が1,200円の場合、月利息は100円になります。"}}, {"@type": "Question", "name": "このツールは複利計算に対応していますか？", "acceptedAnswer": {"@type": "Answer", "text": "このツールは単利計算専用です。複利の計算が必要な場合は、別の複利計算機をご使用ください。"}}, {"@type": "Question", "name": "年利率の入力方法は？", "acceptedAnswer": {"@type": "Answer", "text": "年利率はパーセンテージで入力してください。例えば、5%の場合は「5」と入力します。"}}, {"@type": "Question", "name": "どのような金融商品に使用できますか？", "acceptedAnswer": {"@type": "Answer", "text": "定期預金、定期積金、社債、一部の投資信託など、単利で計算される金融商品に使用できます。ご利用前に商品の利息計算方法をご確認ください。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 単利計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>単利計算機</h1>
+    <p class="calc-subtitle">元金に対して得られる利息を即座に計算します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="principal">元金</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="principal" placeholder="10000"  step="0.01"></div>
+</div>
+  <small class="input-help">投資または貯蓄する元の金額を入力してください</small>
+<div class="input-group">
+  <label for="rate">年利率</label>
+  <div class="input-row"><input type="number" id="rate" placeholder="5"  step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">年間の利率をパーセンテージで入力してください</small>
+<div class="input-group">
+  <label for="time">期間</label>
+  <div class="input-row"><input type="number" id="time" placeholder="2"  step="0.01"><span class="input-suffix">年</span></div>
+</div>
+  <small class="input-help">利息を計算する期間を年数で入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">得られる利息</span><span class="result-value" id="simpleInterest">—</span></div>
+<div class="result-highlight"><span class="result-label">総額（元金＋利息）</span><span class="result-value" id="totalAmount">—</span></div>
+<div class="result-item"><span class="result-label">月利息</span><span class="result-value" id="monthlyInterest">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 得られる利息は、元金に年利率と期間を掛けて計算された金額です。総額は元金と利息を足した合計金額になります。月利息は、年間の利息を12ヶ月で割った金額です。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>単利計算機について</h2><p>単利計算機は、元金に対して得られる利息を簡単に計算するツールです。銀行預金、定期積金、または簡単な投資商品の利息収益を素早く把握できます。元金、年利率、期間の3つの値を入力するだけで、自動的に利息額と総額が計算されます。</p><h2>単利の計算式</h2><p>単利は以下の式で計算されます：利息 = 元金 × 年利率 × 期間（年）。例えば、元金が10,000円、年利率が5%、期間が2年の場合、得られる利息は1,000円になります。この計算方法は複利と異なり、利息に対して利息がつくことはありません。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>月利息について</h2><p>月利息は、年間に得られる利息を12で割った金額です。これにより、毎月どのくらいの利息が発生するかを把握することができます。前述の例では、年利息1,000円を12ヶ月で割ると、月利息は約83.33円になります。</p><h2>実際の活用例</h2><p>このツールは、定期預金の利息計算、貯蓄目標の設定、または簡単な投資シミュレーションに活用できます。複数の条件を試すことで、最適な投資プランを見つけるのに役立ちます。</p><h2>単利と複利の違い</h2><p>単利は元金に対してのみ利息が計算される方式です。一方、複利は利息に対しても利息がつく方式で、時間とともに資産がより早く増えます。長期的な資産形成を考える場合は、複利の効果を検討することも重要です。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">単利と複利の違いは何ですか？</div><div class="faq-a">単利は元金に対してのみ利息が計算される方式です。複利は利息に対しても利息がつき、時間とともに資産がより速く増えます。長期投資では複利の効果がより顕著になります。</div></div>
+  <div class="faq-item"><div class="faq-q">月利息はどのように計算されていますか？</div><div class="faq-a">月利息は、年間に得られる利息を12ヶ月で割って計算されます。例えば、年利息が1,200円の場合、月利息は100円になります。</div></div>
+  <div class="faq-item"><div class="faq-q">このツールは複利計算に対応していますか？</div><div class="faq-a">このツールは単利計算専用です。複利の計算が必要な場合は、別の複利計算機をご使用ください。</div></div>
+  <div class="faq-item"><div class="faq-q">年利率の入力方法は？</div><div class="faq-a">年利率はパーセンテージで入力してください。例えば、5%の場合は「5」と入力します。</div></div>
+  <div class="faq-item"><div class="faq-q">どのような金融商品に使用できますか？</div><div class="faq-a">定期預金、定期積金、社債、一部の投資信託など、単利で計算される金融商品に使用できます。ご利用前に商品の利息計算方法をご確認ください。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">ROI計算機</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">リスク・リワード計算機</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">ポジションサイズ計算機</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">P/Eレシオ計算機</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">証拠金計算機</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/simple-interest.html" class="lang-btn">English</a>
+    <a href="/tools/simple-interest.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/simple-interest.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/simple-interest.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/simple-interest.html" class="lang-btn">Français</a>
+    <a href="/tools/es/simple-interest.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/simple-interest.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/simple-interest.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/simple-interest.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/simple-interest.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() { const principalInput = document.getElementById('principal'); const rateInput = document.getElementById('rate'); const timeInput = document.getElementById('time'); if (!principalInput.value || !rateInput.value || !timeInput.value) { alert('Please fill in all fields with valid numbers'); return; } const principal = parseFloat(principalInput.value); const rate = parseFloat(rateInput.value); const time = parseFloat(timeInput.value); if (principal <= 0 || rate < 0 || time <= 0) { alert('Please enter positive values for principal and time, and non-negative rate'); return; } const simpleInterest = (principal * rate * time) / 100; const totalAmount = principal + simpleInterest; const monthlyInterest = simpleInterest / (time * 12); document.getElementById('simpleInterest').textContent = simpleInterest.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); document.getElementById('totalAmount').textContent = totalAmount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); document.getElementById('monthlyInterest').textContent = monthlyInterest.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); document.getElementById('results').classList.add('show'); }
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|simple-interest|2026-07-09 -->

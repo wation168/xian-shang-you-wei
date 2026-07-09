@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>最低required分配(RMD)计算器</title>
+<meta name="description" content="免费计算您退休账户的最低required分配金额。输入账户余额和年龄，立即获取RMD金额。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/zh-CN/required-minimum-dist.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/required-minimum-dist.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/required-minimum-dist.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/required-minimum-dist.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/required-minimum-dist.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/required-minimum-dist.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/required-minimum-dist.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/required-minimum-dist.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/required-minimum-dist.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/required-minimum-dist.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/required-minimum-dist.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/required-minimum-dist.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "最低required分配计算器", "url": "https://softglow-ai.com/tools/zh-CN/required-minimum-dist.html", "description": "免费计算您退休账户的最低required分配金额。输入账户余额和年龄，立即获取RMD金额。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "RMD是什么意思？", "acceptedAnswer": {"@type": "Answer", "text": "RMD代表最低required分配，是美国国税局要求符合条件的退休账户持有人每年提取的最低金额。这适用于传统IRA、SEP IRA、SIMPLE IRA和401(k)计划等账户。"}}, {"@type": "Question", "name": "我什么时候必须开始提取RMD？", "acceptedAnswer": {"@type": "Answer", "text": "对于大多数账户，您必须在72岁(出生于1951年或之后)的4月1日之前开始提取RMD。如果您在该年仍在工作且不拥有雇主公司5%以上的股份，可能会有例外。"}}, {"@type": "Question", "name": "如果我不提取RMD会怎样？", "acceptedAnswer": {"@type": "Answer", "text": "如果您未能提取所需的最低分配金额，国税局将对未提取金额征收25%的罚款(根据最新法律)。您还可能需要为分配金额缴纳所得税。"}}, {"@type": "Question", "name": "生命预期因子是如何确定的？", "acceptedAnswer": {"@type": "Answer", "text": "生命预期因子由美国国税局根据统计生命预期数据发布和更新。这些因子显示在IRS发布的生命期望表中，大多数账户持有人使用统一生命期望表。"}}, {"@type": "Question", "name": "Roth IRA需要提取RMD吗？", "acceptedAnswer": {"@type": "Answer", "text": "Roth IRA在账户所有者的有生之年不需要提取RMD。但是，在账户所有者去世后，受益人可能需要提取RMD。这是选择Roth IRA的主要优势之一。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/zh-CN/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 最低required分配计算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>最低required分配计算器</h1>
+    <p class="calc-subtitle">计算退休账户的最低required分配金额</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="accountBalance">账户余额（前一年12月31日）</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="accountBalance" placeholder="250000"  value="250000" step="1"></div>
+</div>
+  <small class="input-help">输入您在前一个日历年12月31日的退休账户总余额</small>
+<div class="input-group">
+  <label for="yourAge">您的年龄</label>
+  <div class="input-row"><input type="number" id="yourAge" placeholder="72"  value="72" step="1"><span class="input-suffix">年</span></div>
+</div>
+  <small class="input-help">输入您在本日历年的年龄</small></div>
+    <button class="btn-calc" onclick="calculate()">计算</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">生命预期因子</span><span class="result-value" id="distributionFactor">—</span></div>
+<div class="result-highlight"><span class="result-label">最低required分配(RMD)</span><span class="result-value" id="rmdAmount">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>这代表什么？</strong> 生命预期因子是美国国税局(IRS)根据您的年龄制定的统计数据。将您的账户余额除以生命预期因子，得到您必须在该日历年底前从退休账户中提取的最低金额，即RMD。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 打印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什么是最低required分配(RMD)?</h2><p>最低required分配(RMD)是美国国税局(IRS)要求退休账户持有人每年必须从其传统个人退休账户(IRA)、401(k)计划和其他合格退休账户中提取的最低金额。这一规定适用于大多数退休账户，以确保这些税收优惠账户中的资金最终会被征税。</p><h2>何时开始提取RMD?</h2><p>对于传统IRA和401(k)计划，您必须在达到72岁(根据《安全2.0法案》，出生于1951年或之后的人)的4月1日之前开始提取RMD。初次提取可以推迟到达到该年龄的次年4月1日。此后，您必须在每个日历年的12月31日之前提取所需金额。</p><h2>如何计算RMD?</h2><p>RMD计算很简单：将您在前一个日历年12月31日的退休账户余额除以您当前年龄对应的生命预期因子。美国国税局根据统计生命预期数据发布了三个生命预期表：统一生命期望表、配偶受益人表和单身受益人表。大多数账户持有人使用统一生命期望表。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>未能提取RMD的后果</h2><p>如果您未能在规定期限内提取所需的最低分配金额，国税局将对未提取金额征收25%的税款罚款(根据最新税法)。此外，您可能还需缴纳所得税。因此，跟踪您的RMD截止日期非常重要。</p><h2>豁免和特殊情况</h2><p>某些情况下可能会豁免RMD要求，包括现仍在工作的人(如果他们不拥有该公司5%以上的股份)，以及某些受益人账户。2020年《冠状病毒援助、救济和经济安全法案》(CARES法案)暂时免除了该年度的RMD要求。</p><h2>使用RMD计算器的优势</h2><p>我们的免费RMD计算器可帮助您快速准确地确定您的最低required分配金额。只需输入您的账户余额和年龄，计算器将使用最新的IRS生命期望因子自动计算您的RMD。这有助于确保您遵守税务规定，避免罚款，并制定明智的退休财务计划。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸阅读</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常见问题</h2><div class="faq-item"><div class="faq-q">RMD是什么意思？</div><div class="faq-a">RMD代表最低required分配，是美国国税局要求符合条件的退休账户持有人每年提取的最低金额。这适用于传统IRA、SEP IRA、SIMPLE IRA和401(k)计划等账户。</div></div>
+  <div class="faq-item"><div class="faq-q">我什么时候必须开始提取RMD？</div><div class="faq-a">对于大多数账户，您必须在72岁(出生于1951年或之后)的4月1日之前开始提取RMD。如果您在该年仍在工作且不拥有雇主公司5%以上的股份，可能会有例外。</div></div>
+  <div class="faq-item"><div class="faq-q">如果我不提取RMD会怎样？</div><div class="faq-a">如果您未能提取所需的最低分配金额，国税局将对未提取金额征收25%的罚款(根据最新法律)。您还可能需要为分配金额缴纳所得税。</div></div>
+  <div class="faq-item"><div class="faq-q">生命预期因子是如何确定的？</div><div class="faq-a">生命预期因子由美国国税局根据统计生命预期数据发布和更新。这些因子显示在IRS发布的生命期望表中，大多数账户持有人使用统一生命期望表。</div></div>
+  <div class="faq-item"><div class="faq-q">Roth IRA需要提取RMD吗？</div><div class="faq-a">Roth IRA在账户所有者的有生之年不需要提取RMD。但是，在账户所有者去世后，受益人可能需要提取RMD。这是选择Roth IRA的主要优势之一。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/zh-CN/compound-interest.html">复利计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/roi-calculator.html">投资回报率 (ROI) 计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/risk-reward.html">风险收益比计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/position-size.html">头寸规模计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stop-loss.html">止损计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dividend-yield.html">股息收益率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/pe-ratio.html">市盈率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dca-calculator.html">定期定额投资计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/cagr.html">复合年增长率(CAGR)计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/margin-calculator.html">保证金计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stock-gain-loss.html">股票盈亏计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/break-even.html">损益平衡点计算器</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/required-minimum-dist.html" class="lang-btn">English</a>
+    <a href="/tools/required-minimum-dist.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/required-minimum-dist.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/required-minimum-dist.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/required-minimum-dist.html" class="lang-btn">Français</a>
+    <a href="/tools/es/required-minimum-dist.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/required-minimum-dist.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/required-minimum-dist.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/required-minimum-dist.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/required-minimum-dist.html" class="lang-btn active">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相关工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const accountBalance = document.getElementById('accountBalance').value;
+  const yourAge = document.getElementById('yourAge').value;
+  
+  if (!accountBalance || !yourAge) {
+    alert('Please enter both account balance and age');
+    return;
+  }
+  
+  const balance = parseFloat(accountBalance);
+  const age = parseInt(yourAge);
+  
+  if (isNaN(balance) || isNaN(age) || balance < 0 || age < 72) {
+    alert('Please enter valid values (age must be 72+)');
+    return;
+  }
+  
+  const ageFactors = {
+    72: 27.4,
+    73: 26.5,
+    74: 25.5,
+    75: 24.6,
+    76: 23.7,
+    77: 22.9,
+    78: 22.0,
+    79: 21.1,
+    80: 20.2,
+    81: 19.4,
+    82: 18.5,
+    83: 17.7,
+    84: 16.8,
+    85: 16.0,
+    86: 15.2,
+    87: 14.4,
+    88: 13.6,
+    89: 12.8,
+    90: 12.0,
+    91: 11.3,
+    92: 10.5,
+    93: 9.8,
+    94: 9.1,
+    95: 8.4,
+    96: 7.8,
+    97: 7.1,
+    98: 6.6,
+    99: 6.0,
+    100: 5.5,
+    101: 5.0,
+    102: 4.6,
+    103: 4.1,
+    104: 3.7,
+    105: 3.4,
+    106: 3.0,
+    107: 2.7,
+    108: 2.4,
+    109: 2.1,
+    110: 1.9,
+    111: 1.6,
+    112: 1.4,
+    113: 1.1,
+    114: 1.0,
+    115: 1.0
+  };
+  
+  let factor = ageFactors[age];
+  if (!factor) {
+    if (age > 115) {
+      factor = 1.0;
+    } else if (age < 72) {
+      alert('RMD calculations apply at age 72 and older');
+      return;
+    }
+  }
+  
+  const rmd = balance / factor;
+  
+  document.getElementById('distributionFactor').textContent = factor.toFixed(1);
+  document.getElementById('rmdAmount').textContent = '$' + rmd.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已复制！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-CN|required-minimum-dist|2026-07-09 -->

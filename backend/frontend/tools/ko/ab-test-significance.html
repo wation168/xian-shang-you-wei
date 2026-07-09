@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A/B 테스트 유의성 계산기 - 통계 분석</title>
+<meta name="description" content="A/B 테스트 결과의 통계적 유의성을 계산하세요. Z-점수, P-값, 전환율 향상도를 분석합니다.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ko/ab-test-significance.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/ab-test-significance.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/ab-test-significance.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/ab-test-significance.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/ab-test-significance.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/ab-test-significance.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/ab-test-significance.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/ab-test-significance.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/ab-test-significance.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/ab-test-significance.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/ab-test-significance.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/ab-test-significance.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "A/B 테스트 유의성 계산기", "url": "https://softglow-ai.com/tools/ko/ab-test-significance.html", "description": "A/B 테스트 결과의 통계적 유의성을 계산하세요. Z-점수, P-값, 전환율 향상도를 분석합니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "P-값이 0.05는 무엇을 의미하나요?", "acceptedAnswer": {"@type": "Answer", "text": "P-값 0.05는 두 그룹이 실제로 같은데도 현재 차이가 나타날 확률이 5%라는 뜻입니다. 즉, 95% 확실성으로 두 그룹이 다르다고 판단할 수 있습니다."}}, {"@type": "Question", "name": "샘플 크기가 작으면 어떻게 되나요?", "acceptedAnswer": {"@type": "Answer", "text": "샘플 크기가 작으면 실제 효과가 있어도 통계적으로 감지하지 못할 수 있습니다. 신뢰할 수 있는 결과를 위해 충분한 샘플 크기가 필요합니다."}}, {"@type": "Question", "name": "전환율 향상도 10%는 좋은 결과인가요?", "acceptedAnswer": {"@type": "Answer", "text": "향상도가 크다고 해서 항상 좋은 것은 아닙니다. 향상도가 크더라도 통계적으로 유의미하지 않으면 우연일 수 있으므로, P-값과 함께 확인해야 합니다."}}, {"@type": "Question", "name": "언제 테스트를 종료해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "충분한 샘플 크기에 도달했을 때(일반적으로 각 그룹 1,000명 이상) 통계적 유의성이 나타나면 테스트를 종료할 수 있습니다. 단, 최소 1-2주 이상 운영하는 것이 좋습니다."}}, {"@type": "Question", "name": "99% 신뢰도와 95% 신뢰도의 차이는?", "acceptedAnswer": {"@type": "Answer", "text": "99% 신뢰도가 더 높은 확실성을 제공하지만, 더 많은 샘플과 시간이 필요합니다. 95%는 일반적인 온라인 테스트에서 표준으로 사용됩니다."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ko/">도구</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > A/B 테스트 유의성 계산기</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>A/B 테스트 유의성 계산기</h1>
+    <p class="calc-subtitle">A/B 테스트 결과가 통계적으로 유의미한지 확인하세요</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="controlConversions">대조군 전환수</label>
+  <div class="input-row"><input type="number" id="controlConversions" placeholder="예: 245"  step="1"></div>
+</div>
+  <small class="input-help">대조군에서 발생한 전환(구매, 가입 등)의 총 개수</small>
+<div class="input-group">
+  <label for="controlVisitors">대조군 방문자수</label>
+  <div class="input-row"><input type="number" id="controlVisitors" placeholder="예: 5000"  step="1"></div>
+</div>
+  <small class="input-help">대조군의 총 방문자 또는 사용자 수</small>
+<div class="input-group">
+  <label for="variantConversions">변형군 전환수</label>
+  <div class="input-row"><input type="number" id="variantConversions" placeholder="예: 310"  step="1"></div>
+</div>
+  <small class="input-help">변형군에서 발생한 전환의 총 개수</small>
+<div class="input-group">
+  <label for="variantVisitors">변형군 방문자수</label>
+  <div class="input-row"><input type="number" id="variantVisitors" placeholder="예: 5100"  step="1"></div>
+</div>
+  <small class="input-help">변형군의 총 방문자 또는 사용자 수</small>
+<div class="input-group">
+  <label for="confidenceLevel">신뢰도 수준</label>
+  <div class="input-row"><input type="number" id="confidenceLevel" placeholder="95"  value="95" step="1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">일반적으로 95% 또는 99%를 사용합니다</small></div>
+    <button class="btn-calc" onclick="calculate()">계산하기</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">대조군 전환율</span><span class="result-value" id="controlConversionRate">—</span></div>
+<div class="result-item"><span class="result-label">변형군 전환율</span><span class="result-value" id="variantConversionRate">—</span></div>
+<div class="result-item"><span class="result-label">전환율 향상도</span><span class="result-value" id="conversionLift">—</span></div>
+<div class="result-item"><span class="result-label">Z-점수</span><span class="result-value" id="zScore">—</span></div>
+<div class="result-item"><span class="result-label">P-값</span><span class="result-value" id="pValue">—</span></div>
+<div class="result-highlight"><span class="result-label">통계적 유의성</span><span class="result-value" id="significance">—</span></div>
+<div class="result-highlight"><span class="result-label">결과</span><span class="result-value" id="result">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>이것은 무엇을 의미합니까?</strong> P-값이 신뢰도 수준보다 작으면 테스트 결과가 통계적으로 유의미합니다. 전환율 향상도는 변형군이 대조군보다 얼마나 더 나은지 보여줍니다. Z-점수가 높을수록 두 그룹 간의 차이가 더 유의미합니다.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 인쇄</button>
+        <button onclick="shareResult()">&#x1f4e4; 공유</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>A/B 테스트 유의성이란?</h2><p>A/B 테스트는 두 가지 버전(A와 B)을 비교하여 어느 것이 더 나은 성과를 내는지 확인하는 방법입니다. 통계적 유의성은 관찰된 차이가 우연이 아니라 실제 효과 때문인지 판단합니다.</p><h2>주요 지표 해석</h2><p><strong>전환율(Conversion Rate)</strong>은 전체 방문자 중 전환이 일어난 비율입니다. 대조군 전환율 = (대조군 전환수 / 대조군 방문자수) × 100입니다. <strong>전환율 향상도(Lift)</strong>는 변형군이 대조군 대비 얼마나 개선되었는지 보여줍니다.</p><h2>Z-점수와 P-값</h2><p>Z-점수는 두 그룹 간의 차이를 표준편차 단위로 측정합니다. P-값은 귀무가설(두 그룹이 같다)이 참일 확률입니다. 일반적으로 P-값이 0.05 이하면(95% 신뢰도) 결과가 통계적으로 유의미하다고 판단합니다.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>신뢰도 수준의 의미</h2><p>95% 신뢰도는 100번 실험을 반복했을 때 95번은 같은 결과가 나온다는 의미입니다. 99% 신뢰도는 더 높은 확실성을 원할 때 사용하지만, 더 많은 샘플이 필요합니다.</p><h2>샘플 크기의 중요성</h2><p>충분한 샘플 크기가 없으면 실제 효과를 감지하지 못할 수 있습니다. 일반적으로 각 그룹마다 최소 100-1000명 이상의 데이터가 필요합니다. 샘플이 작을수록 더 큰 차이가 있어야 유의성을 얻을 수 있습니다.</p><h2>결과 해석 가이드</h2><p>통계적으로 유의미한 결과가 나왔다면 변형군을 도입해도 됩니다. 하지만 실제 비즈니스 영향도 함께 고려해야 합니다. 유의미하지 않은 결과라면 더 많은 데이터 수집 또는 테스트 기간 연장을 고려하세요.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 관련 기사</h3><div class="blog-grid"><a class="blog-card" href="/blog/ko/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ko/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ko/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>자주 묻는 질문</h2><div class="faq-item"><div class="faq-q">P-값이 0.05는 무엇을 의미하나요?</div><div class="faq-a">P-값 0.05는 두 그룹이 실제로 같은데도 현재 차이가 나타날 확률이 5%라는 뜻입니다. 즉, 95% 확실성으로 두 그룹이 다르다고 판단할 수 있습니다.</div></div>
+  <div class="faq-item"><div class="faq-q">샘플 크기가 작으면 어떻게 되나요?</div><div class="faq-a">샘플 크기가 작으면 실제 효과가 있어도 통계적으로 감지하지 못할 수 있습니다. 신뢰할 수 있는 결과를 위해 충분한 샘플 크기가 필요합니다.</div></div>
+  <div class="faq-item"><div class="faq-q">전환율 향상도 10%는 좋은 결과인가요?</div><div class="faq-a">향상도가 크다고 해서 항상 좋은 것은 아닙니다. 향상도가 크더라도 통계적으로 유의미하지 않으면 우연일 수 있으므로, P-값과 함께 확인해야 합니다.</div></div>
+  <div class="faq-item"><div class="faq-q">언제 테스트를 종료해야 하나요?</div><div class="faq-a">충분한 샘플 크기에 도달했을 때(일반적으로 각 그룹 1,000명 이상) 통계적 유의성이 나타나면 테스트를 종료할 수 있습니다. 단, 최소 1-2주 이상 운영하는 것이 좋습니다.</div></div>
+  <div class="faq-item"><div class="faq-q">99% 신뢰도와 95% 신뢰도의 차이는?</div><div class="faq-a">99% 신뢰도가 더 높은 확실성을 제공하지만, 더 많은 샘플과 시간이 필요합니다. 95%는 일반적인 온라인 테스트에서 표준으로 사용됩니다.</div></div></section>
+  <div class="more-tools"><h3>더 많은 도구</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ko/compound-interest.html">복리 이자 계산기</a>
+      <a class="tool-pill" href="/tools/ko/roi-calculator.html">ROI 계산기</a>
+      <a class="tool-pill" href="/tools/ko/risk-reward.html">위험-수익 계산기</a>
+      <a class="tool-pill" href="/tools/ko/position-size.html">포지션 크기 계산기</a>
+      <a class="tool-pill" href="/tools/ko/stop-loss.html">손절매 계산기</a>
+      <a class="tool-pill" href="/tools/ko/dividend-yield.html">배당 수익률 계산기</a>
+      <a class="tool-pill" href="/tools/ko/pe-ratio.html">P/E 비율 계산기</a>
+      <a class="tool-pill" href="/tools/ko/dca-calculator.html">DCA 계산기</a>
+      <a class="tool-pill" href="/tools/ko/cagr.html">CAGR 계산기</a>
+      <a class="tool-pill" href="/tools/ko/margin-calculator.html">마진 계산기</a>
+      <a class="tool-pill" href="/tools/ko/stock-gain-loss.html">주식 수익/손실 계산기</a>
+      <a class="tool-pill" href="/tools/ko/break-even.html">손익분기점 계산기</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/ab-test-significance.html" class="lang-btn">English</a>
+    <a href="/tools/ab-test-significance.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/ab-test-significance.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/ab-test-significance.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/ab-test-significance.html" class="lang-btn">Français</a>
+    <a href="/tools/es/ab-test-significance.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/ab-test-significance.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/ab-test-significance.html" class="lang-btn active">한국어</a>
+    <a href="/tools/id/ab-test-significance.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/ab-test-significance.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>관련 계산기</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const controlConversions = parseFloat(document.getElementById('controlConversions').value);
+  const controlVisitors = parseFloat(document.getElementById('controlVisitors').value);
+  const variantConversions = parseFloat(document.getElementById('variantConversions').value);
+  const variantVisitors = parseFloat(document.getElementById('variantVisitors').value);
+  const confidenceLevel = parseFloat(document.getElementById('confidenceLevel').value);
+
+  if (!controlConversions || !controlVisitors || !variantConversions || !variantVisitors || !confidenceLevel) {
+    alert('Please fill in all fields with valid numbers');
+    return;
+  }
+
+  if (controlConversions > controlVisitors || variantConversions > variantVisitors) {
+    alert('Conversions cannot exceed visitors');
+    return;
+  }
+
+  const controlRate = (controlConversions / controlVisitors) * 100;
+  const variantRate = (variantConversions / variantVisitors) * 100;
+  const lift = ((variantRate - controlRate) / controlRate) * 100;
+
+  const pooledConversions = controlConversions + variantConversions;
+  const pooledVisitors = controlVisitors + variantVisitors;
+  const pooledRate = pooledConversions / pooledVisitors;
+
+  const standardError = Math.sqrt(
+    pooledRate * (1 - pooledRate) * (1 / controlVisitors + 1 / variantVisitors)
+  );
+
+  const zScore = ((variantRate / 100) - (controlRate / 100)) / standardError;
+  const pValue = 2 * (1 - normalCDF(Math.abs(zScore)));
+
+  let significancePercent = 0;
+  if (pValue < 0.001) {
+    significancePercent = 99.9;
+  } else if (pValue < 0.01) {
+    significancePercent = 99;
+  } else if (pValue < 0.05) {
+    significancePercent = 95;
+  } else if (pValue < 0.1) {
+    significancePercent = 90;
+  } else {
+    significancePercent = (1 - pValue) * 100;
+  }
+
+  const isSignificant = significancePercent >= confidenceLevel;
+
+  document.getElementById('controlConversionRate').textContent = controlRate.toFixed(2);
+  document.getElementById('variantConversionRate').textContent = variantRate.toFixed(2);
+  document.getElementById('conversionLift').textContent = lift.toFixed(2);
+  document.getElementById('zScore').textContent = zScore.toFixed(4);
+  document.getElementById('pValue').textContent = pValue.toFixed(6);
+  document.getElementById('significance').textContent = significancePercent.toFixed(2);
+  document.getElementById('result').textContent = isSignificant ? 'SIGNIFICANT' : 'NOT SIGNIFICANT';
+
+  if (isSignificant) {
+    document.getElementById('result').style.color = '#27ae60';
+  } else {
+    document.getElementById('result').style.color = '#e74c3c';
+  }
+
+  document.getElementById('results').classList.add('show');
+}
+
+function normalCDF(z) {
+  const a1 = 0.254829592;
+  const a2 = -0.284496736;
+  const a3 = 1.421413741;
+  const a4 = -1.453152027;
+  const a5 = 1.061405429;
+  const p = 0.3275911;
+
+  const sign = z < 0 ? -1 : 1;
+  z = Math.abs(z) / Math.sqrt(2);
+
+  const t = 1.0 / (1.0 + p * z);
+  const y = 1.0 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-z * z);
+
+  return 0.5 * (1.0 + sign * y);
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='복사됨!';setTimeout(function(){b.textContent='공유'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ko|ab-test-significance|2026-07-09 -->

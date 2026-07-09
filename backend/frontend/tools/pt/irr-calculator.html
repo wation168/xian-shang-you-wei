@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de TIR - Taxa Interna de Retorno</title>
+<meta name="description" content="Calcule a Taxa Interna de Retorno (TIR) e VPL para análise profissional de investimentos e projetos financeiros.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/pt/irr-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/irr-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/irr-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/irr-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/irr-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/irr-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/irr-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/irr-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/irr-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/irr-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/irr-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/irr-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculadora de TIR", "url": "https://softglow-ai.com/tools/pt/irr-calculator.html", "description": "Calcule a Taxa Interna de Retorno (TIR) e VPL para análise profissional de investimentos e projetos financeiros.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "pt"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Qual é a diferença entre TIR e VPL?", "acceptedAnswer": {"@type": "Answer", "text": "O VPL (Valor Presente Líquido) calcula o valor absoluto do investimento em libras esterlinas utilizando uma taxa de desconto específica. A TIR é a taxa de desconto que torna o VPL igual a zero. Enquanto o VPL dá uma resposta em euros/libras, a TIR oferece uma resposta em percentagem de retorno."}}, {"@type": "Question", "name": "Uma TIR negativa significa que vou perder dinheiro?", "acceptedAnswer": {"@type": "Answer", "text": "Uma TIR negativa indica que o investimento não gera retorno positivo e você pode estar perdendo valor em relação ao investimento inicial. Neste caso, é recomendável reconsiderar o investimento, a menos que existam razões estratégicas específicas para prosseguir."}}, {"@type": "Question", "name": "Qual é uma boa taxa de TIR para um investimento?", "acceptedAnswer": {"@type": "Answer", "text": "O que constitui uma 'boa' TIR depende do contexto, incluindo a taxa de desconto mínima aceitável, o perfil de risco do investidor e as oportunidades alternativas disponíveis. Geralmente, a TIR deve ser significativamente superior à taxa de juros sem risco para compensar o risco adicional."}}, {"@type": "Question", "name": "Posso ter múltiplas TIRs para o mesmo projeto?", "acceptedAnswer": {"@type": "Answer", "text": "Sim, projetos com múltiplas mudanças de sinal nos fluxos de caixa (investimento inicial negativo, seguido por retornos, depois novamente investimento negativo) podem ter múltiplas TIRs. Nesses casos, análises adicionais são necessárias para tomar decisões apropriadas."}}, {"@type": "Question", "name": "Como as mudanças nos fluxos de caixa afetam a TIR?", "acceptedAnswer": {"@type": "Answer", "text": "Aumentos nos fluxos de caixa esperados resultarão em uma TIR maior, enquanto diminuições resultarão em uma TIR menor. Atrasos na recepção de fluxos de caixa também reduzem a TIR, pois o dinheiro recebido posteriormente vale menos em termos de valor presente."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/pt/">Ferramentas</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/pt/">Ferramentas</a> > Calculadora de TIR</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Calculadora de TIR</h1>
+    <p class="calc-subtitle">Calcule a Taxa Interna de Retorno para análise de investimentos</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="initialInvestment">Investimento Inicial (Ano 0)</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="initialInvestment" placeholder="ex: -50000"  value="-50000" step="1"></div>
+</div>
+  <small class="input-help">Digite o investimento inicial em valores negativos (exemplo: -50000)</small>
+<div class="input-group">
+  <label for="year1CashFlow">Fluxo de Caixa Ano 1</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="year1CashFlow" placeholder="ex: 10000"  value="10000" step="1"></div>
+</div>
+  <small class="input-help">Insira o fluxo de caixa esperado para o primeiro ano</small>
+<div class="input-group">
+  <label for="year2CashFlow">Fluxo de Caixa Ano 2</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="year2CashFlow" placeholder="ex: 15000"  value="15000" step="1"></div>
+</div>
+  <small class="input-help">Insira o fluxo de caixa esperado para o segundo ano</small>
+<div class="input-group">
+  <label for="year3CashFlow">Fluxo de Caixa Ano 3</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="year3CashFlow" placeholder="ex: 12000"  value="12000" step="1"></div>
+</div>
+  <small class="input-help">Insira o fluxo de caixa esperado para o terceiro ano</small>
+<div class="input-group">
+  <label for="year4CashFlow">Fluxo de Caixa Ano 4</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="year4CashFlow" placeholder="ex: 18000"  value="18000" step="1"></div>
+</div>
+  <small class="input-help">Insira o fluxo de caixa esperado para o quarto ano</small>
+<div class="input-group">
+  <label for="year5CashFlow">Fluxo de Caixa Ano 5</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="year5CashFlow" placeholder="ex: 20000"  value="20000" step="1"></div>
+</div>
+  <small class="input-help">Insira o fluxo de caixa esperado para o quinto ano</small></div>
+    <button class="btn-calc" onclick="calculate()">Calcular</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Taxa Interna de Retorno (TIR)</span><span class="result-value" id="irrResult">—</span></div>
+<div class="result-item"><span class="result-label">VPL à Taxa de TIR</span><span class="result-value" id="npvAtZero">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>O que isso significa?</strong> A Taxa Interna de Retorno (TIR) representa o percentual de retorno anual do seu investimento. Quanto maior a TIR, melhor o investimento. O VPL à taxa de TIR será sempre próximo a zero, confirmando a precisão do cálculo.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Imprimir</button>
+        <button onclick="shareResult()">&#x1f4e4; Compartilhar</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>O que é Taxa Interna de Retorno (TIR)?</h2><p>A Taxa Interna de Retorno (TIR) é uma métrica fundamental na análise de investimentos que representa a taxa de desconto na qual o Valor Presente Líquido (VPL) de um projeto é igual a zero. Em outras palavras, é a taxa de retorno anual que um investimento gera ao longo de seu ciclo de vida. A TIR é amplamente utilizada por analistas financeiros, gestores de projetos e investidores para avaliar a viabilidade e atratividade de diferentes oportunidades de investimento.</p><p>A importância da TIR reside na sua capacidade de fornecer uma única métrica percentual que facilita a comparação entre diferentes projetos e investimentos. Diferentemente do VPL absoluto, que depende da taxa de desconto utilizada, a TIR oferece uma medida independente da taxa de desconto, tornando-a particularmente útil na avaliação comparativa de projetos com tamanhos e durações diferentes.</p><h2>Como Calcular a Taxa Interna de Retorno</h2><p>O cálculo da TIR é baseado na fórmula do Valor Presente Líquido, onde a soma de todos os fluxos de caixa descontados é igual a zero. A fórmula geral é: VPL = 0 = CF₀ + CF₁/(1+TIR)¹ + CF₂/(1+TIR)² + ... + CFₙ/(1+TIR)ⁿ, onde CF representa os fluxos de caixa em cada período e n é o número total de períodos.</p><p>Como não existe uma solução algébrica direta para esta equação quando há múltiplos períodos, a TIR é calculada através de métodos iterativos. Nossa calculadora utiliza algoritmos numéricos sofisticados para encontrar a taxa que torna o VPL igual a zero. O processo envolve testar diferentes taxas até convergir para o valor que satisfaz a equação.</p><h2>Interpretação dos Resultados</h2><p>Após inserir todos os fluxos de caixa, a calculadora fornecerá dois resultados principais: a Taxa Interna de Retorno (TIR) e o VPL na taxa de TIR. A TIR é expressa em percentagem, representando o retorno anual esperado do investimento. Por exemplo, uma TIR de 15% significa que seu investimento renderá uma média de 15% ao ano durante o período analisado.</p><p>O VPL à taxa de TIR deve estar muito próximo a zero (idealmente zero ou muito próximo), confirmando a precisão do cálculo. Qualquer desvio pequeno é devido a arredondamentos numéricos. Quando interpretando resultados, lembre-se de que uma TIR mais elevada geralmente indica um investimento mais atrativo, mas sempre deve ser considerada em conjunto com outros fatores como risco, liquidez e oportunidades alternativas.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Critérios de Decisão para Investimentos</h2><p>Para utilizar a TIR como ferramenta de decisão de investimento, você deve compará-la com a sua taxa de retorno mínima aceitável, também conhecida como taxa de desconto ou custo de capital. Se a TIR for maior que a taxa de desconto (taxa de hurdle), o projeto é considerado viável e recomenda-se sua aprovação. Se a TIR for menor que a taxa de desconto, o projeto não atinge o retorno mínimo esperado.</p><p>Ao comparar múltiplos projetos, aquele com a maior TIR é teoricamente o mais atrativo, desde que sua TIR seja superior à taxa de desconto mínima aceitável. No entanto, é importante considerar que a TIR não leva em conta o tamanho absoluto do investimento ou a magnitude dos retornos, apenas a taxa de retorno percentual.</p><h2>Limitações da TIR</h2><p>Embora a TIR seja uma ferramenta poderosa, possui algumas limitações importantes. Primeiro, assume que todos os fluxos de caixa intermediários são reinvestidos à taxa de TIR, o que pode não ser realista. Segundo, projetos com fluxos de caixa não convencionais (múltiplas mudanças de sinal) podem resultar em múltiplas TIRs, tornando a análise ambígua.</p><p>Além disso, a TIR não considera a escala do projeto - dois projetos com a mesma TIR podem ter retornos absolutos muito diferentes em libras esterlinas. Por essas razões, é recomendável usar a TIR em conjunto com outras métricas como VPL, período de payback e índice de rentabilidade para tomar decisões de investimento bem informadas.</p><h2>Exemplo Prático</h2><p>Suponha um investimento inicial de £50.000 (ano 0) com fluxos de caixa esperados de £10.000 (ano 1), £15.000 (ano 2), £12.000 (ano 3), £18.000 (ano 4) e £20.000 (ano 5). Ao inserir esses valores na calculadora, ela determinará a TIR que iguala o valor presente desses fluxos ao investimento inicial. Se o resultado for uma TIR de 12,5%, isso significa que, em média, você está obtendo um retorno de 12,5% ao ano sobre seu investimento inicial de £50.000.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Artigos relacionados</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>Perguntas frequentes</h2><div class="faq-item"><div class="faq-q">Qual é a diferença entre TIR e VPL?</div><div class="faq-a">O VPL (Valor Presente Líquido) calcula o valor absoluto do investimento em libras esterlinas utilizando uma taxa de desconto específica. A TIR é a taxa de desconto que torna o VPL igual a zero. Enquanto o VPL dá uma resposta em euros/libras, a TIR oferece uma resposta em percentagem de retorno.</div></div>
+  <div class="faq-item"><div class="faq-q">Uma TIR negativa significa que vou perder dinheiro?</div><div class="faq-a">Uma TIR negativa indica que o investimento não gera retorno positivo e você pode estar perdendo valor em relação ao investimento inicial. Neste caso, é recomendável reconsiderar o investimento, a menos que existam razões estratégicas específicas para prosseguir.</div></div>
+  <div class="faq-item"><div class="faq-q">Qual é uma boa taxa de TIR para um investimento?</div><div class="faq-a">O que constitui uma 'boa' TIR depende do contexto, incluindo a taxa de desconto mínima aceitável, o perfil de risco do investidor e as oportunidades alternativas disponíveis. Geralmente, a TIR deve ser significativamente superior à taxa de juros sem risco para compensar o risco adicional.</div></div>
+  <div class="faq-item"><div class="faq-q">Posso ter múltiplas TIRs para o mesmo projeto?</div><div class="faq-a">Sim, projetos com múltiplas mudanças de sinal nos fluxos de caixa (investimento inicial negativo, seguido por retornos, depois novamente investimento negativo) podem ter múltiplas TIRs. Nesses casos, análises adicionais são necessárias para tomar decisões apropriadas.</div></div>
+  <div class="faq-item"><div class="faq-q">Como as mudanças nos fluxos de caixa afetam a TIR?</div><div class="faq-a">Aumentos nos fluxos de caixa esperados resultarão em uma TIR maior, enquanto diminuições resultarão em uma TIR menor. Atrasos na recepção de fluxos de caixa também reduzem a TIR, pois o dinheiro recebido posteriormente vale menos em termos de valor presente.</div></div></section>
+  <div class="more-tools"><h3>Mais ferramentas</h3><div class="tools-grid"><a class="tool-pill" href="/tools/pt/compound-interest.html">Calculadora de Juros Compostos</a>
+      <a class="tool-pill" href="/tools/pt/roi-calculator.html">Calculadora de ROI</a>
+      <a class="tool-pill" href="/tools/pt/risk-reward.html">Calculadora de Risco-Recompensa</a>
+      <a class="tool-pill" href="/tools/pt/position-size.html">Calculadora de Tamanho de Posição</a>
+      <a class="tool-pill" href="/tools/pt/stop-loss.html">Calculadora de Stop Loss</a>
+      <a class="tool-pill" href="/tools/pt/dividend-yield.html">Calculadora de Rendimento de Dividendos</a>
+      <a class="tool-pill" href="/tools/pt/pe-ratio.html">Calculadora de Índice P/L</a>
+      <a class="tool-pill" href="/tools/pt/dca-calculator.html">Calculadora de DCA</a>
+      <a class="tool-pill" href="/tools/pt/cagr.html">Calculadora de CAGR</a>
+      <a class="tool-pill" href="/tools/pt/margin-calculator.html">Calculadora de Margem</a>
+      <a class="tool-pill" href="/tools/pt/stock-gain-loss.html">Calculadora de Ganho/Perda em Ações</a>
+      <a class="tool-pill" href="/tools/pt/break-even.html">Calculadora de Ponto de Equilíbrio</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/irr-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/irr-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/irr-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/irr-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/irr-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/irr-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/irr-calculator.html" class="lang-btn active">Português</a>
+    <a href="/tools/ko/irr-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/irr-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/irr-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Ferramentas relacionadas</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const cf0 = parseFloat(document.getElementById('initialInvestment').value);
+  const cf1 = parseFloat(document.getElementById('year1CashFlow').value);
+  const cf2 = parseFloat(document.getElementById('year2CashFlow').value);
+  const cf3 = parseFloat(document.getElementById('year3CashFlow').value);
+  const cf4 = parseFloat(document.getElementById('year4CashFlow').value);
+  const cf5 = parseFloat(document.getElementById('year5CashFlow').value);
+
+  if (isNaN(cf0) || isNaN(cf1) || isNaN(cf2) || isNaN(cf3) || isNaN(cf4) || isNaN(cf5)) {
+    alert('Please enter all cash flow values');
+    return;
+  }
+
+  const cashFlows = [cf0, cf1, cf2, cf3, cf4, cf5];
+
+  function npv(rate, flows) {
+    let sum = 0;
+    for (let i = 0; i < flows.length; i++) {
+      sum += flows[i] / Math.pow(1 + rate, i);
+    }
+    return sum;
+  }
+
+  let irr = 0.1;
+  let low = -0.99;
+  let high = 10;
+  let tolerance = 0.0001;
+
+  for (let i = 0; i < 1000; i++) {
+    const npvValue = npv(irr, cashFlows);
+    if (Math.abs(npvValue) < tolerance) {
+      break;
+    }
+    if (npvValue > 0) {
+      low = irr;
+    } else {
+      high = irr;
+    }
+    irr = (low + high) / 2;
+  }
+
+  const irrPercent = (irr * 100).toFixed(2);
+  const npvValue = npv(irr, cashFlows).toFixed(2);
+
+  document.getElementById('irrResult').textContent = parseFloat(irrPercent).toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('npvAtZero').textContent = parseFloat(npvValue).toLocaleString('en-GB', {style: 'currency', currency: 'GBP', minimumFractionDigits: 2});
+
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copiado!';setTimeout(function(){b.textContent='Compartilhar'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|pt|irr-calculator|2026-07-09 -->

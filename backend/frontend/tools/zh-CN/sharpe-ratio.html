@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>夏普比率计算器 - 风险调整收益分析工具</title>
+<meta name="description" content="免费在线夏普比率计算器，帮助投资者精确衡量投资组合的风险调整回报，评估投资效率。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/zh-CN/sharpe-ratio.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/sharpe-ratio.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/sharpe-ratio.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/sharpe-ratio.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/sharpe-ratio.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/sharpe-ratio.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/sharpe-ratio.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/sharpe-ratio.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/sharpe-ratio.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/sharpe-ratio.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/sharpe-ratio.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/sharpe-ratio.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "夏普比率计算器", "url": "https://softglow-ai.com/tools/zh-CN/sharpe-ratio.html", "description": "免费在线夏普比率计算器，帮助投资者精确衡量投资组合的风险调整回报，评估投资效率。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "什么是无风险利率？", "acceptedAnswer": {"@type": "Answer", "text": "无风险利率是指投资者投资于完全没有风险的资产所获得的收益率，通常以国债（如美国10年期国债、中国10年期国债）的收益率作为代理。无风险利率反映了资金的时间价值。"}}, {"@type": "Question", "name": "标准差在夏普比率中代表什么？", "acceptedAnswer": {"@type": "Answer", "text": "标准差衡量投资组合收益的波动程度，反映投资的风险程度。标准差越大，说明收益波动越剧烈，风险越高。夏普比率用标准差来量化风险，便于进行风险调整收益的比较。"}}, {"@type": "Question", "name": "夏普比率为负数意味着什么？", "acceptedAnswer": {"@type": "Answer", "text": "负数夏普比率表示投资组合的平均收益率低于无风险利率，即投资者承担了风险但获得的收益反而不如无风险资产。此时应重新考虑投资策略和资产配置。"}}, {"@type": "Question", "name": "如何使用夏普比率比较不同的投资？", "acceptedAnswer": {"@type": "Answer", "text": "计算各个投资组合或基金的夏普比率，数值越高说明风险调整收益越好。但需注意投资期限、市场环境、资产类别等因素的影响。建议结合其他指标进行综合比较。"}}, {"@type": "Question", "name": "高的夏普比率一定意味着好的投资吗？", "acceptedAnswer": {"@type": "Answer", "text": "虽然高夏普比率表示风险调整收益较好，但不能单独作为投资决策的依据。还应考虑绝对收益率、最大回撤、投资期限、流动性、费用等多个因素，进行全面评估。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/zh-CN/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 夏普比率计算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>夏普比率计算器</h1>
+    <p class="calc-subtitle">精确衡量风险调整后的投资回报</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="portfolioReturn">投资组合收益率 (Rp)</label>
+  <div class="input-row"><input type="number" id="portfolioReturn" placeholder="例如：12.5"  step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">输入投资组合的预期年收益率百分比</small>
+<div class="input-group">
+  <label for="riskFreeRate">无风险利率 (Rf)</label>
+  <div class="input-row"><input type="number" id="riskFreeRate" placeholder="例如：4.5"  step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">输入无风险资产（如国债）的年利率百分比</small>
+<div class="input-group">
+  <label for="standardDeviation">标准差 (σp)</label>
+  <div class="input-row"><input type="number" id="standardDeviation" placeholder="例如：8.3"  step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">输入投资组合的年标准差（波动率）百分比</small></div>
+    <button class="btn-calc" onclick="calculate()">计算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">夏普比率</span><span class="result-value" id="sharpeRatioResult">—</span></div>
+<div class="result-item"><span class="result-label">超额收益</span><span class="result-value" id="excessReturnResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>这代表什么？</strong> 夏普比率越高，表示每承担一单位风险所获得的超额收益越多，投资效率越好。超额收益是投资组合收益率与无风险利率的差值，代表风险溢价。一般而言，夏普比率大于1被认为是良好的投资。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 打印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什么是夏普比率？</h2><p>夏普比率是由诺贝尔奖得主威廉·夏普（William Sharpe）提出的风险调整收益指标。它通过将投资组合的超额收益除以标准差，衡量投资者每承担一单位风险所获得的回报。夏普比率是评估投资组合业绩最重要的指标之一。</p><h2>夏普比率的计算公式</h2><p>夏普比率 = (投资组合收益率 - 无风险利率) / 标准差<br/>即：Sharpe Ratio = (Rp - Rf) / σp<br/>其中，Rp为投资组合收益率，Rf为无风险利率，σp为投资组合的标准差（波动率）。</p><h2>如何解读夏普比率</h2><p>夏普比率数值越大，说明投资组合相对风险下的超额收益越高，即风险调整收益越好。通常认为夏普比率大于1的投资相对较优，大于2则表示优秀，大于3表示非常优秀。负数表示投资组合的收益率低于无风险利率，投资效率较差。不同资产类别的夏普比率无法直接比较。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>夏普比率在投资中的应用</h2><p>投资者可以使用夏普比率来比较不同投资组合或基金的风险调整收益，选择性价比最优的投资方案。在构建投资组合时，应同时考虑夏普比率、最大回撤、收益率等多个指标，进行全面评估。机构投资者常使用夏普比率作为基金经理业绩评价的重要标准。</p><h2>影响夏普比率的主要因素</h2><p>投资组合的收益率越高、风险越低，夏普比率就越高。市场环境变化、资产配置比例、选股能力等都会影响夏普比率。无风险利率的选择也很重要，通常以国债收益率作为参考。定期监测和调整投资组合，可以持续优化夏普比率。</p><h2>使用本计算器的建议</h2><p>输入历史数据或预期数据均可。对于历史数据，可使用过去3年、5年或10年的年化收益率和标准差。使用本计算器时，应结合其他指标如信息比率、索提诺比率等进行综合分析，以获得更全面的投资评估。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸阅读</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常见问题</h2><div class="faq-item"><div class="faq-q">什么是无风险利率？</div><div class="faq-a">无风险利率是指投资者投资于完全没有风险的资产所获得的收益率，通常以国债（如美国10年期国债、中国10年期国债）的收益率作为代理。无风险利率反映了资金的时间价值。</div></div>
+  <div class="faq-item"><div class="faq-q">标准差在夏普比率中代表什么？</div><div class="faq-a">标准差衡量投资组合收益的波动程度，反映投资的风险程度。标准差越大，说明收益波动越剧烈，风险越高。夏普比率用标准差来量化风险，便于进行风险调整收益的比较。</div></div>
+  <div class="faq-item"><div class="faq-q">夏普比率为负数意味着什么？</div><div class="faq-a">负数夏普比率表示投资组合的平均收益率低于无风险利率，即投资者承担了风险但获得的收益反而不如无风险资产。此时应重新考虑投资策略和资产配置。</div></div>
+  <div class="faq-item"><div class="faq-q">如何使用夏普比率比较不同的投资？</div><div class="faq-a">计算各个投资组合或基金的夏普比率，数值越高说明风险调整收益越好。但需注意投资期限、市场环境、资产类别等因素的影响。建议结合其他指标进行综合比较。</div></div>
+  <div class="faq-item"><div class="faq-q">高的夏普比率一定意味着好的投资吗？</div><div class="faq-a">虽然高夏普比率表示风险调整收益较好，但不能单独作为投资决策的依据。还应考虑绝对收益率、最大回撤、投资期限、流动性、费用等多个因素，进行全面评估。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/zh-CN/compound-interest.html">复利计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/roi-calculator.html">投资回报率 (ROI) 计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/risk-reward.html">风险收益比计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/position-size.html">头寸规模计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stop-loss.html">止损计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dividend-yield.html">股息收益率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/pe-ratio.html">市盈率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dca-calculator.html">定期定额投资计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/cagr.html">复合年增长率(CAGR)计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/margin-calculator.html">保证金计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stock-gain-loss.html">股票盈亏计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/break-even.html">损益平衡点计算器</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/sharpe-ratio.html" class="lang-btn">English</a>
+    <a href="/tools/sharpe-ratio.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/sharpe-ratio.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/sharpe-ratio.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/sharpe-ratio.html" class="lang-btn">Français</a>
+    <a href="/tools/es/sharpe-ratio.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/sharpe-ratio.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/sharpe-ratio.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/sharpe-ratio.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/sharpe-ratio.html" class="lang-btn active">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相关工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const portfolioReturnEl = document.getElementById('portfolioReturn');
+  const riskFreeRateEl = document.getElementById('riskFreeRate');
+  const standardDeviationEl = document.getElementById('standardDeviation');
+  
+  const portfolioReturn = parseFloat(portfolioReturnEl.value);
+  const riskFreeRate = parseFloat(riskFreeRateEl.value);
+  const standardDeviation = parseFloat(standardDeviationEl.value);
+  
+  if (isNaN(portfolioReturn) || portfolioReturnEl.value.trim() === '') {
+    alert('Please enter a valid Portfolio Return');
+    return;
+  }
+  if (isNaN(riskFreeRate) || riskFreeRateEl.value.trim() === '') {
+    alert('Please enter a valid Risk-Free Rate');
+    return;
+  }
+  if (isNaN(standardDeviation) || standardDeviationEl.value.trim() === '') {
+    alert('Please enter a valid Standard Deviation');
+    return;
+  }
+  if (standardDeviation === 0) {
+    alert('Standard Deviation cannot be zero');
+    return;
+  }
+  
+  const excessReturn = portfolioReturn - riskFreeRate;
+  const sharpeRatio = excessReturn / standardDeviation;
+  
+  document.getElementById('sharpeRatioResult').textContent = sharpeRatio.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+  document.getElementById('excessReturnResult').textContent = excessReturn.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已复制！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-CN|sharpe-ratio|2026-07-09 -->

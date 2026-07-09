@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>피어슨 상관계수 계산기 - 두 변수 상관관계 분석</title>
+<meta name="description" content="두 변수 간의 피어슨 상관계수, R제곱값, 상관강도를 계산하는 무료 통계 도구입니다.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ko/correlation-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/correlation-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/correlation-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/correlation-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/correlation-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/correlation-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/correlation-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/correlation-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/correlation-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/correlation-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/correlation-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/correlation-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "상관계수 계산기", "url": "https://softglow-ai.com/tools/ko/correlation-calculator.html", "description": "두 변수 간의 피어슨 상관계수, R제곱값, 상관강도를 계산하는 무료 통계 도구입니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "피어슨 상관계수와 스피어만 상관계수의 차이는?", "acceptedAnswer": {"@type": "Answer", "text": "피어슨 상관계수는 선형 관계를 측정하며 연속 변수에 사용됩니다. 스피어만 상관계수는 순위 기반이므로 비선형 관계나 순서형 데이터에 더 적합합니다."}}, {"@type": "Question", "name": "상관계수가 0.5라면 어떻게 해석하나요?", "acceptedAnswer": {"@type": "Answer", "text": "r = 0.5는 중간 정도의 양의 상관관계를 의미합니다. 한 변수가 증가할 때 다른 변수도 증가하는 경향이 있지만, 관계가 매우 강하지는 않습니다."}}, {"@type": "Question", "name": "P값이 0.05보다 크면 어떤 의미인가요?", "acceptedAnswer": {"@type": "Answer", "text": "P값 > 0.05는 95% 신뢰도에서 통계적으로 유의미한 상관관계가 없다는 의미입니다. 즉, 관찰된 상관계수가 우연으로 발생했을 가능성이 높습니다."}}, {"@type": "Question", "name": "데이터에 결측값이 있으면 어떻게 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "결측값이 있는 행을 제거하고 완전한 데이터 쌍만 사용하여 계산합니다. 데이터 입력 시 결측값을 제외하고 쉼표로 구분된 숫자만 입력하세요."}}, {"@type": "Question", "name": "상관계수가 높으면 인과관계가 있다는 뜻인가요?", "acceptedAnswer": {"@type": "Answer", "text": "아니요. 상관계수가 높다고 해서 인과관계가 있는 것은 아닙니다. 두 변수가 함께 변하는 경향을 보일 뿐이며, 원인과 결과 관계는 별도의 분석이 필요합니다."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ko/">도구</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 상관계수 계산기</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>상관계수 계산기</h1>
+    <p class="calc-subtitle">두 변수 간의 피어슨 상관계수를 즉시 계산합니다</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="xvalues">X 값 (쉼표로 구분)</label>
+  <div class="input-row"><input type="text" id="xvalues" placeholder="예: 1, 2, 3, 4, 5"  step="1"></div>
+</div>
+  <small class="input-help">첫 번째 변수의 데이터를 쉼표로 구분하여 입력하세요</small>
+<div class="input-group">
+  <label for="yvalues">Y 값 (쉼표로 구분)</label>
+  <div class="input-row"><input type="text" id="yvalues" placeholder="예: 2, 4, 5, 4, 6"  step="1"></div>
+</div>
+  <small class="input-help">두 번째 변수의 데이터를 쉼표로 구분하여 입력하세요</small></div>
+    <button class="btn-calc" onclick="calculate()">계산하기</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">피어슨 상관계수 (r)</span><span class="result-value" id="correlationResult">—</span></div>
+<div class="result-item"><span class="result-label">R제곱값 (결정계수)</span><span class="result-value" id="rSquaredResult">—</span></div>
+<div class="result-item"><span class="result-label">상관강도</span><span class="result-value" id="strengthResult">—</span></div>
+<div class="result-item"><span class="result-label">근사 P값</span><span class="result-value" id="pvalueResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>이것은 무엇을 의미합니까?</strong> 피어슨 상관계수(r)는 -1에서 1 사이의 값으로, 두 변수 간의 선형 관계의 강도와 방향을 나타냅니다. R제곱값은 한 변수가 다른 변수의 변동을 설명하는 정도를 백분율로 보여줍니다. P값이 0.05보다 작으면 통계적으로 유의미한 상관관계입니다.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 인쇄</button>
+        <button onclick="shareResult()">&#x1f4e4; 공유</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>상관계수 계산기란?</h2><p>상관계수 계산기는 두 변수 간의 선형 관계를 측정하는 피어슨 상관계수를 계산하는 통계 도구입니다. 이 도구는 데이터 분석, 연구, 투자 분석 등 다양한 분야에서 변수 간의 관계를 파악하는 데 사용됩니다.</p><h2>피어슨 상관계수 이해하기</h2><p>피어슨 상관계수(r)는 -1부터 1까지의 값을 가집니다. r = 1은 완벽한 양의 상관관계, r = -1은 완벽한 음의 상관관계, r = 0은 상관관계가 없음을 의미합니다. 예를 들어, 기온과 아이스크림 판매량은 양의 상관관계를 보이는 경향이 있습니다.</p><h2>R제곱값의 의미</h2><p>R제곱값(결정계수)은 피어슨 상관계수의 제곱으로, 한 변수가 다른 변수의 변동을 설명하는 정도를 백분율로 나타냅니다. 예를 들어, R² = 0.64는 한 변수가 다른 변수의 변동의 64%를 설명한다는 의미입니다.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>상관강도 해석</h2><p>상관강도는 다음과 같이 분류됩니다: |r| ≥ 0.8은 매우 강함, 0.6 ≤ |r| < 0.8은 강함, 0.4 ≤ |r| < 0.6은 중간, 0.2 ≤ |r| < 0.4는 약함, |r| < 0.2는 매우 약함입니다. 이를 통해 두 변수 간 관계의 강도를 직관적으로 파악할 수 있습니다.</p><h2>P값과 통계적 유의성</h2><p>P값은 귀무가설(상관관계가 없다)이 참일 확률입니다. 일반적으로 P값 < 0.05이면 95% 신뢰도에서 통계적으로 유의미한 상관관계가 있다고 판단합니다. 표본 크기가 클수록 같은 상관계수에서도 더 작은 P값을 얻습니다.</p><h2>실무 활용</h2><p>상관계수는 금융(주식 간 상관관계), 마케팅(광고비와 판매량), 의학(치료와 효과), 교육(학습시간과 성적) 등 다양한 분야에서 변수 간의 관계를 파악하는 데 활용됩니다. 단, 상관관계는 인과관계를 의미하지 않으므로 주의가 필요합니다.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 관련 기사</h3><div class="blog-grid"><a class="blog-card" href="/blog/ko/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ko/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ko/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>자주 묻는 질문</h2><div class="faq-item"><div class="faq-q">피어슨 상관계수와 스피어만 상관계수의 차이는?</div><div class="faq-a">피어슨 상관계수는 선형 관계를 측정하며 연속 변수에 사용됩니다. 스피어만 상관계수는 순위 기반이므로 비선형 관계나 순서형 데이터에 더 적합합니다.</div></div>
+  <div class="faq-item"><div class="faq-q">상관계수가 0.5라면 어떻게 해석하나요?</div><div class="faq-a">r = 0.5는 중간 정도의 양의 상관관계를 의미합니다. 한 변수가 증가할 때 다른 변수도 증가하는 경향이 있지만, 관계가 매우 강하지는 않습니다.</div></div>
+  <div class="faq-item"><div class="faq-q">P값이 0.05보다 크면 어떤 의미인가요?</div><div class="faq-a">P값 > 0.05는 95% 신뢰도에서 통계적으로 유의미한 상관관계가 없다는 의미입니다. 즉, 관찰된 상관계수가 우연으로 발생했을 가능성이 높습니다.</div></div>
+  <div class="faq-item"><div class="faq-q">데이터에 결측값이 있으면 어떻게 하나요?</div><div class="faq-a">결측값이 있는 행을 제거하고 완전한 데이터 쌍만 사용하여 계산합니다. 데이터 입력 시 결측값을 제외하고 쉼표로 구분된 숫자만 입력하세요.</div></div>
+  <div class="faq-item"><div class="faq-q">상관계수가 높으면 인과관계가 있다는 뜻인가요?</div><div class="faq-a">아니요. 상관계수가 높다고 해서 인과관계가 있는 것은 아닙니다. 두 변수가 함께 변하는 경향을 보일 뿐이며, 원인과 결과 관계는 별도의 분석이 필요합니다.</div></div></section>
+  <div class="more-tools"><h3>더 많은 도구</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ko/compound-interest.html">복리 이자 계산기</a>
+      <a class="tool-pill" href="/tools/ko/roi-calculator.html">ROI 계산기</a>
+      <a class="tool-pill" href="/tools/ko/risk-reward.html">위험-수익 계산기</a>
+      <a class="tool-pill" href="/tools/ko/position-size.html">포지션 크기 계산기</a>
+      <a class="tool-pill" href="/tools/ko/stop-loss.html">손절매 계산기</a>
+      <a class="tool-pill" href="/tools/ko/dividend-yield.html">배당 수익률 계산기</a>
+      <a class="tool-pill" href="/tools/ko/pe-ratio.html">P/E 비율 계산기</a>
+      <a class="tool-pill" href="/tools/ko/dca-calculator.html">DCA 계산기</a>
+      <a class="tool-pill" href="/tools/ko/cagr.html">CAGR 계산기</a>
+      <a class="tool-pill" href="/tools/ko/margin-calculator.html">마진 계산기</a>
+      <a class="tool-pill" href="/tools/ko/stock-gain-loss.html">주식 수익/손실 계산기</a>
+      <a class="tool-pill" href="/tools/ko/break-even.html">손익분기점 계산기</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/correlation-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/correlation-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/correlation-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/correlation-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/correlation-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/correlation-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/correlation-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/correlation-calculator.html" class="lang-btn active">한국어</a>
+    <a href="/tools/id/correlation-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/correlation-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>관련 계산기</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const xInput = document.getElementById('xvalues').value.trim();
+  const yInput = document.getElementById('yvalues').value.trim();
+  
+  if (!xInput || !yInput) {
+    alert('Please enter values for both X and Y variables');
+    return;
+  }
+  
+  const xValues = xInput.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+  const yValues = yInput.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+  
+  if (xValues.length !== yValues.length) {
+    alert('X and Y must have the same number of values');
+    return;
+  }
+  
+  if (xValues.length < 2) {
+    alert('Please enter at least 2 value pairs');
+    return;
+  }
+  
+  const n = xValues.length;
+  const meanX = xValues.reduce((a, b) => a + b, 0) / n;
+  const meanY = yValues.reduce((a, b) => a + b, 0) / n;
+  
+  let numerator = 0;
+  let sumSqX = 0;
+  let sumSqY = 0;
+  
+  for (let i = 0; i < n; i++) {
+    const dx = xValues[i] - meanX;
+    const dy = yValues[i] - meanY;
+    numerator += dx * dy;
+    sumSqX += dx * dx;
+    sumSqY += dy * dy;
+  }
+  
+  const denominator = Math.sqrt(sumSqX * sumSqY);
+  
+  if (denominator === 0) {
+    alert('Cannot calculate correlation: one variable has no variance');
+    return;
+  }
+  
+  const r = numerator / denominator;
+  const rSquared = r * r;
+  
+  let strengthText = '';
+  const absR = Math.abs(r);
+  if (absR >= 0.9) strengthText = 'Very Strong';
+  else if (absR >= 0.7) strengthText = 'Strong';
+  else if (absR >= 0.5) strengthText = 'Moderate';
+  else if (absR >= 0.3) strengthText = 'Weak';
+  else strengthText = 'Very Weak';
+  
+  const tStat = r * Math.sqrt(n - 2) / Math.sqrt(1 - r * r);
+  const df = n - 2;
+  const pvalue = 2 * (1 - tcdf(Math.abs(tStat), df));
+  
+  document.getElementById('correlationResult').textContent = r.toFixed(4);
+  document.getElementById('rSquaredResult').textContent = rSquared.toFixed(4);
+  document.getElementById('strengthResult').textContent = strengthText + ' (' + (r >= 0 ? 'Positive' : 'Negative') + ')';
+  document.getElementById('pvalueResult').textContent = pvalue.toFixed(4);
+  
+  document.getElementById('resultsDiv').classList.add('show');
+}
+
+function tcdf(t, df) {
+  const x = df / (df + t * t);
+  return ibeta(x, df / 2, 0.5);
+}
+
+function ibeta(x, a, b) {
+  if (x === 0) return 0;
+  if (x === 1) return 1;
+  const lbeta = (a + b - 1.5) * Math.log(x) + (b - 0.5) * Math.log(1 - x) - 0.5 * Math.log(2 * Math.PI) + lgamma(a) + lgamma(b) - lgamma(a + b);
+  return Math.exp(lbeta) * (a + b) / (a * (1 - x) + b * x);
+}
+
+function lgamma(x) {
+  const g = 7;
+  const coef = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+  if (x < 0.5) return Math.log(Math.PI) - Math.log(Math.sin(Math.PI * x)) - lgamma(1 - x);
+  x -= 1;
+  let a = coef[0];
+  const t = x + g + 0.5;
+  for (let i = 1; i < coef.length; i++) {
+    a += coef[i] / (x + i);
+  }
+  return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='복사됨!';setTimeout(function(){b.textContent='공유'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ko|correlation-calculator|2026-07-09 -->

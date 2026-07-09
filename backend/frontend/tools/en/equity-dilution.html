@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Equity Dilution Calculator | Ownership Stake</title>
+<meta name="description" content="Calculate how new funding rounds dilute your ownership percentage. Understand the impact of venture capital on your equity stake.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/en/equity-dilution.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/equity-dilution.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/equity-dilution.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/equity-dilution.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/equity-dilution.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/equity-dilution.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/equity-dilution.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/equity-dilution.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/equity-dilution.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/equity-dilution.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/equity-dilution.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/equity-dilution.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Equity Dilution Calculator", "url": "https://softglow-ai.com/tools/en/equity-dilution.html", "description": "Calculate how new funding rounds dilute your ownership percentage. Understand the impact of venture capital on your equity stake.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is the difference between dilution percentage and my new ownership percentage?", "acceptedAnswer": {"@type": "Answer", "text": "The dilution percentage represents the amount of new shares being issued relative to existing shares. Your new ownership percentage reflects what portion of the total outstanding shares you'll own after the dilution. For example, a 20% dilution doesn't mean you lose exactly 20 percentage points of ownership—the actual impact depends on your starting ownership percentage."}}, {"@type": "Question", "name": "Can my equity value increase even though my ownership percentage decreases?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, absolutely. If the company's total valuation increases more than the dilution percentage, your equity stake value can grow despite owning a smaller percentage. For instance, if your stake is diluted 20% but the company valuation doubles, your absolute value likely increases even with lower percentage ownership."}}, {"@type": "Question", "name": "How many funding rounds can I go through before losing effective control?", "acceptedAnswer": {"@type": "Answer", "text": "Control typically requires owning enough shares to influence major decisions, though this varies by company structure and investor agreements. Many founders aim to maintain at least 10-15% ownership through multiple rounds to preserve meaningful control. Board seats, voting agreements, and founder-friendly terms also impact control independent of ownership percentage."}}, {"@type": "Question", "name": "What is anti-dilution protection and should I negotiate for it as a founder?", "acceptedAnswer": {"@type": "Answer", "text": "Anti-dilution provisions protect existing shareholders when future rounds occur at lower valuations (down rounds). While founders benefit from anti-dilution clauses, investors typically demand them as a condition of investment. As a founder, you'll likely negotiate the type—broad-based weighted average is most common and founder-friendly compared to full-ratchet provisions."}}, {"@type": "Question", "name": "Should I be concerned about equity dilution during early funding rounds?", "acceptedAnswer": {"@type": "Answer", "text": "Some dilution is necessary and expected for startup growth. Early-stage dilution is often acceptable if the funding enables significant value creation. However, you should still calculate projected ownership through multiple rounds and ensure the dilution trajectory aligns with your long-term goals. Negotiate valuations and round sizes to optimize your equity preservation while securing necessary capital."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/en/">Tools</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/en/">Tools</a> > Equity Dilution Calculator</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Equity Dilution Calculator</h1>
+    <p class="calc-subtitle">Calculate how funding rounds reduce your ownership stake</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="oldOwnership">Your Current Ownership Percentage</label>
+  <div class="input-row"><input type="number" id="oldOwnership" placeholder="25"  step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">Enter your current ownership percentage before the new funding round (e.g., 25%)</small>
+<div class="input-group">
+  <label for="dilutionPercent">Dilution Percentage (New Funding)</label>
+  <div class="input-row"><input type="number" id="dilutionPercent" placeholder="20"  step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">Enter the percentage of equity being diluted by the new funding round (e.g., 20%)</small></div>
+    <button class="btn-calc" onclick="calculate()">Calculate</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Your New Ownership Percentage</span><span class="result-value" id="newOwnership">—</span></div>
+<div class="result-item"><span class="result-label">Ownership Stake Lost</span><span class="result-value" id="ownershipLoss">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>What does this mean?</strong> Your new ownership percentage shows what portion of the company you'll own after dilution from the new funding round. The ownership stake lost represents the percentage points you've surrendered, helping you understand the impact of capital raises on your equity position.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Print</button>
+        <button onclick="shareResult()">&#x1f4e4; Share</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>Understanding Equity Dilution</h2><p>Equity dilution occurs when a company issues new shares, reducing the percentage ownership of existing shareholders. This commonly happens during funding rounds when investors purchase shares, expanding the total share count. Understanding dilution is crucial for founders and early investors to evaluate the long-term impact of capital raises on their ownership stakes.</p><h2>How Equity Dilution Works</h2><p>When your company raises funding, new shares are issued to investors. If you owned 25% of 1 million shares (250,000 shares) and the company issues 500,000 new shares, your ownership drops even though your share count remains the same. Your 250,000 shares now represent a smaller percentage of the total 1.5 million shares outstanding, typically resulting in approximately 16.67% ownership. This mathematical reduction is equity dilution.</p><h2>Impact on Founder and Early Investor Value</h2><p>While dilution reduces percentage ownership, it doesn't necessarily reduce absolute value if the funding increases company valuation proportionally. For example, if your stake dilutes from 25% to 20% but the company valuation grows from $10 million to $15 million, your equity value actually increases from $2.5 million to $3 million. However, if valuation remains flat or grows slower than the dilution percentage, your stake value may decrease in real terms.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Planning for Multiple Funding Rounds</h2><p>Successful companies often go through multiple funding rounds, each creating additional dilution. A founder who owns 100% pre-seed might own 80% after seed funding, 50% after Series A, 30% after Series B, and 20% after Series C. Planning for anticipated dilution helps founders understand how many rounds they can support while maintaining meaningful control and motivation. Most founders aim to retain at least 10-15% ownership to ensure continued alignment with investor interests.</p><h2>Anti-Dilution Protection</h2><p>To protect against excessive dilution, investors often negotiate anti-dilution provisions. Broad-based weighted average anti-dilution adjusts share prices based on the weighted average of all shares issued, offering moderate protection. Narrow-based weighted average provides stronger protection by only considering preferred shares. Full-ratchet anti-dilution, the most founder-unfavorable provision, reprices shares at the lowest price paid in any down round, potentially causing severe founder dilution.</p><h2>Strategic Considerations for Fundraising</h2><p>Before accepting funding terms, evaluate the dilution impact against your strategic goals. Consider the dilution percentage, company valuation, and your long-term ownership targets. Negotiate with investors to minimize dilution through higher valuations, smaller round sizes, or alternative funding structures. Remember that some dilution is necessary for growth capital, but excessive dilution can reduce founder motivation and control. Always calculate projected ownership through multiple rounds to understand the total impact on your long-term equity position.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Related Articles</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>FAQ</h2><div class="faq-item"><div class="faq-q">What is the difference between dilution percentage and my new ownership percentage?</div><div class="faq-a">The dilution percentage represents the amount of new shares being issued relative to existing shares. Your new ownership percentage reflects what portion of the total outstanding shares you'll own after the dilution. For example, a 20% dilution doesn't mean you lose exactly 20 percentage points of ownership—the actual impact depends on your starting ownership percentage.</div></div>
+  <div class="faq-item"><div class="faq-q">Can my equity value increase even though my ownership percentage decreases?</div><div class="faq-a">Yes, absolutely. If the company's total valuation increases more than the dilution percentage, your equity stake value can grow despite owning a smaller percentage. For instance, if your stake is diluted 20% but the company valuation doubles, your absolute value likely increases even with lower percentage ownership.</div></div>
+  <div class="faq-item"><div class="faq-q">How many funding rounds can I go through before losing effective control?</div><div class="faq-a">Control typically requires owning enough shares to influence major decisions, though this varies by company structure and investor agreements. Many founders aim to maintain at least 10-15% ownership through multiple rounds to preserve meaningful control. Board seats, voting agreements, and founder-friendly terms also impact control independent of ownership percentage.</div></div>
+  <div class="faq-item"><div class="faq-q">What is anti-dilution protection and should I negotiate for it as a founder?</div><div class="faq-a">Anti-dilution provisions protect existing shareholders when future rounds occur at lower valuations (down rounds). While founders benefit from anti-dilution clauses, investors typically demand them as a condition of investment. As a founder, you'll likely negotiate the type—broad-based weighted average is most common and founder-friendly compared to full-ratchet provisions.</div></div>
+  <div class="faq-item"><div class="faq-q">Should I be concerned about equity dilution during early funding rounds?</div><div class="faq-a">Some dilution is necessary and expected for startup growth. Early-stage dilution is often acceptable if the funding enables significant value creation. However, you should still calculate projected ownership through multiple rounds and ensure the dilution trajectory aligns with your long-term goals. Negotiate valuations and round sizes to optimize your equity preservation while securing necessary capital.</div></div></section>
+  <div class="more-tools"><h3>More Tools</h3><div class="tools-grid"><a class="tool-pill" href="/tools/en/compound-interest.html">Compound Interest Calculator</a>
+      <a class="tool-pill" href="/tools/en/roi-calculator.html">ROI Calculator</a>
+      <a class="tool-pill" href="/tools/en/risk-reward.html">Risk Reward Calculator</a>
+      <a class="tool-pill" href="/tools/en/position-size.html">Position Size Calculator</a>
+      <a class="tool-pill" href="/tools/en/stop-loss.html">Stop Loss Calculator</a>
+      <a class="tool-pill" href="/tools/en/dividend-yield.html">Dividend Yield Calculator</a>
+      <a class="tool-pill" href="/tools/en/pe-ratio.html">P/E Ratio Calculator</a>
+      <a class="tool-pill" href="/tools/en/dca-calculator.html">DCA Calculator</a>
+      <a class="tool-pill" href="/tools/en/cagr.html">CAGR Calculator</a>
+      <a class="tool-pill" href="/tools/en/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/en/stock-gain-loss.html">Stock Gain/Loss Calculator</a>
+      <a class="tool-pill" href="/tools/en/break-even.html">Break Even Calculator</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/equity-dilution.html" class="lang-btn active">English</a>
+    <a href="/tools/equity-dilution.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/equity-dilution.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/equity-dilution.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/equity-dilution.html" class="lang-btn">Français</a>
+    <a href="/tools/es/equity-dilution.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/equity-dilution.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/equity-dilution.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/equity-dilution.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/equity-dilution.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Related Tools</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const oldOwnershipInput = document.getElementById('oldOwnership');
+  const dilutionPercentInput = document.getElementById('dilutionPercent');
+  const newOwnershipResult = document.getElementById('newOwnership');
+  const ownershipLossResult = document.getElementById('ownershipLoss');
+  const resultsDiv = document.getElementById('results');
+
+  if (!oldOwnershipInput.value || !dilutionPercentInput.value) {
+    alert('Please enter both your current ownership percentage and the dilution percentage.');
+    return;
+  }
+
+  const oldOwnership = parseFloat(oldOwnershipInput.value);
+  const dilutionPercent = parseFloat(dilutionPercentInput.value);
+
+  if (oldOwnership < 0 || oldOwnership > 100 || dilutionPercent < 0 || dilutionPercent > 100) {
+    alert('Please enter values between 0 and 100.');
+    return;
+  }
+
+  const newOwnership = oldOwnership * (1 - dilutionPercent / 100);
+  const ownershipLoss = oldOwnership - newOwnership;
+
+  newOwnershipResult.textContent = newOwnership.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+  ownershipLossResult.textContent = ownershipLoss.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copied!';setTimeout(function(){b.textContent='Share'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|en|equity-dilution|2026-07-09 -->

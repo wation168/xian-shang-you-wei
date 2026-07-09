@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora ATR - Análisis de Volatilidad</title>
+<meta name="description" content="Calcula el Rango Verdadero Promedio (ATR) para analizar la volatilidad del mercado y mejorar tus estrategias de trading.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/es/atr-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/atr-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/atr-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/atr-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/atr-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/atr-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/atr-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/atr-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/atr-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/atr-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/atr-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/atr-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculadora ATR", "url": "https://softglow-ai.com/tools/es/atr-calculator.html", "description": "Calcula el Rango Verdadero Promedio (ATR) para analizar la volatilidad del mercado y mejorar tus estrategias de trading.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "es"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "¿Cuál es la diferencia entre ATR y el rango simple alto-bajo?", "acceptedAnswer": {"@type": "Answer", "text": "El rango simple solo mide la diferencia entre el máximo y mínimo del período actual. El ATR es más sofisticado porque incluye los gaps respecto al cierre anterior y promedia varios períodos, proporcionando una medida más completa y estable de la volatilidad."}}, {"@type": "Question", "name": "¿Cuál es el período estándar para calcular el ATR?", "acceptedAnswer": {"@type": "Answer", "text": "J. Welles Wilder, el creador del ATR, originalmente utilizó 14 períodos. Este sigue siendo el estándar en la mayoría de plataformas de trading, aunque algunos traders ajustan este valor según su estilo de trading (períodos más cortos para trading intradía, más largos para swing trading)."}}, {"@type": "Question", "name": "¿Puede el ATR predecir la dirección del movimiento del precio?", "acceptedAnswer": {"@type": "Answer", "text": "No, el ATR solo mide la volatilidad (magnitud de los movimientos), no la dirección. Un ATR alto significa que hay movimientos significativos, pero no indica si el precio subirá o bajará. Debes usar otros indicadores para determinar la dirección."}}, {"@type": "Question", "name": "¿Cómo utilizo el ATR para establecer stop-loss?", "acceptedAnswer": {"@type": "Answer", "text": "Una regla común es multiplicar el ATR por un factor (generalmente 1.5 a 2) y establecer el stop-loss a esa distancia desde tu punto de entrada. Por ejemplo, si el ATR es $2 y usas un factor de 2, tu stop-loss estaría $4 por debajo de tu entrada en una operación larga."}}, {"@type": "Question", "name": "¿Qué significa un ATR muy bajo?", "acceptedAnswer": {"@type": "Answer", "text": "Un ATR muy bajo indica que el activo tiene baja volatilidad en el período analizado, lo que significa movimientos de precio pequeños y predecibles. Algunos traders evitan estos mercados porque hay menos oportunidades de ganancias significativas, mientras que otros los prefieren por ser más estables."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/es/">Herramientas</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/es/">Herramientas</a> > Calculadora ATR</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Calculadora ATR</h1>
+    <p class="calc-subtitle">Calcula el Rango Verdadero Promedio para análisis de volatilidad y estrategias de trading</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="highPrice">Precio Máximo</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="highPrice" placeholder="150,75"  step="0.01"></div>
+</div>
+  <small class="input-help">Ingresa el precio más alto del período de trading actual</small>
+<div class="input-group">
+  <label for="lowPrice">Precio Mínimo</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="lowPrice" placeholder="148,50"  step="0.01"></div>
+</div>
+  <small class="input-help">Ingresa el precio más bajo del período de trading actual</small>
+<div class="input-group">
+  <label for="closePrice">Precio de Cierre (Anterior)</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="closePrice" placeholder="149,25"  step="0.01"></div>
+</div>
+  <small class="input-help">Ingresa el precio de cierre del período anterior</small>
+<div class="input-group">
+  <label for="period">Período (días)</label>
+  <div class="input-row"><input type="number" id="period" placeholder="14"  value="14" step="1"></div>
+</div>
+  <small class="input-help">Ingresa el número de días para calcular el ATR promedio</small>
+<div class="input-group">
+  <label for="historicalTR">Valores de TR Históricos (separados por comas)</label>
+  <div class="input-row"><input type="text" id="historicalTR" placeholder="2,50;2,75;2,10;2,90;1,85"  step="1"></div>
+</div>
+  <small class="input-help">Ingresa los valores históricos del Rango Verdadero separados por comas</small></div>
+    <button class="btn-calc" onclick="calculate()">Calcular</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">Rango Verdadero (TR)</span><span class="result-value" id="trueRange">—</span></div>
+<div class="result-highlight"><span class="result-label">Rango Verdadero Promedio (ATR)</span><span class="result-value" id="atrResult">—</span></div>
+<div class="result-item"><span class="result-label">ATR como % del Precio</span><span class="result-value" id="atrPercent">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>¿Qué significa esto?</strong> El Rango Verdadero (TR) representa la volatilidad máxima en un período, considerando el rango entre máximo y mínimo, más el hueco respecto al cierre anterior. El ATR es el promedio de estos valores y se utiliza para establecer niveles de stop-loss y tomar-ganancias. Un ATR más alto indica mayor volatilidad en el activo.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Imprimir</button>
+        <button onclick="shareResult()">&#x1f4e4; Compartir</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>¿Qué es el Rango Verdadero Promedio (ATR)?</h2><p>El Rango Verdadero Promedio (ATR, por sus siglas en inglés) es un indicador técnico desarrollado por J. Welles Wilder que mide la volatilidad de un activo financiero. A diferencia de otros indicadores que solo consideran el rango entre el máximo y mínimo de un período, el ATR también toma en cuenta los huecos (gaps) que puedan ocurrir entre el cierre de un período y la apertura del siguiente. Este indicador es especialmente útil para traders que desean comprender la magnitud de los movimientos de precios y ajustar sus estrategias de riesgo en consecuencia.</p><h2>Cálculo del Rango Verdadero (TR)</h2><p>El primer paso para calcular el ATR es determinar el Rango Verdadero (TR) para cada período. El TR se calcula como el máximo de los siguientes tres valores: (1) el rango entre el precio máximo y el precio mínimo del período actual, (2) el valor absoluto de la diferencia entre el precio máximo actual y el precio de cierre anterior, y (3) el valor absoluto de la diferencia entre el precio mínimo actual y el precio de cierre anterior. Esta fórmula garantiza que se capture cualquier movimiento significativo, incluyendo los gaps.</p><h2>Cálculo del ATR</h2><p>Una vez que tenemos el Rango Verdadero para cada período, el ATR se calcula como el promedio de estos valores durante el período especificado (generalmente 14 días es el estándar). Para el primer ATR, simplemente se promedian todos los valores de TR del período. Para los cálculos posteriores, se utiliza un promedio móvil suavizado exponencialmente para dar más peso a los datos recientes. Esta metodología permite que el ATR refleje mejor las condiciones actuales del mercado.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Interpretación del ATR y su Aplicación en Trading</h2><p>Un ATR alto indica que el activo está experimentando una alta volatilidad, lo que significa que los precios se mueven significativamente en cortos períodos de tiempo. Esto puede representar tanto oportunidades como riesgos para los traders. Un ATR bajo, por el contrario, sugiere una baja volatilidad y movimientos de precio más lentos y predecibles. Los traders utilizan estos valores para ajustar el tamaño de sus posiciones, establecer niveles de stop-loss más amplios en mercados volátiles, o esperar a que aumente la volatilidad antes de operar. El ATR también se puede expresar como un porcentaje del precio actual, lo que permite comparar la volatilidad entre diferentes activos con precios muy distintos.</p><h2>Estrategias de Trading con ATR</h2><p>Muchos traders profesionales utilizan el ATR como base para sus sistemas de gestión de riesgos. Una estrategia común es fijar el stop-loss a una distancia de 1.5 a 2 veces el ATR por debajo del punto de entrada en una operación larga, o por encima en una operación corta. Esto asegura que el stop-loss no se active por simples fluctuaciones normales del mercado. Además, algunos traders prefieren operar solo cuando el ATR está por encima de un cierto umbral, indicando que hay suficiente volatilidad para generar ganancias significativas. El ATR también ayuda a identificar cambios en la volatilidad que podrían preceder a movimientos importantes de precios.</p><h2>Ventajas y Limitaciones del ATR</h2><p>El ATR es un indicador versátil que funciona bien en diferentes mercados y períodos de tiempo. No está diseñado para predecir la dirección del movimiento del precio, sino solo su magnitud, lo que lo hace complementario a otros indicadores direccionales. Sin embargo, tiene limitaciones: en mercados con tendencias fuertes y sostenidas, el ATR puede no capturar adecuadamente los picos de volatilidad; además, su utilidad disminuye en mercados muy ilíquidos donde los gaps pueden ser excesivos. Es importante usar el ATR en combinación con otros análisis técnicos y fundamentales para tomar decisiones de trading bien informadas.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Artículos relacionados</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/candlestick-patterns.html">Candlestick Patterns<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/support-resistance.html">Support & Resistance<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/moving-average-guide.html">Moving Average Guide<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>Preguntas frecuentes</h2><div class="faq-item"><div class="faq-q">¿Cuál es la diferencia entre ATR y el rango simple alto-bajo?</div><div class="faq-a">El rango simple solo mide la diferencia entre el máximo y mínimo del período actual. El ATR es más sofisticado porque incluye los gaps respecto al cierre anterior y promedia varios períodos, proporcionando una medida más completa y estable de la volatilidad.</div></div>
+  <div class="faq-item"><div class="faq-q">¿Cuál es el período estándar para calcular el ATR?</div><div class="faq-a">J. Welles Wilder, el creador del ATR, originalmente utilizó 14 períodos. Este sigue siendo el estándar en la mayoría de plataformas de trading, aunque algunos traders ajustan este valor según su estilo de trading (períodos más cortos para trading intradía, más largos para swing trading).</div></div>
+  <div class="faq-item"><div class="faq-q">¿Puede el ATR predecir la dirección del movimiento del precio?</div><div class="faq-a">No, el ATR solo mide la volatilidad (magnitud de los movimientos), no la dirección. Un ATR alto significa que hay movimientos significativos, pero no indica si el precio subirá o bajará. Debes usar otros indicadores para determinar la dirección.</div></div>
+  <div class="faq-item"><div class="faq-q">¿Cómo utilizo el ATR para establecer stop-loss?</div><div class="faq-a">Una regla común es multiplicar el ATR por un factor (generalmente 1.5 a 2) y establecer el stop-loss a esa distancia desde tu punto de entrada. Por ejemplo, si el ATR es $2 y usas un factor de 2, tu stop-loss estaría $4 por debajo de tu entrada en una operación larga.</div></div>
+  <div class="faq-item"><div class="faq-q">¿Qué significa un ATR muy bajo?</div><div class="faq-a">Un ATR muy bajo indica que el activo tiene baja volatilidad en el período analizado, lo que significa movimientos de precio pequeños y predecibles. Algunos traders evitan estos mercados porque hay menos oportunidades de ganancias significativas, mientras que otros los prefieren por ser más estables.</div></div></section>
+  <div class="more-tools"><h3>Más herramientas</h3><div class="tools-grid"><a class="tool-pill" href="/tools/es/fibonacci-retracement.html">Calculadora de Retracción Fibonacci</a>
+      <a class="tool-pill" href="/tools/es/pivot-point.html">Calculadora de Puntos Pivote</a>
+      <a class="tool-pill" href="/tools/es/rsi-calculator.html">Calculadora de RSI</a>
+      <a class="tool-pill" href="/tools/es/macd-calculator.html">Calculadora MACD</a>
+      <a class="tool-pill" href="/tools/es/bollinger-bands.html">Calculadora de Bandas de Bollinger</a>
+      <a class="tool-pill" href="/tools/es/ma-crossover.html">Calculadora de Cruce de Medias Móviles</a>
+      <a class="tool-pill" href="/tools/es/candlestick-identifier.html">Identificador de Patrones de Velas</a>
+      <a class="tool-pill" href="/tools/es/support-resistance.html">Calculadora de Soporte y Resistencia</a>
+      <a class="tool-pill" href="/tools/es/pip-value.html">Calculadora de Valor del Pip</a>
+      <a class="tool-pill" href="/tools/es/options-profit.html">Calculadora de Ganancias en Opciones</a>
+      <a class="tool-pill" href="/tools/es/stock-split.html">Calculadora de División de Acciones</a>
+      <a class="tool-pill" href="/tools/es/trading-fee.html">Calculadora de Comisiones de Trading</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/atr-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/atr-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/atr-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/atr-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/atr-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/atr-calculator.html" class="lang-btn active">Español</a>
+    <a href="/tools/pt/atr-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/atr-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/atr-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/atr-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Herramientas relacionadas</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const highPrice = parseFloat(document.getElementById('highPrice').value);
+  const lowPrice = parseFloat(document.getElementById('lowPrice').value);
+  const closePrice = parseFloat(document.getElementById('closePrice').value);
+  const period = parseInt(document.getElementById('period').value);
+  const historicalTRInput = document.getElementById('historicalTR').value.trim();
+
+  if (isNaN(highPrice) || isNaN(lowPrice) || isNaN(closePrice) || isNaN(period)) {
+    alert('Please enter valid values for High Price, Low Price, Close Price, and Period.');
+    return;
+  }
+
+  if (highPrice < lowPrice) {
+    alert('High Price must be greater than or equal to Low Price.');
+    return;
+  }
+
+  if (period < 1) {
+    alert('Period must be at least 1.');
+    return;
+  }
+
+  const tr1 = highPrice - lowPrice;
+  const tr2 = Math.abs(highPrice - closePrice);
+  const tr3 = Math.abs(lowPrice - closePrice);
+  const currentTR = Math.max(tr1, tr2, tr3);
+
+  document.getElementById('trueRange').textContent = '$' + currentTR.toFixed(2);
+
+  let atr = 0;
+
+  if (historicalTRInput !== '') {
+    const trValues = historicalTRInput.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+    
+    if (trValues.length === 0) {
+      alert('Please provide valid comma-separated TR values or leave the field empty.');
+      return;
+    }
+
+    trValues.push(currentTR);
+    
+    if (trValues.length >= period) {
+      const recentTRs = trValues.slice(-period);
+      atr = recentTRs.reduce((sum, val) => sum + val, 0) / period;
+    } else {
+      atr = trValues.reduce((sum, val) => sum + val, 0) / trValues.length;
+    }
+  } else {
+    atr = currentTR;
+  }
+
+  const atrPercent = (atr / highPrice * 100);
+
+  document.getElementById('atrResult').textContent = '$' + atr.toFixed(2);
+  document.getElementById('atrPercent').textContent = atrPercent.toFixed(2);
+
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='¡Copiado!';setTimeout(function(){b.textContent='Compartir'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|es|atr-calculator|2026-07-09 -->

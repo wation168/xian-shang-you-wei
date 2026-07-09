@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de RSI - Análisis Técnico</title>
+<meta name="description" content="Calcula el Índice de Fuerza Relativa (RSI) para identificar condiciones de sobrecompra y sobreventa en tus análisis técnicos.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/es/rsi-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/rsi-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/rsi-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/rsi-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/rsi-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/rsi-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/rsi-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/rsi-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/rsi-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/rsi-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/rsi-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/rsi-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculadora de RSI", "url": "https://softglow-ai.com/tools/es/rsi-calculator.html", "description": "Calcula el Índice de Fuerza Relativa (RSI) para identificar condiciones de sobrecompra y sobreventa en tus análisis técnicos.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "es"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "¿Cuál es el período RSI más utilizado?", "acceptedAnswer": {"@type": "Answer", "text": "El período más común es 14 días, establecido por J. Welles Wilder. Sin embargo, algunos traders utilizan 7 días para mayor sensibilidad o 21 días para menor sensibilidad según su estrategia."}}, {"@type": "Question", "name": "¿Qué significa un RSI de 70?", "acceptedAnswer": {"@type": "Answer", "text": "Un RSI de 70 o superior indica condición de sobrecompra, sugiriendo que el precio ha subido significativamente y podría estar cerca de una corrección o retroceso de precios."}}, {"@type": "Question", "name": "¿Es el RSI confiable en mercados con tendencia fuerte?", "acceptedAnswer": {"@type": "Answer", "text": "El RSI es menos confiable en mercados con tendencias fuertes, ya que puede permanecer en territorio de sobrecompra o sobreventa durante períodos prolongados sin cambiar de dirección."}}, {"@type": "Question", "name": "¿Puedo usar RSI como único indicador para trading?", "acceptedAnswer": {"@type": "Answer", "text": "No se recomienda usar RSI como único indicador. Es mejor combinarlo con otros indicadores técnicos, análisis de tendencia y gestión de riesgo para decisiones más informadas."}}, {"@type": "Question", "name": "¿Cómo identifico una divergencia RSI?", "acceptedAnswer": {"@type": "Answer", "text": "Una divergencia ocurre cuando el precio alcanza un nuevo máximo pero el RSI no lo hace (divergencia bajista), o cuando el precio alcanza un nuevo mínimo pero el RSI no lo hace (divergencia alcista), sugiriendo un posible cambio de tendencia."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/es/">Herramientas</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/es/">Herramientas</a> > Calculadora de RSI</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Calculadora de RSI</h1>
+    <p class="calc-subtitle">Calcula el Índice de Fuerza Relativa para análisis técnico y señales de trading</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="closingPrices">Precios de Cierre (separados por comas)</label>
+  <div class="input-row"><input type="text" id="closingPrices" placeholder="100, 102, 101, 103, 105, 104, 106"  step="0.01"></div>
+</div>
+  <small class="input-help">Ingresa una serie de precios de cierre históricos separados por comas</small>
+<div class="input-group">
+  <label for="period">Período RSI (días)</label>
+  <div class="input-row"><input type="number" id="period" placeholder="14"  value="14" step="1"><span class="input-suffix">días</span></div>
+</div>
+  <small class="input-help">Define el período de análisis en días (típicamente 14 días)</small></div>
+    <button class="btn-calc" onclick="calculate()">Calcular</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Valor RSI</span><span class="result-value" id="rsiValue">—</span></div>
+<div class="result-item"><span class="result-label">Condición del Mercado</span><span class="result-value" id="rsiCondition">—</span></div>
+<div class="result-item"><span class="result-label">Ganancia Promedio</span><span class="result-value" id="avgGain">—</span></div>
+<div class="result-item"><span class="result-label">Pérdida Promedio</span><span class="result-value" id="avgLoss">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>¿Qué significa esto?</strong> El RSI oscila entre 0 y 100, indicando el momentum del precio. Valores superiores a 70 sugieren sobrecompra, mientras que valores inferiores a 30 indican sobreventa. El valor RSI se calcula a partir de las ganancias y pérdidas promedio del período seleccionado.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Imprimir</button>
+        <button onclick="shareResult()">&#x1f4e4; Compartir</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>¿Qué es el Índice de Fuerza Relativa (RSI)?</h2><p>El Índice de Fuerza Relativa (RSI) es un indicador técnico de momentum que mide la velocidad y magnitud de los cambios de precios. Desarrollado por J. Welles Wilder en 1978, el RSI oscila entre 0 y 100 y se utiliza para identificar condiciones de sobrecompra y sobreventa en los mercados financieros. Este indicador es ampliamente utilizado por traders e inversores para generar señales de compra y venta.</p><h2>Cómo Funciona la Calculadora de RSI</h2><p>Nuestra calculadora de RSI automatiza el proceso de cálculo del índice de fuerza relativa. Ingresando una serie de precios de cierre y especificando el período de análisis (generalmente 14 días), la herramienta calcula automáticamente el valor RSI, la ganancia promedio y la pérdida promedio. El algoritmo compara los movimientos alcistas con los movimientos bajistas para determinar el momentum general del activo. Los resultados se presentan con claridad, permitiendo identificar rápidamente las condiciones del mercado.</p><h2>Interpretación de los Resultados</h2><p>El valor RSI resultante se interpreta de la siguiente manera: un RSI superior a 70 indica una condición de sobrecompra, sugiriendo que el precio ha subido demasiado rápido y podría estar cerca de una corrección. Un RSI inferior a 30 indica sobreventa, sugiriendo que el precio ha bajado excesivamente y podría estar próximo a un rebote. Un RSI entre 40 y 60 se considera neutral. La ganancia promedio y la pérdida promedio son componentes clave del cálculo y ayudan a entender el balance entre movimientos alcistas y bajistas durante el período analizado.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Aplicaciones Prácticas del RSI</h2><p>El RSI es especialmente útil en mercados con tendencias laterales o en rangos definidos, donde la sobreventa y sobrecompra generan señales más confiables. Los traders utilizan el RSI para confirmar puntos de entrada y salida, identificar divergencias con el precio (cuando el RSI y el precio se mueven en direcciones opuestas) y detectar cambios en el momentum antes de que ocurran movimientos significativos. Es importante combinar el RSI con otros indicadores técnicos y análisis fundamental para mejorar la precisión de las decisiones comerciales.</p><h2>Ventajas y Limitaciones</h2><p>Entre las ventajas del RSI están su simplicidad de cálculo, su rápida identificación de puntos de inflexión y su efectividad en mercados volátiles. Sin embargo, el RSI también tiene limitaciones: en mercados con tendencias fuertes, el indicador puede mantenerse en territorio de sobrecompra o sobreventa durante períodos prolongados sin generar señales confiables. Además, el RSI puede producir señales falsas en mercados muy volátiles o durante eventos económicos significativos. Por estas razones, se recomienda usar el RSI como parte de una estrategia integral de análisis técnico.</p><h2>Consejos para Utilizar la Calculadora de RSI</h2><p>Para obtener los mejores resultados con esta calculadora, asegúrate de utilizar datos históricos de precios confiables y consistentes. El período más común es 14 días, aunque algunos traders utilizan períodos más cortos (7 días) para señales más sensibles o períodos más largos (21 días) para señales menos volátiles. Actualiza regularmente tus datos para mantener el análisis relevante y considera utilizar múltiples períodos RSI para confirmar tendencias. Recuerda que ningún indicador es infalible, y siempre debes combinar el análisis técnico con gestión de riesgo adecuada.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Artículos relacionados</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/candlestick-patterns.html">Candlestick Patterns<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/support-resistance.html">Support & Resistance<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/moving-average-guide.html">Moving Average Guide<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>Preguntas frecuentes</h2><div class="faq-item"><div class="faq-q">¿Cuál es el período RSI más utilizado?</div><div class="faq-a">El período más común es 14 días, establecido por J. Welles Wilder. Sin embargo, algunos traders utilizan 7 días para mayor sensibilidad o 21 días para menor sensibilidad según su estrategia.</div></div>
+  <div class="faq-item"><div class="faq-q">¿Qué significa un RSI de 70?</div><div class="faq-a">Un RSI de 70 o superior indica condición de sobrecompra, sugiriendo que el precio ha subido significativamente y podría estar cerca de una corrección o retroceso de precios.</div></div>
+  <div class="faq-item"><div class="faq-q">¿Es el RSI confiable en mercados con tendencia fuerte?</div><div class="faq-a">El RSI es menos confiable en mercados con tendencias fuertes, ya que puede permanecer en territorio de sobrecompra o sobreventa durante períodos prolongados sin cambiar de dirección.</div></div>
+  <div class="faq-item"><div class="faq-q">¿Puedo usar RSI como único indicador para trading?</div><div class="faq-a">No se recomienda usar RSI como único indicador. Es mejor combinarlo con otros indicadores técnicos, análisis de tendencia y gestión de riesgo para decisiones más informadas.</div></div>
+  <div class="faq-item"><div class="faq-q">¿Cómo identifico una divergencia RSI?</div><div class="faq-a">Una divergencia ocurre cuando el precio alcanza un nuevo máximo pero el RSI no lo hace (divergencia bajista), o cuando el precio alcanza un nuevo mínimo pero el RSI no lo hace (divergencia alcista), sugiriendo un posible cambio de tendencia.</div></div></section>
+  <div class="more-tools"><h3>Más herramientas</h3><div class="tools-grid"><a class="tool-pill" href="/tools/es/fibonacci-retracement.html">Calculadora de Retracción Fibonacci</a>
+      <a class="tool-pill" href="/tools/es/pivot-point.html">Calculadora de Puntos Pivote</a>
+      <a class="tool-pill" href="/tools/es/macd-calculator.html">Calculadora MACD</a>
+      <a class="tool-pill" href="/tools/es/bollinger-bands.html">Calculadora de Bandas de Bollinger</a>
+      <a class="tool-pill" href="/tools/es/atr-calculator.html">Calculadora ATR</a>
+      <a class="tool-pill" href="/tools/es/ma-crossover.html">Calculadora de Cruce de Medias Móviles</a>
+      <a class="tool-pill" href="/tools/es/candlestick-identifier.html">Identificador de Patrones de Velas</a>
+      <a class="tool-pill" href="/tools/es/support-resistance.html">Calculadora de Soporte y Resistencia</a>
+      <a class="tool-pill" href="/tools/es/pip-value.html">Calculadora de Valor del Pip</a>
+      <a class="tool-pill" href="/tools/es/options-profit.html">Calculadora de Ganancias en Opciones</a>
+      <a class="tool-pill" href="/tools/es/stock-split.html">Calculadora de División de Acciones</a>
+      <a class="tool-pill" href="/tools/es/trading-fee.html">Calculadora de Comisiones de Trading</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/rsi-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/rsi-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/rsi-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/rsi-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/rsi-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/rsi-calculator.html" class="lang-btn active">Español</a>
+    <a href="/tools/pt/rsi-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/rsi-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/rsi-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/rsi-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Herramientas relacionadas</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const closingPricesInput = document.getElementById('closingPrices').value.trim();
+  const periodInput = document.getElementById('period').value.trim();
+  
+  if (!closingPricesInput || !periodInput) {
+    alert('Please enter closing prices and RSI period');
+    return;
+  }
+  
+  const prices = closingPricesInput.split(',').map(p => parseFloat(p.trim()));
+  const period = parseInt(periodInput);
+  
+  if (prices.length < period + 1 || prices.some(isNaN)) {
+    alert('Please enter valid prices. You need at least ' + (period + 1) + ' prices.');
+    return;
+  }
+  
+  const changes = [];
+  for (let i = 1; i < prices.length; i++) {
+    changes.push(prices[i] - prices[i - 1]);
+  }
+  
+  let gainSum = 0;
+  let lossSum = 0;
+  
+  for (let i = 0; i < period; i++) {
+    if (changes[i] > 0) {
+      gainSum += changes[i];
+    } else {
+      lossSum += Math.abs(changes[i]);
+    }
+  }
+  
+  let avgGain = gainSum / period;
+  let avgLoss = lossSum / period;
+  
+  for (let i = period; i < changes.length; i++) {
+    if (changes[i] > 0) {
+      avgGain = (avgGain * (period - 1) + changes[i]) / period;
+      avgLoss = (avgLoss * (period - 1)) / period;
+    } else {
+      avgGain = (avgGain * (period - 1)) / period;
+      avgLoss = (avgLoss * (period - 1) + Math.abs(changes[i])) / period;
+    }
+  }
+  
+  let rsi;
+  if (avgLoss === 0) {
+    rsi = avgGain === 0 ? 50 : 100;
+  } else {
+    const rs = avgGain / avgLoss;
+    rsi = 100 - (100 / (1 + rs));
+  }
+  
+  let condition = '';
+  if (rsi >= 70) {
+    condition = 'Overbought - Consider selling';
+  } else if (rsi <= 30) {
+    condition = 'Oversold - Consider buying';
+  } else {
+    condition = 'Neutral - Monitor for signals';
+  }
+  
+  document.getElementById('rsiValue').textContent = rsi.toFixed(2);
+  document.getElementById('rsiCondition').textContent = condition;
+  document.getElementById('avgGain').textContent = avgGain.toFixed(4);
+  document.getElementById('avgLoss').textContent = avgLoss.toFixed(4);
+  
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='¡Copiado!';setTimeout(function(){b.textContent='Compartir'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|es|rsi-calculator|2026-07-09 -->

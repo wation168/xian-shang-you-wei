@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>断熱計算機 - 必要な断熱厚さとコストを算出</title>
+<meta name="description" content="面積とR値から必要な断熱材の厚さと総コストを計算。建築・リフォーム工事の断熱計画に役立つツールです。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/insulation-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/insulation-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/insulation-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/insulation-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/insulation-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/insulation-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/insulation-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/insulation-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/insulation-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/insulation-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/insulation-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/insulation-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "断熱計算機", "url": "https://softglow-ai.com/tools/ja/insulation-calculator.html", "description": "面積とR値から必要な断熱材の厚さと総コストを計算。建築・リフォーム工事の断熱計画に役立つツールです。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "R値とはどのような指標ですか？", "acceptedAnswer": {"@type": "Answer", "text": "R値は熱抵抗値の指標で、数字が高いほど断熱性能が優れています。インチあたりのR値で表示され、1インチあたり3～4のR値が一般的です。"}}, {"@type": "Question", "name": "必要な断熱厚さはどのように計算されますか？", "acceptedAnswer": {"@type": "Answer", "text": "必要な厚さ = 目標R値 ÷ インチあたりのR値で計算されます。例えば、R38を達成するのにR3.5の断熱材を使う場合、約10.9インチの厚さが必要です。"}}, {"@type": "Question", "name": "地域によって推奨されるR値は異なりますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、気候ゾーンにより異なります。寒冷地では屋根裏にR49～60、温暖地ではR19～38が推奨されることが多いです。地域の建築基準を確認してください。"}}, {"@type": "Question", "name": "このツールで複数の部位を計算できますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、各部位（屋根、壁、床）について個別に計算できます。それぞれの面積と必要なR値を入力して計算してください。"}}, {"@type": "Question", "name": "単価はどのように決まりますか？", "acceptedAnswer": {"@type": "Answer", "text": "断熱材の種類、品質、地域による配送コストなどにより変わります。複数のサプライヤーから見積もりを取得して比較することをお勧めします。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 断熱計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>断熱計算機</h1>
+    <p class="calc-subtitle">面積とR値仕様に基づいて断熱要件を計算します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="areaSquareFeet">断熱施工面積</label>
+  <div class="input-row"><input type="number" id="areaSquareFeet" placeholder="1500"  step="0.1"><span class="input-suffix">平方フィート</span></div>
+</div>
+  <small class="input-help">断熱する面積を平方フィート単位で入力してください</small>
+<div class="input-group">
+  <label for="rValue">必要R値</label>
+  <div class="input-row"><input type="number" id="rValue" placeholder="3.5"  step="0.1"><span class="input-suffix">インチあたり</span></div>
+</div>
+  <small class="input-help">インチあたりのR値を入力してください</small>
+<div class="input-group">
+  <label for="desiredRating">目標R値（合計）</label>
+  <div class="input-row"><input type="number" id="desiredRating" placeholder="38"  step="1"><span class="input-suffix">R値</span></div>
+</div>
+  <small class="input-help">達成したい総合R値を入力してください</small>
+<div class="input-group">
+  <label for="insulationCost">単価（オプション）</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="insulationCost" placeholder="0.50"  step="0.01"><span class="input-suffix">平方フィートあたり</span></div>
+</div>
+  <small class="input-help">平方フィートあたりの断熱材の単価を入力してください（オプション）</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">必要な断熱厚さ</span><span class="result-value" id="requiredThickness">—</span></div>
+<div class="result-highlight"><span class="result-label">総R値カバー範囲</span><span class="result-value" id="rValuePerArea">—</span></div>
+<div class="result-item"><span class="result-label">必要な断熱材量</span><span class="result-value" id="totalQuantity">—</span></div>
+<div class="result-item"><span class="result-label">推定総コスト</span><span class="result-value" id="estimatedCost">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 計算結果は、指定された面積に必要な断熱材の厚さ、達成されるR値レベル、必要な総断熱材量、および推定総コストを示します。これらの値は、建築プロジェクトの計画と予算策定に使用できます。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>断熱計算機について</h2><p>断熱計算機は、建築やリフォーム工事で必要な断熱材の量とコストを正確に計算するためのツールです。面積、R値仕様、単価を入力することで、プロジェクトに必要な断熱材の厚さと総コストを簡単に算出できます。</p><h2>R値とは</h2><p>R値は断熱材の断熱性能を表す指標で、値が高いほど断熱性能に優れています。一般的に、住宅の屋根裏には38～60のR値、壁には13～21のR値が推奨されています。地域の気候条件や建築基準に応じて適切なR値を選択することが重要です。</p><h2>断熱材の厚さの計算方法</h2><p>必要な断熱厚さは、目標R値を単位R値（インチあたりのR値）で割ることで計算されます。例えば、目標R値が38で、使用する断熱材のR値がインチあたり3.5の場合、必要な厚さは約10.9インチになります。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>コスト計算</h2><p>総コストは、必要な断熱材の面積に単価を乗じて計算されます。単価を入力することで、プロジェクト全体の予算を正確に把握できます。複数の断熱材オプションを比較して、最適なコストと性能のバランスを見つけることができます。</p><h2>断熱工事の計画</h2><p>断熱計算機の結果を使用して、必要な材料の発注量を決定し、工事予算を立てることができます。正確な計算により、材料の無駄を減らし、効率的なプロジェクト管理が可能になります。</p><h2>省エネルギー効果</h2><p>適切な断熱を施工することで、冬の暖房費と夏の冷房費を大幅に削減できます。断熱性能の向上は、快適な室内環境の実現と長期的なエネルギーコストの削減につながります。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">R値とはどのような指標ですか？</div><div class="faq-a">R値は熱抵抗値の指標で、数字が高いほど断熱性能が優れています。インチあたりのR値で表示され、1インチあたり3～4のR値が一般的です。</div></div>
+  <div class="faq-item"><div class="faq-q">必要な断熱厚さはどのように計算されますか？</div><div class="faq-a">必要な厚さ = 目標R値 ÷ インチあたりのR値で計算されます。例えば、R38を達成するのにR3.5の断熱材を使う場合、約10.9インチの厚さが必要です。</div></div>
+  <div class="faq-item"><div class="faq-q">地域によって推奨されるR値は異なりますか？</div><div class="faq-a">はい、気候ゾーンにより異なります。寒冷地では屋根裏にR49～60、温暖地ではR19～38が推奨されることが多いです。地域の建築基準を確認してください。</div></div>
+  <div class="faq-item"><div class="faq-q">このツールで複数の部位を計算できますか？</div><div class="faq-a">はい、各部位（屋根、壁、床）について個別に計算できます。それぞれの面積と必要なR値を入力して計算してください。</div></div>
+  <div class="faq-item"><div class="faq-q">単価はどのように決まりますか？</div><div class="faq-a">断熱材の種類、品質、地域による配送コストなどにより変わります。複数のサプライヤーから見積もりを取得して比較することをお勧めします。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">Roi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">Risk Reward</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">Position Size</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">Pe Ratio</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/insulation-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/insulation-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/insulation-calculator.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/insulation-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/insulation-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/insulation-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/insulation-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/insulation-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/insulation-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/insulation-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const areaSquareFeet = parseFloat(document.getElementById('areaSquareFeet').value);
+  const rValue = parseFloat(document.getElementById('rValue').value);
+  const desiredRating = parseFloat(document.getElementById('desiredRating').value);
+  const insulationCost = parseFloat(document.getElementById('insulationCost').value);
+
+  if (!areaSquareFeet || !rValue || !desiredRating) {
+    alert('Please enter Area, R-Value per inch, and Target R-Rating');
+    return;
+  }
+
+  if (areaSquareFeet <= 0 || rValue <= 0 || desiredRating <= 0) {
+    alert('All values must be greater than zero');
+    return;
+  }
+
+  const requiredThickness = desiredRating / rValue;
+  const rValuePerArea = desiredRating;
+  const totalQuantity = areaSquareFeet;
+  let estimatedCost = 0;
+
+  if (!isNaN(insulationCost) && insulationCost > 0) {
+    estimatedCost = areaSquareFeet * insulationCost;
+  }
+
+  document.getElementById('requiredThickness').textContent = requiredThickness.toFixed(2);
+  document.getElementById('rValuePerArea').textContent = rValuePerArea.toFixed(1);
+  document.getElementById('totalQuantity').textContent = totalQuantity.toLocaleString('en-US', {maximumFractionDigits: 2});
+  
+  if (estimatedCost > 0) {
+    document.getElementById('estimatedCost').textContent = estimatedCost.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
+  } else {
+    document.getElementById('estimatedCost').textContent = 'Not calculated';
+  }
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|insulation-calculator|2026-07-09 -->

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>信賴區間計算機 - 統計分析工具</title>
+<meta name="description" content="快速計算樣本均值的信賴區間、標準誤差和誤差邊界。支援90%、95%和99%信賴水準的統計分析。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/confidence-interval.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/confidence-interval.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/confidence-interval.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/confidence-interval.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/confidence-interval.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/confidence-interval.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/confidence-interval.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/confidence-interval.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/confidence-interval.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/confidence-interval.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/confidence-interval.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/confidence-interval.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "信賴區間計算機", "url": "https://softglow-ai.com/tools/confidence-interval.html", "description": "快速計算樣本均值的信賴區間、標準誤差和誤差邊界。支援90%、95%和99%信賴水準的統計分析。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "信賴水準和信心之間有什麼區別？", "acceptedAnswer": {"@type": "Answer", "text": "信賴水準（如95%）是指在重複抽樣中，計算出的區間包含真實參數的次數比例。信心是主觀概念，而信賴水準是客觀的統計性質。95%信賴水準意味著該方法在長期使用中有95%的成功率。"}}, {"@type": "Question", "name": "如何選擇合適的信賴水準？", "acceptedAnswer": {"@type": "Answer", "text": "選擇取決於應用領域和風險容忍度。95%是商業和社會科學中最常見的標準。99%用於需要高度確定性的場景（如製藥），90%用於初步研究或風險較低的決策。"}}, {"@type": "Question", "name": "為什麼樣本大小很重要？", "acceptedAnswer": {"@type": "Answer", "text": "更大的樣本提供更多信息，導致更小的標準誤差和更窄的信賴區間。這使得對母體參數的估計更加精確。樣本太小可能導致不可靠的結果。"}}, {"@type": "Question", "name": "標準差和標準誤差有什麼不同？", "acceptedAnswer": {"@type": "Answer", "text": "標準差（σ）衡量原始數據相對於平均值的分散程度。標準誤差（σ/√n）衡量樣本平均值估計母體平均值時的不確定性。標準誤差總是小於標準差。"}}, {"@type": "Question", "name": "如果信賴區間包含零會怎樣？", "acceptedAnswer": {"@type": "Answer", "text": "如果您估計的參數的信賴區間包含零，這通常表示在所選信賴水準下，不能確定該參數是否顯著不同於零。在假設檢驗中，這通常意味著沒有統計顯著性。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 信賴區間計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>信賴區間計算機</h1>
+    <p class="calc-subtitle">計算統計數據的信賴區間和誤差邊界</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="sampleMean">樣本平均數 (x̄)</label>
+  <div class="input-row"><input type="number" id="sampleMean" placeholder="輸入樣本平均數"  value="100" step="0.01"></div>
+</div>
+  <small class="input-help">輸入您數據集的平均值</small>
+<div class="input-group">
+  <label for="stdDeviation">標準差 (σ)</label>
+  <div class="input-row"><input type="number" id="stdDeviation" placeholder="輸入標準差"  value="15" step="0.01"></div>
+</div>
+  <small class="input-help">輸入數據的標準差</small>
+<div class="input-group">
+  <label for="sampleSize">樣本大小 (n)</label>
+  <div class="input-row"><input type="number" id="sampleSize" placeholder="輸入樣本大小"  value="100" step="1"></div>
+</div>
+  <small class="input-help">輸入樣本中的觀測數量</small>
+<div class="input-group">
+  <label for="confidenceLevel">信賴水準</label>
+  <div class="input-row"><input type="number" id="confidenceLevel" placeholder="輸入90、95或99"  value="95" step="1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">輸入90、95或99作為信賴百分比</small></div>
+    <button class="btn-calc" onclick="calculate()">計算</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">Z分數</span><span class="result-value" id="zScore">—</span></div>
+<div class="result-item"><span class="result-label">標準誤差 (σ/√n)</span><span class="result-value" id="standardError">—</span></div>
+<div class="result-highlight"><span class="result-label">誤差邊界</span><span class="result-value" id="marginOfError">—</span></div>
+<div class="result-highlight"><span class="result-label">信賴下界</span><span class="result-value" id="lowerBound">—</span></div>
+<div class="result-highlight"><span class="result-label">信賴上界</span><span class="result-value" id="upperBound">—</span></div>
+<div class="result-highlight"><span class="result-label">信賴區間</span><span class="result-value" id="confidenceInterval">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> 信賴區間範圍表示在所選信賴水準下，真實母體參數可能落在的區間。誤差邊界表示點估計值上下的最大誤差。Z分數決定了信賴水準所對應的標準差倍數。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 列印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什麼是信賴區間？</h2><p>信賴區間是一個統計範圍，用於估計未知母體參數（如平均數）的可能位置。基於樣本數據，我們計算出一個區間，該區間有特定的概率包含真實的母體參數。常見的信賴水準為90%、95%和99%，分別表示如果我們重複抽樣多次，真實參數約有90%、95%或99%的概率落在所計算的區間內。</p><h2>如何計算信賴區間？</h2><p>信賴區間的計算涉及以下步驟：首先計算標準誤差（SE = σ/√n），然後根據所選信賴水準查找相應的Z分數（90%信賴水準Z=1.645，95%信賴水準Z=1.96，99%信賴水準Z=2.576），最後誤差邊界 = Z × SE。信賴區間的上下界分別為樣本平均數加減誤差邊界。</p><h2>信賴水準的意義</h2><p>信賴水準反映了估計的精確度。95%信賴水準是最常用的標準，表示在該水準下，如果進行100次抽樣，約95次的信賴區間會包含真實的母體參數。更高的信賴水準（如99%）會產生更寬的區間，提供更高的可靠性但精確度較低；較低的信賴水準（如90%）會產生更窄的區間，但可靠性相對降低。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>樣本大小的影響</h2><p>樣本大小直接影響標準誤差和最終的誤差邊界。樣本越大，標準誤差越小，信賴區間越窄，估計越精確。因此，進行統計研究時，適當增加樣本規模可以提高結果的可靠性。根據公式 SE = σ/√n，樣本大小與標準誤差的關係是平方根關係，即樣本大小增加四倍才能使誤差邊界減少一半。</p><h2>實際應用場景</h2><p>信賴區間廣泛應用於市場調查、民意測驗、臨床醫學試驗、品質控制等領域。例如，民調機構會報告「某候選人支持率為45%，95%信賴區間為±3%」，這意味著真實支持率很可能在42%到48%之間。在製造業中，品質檢驗人員使用信賴區間來評估產品的平均壽命或性能指標是否符合標準。</p><h2>使用本計算機的建議</h2><p>確保輸入的數據準確無誤，特別是標準差的計算應該使用樣本標準差而非母體標準差。選擇適當的信賴水準時，考慮您的應用場景和對風險的容忍度。記住信賴區間只適用於量化數據，如平均值、測量值等，不適用於比例或分類數據。若需要進一步的統計分析，建議諮詢統計專業人士。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">信賴水準和信心之間有什麼區別？</div><div class="faq-a">信賴水準（如95%）是指在重複抽樣中，計算出的區間包含真實參數的次數比例。信心是主觀概念，而信賴水準是客觀的統計性質。95%信賴水準意味著該方法在長期使用中有95%的成功率。</div></div>
+  <div class="faq-item"><div class="faq-q">如何選擇合適的信賴水準？</div><div class="faq-a">選擇取決於應用領域和風險容忍度。95%是商業和社會科學中最常見的標準。99%用於需要高度確定性的場景（如製藥），90%用於初步研究或風險較低的決策。</div></div>
+  <div class="faq-item"><div class="faq-q">為什麼樣本大小很重要？</div><div class="faq-a">更大的樣本提供更多信息，導致更小的標準誤差和更窄的信賴區間。這使得對母體參數的估計更加精確。樣本太小可能導致不可靠的結果。</div></div>
+  <div class="faq-item"><div class="faq-q">標準差和標準誤差有什麼不同？</div><div class="faq-a">標準差（σ）衡量原始數據相對於平均值的分散程度。標準誤差（σ/√n）衡量樣本平均值估計母體平均值時的不確定性。標準誤差總是小於標準差。</div></div>
+  <div class="faq-item"><div class="faq-q">如果信賴區間包含零會怎樣？</div><div class="faq-a">如果您估計的參數的信賴區間包含零，這通常表示在所選信賴水準下，不能確定該參數是否顯著不同於零。在假設檢驗中，這通常意味著沒有統計顯著性。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/roi-calculator.html">ROI 計算機</a>
+      <a class="tool-pill" href="/tools/risk-reward.html">風險報酬計算機</a>
+      <a class="tool-pill" href="/tools/position-size.html">部位規模計算器</a>
+      <a class="tool-pill" href="/tools/stop-loss.html">停損計算機</a>
+      <a class="tool-pill" href="/tools/dividend-yield.html">股息收益率計算機</a>
+      <a class="tool-pill" href="/tools/pe-ratio.html">本益比計算機</a>
+      <a class="tool-pill" href="/tools/dca-calculator.html">定期定額投資計算機</a>
+      <a class="tool-pill" href="/tools/cagr.html">年複合成長率計算器</a>
+      <a class="tool-pill" href="/tools/margin-calculator.html">保證金計算器</a>
+      <a class="tool-pill" href="/tools/stock-gain-loss.html">股票損益計算機</a>
+      <a class="tool-pill" href="/tools/break-even.html">損益平衡點計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/confidence-interval.html" class="lang-btn">English</a>
+    <a href="/tools/confidence-interval.html" class="lang-btn active">繁體中文</a>
+    <a href="/tools/ja/confidence-interval.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/confidence-interval.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/confidence-interval.html" class="lang-btn">Français</a>
+    <a href="/tools/es/confidence-interval.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/confidence-interval.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/confidence-interval.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/confidence-interval.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/confidence-interval.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() { const sampleMean = parseFloat(document.getElementById('sampleMean').value); const stdDeviation = parseFloat(document.getElementById('stdDeviation').value); const sampleSize = parseFloat(document.getElementById('sampleSize').value); const confidenceLevel = parseFloat(document.getElementById('confidenceLevel').value); if (isNaN(sampleMean) || isNaN(stdDeviation) || isNaN(sampleSize) || isNaN(confidenceLevel)) { alert('Please fill in all fields with valid numbers'); return; } if (stdDeviation < 0 || sampleSize < 1) { alert('Standard deviation must be non-negative and sample size must be at least 1'); return; } if (confidenceLevel <= 0 || confidenceLevel >= 100) { alert('Confidence level must be between 0 and 100'); return; } let zScore = 0; if (confidenceLevel === 90) { zScore = 1.645; } else if (confidenceLevel === 95) { zScore = 1.96; } else if (confidenceLevel === 99) { zScore = 2.576; } else { const alpha = (100 - confidenceLevel) / 200; zScore = Math.abs((((-2.5258 * alpha * alpha) + (8.0564 * alpha) + 0.4501) / (1 - (0.0236 * alpha))).toFixed(3)); } const sqrtN = Math.sqrt(sampleSize); const standardError = stdDeviation / sqrtN; const marginOfError = zScore * standardError; const lowerBound = sampleMean - marginOfError; const upperBound = sampleMean + marginOfError; document.getElementById('zScore').textContent = zScore.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }); document.getElementById('standardError').textContent = standardError.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }); document.getElementById('marginOfError').textContent = marginOfError.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }); document.getElementById('lowerBound').textContent = lowerBound.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }); document.getElementById('upperBound').textContent = upperBound.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }); document.getElementById('confidenceInterval').textContent = lowerBound.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ', ' + upperBound.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); document.getElementById('results').classList.add('show'); }
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-TW|confidence-interval|2026-07-09 -->

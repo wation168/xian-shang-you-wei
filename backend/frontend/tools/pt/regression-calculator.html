@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Regressão Linear - y = mx + b</title>
+<meta name="description" content="Calcule a linha de melhor ajuste, coeficiente de correlação e R² usando nossa calculadora de regressão linear gratuita.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/pt/regression-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/regression-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/regression-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/regression-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/regression-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/regression-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/regression-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/regression-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/regression-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/regression-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/regression-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/regression-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculadora de Regressão Linear", "url": "https://softglow-ai.com/tools/pt/regression-calculator.html", "description": "Calcule a linha de melhor ajuste, coeficiente de correlação e R² usando nossa calculadora de regressão linear gratuita.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "pt"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Qual é a diferença entre correlação e regressão linear?", "acceptedAnswer": {"@type": "Answer", "text": "A correlação mede apenas a força e a direção da relação entre duas variáveis, resultando em um número entre -1 e 1. A regressão linear, por outro lado, estabelece uma equação que permite fazer previsões de uma variável com base na outra. A regressão é mais robusta e fornece mais informações que apenas a correlação."}}, {"@type": "Question", "name": "O que significa um R² de 0,75?", "acceptedAnswer": {"@type": "Answer", "text": "Um R² de 0,75 significa que 75% da variabilidade nos valores de Y é explicada pela variável X através do modelo de regressão linear. Os 25% restantes são explicados por outros fatores não incluídos no modelo. Um R² mais próximo de 1 indica um modelo mais adequado aos dados."}}, {"@type": "Question", "name": "Posso usar regressão linear com dados não-lineares?", "acceptedAnswer": {"@type": "Answer", "text": "Tecnicamente é possível, mas não é recomendado. Se seus dados têm uma relação não-linear, a regressão linear pode produzir um modelo com baixo R² e previsões imprecisas. Nesses casos, considere usar regressão polinomial ou outros modelos não-lineares que se adequem melhor aos dados."}}, {"@type": "Question", "name": "Quantos pontos de dados preciso para uma regressão linear confiável?", "acceptedAnswer": {"@type": "Answer", "text": "Embora tecnicamente você precise de apenas 2 pontos para definir uma reta, uma regressão linear confiável geralmente requer pelo menos 10-15 pontos de dados. Quanto mais dados você tiver, mais confiável será o modelo, especialmente para fazer previsões fora do intervalo dos dados observados."}}, {"@type": "Question", "name": "Como interpreto um coeficiente de correlação de -0,82?", "acceptedAnswer": {"@type": "Answer", "text": "Um coeficiente de correlação de -0,82 indica uma correlação linear negativa forte entre as variáveis. Isso significa que quando X aumenta, Y tende a diminuir de forma consistente. O valor absoluto (0,82) mostra a força da relação, que é considerada forte, enquanto o sinal negativo indica a direção da relação."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/pt/">Ferramentas</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/pt/">Ferramentas</a> > Calculadora de Regressão Linear</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Calculadora de Regressão Linear</h1>
+    <p class="calc-subtitle">Calcule a linha de melhor ajuste usando a fórmula y = mx + b</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="xValues">Valores de X (separados por vírgula)</label>
+  <div class="input-row"><input type="text" id="xValues" placeholder="1, 2, 3, 4, 5"  step="1"></div>
+</div>
+  <small class="input-help">Insira os valores da variável independente (X) separados por vírgula</small>
+<div class="input-group">
+  <label for="yValues">Valores de Y (separados por vírgula)</label>
+  <div class="input-row"><input type="text" id="yValues" placeholder="2, 4, 5, 4, 6"  step="1"></div>
+</div>
+  <small class="input-help">Insira os valores da variável dependente (Y) separados por vírgula</small></div>
+    <button class="btn-calc" onclick="calculate()">Calcular</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Inclinação (m)</span><span class="result-value" id="slopeResult">—</span></div>
+<div class="result-highlight"><span class="result-label">Intercepto Y (b)</span><span class="result-value" id="interceptResult">—</span></div>
+<div class="result-highlight"><span class="result-label">Equação de Regressão</span><span class="result-value" id="equationResult">—</span></div>
+<div class="result-item"><span class="result-label">Coeficiente de Correlação (R)</span><span class="result-value" id="correlationResult">—</span></div>
+<div class="result-item"><span class="result-label">R-Quadrado (R²)</span><span class="result-value" id="rSquaredResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>O que isso significa?</strong> A inclinação (m) indica o quanto Y muda para cada unidade de aumento em X. O intercepto Y (b) é o valor de Y quando X é zero. O coeficiente de correlação (R) mede a força da relação linear entre as variáveis, variando de -1 a 1. O R² indica a porcentagem da variação em Y que é explicada pela variação em X.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Imprimir</button>
+        <button onclick="shareResult()">&#x1f4e4; Compartilhar</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>O que é Regressão Linear?</h2><p>A regressão linear é um método estatístico fundamental que permite estabelecer uma relação entre duas variáveis contínuas. A fórmula y = mx + b representa a equação da reta que melhor se ajusta aos dados observados, onde m é a inclinação da reta e b é o intercepto no eixo Y. Este método é amplamente utilizado em análises de dados, previsões e estudos científicos.</p><h2>Como Usar a Calculadora de Regressão Linear</h2><p>Para utilizar esta calculadora, você deve inserir seus dados em dois campos: valores de X (variável independente) e valores de Y (variável dependente). Os dados devem ser separados por vírgulas e estar na mesma quantidade. Por exemplo, se você tem 5 observações em X, deve ter exatamente 5 observações em Y. A calculadora processará automaticamente seus dados e fornecerá todos os parâmetros da regressão linear.</p><h2>Interpretando os Resultados</h2><p>A inclinação (m) representa a mudança esperada em Y para cada unidade de aumento em X. Uma inclinação positiva indica uma relação direta entre as variáveis, enquanto uma negativa indica uma relação inversa. O intercepto Y (b) é o ponto onde a reta cruza o eixo Y, representando o valor de Y quando X é igual a zero. O coeficiente de correlação (R) varia de -1 a 1, com valores próximos a ±1 indicando uma relação linear forte entre as variáveis.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Compreendendo o Coeficiente de Correlação (R) e R²</h2><p>O coeficiente de correlação de Pearson (R) mede a intensidade e a direção da relação linear entre X e Y. R = 1 indica correlação positiva perfeita, R = -1 indica correlação negativa perfeita, e R = 0 indica ausência de correlação linear. O R² (coeficiente de determinação) é o quadrado de R e representa a proporção da variância total em Y que é explicada pelo modelo. Por exemplo, um R² de 0,85 significa que 85% da variabilidade em Y é explicada pela variável X no modelo de regressão linear.</p><h2>Aplicações Práticas da Regressão Linear</h2><p>A regressão linear é amplamente utilizada em diversos campos, como economia, onde pode prever o comportamento de preços baseado em variáveis econômicas; em medicina, para relacionar doses de medicamentos com resultados terapêuticos; em engenharia, para otimizar processos produtivos; e em marketing, para estimar vendas futuras com base em gastos com publicidade. As empresas utilizam estas análises para tomar decisões estratégicas e fundamentadas em dados.</p><h2>Limitações e Considerações Importantes</h2><p>Embora a regressão linear seja uma ferramenta poderosa, ela assume que a relação entre X e Y é linear. Se a verdadeira relação for não-linear, os resultados podem ser enganosos. Além disso, a presença de outliers (valores extremos) pode distorcer significativamente os resultados. É importante também verificar se os pressupostos da regressão linear são atendidos, como a normalidade dos resíduos e a homocedasticidade (variância constante dos erros).</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Artigos relacionados</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>Perguntas frequentes</h2><div class="faq-item"><div class="faq-q">Qual é a diferença entre correlação e regressão linear?</div><div class="faq-a">A correlação mede apenas a força e a direção da relação entre duas variáveis, resultando em um número entre -1 e 1. A regressão linear, por outro lado, estabelece uma equação que permite fazer previsões de uma variável com base na outra. A regressão é mais robusta e fornece mais informações que apenas a correlação.</div></div>
+  <div class="faq-item"><div class="faq-q">O que significa um R² de 0,75?</div><div class="faq-a">Um R² de 0,75 significa que 75% da variabilidade nos valores de Y é explicada pela variável X através do modelo de regressão linear. Os 25% restantes são explicados por outros fatores não incluídos no modelo. Um R² mais próximo de 1 indica um modelo mais adequado aos dados.</div></div>
+  <div class="faq-item"><div class="faq-q">Posso usar regressão linear com dados não-lineares?</div><div class="faq-a">Tecnicamente é possível, mas não é recomendado. Se seus dados têm uma relação não-linear, a regressão linear pode produzir um modelo com baixo R² e previsões imprecisas. Nesses casos, considere usar regressão polinomial ou outros modelos não-lineares que se adequem melhor aos dados.</div></div>
+  <div class="faq-item"><div class="faq-q">Quantos pontos de dados preciso para uma regressão linear confiável?</div><div class="faq-a">Embora tecnicamente você precise de apenas 2 pontos para definir uma reta, uma regressão linear confiável geralmente requer pelo menos 10-15 pontos de dados. Quanto mais dados você tiver, mais confiável será o modelo, especialmente para fazer previsões fora do intervalo dos dados observados.</div></div>
+  <div class="faq-item"><div class="faq-q">Como interpreto um coeficiente de correlação de -0,82?</div><div class="faq-a">Um coeficiente de correlação de -0,82 indica uma correlação linear negativa forte entre as variáveis. Isso significa que quando X aumenta, Y tende a diminuir de forma consistente. O valor absoluto (0,82) mostra a força da relação, que é considerada forte, enquanto o sinal negativo indica a direção da relação.</div></div></section>
+  <div class="more-tools"><h3>Mais ferramentas</h3><div class="tools-grid"><a class="tool-pill" href="/tools/pt/compound-interest.html">Calculadora de Juros Compostos</a>
+      <a class="tool-pill" href="/tools/pt/roi-calculator.html">Calculadora de ROI</a>
+      <a class="tool-pill" href="/tools/pt/risk-reward.html">Calculadora de Risco-Recompensa</a>
+      <a class="tool-pill" href="/tools/pt/position-size.html">Calculadora de Tamanho de Posição</a>
+      <a class="tool-pill" href="/tools/pt/stop-loss.html">Calculadora de Stop Loss</a>
+      <a class="tool-pill" href="/tools/pt/dividend-yield.html">Calculadora de Rendimento de Dividendos</a>
+      <a class="tool-pill" href="/tools/pt/pe-ratio.html">Calculadora de Índice P/L</a>
+      <a class="tool-pill" href="/tools/pt/dca-calculator.html">Calculadora de DCA</a>
+      <a class="tool-pill" href="/tools/pt/cagr.html">Calculadora de CAGR</a>
+      <a class="tool-pill" href="/tools/pt/margin-calculator.html">Calculadora de Margem</a>
+      <a class="tool-pill" href="/tools/pt/stock-gain-loss.html">Calculadora de Ganho/Perda em Ações</a>
+      <a class="tool-pill" href="/tools/pt/break-even.html">Calculadora de Ponto de Equilíbrio</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/regression-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/regression-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/regression-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/regression-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/regression-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/regression-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/regression-calculator.html" class="lang-btn active">Português</a>
+    <a href="/tools/ko/regression-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/regression-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/regression-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Ferramentas relacionadas</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const xInput = document.getElementById('xValues').value.trim();
+  const yInput = document.getElementById('yValues').value.trim();
+  
+  if (!xInput || !yInput) {
+    alert('Please enter both X and Y values');
+    return;
+  }
+  
+  const xValues = xInput.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+  const yValues = yInput.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+  
+  if (xValues.length === 0 || yValues.length === 0) {
+    alert('Please enter valid numeric values');
+    return;
+  }
+  
+  if (xValues.length !== yValues.length) {
+    alert('X and Y must have the same number of values');
+    return;
+  }
+  
+  if (xValues.length < 2) {
+    alert('Please enter at least 2 data points');
+    return;
+  }
+  
+  const n = xValues.length;
+  const sumX = xValues.reduce((a, b) => a + b, 0);
+  const sumY = yValues.reduce((a, b) => a + b, 0);
+  const sumXY = xValues.reduce((sum, x, i) => sum + x * yValues[i], 0);
+  const sumX2 = xValues.reduce((sum, x) => sum + x * x, 0);
+  const sumY2 = yValues.reduce((sum, y) => sum + y * y, 0);
+  
+  const meanX = sumX / n;
+  const meanY = sumY / n;
+  
+  const numerator = n * sumXY - sumX * sumY;
+  const denominator = n * sumX2 - sumX * sumX;
+  
+  if (denominator === 0) {
+    alert('Cannot calculate regression with these values');
+    return;
+  }
+  
+  const slope = numerator / denominator;
+  const intercept = meanY - slope * meanX;
+  
+  const rNumerator = numerator;
+  const rDenominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+  const correlation = rDenominator === 0 ? 0 : rNumerator / rDenominator;
+  const rSquared = correlation * correlation;
+  
+  const slopeFormatted = slope.toFixed(4);
+  const interceptFormatted = intercept.toFixed(4);
+  const equationText = `y = ${slopeFormatted}x + ${interceptFormatted}`;
+  const correlationFormatted = correlation.toFixed(4);
+  const rSquaredFormatted = rSquared.toFixed(4);
+  
+  document.getElementById('slopeResult').textContent = slopeFormatted;
+  document.getElementById('interceptResult').textContent = interceptFormatted;
+  document.getElementById('equationResult').textContent = equationText;
+  document.getElementById('correlationResult').textContent = correlationFormatted;
+  document.getElementById('rSquaredResult').textContent = rSquaredFormatted;
+  
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copiado!';setTimeout(function(){b.textContent='Compartilhar'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|pt|regression-calculator|2026-07-09 -->

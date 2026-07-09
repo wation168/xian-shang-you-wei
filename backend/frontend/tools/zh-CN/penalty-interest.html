@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>罚息计算器 - 快速计算罚息费用</title>
+<meta name="description" content="使用我们的罚息计算器快速准确计算未偿还金额产生的罚息费用。支持自定义本金、罚息率和期限。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/zh-CN/penalty-interest.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/penalty-interest.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/penalty-interest.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/penalty-interest.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/penalty-interest.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/penalty-interest.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/penalty-interest.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/penalty-interest.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/penalty-interest.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/penalty-interest.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/penalty-interest.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/penalty-interest.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "罚息计算器", "url": "https://softglow-ai.com/tools/zh-CN/penalty-interest.html", "description": "使用我们的罚息计算器快速准确计算未偿还金额产生的罚息费用。支持自定义本金、罚息率和期限。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "罚息和滞纳金有什么区别？", "acceptedAnswer": {"@type": "Answer", "text": "罚息是按照一定比例计算的利息，随时间累积增长。滞纳金通常是固定的一次性费用。罚息通常用于长期债务，而滞纳金用于逾期账单。"}}, {"@type": "Question", "name": "罚息率如何确定？", "acceptedAnswer": {"@type": "Answer", "text": "罚息率通常由贷款合同、信用卡协议或相关法律规定。不同机构和地区的罚息率差异很大，可能从5%到15%不等。"}}, {"@type": "Question", "name": "我可以协商降低罚息吗？", "acceptedAnswer": {"@type": "Answer", "text": "在某些情况下，您可以与债权人协商降低罚息。如果您有正当理由延迟付款或有良好的付款历史，债权人可能愿意减免或降低罚息。"}}, {"@type": "Question", "name": "如何使用本计算器进行精确计算？", "acceptedAnswer": {"@type": "Answer", "text": "输入准确的本金金额、正确的罚息率百分比和确切的欠款月份数。计算器会自动进行计算，结果精确到便士。"}}, {"@type": "Question", "name": "罚息会继续增长吗？", "acceptedAnswer": {"@type": "Answer", "text": "是的，罚息通常会继续增长，直到债务全额偿还。这就是为什么尽快支付逾期债务很重要，以防止罚息的进一步累积。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/zh-CN/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 罚息计算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>罚息计算器</h1>
+    <p class="calc-subtitle">快速准确计算未偿还金额的罚息费用</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="principal_amount">本金金额</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="principal_amount" placeholder="10000"  step="0.01"></div>
+</div>
+  <small class="input-help">输入需要计算罚息的本金总额</small>
+<div class="input-group">
+  <label for="penalty_rate">罚息率</label>
+  <div class="input-row"><input type="number" id="penalty_rate" placeholder="8.5"  step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">输入每月或每年的罚息利率百分比</small>
+<div class="input-group">
+  <label for="time_period">期限</label>
+  <div class="input-row"><input type="number" id="time_period" placeholder="12"  step="0.1"><span class="input-suffix">个月</span></div>
+</div>
+  <small class="input-help">输入罚息计算的月份数</small></div>
+    <button class="btn-calc" onclick="calculate()">计算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">罚息费用</span><span class="result-value" id="penalty_interest_result">—</span></div>
+<div class="result-highlight"><span class="result-label">总金额（本金+罚息）</span><span class="result-value" id="total_amount_result">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>这代表什么？</strong> 罚息费用显示根据本金、罚息率和期限计算出的总罚息金额。总金额是原始本金加上计算得出的罚息费用。这可以帮助您了解未按时支付所需的总成本。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 打印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什么是罚息？</h2><p>罚息是指在债务人未能按期偿还债务时，债权人根据合同或法律规定向债务人收取的利息。罚息通常高于正常利息率，目的是对未按时付款进行惩罚并补偿债权人的损失。</p><h2>罚息的计算方法</h2><p>罚息的计算通常基于三个主要因素：本金金额、罚息率和欠款期限。基本公式为：罚息 = 本金 × 罚息率 × 期限。例如，如果您有£10,000的未偿还债务，罚息率为8.5%，期限为12个月，则罚息费用为£10,000 × 8.5% × 12 ÷ 12 = £850。</p><h2>何时适用罚息</h2><p>罚息通常在以下情况适用：信用卡逾期付款、贷款未按期还款、商业发票逾期付款、以及法律判决中规定的债务。不同的金融机构和地区可能有不同的罚息规定和上限。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>如何使用本计算器</h2><p>使用我们的罚息计算器非常简单。首先输入本金金额（如£10,000），然后输入适用的罚息率（如8.5%），最后输入欠款期限（如12个月）。计算器会自动为您计算出总的罚息费用和应支付的总金额。</p><h2>罚息计算示例</h2><p>假设您有£5,000的未偿还债务，罚息率为10%，期限为6个月。使用我们的计算器，罚息费用将为£250，总应付金额为£5,250。这可以帮助您更好地理解延迟付款的成本。</p><h2>避免罚息的建议</h2><p>为了避免罚息的产生，最重要的是按时支付账单和贷款。建立预算计划、设置提醒和自动付款都可以帮助您避免逾期。如果您已经产生了罚息，考虑与债权人沟通以了解是否可能减免或重新安排付款。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸阅读</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常见问题</h2><div class="faq-item"><div class="faq-q">罚息和滞纳金有什么区别？</div><div class="faq-a">罚息是按照一定比例计算的利息，随时间累积增长。滞纳金通常是固定的一次性费用。罚息通常用于长期债务，而滞纳金用于逾期账单。</div></div>
+  <div class="faq-item"><div class="faq-q">罚息率如何确定？</div><div class="faq-a">罚息率通常由贷款合同、信用卡协议或相关法律规定。不同机构和地区的罚息率差异很大，可能从5%到15%不等。</div></div>
+  <div class="faq-item"><div class="faq-q">我可以协商降低罚息吗？</div><div class="faq-a">在某些情况下，您可以与债权人协商降低罚息。如果您有正当理由延迟付款或有良好的付款历史，债权人可能愿意减免或降低罚息。</div></div>
+  <div class="faq-item"><div class="faq-q">如何使用本计算器进行精确计算？</div><div class="faq-a">输入准确的本金金额、正确的罚息率百分比和确切的欠款月份数。计算器会自动进行计算，结果精确到便士。</div></div>
+  <div class="faq-item"><div class="faq-q">罚息会继续增长吗？</div><div class="faq-a">是的，罚息通常会继续增长，直到债务全额偿还。这就是为什么尽快支付逾期债务很重要，以防止罚息的进一步累积。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/zh-CN/compound-interest.html">复利计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/roi-calculator.html">投资回报率 (ROI) 计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/risk-reward.html">风险收益比计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/position-size.html">头寸规模计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stop-loss.html">止损计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dividend-yield.html">股息收益率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/pe-ratio.html">市盈率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dca-calculator.html">定期定额投资计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/cagr.html">复合年增长率(CAGR)计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/margin-calculator.html">保证金计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stock-gain-loss.html">股票盈亏计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/break-even.html">损益平衡点计算器</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/penalty-interest.html" class="lang-btn">English</a>
+    <a href="/tools/penalty-interest.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/penalty-interest.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/penalty-interest.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/penalty-interest.html" class="lang-btn">Français</a>
+    <a href="/tools/es/penalty-interest.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/penalty-interest.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/penalty-interest.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/penalty-interest.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/penalty-interest.html" class="lang-btn active">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相关工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() { const principalInput = document.getElementById('principal_amount'); const rateInput = document.getElementById('penalty_rate'); const periodInput = document.getElementById('time_period'); if (!principalInput.value || !rateInput.value || !periodInput.value) { alert('Please fill in all fields'); return; } const principal = parseFloat(principalInput.value); const rate = parseFloat(rateInput.value); const period = parseFloat(periodInput.value); if (principal < 0 || rate < 0 || period < 0) { alert('Please enter positive values'); return; } const periodInYears = period / 12; const penaltyInterest = principal * (rate / 100) * periodInYears; const totalAmount = principal + penaltyInterest; const resultsDiv = document.getElementById('results'); const penaltyResultEl = document.getElementById('penalty_interest_result'); const totalResultEl = document.getElementById('total_amount_result'); penaltyResultEl.textContent = penaltyInterest.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); totalResultEl.textContent = totalAmount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); resultsDiv.classList.add('show'); }
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已复制！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-CN|penalty-interest|2026-07-09 -->

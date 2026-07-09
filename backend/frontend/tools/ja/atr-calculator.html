@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATR計算機 - ボラティリティ分析ツール</title>
+<meta name="description" content="ATR（平均トゥルーレンジ）を計算して、株価のボラティリティを分析します。トレーディング戦略とリスク管理に役立つツール。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/atr-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/atr-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/atr-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/atr-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/atr-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/atr-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/atr-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/atr-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/atr-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/atr-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/atr-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/atr-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "ATR計算機", "url": "https://softglow-ai.com/tools/ja/atr-calculator.html", "description": "ATR（平均トゥルーレンジ）を計算して、株価のボラティリティを分析します。トレーディング戦略とリスク管理に役立つツール。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "ATRの計算に使用する期間はどのように決めるべきですか？", "acceptedAnswer": {"@type": "Answer", "text": "標準的には14日間が使用されていますが、短期トレーダーは7日間を、長期投資家は21日間以上を使用することが一般的です。市場の性質とトレーディングスタイルに応じて調整してください。"}}, {"@type": "Question", "name": "ATRが高いことは何を意味しますか？", "acceptedAnswer": {"@type": "Answer", "text": "ATRが高いことは、市場のボラティリティが高く、価格が大きく変動していることを示します。これはリスクが高い一方で、大きな利益の機会も存在する可能性があります。"}}, {"@type": "Question", "name": "ストップロスの設定にATRをどのように使用しますか？", "acceptedAnswer": {"@type": "Answer", "text": "一般的な方法は、現在の価格からATRの1倍～3倍分下に設定することです。例えば、ATRが2ドルの場合、ストップロスを現在価格から4～6ドル下に設定します。"}}, {"@type": "Question", "name": "トゥルーレンジと通常の高値安値の差は何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "トゥルーレンジは前日終値も考慮するため、ギャップアップやギャップダウンが発生した場合でも実際の価格変動を正確に反映します。単純な高値安値の差ではこの情報が失われる可能性があります。"}}, {"@type": "Question", "name": "複数の銘柄のボラティリティを比較するにはどうすればよいですか？", "acceptedAnswer": {"@type": "Answer", "text": "ATR対価格比率（%）を使用することで、異なる価格帯の銘柄間で公平にボラティリティを比較できます。この相対値により、より正確な比較分析が可能になります。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > ATR計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>ATR計算機</h1>
+    <p class="calc-subtitle">ボラティリティ分析とトレーディング戦略のための平均トゥルーレンジを計算</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="highPrice">高値</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="highPrice" placeholder="150.75"  step="0.01"></div>
+</div>
+  <small class="input-help">本日の最高価格を入力してください</small>
+<div class="input-group">
+  <label for="lowPrice">安値</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="lowPrice" placeholder="148.50"  step="0.01"></div>
+</div>
+  <small class="input-help">本日の最安価格を入力してください</small>
+<div class="input-group">
+  <label for="closePrice">前日終値</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="closePrice" placeholder="149.25"  step="0.01"></div>
+</div>
+  <small class="input-help">前日の終値を入力してください</small>
+<div class="input-group">
+  <label for="period">期間（日数）</label>
+  <div class="input-row"><input type="number" id="period" placeholder="14"  value="14" step="1"></div>
+</div>
+  <small class="input-help">ATRを計算する期間を日数で入力してください</small>
+<div class="input-group">
+  <label for="historicalTR">過去のトゥルーレンジ値（カンマ区切り）</label>
+  <div class="input-row"><input type="text" id="historicalTR" placeholder="2.50,2.75,2.10,2.90,1.85"  step="1"></div>
+</div>
+  <small class="input-help">過去のトゥルーレンジ値をカンマで区切って入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">トゥルーレンジ（TR）</span><span class="result-value" id="trueRange">—</span></div>
+<div class="result-highlight"><span class="result-label">平均トゥルーレンジ（ATR）</span><span class="result-value" id="atrResult">—</span></div>
+<div class="result-item"><span class="result-label">ATR対価格比率（%）</span><span class="result-value" id="atrPercent">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> トゥルーレンジ（TR）は本日の価格変動幅を示します。平均トゥルーレンジ（ATR）はこれを指定期間で平均化したもので、ボラティリティが高いほどATRは大きくなります。ATR対価格比率（%）は、現在の価格に対するボラティリティの相対的な大きさを示し、トレーディング戦略やストップロス設定の参考になります。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>ATR計算機について</h2><p>ATR（Average True Range：平均トゥルーレンジ）は、金融市場でボラティリティを測定するための重要な技術指標です。トレーダーやアナリストは、このツールを使用して価格変動の大きさを把握し、リスク管理やトレーディング戦略の策定に役立てています。</p><h2>トゥルーレンジの計算方法</h2><p>トゥルーレンジ（TR）は、以下の3つの値の最大値として計算されます：（1）本日高値 - 本日安値、（2）本日高値 - 前日終値の絶対値、（3）本日安値 - 前日終値の絶対値。この計算により、ギャップを含めた実際の価格変動幅が正確に捉えられます。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>平均トゥルーレンジの活用</h2><p>ATRは通常14日間の期間で計算されますが、トレーダーの好みに応じて調整可能です。短い期間ほど敏感に反応し、長い期間ほど安定した指標になります。ATRが高い場合は市場のボラティリティが高く、ATRが低い場合はボラティリティが低いことを示します。</p><h2>トレーディング戦略での応用</h2><p>多くのトレーダーはATRを使用してストップロスレベルを設定します。例えば、現在価格からATRの2倍分だけ下に設定するなど、市場のボラティリティに応じた柔軟なリスク管理が可能になります。また、ATRが上昇している場合はトレンドが強化されている可能性を示唆します。</p><h2>ボラティリティ比較</h2><p>ATR対価格比率（%）を計算することで、異なる価格帯の銘柄間でボラティリティを比較できます。この相対的な指標により、どの銘柄がより大きな価格変動を示しているかが一目瞭然になり、ポートフォリオのバランス調整に役立ちます。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/candlestick-patterns.html">Candlestick Patterns<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/support-resistance.html">Support & Resistance<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/moving-average-guide.html">Moving Average Guide<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">ATRの計算に使用する期間はどのように決めるべきですか？</div><div class="faq-a">標準的には14日間が使用されていますが、短期トレーダーは7日間を、長期投資家は21日間以上を使用することが一般的です。市場の性質とトレーディングスタイルに応じて調整してください。</div></div>
+  <div class="faq-item"><div class="faq-q">ATRが高いことは何を意味しますか？</div><div class="faq-a">ATRが高いことは、市場のボラティリティが高く、価格が大きく変動していることを示します。これはリスクが高い一方で、大きな利益の機会も存在する可能性があります。</div></div>
+  <div class="faq-item"><div class="faq-q">ストップロスの設定にATRをどのように使用しますか？</div><div class="faq-a">一般的な方法は、現在の価格からATRの1倍～3倍分下に設定することです。例えば、ATRが2ドルの場合、ストップロスを現在価格から4～6ドル下に設定します。</div></div>
+  <div class="faq-item"><div class="faq-q">トゥルーレンジと通常の高値安値の差は何ですか？</div><div class="faq-a">トゥルーレンジは前日終値も考慮するため、ギャップアップやギャップダウンが発生した場合でも実際の価格変動を正確に反映します。単純な高値安値の差ではこの情報が失われる可能性があります。</div></div>
+  <div class="faq-item"><div class="faq-q">複数の銘柄のボラティリティを比較するにはどうすればよいですか？</div><div class="faq-a">ATR対価格比率（%）を使用することで、異なる価格帯の銘柄間で公平にボラティリティを比較できます。この相対値により、より正確な比較分析が可能になります。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/fibonacci-retracement.html">Fibonacci Retracement</a>
+      <a class="tool-pill" href="/tools/ja/pivot-point.html">Pivot Point</a>
+      <a class="tool-pill" href="/tools/ja/rsi-calculator.html">Rsi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/macd-calculator.html">Macd Calculator</a>
+      <a class="tool-pill" href="/tools/ja/bollinger-bands.html">Bollinger Bands</a>
+      <a class="tool-pill" href="/tools/ja/ma-crossover.html">Ma Crossover</a>
+      <a class="tool-pill" href="/tools/ja/candlestick-identifier.html">Candlestick Identifier</a>
+      <a class="tool-pill" href="/tools/ja/support-resistance.html">Support Resistance</a>
+      <a class="tool-pill" href="/tools/ja/pip-value.html">Pip Value</a>
+      <a class="tool-pill" href="/tools/ja/options-profit.html">Options Profit</a>
+      <a class="tool-pill" href="/tools/ja/stock-split.html">Stock Split</a>
+      <a class="tool-pill" href="/tools/ja/trading-fee.html">Trading Fee</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/atr-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/atr-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/atr-calculator.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/atr-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/atr-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/atr-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/atr-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/atr-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/atr-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/atr-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const highPrice = parseFloat(document.getElementById('highPrice').value);
+  const lowPrice = parseFloat(document.getElementById('lowPrice').value);
+  const closePrice = parseFloat(document.getElementById('closePrice').value);
+  const period = parseInt(document.getElementById('period').value);
+  const historicalTRInput = document.getElementById('historicalTR').value.trim();
+
+  if (isNaN(highPrice) || isNaN(lowPrice) || isNaN(closePrice) || isNaN(period)) {
+    alert('Please enter valid values for High Price, Low Price, Close Price, and Period.');
+    return;
+  }
+
+  if (highPrice < lowPrice) {
+    alert('High Price must be greater than or equal to Low Price.');
+    return;
+  }
+
+  if (period < 1) {
+    alert('Period must be at least 1.');
+    return;
+  }
+
+  const tr1 = highPrice - lowPrice;
+  const tr2 = Math.abs(highPrice - closePrice);
+  const tr3 = Math.abs(lowPrice - closePrice);
+  const currentTR = Math.max(tr1, tr2, tr3);
+
+  document.getElementById('trueRange').textContent = '$' + currentTR.toFixed(2);
+
+  let atr = 0;
+
+  if (historicalTRInput !== '') {
+    const trValues = historicalTRInput.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+    
+    if (trValues.length === 0) {
+      alert('Please provide valid comma-separated TR values or leave the field empty.');
+      return;
+    }
+
+    trValues.push(currentTR);
+    
+    if (trValues.length >= period) {
+      const recentTRs = trValues.slice(-period);
+      atr = recentTRs.reduce((sum, val) => sum + val, 0) / period;
+    } else {
+      atr = trValues.reduce((sum, val) => sum + val, 0) / trValues.length;
+    }
+  } else {
+    atr = currentTR;
+  }
+
+  const atrPercent = (atr / highPrice * 100);
+
+  document.getElementById('atrResult').textContent = '$' + atr.toFixed(2);
+  document.getElementById('atrPercent').textContent = atrPercent.toFixed(2);
+
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|atr-calculator|2026-07-09 -->

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APR 계산기 - 실제 연이율 계산</title>
+<meta name="description" content="대출 금액, 이자율, 수수료를 입력하여 실제 연간 이자율(APR)과 월 상환금을 계산하세요.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ko/apr-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/apr-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/apr-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/apr-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/apr-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/apr-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/apr-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/apr-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/apr-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/apr-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/apr-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/apr-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "APR 계산기", "url": "https://softglow-ai.com/tools/ko/apr-calculator.html", "description": "대출 금액, 이자율, 수수료를 입력하여 실제 연간 이자율(APR)과 월 상환금을 계산하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "APR과 이자율의 차이는 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "이자율은 원금에 대한 기본 이자만 계산하지만, APR(연간 이자율)은 수수료, 보험료, 처리 비용 등 모든 부대 비용을 포함합니다. 따라서 APR이 실제 차용 비용을 더 정확하게 반영합니다."}}, {"@type": "Question", "name": "처리 수수료가 APR에 어떻게 영향을 미치나요?", "acceptedAnswer": {"@type": "Answer", "text": "처리 수수료는 실제 차용 비용에 포함되므로 APR을 높입니다. 처리 수수료가 클수록 APR이 더 높아집니다. 예를 들어, £1,000의 처리 수수료가 있으면 APR이 0.5~1% 이상 증가할 수 있습니다."}}, {"@type": "Question", "name": "월 상환금은 전체 기간에 걸쳐 같나요?", "acceptedAnswer": {"@type": "Answer", "text": "일반적으로 등가 월상환 방식의 경우 월 상환금은 일정합니다. 그러나 변동 금리 대출의 경우 이자율 변경에 따라 월 상환금이 달라질 수 있습니다."}}, {"@type": "Question", "name": "대출 기간을 단축하면 총 비용이 줄어드나요?", "acceptedAnswer": {"@type": "Answer", "text": "네, 대출 기간을 단축하면 이자가 적립되는 기간이 짧아지므로 총 차용 비용이 감소합니다. 예를 들어, 60개월 대신 48개월로 상환하면 총 비용이 상당히 절감됩니다."}}, {"@type": "Question", "name": "유효 연이율(Effective Annual Rate)은 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "유효 연이율은 복리 효과를 반영한 실제 연이율입니다. 월별 또는 분기별로 이자가 계산될 때 복리 효과가 발생하므로, 유효 연이율이 명목 이자율보다 높습니다. 이는 장기 투자나 저축을 비교할 때 특히 중요합니다."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ko/">도구</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > APR 계산기</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>APR 계산기</h1>
+    <p class="calc-subtitle">모든 수수료를 포함한 실제 연간 차용 비용 계산</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="loanAmount">대출 금액</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="loanAmount" placeholder="25000"  step="0.01"></div>
+</div>
+  <small class="input-help">빌리려는 총 금액을 입력하세요</small>
+<div class="input-group">
+  <label for="nominalRate">명목 연이율</label>
+  <div class="input-row"><input type="number" id="nominalRate" placeholder="5.5"  step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">연간 명목 이자율(%)을 입력하세요</small>
+<div class="input-group">
+  <label for="loanTerm">대출 기간</label>
+  <div class="input-row"><input type="number" id="loanTerm" placeholder="60"  step="1"><span class="input-suffix">개월</span></div>
+</div>
+  <small class="input-help">대출 상환 기간(개월)을 입력하세요</small>
+<div class="input-group">
+  <label for="totalFees">총 수수료 및 비용</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="totalFees" placeholder="500"  step="0.01"></div>
+</div>
+  <small class="input-help">모든 수수료와 비용의 합계를 입력하세요</small>
+<div class="input-group">
+  <label for="processingFee">처리 수수료(선택사항)</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="processingFee" placeholder="0"  value="0" step="0.01"></div>
+</div>
+  <small class="input-help">있는 경우 별도의 처리 수수료를 입력하세요</small></div>
+    <button class="btn-calc" onclick="calculate()">계산하기</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">연간 이자율(APR)</span><span class="result-value" id="aprResult">—</span></div>
+<div class="result-item"><span class="result-label">월 상환금</span><span class="result-value" id="monthlyPayment">—</span></div>
+<div class="result-item"><span class="result-label">총 상환액</span><span class="result-value" id="totalRepayment">—</span></div>
+<div class="result-item"><span class="result-label">총 차용 비용</span><span class="result-value" id="totalCost">—</span></div>
+<div class="result-highlight"><span class="result-label">유효 연이율</span><span class="result-value" id="effectiveRate">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>이것은 무엇을 의미합니까?</strong> 계산된 APR은 모든 수수료를 포함한 실제 연간 이자율입니다. 월 상환금은 정기적으로 납부할 금액이고, 총 상환액은 이자와 수수료를 모두 포함한 최종 금액입니다. 유효 연이율은 복리 효과를 반영한 실제 연이율입니다.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 인쇄</button>
+        <button onclick="shareResult()">&#x1f4e4; 공유</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>APR 계산기란 무엇인가요?</h2><p>연간 이자율(APR) 계산기는 대출의 실제 비용을 정확하게 파악하는 데 도움을 줍니다. 명목 이자율만으로는 처리 수수료, 보험료, 기타 비용 등이 반영되지 않습니다. APR은 이러한 모든 비용을 포함하여 계산되므로, 서로 다른 대출 상품을 공정하게 비교할 수 있습니다.</p><h2>APR과 명목 이자율의 차이</h2><p>명목 이자율은 기본 이자만 계산한 것이지만, APR은 처리 수수료, 보험료, 등록비 등 모든 부대 비용을 포함합니다. 따라서 APR이 실제 차용 비용을 더 정확하게 반영합니다. 예를 들어, 명목 이자율이 5.5%인 대출도 수수료가 많으면 APR은 6% 이상이 될 수 있습니다.</p><h2>월 상환금 계산 방식</h2><p>월 상환금은 원금, 이자, 수수료를 대출 기간에 걸쳐 균등하게 분배하여 계산됩니다. 초기 상환금에는 이자 비중이 높지만, 시간이 지나면서 원금 상환 비중이 증가합니다. 정확한 월 상환금을 알면 월간 예산을 더욱 효과적으로 관리할 수 있습니다.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>총 차용 비용 이해하기</h2><p>총 차용 비용은 모든 상환금의 합계에서 원래 빌린 금액을 뺀 값입니다. 이것이 대출로 인해 실제로 지불하게 되는 비용입니다. 대출 기간이 길수록, 이자율이 높을수록 총 차용 비용이 증가합니다. 따라서 가능하면 조기 상환을 고려하면 총 비용을 절감할 수 있습니다.</p><h2>수수료의 영향</h2><p>처리 수수료와 기타 비용은 APR에 상당한 영향을 미칩니다. 같은 명목 이자율이라도 수수료가 다르면 APR이 크게 달라집니다. 대출을 신청하기 전에 모든 수수료를 명확히 확인하고 총 비용을 비교하는 것이 중요합니다.</p><h2>효과적인 대출 비교</h2><p>여러 대출 상품을 비교할 때는 명목 이자율보다 APR을 기준으로 삼아야 합니다. APR은 모든 비용을 포함하므로 가장 정확한 비교 기준입니다. 우리의 APR 계산기를 사용하면 다양한 시나리오를 빠르게 계산하여 가장 유리한 대출 조건을 찾을 수 있습니다.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 관련 기사</h3><div class="blog-grid"><a class="blog-card" href="/blog/ko/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ko/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ko/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>자주 묻는 질문</h2><div class="faq-item"><div class="faq-q">APR과 이자율의 차이는 무엇인가요?</div><div class="faq-a">이자율은 원금에 대한 기본 이자만 계산하지만, APR(연간 이자율)은 수수료, 보험료, 처리 비용 등 모든 부대 비용을 포함합니다. 따라서 APR이 실제 차용 비용을 더 정확하게 반영합니다.</div></div>
+  <div class="faq-item"><div class="faq-q">처리 수수료가 APR에 어떻게 영향을 미치나요?</div><div class="faq-a">처리 수수료는 실제 차용 비용에 포함되므로 APR을 높입니다. 처리 수수료가 클수록 APR이 더 높아집니다. 예를 들어, £1,000의 처리 수수료가 있으면 APR이 0.5~1% 이상 증가할 수 있습니다.</div></div>
+  <div class="faq-item"><div class="faq-q">월 상환금은 전체 기간에 걸쳐 같나요?</div><div class="faq-a">일반적으로 등가 월상환 방식의 경우 월 상환금은 일정합니다. 그러나 변동 금리 대출의 경우 이자율 변경에 따라 월 상환금이 달라질 수 있습니다.</div></div>
+  <div class="faq-item"><div class="faq-q">대출 기간을 단축하면 총 비용이 줄어드나요?</div><div class="faq-a">네, 대출 기간을 단축하면 이자가 적립되는 기간이 짧아지므로 총 차용 비용이 감소합니다. 예를 들어, 60개월 대신 48개월로 상환하면 총 비용이 상당히 절감됩니다.</div></div>
+  <div class="faq-item"><div class="faq-q">유효 연이율(Effective Annual Rate)은 무엇인가요?</div><div class="faq-a">유효 연이율은 복리 효과를 반영한 실제 연이율입니다. 월별 또는 분기별로 이자가 계산될 때 복리 효과가 발생하므로, 유효 연이율이 명목 이자율보다 높습니다. 이는 장기 투자나 저축을 비교할 때 특히 중요합니다.</div></div></section>
+  <div class="more-tools"><h3>더 많은 도구</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ko/compound-interest.html">복리 이자 계산기</a>
+      <a class="tool-pill" href="/tools/ko/roi-calculator.html">ROI 계산기</a>
+      <a class="tool-pill" href="/tools/ko/risk-reward.html">위험-수익 계산기</a>
+      <a class="tool-pill" href="/tools/ko/position-size.html">포지션 크기 계산기</a>
+      <a class="tool-pill" href="/tools/ko/stop-loss.html">손절매 계산기</a>
+      <a class="tool-pill" href="/tools/ko/dividend-yield.html">배당 수익률 계산기</a>
+      <a class="tool-pill" href="/tools/ko/pe-ratio.html">P/E 비율 계산기</a>
+      <a class="tool-pill" href="/tools/ko/dca-calculator.html">DCA 계산기</a>
+      <a class="tool-pill" href="/tools/ko/cagr.html">CAGR 계산기</a>
+      <a class="tool-pill" href="/tools/ko/margin-calculator.html">마진 계산기</a>
+      <a class="tool-pill" href="/tools/ko/stock-gain-loss.html">주식 수익/손실 계산기</a>
+      <a class="tool-pill" href="/tools/ko/break-even.html">손익분기점 계산기</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/apr-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/apr-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/apr-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/apr-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/apr-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/apr-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/apr-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/apr-calculator.html" class="lang-btn active">한국어</a>
+    <a href="/tools/id/apr-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/apr-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>관련 계산기</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() { const loanAmount = parseFloat(document.getElementById('loanAmount').value); const nominalRate = parseFloat(document.getElementById('nominalRate').value); const loanTerm = parseFloat(document.getElementById('loanTerm').value); const totalFees = parseFloat(document.getElementById('totalFees').value); const processingFee = parseFloat(document.getElementById('processingFee').value); if (!loanAmount || !nominalRate || !loanTerm || loanAmount <= 0 || nominalRate < 0 || loanTerm <= 0) { alert('Please enter valid positive numbers for all required fields'); return; } const totalCharges = (totalFees || 0) + (processingFee || 0); const monthlyRate = nominalRate / 100 / 12; const monthlyPayment = (loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, loanTerm))) / (Math.pow(1 + monthlyRate, loanTerm) - 1); const totalRepayment = monthlyPayment * loanTerm; const totalInterest = totalRepayment - loanAmount; const totalBorrowingCost = totalInterest + totalCharges; const netLoanAmount = loanAmount - processingFee; let apr = nominalRate; let low = 0; let high = 100; for (let i = 0; i < 100; i++) { apr = (low + high) / 2; const monthlyAprRate = apr / 100 / 12; let pv = 0; for (let month = 1; month <= loanTerm; month++) { pv += monthlyPayment / Math.pow(1 + monthlyAprRate, month); } if (pv > netLoanAmount) { low = apr; } else { high = apr; } } const effectiveAnnualRate = Math.pow(1 + (nominalRate / 100 / 12), 12) - 1; document.getElementById('aprResult').textContent = apr.toFixed(2); document.getElementById('monthlyPayment').textContent = monthlyPayment.toFixed(2); document.getElementById('totalRepayment').textContent = totalRepayment.toFixed(2); document.getElementById('totalCost').textContent = totalBorrowingCost.toFixed(2); document.getElementById('effectiveRate').textContent = (effectiveAnnualRate * 100).toFixed(2); document.getElementById('results').classList.add('show'); }
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='복사됨!';setTimeout(function(){b.textContent='공유'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ko|apr-calculator|2026-07-09 -->

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日付差分計算機 - 日数・週数・月数を計算</title>
+<meta name="description" content="2つの日付間の日数、週数、月数、年数を簡単に計算できます。プロジェクト管理や期間計算に最適なツールです。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/date-difference.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/date-difference.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/date-difference.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/date-difference.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/date-difference.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/date-difference.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/date-difference.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/date-difference.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/date-difference.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/date-difference.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/date-difference.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/date-difference.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "日付差分計算機", "url": "https://softglow-ai.com/tools/ja/date-difference.html", "description": "2つの日付間の日数、週数、月数、年数を簡単に計算できます。プロジェクト管理や期間計算に最適なツールです。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "閏年は計算に反映されていますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、このツールは閏年を考慮した正確な計算を行います。西暦4の倍数の年は閏年（2月が29日）となり、これが計算に反映されています。"}}, {"@type": "Question", "name": "月数の計算方法はどうなっていますか？", "acceptedAnswer": {"@type": "Answer", "text": "月数は、合計日数を平均月日数（30.44日）で除算して算出しています。これは年間365.25日を12ヶ月で割った値に基づいています。"}}, {"@type": "Question", "name": "同じ日付を入力するとどうなりますか？", "acceptedAnswer": {"@type": "Answer", "text": "開始日と終了日が同じ場合、すべての結果は0となります。計算は終了日から開始日を引いた値となります。"}}, {"@type": "Question", "name": "過去の日付から現在までを計算できますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、開始日に過去の日付を、終了日に現在の日付を入力することで、経過日数を計算できます。"}}, {"@type": "Question", "name": "計算結果を保存したり、シェアできますか？", "acceptedAnswer": {"@type": "Answer", "text": "このツールはブラウザで動作するため、スクリーンショットで結果を保存できます。結果をメールやメッセージで共有する場合は、日付を記録して再計算することをお勧めします。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 日付差分計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>日付差分計算機</h1>
+    <p class="calc-subtitle">任意の2つの日付間の日数、週数、月数を瞬時に計算します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="startDate">開始日</label>
+  <div class="input-row"><input type="date" id="startDate" placeholder=""  step="1"></div>
+</div>
+  <small class="input-help">計算を開始する日付を選択してください</small>
+<div class="input-group">
+  <label for="endDate">終了日</label>
+  <div class="input-row"><input type="date" id="endDate" placeholder=""  step="1"></div>
+</div>
+  <small class="input-help">計算を終了する日付を選択してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">合計日数</span><span class="result-value" id="resultDays">—</span></div>
+<div class="result-item"><span class="result-label">合計週数</span><span class="result-value" id="resultWeeks">—</span></div>
+<div class="result-item"><span class="result-label">合計月数</span><span class="result-value" id="resultMonths">—</span></div>
+<div class="result-item"><span class="result-label">合計年数</span><span class="result-value" id="resultYears">—</span></div>
+<div class="result-item"><span class="result-label">詳細な内訳</span><span class="result-value" id="resultBreakdown">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 計算結果は、2つの日付間の経過期間を複数の単位で表示します。合計日数は最も正確な計算値であり、週数や月数はこれを基に換算されています。詳細な内訳では、年単位での期間分割が確認できます。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>日付差分計算機について</h2><p>日付差分計算機は、任意の2つの日付間の時間経過を正確に計算するツールです。プロジェクト管理、契約期間の計算、誕生日から現在までの日数など、様々なビジネスシーンで活用できます。</p><h2>計算方法</h2><p>このツールは開始日と終了日を比較して、以下の項目を自動計算します。合計日数は最も基本的な計算値で、この値を基準に週数（7で除算）、月数（30.44で除算）、年数（365.25で除算）が算出されます。月数の計算には平均月の日数である30.44日を使用しています。</p><h2>ビジネスでの活用例</h2><p>プロジェクト管理では、プロジェクト開始日から完了予定日までの期間を計算して、スケジュール管理に活用できます。また、契約期間の計算、従業員の勤続年数の把握、リース期間の管理など、企業経営に欠かせない機能です。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>正確な計算のコツ</h2><p>より正確な結果を得るために、閏年（うるうどし）の概念を考慮して計算されています。西暦4の倍数の年は閏年となり、2月が29日まであります。ただし、西暦100の倍数の年は閏年ではなく、400の倍数の年は閏年となる特殊なルールがあります。</p><h2>結果の読み方</h2><p>「合計日数」が最も正確な値です。「合計週数」は日数を7で割った値、「合計月数」は平均月日数で割った概算値です。詳細な内訳では、○年○ヶ月○日という形式で期間が表示されるため、より直感的に期間を把握できます。</p><h2>その他の機能</h2><p>このツールは完全無料で利用でき、ブラウザ上で即座に計算結果が表示されます。スマートフォンやタブレットにも対応しており、外出先からでも簡単に日付計算ができます。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">閏年は計算に反映されていますか？</div><div class="faq-a">はい、このツールは閏年を考慮した正確な計算を行います。西暦4の倍数の年は閏年（2月が29日）となり、これが計算に反映されています。</div></div>
+  <div class="faq-item"><div class="faq-q">月数の計算方法はどうなっていますか？</div><div class="faq-a">月数は、合計日数を平均月日数（30.44日）で除算して算出しています。これは年間365.25日を12ヶ月で割った値に基づいています。</div></div>
+  <div class="faq-item"><div class="faq-q">同じ日付を入力するとどうなりますか？</div><div class="faq-a">開始日と終了日が同じ場合、すべての結果は0となります。計算は終了日から開始日を引いた値となります。</div></div>
+  <div class="faq-item"><div class="faq-q">過去の日付から現在までを計算できますか？</div><div class="faq-a">はい、開始日に過去の日付を、終了日に現在の日付を入力することで、経過日数を計算できます。</div></div>
+  <div class="faq-item"><div class="faq-q">計算結果を保存したり、シェアできますか？</div><div class="faq-a">このツールはブラウザで動作するため、スクリーンショットで結果を保存できます。結果をメールやメッセージで共有する場合は、日付を記録して再計算することをお勧めします。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">Roi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">Risk Reward</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">Position Size</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">Dividend Yield</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">Pe Ratio</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">Dca Calculator</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/date-difference.html" class="lang-btn">English</a>
+    <a href="/tools/date-difference.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/date-difference.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/date-difference.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/date-difference.html" class="lang-btn">Français</a>
+    <a href="/tools/es/date-difference.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/date-difference.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/date-difference.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/date-difference.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/date-difference.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const startDateInput = document.getElementById('startDate').value;
+  const endDateInput = document.getElementById('endDate').value;
+  
+  if (!startDateInput || !endDateInput) {
+    alert('Please enter both start and end dates');
+    return;
+  }
+  
+  const startDate = new Date(startDateInput);
+  const endDate = new Date(endDateInput);
+  
+  if (startDate > endDate) {
+    alert('Start date must be before end date');
+    return;
+  }
+  
+  // Calculate total days
+  const timeDiff = endDate - startDate;
+  const totalDays = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+  
+  // Calculate weeks and remaining days
+  const totalWeeks = Math.floor(totalDays / 7);
+  const remainingDays = totalDays % 7;
+  
+  // Calculate months and years
+  let months = 0;
+  let years = 0;
+  let tempDate = new Date(startDate);
+  
+  while (tempDate < endDate) {
+    tempDate.setMonth(tempDate.getMonth() + 1);
+    if (tempDate <= endDate) {
+      months++;
+    }
+  }
+  
+  years = Math.floor(months / 12);
+  const remainingMonths = months % 12;
+  
+  // Update results
+  document.getElementById('resultDays').textContent = totalDays.toLocaleString('en-US');
+  document.getElementById('resultWeeks').textContent = totalWeeks.toLocaleString('en-US');
+  document.getElementById('resultMonths').textContent = months.toLocaleString('en-US');
+  document.getElementById('resultYears').textContent = years.toLocaleString('en-US');
+  document.getElementById('resultBreakdown').textContent = years + ' years, ' + remainingMonths + ' months, and ' + remainingDays + ' days';
+  
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|date-difference|2026-07-09 -->

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Índice de Sharpe - Análise de Risco</title>
+<meta name="description" content="Calcule o Índice de Sharpe para avaliar retornos ajustados ao risco. Analise a performance da sua carteira em relação ao risco assumido.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/pt/sharpe-ratio.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/sharpe-ratio.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/sharpe-ratio.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/sharpe-ratio.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/sharpe-ratio.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/sharpe-ratio.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/sharpe-ratio.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/sharpe-ratio.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/sharpe-ratio.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/sharpe-ratio.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/sharpe-ratio.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/sharpe-ratio.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculadora de Índice de Sharpe", "url": "https://softglow-ai.com/tools/pt/sharpe-ratio.html", "description": "Calcule o Índice de Sharpe para avaliar retornos ajustados ao risco. Analise a performance da sua carteira em relação ao risco assumido.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "pt"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Qual é o Índice de Sharpe ideal?", "acceptedAnswer": {"@type": "Answer", "text": "Um Índice de Sharpe acima de 1,0 é geralmente considerado aceitável, acima de 2,0 é bom, e acima de 3,0 é excelente. No entanto, o ideal depende do seu perfil de investidor e dos objetivos. Valores mais altos indicam melhor desempenho ajustado ao risco."}}, {"@type": "Question", "name": "Como a taxa livre de risco afeta o cálculo?", "acceptedAnswer": {"@type": "Answer", "text": "A taxa livre de risco é o ponto de referência mínimo de retorno. Quanto maior for essa taxa, menor será o Índice de Sharpe resultante, pois reduz o retorno em excesso. No Brasil, frequentemente usa-se a taxa Selic ou rentabilidade de títulos do Tesouro Direto."}}, {"@type": "Question", "name": "Posso comparar carteiras com diferentes períodos?", "acceptedAnswer": {"@type": "Answer", "text": "É recomendável usar períodos similares ao comparar carteiras com o Índice de Sharpe, pois diferentes períodos podem resultar em desvios padrão e retornos distintos. Idealmente, compare carteiras usando dados do mesmo intervalo de tempo."}}, {"@type": "Question", "name": "O que significa um Índice de Sharpe negativo?", "acceptedAnswer": {"@type": "Answer", "text": "Um Índice de Sharpe negativo indica que o retorno da carteira é inferior à taxa livre de risco. Neste caso, seria mais prudente investir em ativos sem risco. Isso geralmente significa que a carteira não está oferecendo compensação adequada pelo risco assumido."}}, {"@type": "Question", "name": "Como a diversificação afeta o Índice de Sharpe?", "acceptedAnswer": {"@type": "Answer", "text": "A diversificação bem executada reduz o desvio padrão (risco) da carteira sem necessariamente reduzir o retorno esperado, melhorando assim o Índice de Sharpe. Adicionar ativos com correlação baixa ou negativa é especialmente eficaz para otimizar essa métrica."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/pt/">Ferramentas</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/pt/">Ferramentas</a> > Calculadora de Índice de Sharpe</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Calculadora de Índice de Sharpe</h1>
+    <p class="calc-subtitle">Meça retornos de investimento ajustados ao risco com precisão</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="portfolioReturn">Retorno da Carteira (Rp)</label>
+  <div class="input-row"><input type="number" id="portfolioReturn" placeholder="ex: 12,5"  step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">Retorno total esperado ou histórico da sua carteira de investimentos em percentual</small>
+<div class="input-group">
+  <label for="riskFreeRate">Taxa Livre de Risco (Rf)</label>
+  <div class="input-row"><input type="number" id="riskFreeRate" placeholder="ex: 4,5"  step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">Taxa de retorno de um investimento sem risco, como títulos do governo</small>
+<div class="input-group">
+  <label for="standardDeviation">Desvio Padrão (σp)</label>
+  <div class="input-row"><input type="number" id="standardDeviation" placeholder="ex: 8,3"  step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">Volatilidade ou variabilidade dos retornos da carteira em percentual</small></div>
+    <button class="btn-calc" onclick="calculate()">Calcular</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Índice de Sharpe</span><span class="result-value" id="sharpeRatioResult">—</span></div>
+<div class="result-item"><span class="result-label">Retorno em Excesso</span><span class="result-value" id="excessReturnResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>O que isso significa?</strong> O Índice de Sharpe indica quanto de retorno em excesso você recebe por cada unidade de risco assumido. Quanto maior o valor, melhor a relação risco-retorno da sua carteira. O Retorno em Excesso mostra a diferença entre o retorno da carteira e a taxa livre de risco.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Imprimir</button>
+        <button onclick="shareResult()">&#x1f4e4; Compartilhar</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>O que é o Índice de Sharpe?</h2><p>O Índice de Sharpe é uma métrica fundamental na análise de investimentos que mede o desempenho ajustado ao risco de uma carteira. Desenvolvido por William F. Sharpe em 1966, este indicador permite comparar diferentes investimentos considerando não apenas o retorno, mas também o risco envolvido. A fórmula do Índice de Sharpe é: (Rp - Rf) / σp, onde Rp é o retorno da carteira, Rf é a taxa livre de risco e σp é o desvio padrão dos retornos.</p><h2>Como Interpretar os Resultados</h2><p>Um Índice de Sharpe positivo e elevado indica que o investimento oferece um bom retorno para o risco assumido. Geralmente, valores acima de 1,0 são considerados bons, acima de 2,0 são muito bons, e acima de 3,0 são excelentes. Um índice negativo sugere que o retorno da carteira é inferior à taxa livre de risco, indicando um investimento inadequado. Ao comparar múltiplas carteiras, aquela com o maior Índice de Sharpe oferece melhor relação risco-retorno.</p><h2>Componentes da Fórmula</h2><p>O Retorno da Carteira (Rp) representa o ganho total esperado ou obtido com seu investimento, considerando dividendos e ganhos de capital. A Taxa Livre de Risco (Rf) é tipicamente o retorno de títulos do governo, como Tesouro Direto no Brasil, que teoricamente não possuem risco de crédito. O Desvio Padrão (σp) mede a volatilidade dos retornos, indicando quanto o desempenho varia ao longo do tempo. Quanto maior o desvio padrão, mais volátil e arriscada é a carteira.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Aplicações Práticas</h2><p>A Calculadora de Índice de Sharpe é essencial para investidores que desejam otimizar suas carteiras. Use esta ferramenta para comparar fundos de investimento, ações individuais ou diferentes estratégias de alocação de ativos. Ao avaliar um fundo que promete 15% de retorno anual, o Índice de Sharpe ajuda a entender se esse retorno justifica o risco assoc iado. Também é útil para rebalancear sua carteira periodicamente, substituindo investimentos com baixo Índice de Sharpe por alternativas mais eficientes.</p><h2>Limitações e Considerações</h2><p>Embora poderoso, o Índice de Sharpe possui limitações. Ele assume que os retornos seguem uma distribuição normal, o que nem sempre é verdade nos mercados reais. A métrica também é sensível ao período analisado e à escolha da taxa livre de risco. Investimentos com retornos não-normais, como estratégias de opções ou hedge funds, podem ter seu risco subestimado. Portanto, use o Índice de Sharpe em conjunto com outras análises, como o índice Sortino ou avaliação de risco de queda.</p><h2>Melhorando Seu Índice de Sharpe</h2><p>Para aumentar o Índice de Sharpe de sua carteira, você pode buscar ativos com alto retorno esperado, reduzir a volatilidade através de diversificação adequada, ou ambos. Adicionar investimentos com baixa correlação entre si ajuda a diminuir o desvio padrão total sem sacrificar retornos. Considere também custos de transação e impostos, que reduzem retornos líquidos e afetam o índice negativamente. Monitorar regularmente sua carteira e rebalanceá-la conforme necessário garante que você mantenha um Índice de Sharpe otimizado ao longo do tempo.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Artigos relacionados</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>Perguntas frequentes</h2><div class="faq-item"><div class="faq-q">Qual é o Índice de Sharpe ideal?</div><div class="faq-a">Um Índice de Sharpe acima de 1,0 é geralmente considerado aceitável, acima de 2,0 é bom, e acima de 3,0 é excelente. No entanto, o ideal depende do seu perfil de investidor e dos objetivos. Valores mais altos indicam melhor desempenho ajustado ao risco.</div></div>
+  <div class="faq-item"><div class="faq-q">Como a taxa livre de risco afeta o cálculo?</div><div class="faq-a">A taxa livre de risco é o ponto de referência mínimo de retorno. Quanto maior for essa taxa, menor será o Índice de Sharpe resultante, pois reduz o retorno em excesso. No Brasil, frequentemente usa-se a taxa Selic ou rentabilidade de títulos do Tesouro Direto.</div></div>
+  <div class="faq-item"><div class="faq-q">Posso comparar carteiras com diferentes períodos?</div><div class="faq-a">É recomendável usar períodos similares ao comparar carteiras com o Índice de Sharpe, pois diferentes períodos podem resultar em desvios padrão e retornos distintos. Idealmente, compare carteiras usando dados do mesmo intervalo de tempo.</div></div>
+  <div class="faq-item"><div class="faq-q">O que significa um Índice de Sharpe negativo?</div><div class="faq-a">Um Índice de Sharpe negativo indica que o retorno da carteira é inferior à taxa livre de risco. Neste caso, seria mais prudente investir em ativos sem risco. Isso geralmente significa que a carteira não está oferecendo compensação adequada pelo risco assumido.</div></div>
+  <div class="faq-item"><div class="faq-q">Como a diversificação afeta o Índice de Sharpe?</div><div class="faq-a">A diversificação bem executada reduz o desvio padrão (risco) da carteira sem necessariamente reduzir o retorno esperado, melhorando assim o Índice de Sharpe. Adicionar ativos com correlação baixa ou negativa é especialmente eficaz para otimizar essa métrica.</div></div></section>
+  <div class="more-tools"><h3>Mais ferramentas</h3><div class="tools-grid"><a class="tool-pill" href="/tools/pt/compound-interest.html">Calculadora de Juros Compostos</a>
+      <a class="tool-pill" href="/tools/pt/roi-calculator.html">Calculadora de ROI</a>
+      <a class="tool-pill" href="/tools/pt/risk-reward.html">Calculadora de Risco-Recompensa</a>
+      <a class="tool-pill" href="/tools/pt/position-size.html">Calculadora de Tamanho de Posição</a>
+      <a class="tool-pill" href="/tools/pt/stop-loss.html">Calculadora de Stop Loss</a>
+      <a class="tool-pill" href="/tools/pt/dividend-yield.html">Calculadora de Rendimento de Dividendos</a>
+      <a class="tool-pill" href="/tools/pt/pe-ratio.html">Calculadora de Índice P/L</a>
+      <a class="tool-pill" href="/tools/pt/dca-calculator.html">Calculadora de DCA</a>
+      <a class="tool-pill" href="/tools/pt/cagr.html">Calculadora de CAGR</a>
+      <a class="tool-pill" href="/tools/pt/margin-calculator.html">Calculadora de Margem</a>
+      <a class="tool-pill" href="/tools/pt/stock-gain-loss.html">Calculadora de Ganho/Perda em Ações</a>
+      <a class="tool-pill" href="/tools/pt/break-even.html">Calculadora de Ponto de Equilíbrio</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/sharpe-ratio.html" class="lang-btn">English</a>
+    <a href="/tools/sharpe-ratio.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/sharpe-ratio.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/sharpe-ratio.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/sharpe-ratio.html" class="lang-btn">Français</a>
+    <a href="/tools/es/sharpe-ratio.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/sharpe-ratio.html" class="lang-btn active">Português</a>
+    <a href="/tools/ko/sharpe-ratio.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/sharpe-ratio.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/sharpe-ratio.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Ferramentas relacionadas</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const portfolioReturnEl = document.getElementById('portfolioReturn');
+  const riskFreeRateEl = document.getElementById('riskFreeRate');
+  const standardDeviationEl = document.getElementById('standardDeviation');
+  
+  const portfolioReturn = parseFloat(portfolioReturnEl.value);
+  const riskFreeRate = parseFloat(riskFreeRateEl.value);
+  const standardDeviation = parseFloat(standardDeviationEl.value);
+  
+  if (isNaN(portfolioReturn) || portfolioReturnEl.value.trim() === '') {
+    alert('Please enter a valid Portfolio Return');
+    return;
+  }
+  if (isNaN(riskFreeRate) || riskFreeRateEl.value.trim() === '') {
+    alert('Please enter a valid Risk-Free Rate');
+    return;
+  }
+  if (isNaN(standardDeviation) || standardDeviationEl.value.trim() === '') {
+    alert('Please enter a valid Standard Deviation');
+    return;
+  }
+  if (standardDeviation === 0) {
+    alert('Standard Deviation cannot be zero');
+    return;
+  }
+  
+  const excessReturn = portfolioReturn - riskFreeRate;
+  const sharpeRatio = excessReturn / standardDeviation;
+  
+  document.getElementById('sharpeRatioResult').textContent = sharpeRatio.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+  document.getElementById('excessReturnResult').textContent = excessReturn.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copiado!';setTimeout(function(){b.textContent='Compartilhar'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|pt|sharpe-ratio|2026-07-09 -->

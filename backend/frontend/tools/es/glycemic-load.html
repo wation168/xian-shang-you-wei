@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Carga Glucémica - Índice Glucémico</title>
+<meta name="description" content="Calcula la carga glucémica (GL) de tus alimentos. Comprende cómo afectan los carbohidratos a tu glucosa en sangre.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/es/glycemic-load.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/glycemic-load.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/glycemic-load.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/glycemic-load.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/glycemic-load.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/glycemic-load.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/glycemic-load.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/glycemic-load.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/glycemic-load.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/glycemic-load.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/glycemic-load.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/glycemic-load.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculadora de Carga Glucémica", "url": "https://softglow-ai.com/tools/es/glycemic-load.html", "description": "Calcula la carga glucémica (GL) de tus alimentos. Comprende cómo afectan los carbohidratos a tu glucosa en sangre.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "es"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "¿Cuál es la diferencia entre Índice Glucémico y Carga Glucémica?", "acceptedAnswer": {"@type": "Answer", "text": "El Índice Glucémico (IG) mide la velocidad de absorción de carbohidratos en una escala de 0 a 100, mientras que la Carga Glucémica (CG) combina este valor con la cantidad real de carbohidratos. La CG es más práctica porque considera la porción real que consumes."}}, {"@type": "Question", "name": "¿Qué valores de Carga Glucémica debo buscar?", "acceptedAnswer": {"@type": "Answer", "text": "Idealmente, busca alimentos con CG baja (menor a 10) para consumo regular. Una CG media (10-20) puede consumirse con moderación, y una CG alta (mayor a 20) debe limitarse, especialmente si tienes problemas de control glucémico."}}, {"@type": "Question", "name": "¿Cómo puedo reducir la Carga Glucémica de mis comidas?", "acceptedAnswer": {"@type": "Answer", "text": "Puedes reducir la CG disminuyendo el tamaño de las porciones, eligiendo alimentos con IG más bajo, aumentando la fibra dietética, o combinando carbohidratos con proteínas y grasas saludables que ralentizan la absorción de glucosa."}}, {"@type": "Question", "name": "¿Esta calculadora es adecuada para personas con diabetes?", "acceptedAnswer": {"@type": "Answer", "text": "Sí, esta calculadora es especialmente útil para personas con diabetes o prediabetes. Ayuda a entender cómo diferentes alimentos afectan los niveles de glucosa en sangre y permite tomar decisiones alimenticias más informadas."}}, {"@type": "Question", "name": "¿Necesito conocer el Índice Glucémico exacto de cada alimento?", "acceptedAnswer": {"@type": "Answer", "text": "Idealmente sí, aunque existen tablas de IG disponibles para la mayoría de alimentos comunes. Si no encuentras el valor exacto, puedes usar valores aproximados de alimentos similares como referencia."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/es/">Herramientas</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/es/">Herramientas</a> > Calculadora de Carga Glucémica</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Calculadora de Carga Glucémica</h1>
+    <p class="calc-subtitle">Calcula la carga glucémica de los alimentos para entender su impacto en los niveles de glucosa en sangre</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="glycemicIndex">Índice Glucémico (IG)</label>
+  <div class="input-row"><input type="number" id="glycemicIndex" placeholder="ej., 55"  step="1"></div>
+</div>
+  <small class="input-help">Ingresa el valor del Índice Glucémico del alimento (0-100)</small>
+<div class="input-group">
+  <label for="carbohydrates">Carbohidratos</label>
+  <div class="input-row"><input type="number" id="carbohydrates" placeholder="ej., 30"  step="0.1"><span class="input-suffix">gramos</span></div>
+</div>
+  <small class="input-help">Ingresa la cantidad de carbohidratos en gramos</small></div>
+    <button class="btn-calc" onclick="calculate()">Calcular</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Carga Glucémica (CG)</span><span class="result-value" id="glycemicLoadResult">—</span></div>
+<div class="result-item"><span class="result-label">Interpretación</span><span class="result-value" id="glInterpretation">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>¿Qué significa esto?</strong> La Carga Glucémica (CG) indica cómo de rápido un alimento eleva tu glucosa en sangre. Una CG baja (menor a 10) tiene un impacto mínimo, una CG media (10-20) tiene impacto moderado, y una CG alta (mayor a 20) provoca aumentos significativos de glucosa. Utiliza estos valores para elegir alimentos más saludables.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Imprimir</button>
+        <button onclick="shareResult()">&#x1f4e4; Compartir</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>¿Qué es la Carga Glucémica?</h2><p>La Carga Glucémica (CG) es una medida que combina el Índice Glucémico (IG) con la cantidad de carbohidratos en una porción de alimento. A diferencia del IG, que solo considera la velocidad de absorción de glucosa, la CG proporciona una evaluación más precisa del impacto real del alimento en tus niveles de glucosa en sangre. Esta herramienta es especialmente útil para personas con diabetes, prediabetes o cualquiera que busque mantener estables sus niveles de azúcar.</p><h2>¿Cómo se Calcula la Carga Glucémica?</h2><p>La fórmula para calcular la Carga Glucémica es simple pero efectiva: CG = (IG × gramos de carbohidratos) / 100. Por ejemplo, si un alimento tiene un IG de 60 y contiene 20 gramos de carbohidratos, la CG sería (60 × 20) / 100 = 12. Este resultado te da una idea clara del impacto glucémico real de una porción específica del alimento, no solo de su índice teórico.</p><h2>Interpretación de los Resultados</h2><p>Los resultados de la Carga Glucémica se clasifican en tres categorías principales. Una CG baja (menor a 10) indica que el alimento tiene un impacto mínimo en los niveles de glucosa en sangre y es generalmente seguro para consumir regularmente. Una CG media (entre 10 y 20) significa que el alimento tiene un impacto moderado y puede consumirse con moderación. Una CG alta (mayor a 20) indica que el alimento provoca aumentos significativos de glucosa en sangre y debe limitarse, especialmente para personas con control glucémico comprometido.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Diferencia entre Índice Glucémico y Carga Glucémica</h2><p>Aunque el Índice Glucémico y la Carga Glucémica están relacionados, son medidas diferentes. El IG es un valor fijo que describe la velocidad relativa de digestión de un alimento en comparación con la glucosa pura. La CG, por otro lado, considera tanto el IG como la cantidad real de carbohidratos en una porción servida. Esto hace que la CG sea más práctica para la vida cotidiana, ya que refleja lo que realmente comes.</p><h2>Aplicaciones Prácticas de la Calculadora</h2><p>Esta calculadora de Carga Glucémica es una herramienta práctica para planificar comidas equilibradas. Puedes usarla para comparar diferentes alimentos, ajustar tamaños de porción, o diseñar comidas que mantengan tu glucosa en sangre estable. Por ejemplo, si deseas comer un alimento con IG alto pero quieres mantener una CG baja, puedes reducir el tamaño de la porción. También es útil para identificar alimentos alternativos más saludables con menor impacto glucémico.</p><h2>Consejos para Mantener una Carga Glucémica Saludable</h2><p>Para mantener tu salud metabólica, intenta mantener la CG total de tus comidas por debajo de 60 a 80 diarios. Combina alimentos con CG baja (verduras sin almidón, proteínas, grasas saludables) con pequeñas porciones de alimentos con CG media. Incrementa la fibra dietética, que ralentiza la absorción de glucosa y reduce efectivamente la CG. También considera hacer ejercicio después de comer, que mejora la sensibilidad a la insulina. Monitorear y calcular regularmente la CG te ayudará a desarrollar mejores hábitos alimenticios a largo plazo.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Artículos relacionados</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>Preguntas frecuentes</h2><div class="faq-item"><div class="faq-q">¿Cuál es la diferencia entre Índice Glucémico y Carga Glucémica?</div><div class="faq-a">El Índice Glucémico (IG) mide la velocidad de absorción de carbohidratos en una escala de 0 a 100, mientras que la Carga Glucémica (CG) combina este valor con la cantidad real de carbohidratos. La CG es más práctica porque considera la porción real que consumes.</div></div>
+  <div class="faq-item"><div class="faq-q">¿Qué valores de Carga Glucémica debo buscar?</div><div class="faq-a">Idealmente, busca alimentos con CG baja (menor a 10) para consumo regular. Una CG media (10-20) puede consumirse con moderación, y una CG alta (mayor a 20) debe limitarse, especialmente si tienes problemas de control glucémico.</div></div>
+  <div class="faq-item"><div class="faq-q">¿Cómo puedo reducir la Carga Glucémica de mis comidas?</div><div class="faq-a">Puedes reducir la CG disminuyendo el tamaño de las porciones, eligiendo alimentos con IG más bajo, aumentando la fibra dietética, o combinando carbohidratos con proteínas y grasas saludables que ralentizan la absorción de glucosa.</div></div>
+  <div class="faq-item"><div class="faq-q">¿Esta calculadora es adecuada para personas con diabetes?</div><div class="faq-a">Sí, esta calculadora es especialmente útil para personas con diabetes o prediabetes. Ayuda a entender cómo diferentes alimentos afectan los niveles de glucosa en sangre y permite tomar decisiones alimenticias más informadas.</div></div>
+  <div class="faq-item"><div class="faq-q">¿Necesito conocer el Índice Glucémico exacto de cada alimento?</div><div class="faq-a">Idealmente sí, aunque existen tablas de IG disponibles para la mayoría de alimentos comunes. Si no encuentras el valor exacto, puedes usar valores aproximados de alimentos similares como referencia.</div></div></section>
+  <div class="more-tools"><h3>Más herramientas</h3><div class="tools-grid"><a class="tool-pill" href="/tools/es/compound-interest.html">Calculadora de Interés Compuesto</a>
+      <a class="tool-pill" href="/tools/es/roi-calculator.html">Calculadora de ROI</a>
+      <a class="tool-pill" href="/tools/es/risk-reward.html">Calculadora de Riesgo-Recompensa</a>
+      <a class="tool-pill" href="/tools/es/position-size.html">Calculadora de Tamaño de Posición</a>
+      <a class="tool-pill" href="/tools/es/stop-loss.html">Calculadora de Stop Loss</a>
+      <a class="tool-pill" href="/tools/es/dividend-yield.html">Calculadora de Rendimiento por Dividendo</a>
+      <a class="tool-pill" href="/tools/es/pe-ratio.html">Calculadora de Ratio P/E</a>
+      <a class="tool-pill" href="/tools/es/dca-calculator.html">Calculadora DCA</a>
+      <a class="tool-pill" href="/tools/es/cagr.html">Calculadora CAGR</a>
+      <a class="tool-pill" href="/tools/es/margin-calculator.html">Calculadora de Margen</a>
+      <a class="tool-pill" href="/tools/es/stock-gain-loss.html">Calculadora de Ganancias/Pérdidas en Acciones</a>
+      <a class="tool-pill" href="/tools/es/break-even.html">Calculadora de Punto de Equilibrio</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/glycemic-load.html" class="lang-btn">English</a>
+    <a href="/tools/glycemic-load.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/glycemic-load.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/glycemic-load.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/glycemic-load.html" class="lang-btn">Français</a>
+    <a href="/tools/es/glycemic-load.html" class="lang-btn active">Español</a>
+    <a href="/tools/pt/glycemic-load.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/glycemic-load.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/glycemic-load.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/glycemic-load.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Herramientas relacionadas</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const giInput = document.getElementById('glycemicIndex');
+  const carbsInput = document.getElementById('carbohydrates');
+  const glResult = document.getElementById('glycemicLoadResult');
+  const interpretResult = document.getElementById('glInterpretation');
+  const resultsDiv = document.getElementById('results');
+
+  if (!giInput.value || !carbsInput.value) {
+    alert('Please enter both Glycemic Index and Carbohydrates values');
+    return;
+  }
+
+  const gi = parseFloat(giInput.value);
+  const carbs = parseFloat(carbsInput.value);
+
+  if (gi < 0 || gi > 100 || carbs < 0) {
+    alert('Please enter valid values. GI should be 0-100, carbs should be positive');
+    return;
+  }
+
+  const gl = (gi * carbs) / 100;
+
+  glResult.textContent = gl.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+  let interpretation = '';
+  if (gl < 10) {
+    interpretation = 'Low GL - Minimal blood sugar impact';
+  } else if (gl < 20) {
+    interpretation = 'Medium GL - Moderate blood sugar impact';
+  } else {
+    interpretation = 'High GL - Significant blood sugar impact';
+  }
+
+  interpretResult.textContent = interpretation;
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='¡Copiado!';setTimeout(function(){b.textContent='Compartir'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|es|glycemic-load|2026-07-09 -->

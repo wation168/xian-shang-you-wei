@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>債券殖利率計算機 - YTM計算工具</title>
+<meta name="description" content="免費債券殖利率計算機，快速計算到期殖利率(YTM)、息票支付及債券投資報酬。精確的金融分析工具。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/bond-yield.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/bond-yield.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/bond-yield.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/bond-yield.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/bond-yield.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/bond-yield.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/bond-yield.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/bond-yield.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/bond-yield.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/bond-yield.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/bond-yield.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/bond-yield.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "債券殖利率計算機", "url": "https://softglow-ai.com/tools/bond-yield.html", "description": "免費債券殖利率計算機，快速計算到期殖利率(YTM)、息票支付及債券投資報酬。精確的金融分析工具。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "什麼是到期殖利率(YTM)?", "acceptedAnswer": {"@type": "Answer", "text": "到期殖利率是指投資者購買債券並持有至到期時的年化報酬率。它考慮了目前市場價格、所有息票支付和到期時的本金償還。YTM是評估債券投資吸引力的最重要指標。"}}, {"@type": "Question", "name": "為什麼債券的市場價格會與面值不同?", "acceptedAnswer": {"@type": "Answer", "text": "債券市場價格根據利率環境、信用風險和市場供求而波動。當市場利率上升時，現有債券價格下跌；當利率下降時，債券價格上升。這是因為投資者可以根據現行利率計算債券的合理價值。"}}, {"@type": "Question", "name": "目前殖利率與到期殖利率有什麼區別?", "acceptedAnswer": {"@type": "Answer", "text": "目前殖利率只計算年度利息除以現行價格，不考慮資本利得或損失。到期殖利率包含所有未來的息票支付和到期時的本金差異，提供了更全面的報酬評估。YTM更能反映真實的投資報酬。"}}, {"@type": "Question", "name": "我應該選擇高YTM的債券嗎?", "acceptedAnswer": {"@type": "Answer", "text": "較高的YTM通常意味著較高的預期報酬，但也可能反映較高的風險。高YTM可能來自信用風險較高的發行人或市場定價過度。應結合債券的信用等級、發行機構和自身風險承受能力來評估。"}}, {"@type": "Question", "name": "息票支付頻率如何影響計算結果?", "acceptedAnswer": {"@type": "Answer", "text": "息票支付頻率(每年1次、2次或更多)會影響周期殖利率和YTM的計算。更頻繁的支付意味著投資者可以更快地獲得利息收入，這在複利計算中可能產生微妙的差異。大多數債券每年支付1或2次息票。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 債券殖利率計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>債券殖利率計算機</h1>
+    <p class="calc-subtitle">精確計算債券到期殖利率及投資報酬</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="faceValue">面值(票面價值)</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="faceValue" placeholder="1000"  value="1000" step="1"></div>
+</div>
+  <small class="input-help">輸入債券的面值(通常為1000</small>
+<div class="input-group">
+  <label for="currentPrice">現行市場價格</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="currentPrice" placeholder="950"  value="950" step="0.01"></div>
+</div>
+  <small class="input-help">輸入債券目前在市場上的交易價格</small>
+<div class="input-group">
+  <label for="couponRate">年度息票率</label>
+  <div class="input-row"><input type="number" id="couponRate" placeholder="5"  value="5" step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">輸入年度息票利率(百分比)</small>
+<div class="input-group">
+  <label for="yearsToMaturity">到期年數</label>
+  <div class="input-row"><input type="number" id="yearsToMaturity" placeholder="10"  value="10" step="0.5"><span class="input-suffix">年</span></div>
+</div>
+  <small class="input-help">輸入債券距離到期還剩多少年</small>
+<div class="input-group">
+  <label for="paymentsPerYear">每年息票支付次數</label>
+  <div class="input-row"><input type="number" id="paymentsPerYear" placeholder="2"  value="2" step="1"></div>
+</div>
+  <small class="input-help">輸入每年支付息票的次數(通常為1或2次)</small></div>
+    <button class="btn-calc" onclick="calculate()">計算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">到期殖利率(YTM)</span><span class="result-value" id="ytmResult">—</span></div>
+<div class="result-item"><span class="result-label">周期殖利率</span><span class="result-value" id="ytmPeriodicResult">—</span></div>
+<div class="result-item"><span class="result-label">年度息票支付額</span><span class="result-value" id="annualCoupon">—</span></div>
+<div class="result-item"><span class="result-label">目前殖利率</span><span class="result-value" id="currentYield">—</span></div>
+<div class="result-item"><span class="result-label">到期總報酬</span><span class="result-value" id="totalReturn">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> 到期殖利率(YTM)代表若您持有債券至到期可獲得的年化報酬率。目前殖利率是根據現行價格計算的年度利息收益。總報酬則包含息票收入與到期時的本金差異。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 列印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>債券殖利率計算機使用指南</h2><p>債券殖利率計算機是投資者評估債券投資報酬的重要工具。到期殖利率(YTM)是最常用的債券評估指標，它反映了投資者購買債券並持有至到期時的年化報酬率。本計算機協助您快速準確地計算各項重要的債券指標。</p><h2>核心概念解析</h2><p>面值是債券發行時的原始金額，通常為£1000。現行市場價格是債券在二級市場的交易價格，可能高於或低於面值。息票率是債券每年支付的利息百分比。到期年數是債券距離償還本金的剩餘時間。息票支付次數決定了利息的支付頻率，例如年支付2次表示每半年支付一次利息。</p><h2>到期殖利率的計算</h2><p>到期殖利率(YTM)是最重要的債券投資指標。它考慮了目前市場價格、息票支付、面值以及到期時間等所有因素。當債券以折價(價格低於面值)購買時，YTM會高於息票率。相反，溢價購買(價格高於面值)時，YTM會低於息票率。YTM越高，投資報酬越好，但通常伴隨著更高的風險。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>目前殖利率與總報酬</h2><p>目前殖利率是簡單的年度利息收入除以現行市場價格，不考慮資本利得或損失。到期總報酬包括所有息票收入加上購入價格與面值之間的差異。這提供了更完整的投資報酬圖景。周期殖利率則表示每個息票支付周期內的報酬率。</p><h2>投資決策應用</h2><p>使用本計算機比較不同債券時，應重點關注YTM而非息票率。兩份不同價格的債券可能有相同的息票率，但YTM會因市場價格而異。投資者應根據自身的風險承受能力和投資期限來選擇債券。信用等級、發行機構和市場環境都會影響債券的吸引力。</p><h2>常見用途</h2><p>債券殖利率計算機廣泛應用於債券投資分析、投資組合管理和固定收益證券評估。無論是政府債券、公司債券還是其他固定收益證券，本工具都能幫助您做出更明智的投資決策。定期更新債券市場價格並重新計算YTM，可以幫助您跟踪投資表現和市場變化。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">什麼是到期殖利率(YTM)?</div><div class="faq-a">到期殖利率是指投資者購買債券並持有至到期時的年化報酬率。它考慮了目前市場價格、所有息票支付和到期時的本金償還。YTM是評估債券投資吸引力的最重要指標。</div></div>
+  <div class="faq-item"><div class="faq-q">為什麼債券的市場價格會與面值不同?</div><div class="faq-a">債券市場價格根據利率環境、信用風險和市場供求而波動。當市場利率上升時，現有債券價格下跌；當利率下降時，債券價格上升。這是因為投資者可以根據現行利率計算債券的合理價值。</div></div>
+  <div class="faq-item"><div class="faq-q">目前殖利率與到期殖利率有什麼區別?</div><div class="faq-a">目前殖利率只計算年度利息除以現行價格，不考慮資本利得或損失。到期殖利率包含所有未來的息票支付和到期時的本金差異，提供了更全面的報酬評估。YTM更能反映真實的投資報酬。</div></div>
+  <div class="faq-item"><div class="faq-q">我應該選擇高YTM的債券嗎?</div><div class="faq-a">較高的YTM通常意味著較高的預期報酬，但也可能反映較高的風險。高YTM可能來自信用風險較高的發行人或市場定價過度。應結合債券的信用等級、發行機構和自身風險承受能力來評估。</div></div>
+  <div class="faq-item"><div class="faq-q">息票支付頻率如何影響計算結果?</div><div class="faq-a">息票支付頻率(每年1次、2次或更多)會影響周期殖利率和YTM的計算。更頻繁的支付意味著投資者可以更快地獲得利息收入，這在複利計算中可能產生微妙的差異。大多數債券每年支付1或2次息票。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/roi-calculator.html">ROI 計算機</a>
+      <a class="tool-pill" href="/tools/risk-reward.html">風險報酬計算機</a>
+      <a class="tool-pill" href="/tools/position-size.html">部位規模計算器</a>
+      <a class="tool-pill" href="/tools/stop-loss.html">停損計算機</a>
+      <a class="tool-pill" href="/tools/dividend-yield.html">股息收益率計算機</a>
+      <a class="tool-pill" href="/tools/pe-ratio.html">本益比計算機</a>
+      <a class="tool-pill" href="/tools/dca-calculator.html">定期定額投資計算機</a>
+      <a class="tool-pill" href="/tools/cagr.html">年複合成長率計算器</a>
+      <a class="tool-pill" href="/tools/margin-calculator.html">保證金計算器</a>
+      <a class="tool-pill" href="/tools/stock-gain-loss.html">股票損益計算機</a>
+      <a class="tool-pill" href="/tools/break-even.html">損益平衡點計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/bond-yield.html" class="lang-btn">English</a>
+    <a href="/tools/bond-yield.html" class="lang-btn active">繁體中文</a>
+    <a href="/tools/ja/bond-yield.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/bond-yield.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/bond-yield.html" class="lang-btn">Français</a>
+    <a href="/tools/es/bond-yield.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/bond-yield.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/bond-yield.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/bond-yield.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/bond-yield.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const faceValue = parseFloat(document.getElementById('faceValue').value);
+  const currentPrice = parseFloat(document.getElementById('currentPrice').value);
+  const couponRate = parseFloat(document.getElementById('couponRate').value);
+  const yearsToMaturity = parseFloat(document.getElementById('yearsToMaturity').value);
+  const paymentsPerYear = parseFloat(document.getElementById('paymentsPerYear').value);
+
+  if (!faceValue || !currentPrice || !couponRate || !yearsToMaturity || !paymentsPerYear) {
+    alert('Please fill in all fields with valid numbers');
+    return;
+  }
+
+  if (faceValue <= 0 || currentPrice <= 0 || yearsToMaturity <= 0 || paymentsPerYear <= 0) {
+    alert('All values must be positive numbers');
+    return;
+  }
+
+  const annualCoupon = (faceValue * couponRate) / 100;
+  const periodicCoupon = annualCoupon / paymentsPerYear;
+  const totalPeriods = yearsToMaturity * paymentsPerYear;
+  const periodicYield = couponRate / paymentsPerYear / 100;
+
+  let ytmPeriodic = periodicYield;
+  for (let i = 0; i < 100; i++) {
+    let pv = 0;
+    for (let t = 1; t <= totalPeriods; t++) {
+      pv += periodicCoupon / Math.pow(1 + ytmPeriodic, t);
+    }
+    pv += faceValue / Math.pow(1 + ytmPeriodic, totalPeriods);
+    const diff = pv - currentPrice;
+    
+    if (Math.abs(diff) < 0.01) break;
+    
+    let derivative = 0;
+    for (let t = 1; t <= totalPeriods; t++) {
+      derivative -= (t * periodicCoupon) / Math.pow(1 + ytmPeriodic, t + 1);
+    }
+    derivative -= (totalPeriods * faceValue) / Math.pow(1 + ytmPeriodic, totalPeriods + 1);
+    
+    if (Math.abs(derivative) < 0.0001) break;
+    ytmPeriodic = ytmPeriodic - (diff / derivative);
+  }
+
+  const ytmAnnual = ytmPeriodic * paymentsPerYear * 100;
+  const currentYield = (annualCoupon / currentPrice) * 100;
+  const totalReturn = (faceValue - currentPrice) + (annualCoupon * yearsToMaturity);
+
+  document.getElementById('ytmResult').textContent = ytmAnnual.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 4});
+  document.getElementById('ytmPeriodicResult').textContent = (ytmPeriodic * 100).toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 4});
+  document.getElementById('annualCoupon').textContent = annualCoupon.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('currentYield').textContent = currentYield.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 4});
+  document.getElementById('totalReturn').textContent = totalReturn.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-TW|bond-yield|2026-07-09 -->

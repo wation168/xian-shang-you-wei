@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIRE数値計算機 - 早期リタイアの目標資産額を計算</title>
+<meta name="description" content="年間支出と引き出し率から、経済的自由を達成するために必要な資産額（FIRE数値）を計算できます。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/fire-number-calc.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/fire-number-calc.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/fire-number-calc.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/fire-number-calc.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/fire-number-calc.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/fire-number-calc.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/fire-number-calc.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/fire-number-calc.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/fire-number-calc.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/fire-number-calc.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/fire-number-calc.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/fire-number-calc.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "FIRE数値計算機", "url": "https://softglow-ai.com/tools/ja/fire-number-calc.html", "description": "年間支出と引き出し率から、経済的自由を達成するために必要な資産額（FIRE数値）を計算できます。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "FIRE数値の計算式は何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "FIRE数値 = 年間支出 ÷ 引き出し率（%）× 100 です。例えば年間支出50万円、引き出し率4%の場合、50万円 ÷ 0.04 = 1,250万円が必要な資産額となります。"}}, {"@type": "Question", "name": "4%ルールとは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "4%ルールは、保有資産の4%を毎年引き出しても、30年以上資産が枯渇しないという理論です。1994年の研究に基づており、多くのFIRE実践者に使用されています。"}}, {"@type": "Question", "name": "引き出し率を3%にすべきですか？", "acceptedAnswer": {"@type": "Answer", "text": "より安全性を求める場合は3%を選択できます。4%ルールより保守的で、市場変動に強い傾向がありますが、必要資産額は増加します。ご自身のリスク許容度で判断してください。"}}, {"@type": "Question", "name": "リタイア後の支出は現在と変わりますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、通常変わります。通勤費削減、子どもの教育費終了など支出が減る一方、旅行や趣味に増える可能性もあります。リタイア後の生活スタイルを具体的に想定することが重要です。"}}, {"@type": "Question", "name": "この計算に税金は含まれていますか？", "acceptedAnswer": {"@type": "Answer", "text": "このシンプルな計算には税金は含まれていません。実際には、配当金や売却益に対する税金、居住国の税制を考慮する必要があります。専門家に相談することをお勧めします。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > FIRE数値計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>FIRE数値計算機</h1>
+    <p class="calc-subtitle">経済的独立と早期リタイアの目標額を計算します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="annualExpenses">年間支出</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="annualExpenses" placeholder="50000"  step="1"></div>
+</div>
+  <small class="input-help">毎年の生活費として必要な金額を入力してください</small>
+<div class="input-group">
+  <label for="withdrawalRate">引き出し率（%）</label>
+  <div class="input-row"><input type="number" id="withdrawalRate" placeholder="4"  value="4" step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">安全な資産取り崩し率を入力してください（一般的には3～4%）</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">あなたのFIRE数値</span><span class="result-value" id="fireNumber">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 計算されたFIRE数値は、あなたが経済的に独立し、仕事をしなくても生活できるために必要な総資産額です。この金額を蓄積することで、設定した引き出し率で永遠に生活費をまかなえます。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>FIRE数値とは</h2><p>FIRE（Financial Independence, Retire Early）数値とは、経済的自由を達成するために必要な総資産額です。年間支出を引き出し率で割ることで計算されます。例えば、年間支出が50万円で引き出し率が4%の場合、必要な資産額は1,250万円となります。</p><h2>引き出し率の重要性</h2><p>引き出し率は、保有資産から毎年安全に取り崩せる割合を示します。4%ルールが広く使用されていますが、これは30年間の資産の枯渇を防ぐという研究に基づいています。市場環境やインフレ率によって、適切な引き出し率は変動します。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>年間支出の計算方法</h2><p>正確なFIRE数値を算出するには、現在の生活費をベースに、リタイア後の支出を予測することが重要です。住宅ローンの完済、子どもの教育費の終了など、ライフステージの変化を考慮してください。</p><h2>インフレーションへの対応</h2><p>長期的な資産計画では、インフレーションの影響を無視できません。年1～2%のインフレを想定し、必要な資産額に余裕を持たせることが推奨されます。定期的に計算を見直し、目標額を調整しましょう。</p><h2>実現へのステップ</h2><p>FIRE数値を達成するには、貯蓄率を高め、投資利回りを最大化することが必要です。給与の50%以上を貯蓄に回し、低コストのインデックスファンドなどに投資することで、目標達成までの期間を短縮できます。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">FIRE数値の計算式は何ですか？</div><div class="faq-a">FIRE数値 = 年間支出 ÷ 引き出し率（%）× 100 です。例えば年間支出50万円、引き出し率4%の場合、50万円 ÷ 0.04 = 1,250万円が必要な資産額となります。</div></div>
+  <div class="faq-item"><div class="faq-q">4%ルールとは何ですか？</div><div class="faq-a">4%ルールは、保有資産の4%を毎年引き出しても、30年以上資産が枯渇しないという理論です。1994年の研究に基づており、多くのFIRE実践者に使用されています。</div></div>
+  <div class="faq-item"><div class="faq-q">引き出し率を3%にすべきですか？</div><div class="faq-a">より安全性を求める場合は3%を選択できます。4%ルールより保守的で、市場変動に強い傾向がありますが、必要資産額は増加します。ご自身のリスク許容度で判断してください。</div></div>
+  <div class="faq-item"><div class="faq-q">リタイア後の支出は現在と変わりますか？</div><div class="faq-a">はい、通常変わります。通勤費削減、子どもの教育費終了など支出が減る一方、旅行や趣味に増える可能性もあります。リタイア後の生活スタイルを具体的に想定することが重要です。</div></div>
+  <div class="faq-item"><div class="faq-q">この計算に税金は含まれていますか？</div><div class="faq-a">このシンプルな計算には税金は含まれていません。実際には、配当金や売却益に対する税金、居住国の税制を考慮する必要があります。専門家に相談することをお勧めします。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">Roi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">Risk Reward</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">Position Size</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">Pe Ratio</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/fire-number-calc.html" class="lang-btn">English</a>
+    <a href="/tools/fire-number-calc.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/fire-number-calc.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/fire-number-calc.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/fire-number-calc.html" class="lang-btn">Français</a>
+    <a href="/tools/es/fire-number-calc.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/fire-number-calc.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/fire-number-calc.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/fire-number-calc.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/fire-number-calc.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const annualExpensesInput = document.getElementById('annualExpenses');
+  const withdrawalRateInput = document.getElementById('withdrawalRate');
+  const fireNumberResult = document.getElementById('fireNumber');
+  const resultsDiv = document.getElementById('results');
+
+  const annualExpenses = parseFloat(annualExpensesInput.value);
+  const withdrawalRate = parseFloat(withdrawalRateInput.value);
+
+  if (!annualExpenses || annualExpenses <= 0) {
+    alert('Please enter valid annual expenses');
+    return;
+  }
+
+  if (!withdrawalRate || withdrawalRate <= 0) {
+    alert('Please enter a valid withdrawal rate');
+    return;
+  }
+
+  const fireNumber = annualExpenses / (withdrawalRate / 100);
+
+  fireNumberResult.textContent = fireNumber.toLocaleString('en-GB', {
+    style: 'currency',
+    currency: 'GBP',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  });
+
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|fire-number-calc|2026-07-09 -->

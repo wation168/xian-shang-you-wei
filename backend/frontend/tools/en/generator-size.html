@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generator Size Calculator | Find Your Ideal Capacity</title>
+<meta name="description" content="Use our generator size calculator to determine the perfect generator capacity based on your running watts and peak load requirements.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/en/generator-size.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/generator-size.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/generator-size.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/generator-size.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/generator-size.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/generator-size.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/generator-size.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/generator-size.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/generator-size.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/generator-size.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/generator-size.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/generator-size.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Generator Size Calculator", "url": "https://softglow-ai.com/tools/en/generator-size.html", "description": "Use our generator size calculator to determine the perfect generator capacity based on your running watts and peak load requirements.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What's the difference between running watts and starting watts?", "acceptedAnswer": {"@type": "Answer", "text": "Running watts are the continuous power needed to operate an appliance normally, while starting watts (also called inrush watts) are the additional power required when motors or compressors first start. Starting watts are typically much higher and last only a few seconds. Your generator must handle both to operate effectively."}}, {"@type": "Question", "name": "Why do you recommend a 20% buffer?", "acceptedAnswer": {"@type": "Answer", "text": "A 20% buffer prevents your generator from running at maximum capacity continuously, which extends equipment lifespan and improves efficiency. It also provides headroom for unexpected power surges and allows for future expansion of your power needs without requiring a new generator."}}, {"@type": "Question", "name": "What happens if I buy a generator that's too small?", "acceptedAnswer": {"@type": "Answer", "text": "An undersized generator will struggle to power all your devices simultaneously and may shut down unexpectedly. This can damage appliances due to voltage drops and leave you without critical power when you need it most, defeating the purpose of having backup power."}}, {"@type": "Question", "name": "Can I use a larger generator than calculated?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, a larger generator is generally safe and provides more flexibility. However, ensure you're not oversizing excessively, as larger units consume more fuel and cost more. A generator 10-20% larger than recommended is reasonable for future expansion."}}, {"@type": "Question", "name": "How do I find the wattage for my appliances?", "acceptedAnswer": {"@type": "Answer", "text": "Check the nameplate on the device itself, look in the owner's manual, or search online for the model number. Most appliances clearly display their wattage requirements. If a device lists amperage instead, multiply amps by volts (typically 120 or 240) to calculate watts."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/en/">Tools</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/en/">Tools</a> > Generator Size Calculator</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Generator Size Calculator</h1>
+    <p class="calc-subtitle">Calculate the perfect generator capacity for your power needs</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="runningWatts">Total Running Watts</label>
+  <div class="input-row"><input type="number" id="runningWatts" placeholder="5000"  step="1"><span class="input-suffix">W</span></div>
+</div>
+  <small class="input-help">Enter the total continuous wattage of all devices you plan to run simultaneously</small>
+<div class="input-group">
+  <label for="startingWatts">Starting Watts (Peak Load)</label>
+  <div class="input-row"><input type="number" id="startingWatts" placeholder="3000"  step="1"><span class="input-suffix">W</span></div>
+</div>
+  <small class="input-help">Enter the peak starting wattage required for devices with high inrush currents like motors or compressors</small></div>
+    <button class="btn-calc" onclick="calculate()">Calculate</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Minimum Generator Size Required</span><span class="result-value" id="requiredCapacity">—</span></div>
+<div class="result-item"><span class="result-label">Generator Size in Kilowatts</span><span class="result-value" id="requiredCapacityKW">—</span></div>
+<div class="result-highlight"><span class="result-label">Recommended Generator Size (20% Buffer)</span><span class="result-value" id="recommendedCapacity">—</span></div>
+<div class="result-item"><span class="result-label">Recommended Size in Kilowatts</span><span class="result-value" id="recommendedCapacityKW">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>What does this mean?</strong> The minimum generator size shows the absolute lowest capacity needed to handle your peak load. The recommended size with a 20% buffer provides additional headroom for safety and longevity, preventing the generator from running at maximum capacity continuously. Choose the recommended size for optimal performance and equipment protection.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Print</button>
+        <button onclick="shareResult()">&#x1f4e4; Share</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>Understanding Generator Sizing</h2><p>Selecting the right generator size is crucial for ensuring reliable power supply to your home or business. A generator that is too small will struggle to power your devices and may shut down unexpectedly, while an oversized generator wastes fuel and money. Our calculator helps you find the optimal balance by considering both your continuous running watts and peak starting watts.</p><h2>Running Watts vs. Starting Watts</h2><p>Running watts represent the continuous power consumption of your appliances during normal operation. Starting watts, also called inrush or peak load, are the additional watts required when motors and compressors first start up. For example, an air conditioner might require 3,500 watts to run continuously but needs 8,500 watts at startup. Your generator must handle both these requirements to function properly.</p><h2>The 20% Buffer Recommendation</h2><p>We recommend adding a 20% buffer to your calculated minimum generator size. This buffer serves multiple purposes: it prevents the generator from running at maximum capacity continuously, which extends its lifespan; it provides headroom for unexpected power surges; and it allows for future expansion of your power needs. Running a generator at 80% of its rated capacity is industry best practice for optimal efficiency and durability.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>How to Use This Calculator</h2><p>Start by listing all the devices and appliances you plan to run from your generator. Look up the wattage requirements for each device—this information is typically found on the device itself or in the manual. Add up all the running wattages to get your total running watts. For starting watts, identify devices with motors or compressors and add their peak wattage requirements. Enter both figures into our calculator to instantly determine your ideal generator size.</p><h2>Common Wattage Requirements</h2><p>Understanding typical power consumption helps you calculate accurately. A standard refrigerator uses about 600 watts running, a microwave uses 1,000-2,000 watts, an electric water heater uses 3,500-5,500 watts, and a central air conditioner uses 3,500-5,500 watts running with 8,000-15,000 watts peak. Window units typically need 1,200-1,500 watts running. Small power tools vary from 500-1,500 watts, while larger tools like table saws can reach 2,000-4,000 watts. Always check manufacturer specifications for precise figures.</p><h2>Choosing the Right Generator Type</h2><p>Once you know your required capacity, you'll need to choose between portable and standby generators. Portable generators offer flexibility and lower cost but require manual setup and fuel. Standby generators provide automatic backup power and can run on natural gas or propane, making them convenient for whole-home use. Consider your primary needs: occasional backup power might suit a portable model, while continuous reliability typically requires a standby unit. Inverter generators are excellent for sensitive electronics and RVs due to their stable power output.</p><h2>Installation and Safety Considerations</h2><p>Proper installation is essential for safe generator operation. Always place generators outside, at least 20 feet away from windows, doors, and vents to prevent carbon monoxide accumulation. Never refuel while the generator is running or hot. Use heavy-duty extension cords rated for outdoor use if needed. Install a transfer switch for standby generators to prevent backfeeding power into the utility lines. Consult a licensed electrician for permanent installations. Regular maintenance including oil changes, fuel stabilizer addition, and periodic testing ensures your generator performs when needed.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Related Articles</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>FAQ</h2><div class="faq-item"><div class="faq-q">What's the difference between running watts and starting watts?</div><div class="faq-a">Running watts are the continuous power needed to operate an appliance normally, while starting watts (also called inrush watts) are the additional power required when motors or compressors first start. Starting watts are typically much higher and last only a few seconds. Your generator must handle both to operate effectively.</div></div>
+  <div class="faq-item"><div class="faq-q">Why do you recommend a 20% buffer?</div><div class="faq-a">A 20% buffer prevents your generator from running at maximum capacity continuously, which extends equipment lifespan and improves efficiency. It also provides headroom for unexpected power surges and allows for future expansion of your power needs without requiring a new generator.</div></div>
+  <div class="faq-item"><div class="faq-q">What happens if I buy a generator that's too small?</div><div class="faq-a">An undersized generator will struggle to power all your devices simultaneously and may shut down unexpectedly. This can damage appliances due to voltage drops and leave you without critical power when you need it most, defeating the purpose of having backup power.</div></div>
+  <div class="faq-item"><div class="faq-q">Can I use a larger generator than calculated?</div><div class="faq-a">Yes, a larger generator is generally safe and provides more flexibility. However, ensure you're not oversizing excessively, as larger units consume more fuel and cost more. A generator 10-20% larger than recommended is reasonable for future expansion.</div></div>
+  <div class="faq-item"><div class="faq-q">How do I find the wattage for my appliances?</div><div class="faq-a">Check the nameplate on the device itself, look in the owner's manual, or search online for the model number. Most appliances clearly display their wattage requirements. If a device lists amperage instead, multiply amps by volts (typically 120 or 240) to calculate watts.</div></div></section>
+  <div class="more-tools"><h3>More Tools</h3><div class="tools-grid"><a class="tool-pill" href="/tools/en/compound-interest.html">Compound Interest Calculator</a>
+      <a class="tool-pill" href="/tools/en/roi-calculator.html">ROI Calculator</a>
+      <a class="tool-pill" href="/tools/en/risk-reward.html">Risk Reward Calculator</a>
+      <a class="tool-pill" href="/tools/en/position-size.html">Position Size Calculator</a>
+      <a class="tool-pill" href="/tools/en/stop-loss.html">Stop Loss Calculator</a>
+      <a class="tool-pill" href="/tools/en/dividend-yield.html">Dividend Yield Calculator</a>
+      <a class="tool-pill" href="/tools/en/pe-ratio.html">P/E Ratio Calculator</a>
+      <a class="tool-pill" href="/tools/en/dca-calculator.html">DCA Calculator</a>
+      <a class="tool-pill" href="/tools/en/cagr.html">CAGR Calculator</a>
+      <a class="tool-pill" href="/tools/en/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/en/stock-gain-loss.html">Stock Gain/Loss Calculator</a>
+      <a class="tool-pill" href="/tools/en/break-even.html">Break Even Calculator</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/generator-size.html" class="lang-btn active">English</a>
+    <a href="/tools/generator-size.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/generator-size.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/generator-size.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/generator-size.html" class="lang-btn">Français</a>
+    <a href="/tools/es/generator-size.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/generator-size.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/generator-size.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/generator-size.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/generator-size.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Related Tools</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const runningWattsInput = document.getElementById('runningWatts');
+  const startingWattsInput = document.getElementById('startingWatts');
+  const requiredCapacity = document.getElementById('requiredCapacity');
+  const requiredCapacityKW = document.getElementById('requiredCapacityKW');
+  const recommendedCapacity = document.getElementById('recommendedCapacity');
+  const recommendedCapacityKW = document.getElementById('recommendedCapacityKW');
+  const resultsDiv = document.querySelector('.results');
+
+  const runningWatts = parseFloat(runningWattsInput.value);
+  const startingWatts = parseFloat(startingWattsInput.value);
+
+  if (!runningWattsInput.value || !startingWattsInput.value) {
+    alert('Please enter both running watts and starting watts.');
+    return;
+  }
+
+  if (isNaN(runningWatts) || isNaN(startingWatts) || runningWatts < 0 || startingWatts < 0) {
+    alert('Please enter valid positive numbers for both fields.');
+    return;
+  }
+
+  const required = runningWatts + startingWatts;
+  const requiredKW = (required / 1000).toFixed(2);
+  const recommended = Math.ceil(required * 1.2);
+  const recommendedKW = (recommended / 1000).toFixed(2);
+
+  requiredCapacity.textContent = required.toLocaleString();
+  requiredCapacityKW.textContent = requiredKW;
+  recommendedCapacity.textContent = recommended.toLocaleString();
+  recommendedCapacityKW.textContent = recommendedKW;
+
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copied!';setTimeout(function(){b.textContent='Share'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|en|generator-size|2026-07-09 -->

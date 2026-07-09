@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>布林帶計算器 - 技術分析工具</title>
+<meta name="description" content="免費布林帶計算器，快速計算上軌、中軌、下軌及帶寬。適合股票、期貨技術分析使用。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/bollinger-bands.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/bollinger-bands.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/bollinger-bands.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/bollinger-bands.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/bollinger-bands.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/bollinger-bands.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/bollinger-bands.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/bollinger-bands.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/bollinger-bands.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/bollinger-bands.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/bollinger-bands.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/bollinger-bands.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "布林帶計算器", "url": "https://softglow-ai.com/tools/bollinger-bands.html", "description": "免費布林帶計算器，快速計算上軌、中軌、下軌及帶寬。適合股票、期貨技術分析使用。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "什麼是布林帶？", "acceptedAnswer": {"@type": "Answer", "text": "布林帶是以簡單移動平均線為基礎，加上上下兩條標準差線組成的技術指標。它用於識別價格波動範圍、超買超賣現象和市場波動性的變化。"}}, {"@type": "Question", "name": "布林帶的標準差倍數為什麼通常設為2？", "acceptedAnswer": {"@type": "Answer", "text": "統計學上，數據在平均值±2倍標準差範圍內的概率約為95%。將倍數設為2能涵蓋大部分正常價格波動，使指標更實用。交易者也可根據需要調整倍數。"}}, {"@type": "Question", "name": "帶位置百分比（%B）如何解讀？", "acceptedAnswer": {"@type": "Answer", "text": "%B顯示價格在布林帶內的位置。100%表示價格在上軌，0%表示價格在下軌。超過100%或低於0%表示價格超出正常波動範圍，可能出現極端行情。"}}, {"@type": "Question", "name": "布林帶變窄說明什麼？", "acceptedAnswer": {"@type": "Answer", "text": "布林帶變窄表示市場波動性降低，價格趨於穩定。這通常預示著可能即將出現大的價格波動，交易者應提高警惕。"}}, {"@type": "Question", "name": "布林帶可以單獨用於交易嗎？", "acceptedAnswer": {"@type": "Answer", "text": "不建議單獨使用。布林帶應與其他技術指標（如RSI、MACD）、基本面分析和風險管理策略結合使用，以提高交易決策的準確性和安全性。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 布林帶計算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>布林帶計算器</h1>
+    <p class="calc-subtitle">計算技術分析的上、中、下軌道</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="smaValue">簡單移動平均線 (SMA)</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="smaValue" placeholder="50.25"  step="0.01"></div>
+</div>
+  <small class="input-help">輸入計算期間的簡單移動平均值</small>
+<div class="input-group">
+  <label for="standardDeviation">標準差 (σ)</label>
+  <div class="input-row"><input type="number" id="standardDeviation" placeholder="2.50"  step="0.01"></div>
+</div>
+  <small class="input-help">輸入價格數據的標準差</small>
+<div class="input-group">
+  <label for="numDeviation">標準差倍數</label>
+  <div class="input-row"><input type="number" id="numDeviation" placeholder="2"  value="2" step="0.1"></div>
+</div>
+  <small class="input-help">輸入用於計算上下軌的標準差倍數，通常為2</small></div>
+    <button class="btn-calc" onclick="calculate()">計算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">上軌</span><span class="result-value" id="upperBand">—</span></div>
+<div class="result-item"><span class="result-label">中軌 (SMA)</span><span class="result-value" id="middleBand">—</span></div>
+<div class="result-highlight"><span class="result-label">下軌</span><span class="result-value" id="lowerBand">—</span></div>
+<div class="result-item"><span class="result-label">帶寬</span><span class="result-value" id="bandWidth">—</span></div>
+<div class="result-item"><span class="result-label">帶位置 (%)</span><span class="result-value" id="bandPercent">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> 上軌和下軌由中軌（SMA）加減標準差倍數決定。帶寬表示上下軌之間的距離，帶位置百分比顯示目前價格在布林帶內的相對位置，0%表示在下軌，100%表示在上軌。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 列印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>布林帶指標介紹</h2><p>布林帶（Bollinger Bands）是由美國技術分析師約翰·布林傑（John Bollinger）發明的技術指標。它由一條簡單移動平均線（中軌）以及位於其上下方的兩條標準差線組成。布林帶能幫助交易者識別超買、超賣現象和價格波動性。</p><h2>計算公式說明</h2><p>中軌 = N日簡單移動平均線（SMA）；上軌 = 中軌 + (標準差 × 倍數)；下軌 = 中軌 - (標準差 × 倍數)；帶寬 = 上軌 - 下軌。其中標準差倍數通常設為2，代表價格在正常波動範圍內的可能性約為95%。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>使用場景與交易策略</h2><p>當價格觸及上軌時，可能表示市場超買；當價格觸及下軌時，可能表示市場超賣。帶寬變化反映市場波動性——帶寬擴大表示波動性增加，帶寬收縮表示波動性減少。交易者常利用布林帶突破、回歸均值等策略進行交易決策。</p><h2>帶位置百分比的應用</h2><p>帶位置百分比（%B）顯示價格在布林帶內的相對位置。當%B大於100%時，價格在上軌上方，表示強勢上升；當%B小於0%時，價格在下軌下方，表示強勢下跌。%B介於0-100%之間表示價格在正常波動範圍內。</p><h2>風險提示與注意事項</h2><p>布林帶僅為技術分析工具，不應單獨作為交易決策的唯一依據。應結合其他指標、市場基本面和風險管理策略使用。不同的市場環境和標準差倍數設定會影響布林帶的有效性，需根據個人交易風格進行調整。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/candlestick-patterns.html">Candlestick Patterns<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/support-resistance.html">Support & Resistance<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/moving-average-guide.html">Moving Average Guide<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">什麼是布林帶？</div><div class="faq-a">布林帶是以簡單移動平均線為基礎，加上上下兩條標準差線組成的技術指標。它用於識別價格波動範圍、超買超賣現象和市場波動性的變化。</div></div>
+  <div class="faq-item"><div class="faq-q">布林帶的標準差倍數為什麼通常設為2？</div><div class="faq-a">統計學上，數據在平均值±2倍標準差範圍內的概率約為95%。將倍數設為2能涵蓋大部分正常價格波動，使指標更實用。交易者也可根據需要調整倍數。</div></div>
+  <div class="faq-item"><div class="faq-q">帶位置百分比（%B）如何解讀？</div><div class="faq-a">%B顯示價格在布林帶內的位置。100%表示價格在上軌，0%表示價格在下軌。超過100%或低於0%表示價格超出正常波動範圍，可能出現極端行情。</div></div>
+  <div class="faq-item"><div class="faq-q">布林帶變窄說明什麼？</div><div class="faq-a">布林帶變窄表示市場波動性降低，價格趨於穩定。這通常預示著可能即將出現大的價格波動，交易者應提高警惕。</div></div>
+  <div class="faq-item"><div class="faq-q">布林帶可以單獨用於交易嗎？</div><div class="faq-a">不建議單獨使用。布林帶應與其他技術指標（如RSI、MACD）、基本面分析和風險管理策略結合使用，以提高交易決策的準確性和安全性。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/fibonacci-retracement.html">斐波那契回調計算器</a>
+      <a class="tool-pill" href="/tools/pivot-point.html">樞紐點計算器</a>
+      <a class="tool-pill" href="/tools/rsi-calculator.html">RSI 計算器</a>
+      <a class="tool-pill" href="/tools/macd-calculator.html">MACD 計算器</a>
+      <a class="tool-pill" href="/tools/atr-calculator.html">ATR計算器</a>
+      <a class="tool-pill" href="/tools/ma-crossover.html">移動平均線交叉計算器</a>
+      <a class="tool-pill" href="/tools/candlestick-identifier.html">K線型態識別器</a>
+      <a class="tool-pill" href="/tools/support-resistance.html">支撐與阻力計算器</a>
+      <a class="tool-pill" href="/tools/pip-value.html">點值計算機</a>
+      <a class="tool-pill" href="/tools/options-profit.html">期權損益計算器</a>
+      <a class="tool-pill" href="/tools/stock-split.html">股票分割計算器</a>
+      <a class="tool-pill" href="/tools/trading-fee.html">交易手續費計算器</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/bollinger-bands.html" class="lang-btn">English</a>
+    <a href="/tools/bollinger-bands.html" class="lang-btn active">繁體中文</a>
+    <a href="/tools/ja/bollinger-bands.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/bollinger-bands.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/bollinger-bands.html" class="lang-btn">Français</a>
+    <a href="/tools/es/bollinger-bands.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/bollinger-bands.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/bollinger-bands.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/bollinger-bands.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/bollinger-bands.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const smaInput = document.getElementById('smaValue');
+  const stdDevInput = document.getElementById('standardDeviation');
+  const numDevInput = document.getElementById('numDeviation');
+  
+  if (!smaInput.value || !stdDevInput.value || !numDevInput.value) {
+    alert('Please fill in all fields');
+    return;
+  }
+  
+  const sma = parseFloat(smaInput.value);
+  const stdDev = parseFloat(stdDevInput.value);
+  const numDev = parseFloat(numDevInput.value);
+  
+  if (sma <= 0 || stdDev < 0 || numDev <= 0) {
+    alert('Please enter valid positive numbers');
+    return;
+  }
+  
+  const upperBand = sma + (numDev * stdDev);
+  const middleBand = sma;
+  const lowerBand = sma - (numDev * stdDev);
+  const bandWidth = upperBand - lowerBand;
+  
+  let bandPercent = 0;
+  if (bandWidth > 0) {
+    bandPercent = ((sma - lowerBand) / bandWidth) * 100;
+  }
+  
+  document.getElementById('upperBand').textContent = '$' + upperBand.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('middleBand').textContent = '$' + middleBand.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('lowerBand').textContent = '$' + lowerBand.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('bandWidth').textContent = '$' + bandWidth.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('bandPercent').textContent = bandPercent.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '%';
+  
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-TW|bollinger-bands|2026-07-09 -->

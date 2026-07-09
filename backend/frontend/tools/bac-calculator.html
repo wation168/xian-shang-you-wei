@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>血液酒精濃度(BAC)計算器 - Widmark公式</title>
+<meta name="description" content="免費線上BAC計算器，使用Widmark公式精確計算血液酒精濃度，判斷酒駕合法性及身體損傷程度。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/bac-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/bac-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/bac-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/bac-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/bac-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/bac-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/bac-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/bac-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/bac-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/bac-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/bac-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/bac-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "血液酒精濃度計算器", "url": "https://softglow-ai.com/tools/bac-calculator.html", "description": "免費線上BAC計算器，使用Widmark公式精確計算血液酒精濃度，判斷酒駕合法性及身體損傷程度。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Widmark公式有多準確?", "acceptedAnswer": {"@type": "Answer", "text": "Widmark公式提供了BAC的合理估計，但不如實際血液測試準確。它的誤差範圍約為±0.01-0.02% BAC。影響準確性的因素包括個人代謝差異、飲酒速度和食物攝入。"}}, {"@type": "Question", "name": "女性和男性的BAC計算有什麼不同?", "acceptedAnswer": {"@type": "Answer", "text": "女性通常比男性有更高的BAC，體重和酒精攝入量相同的情況下。這是因為女性平均體水分含量較低(約55%)，而男性約為58%)。Widmark公式通過使用不同的分佈係數來考慮這一差異。"}}, {"@type": "Question", "name": "我可以用這個計算器判斷我是否適合駕駛嗎?", "acceptedAnswer": {"@type": "Answer", "text": "不應該。這個計算器提供的是估計值，不是法律建議或醫學診斷。如果您飲酒，最安全的選擇是不駕駛。使用出租車、叫車服務或指定駕駛員是確保您和他人安全的最佳方式。"}}, {"@type": "Question", "name": "我的身體需要多長時間才能代謝酒精?", "acceptedAnswer": {"@type": "Answer", "text": "平均而言，人體每小時代謝約一個標準飲酒量的酒精，導致BAC降低約0.015%。然而，這個速率因人而異，取決於肝臟功能、體重和整體健康。沒有任何方法可以加快這個過程。"}}, {"@type": "Question", "name": "什麼是標準飲酒量?", "acceptedAnswer": {"@type": "Answer", "text": "在美國，標準飲酒量定義為：12盎司啤酒(約5% ABV)、5盎司葡萄酒(約12% ABV)或1.5盎司烈酒(約40% ABV)。這些定義幫助人們追蹤酒精攝入量並估計BAC水平。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 血液酒精濃度計算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>血液酒精濃度計算器</h1>
+    <p class="calc-subtitle">使用科學精確的Widmark公式計算血液酒精濃度</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="gender">性別</label>
+  <div class="input-row"><select id="gender"><option value="male" selected>男性</option><option value="female">女性</option></select></div>
+</div>
+  <small class="input-help">選擇男性或女性</small>
+<div class="input-group">
+  <label for="weight">體重</label>
+  <div class="input-row"><input type="number" id="weight" placeholder="180"  value="180" step="1"><span class="input-suffix">磅</span></div>
+</div>
+  <small class="input-help">輸入您的體重(磅)</small>
+<div class="input-group">
+  <label for="alcoholAmount">酒精攝入量</label>
+  <div class="input-row"><input type="number" id="alcoholAmount" placeholder="2.0"  value="1" step="0.1"><span class="input-suffix">標準飲酒量</span></div>
+</div>
+  <small class="input-help">輸入標準飲酒數量</small>
+<div class="input-group">
+  <label for="timePassed">首次飲酒後的時間</label>
+  <div class="input-row"><input type="number" id="timePassed" placeholder="2"  value="1" step="0.25"><span class="input-suffix">小時</span></div>
+</div>
+  <small class="input-help">輸入自首次飲酒以來經過的時間(小時)</small></div>
+    <button class="btn-calc" onclick="calculate()">計算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">血液酒精濃度(BAC)</span><span class="result-value" id="bacResult">—</span></div>
+<div class="result-item"><span class="result-label">損傷程度</span><span class="result-value" id="impairmentLevel">—</span></div>
+<div class="result-item"><span class="result-label">美國合法駕駛狀態</span><span class="result-value" id="legalStatus">—</span></div>
+<div class="result-item"><span class="result-label">達到0.00% BAC所需時間</span><span class="result-value" id="metabolizationTime">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> 血液酒精濃度(BAC)顯示您血液中的酒精百分比。損傷程度指示身體和認知功能受損程度。在美國，BAC達到0.08%或更高被視為酒駕。最後一個結果估計您的血液完全清除酒精所需的時間。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 列印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什麼是血液酒精濃度(BAC)?</h2><p>血液酒精濃度(BAC)是衡量人體血液中酒精含量的指標，以百分比表示。它是判斷一個人是否適合駕駛以及是否可能面臨法律後果的重要因素。BAC通常通過呼氣分析儀、血液檢查或尿液檢查來測量。</p><h2>Widmark公式如何運作?</h2><p>Widmark公式是計算BAC的科學標準方法。它考慮了多個因素：性別(男性和女性的體水分含量不同)、體重、攝入的酒精量以及自飲酒以來經過的時間。該公式還計入酒精的代謝速率，平均每小時約0.015% BAC。</p><h2>美國酒駕法律標準</h2><p>在美國，21歲及以上的駕駛者若BAC達到0.08%或更高，在大多數州被視為酒駕(DUI)。對於21歲以下的駕駛者，零容忍政策適用，任何可測量的酒精量都可能導致法律後果。商業駕駛員的限制更為嚴格，為0.04%。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>損傷程度與BAC等級</h2><p>不同BAC水平會導致不同程度的損傷：0.00-0.05%被認為無損傷；0.05-0.08%出現輕微損傷；0.08-0.15%出現中等損傷；0.15-0.30%出現嚴重損傷；超過0.30%可能導致昏迷或生命危險。</p><h2>影響BAC的因素</h2><p>除了性別和體重，食物攝入、飲酒速度、個人代謝率和整體健康狀況都會影響BAC水平。在進食前飲酒會導致更快的酒精吸收和更高的BAC。年齡和藥物也會影響身體對酒精的反應。</p><h2>何時尋求幫助</h2><p>如果您或您認識的人經歷酒精相關問題，許多資源可提供幫助。在美國，藥物濫用和心理健康服務管理局(SAMHSA)提供免費、機密的支持。請記住，負責任的飲酒和安全駕駛始終是首要任務。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">Widmark公式有多準確?</div><div class="faq-a">Widmark公式提供了BAC的合理估計，但不如實際血液測試準確。它的誤差範圍約為±0.01-0.02% BAC。影響準確性的因素包括個人代謝差異、飲酒速度和食物攝入。</div></div>
+  <div class="faq-item"><div class="faq-q">女性和男性的BAC計算有什麼不同?</div><div class="faq-a">女性通常比男性有更高的BAC，體重和酒精攝入量相同的情況下。這是因為女性平均體水分含量較低(約55%)，而男性約為58%)。Widmark公式通過使用不同的分佈係數來考慮這一差異。</div></div>
+  <div class="faq-item"><div class="faq-q">我可以用這個計算器判斷我是否適合駕駛嗎?</div><div class="faq-a">不應該。這個計算器提供的是估計值，不是法律建議或醫學診斷。如果您飲酒，最安全的選擇是不駕駛。使用出租車、叫車服務或指定駕駛員是確保您和他人安全的最佳方式。</div></div>
+  <div class="faq-item"><div class="faq-q">我的身體需要多長時間才能代謝酒精?</div><div class="faq-a">平均而言，人體每小時代謝約一個標準飲酒量的酒精，導致BAC降低約0.015%。然而，這個速率因人而異，取決於肝臟功能、體重和整體健康。沒有任何方法可以加快這個過程。</div></div>
+  <div class="faq-item"><div class="faq-q">什麼是標準飲酒量?</div><div class="faq-a">在美國，標準飲酒量定義為：12盎司啤酒(約5% ABV)、5盎司葡萄酒(約12% ABV)或1.5盎司烈酒(約40% ABV)。這些定義幫助人們追蹤酒精攝入量並估計BAC水平。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/bmi-calculator.html">BMI計算機</a>
+      <a class="tool-pill" href="/tools/bmr-calculator.html">基礎代謝率計算器</a>
+      <a class="tool-pill" href="/tools/body-fat-calculator.html">身體脂肪計算機</a>
+      <a class="tool-pill" href="/tools/calorie-calculator.html">卡路里計算機</a>
+      <a class="tool-pill" href="/tools/macro-calculator.html">巨量營養素計算機</a>
+      <a class="tool-pill" href="/tools/protein-intake.html">Protein Intake</a>
+      <a class="tool-pill" href="/tools/heart-rate-zone.html">心率區域計算器</a>
+      <a class="tool-pill" href="/tools/blood-pressure-chart.html">血壓檢查器</a>
+      <a class="tool-pill" href="/tools/baby-growth.html">嬰兒生長百分位數計算器</a>
+      <a class="tool-pill" href="/tools/caffeine-calculator.html">咖啡因攝入量計算機</a>
+      <a class="tool-pill" href="/tools/hydration-calculator.html">Hydration Calculator</a>
+      <a class="tool-pill" href="/tools/sleep-calculator.html">睡眠週期計算器</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/bac-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/bac-calculator.html" class="lang-btn active">繁體中文</a>
+    <a href="/tools/ja/bac-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/bac-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/bac-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/bac-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/bac-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/bac-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/bac-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/bac-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const genderEl = document.getElementById('gender');
+  const weightEl = document.getElementById('weight');
+  const alcoholAmountEl = document.getElementById('alcoholAmount');
+  const timePassedEl = document.getElementById('timePassed');
+
+  const gender = genderEl ? genderEl.value : '';
+  const weight = parseFloat(weightEl ? weightEl.value : 0);
+  const alcoholAmount = parseFloat(alcoholAmountEl ? alcoholAmountEl.value : 0);
+  const timePassed = parseFloat(timePassedEl ? timePassedEl.value : 0);
+
+  if (!gender || weight <= 0 || alcoholAmount < 0 || timePassed < 0) {
+    alert('Please enter valid values for all fields');
+    return;
+  }
+
+  const standardDrinkGrams = 14;
+  const gramsAlcohol = alcoholAmount * standardDrinkGrams;
+  const genderFactor = gender === 'male' ? 0.68 : 0.55;
+  const bodyWaterDist = weight * genderFactor;
+  const absorption = (gramsAlcohol / bodyWaterDist) * 100;
+  const metabolismRate = 0.015;
+  const elimination = metabolismRate * timePassed;
+  const bac = Math.max(0, absorption - elimination);
+
+  let impairment = '';
+  let legalStatus = '';
+
+  if (bac === 0) {
+    impairment = 'No impairment';
+    legalStatus = 'Safe to drive (sober)';
+  } else if (bac > 0 && bac < 0.02) {
+    impairment = 'Minimal impairment';
+    legalStatus = 'Safe to drive';
+  } else if (bac >= 0.02 && bac < 0.05) {
+    impairment = 'Slight impairment';
+    legalStatus = 'Safe to drive';
+  } else if (bac >= 0.05 && bac < 0.08) {
+    impairment = 'Moderate impairment';
+    legalStatus = 'Illegal to drive';
+  } else if (bac >= 0.08 && bac < 0.15) {
+    impairment = 'Significant impairment';
+    legalStatus = 'Illegal to drive (DUI)';
+  } else if (bac >= 0.15 && bac < 0.25) {
+    impairment = 'Severe impairment';
+    legalStatus = 'Illegal to drive (DUI)';
+  } else if (bac >= 0.25 && bac < 0.35) {
+    impairment = 'Dangerous impairment';
+    legalStatus = 'Risk of alcohol poisoning';
+  } else {
+    impairment = 'Critical - Life threatening';
+    legalStatus = 'Seek medical help immediately';
+  }
+
+  const hoursToSober = absorption / metabolismRate;
+
+  const bacResultEl = document.getElementById('bacResult');
+  const impairmentLevelEl = document.getElementById('impairmentLevel');
+  const legalStatusEl = document.getElementById('legalStatus');
+  const metabolizationTimeEl = document.getElementById('metabolizationTime');
+
+  if (bacResultEl) bacResultEl.textContent = bac.toFixed(3);
+  if (impairmentLevelEl) impairmentLevelEl.textContent = impairment;
+  if (legalStatusEl) legalStatusEl.textContent = legalStatus;
+  if (metabolizationTimeEl) metabolizationTimeEl.textContent = hoursToSober.toFixed(1);
+
+  const resultsDiv = document.getElementById('results');
+  if (resultsDiv) resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-TW|bac-calculator|2026-07-09 -->

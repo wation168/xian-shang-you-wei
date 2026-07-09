@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculateur de Taille de Position Trading</title>
+<meta name="description" content="Calculez la taille idéale de votre position de trading basée sur votre solde de compte, votre tolérance au risque et vos prix d'entrée et de stop loss.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/fr/position-size.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/position-size.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/position-size.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/position-size.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/position-size.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/position-size.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/position-size.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/position-size.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/position-size.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/position-size.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/position-size.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/position-size.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculateur de Taille de Position", "url": "https://softglow-ai.com/tools/fr/position-size.html", "description": "Calculez la taille idéale de votre position de trading basée sur votre solde de compte, votre tolérance au risque et vos prix d'entrée et de stop loss.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "fr"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Quel pourcentage de risque devrais-je utiliser?", "acceptedAnswer": {"@type": "Answer", "text": "La plupart des experts recommandent 1 à 2% de votre solde de compte par trade. Les débutants devraient commencer à 1% ou même moins. Ce pourcentage assure que vous pouvez tolérer plusieurs trades perdants consécutifs sans déstabiliser votre compte."}}, {"@type": "Question", "name": "Comment placer mon stop loss?", "acceptedAnswer": {"@type": "Answer", "text": "Votre stop loss devrait être placé à un niveau logique basé sur votre analyse technique, comme sous un support clé ou au-dessus d'une résistance. Ne le placez jamais arbitrairement. La distance détermine votre taille de position, pas l'inverse."}}, {"@type": "Question", "name": "Que faire si la taille de position calculée est très petite?", "acceptedAnswer": {"@type": "Answer", "text": "Une petite taille signifie que votre stop loss est très proche de votre entrée. Cela peut indiquer que votre configuration de trade n'est pas idéale. Recherchez des setups avec un meilleur rapport risque-récompense plutôt que d'augmenter votre risque par trade."}}, {"@type": "Question", "name": "Puis-je modifier ma taille après avoir entré le trade?", "acceptedAnswer": {"@type": "Answer", "text": "Non, vous devez respecter la taille calculée. Modifier votre position viole votre plan de risque. Si vous devez ajuster, faites-le avant d'entrer, jamais après."}}, {"@type": "Question", "name": "Ce calculateur fonctionne-t-il pour tous les marchés?", "acceptedAnswer": {"@type": "Answer", "text": "Oui, le principe s'applique au forex, aux actions, aux crypto-monnaies et aux matières premières. Seules les unités changent. La gestion mathématique du risque reste universellement valide."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/fr/">Outils</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/fr/">Outils</a> > Calculateur de Taille de Position</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Calculateur de Taille de Position</h1>
+    <p class="calc-subtitle">Déterminez la taille de position de trading parfaite en fonction de votre tolérance au risque et de vos niveaux de prix</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="accountBalance">Solde du Compte</label>
+  <div class="input-row"><span class="input-prefix">€</span><input type="number" id="accountBalance" placeholder="10000"  step="0.01"></div>
+</div>
+  <small class="input-help">Montant total disponible dans votre compte de trading</small>
+<div class="input-group">
+  <label for="riskPercentage">Pourcentage de Risque (%)</label>
+  <div class="input-row"><input type="number" id="riskPercentage" placeholder="2"  step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">Pourcentage du solde que vous êtes prêt à risquer par trade</small>
+<div class="input-group">
+  <label for="entryPrice">Prix d'Entrée</label>
+  <div class="input-row"><span class="input-prefix">€</span><input type="number" id="entryPrice" placeholder="100"  step="0.01"></div>
+</div>
+  <small class="input-help">Prix auquel vous prévoyez d'acheter ou de vendre</small>
+<div class="input-group">
+  <label for="stopLossPrice">Prix du Stop Loss</label>
+  <div class="input-row"><span class="input-prefix">€</span><input type="number" id="stopLossPrice" placeholder="95"  step="0.01"></div>
+</div>
+  <small class="input-help">Prix auquel vous clôturerez la position en cas de perte</small></div>
+    <button class="btn-calc" onclick="calculate()">Calculer</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Taille de Position (Unités)</span><span class="result-value" id="positionSize">—</span></div>
+<div class="result-item"><span class="result-label">Montant à Risquer</span><span class="result-value" id="riskAmount">—</span></div>
+<div class="result-item"><span class="result-label">Distance du Stop Loss</span><span class="result-value" id="stopLossDistance">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>Qu'est-ce que cela signifie ?</strong> La taille de position indique le nombre d'unités à trader. Le montant à risquer correspond à la perte maximale acceptée sur ce trade. La distance du stop loss montre l'écart en points ou en pourcentage entre votre prix d'entrée et votre niveau de protection.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Imprimer</button>
+        <button onclick="shareResult()">&#x1f4e4; Partager</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>Qu'est-ce qu'un Calculateur de Taille de Position?</h2><p>Un calculateur de taille de position est un outil essentiel pour tout trader sérieux. Il vous permet de déterminer exactement combien d'unités vous devriez trader en fonction de votre solde de compte, de votre tolérance au risque et de votre stratégie de trading. Cette approche mathématique garantit que vous ne risquez jamais plus que vous ne pouvez vous permettre de perdre, ce qui est fondamental pour la gestion du risque.</p><h2>Pourquoi la Gestion du Risque est Cruciale</h2><p>La gestion du risque est le pilier fondamental du trading réussi. Même les meilleurs traders perdent des trades, mais ceux qui gèrent correctement leur risque survivent et prospèrent à long terme. En utilisant un calculateur de taille de position, vous vous assurez que chaque trade représente une fraction acceptable de votre capital. La plupart des experts recommandent de ne pas risquer plus de 1 à 2% de votre compte sur un seul trade.</p><h2>Comment Utiliser le Calculateur</h2><p>Commencez par entrer votre solde de compte total. Ensuite, définissez le pourcentage de risque que vous êtes confortable de perdre sur un trade particulier. Puis, saisissez votre prix d'entrée prévu et votre prix de stop loss. Le calculateur déterminera automatiquement la taille de position optimale qui aligne votre risque réel avec votre pourcentage de risque souhaité. Cette taille garantit une gestion cohérente du capital à travers tous vos trades.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Comprendre les Résultats</h2><p>Le résultat principal est la taille de position en unités, qui indique exactement combien vous devriez acheter ou vendre. Le montant à risquer montre votre perte maximale potentielle en euros si le trade va au stop loss. La distance du stop loss représente l'écart entre votre entrée et votre protection, mesurée en points ou en pourcentage. Ensemble, ces trois éléments créent un plan de trading mathématiquement solide.</p><h2>Stratégies de Positionnement Avancées</h2><p>Une fois que vous maîtrisez les bases, vous pouvez adapter votre approche. Certains traders utilisent des pourcentages de risque variables selon les conditions de marché. D'autres ajustent leur distance de stop loss en fonction de la volatilité. Le principe reste constant: la taille de position doit toujours être calculée mathématiquement pour correspondre à votre plan de risque, jamais déterminée émotionnellement.</p><h2>Discipline et Cohérence</h2><p>L'avantage majeur de l'utilisation systématique d'un calculateur est la cohérence qu'il apporte à vos décisions de trading. Au lieu de deviner ou de laisser les émotions influencer votre sizing, vous suivez un processus répétable. Cette discipline est souvent la différence entre les traders rentables et ceux qui échouent. Investissez quelques secondes dans ce calcul à chaque fois, et votre portefeuille vous en remerciera.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Articles connexes</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>Questions fréquentes</h2><div class="faq-item"><div class="faq-q">Quel pourcentage de risque devrais-je utiliser?</div><div class="faq-a">La plupart des experts recommandent 1 à 2% de votre solde de compte par trade. Les débutants devraient commencer à 1% ou même moins. Ce pourcentage assure que vous pouvez tolérer plusieurs trades perdants consécutifs sans déstabiliser votre compte.</div></div>
+  <div class="faq-item"><div class="faq-q">Comment placer mon stop loss?</div><div class="faq-a">Votre stop loss devrait être placé à un niveau logique basé sur votre analyse technique, comme sous un support clé ou au-dessus d'une résistance. Ne le placez jamais arbitrairement. La distance détermine votre taille de position, pas l'inverse.</div></div>
+  <div class="faq-item"><div class="faq-q">Que faire si la taille de position calculée est très petite?</div><div class="faq-a">Une petite taille signifie que votre stop loss est très proche de votre entrée. Cela peut indiquer que votre configuration de trade n'est pas idéale. Recherchez des setups avec un meilleur rapport risque-récompense plutôt que d'augmenter votre risque par trade.</div></div>
+  <div class="faq-item"><div class="faq-q">Puis-je modifier ma taille après avoir entré le trade?</div><div class="faq-a">Non, vous devez respecter la taille calculée. Modifier votre position viole votre plan de risque. Si vous devez ajuster, faites-le avant d'entrer, jamais après.</div></div>
+  <div class="faq-item"><div class="faq-q">Ce calculateur fonctionne-t-il pour tous les marchés?</div><div class="faq-a">Oui, le principe s'applique au forex, aux actions, aux crypto-monnaies et aux matières premières. Seules les unités changent. La gestion mathématique du risque reste universellement valide.</div></div></section>
+  <div class="more-tools"><h3>Plus d'outils</h3><div class="tools-grid"><a class="tool-pill" href="/tools/fr/compound-interest.html">Calculatrice d'Intérêts Composés</a>
+      <a class="tool-pill" href="/tools/fr/roi-calculator.html">Calculatrice de ROI</a>
+      <a class="tool-pill" href="/tools/fr/risk-reward.html">Calculateur Risque-Récompense</a>
+      <a class="tool-pill" href="/tools/fr/stop-loss.html">Calculatrice de Stop Loss</a>
+      <a class="tool-pill" href="/tools/fr/dividend-yield.html">Calculateur de Rendement de Dividende</a>
+      <a class="tool-pill" href="/tools/fr/pe-ratio.html">Calculateur de Ratio P/E</a>
+      <a class="tool-pill" href="/tools/fr/dca-calculator.html">Calculatrice d'Investissement Progressif</a>
+      <a class="tool-pill" href="/tools/fr/cagr.html">Calculatrice TCAC</a>
+      <a class="tool-pill" href="/tools/fr/margin-calculator.html">Calculatrice de Marge</a>
+      <a class="tool-pill" href="/tools/fr/stock-gain-loss.html">Calculateur de Gain/Perte en Bourse</a>
+      <a class="tool-pill" href="/tools/fr/break-even.html">Calculatrice du Seuil de Rentabilité</a>
+      <a class="tool-pill" href="/tools/fr/rule-of-72.html">Calculatrice de la Règle de 72</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/position-size.html" class="lang-btn">English</a>
+    <a href="/tools/position-size.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/position-size.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/position-size.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/position-size.html" class="lang-btn active">Français</a>
+    <a href="/tools/es/position-size.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/position-size.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/position-size.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/position-size.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/position-size.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Outils connexes</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const accountBalance = parseFloat(document.getElementById('accountBalance').value);
+  const riskPercentage = parseFloat(document.getElementById('riskPercentage').value);
+  const entryPrice = parseFloat(document.getElementById('entryPrice').value);
+  const stopLossPrice = parseFloat(document.getElementById('stopLossPrice').value);
+
+  if (!accountBalance || !riskPercentage || !entryPrice || !stopLossPrice) {
+    alert('Please fill in all fields with valid numbers');
+    return;
+  }
+
+  if (accountBalance <= 0 || riskPercentage <= 0 || entryPrice <= 0) {
+    alert('Account balance, risk percentage, and entry price must be positive');
+    return;
+  }
+
+  if (entryPrice === stopLossPrice) {
+    alert('Entry price and stop loss price cannot be the same');
+    return;
+  }
+
+  const riskAmount = (accountBalance * riskPercentage) / 100;
+  const stopLossDistance = Math.abs(entryPrice - stopLossPrice);
+  const positionSize = riskAmount / stopLossDistance;
+
+  document.getElementById('positionSize').textContent = positionSize.toFixed(2);
+  document.getElementById('riskAmount').textContent = '$' + riskAmount.toFixed(2);
+  document.getElementById('stopLossDistance').textContent = '$' + stopLossDistance.toFixed(2);
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copié !';setTimeout(function(){b.textContent='Partager'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|fr|position-size|2026-07-09 -->

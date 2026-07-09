@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>家庭のエネルギー消費分析ツール</title>
+<meta name="description" content="冷蔵庫、洗濯機、エアコンなど家電製品のエネルギー消費を計算し、月額・年間電気代を算出できます。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/home-energy-audit.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/home-energy-audit.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/home-energy-audit.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/home-energy-audit.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/home-energy-audit.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/home-energy-audit.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/home-energy-audit.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/home-energy-audit.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/home-energy-audit.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/home-energy-audit.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/home-energy-audit.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/home-energy-audit.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "ホーム エネルギー監査ツール", "url": "https://softglow-ai.com/tools/ja/home-energy-audit.html", "description": "冷蔵庫、洗濯機、エアコンなど家電製品のエネルギー消費を計算し、月額・年間電気代を算出できます。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "消費電力がわからない場合はどうすればよいですか？", "acceptedAnswer": {"@type": "Answer", "text": "製品の銘板（背面や底面のシール）、取扱説明書、またはメーカーの公式ウェブサイトで確認できます。スマートメーターやエネルギーモニターを使用して、実際の消費電力を測定することもできます。"}}, {"@type": "Question", "name": "季節による使用パターンの変動はどのように入力すればよいですか？", "acceptedAnswer": {"@type": "Answer", "text": "冬と夏で異なるパターンがある場合は、それぞれの季節の平均値を計算して入力してください。または、年間の平均値を使用して全体的なエネルギーコストを推定することもできます。"}}, {"@type": "Question", "name": "料金単価はどこで確認できますか？", "acceptedAnswer": {"@type": "Answer", "text": "毎月の電気料金やガス料金の請求書を確認してください。通常、1kWh当たりの単価が「電力量料金」として記載されています。不確実な場合は、お住まいの地域の電力会社やガス会社に問い合わせてください。"}}, {"@type": "Question", "name": "このツールの計算は正確ですか？", "acceptedAnswer": {"@type": "Answer", "text": "このツールは、提供された情報に基づいて推定値を計算します。実際のコストは、使用パターンの変動や料金プランの詳細によって異なる場合があります。より正確な情報を得るために、実際の請求書と比較することをお勧めします。"}}, {"@type": "Question", "name": "電気代を削減するための最も効果的な方法は何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "最初に、コスト削減の優先順位を特定するため、このツールで最大エネルギー消費家電を確認してください。次に、使用時間の短縮、温度設定の最適化、古い機器の買い替え（特にエネルギースター認定製品）などの対策を実施してください。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > ホーム エネルギー監査ツール</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>ホーム エネルギー監査ツール</h1>
+    <p class="calc-subtitle">家電製品のエネルギー消費を分析し、コスト削減の機会を特定します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="refrigerator_watts">冷蔵庫の消費電力（ワット）</label>
+  <div class="input-row"><input type="number" id="refrigerator_watts" placeholder="150"  value="150" step="10"><span class="input-suffix">W</span></div>
+</div>
+  <small class="input-help">冷蔵庫の銘板に記載されている消費電力を入力してください</small>
+<div class="input-group">
+  <label for="refrigerator_hours">1日の運転時間</label>
+  <div class="input-row"><input type="number" id="refrigerator_hours" placeholder="24"  value="24" step="1"><span class="input-suffix">時間</span></div>
+</div>
+  <small class="input-help">冷蔵庫が1日平均何時間運転するかを入力してください</small>
+<div class="input-group">
+  <label for="washing_machine_watts">洗濯機の消費電力（ワット）</label>
+  <div class="input-row"><input type="number" id="washing_machine_watts" placeholder="500"  value="500" step="50"><span class="input-suffix">W</span></div>
+</div>
+  <small class="input-help">洗濯機の最大消費電力を入力してください</small>
+<div class="input-group">
+  <label for="washing_machine_weekly">週間の洗濯回数</label>
+  <div class="input-row"><input type="number" id="washing_machine_weekly" placeholder="5"  value="5" step="1"><span class="input-suffix">回</span></div>
+</div>
+  <small class="input-help">1週間の平均洗濯回数を入力してください</small>
+<div class="input-group">
+  <label for="dishwasher_watts">食器洗い機の消費電力（ワット）</label>
+  <div class="input-row"><input type="number" id="dishwasher_watts" placeholder="1800"  value="1800" step="100"><span class="input-suffix">W</span></div>
+</div>
+  <small class="input-help">食器洗い機の消費電力を入力してください</small>
+<div class="input-group">
+  <label for="dishwasher_weekly">週間のサイクル数</label>
+  <div class="input-row"><input type="number" id="dishwasher_weekly" placeholder="4"  value="4" step="1"><span class="input-suffix">回</span></div>
+</div>
+  <small class="input-help">1週間の平均使用回数を入力してください</small>
+<div class="input-group">
+  <label for="oven_watts">電気オーブンの消費電力（ワット）</label>
+  <div class="input-row"><input type="number" id="oven_watts" placeholder="3000"  value="3000" step="100"><span class="input-suffix">W</span></div>
+</div>
+  <small class="input-help">電気オーブンの消費電力を入力してください</small>
+<div class="input-group">
+  <label for="oven_weekly">週間の使用時間</label>
+  <div class="input-row"><input type="number" id="oven_weekly" placeholder="3"  value="3" step="0.5"><span class="input-suffix">時間</span></div>
+</div>
+  <small class="input-help">1週間の平均使用時間を入力してください</small>
+<div class="input-group">
+  <label for="microwave_watts">電子レンジの消費電力（ワット）</label>
+  <div class="input-row"><input type="number" id="microwave_watts" placeholder="1000"  value="1000" step="100"><span class="input-suffix">W</span></div>
+</div>
+  <small class="input-help">電子レンジの消費電力を入力してください</small>
+<div class="input-group">
+  <label for="microwave_daily">1日の使用時間（分）</label>
+  <div class="input-row"><input type="number" id="microwave_daily" placeholder="30"  value="30" step="5"><span class="input-suffix">分</span></div>
+</div>
+  <small class="input-help">1日の平均使用時間を分単位で入力してください</small>
+<div class="input-group">
+  <label for="tv_watts">テレビの消費電力（ワット）</label>
+  <div class="input-row"><input type="number" id="tv_watts" placeholder="120"  value="120" step="10"><span class="input-suffix">W</span></div>
+</div>
+  <small class="input-help">テレビの消費電力を入力してください</small>
+<div class="input-group">
+  <label for="tv_daily">1日の視聴時間</label>
+  <div class="input-row"><input type="number" id="tv_daily" placeholder="5"  value="5" step="0.5"><span class="input-suffix">時間</span></div>
+</div>
+  <small class="input-help">1日の平均視聴時間を入力してください</small>
+<div class="input-group">
+  <label for="boiler_watts">温水器/ボイラーの消費電力（ワット）</label>
+  <div class="input-row"><input type="number" id="boiler_watts" placeholder="2000"  value="2000" step="100"><span class="input-suffix">W</span></div>
+</div>
+  <small class="input-help">温水器またはボイラーの消費電力を入力してください</small>
+<div class="input-group">
+  <label for="boiler_daily">1日の運転時間</label>
+  <div class="input-row"><input type="number" id="boiler_daily" placeholder="4"  value="4" step="0.5"><span class="input-suffix">時間</span></div>
+</div>
+  <small class="input-help">温水器が1日平均何時間運転するかを入力してください</small>
+<div class="input-group">
+  <label for="heating_watts">中央暖房システムの消費電力（ワット）</label>
+  <div class="input-row"><input type="number" id="heating_watts" placeholder="1500"  value="1500" step="100"><span class="input-suffix">W</span></div>
+</div>
+  <small class="input-help">中央暖房システムの消費電力を入力してください</small>
+<div class="input-group">
+  <label for="heating_daily">1日の運転時間（冬季平均）</label>
+  <div class="input-row"><input type="number" id="heating_daily" placeholder="6"  value="6" step="0.5"><span class="input-suffix">時間</span></div>
+</div>
+  <small class="input-help">冬季の1日平均運転時間を入力してください</small>
+<div class="input-group">
+  <label for="ac_watts">エアコンの消費電力（ワット）</label>
+  <div class="input-row"><input type="number" id="ac_watts" placeholder="3500"  value="3500" step="100"><span class="input-suffix">W</span></div>
+</div>
+  <small class="input-help">エアコンの消費電力を入力してください</small>
+<div class="input-group">
+  <label for="ac_daily">1日の運転時間（夏季平均）</label>
+  <div class="input-row"><input type="number" id="ac_daily" placeholder="4"  value="4" step="0.5"><span class="input-suffix">時間</span></div>
+</div>
+  <small class="input-help">夏季の1日平均運転時間を入力してください</small>
+<div class="input-group">
+  <label for="lighting_watts">家庭用照明の合計消費電力（ワット）</label>
+  <div class="input-row"><input type="number" id="lighting_watts" placeholder="200"  value="200" step="25"><span class="input-suffix">W</span></div>
+</div>
+  <small class="input-help">家庭内のすべての照明の合計消費電力を入力してください</small>
+<div class="input-group">
+  <label for="lighting_daily">1日の使用時間（夜間）</label>
+  <div class="input-row"><input type="number" id="lighting_daily" placeholder="6"  value="6" step="0.5"><span class="input-suffix">時間</span></div>
+</div>
+  <small class="input-help">照明が1日平均何時間使用されるか（夜間）を入力してください</small>
+<div class="input-group">
+  <label for="electricity_rate">電気料金</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="electricity_rate" placeholder="0.28"  value="0.28" step="0.01"><span class="input-suffix">kWh当たり</span></div>
+</div>
+  <small class="input-help">1kWh当たりの電気料金を入力してください</small>
+<div class="input-group">
+  <label for="gas_rate">ガス料金（該当する場合）</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="gas_rate" placeholder="0.07"  value="0.07" step="0.01"><span class="input-suffix">kWh当たり</span></div>
+</div>
+  <small class="input-help">1kWh当たりのガス料金を入力してください（必要な場合）</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">冷蔵庫の月額コスト</span><span class="result-value" id="refrigerator_monthly">—</span></div>
+<div class="result-item"><span class="result-label">洗濯機の月額コスト</span><span class="result-value" id="washing_machine_monthly">—</span></div>
+<div class="result-item"><span class="result-label">食器洗い機の月額コスト</span><span class="result-value" id="dishwasher_monthly">—</span></div>
+<div class="result-item"><span class="result-label">電気オーブンの月額コスト</span><span class="result-value" id="oven_monthly">—</span></div>
+<div class="result-item"><span class="result-label">電子レンジの月額コスト</span><span class="result-value" id="microwave_monthly">—</span></div>
+<div class="result-item"><span class="result-label">テレビの月額コスト</span><span class="result-value" id="tv_monthly">—</span></div>
+<div class="result-item"><span class="result-label">温水器の月額コスト</span><span class="result-value" id="boiler_monthly">—</span></div>
+<div class="result-item"><span class="result-label">中央暖房の月額コスト</span><span class="result-value" id="heating_monthly">—</span></div>
+<div class="result-item"><span class="result-label">エアコンの月額コスト</span><span class="result-value" id="ac_monthly">—</span></div>
+<div class="result-item"><span class="result-label">照明の月額コスト</span><span class="result-value" id="lighting_monthly">—</span></div>
+<div class="result-highlight"><span class="result-label">月額エネルギーコスト合計</span><span class="result-value" id="total_monthly_cost">—</span></div>
+<div class="result-highlight"><span class="result-label">推定年間エネルギーコスト</span><span class="result-value" id="total_annual_cost">—</span></div>
+<div class="result-item"><span class="result-label">1日のエネルギー消費量</span><span class="result-value" id="total_daily_kwh">—</span></div>
+<div class="result-item"><span class="result-label">最大エネルギー消費家電</span><span class="result-value" id="highest_consumer">—</span></div>
+<div class="result-item"><span class="result-label">エネルギー消費の内訳</span><span class="result-value" id="consumption_breakdown">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 各家電製品の月額コストと年間推定コストが表示されます。「最大エネルギー消費家電」でコスト削減の優先順位を判断し、「エネルギー消費の内訳」で使用量の多い機器を特定できます。これらの情報を参考に、省エネ対策を実施してください。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>ホームエネルギー監査とは</h2><p>ホームエネルギー監査は、家庭内のすべての電気製品とガス機器のエネルギー消費を詳細に分析し、月額および年間の電気代・ガス代を把握するプロセスです。このツールを使用することで、各家電製品がどれだけのエネルギーコストを発生させているかを可視化でき、効果的な省エネ対策を立案することができます。</p><h2>消費電力の確認方法</h2><p>各家電製品の消費電力は、製品の背面や底面にある銘板（スペックシート）に記載されています。消費電力はワット（W）またはキロワット（kW）で表示されています。1000W = 1kWです。わからない場合は、製品のマニュアルやメーカーの公式ウェブサイトで確認することができます。</p><h2>運転時間の計算</h2><p>より正確な計算結果を得るために、実際の使用パターンに基づいて運転時間を入力することが重要です。例えば、冷蔵�foo庫は通常24時間運転しており、洗濯機は週間の実際の使用回数を入力します。季節による変動（例：冬の暖房時間が長い）も考慮してください。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>料金単価の確認</h2><p>電気料金とガス料金は、毎月の電気料金/ガス料金の請求書で確認できます。通常、1kWh当たりの単価が記載されています。シーズンによって単価が異なる場合もあるため、平均的な単価を使用することをお勧めします。</p><h2>コスト削減の優先順位</h2><p>結果から「最大エネルギー消費家電」を特定したら、そこから省エネ対策を始めましょう。例えば、エアコンの運転時間を1時間短縮する、冷蔵庫の温度設定を最適化するなど、使用パターンの改善から始めることができます。古い家電製品はエネルギー効率が低いため、必要に応じて省エネ型製品への買い替えも検討してください。</p><h2>定期的なモニタリング</h2><p>季節が変わると、エアコンや暖房の使用パターンが大きく変わります。定期的にこのツールで再計算し、エネルギー消費の変化を追跡することで、より効果的な省エネ管理が可能になります。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">消費電力がわからない場合はどうすればよいですか？</div><div class="faq-a">製品の銘板（背面や底面のシール）、取扱説明書、またはメーカーの公式ウェブサイトで確認できます。スマートメーターやエネルギーモニターを使用して、実際の消費電力を測定することもできます。</div></div>
+  <div class="faq-item"><div class="faq-q">季節による使用パターンの変動はどのように入力すればよいですか？</div><div class="faq-a">冬と夏で異なるパターンがある場合は、それぞれの季節の平均値を計算して入力してください。または、年間の平均値を使用して全体的なエネルギーコストを推定することもできます。</div></div>
+  <div class="faq-item"><div class="faq-q">料金単価はどこで確認できますか？</div><div class="faq-a">毎月の電気料金やガス料金の請求書を確認してください。通常、1kWh当たりの単価が「電力量料金」として記載されています。不確実な場合は、お住まいの地域の電力会社やガス会社に問い合わせてください。</div></div>
+  <div class="faq-item"><div class="faq-q">このツールの計算は正確ですか？</div><div class="faq-a">このツールは、提供された情報に基づいて推定値を計算します。実際のコストは、使用パターンの変動や料金プランの詳細によって異なる場合があります。より正確な情報を得るために、実際の請求書と比較することをお勧めします。</div></div>
+  <div class="faq-item"><div class="faq-q">電気代を削減するための最も効果的な方法は何ですか？</div><div class="faq-a">最初に、コスト削減の優先順位を特定するため、このツールで最大エネルギー消費家電を確認してください。次に、使用時間の短縮、温度設定の最適化、古い機器の買い替え（特にエネルギースター認定製品）などの対策を実施してください。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">Roi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">Risk Reward</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">Position Size</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">Pe Ratio</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/home-energy-audit.html" class="lang-btn">English</a>
+    <a href="/tools/home-energy-audit.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/home-energy-audit.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/home-energy-audit.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/home-energy-audit.html" class="lang-btn">Français</a>
+    <a href="/tools/es/home-energy-audit.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/home-energy-audit.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/home-energy-audit.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/home-energy-audit.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/home-energy-audit.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const refrigeratorWatts = parseFloat(document.getElementById('refrigerator_watts').value);
+  const refrigeratorHours = parseFloat(document.getElementById('refrigerator_hours').value);
+  const washingMachineWatts = parseFloat(document.getElementById('washing_machine_watts').value);
+  const washingMachineWeekly = parseFloat(document.getElementById('washing_machine_weekly').value);
+  const dishwasherWatts = parseFloat(document.getElementById('dishwasher_watts').value);
+  const dishwasherWeekly = parseFloat(document.getElementById('dishwasher_weekly').value);
+  const ovenWatts = parseFloat(document.getElementById('oven_watts').value);
+  const ovenWeekly = parseFloat(document.getElementById('oven_weekly').value);
+  const microwaveWatts = parseFloat(document.getElementById('microwave_watts').value);
+  const microwaveDaily = parseFloat(document.getElementById('microwave_daily').value);
+  const tvWatts = parseFloat(document.getElementById('tv_watts').value);
+  const tvDaily = parseFloat(document.getElementById('tv_daily').value);
+  const boilerWatts = parseFloat(document.getElementById('boiler_watts').value);
+  const boilerDaily = parseFloat(document.getElementById('boiler_daily').value);
+  const heatingWatts = parseFloat(document.getElementById('heating_watts').value);
+  const heatingDaily = parseFloat(document.getElementById('heating_daily').value);
+  const acWatts = parseFloat(document.getElementById('ac_watts').value);
+  const acDaily = parseFloat(document.getElementById('ac_daily').value);
+  const lightingWatts = parseFloat(document.getElementById('lighting_watts').value);
+  const lightingDaily = parseFloat(document.getElementById('lighting_daily').value);
+  const electricityRate = parseFloat(document.getElementById('electricity_rate').value);
+  const gasRate = parseFloat(document.getElementById('gas_rate').value);
+
+  if (!refrigeratorWatts || !electricityRate) {
+    alert('Please fill in all required fields');
+    return;
+  }
+
+  const refrigeratorDailyKwh = (refrigeratorWatts * refrigeratorHours) / 1000;
+  const refrigeratorMonthly = refrigeratorDailyKwh * 30 * electricityRate;
+
+  const washingMachineDailyKwh = (washingMachineWatts * washingMachineWeekly * 1.5) / 1000 / 7;
+  const washingMachineMonthly = washingMachineDailyKwh * 30 * electricityRate;
+
+  const dishwasherDailyKwh = (dishwasherWatts * dishwasherWeekly * 2) / 1000 / 7;
+  const dishwasherMonthly = dishwasherDailyKwh * 30 * electricityRate;
+
+  const ovenDailyKwh = (ovenWatts * ovenWeekly) / 1000 / 7;
+  const ovenMonthly = ovenDailyKwh * 30 * electricityRate;
+
+  const microwaveDailyKwh = (microwaveWatts * microwaveDaily) / 1000 / 60;
+  const microwaveMonthly = microwaveDailyKwh * 30 * electricityRate;
+
+  const tvDailyKwh = (tvWatts * tvDaily) / 1000;
+  const tvMonthly = tvDailyKwh * 30 * electricityRate;
+
+  const boilerDailyKwh = (boilerWatts * boilerDaily) / 1000;
+  const boilerMonthly = boilerDailyKwh * 30 * electricityRate;
+
+  const heatingDailyKwh = (heatingWatts * heatingDaily) / 1000;
+  const heatingMonthly = heatingDailyKwh * 30 * gasRate;
+
+  const acDailyKwh = (acWatts * acDaily) / 1000;
+  const acMonthly = acDailyKwh * 30 * electricityRate;
+
+  const lightingDailyKwh = (lightingWatts * lightingDaily) / 1000;
+  const lightingMonthly = lightingDailyKwh * 30 * electricityRate;
+
+  const totalDailyKwh = refrigeratorDailyKwh + washingMachineDailyKwh + dishwasherDailyKwh + ovenDailyKwh + microwaveDailyKwh + tvDailyKwh + boilerDailyKwh + heatingDailyKwh + acDailyKwh + lightingDailyKwh;
+
+  const totalMonthly = refrigeratorMonthly + washingMachineMonthly + dishwasherMonthly + ovenMonthly + microwaveMonthly + tvMonthly + boilerMonthly + heatingMonthly + acMonthly + lightingMonthly;
+
+  const totalAnnual = totalMonthly * 12;
+
+  const costs = [
+    { name: 'Refrigerator', cost: refrigeratorMonthly },
+    { name: 'Washing Machine', cost: washingMachineMonthly },
+    { name: 'Dishwasher', cost: dishwasherMonthly },
+    { name: 'Oven', cost: ovenMonthly },
+    { name: 'Microwave', cost: microwaveMonthly },
+    { name: 'TV', cost: tvMonthly },
+    { name: 'Water Heater', cost: boilerMonthly },
+    { name: 'Heating', cost: heatingMonthly },
+    { name: 'Air Conditioning', cost: acMonthly },
+    { name: 'Lighting', cost: lightingMonthly }
+  ];
+
+  const highestConsumer = costs.reduce((max, item) => item.cost > max.cost ? item : max);
+
+  document.getElementById('refrigerator_monthly').textContent = '£' + refrigeratorMonthly.toFixed(2);
+  document.getElementById('washing_machine_monthly').textContent = '£' + washingMachineMonthly.toFixed(2);
+  document.getElementById('dishwasher_monthly').textContent = '£' + dishwasherMonthly.toFixed(2);
+  document.getElementById('oven_monthly').textContent = '£' + ovenMonthly.toFixed(2);
+  document.getElementById('microwave_monthly').textContent = '£' + microwaveMonthly.toFixed(2);
+  document.getElementById('tv_monthly').textContent = '£' + tvMonthly.toFixed(2);
+  document.getElementById('boiler_monthly').textContent = '£' + boilerMonthly.toFixed(2);
+  document.getElementById('heating_monthly').textContent = '£' + heatingMonthly.toFixed(2);
+  document.getElementById('ac_monthly').textContent = '£' + acMonthly.toFixed(2);
+  document.getElementById('lighting_monthly').textContent = '£' + lightingMonthly.toFixed(2);
+  document.getElementById('total_monthly_cost').textContent = '£' + totalMonthly.toFixed(2);
+  document.getElementById('total_annual_cost').textContent = '£' + totalAnnual.toFixed(2);
+  document.getElementById('total_daily_kwh').textContent = totalDailyKwh.toFixed(2) + ' kWh';
+  document.getElementById('highest_consumer').textContent = highestConsumer.name + ' (£' + highestConsumer.cost.toFixed(2) + '/month)';
+  document.getElementById('consumption_breakdown').textContent = 'Analyzed ' + costs.length + ' appliances';
+
+  document.querySelector('.results-container').classList.add('show');
+}
+
+document.getElementById('calculateBtn').addEventListener('click', calculate);
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|home-energy-audit|2026-07-09 -->

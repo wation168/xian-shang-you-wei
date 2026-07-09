@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>保证金计算器 - 杠杆交易保证金计算</title>
+<meta name="description" content="快速计算杠杆交易所需的保证金、名义价值和有效杠杆比例。支持自定义头寸规模、资产价格和杠杆倍数。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/zh-CN/margin-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/margin-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/margin-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/margin-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/margin-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/margin-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/margin-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/margin-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/margin-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/margin-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/margin-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/margin-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "保证金计算器", "url": "https://softglow-ai.com/tools/zh-CN/margin-calculator.html", "description": "快速计算杠杆交易所需的保证金、名义价值和有效杠杆比例。支持自定义头寸规模、资产价格和杠杆倍数。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "什么是保证金？", "acceptedAnswer": {"@type": "Answer", "text": "保证金是您在进行杠杆交易时必须存入的资金。它作为交易的抵押品，保护交易商免受您可能的损失。保证金金额取决于您的头寸规模和所选的杠杆比例。"}}, {"@type": "Question", "name": "杠杆比例和保证金有什么关系？", "acceptedAnswer": {"@type": "Answer", "text": "杠杆比例越高，所需保证金越少。例如，在10倍杠杆下，您需要支付名义价值的10%作为保证金；而在5倍杠杆下，需要支付20%。更高的杠杆意味着更少的初始投资，但风险也更大。"}}, {"@type": "Question", "name": "名义价值和保证金有什么区别？", "acceptedAnswer": {"@type": "Answer", "text": "保证金是您实际支付的金额，而名义价值是您控制的总头寸价值。名义价值 = 保证金 × 杠杆比例。您的收益和损失都基于名义价值计算，而不是保证金。"}}, {"@type": "Question", "name": "如果我的头寸亏损会怎样？", "acceptedAnswer": {"@type": "Answer", "text": "亏损会直接从您的账户余额中扣除。如果亏损导致账户余额低于维持保证金要求，交易商可能会强制平仓您的头寸。因此定期监控保证金水平非常重要。"}}, {"@type": "Question", "name": "我应该使用多高的杠杆？", "acceptedAnswer": {"@type": "Answer", "text": "这取决于您的风险承受能力和交易经验。新手交易者应从2-5倍杠杆开始，经验丰富的交易者可使用更高杠杆。始终遵循风险管理原则，确保任何单笔交易的潜在亏损不超过账户的2-5%。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/zh-CN/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 保证金计算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>保证金计算器</h1>
+    <p class="calc-subtitle">计算杠杆交易头寸的保证金要求</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="positionSize">头寸规模</label>
+  <div class="input-row"><input type="number" id="positionSize" placeholder="1000"  step="0.01"><span class="input-suffix">个</span></div>
+</div>
+  <small class="input-help">输入交易头寸的单位数量</small>
+<div class="input-group">
+  <label for="assetPrice">资产价格</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="assetPrice" placeholder="50.00"  step="0.01"></div>
+</div>
+  <small class="input-help">输入每个资产单位的当前价格</small>
+<div class="input-group">
+  <label for="leverageRatio">杠杆比例</label>
+  <div class="input-row"><input type="number" id="leverageRatio" placeholder="10"  step="0.1"><span class="input-suffix">:1</span></div>
+</div>
+  <small class="input-help">输入所需的杠杆倍数（如10表示10倍杠杆）</small></div>
+    <button class="btn-calc" onclick="calculate()">计算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">所需保证金</span><span class="result-value" id="marginRequired">—</span></div>
+<div class="result-item"><span class="result-label">名义价值总额</span><span class="result-value" id="totalNotionalValue">—</span></div>
+<div class="result-item"><span class="result-label">有效杠杆</span><span class="result-value" id="leverageMultiplier">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>这代表什么？</strong> 所需保证金是您需要实际投入的资金量，名义价值总额是您控制的总头寸价值，有效杠杆显示您实际使用的杠杆倍数。这三个指标共同决定了您的交易成本和风险敞口。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 打印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>保证金计算器使用指南</h2><p>保证金计算器是进行杠杆交易时的重要工具，可帮助交易者精确计算所需的初始资金和头寸规模。通过输入头寸规模、资产价格和杠杆比例，您可以立即了解交易需要的具体成本。</p><h2>保证金的含义</h2><p>保证金是您在进行杠杆交易时需要存入账户的初始资金。它充当风险缓冲，保护交易商免受交易者损失的影响。例如，如果您想以10倍杠杆控制价值1000元的头寸，您只需支付100元作为保证金，剩余900元由交易商提供。</p><h2>名义价值的重要性</h2><p>名义价值总额代表您实际控制的头寸价值。这个数字很重要，因为它决定了您的潜在利润和亏损范围。即使您只投入了保证金金额，您的收益或损失计算都是基于完整的名义价值。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>有效杠杆计算</h2><p>有效杠杆是您实际使用的杠杆倍数，计算公式为：名义价值总额÷所需保证金。这个比例帮助您监控风险敞口，确保交易符合风险管理策略。</p><h2>风险管理建议</h2><p>使用高杠杆可以放大收益，但同样也会放大亏损。建议新手交易者从较低的杠杆比例开始，逐步积累经验。定期使用本计算器评估头寸的保证金要求，确保您的账户余额足以维持头寸。</p><h2>实际应用案例</h2><p>假设您想交易一支股票，当前价格为50元，您计划购买1000股，使用10倍杠杆。计算器会显示：所需保证金为5000元，名义价值为50000元。这意味着您只需投入5000元就能控制价值50000元的头寸，但同时您的风险也相应增加。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸阅读</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常见问题</h2><div class="faq-item"><div class="faq-q">什么是保证金？</div><div class="faq-a">保证金是您在进行杠杆交易时必须存入的资金。它作为交易的抵押品，保护交易商免受您可能的损失。保证金金额取决于您的头寸规模和所选的杠杆比例。</div></div>
+  <div class="faq-item"><div class="faq-q">杠杆比例和保证金有什么关系？</div><div class="faq-a">杠杆比例越高，所需保证金越少。例如，在10倍杠杆下，您需要支付名义价值的10%作为保证金；而在5倍杠杆下，需要支付20%。更高的杠杆意味着更少的初始投资，但风险也更大。</div></div>
+  <div class="faq-item"><div class="faq-q">名义价值和保证金有什么区别？</div><div class="faq-a">保证金是您实际支付的金额，而名义价值是您控制的总头寸价值。名义价值 = 保证金 × 杠杆比例。您的收益和损失都基于名义价值计算，而不是保证金。</div></div>
+  <div class="faq-item"><div class="faq-q">如果我的头寸亏损会怎样？</div><div class="faq-a">亏损会直接从您的账户余额中扣除。如果亏损导致账户余额低于维持保证金要求，交易商可能会强制平仓您的头寸。因此定期监控保证金水平非常重要。</div></div>
+  <div class="faq-item"><div class="faq-q">我应该使用多高的杠杆？</div><div class="faq-a">这取决于您的风险承受能力和交易经验。新手交易者应从2-5倍杠杆开始，经验丰富的交易者可使用更高杠杆。始终遵循风险管理原则，确保任何单笔交易的潜在亏损不超过账户的2-5%。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/zh-CN/compound-interest.html">复利计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/roi-calculator.html">投资回报率 (ROI) 计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/risk-reward.html">风险收益比计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/position-size.html">头寸规模计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stop-loss.html">止损计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dividend-yield.html">股息收益率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/pe-ratio.html">市盈率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dca-calculator.html">定期定额投资计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/cagr.html">复合年增长率(CAGR)计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stock-gain-loss.html">股票盈亏计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/break-even.html">损益平衡点计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/rule-of-72.html">72法则计算器</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/margin-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/margin-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/margin-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/margin-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/margin-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/margin-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/margin-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/margin-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/margin-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/margin-calculator.html" class="lang-btn active">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相关工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const positionSize = parseFloat(document.getElementById('positionSize').value);
+  const assetPrice = parseFloat(document.getElementById('assetPrice').value);
+  const leverageRatio = parseFloat(document.getElementById('leverageRatio').value);
+
+  if (!positionSize || !assetPrice || !leverageRatio) {
+    alert('Please fill in all fields with valid numbers');
+    return;
+  }
+
+  if (positionSize <= 0 || assetPrice <= 0 || leverageRatio <= 0) {
+    alert('All values must be greater than zero');
+    return;
+  }
+
+  const totalNotionalValue = positionSize * assetPrice;
+  const marginRequired = totalNotionalValue / leverageRatio;
+  const effectiveLeverage = leverageRatio;
+
+  document.getElementById('marginRequired').textContent = marginRequired.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('totalNotionalValue').textContent = totalNotionalValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('leverageMultiplier').textContent = effectiveLeverage.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已复制！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-CN|margin-calculator|2026-07-09 -->

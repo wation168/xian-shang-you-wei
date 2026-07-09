@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>健康保険控除額トラッカー - 残額計算ツール</title>
+<meta name="description" content="年間控除額と現在の支払額から、残りの健康保険控除額を即座に計算。控除額の進捗状況を把握できます。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/health-deductible-calc.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/health-deductible-calc.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/health-deductible-calc.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/health-deductible-calc.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/health-deductible-calc.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/health-deductible-calc.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/health-deductible-calc.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/health-deductible-calc.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/health-deductible-calc.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/health-deductible-calc.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/health-deductible-calc.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/health-deductible-calc.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "健康保険控除額トラッカー", "url": "https://softglow-ai.com/tools/ja/health-deductible-calc.html", "description": "年間控除額と現在の支払額から、残りの健康保険控除額を即座に計算。控除額の進捗状況を把握できます。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "控除額（デダクティブル）とは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "控除額は、健康保険が医療費をカバーする前に、被保険者が自分で支払う必要がある金額です。例えば、年間控除額が150,000円の場合、その金額に達するまでは保険からの給付を受けられません。"}}, {"@type": "Question", "name": "控除額に達した後はどうなりますか？", "acceptedAnswer": {"@type": "Answer", "text": "控除額に達した後は、保険の規定に従って、医療費の一定割合（例：80%）が保険でカバーされ、残りの割合（例：20%）が自己負担になります。"}}, {"@type": "Question", "name": "控除額はいつリセットされますか？", "acceptedAnswer": {"@type": "Answer", "text": "通常、控除額は毎年1月1日にリセットされます。新しい年が始まると、控除額がゼロからスタートします。"}}, {"@type": "Question", "name": "すべての医療費が控除額にカウントされますか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ、すべての医療費が控除額にカウントされるわけではありません。予防検診や特定のサービスは控除額の対象外の場合もあります。保険契約書で確認してください。"}}, {"@type": "Question", "name": "このツールをどのくらいの頻度で使用すべきですか？", "acceptedAnswer": {"@type": "Answer", "text": "医療費を支払うたびに、または月に一度は更新することをお勧めします。これにより、年間を通じての支出を正確に追跡でき、予算管理がより効果的になります。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 健康保険控除額トラッカー</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>健康保険控除額トラッカー</h1>
+    <p class="calc-subtitle">数秒で残りの健康保険控除額を計算します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="deductibleAmount">年間控除額</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="deductibleAmount" placeholder="150000"  value="1500" step="1"></div>
+</div>
+  <small class="input-help">1年間の健康保険控除額の合計金額を入力してください</small>
+<div class="input-group">
+  <label for="amountSpent">現在までの支払額</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="amountSpent" placeholder="45000"  value="450" step="0.01"></div>
+</div>
+  <small class="input-help">これまでに支払った医療費の合計金額を入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">残り控除額</span><span class="result-value" id="remainingDeductible">—</span></div>
+<div class="result-item"><span class="result-label">使用済み控除額の割合</span><span class="result-value" id="percentageUsed">—</span></div>
+<div class="result-item"><span class="result-label">控除額ステータス</span><span class="result-value" id="deductibleStatus">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 残り控除額は、年間控除額から現在までの支払額を差し引いた金額です。使用済み控除額の割合は、すでに使用した控除額の割合を示しており、100%に達するまでは保険の自己負担が続きます。控除額ステータスでは、控除達成までの進捗状況が表示されます。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>健康保険控除額トラッカーについて</h2><p>健康保険の控除額（デダクティブル）は、保険が医療費をカバーする前に自分で支払う必要がある金額です。このトラッカーを使用することで、年間を通じてどれだけの控除額をすでに達成したか、そして残りいくら必要かを簡単に把握できます。</p><h2>控除額の重要性</h2><p>多くの健康保険プランでは、控除額に達するまで保険からの給付を受けられません。控除額に達した後は、保険がカバー率に応じて医療費の一部を負担します。したがって、年間を通じての医療費支出を把握することは、予算計画に非常に重要です。</p><h2>使用方法</h2><p>年間控除額の欄に、保険契約書に記載されている控除額を入力します。現在までの支払額の欄に、今年度中に医療費として支払った合計金額を入力してください。すると、残り控除額と使用済み割合が自動的に計算されます。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>結果の解釈</h2><p>残り控除額が0になると、あなたの控除額達成状況は100%となり、その後の医療費は保険でカバーされる割合が適用されます。定期的にこのツールを使用して進捗を確認することで、年間の医療費支出を効果的に管理できます。</p><h2>計画的な医療費管理</h2><p>控除額の進捗を理解することで、必要な医療サービスを計画的に受けることができます。控除額達成前と達成後では自己負担の比率が異なるため、事前に把握することが重要です。</p><h2>定期的な確認</h2><p>医療費を支払うたびにこのツールで進捗を更新することをお勧めします。そうすることで、年間通じての医療費支出を正確に把握し、予期しない自己負担を避けることができます。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">控除額（デダクティブル）とは何ですか？</div><div class="faq-a">控除額は、健康保険が医療費をカバーする前に、被保険者が自分で支払う必要がある金額です。例えば、年間控除額が150,000円の場合、その金額に達するまでは保険からの給付を受けられません。</div></div>
+  <div class="faq-item"><div class="faq-q">控除額に達した後はどうなりますか？</div><div class="faq-a">控除額に達した後は、保険の規定に従って、医療費の一定割合（例：80%）が保険でカバーされ、残りの割合（例：20%）が自己負担になります。</div></div>
+  <div class="faq-item"><div class="faq-q">控除額はいつリセットされますか？</div><div class="faq-a">通常、控除額は毎年1月1日にリセットされます。新しい年が始まると、控除額がゼロからスタートします。</div></div>
+  <div class="faq-item"><div class="faq-q">すべての医療費が控除額にカウントされますか？</div><div class="faq-a">いいえ、すべての医療費が控除額にカウントされるわけではありません。予防検診や特定のサービスは控除額の対象外の場合もあります。保険契約書で確認してください。</div></div>
+  <div class="faq-item"><div class="faq-q">このツールをどのくらいの頻度で使用すべきですか？</div><div class="faq-a">医療費を支払うたびに、または月に一度は更新することをお勧めします。これにより、年間を通じての支出を正確に追跡でき、予算管理がより効果的になります。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">Roi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">Risk Reward</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">Position Size</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">Pe Ratio</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/health-deductible-calc.html" class="lang-btn">English</a>
+    <a href="/tools/health-deductible-calc.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/health-deductible-calc.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/health-deductible-calc.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/health-deductible-calc.html" class="lang-btn">Français</a>
+    <a href="/tools/es/health-deductible-calc.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/health-deductible-calc.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/health-deductible-calc.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/health-deductible-calc.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/health-deductible-calc.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const deductibleAmountInput = document.getElementById('deductibleAmount');
+  const amountSpentInput = document.getElementById('amountSpent');
+  const remainingDeductibleResult = document.getElementById('remainingDeductible');
+  const percentageUsedResult = document.getElementById('percentageUsed');
+  const deductibleStatusResult = document.getElementById('deductibleStatus');
+  const resultsDiv = document.getElementById('results');
+
+  const deductibleAmount = parseFloat(deductibleAmountInput.value);
+  const amountSpent = parseFloat(amountSpentInput.value);
+
+  if (isNaN(deductibleAmount) || isNaN(amountSpent) || deductibleAmount <= 0 || amountSpent < 0) {
+    alert('Please enter valid amounts. Deductible must be greater than zero and spent amount must be non-negative.');
+    return;
+  }
+
+  if (amountSpent > deductibleAmount) {
+    alert('Amount spent cannot exceed your deductible amount.');
+    return;
+  }
+
+  const remaining = deductibleAmount - amountSpent;
+  const percentageUsed = (amountSpent / deductibleAmount) * 100;
+  let status = '';
+
+  if (amountSpent === 0) {
+    status = 'Deductible not started';
+  } else if (percentageUsed < 50) {
+    status = 'Early in deductible';
+  } else if (percentageUsed < 100) {
+    status = 'Making progress toward deductible';
+  } else {
+    status = 'Deductible met';
+  }
+
+  remainingDeductibleResult.textContent = remaining.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  percentageUsedResult.textContent = percentageUsed.toFixed(1);
+  deductibleStatusResult.textContent = status;
+
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|health-deductible-calc|2026-07-09 -->

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>股權稀釋計算器 - 融資後所有權比例計算</title>
+<meta name="description" content="免費股權稀釋計算器，快速計算新融資輪次後您的所有權百分比變化和股權損失。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/equity-dilution.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/equity-dilution.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/equity-dilution.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/equity-dilution.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/equity-dilution.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/equity-dilution.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/equity-dilution.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/equity-dilution.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/equity-dilution.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/equity-dilution.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/equity-dilution.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/equity-dilution.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "股權稀釋計算器", "url": "https://softglow-ai.com/tools/equity-dilution.html", "description": "免費股權稀釋計算器，快速計算新融資輪次後您的所有權百分比變化和股權損失。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "融資後我的股票數量會改變嗎？", "acceptedAnswer": {"@type": "Answer", "text": "不會。融資後您持有的實際股票數量保持不變。只有您的所有權百分比會下降，因為公司發行了新股票。"}}, {"@type": "Question", "name": "如何計算股權稀釋？", "acceptedAnswer": {"@type": "Answer", "text": "公式是：新所有權百分比 = 舊所有權百分比 × (1 - 稀釋百分比/100)。例如，25% × (1 - 20/100) = 20%。"}}, {"@type": "Question", "name": "我應該擔心股權稀釋嗎？", "acceptedAnswer": {"@type": "Answer", "text": "適度的稀釋是成長型公司的正常部分，因為融資幫助公司擴展並增加價值。重要的是確保公司的增長足以抵消稀釋的影響。"}}, {"@type": "Question", "name": "多輪融資會如何影響我的所有權？", "acceptedAnswer": {"@type": "Answer", "text": "多輪融資會產生累積的稀釋效應。您需要逐輪計算，因為每一輪都基於前一輪後的新基礎進行計算。"}}, {"@type": "Question", "name": "有什麼方法可以減少股權稀釋？", "acceptedAnswer": {"@type": "Answer", "text": "您可以談判更高的估值以減少新股票數量、尋求債務融資作為替代、進行部分自籌資金，或尋找戰略合作夥伴而不是稀釋投資。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 股權稀釋計算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>股權稀釋計算器</h1>
+    <p class="calc-subtitle">計算融資輪次如何減少您的所有權股份</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="oldOwnership">您目前的所有權百分比</label>
+  <div class="input-row"><input type="number" id="oldOwnership" placeholder="25"  step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">輸入您在公司中目前擁有的所有權百分比</small>
+<div class="input-group">
+  <label for="dilutionPercent">稀釋百分比（新融資）</label>
+  <div class="input-row"><input type="number" id="dilutionPercent" placeholder="20"  step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">輸入新融資輪次導致的稀釋百分比</small></div>
+    <button class="btn-calc" onclick="calculate()">計算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">您的新所有權百分比</span><span class="result-value" id="newOwnership">—</span></div>
+<div class="result-item"><span class="result-label">所有權股份損失</span><span class="result-value" id="ownershipLoss">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> 新所有權百分比表示融資後您在公司中的股權比例。所有權股份損失是融資輪次中您所失去的百分比點數，這直接反映了您的稀釋程度。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 列印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什麼是股權稀釋？</h2><p>股權稀釋是指當公司發行新股票（通常用於融資）時，現有股東的所有權百分比下降的過程。這是創業融資中的常見現象，但了解其影響對於長期規劃至關重要。</p><h2>股權稀釋如何運作</h2><p>當公司進行新一輪融資時，新投資者會購買新發行的股票。這增加了公司的總股數，因此現有股東的百分比所有權自動下降，儘管他們持有的實際股票數量保持不變。例如，如果您擁有100股共1000股（10%），而公司發行500股新股票，您仍然擁有100股，但現在佔公司1500股的6.67%。</p><h2>使用此計算器</h2><p>輸入您目前的所有權百分比和預期的稀釋百分比，計算器將立即顯示融資後的新所有權百分比和您失去的股份百分比。這有助於評估融資決策對您長期股權的影響。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>為什麼這很重要</h2><p>理解股權稀釋對於創始人和早期投資者至關重要，因為它直接影響未來退出時的收益。多輪稀釋可能會顯著降低您的最終所有權，因此在評估融資條款時應仔細計算。</p><h2>稀釋的預防策略</h2><p>雖然稀釋在成長型公司中是不可避免的，但您可以通過談判更有利的融資條款、考慮員工期權池的規模以及規劃未來資本需求來最小化其影響。一些創始人也選擇進行反向分割或優先股安排來保護其利益。</p><h2>多輪融資的累積效應</h2><p>如果您計劃進行多輪融資，請記住稀釋是累積的。第一輪融資後的10%稀釋加上第二輪融資後的15%稀釋不等於25%的總稀釋，因為第二輪是基於已稀釋的基礎計算的。使用此計算器逐輪計算以獲得準確的長期預測。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">融資後我的股票數量會改變嗎？</div><div class="faq-a">不會。融資後您持有的實際股票數量保持不變。只有您的所有權百分比會下降，因為公司發行了新股票。</div></div>
+  <div class="faq-item"><div class="faq-q">如何計算股權稀釋？</div><div class="faq-a">公式是：新所有權百分比 = 舊所有權百分比 × (1 - 稀釋百分比/100)。例如，25% × (1 - 20/100) = 20%。</div></div>
+  <div class="faq-item"><div class="faq-q">我應該擔心股權稀釋嗎？</div><div class="faq-a">適度的稀釋是成長型公司的正常部分，因為融資幫助公司擴展並增加價值。重要的是確保公司的增長足以抵消稀釋的影響。</div></div>
+  <div class="faq-item"><div class="faq-q">多輪融資會如何影響我的所有權？</div><div class="faq-a">多輪融資會產生累積的稀釋效應。您需要逐輪計算，因為每一輪都基於前一輪後的新基礎進行計算。</div></div>
+  <div class="faq-item"><div class="faq-q">有什麼方法可以減少股權稀釋？</div><div class="faq-a">您可以談判更高的估值以減少新股票數量、尋求債務融資作為替代、進行部分自籌資金，或尋找戰略合作夥伴而不是稀釋投資。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/roi-calculator.html">ROI 計算機</a>
+      <a class="tool-pill" href="/tools/risk-reward.html">風險報酬計算機</a>
+      <a class="tool-pill" href="/tools/position-size.html">部位規模計算器</a>
+      <a class="tool-pill" href="/tools/stop-loss.html">停損計算機</a>
+      <a class="tool-pill" href="/tools/dividend-yield.html">股息收益率計算機</a>
+      <a class="tool-pill" href="/tools/pe-ratio.html">本益比計算機</a>
+      <a class="tool-pill" href="/tools/dca-calculator.html">定期定額投資計算機</a>
+      <a class="tool-pill" href="/tools/cagr.html">年複合成長率計算器</a>
+      <a class="tool-pill" href="/tools/margin-calculator.html">保證金計算器</a>
+      <a class="tool-pill" href="/tools/stock-gain-loss.html">股票損益計算機</a>
+      <a class="tool-pill" href="/tools/break-even.html">損益平衡點計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/equity-dilution.html" class="lang-btn">English</a>
+    <a href="/tools/equity-dilution.html" class="lang-btn active">繁體中文</a>
+    <a href="/tools/ja/equity-dilution.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/equity-dilution.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/equity-dilution.html" class="lang-btn">Français</a>
+    <a href="/tools/es/equity-dilution.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/equity-dilution.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/equity-dilution.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/equity-dilution.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/equity-dilution.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const oldOwnershipInput = document.getElementById('oldOwnership');
+  const dilutionPercentInput = document.getElementById('dilutionPercent');
+  const newOwnershipResult = document.getElementById('newOwnership');
+  const ownershipLossResult = document.getElementById('ownershipLoss');
+  const resultsDiv = document.getElementById('results');
+
+  if (!oldOwnershipInput.value || !dilutionPercentInput.value) {
+    alert('Please enter both your current ownership percentage and the dilution percentage.');
+    return;
+  }
+
+  const oldOwnership = parseFloat(oldOwnershipInput.value);
+  const dilutionPercent = parseFloat(dilutionPercentInput.value);
+
+  if (oldOwnership < 0 || oldOwnership > 100 || dilutionPercent < 0 || dilutionPercent > 100) {
+    alert('Please enter values between 0 and 100.');
+    return;
+  }
+
+  const newOwnership = oldOwnership * (1 - dilutionPercent / 100);
+  const ownershipLoss = oldOwnership - newOwnership;
+
+  newOwnershipResult.textContent = newOwnership.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+  ownershipLossResult.textContent = ownershipLoss.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-TW|equity-dilution|2026-07-09 -->

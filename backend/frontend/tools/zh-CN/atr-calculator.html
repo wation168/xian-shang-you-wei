@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ATR计算器 - 平均真实波幅在线计算工具</title>
+<meta name="description" content="免费ATR计算器，快速计算平均真实波幅（Average True Range），帮助交易者分析股票和期货的波动率，制定更好的交易策略。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/zh-CN/atr-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/atr-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/atr-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/atr-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/atr-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/atr-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/atr-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/atr-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/atr-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/atr-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/atr-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/atr-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "ATR计算器", "url": "https://softglow-ai.com/tools/zh-CN/atr-calculator.html", "description": "免费ATR计算器，快速计算平均真实波幅（Average True Range），帮助交易者分析股票和期货的波动率，制定更好的交易策略。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "ATR的标准周期是多少？", "acceptedAnswer": {"@type": "Answer", "text": "ATR的标准周期是14天，由威尔德斯在开发该指标时设定。但交易者可以根据自己的交易策略和时间框架灵活调整，日内交易者可能使用5-10周期，而长期投资者可能使用20-30周期。"}}, {"@type": "Question", "name": "ATR值越高越好吗？", "acceptedAnswer": {"@type": "Answer", "text": "ATR值高低取决于交易目标。高ATR表示市场波动大，可能带来更大利润机会但风险也更高；低ATR表示市场平静，风险较低但利润机会也较少。交易者应根据自己的风险承受能力和交易策略选择合适的ATR环境。"}}, {"@type": "Question", "name": "如何使用ATR设置止损位？", "acceptedAnswer": {"@type": "Answer", "text": "常见做法是以当前价格加减1-2倍的ATR值作为止损和止盈位。例如，在长仓中，止损可设在入场价-2×ATR处。这种方法可以根据市场波动率动态调整风险管理水平，避免止损过紧被扫出。"}}, {"@type": "Question", "name": "ATR可以预测价格方向吗？", "acceptedAnswer": {"@type": "Answer", "text": "不能。ATR只衡量波动幅度，不涉及价格方向。它是一个中立的波动率指标，需要与趋势指标（如移动平均线）或方向指标（如MACD）结合使用才能制定完整的交易策略。"}}, {"@type": "Question", "name": "ATR在不同市场中的表现有差异吗？", "acceptedAnswer": {"@type": "Answer", "text": "是的。不同资产的ATR水平差异很大。股票、期货、外汇和加密货币的波动特性不同，同一个ATR数值在不同市场代表的含义也不同。因此，交易者应该根据具体市场特点调整ATR参数和使用方法。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/zh-CN/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > ATR计算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>ATR计算器</h1>
+    <p class="calc-subtitle">计算平均真实波幅，用于波动率分析和交易策略</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="highPrice">最高价</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="highPrice" placeholder="150.75"  step="0.01"></div>
+</div>
+  <small class="input-help">输入当前交易周期的最高价格</small>
+<div class="input-group">
+  <label for="lowPrice">最低价</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="lowPrice" placeholder="148.50"  step="0.01"></div>
+</div>
+  <small class="input-help">输入当前交易周期的最低价格</small>
+<div class="input-group">
+  <label for="closePrice">前收盘价</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="closePrice" placeholder="149.25"  step="0.01"></div>
+</div>
+  <small class="input-help">输入上一个交易周期的收盘价格</small>
+<div class="input-group">
+  <label for="period">周期（天数）</label>
+  <div class="input-row"><input type="number" id="period" placeholder="14"  value="14" step="1"></div>
+</div>
+  <small class="input-help">输入计算ATR的周期天数，通常为14天</small>
+<div class="input-group">
+  <label for="historicalTR">历史TR值（逗号分隔）</label>
+  <div class="input-row"><input type="text" id="historicalTR" placeholder="2.50,2.75,2.10,2.90,1.85"  step="1"></div>
+</div>
+  <small class="input-help">输入历史真实波幅值，多个值用逗号分隔</small></div>
+    <button class="btn-calc" onclick="calculate()">计算</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">真实波幅（TR）</span><span class="result-value" id="trueRange">—</span></div>
+<div class="result-highlight"><span class="result-label">平均真实波幅（ATR）</span><span class="result-value" id="atrResult">—</span></div>
+<div class="result-item"><span class="result-label">ATR占价格百分比</span><span class="result-value" id="atrPercent">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>这代表什么？</strong> 真实波幅（TR）衡量单个周期的价格波动范围，平均真实波幅（ATR）是指定周期内的平均波幅值。ATR百分比表示波幅相对于当前价格的比例，数值越高表示市场波动越剧烈，可用于评估风险和设置止损水平。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 打印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什么是平均真实波幅（ATR）？</h2><p>平均真实波幅（Average True Range，简称ATR）是由技术分析大师威尔德斯（J. Welles Wilder Jr.）开发的一个指标，用于衡量资产价格在一定时期内的波动程度。ATR不考虑价格方向，只关注波动的幅度，是评估市场波动率的重要工具。</p><h2>真实波幅（TR）的计算</h2><p>真实波幅是单个交易周期内最大的波幅值，计算方法为：TR = max(最高价-最低价，|最高价-前收盘价|，|最低价-前收盘价|)。这个值反映了价格在该周期内可能跳空的情况，因此是比简单高低价差更准确的波幅衡量。</p><h2>ATR的计算方法</h2><p>ATR是指定周期内（通常为14天）所有真实波幅值的简单平均数。第一个ATR值为前14个TR值的算术平均，之后使用平滑平均方式：ATR(当前) = [ATR(前期) × (周期-1) + TR(当前)] ÷ 周期。这种计算方法可以反映市场波动的长期趋势。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>ATR在交易中的应用</h2><p>交易者使用ATR来确定止损和止盈水平，设置风险管理参数。当ATR值较高时，市场波动大，应该设置更宽的止损；当ATR值较低时，市场相对平静，可以使用较紧的止损。此外，ATR的上升通常预示波动率增加，可能带来交易机会。</p><h2>如何解读ATR百分比</h2><p>ATR占价格百分比 = (ATR ÷ 当前价格) × 100%。这个百分比帮助交易者快速了解波幅相对于价格的大小。例如，如果某股票当前价格为150元，ATR为3元，则ATR占价格2%，表明该股票日均波幅约为价格的2%，波动相对较小。</p><h2>选择合适的ATR周期</h2><p>标准ATR周期为14天，但交易者可根据交易时间框架调整。短期交易者可使用较短周期（如7天或10天）以捕捉近期波动，长期投资者可使用较长周期（如20天或30天）以获得更稳定的波动率指标。不同市场和品种可能需要不同的周期设置。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸阅读</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/candlestick-patterns.html">Candlestick Patterns<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/support-resistance.html">Support & Resistance<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/moving-average-guide.html">Moving Average Guide<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常见问题</h2><div class="faq-item"><div class="faq-q">ATR的标准周期是多少？</div><div class="faq-a">ATR的标准周期是14天，由威尔德斯在开发该指标时设定。但交易者可以根据自己的交易策略和时间框架灵活调整，日内交易者可能使用5-10周期，而长期投资者可能使用20-30周期。</div></div>
+  <div class="faq-item"><div class="faq-q">ATR值越高越好吗？</div><div class="faq-a">ATR值高低取决于交易目标。高ATR表示市场波动大，可能带来更大利润机会但风险也更高；低ATR表示市场平静，风险较低但利润机会也较少。交易者应根据自己的风险承受能力和交易策略选择合适的ATR环境。</div></div>
+  <div class="faq-item"><div class="faq-q">如何使用ATR设置止损位？</div><div class="faq-a">常见做法是以当前价格加减1-2倍的ATR值作为止损和止盈位。例如，在长仓中，止损可设在入场价-2×ATR处。这种方法可以根据市场波动率动态调整风险管理水平，避免止损过紧被扫出。</div></div>
+  <div class="faq-item"><div class="faq-q">ATR可以预测价格方向吗？</div><div class="faq-a">不能。ATR只衡量波动幅度，不涉及价格方向。它是一个中立的波动率指标，需要与趋势指标（如移动平均线）或方向指标（如MACD）结合使用才能制定完整的交易策略。</div></div>
+  <div class="faq-item"><div class="faq-q">ATR在不同市场中的表现有差异吗？</div><div class="faq-a">是的。不同资产的ATR水平差异很大。股票、期货、外汇和加密货币的波动特性不同，同一个ATR数值在不同市场代表的含义也不同。因此，交易者应该根据具体市场特点调整ATR参数和使用方法。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/zh-CN/fibonacci-retracement.html">斐波那契回调计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/pivot-point.html">枢纽点计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/rsi-calculator.html">RSI相对强弱指数计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/macd-calculator.html">MACD计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/bollinger-bands.html">布林带计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/ma-crossover.html">均线交叉计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/candlestick-identifier.html">蜡烛图形态识别器</a>
+      <a class="tool-pill" href="/tools/zh-CN/support-resistance.html">支撑和阻力计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/pip-value.html">点值计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/options-profit.html">期权利润计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stock-split.html">股票拆分计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/trading-fee.html">交易费用计算器</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/atr-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/atr-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/atr-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/atr-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/atr-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/atr-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/atr-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/atr-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/atr-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/atr-calculator.html" class="lang-btn active">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相关工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const highPrice = parseFloat(document.getElementById('highPrice').value);
+  const lowPrice = parseFloat(document.getElementById('lowPrice').value);
+  const closePrice = parseFloat(document.getElementById('closePrice').value);
+  const period = parseInt(document.getElementById('period').value);
+  const historicalTRInput = document.getElementById('historicalTR').value.trim();
+
+  if (isNaN(highPrice) || isNaN(lowPrice) || isNaN(closePrice) || isNaN(period)) {
+    alert('Please enter valid values for High Price, Low Price, Close Price, and Period.');
+    return;
+  }
+
+  if (highPrice < lowPrice) {
+    alert('High Price must be greater than or equal to Low Price.');
+    return;
+  }
+
+  if (period < 1) {
+    alert('Period must be at least 1.');
+    return;
+  }
+
+  const tr1 = highPrice - lowPrice;
+  const tr2 = Math.abs(highPrice - closePrice);
+  const tr3 = Math.abs(lowPrice - closePrice);
+  const currentTR = Math.max(tr1, tr2, tr3);
+
+  document.getElementById('trueRange').textContent = '$' + currentTR.toFixed(2);
+
+  let atr = 0;
+
+  if (historicalTRInput !== '') {
+    const trValues = historicalTRInput.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+    
+    if (trValues.length === 0) {
+      alert('Please provide valid comma-separated TR values or leave the field empty.');
+      return;
+    }
+
+    trValues.push(currentTR);
+    
+    if (trValues.length >= period) {
+      const recentTRs = trValues.slice(-period);
+      atr = recentTRs.reduce((sum, val) => sum + val, 0) / period;
+    } else {
+      atr = trValues.reduce((sum, val) => sum + val, 0) / trValues.length;
+    }
+  } else {
+    atr = currentTR;
+  }
+
+  const atrPercent = (atr / highPrice * 100);
+
+  document.getElementById('atrResult').textContent = '$' + atr.toFixed(2);
+  document.getElementById('atrPercent').textContent = atrPercent.toFixed(2);
+
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已复制！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-CN|atr-calculator|2026-07-09 -->

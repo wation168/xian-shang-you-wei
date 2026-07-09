@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>股票内在价值计算器 - 格雷厄姆估值公式</title>
+<meta name="description" content="免费股票内在价值计算器，基于格雷厄姆公式。输入每股收益和增长率，快速计算股票的公平价值。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/zh-CN/intrinsic-value.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/intrinsic-value.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/intrinsic-value.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/intrinsic-value.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/intrinsic-value.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/intrinsic-value.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/intrinsic-value.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/intrinsic-value.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/intrinsic-value.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/intrinsic-value.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/intrinsic-value.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/intrinsic-value.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "内在价值计算器", "url": "https://softglow-ai.com/tools/zh-CN/intrinsic-value.html", "description": "免费股票内在价值计算器，基于格雷厄姆公式。输入每股收益和增长率，快速计算股票的公平价值。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "什么是每股收益(EPS)？", "acceptedAnswer": {"@type": "Answer", "text": "每股收益是衡量公司盈利能力的关键指标，计算方法为公司净利润除以总股份数。EPS越高，说明公司每股创造的利润越多，通常被视为企业盈利能力强的表现。"}}, {"@type": "Question", "name": "预期增长率应该如何估算？", "acceptedAnswer": {"@type": "Answer", "text": "增长率可以基于公司过去5-10年的历史增长率平均值，也可以参考行业平均增长率或分析师预期。保守投资者可以使用较低的增长率，激进投资者可能使用较高的增长率，但应在合理范围内。"}}, {"@type": "Question", "name": "格雷厄姆公式适用于所有公司吗？", "acceptedAnswer": {"@type": "Answer", "text": "格雷厄姆公式最适合成熟、盈利稳定且增长相对可预测的企业。对于初创公司、亏损公司或超高增长科技公司，该公式的有效性可能降低，应谨慎使用。"}}, {"@type": "Question", "name": "内在价值等于公平价格吗？", "acceptedAnswer": {"@type": "Answer", "text": "内在价值是理论价值，代表股票的基本面价值。公平价格还应考虑市场情绪、供求关系、流动性等因素。两者通常会有偏差，但长期来看应该趋于一致。"}}, {"@type": "Question", "name": "如何使用计算结果进行投资决策？", "acceptedAnswer": {"@type": "Answer", "text": "如果股票当前价格低于计算的内在价值，可能具有投资机会。建议留出安全边际(如20-30%)再买入。同时需定期更新数据，因为企业基本面会随时间变化。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/zh-CN/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 内在价值计算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>内在价值计算器</h1>
+    <p class="calc-subtitle">使用格雷厄姆公式确定股票的公平价值</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="epsInput">每股收益 (EPS)</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="epsInput" placeholder="例如：2.50"  step="0.01"></div>
+</div>
+  <small class="input-help">输入公司最近一个财务年度的每股收益，单位为美元</small>
+<div class="input-group">
+  <label for="growthRateInput">预期年增长率 (g)</label>
+  <div class="input-row"><input type="number" id="growthRateInput" placeholder="例如：12"  step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">输入公司未来的年平均增长率预期，单位为百分比</small></div>
+    <button class="btn-calc" onclick="calculate()">计算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">每股内在价值</span><span class="result-value" id="intrinsicValueResult">—</span></div>
+<div class="result-item"><span class="result-label">公式分解</span><span class="result-value" id="formulaBreakdownResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>这代表什么？</strong> 每股内在价值表示根据格雷厄姆公式计算出的股票理论价值。如果当前股价低于此值，可能被低估；如果高于此值，可能被高估。公式分解显示详细计算过程。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 打印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什么是内在价值？</h2><p>内在价值是指基于基本面分析确定的资产真实价值。对于股票而言，内在价值反映了公司未来现金流的现值。格雷厄姆内在价值公式是价值投资领域的经典方法，由投资大师本杰明·格雷厄姆提出。</p><h2>格雷厄姆公式详解</h2><p>公式为：内在价值 = (每股收益 × (8.5 + 2g) × 4.4) ÷ 20年期债券收益率。其中，8.5代表无增长公司的P/E倍数，2g为增长溢价系数，4.4是平均债券收益率，20代表20年期债券。该公式结合了当前收益和长期增长率，适用于相对稳定的成熟企业。</p><h2>如何使用计算器</h2><p>首先输入公司的每股收益(EPS)，这通常可以在财务报表或投资网站上找到。然后输入预期的年增长率，一般基于公司历史增长率或行业分析。计算器将自动生成内在价值和详细的计算步骤，帮助您了解估值的构成。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>解读计算结果</h2><p>对比当前股价与计算出的内在价值。若股价远低于内在价值，该股票可能被市场低估，具有投资价值。反之，若股价远高于内在价值，则可能存在过度估值的风险。建议结合其他财务指标和市场因素进行综合判断。</p><h2>影响内在价值的因素</h2><p>收益稳定性、增长前景、行业竞争力和宏观经济环境都会影响内在价值的准确性。高成长企业、周期性行业或不稳定公司的计算结果可能偏离实际价值。投资者应定期更新数据，重新评估估值。</p><h2>投资建议</h2><p>内在价值计算是选股的参考工具，不能作为唯一投资依据。建议结合财务分析、行业研究、管理层评估等多方面信息做出投资决策。长期投资者可以关注那些股价低于内在价值且基本面良好的公司。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸阅读</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常见问题</h2><div class="faq-item"><div class="faq-q">什么是每股收益(EPS)？</div><div class="faq-a">每股收益是衡量公司盈利能力的关键指标，计算方法为公司净利润除以总股份数。EPS越高，说明公司每股创造的利润越多，通常被视为企业盈利能力强的表现。</div></div>
+  <div class="faq-item"><div class="faq-q">预期增长率应该如何估算？</div><div class="faq-a">增长率可以基于公司过去5-10年的历史增长率平均值，也可以参考行业平均增长率或分析师预期。保守投资者可以使用较低的增长率，激进投资者可能使用较高的增长率，但应在合理范围内。</div></div>
+  <div class="faq-item"><div class="faq-q">格雷厄姆公式适用于所有公司吗？</div><div class="faq-a">格雷厄姆公式最适合成熟、盈利稳定且增长相对可预测的企业。对于初创公司、亏损公司或超高增长科技公司，该公式的有效性可能降低，应谨慎使用。</div></div>
+  <div class="faq-item"><div class="faq-q">内在价值等于公平价格吗？</div><div class="faq-a">内在价值是理论价值，代表股票的基本面价值。公平价格还应考虑市场情绪、供求关系、流动性等因素。两者通常会有偏差，但长期来看应该趋于一致。</div></div>
+  <div class="faq-item"><div class="faq-q">如何使用计算结果进行投资决策？</div><div class="faq-a">如果股票当前价格低于计算的内在价值，可能具有投资机会。建议留出安全边际(如20-30%)再买入。同时需定期更新数据，因为企业基本面会随时间变化。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/zh-CN/compound-interest.html">复利计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/roi-calculator.html">投资回报率 (ROI) 计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/risk-reward.html">风险收益比计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/position-size.html">头寸规模计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stop-loss.html">止损计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dividend-yield.html">股息收益率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/pe-ratio.html">市盈率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dca-calculator.html">定期定额投资计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/cagr.html">复合年增长率(CAGR)计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/margin-calculator.html">保证金计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stock-gain-loss.html">股票盈亏计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/break-even.html">损益平衡点计算器</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/intrinsic-value.html" class="lang-btn">English</a>
+    <a href="/tools/intrinsic-value.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/intrinsic-value.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/intrinsic-value.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/intrinsic-value.html" class="lang-btn">Français</a>
+    <a href="/tools/es/intrinsic-value.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/intrinsic-value.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/intrinsic-value.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/intrinsic-value.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/intrinsic-value.html" class="lang-btn active">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相关工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const eps = parseFloat(document.getElementById('epsInput').value);
+  const growthRate = parseFloat(document.getElementById('growthRateInput').value);
+  
+  if (!eps || eps <= 0 || isNaN(eps)) {
+    alert('Please enter a valid Earnings Per Share (EPS) value greater than 0');
+    return;
+  }
+  
+  if (!growthRate || growthRate < 0 || isNaN(growthRate)) {
+    alert('Please enter a valid Growth Rate percentage (0 or greater)');
+    return;
+  }
+  
+  if (growthRate > 30) {
+    alert('Warning: Growth rates above 30% are unrealistic for most companies. Proceed with caution.');
+  }
+  
+  const multiplier = 8.5 + (2 * growthRate);
+  const intrinsicValue = eps * multiplier;
+  
+  document.getElementById('intrinsicValueResult').textContent = intrinsicValue.toLocaleString('en-US', {style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('formulaBreakdownResult').textContent = 'EPS ($' + eps.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ') × Multiplier (' + multiplier.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ') = $' + intrinsicValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已复制！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-CN|intrinsic-value|2026-07-09 -->

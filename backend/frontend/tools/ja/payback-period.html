@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>回収期間計算機 - 投資回収時間を簡単算出</title>
+<meta name="description" content="初期投資額と年間キャッシュフローから回収期間を計算します。投資判断に必要な期間を年月日で表示。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/payback-period.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/payback-period.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/payback-period.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/payback-period.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/payback-period.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/payback-period.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/payback-period.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/payback-period.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/payback-period.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/payback-period.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/payback-period.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/payback-period.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "回収期間計算機", "url": "https://softglow-ai.com/tools/ja/payback-period.html", "description": "初期投資額と年間キャッシュフローから回収期間を計算します。投資判断に必要な期間を年月日で表示。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "回収期間とはどのような指標ですか？", "acceptedAnswer": {"@type": "Answer", "text": "回収期間は、投資に要した初期資金を、その投資から得られるキャッシュフローで完全に回収するまでに必要な期間です。投資効率とリスクを評価する重要な指標です。"}}, {"@type": "Question", "name": "回収期間が短いほど良いのですか？", "acceptedAnswer": {"@type": "Answer", "text": "一般的には、回収期間が短いほど投資リスクが低く、資金が早期に回転するため良いとされます。ただし、回収期間だけでなく、その後のキャッシュフローも考慮する必要があります。"}}, {"@type": "Question", "name": "年間キャッシュフローが一定でない場合はどうしますか？", "acceptedAnswer": {"@type": "Answer", "text": "このツールは一定の年間キャッシュフローを想定しています。変動するキャッシュフローの場合は、平均値を使用するか、より詳細な財務分析ツールを使用してください。"}}, {"@type": "Question", "name": "回収期間と他の投資指標の違いは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "回収期間は単純性が特徴ですが、回収期間以降のキャッシュフローを考慮しません。NPVやIRRはより包括的な収益性評価ができますが、計算が複雑です。複数の指標を併用することが推奨されます。"}}, {"@type": "Question", "name": "負の年間キャッシュフローを入力するとどうなりますか？", "acceptedAnswer": {"@type": "Answer", "text": "年間キャッシュフローが負（赤字）の場合、回収期間は計算できません。このツールは利益が出ているプロジェクトを対象としています。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 回収期間計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>回収期間計算機</h1>
+    <p class="calc-subtitle">初期投資を回収するのに必要な期間を算出します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="initialInvestment">初期投資額</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="initialInvestment" placeholder="50000"  step="0.01"></div>
+</div>
+  <small class="input-help">投資に必要な初期資金の合計額を入力してください</small>
+<div class="input-group">
+  <label for="annualCashflow">年間キャッシュフロー</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="annualCashflow" placeholder="12500"  step="0.01"></div>
+</div>
+  <small class="input-help">毎年得られる見込みキャッシュフロー（利益）の金額を入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">回収期間</span><span class="result-value" id="paybackPeriod">—</span></div>
+<div class="result-item"><span class="result-label">ヶ月</span><span class="result-value" id="months">—</span></div>
+<div class="result-item"><span class="result-label">日数</span><span class="result-value" id="days">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 計算結果は、初期投資を完全に回収するのに必要な期間を年数、月数、日数で表示します。回収期間が短いほど、投資効率が良いと考えられます。この指標は投資判断の重要な基準となります。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>回収期間とは</h2><p>回収期間（ペイバックピリオド）とは、投資に要した初期資金を、その投資から得られるキャッシュフローで完全に回収するまでに必要な期間です。投資プロジェクトの採算性を評価する重要な指標であり、特に短期的な流動性が重要な場合に活用されます。</p><h2>計算方法</h2><p>回収期間は、初期投資額を年間キャッシュフローで割ることで算出されます。例えば、初期投資が£50,000で年間キャッシュフローが£12,500の場合、50,000÷12,500=4年となります。さらに詳細には、端数を月日に変換して表示します。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>投資判断への活用</h2><p>一般的に、回収期間が短いほど投資リスクが低いと考えられます。業界や投資タイプによって許容される回収期間は異なりますが、この指標は資本配分の優先順位を決める際の重要な参考情報になります。</p><h2>回収期間の利点と限界</h2><p>回収期間は計算が簡単で直感的に理解しやすいという利点があります。一方、回収期間以降のキャッシュフローを考慮しないため、プロジェクト全体の収益性を完全には反映しません。NPVやIRRなど他の指標と組み合わせて評価することが重要です。</p><h2>実際の応用例</h2><p>設備投資、新規事業立ち上げ、不動産投資など、様々な投資判断の場面で活用されます。複数の投資案を比較する際、回収期間が短い案から優先的に検討することで、リスク管理と資金効率の両立を図ることができます。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">回収期間とはどのような指標ですか？</div><div class="faq-a">回収期間は、投資に要した初期資金を、その投資から得られるキャッシュフローで完全に回収するまでに必要な期間です。投資効率とリスクを評価する重要な指標です。</div></div>
+  <div class="faq-item"><div class="faq-q">回収期間が短いほど良いのですか？</div><div class="faq-a">一般的には、回収期間が短いほど投資リスクが低く、資金が早期に回転するため良いとされます。ただし、回収期間だけでなく、その後のキャッシュフローも考慮する必要があります。</div></div>
+  <div class="faq-item"><div class="faq-q">年間キャッシュフローが一定でない場合はどうしますか？</div><div class="faq-a">このツールは一定の年間キャッシュフローを想定しています。変動するキャッシュフローの場合は、平均値を使用するか、より詳細な財務分析ツールを使用してください。</div></div>
+  <div class="faq-item"><div class="faq-q">回収期間と他の投資指標の違いは何ですか？</div><div class="faq-a">回収期間は単純性が特徴ですが、回収期間以降のキャッシュフローを考慮しません。NPVやIRRはより包括的な収益性評価ができますが、計算が複雑です。複数の指標を併用することが推奨されます。</div></div>
+  <div class="faq-item"><div class="faq-q">負の年間キャッシュフローを入力するとどうなりますか？</div><div class="faq-a">年間キャッシュフローが負（赤字）の場合、回収期間は計算できません。このツールは利益が出ているプロジェクトを対象としています。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">Roi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">Risk Reward</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">Position Size</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">Pe Ratio</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">証拠金計算機</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/payback-period.html" class="lang-btn">English</a>
+    <a href="/tools/payback-period.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/payback-period.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/payback-period.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/payback-period.html" class="lang-btn">Français</a>
+    <a href="/tools/es/payback-period.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/payback-period.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/payback-period.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/payback-period.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/payback-period.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const initialInvestmentInput = document.getElementById('initialInvestment');
+  const annualCashflowInput = document.getElementById('annualCashflow');
+  const paybackPeriodResult = document.getElementById('paybackPeriod');
+  const monthsResult = document.getElementById('months');
+  const daysResult = document.getElementById('days');
+  const resultsDiv = document.getElementById('results');
+
+  const initialInvestment = parseFloat(initialInvestmentInput.value);
+  const annualCashflow = parseFloat(annualCashflowInput.value);
+
+  if (!initialInvestmentInput.value || !annualCashflowInput.value) {
+    alert('Please enter both initial investment and annual cash flow values.');
+    return;
+  }
+
+  if (isNaN(initialInvestment) || isNaN(annualCashflow)) {
+    alert('Please enter valid numbers for both fields.');
+    return;
+  }
+
+  if (initialInvestment <= 0) {
+    alert('Initial investment must be greater than zero.');
+    return;
+  }
+
+  if (annualCashflow <= 0) {
+    alert('Annual cash flow must be greater than zero.');
+    return;
+  }
+
+  const paybackPeriodYears = initialInvestment / annualCashflow;
+  const totalMonths = paybackPeriodYears * 12;
+  const months = Math.floor(totalMonths % 12);
+  const days = Math.round(((totalMonths % 1) * 30));
+
+  paybackPeriodResult.textContent = paybackPeriodYears.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  monthsResult.textContent = months.toString();
+  daysResult.textContent = days.toString();
+
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|payback-period|2026-07-09 -->

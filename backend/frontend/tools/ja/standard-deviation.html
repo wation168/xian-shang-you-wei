@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>標準偏差計算機 - データの変動性を測定</title>
+<meta name="description" content="データセットの標準偏差、分散、平均を計算します。サンプルと母集団の両方に対応した統計計算ツールです。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/standard-deviation.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/standard-deviation.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/standard-deviation.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/standard-deviation.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/standard-deviation.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/standard-deviation.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/standard-deviation.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/standard-deviation.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/standard-deviation.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/standard-deviation.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/standard-deviation.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/standard-deviation.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "標準偏差計算機", "url": "https://softglow-ai.com/tools/ja/standard-deviation.html", "description": "データセットの標準偏差、分散、平均を計算します。サンプルと母集団の両方に対応した統計計算ツールです。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "標準偏差と分散の違いは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "分散は標準偏差の二乗値です。標準偏差は元のデータと同じ単位で表現されるため、より直感的に理解しやすい指標です。分散はより数学的な計算に使用されます。"}}, {"@type": "Question", "name": "サンプルと母集団の標準偏差はどちらを使うべきですか？", "acceptedAnswer": {"@type": "Answer", "text": "全体のデータセット全体を分析する場合は母集団標準偏差を、大きな集団から抽出された部分集合を分析する場合はサンプル標準偏差を使用してください。通常、市場調査ではサンプル標準偏差が使用されます。"}}, {"@type": "Question", "name": "標準偏差が0になることはありますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、すべてのデータが同じ値である場合、標準偏差は0になります。この場合、データセット内にばらつきがないことを意味します。"}}, {"@type": "Question", "name": "標準偏差は負の値になることはありますか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ、標準偏差は常に0以上の値です。計算過程で差を二乗するため、負の値になることはありません。"}}, {"@type": "Question", "name": "大量のデータでも計算できますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、このツールは任意の数のデータ値を処理できます。カンマで区切られた形式でデータを入力してください。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 標準偏差計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>標準偏差計算機</h1>
+    <p class="calc-subtitle">データの散らばりと変動性を正確に計算します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="dataInput">データ値を入力</label>
+  <div class="input-row"><input type="text" id="dataInput" placeholder="例: 10, 20, 30, 40, 50"  step="1"></div>
+</div>
+  <small class="input-help">カンマで区切られた数値を入力してください</small>
+<div class="input-group">
+  <label for="samplePopulation">データセットタイプ</label>
+  <div class="input-row"><input type="text" id="samplePopulation" placeholder="サンプルまたは母集団"  value="sample" step="1"></div>
+</div>
+  <small class="input-help">サンプルまたは母集団を選択してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">平均値（平均）</span><span class="result-value" id="meanResult">—</span></div>
+<div class="result-item"><span class="result-label">分散</span><span class="result-value" id="varianceResult">—</span></div>
+<div class="result-highlight"><span class="result-label">標準偏差（σ）</span><span class="result-value" id="stdDevResult">—</span></div>
+<div class="result-item"><span class="result-label">値の個数</span><span class="result-value" id="countResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 標準偏差はデータがどれだけ平均値から散らばっているかを示します。値が小さいほどデータは平均に近く、大きいほど散らばっています。分散は標準偏差の二乗で、データの変動性をより詳しく理解するのに役立ちます。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>標準偏差とは</h2><p>標準偏差は、データセット内の値がどの程度平均値から離れているかを測定する統計指標です。データの散らばりの程度を定量化し、データの安定性や予測可能性を評価するのに使用されます。</p><h2>標準偏差の計算方法</h2><p>標準偏差は、各データ点と平均値の差を二乗し、それらの平均を取った後、平方根を求めることで計算されます。サンプルデータの場合はn-1で割り、母集団データの場合はnで割ります。この違いにより、サンプルデータの標準偏差はより正確な推定値となります。</p><h2>サンプルと母集団の違い</h2><p>母集団標準偏差は全体のデータセット全体を対象とし、サンプル標準偏差は大きな集団から抽出された部分集合に対して使用されます。一般的に、市場調査やアンケート分析ではサンプル標準偏差が使用されます。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>標準偏差の応用</h2><p>標準偏差は金融分析では投資リスクの測定に、品質管理では製品の一貫性評価に、統計分析ではデータの信頼性評価に広く使用されています。値が小さいほどデータはより均一で予測可能です。</p><h2>平均値と分散の関係</h2><p>平均値はデータセットの中心を示し、分散はデータのばらつきを表します。標準偏差は分散の平方根であり、元のデータと同じ単位で表現されるため、より直感的に理解しやすくなります。</p><h2>計算結果の解釈</h2><p>計算結果から得られた標準偏差の値を確認し、データの変動性を評価してください。複数のデータセットを比較する場合、標準偏差が小さいほうがより安定したデータセットとなります。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">標準偏差と分散の違いは何ですか？</div><div class="faq-a">分散は標準偏差の二乗値です。標準偏差は元のデータと同じ単位で表現されるため、より直感的に理解しやすい指標です。分散はより数学的な計算に使用されます。</div></div>
+  <div class="faq-item"><div class="faq-q">サンプルと母集団の標準偏差はどちらを使うべきですか？</div><div class="faq-a">全体のデータセット全体を分析する場合は母集団標準偏差を、大きな集団から抽出された部分集合を分析する場合はサンプル標準偏差を使用してください。通常、市場調査ではサンプル標準偏差が使用されます。</div></div>
+  <div class="faq-item"><div class="faq-q">標準偏差が0になることはありますか？</div><div class="faq-a">はい、すべてのデータが同じ値である場合、標準偏差は0になります。この場合、データセット内にばらつきがないことを意味します。</div></div>
+  <div class="faq-item"><div class="faq-q">標準偏差は負の値になることはありますか？</div><div class="faq-a">いいえ、標準偏差は常に0以上の値です。計算過程で差を二乗するため、負の値になることはありません。</div></div>
+  <div class="faq-item"><div class="faq-q">大量のデータでも計算できますか？</div><div class="faq-a">はい、このツールは任意の数のデータ値を処理できます。カンマで区切られた形式でデータを入力してください。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">ROI計算機</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">リスク・リワード計算機</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">ポジションサイズ計算機</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">P/Eレシオ計算機</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">証拠金計算機</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/standard-deviation.html" class="lang-btn">English</a>
+    <a href="/tools/standard-deviation.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/standard-deviation.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/standard-deviation.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/standard-deviation.html" class="lang-btn">Français</a>
+    <a href="/tools/es/standard-deviation.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/standard-deviation.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/standard-deviation.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/standard-deviation.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/standard-deviation.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const dataInput = document.getElementById('dataInput').value.trim();
+  const samplePopulation = document.getElementById('samplePopulation').value.toLowerCase().trim();
+  
+  if (!dataInput) {
+    alert('Please enter at least one data value');
+    return;
+  }
+  
+  const values = dataInput.split(',').map(v => {
+    const num = parseFloat(v.trim());
+    return isNaN(num) ? null : num;
+  }).filter(v => v !== null);
+  
+  if (values.length === 0) {
+    alert('No valid numbers found. Please enter numeric values separated by commas.');
+    return;
+  }
+  
+  if (values.length === 1) {
+    alert('Please enter at least 2 values to calculate standard deviation');
+    return;
+  }
+  
+  const n = values.length;
+  const mean = values.reduce((a, b) => a + b, 0) / n;
+  
+  const squaredDiffs = values.map(v => Math.pow(v - mean, 2));
+  const sumSquaredDiffs = squaredDiffs.reduce((a, b) => a + b, 0);
+  
+  let divisor = n;
+  if (samplePopulation === 'sample' || samplePopulation === 's') {
+    divisor = n - 1;
+  }
+  
+  const variance = sumSquaredDiffs / divisor;
+  const stdDev = Math.sqrt(variance);
+  
+  document.getElementById('meanResult').textContent = mean.toLocaleString('en-US', {maximumFractionDigits: 4, minimumFractionDigits: 2});
+  document.getElementById('varianceResult').textContent = variance.toLocaleString('en-US', {maximumFractionDigits: 4, minimumFractionDigits: 2});
+  document.getElementById('stdDevResult').textContent = stdDev.toLocaleString('en-US', {maximumFractionDigits: 4, minimumFractionDigits: 2});
+  document.getElementById('countResult').textContent = n;
+  
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|standard-deviation|2026-07-09 -->

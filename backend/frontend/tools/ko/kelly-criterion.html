@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>켈리 기준 계산기 - 최적 베팅 금액 산출</title>
+<meta name="description" content="켈리 기준 공식으로 최적의 베팅 금액을 계산하세요. 승리 확률과 배당률을 입력하여 자금 관리를 최적화하세요.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ko/kelly-criterion.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/kelly-criterion.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/kelly-criterion.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/kelly-criterion.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/kelly-criterion.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/kelly-criterion.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/kelly-criterion.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/kelly-criterion.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/kelly-criterion.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/kelly-criterion.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/kelly-criterion.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/kelly-criterion.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "켈리 기준 계산기", "url": "https://softglow-ai.com/tools/ko/kelly-criterion.html", "description": "켈리 기준 공식으로 최적의 베팅 금액을 계산하세요. 승리 확률과 배당률을 입력하여 자금 관리를 최적화하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "켈리 기준값이 음수가 나왔습니다. 이는 무엇을 의미하나요?", "acceptedAnswer": {"@type": "Answer", "text": "음수 켈리 기준값은 그 베팅이 통계적으로 불리하다는 의미입니다. 즉, 장기적으로 손실을 초래할 확률이 높습니다. 이 경우 그 베팅을 피하는 것이 좋습니다."}}, {"@type": "Question", "name": "실제 베팅에서 100% 켈리 기준을 사용해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "아니요. 이론적으로는 100% 켈리가 최적이지만, 실무에서는 일반적으로 25~50%의 부분 켈리를 사용합니다. 이는 확률 추정 오류로 인한 손실을 줄이고 자금 변동성을 관리하기 위함입니다."}}, {"@type": "Question", "name": "켈리 기준은 항상 정확한가요?", "acceptedAnswer": {"@type": "Answer", "text": "켈리 기준은 승리 확률과 배당률을 정확히 알고 있을 때만 효과적입니다. 현실에서는 확률을 완벽하게 추정하기 어렵기 때문에, 계산 결과를 참고만 하고 개인의 판단을 우선해야 합니다."}}, {"@type": "Question", "name": "작은 자금으로 시작할 때는 어떻게 해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "자금이 적을 때는 부분 켈리를 사용하는 것이 더욱 중요합니다. 자금의 25% 정도만 베팅하여 몇 번의 손실 후에도 계속 베팅할 수 있는 여유를 유지하세요. 이렇게 하면 초기 자금이 증가할 기회를 더 많이 갖게 됩니다."}}, {"@type": "Question", "name": "베팅당 기댓값은 어떻게 해석하나요?", "acceptedAnswer": {"@type": "Answer", "text": "기댓값은 한 번의 베팅에서 평균적으로 얼마를 벌거나 잃을 수 있는지를 나타냅니다. 양수이면 수익을 기대할 수 있고, 음수이면 손실을 예상해야 합니다. 단, 이는 많은 베팅을 반복했을 때의 평균값이므로, 한두 번의 베팅 결과로 판단해서는 안 됩니다."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ko/">도구</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 켈리 기준 계산기</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>켈리 기준 계산기</h1>
+    <p class="calc-subtitle">각 베팅에서 최적의 자금 배분 비율을 계산하세요</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="winProbability">승리 확률(소수점)</label>
+  <div class="input-row"><input type="number" id="winProbability" placeholder="0.55"  step="0.01"></div>
+</div>
+  <small class="input-help">0과 1 사이의 숫자로 입력하세요(예: 0.55는 55%)</small>
+<div class="input-group">
+  <label for="oddsDecimal">배당률(소수점 형식)</label>
+  <div class="input-row"><input type="number" id="oddsDecimal" placeholder="2.5"  step="0.01"></div>
+</div>
+  <small class="input-help">소수점 형식의 배당률을 입력하세요(예: 2.5)</small>
+<div class="input-group">
+  <label for="bankroll">초기 자금</label>
+  <div class="input-row"><span class="input-prefix">₩</span><input type="number" id="bankroll" placeholder="1000"  step="1"></div>
+</div>
+  <small class="input-help">베팅에 사용할 총 자금을 입력하세요</small></div>
+    <button class="btn-calc" onclick="calculate()">계산하기</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">켈리 기준(f값)</span><span class="result-value" id="kellyCriterion">—</span></div>
+<div class="result-highlight"><span class="result-label">최적 베팅 금액</span><span class="result-value" id="optimalBetAmount">—</span></div>
+<div class="result-item"><span class="result-label">위험 평가</span><span class="result-value" id="riskLevel">—</span></div>
+<div class="result-item"><span class="result-label">베팅당 기댓값</span><span class="result-value" id="expectedValue">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>이것은 무엇을 의미합니까?</strong> 켈리 기준은 장기적으로 자금을 최대화하는 최적의 베팅 비율을 나타냅니다. 최적 베팅 금액은 현재 자금에 이 비율을 곱한 값입니다. 위험 평가는 이 베팅의 위험 수준을 나타내며, 기댓값은 평균적으로 한 번의 베팅에서 얼마를 기대할 수 있는지 보여줍니다.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 인쇄</button>
+        <button onclick="shareResult()">&#x1f4e4; 공유</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>켈리 기준 계산기란?</h2><p>켈리 기준(Kelly Criterion)은 도박, 투자, 스포츠 베팅에서 장기적인 자금 증대를 위한 최적의 베팅 비율을 계산하는 수학적 공식입니다. 1956년 존 켈리가 개발한 이 공식은 확률론과 정보 이론에 기반하여 당신의 자금을 체계적으로 관리하도록 도와줍니다.</p><h2>켈리 기준 공식</h2><p>켈리 기준(f) = (bp - q) / b, 여기서 b는 배당률, p는 승리 확률, q는 패배 확률(1-p)입니다. 예를 들어, 55% 확률로 2.5배 배당의 베팅이 있다면, f = (2.5×0.55 - 0.45) / 2.5 = 0.22, 즉 자금의 22%를 베팅해야 합니다.</p><h2>최적 베팅 금액 계산</h2><p>초기 자금에 켈리 기준값을 곱하면 각 베팅에서의 최적 금액을 얻을 수 있습니다. 초기 자금이 ₩1,000,000이고 f값이 0.22라면, 한 번의 베팅에 ₩220,000을 투자하는 것이 최적입니다. 이렇게 하면 장기적으로 자금이 기하급수적으로 증가할 가능성이 높아집니다.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>위험 관리와 실무 적용</h2><p>순수 켈리 기준은 이론적인 최적값이므로 실제로는 보수적으로 운영할 필요가 있습니다. 많은 전문가들은 '부분 켈리(Fractional Kelly)' 전략을 사용하여 실제 베팅 금액을 f값의 25~50%로 줄입니다. 이는 예측 오류로 인한 손실을 최소화하고 자금 변동성을 낮춥니다.</p><h2>베팅 전 주의사항</h2><p>켈리 기준을 사용할 때는 정확한 확률 추정이 매우 중요합니다. 확률을 과대평가하면 베팅 금액이 과도해져 큰 손실을 입을 수 있습니다. 또한 이 계산기의 결과는 수학적 가이드일 뿐이며, 실제 베팅 결정은 개인의 위험 성향, 자금 상황, 법률 준수를 고려하여 신중하게 내려야 합니다.</p><h2>기댓값 이해하기</h2><p>기댓값(Expected Value)은 장기적으로 이 베팅을 통해 평균적으로 얻을 수 있는 수익을 나타냅니다. 양수 기댓값은 통계적으로 수익성 있는 베팅이며, 음수 기댓값은 장기적으로 손실을 초래합니다. 기댓값이 높을수록 더 유리한 베팅이지만, 확률 추정의 정확성에 전적으로 의존합니다.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 관련 기사</h3><div class="blog-grid"><a class="blog-card" href="/blog/ko/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ko/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ko/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>자주 묻는 질문</h2><div class="faq-item"><div class="faq-q">켈리 기준값이 음수가 나왔습니다. 이는 무엇을 의미하나요?</div><div class="faq-a">음수 켈리 기준값은 그 베팅이 통계적으로 불리하다는 의미입니다. 즉, 장기적으로 손실을 초래할 확률이 높습니다. 이 경우 그 베팅을 피하는 것이 좋습니다.</div></div>
+  <div class="faq-item"><div class="faq-q">실제 베팅에서 100% 켈리 기준을 사용해야 하나요?</div><div class="faq-a">아니요. 이론적으로는 100% 켈리가 최적이지만, 실무에서는 일반적으로 25~50%의 부분 켈리를 사용합니다. 이는 확률 추정 오류로 인한 손실을 줄이고 자금 변동성을 관리하기 위함입니다.</div></div>
+  <div class="faq-item"><div class="faq-q">켈리 기준은 항상 정확한가요?</div><div class="faq-a">켈리 기준은 승리 확률과 배당률을 정확히 알고 있을 때만 효과적입니다. 현실에서는 확률을 완벽하게 추정하기 어렵기 때문에, 계산 결과를 참고만 하고 개인의 판단을 우선해야 합니다.</div></div>
+  <div class="faq-item"><div class="faq-q">작은 자금으로 시작할 때는 어떻게 해야 하나요?</div><div class="faq-a">자금이 적을 때는 부분 켈리를 사용하는 것이 더욱 중요합니다. 자금의 25% 정도만 베팅하여 몇 번의 손실 후에도 계속 베팅할 수 있는 여유를 유지하세요. 이렇게 하면 초기 자금이 증가할 기회를 더 많이 갖게 됩니다.</div></div>
+  <div class="faq-item"><div class="faq-q">베팅당 기댓값은 어떻게 해석하나요?</div><div class="faq-a">기댓값은 한 번의 베팅에서 평균적으로 얼마를 벌거나 잃을 수 있는지를 나타냅니다. 양수이면 수익을 기대할 수 있고, 음수이면 손실을 예상해야 합니다. 단, 이는 많은 베팅을 반복했을 때의 평균값이므로, 한두 번의 베팅 결과로 판단해서는 안 됩니다.</div></div></section>
+  <div class="more-tools"><h3>더 많은 도구</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ko/compound-interest.html">복리 이자 계산기</a>
+      <a class="tool-pill" href="/tools/ko/roi-calculator.html">ROI 계산기</a>
+      <a class="tool-pill" href="/tools/ko/risk-reward.html">위험-수익 계산기</a>
+      <a class="tool-pill" href="/tools/ko/position-size.html">포지션 크기 계산기</a>
+      <a class="tool-pill" href="/tools/ko/stop-loss.html">손절매 계산기</a>
+      <a class="tool-pill" href="/tools/ko/dividend-yield.html">배당 수익률 계산기</a>
+      <a class="tool-pill" href="/tools/ko/pe-ratio.html">P/E 비율 계산기</a>
+      <a class="tool-pill" href="/tools/ko/dca-calculator.html">DCA 계산기</a>
+      <a class="tool-pill" href="/tools/ko/cagr.html">CAGR 계산기</a>
+      <a class="tool-pill" href="/tools/ko/margin-calculator.html">마진 계산기</a>
+      <a class="tool-pill" href="/tools/ko/stock-gain-loss.html">주식 수익/손실 계산기</a>
+      <a class="tool-pill" href="/tools/ko/break-even.html">손익분기점 계산기</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/kelly-criterion.html" class="lang-btn">English</a>
+    <a href="/tools/kelly-criterion.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/kelly-criterion.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/kelly-criterion.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/kelly-criterion.html" class="lang-btn">Français</a>
+    <a href="/tools/es/kelly-criterion.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/kelly-criterion.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/kelly-criterion.html" class="lang-btn active">한국어</a>
+    <a href="/tools/id/kelly-criterion.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/kelly-criterion.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>관련 계산기</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const winProb = parseFloat(document.getElementById('winProbability').value);
+  const odds = parseFloat(document.getElementById('oddsDecimal').value);
+  const bankroll = parseFloat(document.getElementById('bankroll').value);
+
+  if (!winProb || !odds || !bankroll) {
+    alert('Please fill in all fields with valid numbers');
+    return;
+  }
+
+  if (winProb <= 0 || winProb > 1) {
+    alert('Probability must be between 0 and 1 (0.01 to 0.99)');
+    return;
+  }
+
+  if (odds < 1) {
+    alert('Odds must be greater than or equal to 1');
+    return;
+  }
+
+  if (bankroll <= 0) {
+    alert('Bankroll must be a positive number');
+    return;
+  }
+
+  const lossProb = 1 - winProb;
+  const b = odds - 1;
+  const kellyCriterion = (b * winProb - lossProb) / b;
+
+  let riskAssessment = 'Moderate';
+  let displayKelly = kellyCriterion;
+
+  if (kellyCriterion < 0) {
+    riskAssessment = 'Avoid bet (negative edge)';
+    displayKelly = 0;
+  } else if (kellyCriterion > 0.25) {
+    riskAssessment = 'High volatility risk';
+  } else if (kellyCriterion < 0.01) {
+    riskAssessment = 'Very conservative';
+  }
+
+  const optimalBet = bankroll * displayKelly;
+  const expectedValue = optimalBet * (winProb * (odds - 1) - lossProb);
+
+  document.getElementById('kellyCriterion').textContent = (displayKelly * 100).toLocaleString('en-US', {maximumFractionDigits: 2});
+  document.getElementById('optimalBetAmount').textContent = optimalBet.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('riskLevel').textContent = riskAssessment;
+  document.getElementById('expectedValue').textContent = expectedValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='복사됨!';setTimeout(function(){b.textContent='공유'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ko|kelly-criterion|2026-07-09 -->

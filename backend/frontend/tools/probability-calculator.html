@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>機率計算機 - 組合排列計算工具</title>
+<meta name="description" content="免費機率計算機，輕鬆計算組合數、排列數和機率結果。支援多種計算類型，適合統計分析和概率問題。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/probability-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/probability-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/probability-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/probability-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/probability-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/probability-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/probability-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/probability-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/probability-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/probability-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/probability-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/probability-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "機率計算機", "url": "https://softglow-ai.com/tools/probability-calculator.html", "description": "免費機率計算機，輕鬆計算組合數、排列數和機率結果。支援多種計算類型，適合統計分析和概率問題。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "組合和排列有什麼區別？", "acceptedAnswer": {"@type": "Answer", "text": "組合不考慮順序，只關心選擇了哪些項目。排列則考慮順序，不同的排列順序視為不同的結果。例如，選擇紅球和藍球是一種組合，但紅球-藍球和藍球-紅球是兩種不同的排列。"}}, {"@type": "Question", "name": "如何計算組合數 C(n,r)？", "acceptedAnswer": {"@type": "Answer", "text": "組合數使用公式 C(n,r) = n! / (r! × (n-r)!)。例如，C(5,2) = 5! / (2! × 3!) = 120 / (2 × 6) = 10。本計算機會自動進行這些計算。"}}, {"@type": "Question", "name": "什麼是階乘？", "acceptedAnswer": {"@type": "Answer", "text": "階乘（n!）是將 1 到 n 的所有正整數相乘的結果。例如，4! = 4 × 3 × 2 × 1 = 24。特殊情況下，0! = 1。階乘在組合和排列計算中是必不可少的。"}}, {"@type": "Question", "name": "排列數 P(n,r) 如何計算？", "acceptedAnswer": {"@type": "Answer", "text": "排列數使用公式 P(n,r) = n! / (n-r)!。例如，P(5,2) = 5! / 3! = 120 / 6 = 20。排列考慮順序，因此結果通常比組合大。"}}, {"@type": "Question", "name": "這個計算機適用於哪些場景？", "acceptedAnswer": {"@type": "Answer", "text": "本計算機適用於彩票機率計算、統計分析、組織安排、數學教學、遊戲設計等多個領域。任何涉及組合、排列或機率計算的問題都可以使用此工具快速求解。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 機率計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>機率計算機</h1>
+    <p class="calc-subtitle">即時計算組合、排列和機率結果</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="totalItems">項目總數 (n)</label>
+  <div class="input-row"><input type="number" id="totalItems" placeholder="10"  step="1"></div>
+</div>
+  <small class="input-help">輸入可供選擇的所有項目總數</small>
+<div class="input-group">
+  <label for="selectItems">選擇項目數 (r)</label>
+  <div class="input-row"><input type="number" id="selectItems" placeholder="3"  step="1"></div>
+</div>
+  <small class="input-help">輸入要從中選擇的項目數量</small>
+<div class="input-group">
+  <label for="calcType">計算類型</label>
+  <div class="input-row"><input type="text" id="calcType" value="combination"></div>
+</div>
+  <small class="input-help">選擇要執行的計算：組合、排列或機率</small></div>
+    <button class="btn-calc" onclick="calculate()">計算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">結果</span><span class="result-value" id="resultValue">—</span></div>
+<div class="result-item"><span class="result-label">使用公式</span><span class="result-value" id="resultFormula">—</span></div>
+<div class="result-item"><span class="result-label">說明</span><span class="result-value" id="resultExplanation">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> 結果顯示根據選定計算類型得出的數值。公式欄位展示所使用的數學公式，幫助您理解計算過程。說明欄位提供結果的實際應用解釋。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 列印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什麼是機率計算機？</h2><p>機率計算機是一個強大的統計工具，用於計算組合、排列和各種機率結果。無論您是在進行數學作業、統計分析或概率研究，這個工具都能幫助您快速準確地獲得答案。</p><h2>組合 (Combination) 與排列 (Permutation) 的區別</h2><p>組合是指從 n 個項目中選擇 r 個項目，不考慮順序的方式數量。例如，從 10 個數字中選擇 3 個的組合數為 120 種。排列則考慮順序，同樣的例子中排列數為 720 種。組合使用公式 C(n,r) = n! / (r!(n-r)!)，而排列使用公式 P(n,r) = n! / (n-r)!。</p><h2>實際應用場景</h2><p>機率計算在多個領域都有廣泛應用。在彩票中，您可以計算中獎機率；在組織活動時，可以計算不同安排方式；在品質管理中，可以評估抽樣檢驗的準確性；在遊戲設計中，可以平衡遊戲難度。這個計算機幫助您量化這些問題的答案。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>如何使用本計算機</h2><p>首先輸入項目總數 (n)，然後輸入要選擇的項目數 (r)。接著選擇您需要的計算類型：組合、排列或機率。點擊計算按鈕後，工具會立即顯示結果、使用的公式以及詳細說明，幫助您理解計算過程。</p><h2>階乘概念介紹</h2><p>階乘（記為 n!）是計算組合和排列的基礎。n! 表示從 1 乘以 2 乘以 3 一直乘到 n 的乘積。例如，5! = 5 × 4 × 3 × 2 × 1 = 120。理解階乘對於深入掌握機率計算至關重要。</p><h2>常見計算示例</h2><p>假設您要從 10 個候選人中選擇 3 個人組成委員會。使用組合計算，結果為 C(10,3) = 120 種方式。如果位置有區別（主席、副主席、秘書），則使用排列，結果為 P(10,3) = 720 種方式。這些計算幫助您在實際決策中做出正確評估。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">組合和排列有什麼區別？</div><div class="faq-a">組合不考慮順序，只關心選擇了哪些項目。排列則考慮順序，不同的排列順序視為不同的結果。例如，選擇紅球和藍球是一種組合，但紅球-藍球和藍球-紅球是兩種不同的排列。</div></div>
+  <div class="faq-item"><div class="faq-q">如何計算組合數 C(n,r)？</div><div class="faq-a">組合數使用公式 C(n,r) = n! / (r! × (n-r)!)。例如，C(5,2) = 5! / (2! × 3!) = 120 / (2 × 6) = 10。本計算機會自動進行這些計算。</div></div>
+  <div class="faq-item"><div class="faq-q">什麼是階乘？</div><div class="faq-a">階乘（n!）是將 1 到 n 的所有正整數相乘的結果。例如，4! = 4 × 3 × 2 × 1 = 24。特殊情況下，0! = 1。階乘在組合和排列計算中是必不可少的。</div></div>
+  <div class="faq-item"><div class="faq-q">排列數 P(n,r) 如何計算？</div><div class="faq-a">排列數使用公式 P(n,r) = n! / (n-r)!。例如，P(5,2) = 5! / 3! = 120 / 6 = 20。排列考慮順序，因此結果通常比組合大。</div></div>
+  <div class="faq-item"><div class="faq-q">這個計算機適用於哪些場景？</div><div class="faq-a">本計算機適用於彩票機率計算、統計分析、組織安排、數學教學、遊戲設計等多個領域。任何涉及組合、排列或機率計算的問題都可以使用此工具快速求解。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/roi-calculator.html">ROI 計算機</a>
+      <a class="tool-pill" href="/tools/risk-reward.html">風險報酬計算機</a>
+      <a class="tool-pill" href="/tools/position-size.html">部位規模計算器</a>
+      <a class="tool-pill" href="/tools/stop-loss.html">停損計算機</a>
+      <a class="tool-pill" href="/tools/dividend-yield.html">股息收益率計算機</a>
+      <a class="tool-pill" href="/tools/pe-ratio.html">本益比計算機</a>
+      <a class="tool-pill" href="/tools/dca-calculator.html">定期定額投資計算機</a>
+      <a class="tool-pill" href="/tools/cagr.html">年複合成長率計算器</a>
+      <a class="tool-pill" href="/tools/margin-calculator.html">保證金計算器</a>
+      <a class="tool-pill" href="/tools/stock-gain-loss.html">股票損益計算機</a>
+      <a class="tool-pill" href="/tools/break-even.html">損益平衡點計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/probability-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/probability-calculator.html" class="lang-btn active">繁體中文</a>
+    <a href="/tools/ja/probability-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/probability-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/probability-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/probability-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/probability-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/probability-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/probability-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/probability-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const totalItems = document.getElementById('totalItems').value;
+  const selectItems = document.getElementById('selectItems').value;
+  const calcType = document.getElementById('calcType').value;
+  const resultDiv = document.getElementById('results');
+  
+  if (!totalItems || !selectItems) {
+    alert('Please enter both the total number of items and the number of items to select.');
+    return;
+  }
+  
+  const n = parseInt(totalItems);
+  const r = parseInt(selectItems);
+  
+  if (n < 0 || r < 0 || r > n) {
+    alert('Invalid input: r must be less than or equal to n, and both must be non-negative.');
+    return;
+  }
+  
+  function factorial(num) {
+    if (num === 0 || num === 1) return 1;
+    let result = 1;
+    for (let i = 2; i <= num; i++) {
+      result *= i;
+    }
+    return result;
+  }
+  
+  let result;
+  let formula;
+  let explanation;
+  
+  if (calcType === 'combination') {
+    result = factorial(n) / (factorial(r) * factorial(n - r));
+    formula = `C(${n},${r}) = ${n}! / (${r}! × ${n - r}!)`;
+    explanation = `There are ${Math.round(result).toLocaleString()} ways to choose ${r} items from ${n} items where the order does not matter.`;
+  } else {
+    result = factorial(n) / factorial(n - r);
+    formula = `P(${n},${r}) = ${n}! / (${n - r}!)`;
+    explanation = `There are ${Math.round(result).toLocaleString()} ways to arrange ${r} items from ${n} items where the order matters.`;
+  }
+  
+  document.getElementById('resultValue').textContent = Math.round(result).toLocaleString();
+  document.getElementById('resultFormula').textContent = formula;
+  document.getElementById('resultExplanation').textContent = explanation;
+  
+  resultDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-TW|probability-calculator|2026-07-09 -->

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator Luas Atap - Hitung Area Atap Miring</title>
+<meta name="description" content="Hitung luas atap actual dengan mudah berdasarkan proyeksi horizontal dan sudut pitch. Tool gratis untuk perencanaan konstruksi atap.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/id/roof-area.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/roof-area.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/roof-area.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/roof-area.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/roof-area.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/roof-area.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/roof-area.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/roof-area.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/roof-area.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/roof-area.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/roof-area.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/roof-area.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Kalkulator Luas Atap", "url": "https://softglow-ai.com/tools/id/roof-area.html", "description": "Hitung luas atap actual dengan mudah berdasarkan proyeksi horizontal dan sudut pitch. Tool gratis untuk perencanaan konstruksi atap.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "id"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Apa itu proyeksi horizontal atap?", "acceptedAnswer": {"@type": "Answer", "text": "Proyeksi horizontal adalah area atap ketika dilihat dari atas atau area dasar yang tertutup oleh atap tersebut. Ini adalah luas 2D sebelum mempertimbangkan sudut kemiringan."}}, {"@type": "Question", "name": "Mengapa luas atap aktual lebih besar dari proyeksi dasar?", "acceptedAnswer": {"@type": "Answer", "text": "Karena atap memiliki sudut kemiringan, permukaan atap menjadi lebih panjang dibandingkan proyeksi horizontalnya. Semakin curam kemiringannya, semakin besar perbedaannya."}}, {"@type": "Question", "name": "Sudut kemiringan atap berapa yang ideal untuk rumah?", "acceptedAnswer": {"@type": "Answer", "text": "Untuk Indonesia yang banyak hujan, sudut 30-35 derajat adalah ideal karena memungkinkan air mengalir lancar sekaligus mudah dirawat dan estetis."}}, {"@type": "Question", "name": "Apakah hasil perhitungan ini akurat untuk semua jenis atap?", "acceptedAnswer": {"@type": "Answer", "text": "Ya, rumus ini akurat untuk atap dengan kemiringan uniform. Untuk atap dengan bentuk kompleks atau dormer, Anda perlu menghitung setiap bagian secara terpisah."}}, {"@type": "Question", "name": "Bagaimana cara mengukur luas dasar atap?", "acceptedAnswer": {"@type": "Answer", "text": "Anda dapat mengukur dari ground level menggunakan meteran, atau menggunakan gambar arsitektur rumah. Kalikan panjang dan lebar untuk mendapat luas proyeksi horizontal."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/id/">Alat</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/id/">Alat</a> > Kalkulator Luas Atap</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Kalkulator Luas Atap</h1>
+    <p class="calc-subtitle">Hitung total luas atap berdasarkan luas dasar dan sudut kemiringan</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="baseArea">Luas Dasar (Proyeksi Horizontal)</label>
+  <div class="input-row"><input type="number" id="baseArea" placeholder="1000"  step="0.1"><span class="input-suffix">m²</span></div>
+</div>
+  <small class="input-help">Masukkan luas area horizontal atau proyeksi dasar atap dalam meter persegi</small>
+<div class="input-group">
+  <label for="pitchAngle">Sudut Kemiringan Atap</label>
+  <div class="input-row"><input type="number" id="pitchAngle" placeholder="30"  step="0.1"><span class="input-suffix">derajat</span></div>
+</div>
+  <small class="input-help">Masukkan sudut kemiringan atap dalam derajat, biasanya antara 15-60 derajat</small></div>
+    <button class="btn-calc" onclick="calculate()">Hitung</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Luas Atap Aktual</span><span class="result-value" id="roofArea">—</span></div>
+<div class="result-item"><span class="result-label">Luas Tambahan (vs Dasar)</span><span class="result-value" id="areaDifference">—</span></div>
+<div class="result-item"><span class="result-label">Persentase Peningkatan</span><span class="result-value" id="percentIncrease">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>Apa artinya ini?</strong> Hasil menunjukkan luas atap sebenarnya setelah mempertimbangkan sudut kemiringan. Luas tambahan adalah selisih antara luas atap aktual dan luas dasar horizontal. Persentase peningkatan menunjukkan berapa persen lebih besar luas atap dibanding proyeksi dasarnya.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Cetak</button>
+        <button onclick="shareResult()">&#x1f4e4; Bagikan</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>Pentingnya Menghitung Luas Atap dengan Akurat</h2><p>Menghitung luas atap yang tepat sangat penting dalam perencanaan konstruksi, terutama untuk menentukan jumlah material yang dibutuhkan seperti genteng, aspal, atau logam penutup atap. Banyak kontraktor atau pemilik rumah sering mengabaikan perbedaan antara proyeksi horizontal atap dan luas aktualnya, yang dapat menghasilkan perhitungan material yang tidak akurat.</p><h2>Memahami Sudut Kemiringan Atap</h2><p>Sudut kemiringan atap atau roof pitch adalah kemiringan dari atap yang biasanya dinyatakan dalam derajat. Semakin besar sudut kemiringan, semakin panjang permukaan atap yang sebenarnya dibandingkan dengan proyeksi horizontalnya. Misalnya, atap dengan sudut 45 derajat akan memiliki luas aktual jauh lebih besar dibanding atap yang hampir datar. Untuk rumah Indonesia, sudut 30-35 derajat adalah yang paling umum digunakan karena cocok untuk menangani curah hujan tropis.</p><h2>Cara Menggunakan Kalkulator Luas Atap</h2><p>Untuk menggunakan kalkulator ini, pertama-tama Anda perlu menentukan luas proyeksi horizontal atap Anda. Ini adalah area ketika Anda melihat atap dari atas. Kemudian, masukkan sudut kemiringan atap dalam derajat. Kalkulator akan secara otomatis menghitung luas atap aktual dengan menggunakan fungsi trigonometri kosinus. Hasil yang ditampilkan mencakup luas atap sebenarnya, luas tambahan dibanding dasar, dan persentase peningkatan.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Rumus Perhitungan Luas Atap</h2><p>Rumus yang digunakan adalah: Luas Atap Aktual = Luas Dasar ÷ cos(sudut). Dengan menggunakan prinsip trigonometri ini, kita dapat menghitung dengan presisi luas permukaan miring. Misalnya, jika luas dasar adalah 100 m² dan sudut 30 derajat, maka luas aktual akan menjadi 100 ÷ cos(30°) = 100 ÷ 0.866 = 115.47 m². Artinya, ada penambahan 15.47 m² atau 15.47% dari luas dasar.</p><h2>Aplikasi Praktis dalam Konstruksi</h2><p>Pengetahuan tentang luas atap aktual sangat penting untuk menghitung kebutuhan material. Jika Anda membeli genteng, harus dihitung berdasarkan luas aktual, bukan proyeksi dasar. Begitu pula dengan pekerjaan pengecatan atau penerapan waterproofing. Kesalahan dalam perhitungan bisa berakibat pada pembelian material yang kurang atau berlebihan, yang pada akhirnya membuang biaya proyek.</p><h2>Tips Memilih Sudut Kemiringan yang Tepat</h2><p>Untuk wilayah dengan curah hujan tinggi seperti Indonesia, disarankan memilih sudut minimal 25-30 derajat agar air hujan dapat mengalir dengan lancar. Namun, sudut yang terlalu curam (di atas 45 derajat) bisa menyulitkan perawatan dan meningkatkan beban angin. Pertimbangkan juga estetika rumah, jenis atap yang digunakan, dan kondisi lokal sebelum memutuskan sudut kemiringan yang optimal untuk rumah Anda.</article>
+  <div class="blog-section"><h3>&#x1f4da; Artikel Terkait</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>Pertanyaan Umum</h2><div class="faq-item"><div class="faq-q">Apa itu proyeksi horizontal atap?</div><div class="faq-a">Proyeksi horizontal adalah area atap ketika dilihat dari atas atau area dasar yang tertutup oleh atap tersebut. Ini adalah luas 2D sebelum mempertimbangkan sudut kemiringan.</div></div>
+  <div class="faq-item"><div class="faq-q">Mengapa luas atap aktual lebih besar dari proyeksi dasar?</div><div class="faq-a">Karena atap memiliki sudut kemiringan, permukaan atap menjadi lebih panjang dibandingkan proyeksi horizontalnya. Semakin curam kemiringannya, semakin besar perbedaannya.</div></div>
+  <div class="faq-item"><div class="faq-q">Sudut kemiringan atap berapa yang ideal untuk rumah?</div><div class="faq-a">Untuk Indonesia yang banyak hujan, sudut 30-35 derajat adalah ideal karena memungkinkan air mengalir lancar sekaligus mudah dirawat dan estetis.</div></div>
+  <div class="faq-item"><div class="faq-q">Apakah hasil perhitungan ini akurat untuk semua jenis atap?</div><div class="faq-a">Ya, rumus ini akurat untuk atap dengan kemiringan uniform. Untuk atap dengan bentuk kompleks atau dormer, Anda perlu menghitung setiap bagian secara terpisah.</div></div>
+  <div class="faq-item"><div class="faq-q">Bagaimana cara mengukur luas dasar atap?</div><div class="faq-a">Anda dapat mengukur dari ground level menggunakan meteran, atau menggunakan gambar arsitektur rumah. Kalikan panjang dan lebar untuk mendapat luas proyeksi horizontal.</div></div></section>
+  <div class="more-tools"><h3>Alat Lainnya</h3><div class="tools-grid"><a class="tool-pill" href="/tools/id/compound-interest.html">Kalkulator Bunga Majemuk</a>
+      <a class="tool-pill" href="/tools/id/roi-calculator.html">Kalkulator ROI</a>
+      <a class="tool-pill" href="/tools/id/risk-reward.html">Kalkulator Risiko Reward</a>
+      <a class="tool-pill" href="/tools/id/position-size.html">Kalkulator Ukuran Posisi</a>
+      <a class="tool-pill" href="/tools/id/stop-loss.html">Kalkulator Stop Loss</a>
+      <a class="tool-pill" href="/tools/id/dividend-yield.html">Kalkulator Hasil Dividen</a>
+      <a class="tool-pill" href="/tools/id/pe-ratio.html">Kalkulator Rasio P/E</a>
+      <a class="tool-pill" href="/tools/id/dca-calculator.html">Kalkulator DCA</a>
+      <a class="tool-pill" href="/tools/id/cagr.html">Kalkulator CAGR</a>
+      <a class="tool-pill" href="/tools/id/margin-calculator.html">Kalkulator Margin</a>
+      <a class="tool-pill" href="/tools/id/stock-gain-loss.html">Kalkulator Keuntungan/Kerugian Saham</a>
+      <a class="tool-pill" href="/tools/id/break-even.html">Kalkulator Break Even</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/roof-area.html" class="lang-btn">English</a>
+    <a href="/tools/roof-area.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/roof-area.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/roof-area.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/roof-area.html" class="lang-btn">Français</a>
+    <a href="/tools/es/roof-area.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/roof-area.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/roof-area.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/roof-area.html" class="lang-btn active">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/roof-area.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Kalkulator Terkait</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const baseAreaInput = document.getElementById('baseArea');
+  const pitchAngleInput = document.getElementById('pitchAngle');
+  const roofAreaResult = document.getElementById('roofArea');
+  const areaDifferenceResult = document.getElementById('areaDifference');
+  const percentIncreaseResult = document.getElementById('percentIncrease');
+  const resultsDiv = document.getElementById('results');
+
+  if (!baseAreaInput.value || !pitchAngleInput.value) {
+    alert('Please enter both base area and pitch angle');
+    return;
+  }
+
+  const baseArea = parseFloat(baseAreaInput.value);
+  const pitchAngle = parseFloat(pitchAngleInput.value);
+
+  if (baseArea <= 0 || pitchAngle < 0 || pitchAngle >= 90) {
+    alert('Please enter valid values. Base area must be positive, pitch angle between 0 and 90 degrees.');
+    return;
+  }
+
+  const angleRad = (pitchAngle * Math.PI) / 180;
+  const cosAngle = Math.cos(angleRad);
+  
+  if (cosAngle <= 0) {
+    alert('Pitch angle must be less than 90 degrees.');
+    return;
+  }
+
+  const roofArea = baseArea / cosAngle;
+  const areaDifference = roofArea - baseArea;
+  const percentIncrease = ((areaDifference / baseArea) * 100);
+
+  roofAreaResult.textContent = roofArea.toLocaleString('en-GB', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+  areaDifferenceResult.textContent = areaDifference.toLocaleString('en-GB', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+  percentIncreaseResult.textContent = percentIncrease.toLocaleString('en-GB', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Disalin!';setTimeout(function(){b.textContent='Bagikan'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|id|roof-area|2026-07-09 -->

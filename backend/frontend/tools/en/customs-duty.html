@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customs Duty Calculator - Import Tax Estimator</title>
+<meta name="description" content="Quickly calculate customs duties and total import costs. Enter CIF value and duty rate to determine exact taxes on your shipments.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/en/customs-duty.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/customs-duty.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/customs-duty.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/customs-duty.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/customs-duty.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/customs-duty.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/customs-duty.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/customs-duty.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/customs-duty.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/customs-duty.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/customs-duty.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/customs-duty.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Customs Duty Calculator", "url": "https://softglow-ai.com/tools/en/customs-duty.html", "description": "Quickly calculate customs duties and total import costs. Enter CIF value and duty rate to determine exact taxes on your shipments.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is the difference between CIF and other valuation methods?", "acceptedAnswer": {"@type": "Answer", "text": "CIF (Cost, Insurance, Freight) includes the product cost plus insurance and freight to the destination port. Other methods include FOB (Free on Board), which excludes freight and insurance, and DDP (Delivered Duty Paid), which includes all costs including duties. CIF is one of the most commonly used methods for duty calculation internationally."}}, {"@type": "Question", "name": "How do I find the correct duty rate for my products?", "acceptedAnswer": {"@type": "Answer", "text": "Consult your country's tariff schedule using the product's Harmonized Tariff Schedule (HTS) code in the US, Combined Nomenclature (CN) code in the EU, or equivalent classification in your country. You can search these databases online, or contact your customs authority or a customs broker for assistance in classifying your specific products."}}, {"@type": "Question", "name": "Are there additional costs beyond customs duties?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, depending on your location and product type, you may face additional charges including Value Added Tax (VAT), excise taxes, port fees, customs clearance fees, and brokerage fees. These vary by country and product category, so research your specific requirements for a complete cost estimate."}}, {"@type": "Question", "name": "Can duty rates change, and how often?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, duty rates can change due to new trade agreements, tariff reforms, or changes in government policy. Some countries adjust rates seasonally or in response to trade disputes. Always verify current rates before making large purchases, as rates in effect when you calculate may differ from rates when you actually import."}}, {"@type": "Question", "name": "What should I do if I believe the duty rate applied to my shipment is incorrect?", "acceptedAnswer": {"@type": "Answer", "text": "Contact your customs broker or the customs authority in your country to file a protest or appeal. Ensure you have all supporting documentation including invoices, shipping records, and product specifications. Customs brokers can help determine if your products were misclassified or if you qualify for preferential rates under trade agreements."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/en/">Tools</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/en/">Tools</a> > Customs Duty Calculator</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Customs Duty Calculator</h1>
+    <p class="calc-subtitle">Calculate import duties and taxes on goods with ease</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="cifValue">CIF Value (Cost, Insurance, Freight)</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="cifValue" placeholder="1500.00"  value="1500" step="0.01"><span class="input-suffix">USD</span></div>
+</div>
+  <small class="input-help">Enter the total CIF value of your shipment in USD, including cost, insurance, and freight charges</small>
+<div class="input-group">
+  <label for="dutyRate">Duty Rate</label>
+  <div class="input-row"><input type="number" id="dutyRate" placeholder="15"  value="15" step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">Enter the applicable customs duty rate as a percentage for your product category</small></div>
+    <button class="btn-calc" onclick="calculate()">Calculate</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Customs Duty Amount</span><span class="result-value" id="dutyAmount">—</span></div>
+<div class="result-highlight"><span class="result-label">Total Cost (CIF + Duty)</span><span class="result-value" id="totalCost">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>What does this mean?</strong> The Customs Duty Amount shows the exact tax you must pay on your imported goods based on the CIF value and applicable duty rate. The Total Cost combines your original CIF value with the calculated duty to give you the complete landed cost of your shipment.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Print</button>
+        <button onclick="shareResult()">&#x1f4e4; Share</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>Understanding Customs Duties and Import Taxes</h2><p>Customs duties are taxes imposed by governments on imported goods. These duties serve multiple purposes, including generating government revenue, protecting domestic industries, and regulating international trade. When importing goods internationally, understanding how customs duties are calculated is essential for accurate cost estimation and compliance with trade regulations.</p><h2>What is CIF Value?</h2><p>CIF stands for Cost, Insurance, and Freight. This represents the total value of your shipment used as the basis for calculating customs duties. The CIF value includes the purchase price of the goods, the cost of insurance during transit, and all freight charges up to the port of entry in the destination country. This comprehensive valuation method ensures that all costs associated with bringing goods to your country are considered when calculating duties.</p><h2>How Customs Duty Rates Work</h2><p>Duty rates vary significantly depending on the type of product, its origin country, and your destination country's trade agreements. Most countries organize products into categories using systems like the Harmonized Tariff Schedule (HTS) in the United States or the Combined Nomenclature (CN) in the European Union. Rates can range from zero percent for certain goods to over 100 percent for heavily protected products. Understanding the correct duty rate for your specific product is crucial for accurate calculations.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Calculating Your Total Import Cost</h2><p>The total cost of importing goods extends beyond the CIF value. By adding the calculated customs duty to your CIF value, you get the true landed cost of your shipment. This figure is essential for budgeting, pricing decisions, and profitability analysis. Keep in mind that some countries may apply additional fees such as value-added tax (VAT), excise taxes, or port handling fees on top of customs duties, so your final cost may be higher than the sum shown in this calculator.</p><h2>Using the Customs Duty Calculator</h2><p>This calculator simplifies the duty calculation process. Simply enter your CIF value and the applicable duty rate percentage, and the tool will instantly compute both your duty amount and total landed cost. For example, a $1,500 shipment with a 15% duty rate results in $225 in duties, bringing your total to $1,725. This quick estimation helps with cost forecasting and helps you determine product pricing and profit margins before finalizing international purchases.</p><h2>Tips for Accurate Duty Calculations</h2><p>To ensure accurate calculations, verify the correct HTS code for your products, as misclassification can result in incorrect duty rates. Research free trade agreements between your country and the supplier's country, as preferential rates may apply. Keep detailed documentation of all shipping costs, insurance premiums, and invoices to support your CIF valuation. When in doubt, consult with a customs broker or trade compliance professional to confirm duty rates and ensure regulatory compliance.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Related Articles</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>FAQ</h2><div class="faq-item"><div class="faq-q">What is the difference between CIF and other valuation methods?</div><div class="faq-a">CIF (Cost, Insurance, Freight) includes the product cost plus insurance and freight to the destination port. Other methods include FOB (Free on Board), which excludes freight and insurance, and DDP (Delivered Duty Paid), which includes all costs including duties. CIF is one of the most commonly used methods for duty calculation internationally.</div></div>
+  <div class="faq-item"><div class="faq-q">How do I find the correct duty rate for my products?</div><div class="faq-a">Consult your country's tariff schedule using the product's Harmonized Tariff Schedule (HTS) code in the US, Combined Nomenclature (CN) code in the EU, or equivalent classification in your country. You can search these databases online, or contact your customs authority or a customs broker for assistance in classifying your specific products.</div></div>
+  <div class="faq-item"><div class="faq-q">Are there additional costs beyond customs duties?</div><div class="faq-a">Yes, depending on your location and product type, you may face additional charges including Value Added Tax (VAT), excise taxes, port fees, customs clearance fees, and brokerage fees. These vary by country and product category, so research your specific requirements for a complete cost estimate.</div></div>
+  <div class="faq-item"><div class="faq-q">Can duty rates change, and how often?</div><div class="faq-a">Yes, duty rates can change due to new trade agreements, tariff reforms, or changes in government policy. Some countries adjust rates seasonally or in response to trade disputes. Always verify current rates before making large purchases, as rates in effect when you calculate may differ from rates when you actually import.</div></div>
+  <div class="faq-item"><div class="faq-q">What should I do if I believe the duty rate applied to my shipment is incorrect?</div><div class="faq-a">Contact your customs broker or the customs authority in your country to file a protest or appeal. Ensure you have all supporting documentation including invoices, shipping records, and product specifications. Customs brokers can help determine if your products were misclassified or if you qualify for preferential rates under trade agreements.</div></div></section>
+  <div class="more-tools"><h3>More Tools</h3><div class="tools-grid"><a class="tool-pill" href="/tools/en/compound-interest.html">Compound Interest Calculator</a>
+      <a class="tool-pill" href="/tools/en/roi-calculator.html">ROI Calculator</a>
+      <a class="tool-pill" href="/tools/en/risk-reward.html">Risk Reward Calculator</a>
+      <a class="tool-pill" href="/tools/en/position-size.html">Position Size Calculator</a>
+      <a class="tool-pill" href="/tools/en/stop-loss.html">Stop Loss Calculator</a>
+      <a class="tool-pill" href="/tools/en/dividend-yield.html">Dividend Yield Calculator</a>
+      <a class="tool-pill" href="/tools/en/pe-ratio.html">P/E Ratio Calculator</a>
+      <a class="tool-pill" href="/tools/en/dca-calculator.html">DCA Calculator</a>
+      <a class="tool-pill" href="/tools/en/cagr.html">CAGR Calculator</a>
+      <a class="tool-pill" href="/tools/en/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/en/stock-gain-loss.html">Stock Gain/Loss Calculator</a>
+      <a class="tool-pill" href="/tools/en/break-even.html">Break Even Calculator</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/customs-duty.html" class="lang-btn active">English</a>
+    <a href="/tools/customs-duty.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/customs-duty.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/customs-duty.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/customs-duty.html" class="lang-btn">Français</a>
+    <a href="/tools/es/customs-duty.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/customs-duty.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/customs-duty.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/customs-duty.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/customs-duty.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Related Tools</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const cifValueInput = document.getElementById('cifValue');
+  const dutyRateInput = document.getElementById('dutyRate');
+  const dutyAmountResult = document.getElementById('dutyAmount');
+  const totalCostResult = document.getElementById('totalCost');
+  const resultsDiv = document.getElementById('results');
+
+  if (!cifValueInput.value || !dutyRateInput.value) {
+    alert('Please fill in all required fields');
+    return;
+  }
+
+  const cifValue = parseFloat(cifValueInput.value);
+  const dutyRate = parseFloat(dutyRateInput.value);
+
+  if (isNaN(cifValue) || isNaN(dutyRate) || cifValue < 0 || dutyRate < 0) {
+    alert('Please enter valid positive numbers');
+    return;
+  }
+
+  const dutyAmount = (cifValue * dutyRate) / 100;
+  const totalCost = cifValue + dutyAmount;
+
+  dutyAmountResult.textContent = dutyAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  totalCostResult.textContent = totalCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copied!';setTimeout(function(){b.textContent='Share'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|en|customs-duty|2026-07-09 -->

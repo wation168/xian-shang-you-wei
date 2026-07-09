@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>読書時間計算機 - 無料オンラインツール</title>
+<meta name="description" content="単語数と読書速度を入力して、コンテンツを読むのにかかる時間を計算します。平均的な読書速度は200〜250語/分です。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/reading-time.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/reading-time.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/reading-time.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/reading-time.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/reading-time.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/reading-time.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/reading-time.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/reading-time.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/reading-time.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/reading-time.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/reading-time.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/reading-time.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "読書時間計算機", "url": "https://softglow-ai.com/tools/ja/reading-time.html", "description": "単語数と読書速度を入力して、コンテンツを読むのにかかる時間を計算します。平均的な読書速度は200〜250語/分です。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "読書速度はどのように測定しますか？", "acceptedAnswer": {"@type": "Answer", "text": "1分間に読める単語数を数えることで測定できます。既知のテキストを1分間読み、読んだ単語数を数えることで、自分の読書速度を把握できます。"}}, {"@type": "Question", "name": "このツールはどのような場面で役立ちますか？", "acceptedAnswer": {"@type": "Answer", "text": "ブログ記事、学論文、本の章など、あらゆるテキストコンテンツの読書時間の推定に使用できます。コンテンツの長さをユーザーに事前に伝える場合に特に便利です。"}}, {"@type": "Question", "name": "子どもの読書時間も計算できますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、できます。ただし、子どもの平均読書速度は大人より遅いため（通常100〜150語/分）、そのペースに合わせて計算する必要があります。"}}, {"@type": "Question", "name": "異なる言語でも使用できますか？", "acceptedAnswer": {"@type": "Answer", "text": "このツールは単語数に基づいているため、言語に関わらず使用できます。ただし、言語によって平均単語数が異なる場合があるため、調整が必要な場合があります。"}}, {"@type": "Question", "name": "計算に含まれない要素はありますか？", "acceptedAnswer": {"@type": "Answer", "text": "このツールは連続的な読書時間を計算しており、図表の確認時間や注釈の読み取り時間は含まれていません。実際の読書時間はこれより長くなる可能性があります。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 読書時間計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>読書時間計算機</h1>
+    <p class="calc-subtitle">任意のコンテンツを読むのにかかる時間を瞬時に計算</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="wordCount">単語数</label>
+  <div class="input-row"><input type="number" id="wordCount" placeholder="単語数の合計を入力"  step="1"><span class="input-suffix">語</span></div>
+</div>
+  <small class="input-help">読むコンテンツの総単語数を入力してください</small>
+<div class="input-group">
+  <label for="readingSpeed">読書速度（1分あたりの単語数）</label>
+  <div class="input-row"><input type="number" id="readingSpeed" placeholder="平均は200〜250語/分"  value="225" step="1"><span class="input-suffix">語/分</span></div>
+</div>
+  <small class="input-help">平均的な読書速度は200〜250語/分です</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">読書時間</span><span class="result-value" id="totalMinutes">—</span></div>
+<div class="result-item"><span class="result-label">時間形式</span><span class="result-value" id="hoursMinutes">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 計算結果は、入力した単語数を読書速度で割った時間を表示します。読書時間は分単位と時間単位の両方で表示されるため、コンテンツの長さを確認できます。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>読書時間計算機について</h2><p>読書時間計算機は、記事、本、レポートなどのコンテンツを読むのにかかる時間を正確に計算するツールです。単語数と個人の読書速度を入力するだけで、すぐに結果が表示されます。</p><h2>読書速度について</h2><p>一般的な読書速度は1分あたり200〜250語です。ただし、個人差があり、速読できる人は300語以上、ゆっくり読む人は150語程度の場合もあります。自分の読書速度を知ることで、より正確な計算ができます。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>計算方法</h2><p>読書時間の計算は単純で、総単語数を1分あたりの読書速度で割るだけです。例えば、1,000語のコンテンツを250語/分で読む場合、1,000÷250=4分となります。</p><h2>活用方法</h2><p>このツールはブロガー、教育者、コンテンツクリエイターにとって非常に便利です。記事の長さを事前に把握することで、ユーザーエクスペリエンスを向上させることができます。</p><h2>読書速度を高める方法</h2><p>読書速度を向上させるには、定期的に読書練習を行い、目を動かす速度を上げることが効果的です。また、内容への集中力を高めることも重要です。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">読書速度はどのように測定しますか？</div><div class="faq-a">1分間に読める単語数を数えることで測定できます。既知のテキストを1分間読み、読んだ単語数を数えることで、自分の読書速度を把握できます。</div></div>
+  <div class="faq-item"><div class="faq-q">このツールはどのような場面で役立ちますか？</div><div class="faq-a">ブログ記事、学論文、本の章など、あらゆるテキストコンテンツの読書時間の推定に使用できます。コンテンツの長さをユーザーに事前に伝える場合に特に便利です。</div></div>
+  <div class="faq-item"><div class="faq-q">子どもの読書時間も計算できますか？</div><div class="faq-a">はい、できます。ただし、子どもの平均読書速度は大人より遅いため（通常100〜150語/分）、そのペースに合わせて計算する必要があります。</div></div>
+  <div class="faq-item"><div class="faq-q">異なる言語でも使用できますか？</div><div class="faq-a">このツールは単語数に基づいているため、言語に関わらず使用できます。ただし、言語によって平均単語数が異なる場合があるため、調整が必要な場合があります。</div></div>
+  <div class="faq-item"><div class="faq-q">計算に含まれない要素はありますか？</div><div class="faq-a">このツールは連続的な読書時間を計算しており、図表の確認時間や注釈の読み取り時間は含まれていません。実際の読書時間はこれより長くなる可能性があります。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">Roi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">Risk Reward</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">ポジションサイズ計算機</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">P/Eレシオ計算機</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">証拠金計算機</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/reading-time.html" class="lang-btn">English</a>
+    <a href="/tools/reading-time.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/reading-time.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/reading-time.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/reading-time.html" class="lang-btn">Français</a>
+    <a href="/tools/es/reading-time.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/reading-time.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/reading-time.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/reading-time.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/reading-time.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const wordCountInput = document.getElementById('wordCount');
+  const readingSpeedInput = document.getElementById('readingSpeed');
+  const totalMinutesResult = document.getElementById('totalMinutes');
+  const hoursMinutesResult = document.getElementById('hoursMinutes');
+  const resultsDiv = document.querySelector('.results');
+
+  const wordCount = parseFloat(wordCountInput.value);
+  const readingSpeed = parseFloat(readingSpeedInput.value);
+
+  if (!wordCount || wordCount <= 0) {
+    alert('Please enter a valid word count');
+    return;
+  }
+
+  if (!readingSpeed || readingSpeed <= 0) {
+    alert('Please enter a valid reading speed (WPM)');
+    return;
+  }
+
+  const totalMinutes = Math.ceil(wordCount / readingSpeed);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  totalMinutesResult.textContent = totalMinutes.toLocaleString('en-US');
+
+  if (hours > 0) {
+    hoursMinutesResult.textContent = hours + ' hour' + (hours > 1 ? 's' : '') + ' ' + minutes + ' minute' + (minutes !== 1 ? 's' : '');
+  } else {
+    hoursMinutesResult.textContent = minutes + ' minute' + (minutes !== 1 ? 's' : '');
+  }
+
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|reading-time|2026-07-09 -->

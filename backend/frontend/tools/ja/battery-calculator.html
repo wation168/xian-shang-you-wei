@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>バッテリー寿命計算機 - 持続時間を簡単計算</title>
+<meta name="description" content="バッテリー容量と消費電力からバッテリーの持続時間を計算できます。mAhと消費電流を入力するだけで、何時間もつか瞬時に判定できます。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/battery-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/battery-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/battery-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/battery-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/battery-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/battery-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/battery-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/battery-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/battery-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/battery-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/battery-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/battery-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "バッテリー寿命計算機", "url": "https://softglow-ai.com/tools/ja/battery-calculator.html", "description": "バッテリー容量と消費電力からバッテリーの持続時間を計算できます。mAhと消費電流を入力するだけで、何時間もつか瞬時に判定できます。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "バッテリー容量はどこで確認できますか?", "acceptedAnswer": {"@type": "Answer", "text": "バッテリー容量はデバイスの設定メニューか、バッテリー本体やバッテリーラベルに「mAh」の単位で記載されています。スマートフォンの場合、設定 > バッテリー情報で確認できることもあります。"}}, {"@type": "Question", "name": "消費電流の平均値はどのくらいですか?", "acceptedAnswer": {"@type": "Answer", "text": "消費電流はデバイスの使用状況で大きく変動します。スマートフォンは通常100〜500mA、ノートパソコンは1000〜3000mAが目安です。デバイスのスペック表に最大消費電流が記載されていることがあります。"}}, {"@type": "Question", "name": "計算結果が実際の持続時間と異なるのはなぜですか?", "acceptedAnswer": {"@type": "Answer", "text": "計算結果は理想的な条件での参考値です。バッテリーの劣化、温度変化、画面操作の頻度、アプリの使用状況など、多くの要因が実際の持続時間に影響します。"}}, {"@type": "Question", "name": "mAhとmAの違いは何ですか?", "acceptedAnswer": {"@type": "Answer", "text": "mAh(ミリアンペアアワー)はバッテリーの容量、mA(ミリアンペア)は電流を表します。バッテリー容量を消費電流で割ると、持続時間が計算できます。"}}, {"@type": "Question", "name": "複数のデバイスを同時に使用する場合は?", "acceptedAnswer": {"@type": "Answer", "text": "複数デバイスを同時に使用する場合、各デバイスの消費電流を合算して計算してください。例えば、スマートフォン300mAとワイヤレスイヤホン50mAを同時使用なら、合計350mAで計算します。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > バッテリー寿命計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>バッテリー寿命計算機</h1>
+    <p class="calc-subtitle">バッテリー容量と消費電力に基づいてバッテリーの持続時間を計算します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="batteryCapacity">バッテリー容量</label>
+  <div class="input-row"><input type="number" id="batteryCapacity" placeholder="2000"  value="2000" step="0.1"><span class="input-suffix">mAh</span></div>
+</div>
+  <small class="input-help">バッテリーの容量をmAh(ミリアンペアアワー)単位で入力してください</small>
+<div class="input-group">
+  <label for="currentDraw">消費電流</label>
+  <div class="input-row"><input type="number" id="currentDraw" placeholder="500"  value="500" step="0.1"><span class="input-suffix">mA</span></div>
+</div>
+  <small class="input-help">デバイスの消費電流をmA(ミリアンペア)単位で入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">バッテリー持続時間(時間)</span><span class="result-value" id="batteryHours">—</span></div>
+<div class="result-item"><span class="result-label">バッテリー持続時間(分)</span><span class="result-value" id="batteryMinutes">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 計算結果は、入力したバッテリー容量を消費電流で割ることで得られたバッテリーの持続時間です。時間と分の両方の形式で表示されるため、用途に応じて選択できます。実際の使用時間は、温度や使用パターンにより異なる場合があります。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>バッテリー寿命計算機について</h2><p>バッテリー寿命計算機は、スマートフォン、タブレット、ワイヤレスイヤホンなどのデバイスがどのくらいの時間使用できるかを簡単に計算できるツールです。バッテリー容量と消費電流の2つの値を入力するだけで、正確な持続時間が瞬時に表示されます。</p><h2>計算方法</h2><p>バッテリーの持続時間は、非常にシンプルな計算式で求められます。バッテリー容量(mAh)を消費電流(mA)で割ることで、時間単位での持続時間が得られます。例えば、2000mAhのバッテリーを500mAの消費電流で使用した場合、4時間持続することになります。</p><h2>バッテリー容量について</h2><p>バッテリー容量はmAh(ミリアンペアアワー)で表記されます。mAhの値が大きいほど、より多くのエネルギーを蓄えることができます。スマートフォンなら2000〜5000mAh、ノートパソコンなら50000mAh以上が一般的です。デバイスの仕様書やバッテリーラベルで確認できます。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>消費電流について</h2><p>消費電流はmA(ミリアンペア)で表記され、デバイスが動作中に消費する電力量を示します。画面の明るさ、実行中のアプリケーション、通信機能の有無など、様々な要因で変動します。一般的な値はデバイスのスペック表に記載されていますが、実際の使用条件で異なる場合があります。</p><h2>計算結果の活用</h2><p>この計算機で得られた結果は、理想的な条件下での参考値です。バッテリーの劣化、温度変化、バージョンアップによる影響で、実際の持続時間は異なることがあります。長時間の外出や旅行前に計算しておくと、モバイルバッテリーの必要性判断に役立ちます。</p><h2>バッテリー管理のコツ</h2><p>バッテリーの寿命を延ばすには、過充電を避け、極端な温度環境での使用を控えることが大切です。バックグラウンドで実行中のアプリを制限し、画面の明るさを調整することで、消費電流を減らしてバッテリー持続時間を伸ばすことができます。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">バッテリー容量はどこで確認できますか?</div><div class="faq-a">バッテリー容量はデバイスの設定メニューか、バッテリー本体やバッテリーラベルに「mAh」の単位で記載されています。スマートフォンの場合、設定 > バッテリー情報で確認できることもあります。</div></div>
+  <div class="faq-item"><div class="faq-q">消費電流の平均値はどのくらいですか?</div><div class="faq-a">消費電流はデバイスの使用状況で大きく変動します。スマートフォンは通常100〜500mA、ノートパソコンは1000〜3000mAが目安です。デバイスのスペック表に最大消費電流が記載されていることがあります。</div></div>
+  <div class="faq-item"><div class="faq-q">計算結果が実際の持続時間と異なるのはなぜですか?</div><div class="faq-a">計算結果は理想的な条件での参考値です。バッテリーの劣化、温度変化、画面操作の頻度、アプリの使用状況など、多くの要因が実際の持続時間に影響します。</div></div>
+  <div class="faq-item"><div class="faq-q">mAhとmAの違いは何ですか?</div><div class="faq-a">mAh(ミリアンペアアワー)はバッテリーの容量、mA(ミリアンペア)は電流を表します。バッテリー容量を消費電流で割ると、持続時間が計算できます。</div></div>
+  <div class="faq-item"><div class="faq-q">複数のデバイスを同時に使用する場合は?</div><div class="faq-a">複数デバイスを同時に使用する場合、各デバイスの消費電流を合算して計算してください。例えば、スマートフォン300mAとワイヤレスイヤホン50mAを同時使用なら、合計350mAで計算します。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/electricity-cost.html">Electricity Cost</a>
+      <a class="tool-pill" href="/tools/ja/solar-panel.html">Solar Panel</a>
+      <a class="tool-pill" href="/tools/ja/water-usage.html">Water Usage</a>
+      <a class="tool-pill" href="/tools/ja/carbon-footprint.html">Carbon Footprint</a>
+      <a class="tool-pill" href="/tools/ja/appliance-energy.html">家電エネルギーコスト計算機</a>
+      <a class="tool-pill" href="/tools/ja/air-conditioner-size.html">エアコン容量計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/battery-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/battery-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/battery-calculator.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/battery-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/battery-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/battery-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/battery-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/battery-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/battery-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/battery-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const capacityInput = document.getElementById('batteryCapacity');
+  const drawInput = document.getElementById('currentDraw');
+  const hoursResult = document.getElementById('batteryHours');
+  const minutesResult = document.getElementById('batteryMinutes');
+  const resultsDiv = document.querySelector('.results');
+
+  const capacity = parseFloat(capacityInput.value);
+  const draw = parseFloat(drawInput.value);
+
+  if (!capacityInput.value.trim() || !drawInput.value.trim()) {
+    alert('Please enter both battery capacity and current draw');
+    return;
+  }
+
+  if (isNaN(capacity) || isNaN(draw)) {
+    alert('Please enter valid numbers');
+    return;
+  }
+
+  if (capacity <= 0 || draw <= 0) {
+    alert('Battery capacity and current draw must be greater than zero');
+    return;
+  }
+
+  const hours = capacity / draw;
+  const minutes = hours * 60;
+
+  hoursResult.textContent = hours.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+  minutesResult.textContent = minutes.toLocaleString('en-US', { maximumFractionDigits: 0, minimumFractionDigits: 0 });
+
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|battery-calculator|2026-07-09 -->

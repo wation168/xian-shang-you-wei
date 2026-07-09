@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>成績計算機 - 加權平均計算</title>
+<meta name="description" content="免費線上成績計算機，輕鬆計算作業和考試的加權平均成績，支援最多4個評估項目。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/grade-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/grade-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/grade-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/grade-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/grade-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/grade-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/grade-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/grade-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/grade-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/grade-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/grade-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/grade-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "成績計算機", "url": "https://softglow-ai.com/tools/grade-calculator.html", "description": "免費線上成績計算機，輕鬆計算作業和考試的加權平均成績，支援最多4個評估項目。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "什麼是加權平均成績？", "acceptedAnswer": {"@type": "Answer", "text": "加權平均成績是根據每項評估的成績和其對應的權重計算的平均值。例如，若期末考佔40%、期中考佔30%、作業佔30%，則最終成績不是簡單的三項平均，而是按各自比例計算得出的加權結果。"}}, {"@type": "Question", "name": "權重總和必須是100%嗎？", "acceptedAnswer": {"@type": "Answer", "text": "是的，為了準確計算，所有權重的總和應為100%。如果權重總和不足100%，計算結果會基於已使用的權重重新計算，可能導致結果不準確。建議在提交前檢查權重設定。"}}, {"@type": "Question", "name": "如果我只需要計算3項作業，第4項可以不填嗎？", "acceptedAnswer": {"@type": "Answer", "text": "可以的。第4項作業是選填的。如果只需要計算3項，只需保持第4項空白即可。系統會自動根據您填入的項目進行計算。"}}, {"@type": "Question", "name": "成績輸入範圍是多少？", "acceptedAnswer": {"@type": "Answer", "text": "通常成績輸入範圍為0-100分。如果您的學校採用其他評分系統（如4.0制或百分制），請先將成績轉換為0-100的範圍後再輸入，以確保字母等級轉換正確。"}}, {"@type": "Question", "name": "字母等級的評分標準是固定的嗎？", "acceptedAnswer": {"@type": "Answer", "text": "本工具使用的是常見的美式評分標準（A=90-100、B=80-89等），但不同國家和地區可能採用不同標準。請根據您所在機構的實際標準進行調整，本工具提供的結果僅供參考。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 成績計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>成績計算機</h1>
+    <p class="calc-subtitle">從作業和考試計算加權平均成績</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="assignment1Name">作業1名稱</label>
+  <div class="input-row"><input type="text" id="assignment1Name" placeholder="例如：作業1"  value="Assignment 1" step="1"></div>
+</div>
+  <small class="input-help">輸入作業或考試的名稱</small>
+<div class="input-group">
+  <label for="assignment1Score">作業1成績</label>
+  <div class="input-row"><input type="number" id="assignment1Score" placeholder="85"  step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">輸入該作業的得分（0-100）</small>
+<div class="input-group">
+  <label for="assignment1Weight">作業1權重</label>
+  <div class="input-row"><input type="number" id="assignment1Weight" placeholder="10"  step="1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">輸入該作業的權重百分比</small>
+<div class="input-group">
+  <label for="assignment2Name">作業2名稱</label>
+  <div class="input-row"><input type="text" id="assignment2Name" placeholder="例如：期中考"  value="Assignment 2" step="1"></div>
+</div>
+  <small class="input-help">輸入第二項作業的名稱</small>
+<div class="input-group">
+  <label for="assignment2Score">作業2成績</label>
+  <div class="input-row"><input type="number" id="assignment2Score" placeholder="78"  step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">輸入該作業的得分（0-100）</small>
+<div class="input-group">
+  <label for="assignment2Weight">作業2權重</label>
+  <div class="input-row"><input type="number" id="assignment2Weight" placeholder="25"  step="1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">輸入該作業的權重百分比</small>
+<div class="input-group">
+  <label for="assignment3Name">作業3名稱</label>
+  <div class="input-row"><input type="text" id="assignment3Name" placeholder="例如：最終專題"  value="Assignment 3" step="1"></div>
+</div>
+  <small class="input-help">輸入第三項作業的名稱</small>
+<div class="input-group">
+  <label for="assignment3Score">作業3成績</label>
+  <div class="input-row"><input type="number" id="assignment3Score" placeholder="92"  step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">輸入該作業的得分（0-100）</small>
+<div class="input-group">
+  <label for="assignment3Weight">作業3權重</label>
+  <div class="input-row"><input type="number" id="assignment3Weight" placeholder="30"  step="1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">輸入該作業的權重百分比</small>
+<div class="input-group">
+  <label for="assignment4Name">作業4名稱（選填）</label>
+  <div class="input-row"><input type="text" id="assignment4Name" placeholder="例如：期末考"  value="Assignment 4" step="1"></div>
+</div>
+  <small class="input-help">輸入第四項作業的名稱（可選）</small>
+<div class="input-group">
+  <label for="assignment4Score">作業4成績</label>
+  <div class="input-row"><input type="number" id="assignment4Score" placeholder="88"  step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">輸入該作業的得分（0-100）</small>
+<div class="input-group">
+  <label for="assignment4Weight">作業4權重</label>
+  <div class="input-row"><input type="number" id="assignment4Weight" placeholder="35"  step="1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">輸入該作業的權重百分比</small></div>
+    <button class="btn-calc" onclick="calculate()">計算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">加權平均成績</span><span class="result-value" id="weightedGradeResult">—</span></div>
+<div class="result-highlight"><span class="result-label">字母等級</span><span class="result-value" id="letterGradeResult">—</span></div>
+<div class="result-item"><span class="result-label">已使用權重</span><span class="result-value" id="totalWeightResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> 加權平均成績是根據各項作業的成績和權重計算得出的最終成績。字母等級顯示對應的等級評分。已使用權重應為100%，表示所有權重已正確分配。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 列印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>成績計算機使用指南</h2><p>成績計算機是學生用來快速計算課程總成績的實用工具。透過加權平均的方式，可以準確反映各項評估對最終成績的貢獻程度。無論是高中、大學或線上課程，此工具都能幫助您瞭解目前的學習表現。</p><h2>如何使用</h2><p>首先，輸入您的作業或考試名稱，例如「作業1」或「期中考」。接著在成績欄位輸入得分（通常為0-100分）。最重要的是設定正確的權重百分比，例如作業佔10%、期中考佔25%、期末考佔35%等。系統會自動計算加權平均成績，並將其轉換為對應的字母等級。</p><h2>權重的設定</h2><p>權重代表每項評估在最終成績中所佔的比例。您需要確保所有權重總和為100%。例如，若課程由3項作業和1次期末考組成，可設定作業各佔20%，期末考佔40%。正確的權重設定能確保計算結果準確反映您的實際成績。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>字母等級轉換標準</h2><p>通常採用以下標準：90-100分為A、80-89分為B、70-79分為C、60-69分為D、60分以下為F。不同學校或地區可能有不同的等級標準，請根據實際情況調整。此工具提供的字母等級僅供參考，請與您的學校標準進行核對。</p><h2>常見應用場景</h2><p>此計算機適用於各種教學場景：高中科目成績計算、大學課程加權評分、線上課程綜合評估，以及技能證書課程的成績統計。學生可利用此工具追蹤學習進度，教育工作者也可用其來演示成績計算方式。</p><h2>準確計算的建議</h2><p>為確保計算準確，請務必檢查所有輸入數據的正確性，特別是權重百分比的總和。如有小數分數，建議四捨五入至整數後再輸入。若需要計算多門課程，可分別使用此工具進行計算，然後手動整合結果。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">什麼是加權平均成績？</div><div class="faq-a">加權平均成績是根據每項評估的成績和其對應的權重計算的平均值。例如，若期末考佔40%、期中考佔30%、作業佔30%，則最終成績不是簡單的三項平均，而是按各自比例計算得出的加權結果。</div></div>
+  <div class="faq-item"><div class="faq-q">權重總和必須是100%嗎？</div><div class="faq-a">是的，為了準確計算，所有權重的總和應為100%。如果權重總和不足100%，計算結果會基於已使用的權重重新計算，可能導致結果不準確。建議在提交前檢查權重設定。</div></div>
+  <div class="faq-item"><div class="faq-q">如果我只需要計算3項作業，第4項可以不填嗎？</div><div class="faq-a">可以的。第4項作業是選填的。如果只需要計算3項，只需保持第4項空白即可。系統會自動根據您填入的項目進行計算。</div></div>
+  <div class="faq-item"><div class="faq-q">成績輸入範圍是多少？</div><div class="faq-a">通常成績輸入範圍為0-100分。如果您的學校採用其他評分系統（如4.0制或百分制），請先將成績轉換為0-100的範圍後再輸入，以確保字母等級轉換正確。</div></div>
+  <div class="faq-item"><div class="faq-q">字母等級的評分標準是固定的嗎？</div><div class="faq-a">本工具使用的是常見的美式評分標準（A=90-100、B=80-89等），但不同國家和地區可能採用不同標準。請根據您所在機構的實際標準進行調整，本工具提供的結果僅供參考。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/roi-calculator.html">ROI 計算機</a>
+      <a class="tool-pill" href="/tools/risk-reward.html">風險報酬計算機</a>
+      <a class="tool-pill" href="/tools/position-size.html">部位規模計算器</a>
+      <a class="tool-pill" href="/tools/stop-loss.html">停損計算機</a>
+      <a class="tool-pill" href="/tools/dividend-yield.html">股息收益率計算機</a>
+      <a class="tool-pill" href="/tools/pe-ratio.html">本益比計算機</a>
+      <a class="tool-pill" href="/tools/dca-calculator.html">定期定額投資計算機</a>
+      <a class="tool-pill" href="/tools/cagr.html">年複合成長率計算器</a>
+      <a class="tool-pill" href="/tools/margin-calculator.html">保證金計算器</a>
+      <a class="tool-pill" href="/tools/stock-gain-loss.html">股票損益計算機</a>
+      <a class="tool-pill" href="/tools/break-even.html">損益平衡點計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/grade-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/grade-calculator.html" class="lang-btn active">繁體中文</a>
+    <a href="/tools/ja/grade-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/grade-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/grade-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/grade-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/grade-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/grade-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/grade-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/grade-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const assignments = [];
+  let totalWeight = 0;
+  let weightedSum = 0;
+  
+  for (let i = 1; i <= 4; i++) {
+    const scoreElement = document.getElementById('assignment' + i + 'Score');
+    const weightElement = document.getElementById('assignment' + i + 'Weight');
+    
+    if (scoreElement && weightElement) {
+      const score = parseFloat(scoreElement.value);
+      const weight = parseFloat(weightElement.value);
+      
+      if (!isNaN(score) && !isNaN(weight) && score >= 0 && weight >= 0) {
+        if (score > 100 || score < 0) {
+          alert('Assignment ' + i + ' score must be between 0 and 100');
+          return;
+        }
+        assignments.push({ score: score, weight: weight });
+        totalWeight += weight;
+        weightedSum += (score * weight);
+      }
+    }
+  }
+  
+  if (assignments.length === 0) {
+    alert('Please enter at least one assignment with both score and weight');
+    return;
+  }
+  
+  if (totalWeight === 0) {
+    alert('Total weight cannot be zero. Please enter weight values');
+    return;
+  }
+  
+  const weightedAverage = weightedSum / totalWeight;
+  
+  let letterGrade = 'F';
+  if (weightedAverage >= 97) letterGrade = 'A+';
+  else if (weightedAverage >= 93) letterGrade = 'A';
+  else if (weightedAverage >= 90) letterGrade = 'A-';
+  else if (weightedAverage >= 87) letterGrade = 'B+';
+  else if (weightedAverage >= 83) letterGrade = 'B';
+  else if (weightedAverage >= 80) letterGrade = 'B-';
+  else if (weightedAverage >= 77) letterGrade = 'C+';
+  else if (weightedAverage >= 73) letterGrade = 'C';
+  else if (weightedAverage >= 70) letterGrade = 'C-';
+  else if (weightedAverage >= 67) letterGrade = 'D+';
+  else if (weightedAverage >= 63) letterGrade = 'D';
+  else if (weightedAverage >= 60) letterGrade = 'D-';
+  
+  document.getElementById('weightedGradeResult').textContent = weightedAverage.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('letterGradeResult').textContent = letterGrade;
+  document.getElementById('totalWeightResult').textContent = totalWeight.toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-TW|grade-calculator|2026-07-09 -->

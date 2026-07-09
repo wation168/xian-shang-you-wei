@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculatrice de Dilution d'Actions - Calcul de Participation</title>
+<meta name="description" content="Calculez l'impact des tours de financement sur votre participation au capital. Estimez votre nouvelle participation après dilution d'actions.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/fr/equity-dilution.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/equity-dilution.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/equity-dilution.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/equity-dilution.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/equity-dilution.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/equity-dilution.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/equity-dilution.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/equity-dilution.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/equity-dilution.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/equity-dilution.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/equity-dilution.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/equity-dilution.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculatrice de Dilution d'Actions", "url": "https://softglow-ai.com/tools/fr/equity-dilution.html", "description": "Calculez l'impact des tours de financement sur votre participation au capital. Estimez votre nouvelle participation après dilution d'actions.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "fr"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Qu'est-ce que la dilution d'actions exactement ?", "acceptedAnswer": {"@type": "Answer", "text": "La dilution d'actions se produit lorsqu'une entreprise émet de nouvelles actions, réduisant le pourcentage de propriété de chaque actionnaire existant. Bien que vous conserviez le même nombre d'actions, votre part du gâteau devient plus petite car le gâteau s'est aggrandi."}}, {"@type": "Question", "name": "Pourquoi les entrepreneurs acceptent-ils la dilution ?", "acceptedAnswer": {"@type": "Answer", "text": "Les entrepreneurs acceptent la dilution pour lever les capitaux nécessaires à la croissance de l'entreprise. Un pourcentage plus petit d'une entreprise plus grande peut être plus précieux qu'un pourcentage plus grand d'une petite entreprise stagnante."}}, {"@type": "Question", "name": "Comment puis-je calculer la dilution sur plusieurs rondes de financement ?", "acceptedAnswer": {"@type": "Answer", "text": "Appliquez cette calculatrice de manière itérative. Après chaque ronde, utilisez votre nouveau pourcentage de participation comme point de départ pour calculer l'impact de la ronde suivante."}}, {"@type": "Question", "name": "Existe-t-il des moyens de protéger ma participation contre la dilution ?", "acceptedAnswer": {"@type": "Answer", "text": "Oui, vous pouvez négocier des clauses anti-dilution, obtenir des droits de préemption vous permettant d'investir davantage dans les futurs tours, ou structurer votre financement pour minimiser la dilution complète."}}, {"@type": "Question", "name": "Quelle est une dilution acceptable pour un fondateur ?", "acceptedAnswer": {"@type": "Answer", "text": "Cela dépend de votre situation, mais généralement, les fondateurs visent à conserver au moins 20-30% après plusieurs tours de financement pour maintenir un contrôle significatif et une motivation entrepreneuriale."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/fr/">Outils</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/fr/">Outils</a> > Calculatrice de Dilution d'Actions</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Calculatrice de Dilution d'Actions</h1>
+    <p class="calc-subtitle">Calculez comment les tours de financement réduisent votre participation</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="oldOwnership">Votre Pourcentage de Participation Actuel</label>
+  <div class="input-row"><input type="number" id="oldOwnership" placeholder="25"  step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">Entrez votre pourcentage de participation actuel dans l'entreprise avant le financement</small>
+<div class="input-group">
+  <label for="dilutionPercent">Pourcentage de Dilution (Nouveau Financement)</label>
+  <div class="input-row"><input type="number" id="dilutionPercent" placeholder="20"  step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">Entrez le pourcentage de dilution causé par la nouvelle ronde de financement</small></div>
+    <button class="btn-calc" onclick="calculate()">Calculer</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Votre Nouveau Pourcentage de Participation</span><span class="result-value" id="newOwnership">—</span></div>
+<div class="result-item"><span class="result-label">Participation Perdue</span><span class="result-value" id="ownershipLoss">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>Qu'est-ce que cela signifie ?</strong> Votre nouveau pourcentage de participation représente votre stake dans l'entreprise après la dilution. La participation perdue montre le pourcentage exact que vous avez dilué en raison de ce tour de financement.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Imprimer</button>
+        <button onclick="shareResult()">&#x1f4e4; Partager</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>Comprendre la Dilution d'Actions</h2><p>La dilution d'actions est un processus naturel dans la vie d'une entreprise en croissance qui lève des capitaux auprès d'investisseurs externes. Lorsqu'une entreprise émet de nouvelles actions pour lever des fonds, le pourcentage de participation de chaque actionnaire existant diminue proportionnellement. Même si vous conservez le même nombre d'actions, votre pourcentage global de propriété diminue car le nombre total d'actions en circulation augmente.</p><h2>Comment Fonctionne la Dilution</h2><p>Imaginons que vous possédiez 25% d'une entreprise. Si l'entreprise lève des fonds et que cela représente une dilution de 20%, votre participation passerait de 25% à 20%. Vous ne perdez pas réellement des actions – au lieu de cela, de nouvelles actions sont créées pour les nouveaux investisseurs, ce qui réduit votre pourcentage de propriété. Cette calculatrice aide les entrepreneurs et les investisseurs à comprendre l'impact exact de chaque tour de financement sur leur participation.</p><h2>Implications Financières et Stratégiques</h2><p>La dilution a des implications importantes pour les fondateurs et les actionnaires. Bien que votre pourcentage diminue, la valeur absolue de votre participation peut augmenter si l'évaluation de l'entreprise croît à un rythme plus rapide que la dilution. C'est pourquoi les entrepreneurs acceptent la dilution lors des tours de financement – ils échangent un pourcentage plus petit d'une entreprise plus grande contre un pourcentage plus grand d'une entreprise plus petite. Cependant, il est crucial de suivre votre participation au fil du temps, car une dilution excessive peut affecter votre contrôle et votre influence sur les décisions de l'entreprise.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Gérer la Dilution à Travers les Tours de Financement</h2><p>Les entrepreneurs stratégiques doivent anticiper la dilution à travers plusieurs tours de financement. Si vous prévoyez de lever des capitaux lors de plusieurs rondes (série A, B, C, etc.), vous devez comprendre comment chaque ronde affectera cumulativement votre participation. Par exemple, une dilution de 20% à chaque ronde signifie que votre participation initiale sera multipliée par 0,8 à chaque étape. Après trois rondes, votre participation initiale serait réduite à environ 51% de sa valeur originale (0,8 × 0,8 × 0,8 = 0,512).</p><h2>Stratégies pour Minimiser la Dilution Excessive</h2><p>Il existe plusieurs stratégies pour gérer la dilution : négocier des conditions favorables, lever uniquement le capital nécessaire, envisager des financements alternatifs comme la dette ou les prises de participation partielles, et mettre en place des pools d'options pour les employés qui ne créent pas une dilution immédiate complète. Les fondateurs doivent également envisager les mécanismes anti-dilution et les droits de préemption qui leur permettent de maintenir leur pourcentage de participation dans les futurs tours.</p><h2>Utiliser Cet Outil pour Planifier Votre Croissance</h2><p>Cette calculatrice est un point de départ utile pour comprendre l'impact d'une seule ronde de financement. Pour une planification plus complète, envisagez de modéliser plusieurs scénarios de financement et de calculer votre participation projetée après chaque ronde. Combinez cet outil avec une analyse de l'évaluation et de la valorisation pour obtenir une vue complète de votre situation financière.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Articles connexes</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>Questions fréquentes</h2><div class="faq-item"><div class="faq-q">Qu'est-ce que la dilution d'actions exactement ?</div><div class="faq-a">La dilution d'actions se produit lorsqu'une entreprise émet de nouvelles actions, réduisant le pourcentage de propriété de chaque actionnaire existant. Bien que vous conserviez le même nombre d'actions, votre part du gâteau devient plus petite car le gâteau s'est aggrandi.</div></div>
+  <div class="faq-item"><div class="faq-q">Pourquoi les entrepreneurs acceptent-ils la dilution ?</div><div class="faq-a">Les entrepreneurs acceptent la dilution pour lever les capitaux nécessaires à la croissance de l'entreprise. Un pourcentage plus petit d'une entreprise plus grande peut être plus précieux qu'un pourcentage plus grand d'une petite entreprise stagnante.</div></div>
+  <div class="faq-item"><div class="faq-q">Comment puis-je calculer la dilution sur plusieurs rondes de financement ?</div><div class="faq-a">Appliquez cette calculatrice de manière itérative. Après chaque ronde, utilisez votre nouveau pourcentage de participation comme point de départ pour calculer l'impact de la ronde suivante.</div></div>
+  <div class="faq-item"><div class="faq-q">Existe-t-il des moyens de protéger ma participation contre la dilution ?</div><div class="faq-a">Oui, vous pouvez négocier des clauses anti-dilution, obtenir des droits de préemption vous permettant d'investir davantage dans les futurs tours, ou structurer votre financement pour minimiser la dilution complète.</div></div>
+  <div class="faq-item"><div class="faq-q">Quelle est une dilution acceptable pour un fondateur ?</div><div class="faq-a">Cela dépend de votre situation, mais généralement, les fondateurs visent à conserver au moins 20-30% après plusieurs tours de financement pour maintenir un contrôle significatif et une motivation entrepreneuriale.</div></div></section>
+  <div class="more-tools"><h3>Plus d'outils</h3><div class="tools-grid"><a class="tool-pill" href="/tools/fr/compound-interest.html">Calculatrice d'Intérêts Composés</a>
+      <a class="tool-pill" href="/tools/fr/roi-calculator.html">Calculatrice de ROI</a>
+      <a class="tool-pill" href="/tools/fr/risk-reward.html">Calculateur Risque-Récompense</a>
+      <a class="tool-pill" href="/tools/fr/position-size.html">Calculateur de Taille de Position</a>
+      <a class="tool-pill" href="/tools/fr/stop-loss.html">Calculatrice de Stop Loss</a>
+      <a class="tool-pill" href="/tools/fr/dividend-yield.html">Calculateur de Rendement de Dividende</a>
+      <a class="tool-pill" href="/tools/fr/pe-ratio.html">Calculateur de Ratio P/E</a>
+      <a class="tool-pill" href="/tools/fr/dca-calculator.html">Calculatrice d'Investissement Progressif</a>
+      <a class="tool-pill" href="/tools/fr/cagr.html">Calculatrice TCAC</a>
+      <a class="tool-pill" href="/tools/fr/margin-calculator.html">Calculatrice de Marge</a>
+      <a class="tool-pill" href="/tools/fr/stock-gain-loss.html">Calculateur de Gain/Perte en Bourse</a>
+      <a class="tool-pill" href="/tools/fr/break-even.html">Calculatrice du Seuil de Rentabilité</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/equity-dilution.html" class="lang-btn">English</a>
+    <a href="/tools/equity-dilution.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/equity-dilution.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/equity-dilution.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/equity-dilution.html" class="lang-btn active">Français</a>
+    <a href="/tools/es/equity-dilution.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/equity-dilution.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/equity-dilution.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/equity-dilution.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/equity-dilution.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Outils connexes</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const oldOwnershipInput = document.getElementById('oldOwnership');
+  const dilutionPercentInput = document.getElementById('dilutionPercent');
+  const newOwnershipResult = document.getElementById('newOwnership');
+  const ownershipLossResult = document.getElementById('ownershipLoss');
+  const resultsDiv = document.getElementById('results');
+
+  if (!oldOwnershipInput.value || !dilutionPercentInput.value) {
+    alert('Please enter both your current ownership percentage and the dilution percentage.');
+    return;
+  }
+
+  const oldOwnership = parseFloat(oldOwnershipInput.value);
+  const dilutionPercent = parseFloat(dilutionPercentInput.value);
+
+  if (oldOwnership < 0 || oldOwnership > 100 || dilutionPercent < 0 || dilutionPercent > 100) {
+    alert('Please enter values between 0 and 100.');
+    return;
+  }
+
+  const newOwnership = oldOwnership * (1 - dilutionPercent / 100);
+  const ownershipLoss = oldOwnership - newOwnership;
+
+  newOwnershipResult.textContent = newOwnership.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+  ownershipLossResult.textContent = ownershipLoss.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copié !';setTimeout(function(){b.textContent='Partager'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|fr|equity-dilution|2026-07-09 -->

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>年金計算器 - 快速計算年金支付額</title>
+<meta name="description" content="免費年金計算器，輕鬆計算定期支付額、總支付額和利息收入。輸入本金、利率和期數即可快速得出結果。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/annuity-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/annuity-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/annuity-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/annuity-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/annuity-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/annuity-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/annuity-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/annuity-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/annuity-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/annuity-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/annuity-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/annuity-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "年金計算器", "url": "https://softglow-ai.com/tools/annuity-calculator.html", "description": "免費年金計算器，輕鬆計算定期支付額、總支付額和利息收入。輸入本金、利率和期數即可快速得出結果。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "年金計算器的計算公式是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "年金計算器使用標準年金公式：PMT = PV × [r(1+r)^n] / [(1+r)^n - 1]，其中PV為現值，r為利率，n為期數。"}}, {"@type": "Question", "name": "普通年金和年初年金有什麼區別？", "acceptedAnswer": {"@type": "Answer", "text": "普通年金的支付在每期末進行，而年初年金的支付在每期初進行。本計算器適用於普通年金。"}}, {"@type": "Question", "name": "我可以用年金計算器計算貸款還款嗎？", "acceptedAnswer": {"@type": "Answer", "text": "可以。輸入貸款金額作為現值、貸款利率和還款期數，計算器會顯示您需要支付的每月或每年還款額。"}}, {"@type": "Question", "name": "如何比較不同期限的年金方案？", "acceptedAnswer": {"@type": "Answer", "text": "使用相同的現值和利率，分別輸入不同的期數，比較結果中的每期支付額和總利息，選擇最適合您的方案。"}}, {"@type": "Question", "name": "年利率應該如何輸入？", "acceptedAnswer": {"@type": "Answer", "text": "年利率以百分比形式輸入。例如，5%的利率應輸入為5，而非0.05。計算器會自動轉換為小數進行計算。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 年金計算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>年金計算器</h1>
+    <p class="calc-subtitle">立即計算年金支付和現值</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="presentValue">現值 (PV)</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="presentValue" placeholder="100000"  value="100000" step="0.01"></div>
+</div>
+  <small class="input-help">輸入初始投資或貸款金額</small>
+<div class="input-group">
+  <label for="interestRate">年利率</label>
+  <div class="input-row"><input type="number" id="interestRate" placeholder="5"  value="5" step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">輸入每年的利率百分比</small>
+<div class="input-group">
+  <label for="numberOfPeriods">期數 (年)</label>
+  <div class="input-row"><input type="number" id="numberOfPeriods" placeholder="20"  value="20" step="1"><span class="input-suffix">年</span></div>
+</div>
+  <small class="input-help">輸入投資或貸款的總期數（以年計）</small></div>
+    <button class="btn-calc" onclick="calculate()">計算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">每期支付額 (PMT)</span><span class="result-value" id="paymentAmount">—</span></div>
+<div class="result-item"><span class="result-label">期間總支付額</span><span class="result-value" id="totalPayments">—</span></div>
+<div class="result-item"><span class="result-label">利息總收入</span><span class="result-value" id="totalInterest">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> 每期支付額顯示您需要定期支付或接收的金額。期間總支付額是所有定期支付的總和。利息總收入是總支付額與初始本金的差額，代表產生的利息或成本。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 列印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什麼是年金？</h2><p>年金是一系列定期進行的相等現金流量，通常用於投資、退休計劃或貸款償還。年金計算器可幫助您確定每期應支付或接收的金額。</p><h2>如何使用年金計算器</h2><p>輸入三個關鍵參數：現值（初始投資或貸款金額）、年利率和期數。計算器將自動計算每期支付額、總支付額和利息收入。例如，投資£100,000，年利率5%，期限20年，可快速了解您的年金情況。</p><h2>現值的重要性</h2><p>現值代表今天的金額，考慮到時間價值。在年金計算中，現值作為基準，利息會根據此金額逐期累積或遞減。較高的現值會導致較高的每期支付額。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>利率對年金的影響</h2><p>年利率直接影響每期支付額和利息總額。利率越高，每期支付額越高，但利息收入也更多。相反，較低的利率會減少每期支付額，適合低風險投資者。</p><h2>期數計算</h2><p>期數是年金持續的年數。期數越長，每期支付額越低，但總支付額和利息收入可能更高。例如，20年期的年金會分散支付，每期金額較小。</p><h2>實際應用</h2><p>年金計算廣泛應用於退休規劃、抵押貸款計算、投資回報分析和保險產品評估。無論是個人財務規劃還是商業決策，準確的年金計算都是做出明智財務決定的基礎。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">年金計算器的計算公式是什麼？</div><div class="faq-a">年金計算器使用標準年金公式：PMT = PV × [r(1+r)^n] / [(1+r)^n - 1]，其中PV為現值，r為利率，n為期數。</div></div>
+  <div class="faq-item"><div class="faq-q">普通年金和年初年金有什麼區別？</div><div class="faq-a">普通年金的支付在每期末進行，而年初年金的支付在每期初進行。本計算器適用於普通年金。</div></div>
+  <div class="faq-item"><div class="faq-q">我可以用年金計算器計算貸款還款嗎？</div><div class="faq-a">可以。輸入貸款金額作為現值、貸款利率和還款期數，計算器會顯示您需要支付的每月或每年還款額。</div></div>
+  <div class="faq-item"><div class="faq-q">如何比較不同期限的年金方案？</div><div class="faq-a">使用相同的現值和利率，分別輸入不同的期數，比較結果中的每期支付額和總利息，選擇最適合您的方案。</div></div>
+  <div class="faq-item"><div class="faq-q">年利率應該如何輸入？</div><div class="faq-a">年利率以百分比形式輸入。例如，5%的利率應輸入為5，而非0.05。計算器會自動轉換為小數進行計算。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/retirement.html">退休計算機</a>
+      <a class="tool-pill" href="/tools/401k-contribution.html">401k 退休金供款計算機</a>
+      <a class="tool-pill" href="/tools/coast-fire-calc.html">Coast FIRE 計算機</a>
+      <a class="tool-pill" href="/tools/catch-up-contribution.html">補繳貢獻計算機</a>
+      <a class="tool-pill" href="/tools/annuity-income.html">年金收入計算機</a>
+      <a class="tool-pill" href="/tools/pension-calculator.html">Pension Calculator</a>
+      <a class="tool-pill" href="/tools/social-security.html">Social Security</a>
+      <a class="tool-pill" href="/tools/roth-conversion.html">Roth Conversion</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/annuity-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/annuity-calculator.html" class="lang-btn active">繁體中文</a>
+    <a href="/tools/ja/annuity-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/annuity-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/annuity-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/annuity-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/annuity-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/annuity-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/annuity-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/annuity-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const pv = parseFloat(document.getElementById('presentValue').value);
+  const annualRate = parseFloat(document.getElementById('interestRate').value);
+  const years = parseFloat(document.getElementById('numberOfPeriods').value);
+
+  if (!pv || !annualRate || !years || pv <= 0 || annualRate < 0 || years <= 0) {
+    alert('Please enter valid values for all fields (positive numbers)');
+    return;
+  }
+
+  const r = annualRate / 100;
+  const n = years;
+
+  if (r === 0) {
+    const pmt = pv / n;
+    const totalPayments = pv;
+    const totalInterest = 0;
+
+    document.getElementById('paymentAmount').textContent = '£' + pmt.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('totalPayments').textContent = '£' + totalPayments.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('totalInterest').textContent = '£' + totalInterest.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  } else {
+    const denominator = 1 - Math.pow(1 + r, -n);
+    const pmt = (pv * r) / denominator;
+    const totalPayments = pmt * n;
+    const totalInterest = totalPayments - pv;
+
+    document.getElementById('paymentAmount').textContent = '£' + pmt.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('totalPayments').textContent = '£' + totalPayments.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('totalInterest').textContent = '£' + totalInterest.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  }
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-TW|annuity-calculator|2026-07-09 -->

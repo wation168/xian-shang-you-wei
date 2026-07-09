@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Startup Burn Rate Calculator | Cash Runway Tool</title>
+<meta name="description" content="Calculate your startup's monthly burn rate, runway, and cash depletion date. Plan your finances with this essential startup calculator.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/en/burn-rate-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/burn-rate-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/burn-rate-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/burn-rate-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/burn-rate-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/burn-rate-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/burn-rate-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/burn-rate-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/burn-rate-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/burn-rate-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/burn-rate-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/burn-rate-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Burn Rate Calculator", "url": "https://softglow-ai.com/tools/en/burn-rate-calculator.html", "description": "Calculate your startup's monthly burn rate, runway, and cash depletion date. Plan your finances with this essential startup calculator.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What exactly is burn rate?", "acceptedAnswer": {"@type": "Answer", "text": "Burn rate is the rate at which a startup spends money from its cash reserves each month. It's calculated by subtracting monthly revenue from monthly expenses. A positive burn rate means you're spending more than you're earning; a negative burn rate (though rare for early startups) means you're profitable."}}, {"@type": "Question", "name": "Why is burn rate important for my startup?", "acceptedAnswer": {"@type": "Answer", "text": "Burn rate is crucial because it tells you how long your company can operate before running out of cash. It helps you plan hiring, marketing spend, and fundraising timelines. Investors also scrutinize burn rate to assess financial management and runway."}}, {"@type": "Question", "name": "How can I reduce my startup's burn rate?", "acceptedAnswer": {"@type": "Answer", "text": "You can reduce burn rate by negotiating better vendor contracts, eliminating unnecessary expenses, automating processes, delaying non-critical hires, and focusing on revenue-generating activities. Even small reductions in monthly expenses significantly extend your runway."}}, {"@type": "Question", "name": "What is a good runway length?", "acceptedAnswer": {"@type": "Answer", "text": "Most investors prefer startups to maintain 12-18 months of runway. This provides enough time to achieve milestones, generate traction, and prepare for the next funding round. Having less than 6 months of runway creates urgency and pressure that can lead to poor decision-making."}}, {"@type": "Question", "name": "Can a startup have a negative burn rate?", "acceptedAnswer": {"@type": "Answer", "text": "Yes! A negative burn rate means your monthly revenue exceeds your monthly expenses, indicating profitability. This is the ultimate goal for sustainable startups. Most early-stage startups have positive burn rates and work toward achieving profitability or reaching sufficient scale before running out of capital."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/en/">Tools</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/en/">Tools</a> > Burn Rate Calculator</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Burn Rate Calculator</h1>
+    <p class="calc-subtitle">Calculate how quickly your startup is spending cash reserves</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="monthlyExpenses">Monthly Expenses</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="monthlyExpenses" placeholder="50000"  step="0.01"></div>
+</div>
+  <small class="input-help">Enter your total monthly operating expenses in dollars</small>
+<div class="input-group">
+  <label for="monthlyRevenue">Monthly Revenue</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="monthlyRevenue" placeholder="30000"  step="0.01"></div>
+</div>
+  <small class="input-help">Enter your total monthly revenue or income in dollars</small>
+<div class="input-group">
+  <label for="cashReserve">Current Cash Reserve (Optional)</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="cashReserve" placeholder="500000"  step="0.01"></div>
+</div>
+  <small class="input-help">Enter your current available cash reserves (optional for runway calculation)</small></div>
+    <button class="btn-calc" onclick="calculate()">Calculate</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Monthly Burn Rate</span><span class="result-value" id="burnRateResult">—</span></div>
+<div class="result-item"><span class="result-label">Runway (Months)</span><span class="result-value" id="runwayResult">—</span></div>
+<div class="result-item"><span class="result-label">Funds Depleted By</span><span class="result-value" id="runwayDateResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>What does this mean?</strong> The Monthly Burn Rate shows how much cash your startup loses each month. Your Runway indicates how many months you can operate before depleting reserves. The Funds Depleted By date helps you plan when additional funding will be needed.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Print</button>
+        <button onclick="shareResult()">&#x1f4e4; Share</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>Understanding Your Startup's Burn Rate</h2><p>The burn rate is one of the most critical metrics for any startup founder to understand. It represents the rate at which your company spends money from its cash reserves each month. For early-stage startups that haven't reached profitability, monitoring burn rate is essential for survival and strategic planning. By calculating your burn rate accurately, you can make informed decisions about hiring, spending, and fundraising timelines.</p><h2>How to Calculate Burn Rate</h2><p>Calculating your burn rate is straightforward: subtract your monthly revenue from your monthly expenses. For example, if your startup spends $50,000 per month in operating costs but only generates $30,000 in revenue, your monthly burn rate is $20,000. This means you're losing $20,000 from your cash reserves every month. Understanding this number helps you track financial health and plan accordingly.</p><h2>Understanding Your Runway</h2><p>Runway is the number of months your company can continue operating at the current burn rate before running out of cash. This is calculated by dividing your current cash reserve by your monthly burn rate. If you have $500,000 in reserves and a burn rate of $20,000 per month, your runway is 25 months. Runway is crucial for planning your path to profitability or your next funding round. Most investors expect startups to have at least 12-18 months of runway when seeking Series A funding.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Optimizing Your Burn Rate</h2><p>Reducing your burn rate is one of the most effective ways to extend your runway and improve financial stability. This can be achieved through various strategies: negotiating better rates with vendors, implementing more efficient processes, delaying non-essential hires, and focusing on revenue-generating activities. Some startups adopt a lean methodology, scaling expenses gradually as revenue increases. Even reducing burn rate by 10-15% can significantly impact how long your company can operate independently.</p><h2>When to Raise Funding</h2><p>Understanding your burn rate helps determine when you should raise funding. A common strategy is to raise new capital when you have 12-18 months of runway remaining. This gives you time to deploy the funds before needing additional capital. If your burn rate is increasing faster than expected, you may need to raise earlier. Conversely, if you're approaching profitability, you might extend your runway without additional funding.</p><h2>Planning for Growth</h2><p>As your startup scales, your burn rate may initially increase due to hiring and expansion costs. This is normal and expected if revenue is growing proportionally or faster. The key is ensuring your growth strategy leads to a path to profitability. Monitor how your burn rate changes relative to revenue growth metrics like customer acquisition cost (CAC) and lifetime value (LTV). A sustainable startup should show improving unit economics even as absolute burn rate increases.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Related Articles</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>FAQ</h2><div class="faq-item"><div class="faq-q">What exactly is burn rate?</div><div class="faq-a">Burn rate is the rate at which a startup spends money from its cash reserves each month. It's calculated by subtracting monthly revenue from monthly expenses. A positive burn rate means you're spending more than you're earning; a negative burn rate (though rare for early startups) means you're profitable.</div></div>
+  <div class="faq-item"><div class="faq-q">Why is burn rate important for my startup?</div><div class="faq-a">Burn rate is crucial because it tells you how long your company can operate before running out of cash. It helps you plan hiring, marketing spend, and fundraising timelines. Investors also scrutinize burn rate to assess financial management and runway.</div></div>
+  <div class="faq-item"><div class="faq-q">How can I reduce my startup's burn rate?</div><div class="faq-a">You can reduce burn rate by negotiating better vendor contracts, eliminating unnecessary expenses, automating processes, delaying non-critical hires, and focusing on revenue-generating activities. Even small reductions in monthly expenses significantly extend your runway.</div></div>
+  <div class="faq-item"><div class="faq-q">What is a good runway length?</div><div class="faq-a">Most investors prefer startups to maintain 12-18 months of runway. This provides enough time to achieve milestones, generate traction, and prepare for the next funding round. Having less than 6 months of runway creates urgency and pressure that can lead to poor decision-making.</div></div>
+  <div class="faq-item"><div class="faq-q">Can a startup have a negative burn rate?</div><div class="faq-a">Yes! A negative burn rate means your monthly revenue exceeds your monthly expenses, indicating profitability. This is the ultimate goal for sustainable startups. Most early-stage startups have positive burn rates and work toward achieving profitability or reaching sufficient scale before running out of capital.</div></div></section>
+  <div class="more-tools"><h3>More Tools</h3><div class="tools-grid"><a class="tool-pill" href="/tools/en/customer-acquisition.html">CAC Calculator</a>
+      <a class="tool-pill" href="/tools/en/conversion-rate.html">Conversion Rate Calculator</a>
+      <a class="tool-pill" href="/tools/en/churn-rate.html">Churn Rate Calculator</a>
+      <a class="tool-pill" href="/tools/en/email-roi.html">Email Marketing ROI Calculator</a>
+      <a class="tool-pill" href="/tools/en/dropship-margin.html">Dropship Profit Calculator</a>
+      <a class="tool-pill" href="/tools/en/amazon-profit.html">Amazon Profit Calculator</a>
+      <a class="tool-pill" href="/tools/en/employee-cost.html">Employee Total Cost Calculator</a>
+      <a class="tool-pill" href="/tools/en/business-exit-value.html">Business Exit Value Calculator</a>
+      <a class="tool-pill" href="/tools/en/company-registration.html">Company Setup Cost Calculator</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/burn-rate-calculator.html" class="lang-btn active">English</a>
+    <a href="/tools/burn-rate-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/burn-rate-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/burn-rate-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/burn-rate-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/burn-rate-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/burn-rate-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/burn-rate-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/burn-rate-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/burn-rate-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Related Tools</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const monthlyExpenses = parseFloat(document.getElementById('monthlyExpenses').value);
+  const monthlyRevenue = parseFloat(document.getElementById('monthlyRevenue').value);
+  const cashReserve = parseFloat(document.getElementById('cashReserve').value);
+
+  if (isNaN(monthlyExpenses) || isNaN(monthlyRevenue)) {
+    alert('Please enter valid values for Monthly Expenses and Monthly Revenue');
+    return;
+  }
+
+  const burnRate = monthlyExpenses - monthlyRevenue;
+  const burnRateElement = document.getElementById('burnRateResult');
+  burnRateElement.textContent = '$' + burnRate.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+  let runwayMonths = 'N/A';
+  let runwayDate = 'N/A';
+
+  if (!isNaN(cashReserve) && cashReserve > 0) {
+    if (burnRate > 0) {
+      runwayMonths = (cashReserve / burnRate).toFixed(1);
+      const today = new Date();
+      const depletionDate = new Date(today.setMonth(today.getMonth() + parseInt(runwayMonths)));
+      runwayDate = depletionDate.toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'});
+    } else if (burnRate === 0) {
+      runwayMonths = 'Infinite';
+      runwayDate = 'Breaking even';
+    } else {
+      runwayMonths = 'Infinite';
+      runwayDate = 'Profitable';
+    }
+  }
+
+  const runwayElement = document.getElementById('runwayResult');
+  const runwayDateElement = document.getElementById('runwayDateResult');
+  runwayElement.textContent = runwayMonths.toString();
+  runwayDateElement.textContent = runwayDate.toString();
+
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copied!';setTimeout(function(){b.textContent='Share'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|en|burn-rate-calculator|2026-07-09 -->

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>バイク ギア比計算機 - 自転車のギア選択を最適化</title>
+<meta name="description" content="フロントスプロケットとリアスプロケットの歯数からギア比を計算。ペダル1回転あたりの走行距離を調べて、最適なギア選択ができます。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/bike-gear-ratio.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/bike-gear-ratio.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/bike-gear-ratio.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/bike-gear-ratio.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/bike-gear-ratio.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/bike-gear-ratio.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/bike-gear-ratio.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/bike-gear-ratio.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/bike-gear-ratio.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/bike-gear-ratio.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/bike-gear-ratio.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/bike-gear-ratio.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "バイク ギア比計算機", "url": "https://softglow-ai.com/tools/ja/bike-gear-ratio.html", "description": "フロントスプロケットとリアスプロケットの歯数からギア比を計算。ペダル1回転あたりの走行距離を調べて、最適なギア選択ができます。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "ギア比とは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "ギア比は、フロントスプロケットの歯数をリアスプロケットの歯数で割った値です。この数値が大きいほど、ペダル1回転でホイールがより多く回転し、高速走行に適しています。"}}, {"@type": "Question", "name": "ギアインチはどのように使用されますか？", "acceptedAnswer": {"@type": "Answer", "text": "ギアインチは、26インチホイールを基準にした場合のペダル1回転あたりの走行距離です。この数値が大きいほど、各ペダル回転でより遠い距離を走行できます。"}}, {"@type": "Question", "name": "坂道では低いギア比を選ぶべきですか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、坂道ではギア比が低い（歯数の差が大きい）組み合わせを選ぶことで、ペダルが軽くなり、楽に登坂できます。"}}, {"@type": "Question", "name": "高いギア比のメリットは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "高いギア比は高速走行に適しており、平坦な道路や下り坂で効率的に速度を出すことができます。ただし、ペダルに力が必要になります。"}}, {"@type": "Question", "name": "この計算機はすべての自転車タイプに対応していますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、この計算機はロードバイク、クロスバイク、マウンテンバイク、その他すべての自転車タイプのギア比計算に使用できます。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > バイク ギア比計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>バイク ギア比計算機</h1>
+    <p class="calc-subtitle">ギア比を計算して自転車のパフォーマンスを最適化し、最適なギアを選択します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="chainring">チェーンリング（フロントスプロケット歯数）</label>
+  <div class="input-row"><input type="number" id="chainring" placeholder="例: 50"  value="50" step="1"><span class="input-suffix">歯</span></div>
+</div>
+  <small class="input-help">フロントスプロケットの歯数を入力してください</small>
+<div class="input-group">
+  <label for="cog">コグ（リアスプロケット歯数）</label>
+  <div class="input-row"><input type="number" id="cog" placeholder="例: 25"  value="25" step="1"><span class="input-suffix">歯</span></div>
+</div>
+  <small class="input-help">リアスプロケットの歯数を入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">ギア比</span><span class="result-value" id="gearRatio">—</span></div>
+<div class="result-item"><span class="result-label">ペダル1回転あたりのホイール回転数</span><span class="result-value" id="wheelRevolutions">—</span></div>
+<div class="result-item"><span class="result-label">ギアインチ（26インチホイール）</span><span class="result-value" id="gearInches">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> ギア比はペダルの力の伝達効率を示します。数値が大きいほど、ペダル1回転でホイールが多く回転し、高速走行に適しています。ギアインチは走行距離の目安を表し、数値が大きいほど軽くペダルを回せます。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>ギア比とは</h2><p>ギア比は、フロントスプロケットの歯数をリアスプロケットの歯数で割った値です。この数値によって、ペダル1回転でホイールがどれだけ回転するかが決まります。ギア比が高いほど、ペダルを回す力が大きくなりますが、高速走行に適しており、ギア比が低いほど軽い力でペダルを回せますが、速度は出しにくくなります。</p><h2>ペダル1回転あたりのホイール回転数</h2><p>この数値はギア比と同じ意味で、ペダルを1回転させるとホイールが何回転するかを表します。例えば、ギア比が2.0の場合、ペダルを1回転させるとホイールは2回転します。この数値が高いほど、同じペダル回転数でより遠い距離を走行できます。</p><h2>ギアインチについて</h2><p>ギアインチは、26インチホイールを使用した場合の走行距離の目安です。この数値は、ペダル1回転あたりにホイールが進む距離をインチで表したものです。例えば、ギアインチが80の場合、ペダルを1回転させると約80インチ（約203cm）進みます。この数値が大きいほど、高速走行に適したギア設定です。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>クロスバイクとロードバイク</h2><p>ロードバイクは一般的に大きなチェーンリング（50～53歯）と小さなコグ（11～25歯）を使用し、ギア比が高く、高速走行に適しています。一方、クロスバイクやマウンテンバイクは、より多くのギア比の選択肢があり、様々な地形や走行条件に対応できるよう設計されています。</p><h2>最適なギア選択</h2><p>平坦な道路では高いギア比を選択して高速走行が可能ですが、坂道では低いギア比を選択して楽にペダルを回します。自分の体力や走行条件に応じて、最適なギアを選択することで、効率的で快適な走行ができます。</p><h2>ギア計算の実践的な使用方法</h2><p>このツールを使用することで、様々なチェーンリングとコグの組み合わせを試して、自分の自転車に最適なギアセットアップを見つけることができます。複数の組み合わせを計算して比較し、自分のライディングスタイルと体力に最も適したギア比を選択してください。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">ギア比とは何ですか？</div><div class="faq-a">ギア比は、フロントスプロケットの歯数をリアスプロケットの歯数で割った値です。この数値が大きいほど、ペダル1回転でホイールがより多く回転し、高速走行に適しています。</div></div>
+  <div class="faq-item"><div class="faq-q">ギアインチはどのように使用されますか？</div><div class="faq-a">ギアインチは、26インチホイールを基準にした場合のペダル1回転あたりの走行距離です。この数値が大きいほど、各ペダル回転でより遠い距離を走行できます。</div></div>
+  <div class="faq-item"><div class="faq-q">坂道では低いギア比を選ぶべきですか？</div><div class="faq-a">はい、坂道ではギア比が低い（歯数の差が大きい）組み合わせを選ぶことで、ペダルが軽くなり、楽に登坂できます。</div></div>
+  <div class="faq-item"><div class="faq-q">高いギア比のメリットは何ですか？</div><div class="faq-a">高いギア比は高速走行に適しており、平坦な道路や下り坂で効率的に速度を出すことができます。ただし、ペダルに力が必要になります。</div></div>
+  <div class="faq-item"><div class="faq-q">この計算機はすべての自転車タイプに対応していますか？</div><div class="faq-a">はい、この計算機はロードバイク、クロスバイク、マウンテンバイク、その他すべての自転車タイプのギア比計算に使用できます。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">Compound Interest</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">Roi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">Risk Reward</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">Position Size</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">Dividend Yield</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">Pe Ratio</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">Dca Calculator</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">Cagr</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">Break Even</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/bike-gear-ratio.html" class="lang-btn">English</a>
+    <a href="/tools/bike-gear-ratio.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/bike-gear-ratio.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/bike-gear-ratio.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/bike-gear-ratio.html" class="lang-btn">Français</a>
+    <a href="/tools/es/bike-gear-ratio.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/bike-gear-ratio.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/bike-gear-ratio.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/bike-gear-ratio.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/bike-gear-ratio.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const chainringInput = document.getElementById('chainring');
+  const cogInput = document.getElementById('cog');
+  const gearRatioResult = document.getElementById('gearRatio');
+  const wheelRevolutionsResult = document.getElementById('wheelRevolutions');
+  const gearInchesResult = document.getElementById('gearInches');
+  const resultsDiv = document.getElementById('results');
+
+  const chainring = parseFloat(chainringInput.value);
+  const cog = parseFloat(cogInput.value);
+
+  if (!chainring || !cog || chainring <= 0 || cog <= 0) {
+    alert('Please enter valid positive numbers for both chainring and cog teeth.');
+    return;
+  }
+
+  const gearRatio = chainring / cog;
+  const wheelRevolutions = gearRatio;
+  const wheelDiameter = 26;
+  const wheelCircumference = wheelDiameter * Math.PI;
+  const gearInches = gearRatio * wheelDiameter;
+
+  gearRatioResult.textContent = gearRatio.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  wheelRevolutionsResult.textContent = wheelRevolutions.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  gearInchesResult.textContent = gearInches.toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|bike-gear-ratio|2026-07-09 -->

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EV充電コスト計算機 - 電気自動車の充電費用を計算</title>
+<meta name="description" content="電気自動車の充電にかかるコストを距離、車両効率、電気代から簡単に計算できます。充電ロスも考慮した正確な費用を知ることができます。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/ev-charging-cost.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/ev-charging-cost.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/ev-charging-cost.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/ev-charging-cost.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/ev-charging-cost.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/ev-charging-cost.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/ev-charging-cost.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/ev-charging-cost.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/ev-charging-cost.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/ev-charging-cost.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/ev-charging-cost.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/ev-charging-cost.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "EV充電コスト計算機", "url": "https://softglow-ai.com/tools/ja/ev-charging-cost.html", "description": "電気自動車の充電にかかるコストを距離、車両効率、電気代から簡単に計算できます。充電ロスも考慮した正確な費用を知ることができます。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "車両効率（マイル/kWh）はどこで確認できますか？", "acceptedAnswer": {"@type": "Answer", "text": "車両効率は、車種のスペックシートやメーカーの公式ウェブサイトで確認できます。また、実際の走行データから計算することもできます。走行距離をバッテリー消費量で割ることで、正確な効率を知ることができます。"}}, {"@type": "Question", "name": "充電ロスは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "充電ロスは、グリッドからバッテリーへのエネルギー転送時に失われるエネルギーです。AC充電では約10～15%、DC急速充電では5～10%程度のロスが一般的です。より効率的な充電器を使用することでロスを減らせます。"}}, {"@type": "Question", "name": "計算結果は正確ですか？", "acceptedAnswer": {"@type": "Answer", "text": "このツールの計算は基本的な公式に基づいており、一般的な条件下では非常に正確です。ただし、実際のコストは天候、運転スタイル、バッテリー温度などの要因に影響されるため、参考値としてご利用ください。"}}, {"@type": "Question", "name": "ガソリン車との費用を比較するにはどうすればよいですか？", "acceptedAnswer": {"@type": "Answer", "text": "このツールで算出したマイルあたりのコストと、ガソリン車のマイルあたりの燃料費を比較してください。EVの方が1マイルあたりのコストが低い場合、長期的には経済的です。"}}, {"@type": "Question", "name": "異なる時間帯の電気代を反映させることができますか？", "acceptedAnswer": {"@type": "Answer", "text": "可能です。お住まいの地域がタイムオブユース（TOU）料金を提供している場合、充電予定の時間帯の電気代を入力してください。複数の時間帯での充電コストを比較することで、最も経済的な充電時間を見つけることができます。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > EV充電コスト計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>EV充電コスト計算機</h1>
+    <p class="calc-subtitle">電気自動車の充電コストを任意の距離で計算します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="distance">走行距離</label>
+  <div class="input-row"><input type="number" id="distance" placeholder="100"  value="100" step="0.1"><span class="input-suffix">マイル</span></div>
+</div>
+  <small class="input-help">走行予定の総距離を入力してください</small>
+<div class="input-group">
+  <label for="efficiency">車両効率</label>
+  <div class="input-row"><input type="number" id="efficiency" placeholder="3.5"  value="3.5" step="0.1"><span class="input-suffix">マイル/kWh</span></div>
+</div>
+  <small class="input-help">車両1kWhあたりの走行距離（マイル/kWh）を入力してください</small>
+<div class="input-group">
+  <label for="electricity_rate">電気代単価</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="electricity_rate" placeholder="0.15"  value="0.15" step="0.001"><span class="input-suffix">/kWh</span></div>
+</div>
+  <small class="input-help">1kWhあたりの電気代（ドル）を入力してください</small>
+<div class="input-group">
+  <label for="charging_loss">充電ロス</label>
+  <div class="input-row"><input type="number" id="charging_loss" placeholder="10"  value="10" step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">充電時のロス率（パーセンテージ）を入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">必要な総エネルギー</span><span class="result-value" id="kwh_needed">—</span></div>
+<div class="result-item"><span class="result-label">充電ロスを含めたエネルギー</span><span class="result-value" id="kwh_with_loss">—</span></div>
+<div class="result-highlight"><span class="result-label">総充電コスト</span><span class="result-value" id="total_cost">—</span></div>
+<div class="result-item"><span class="result-label">マイルあたりのコスト</span><span class="result-value" id="cost_per_mile">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 計算結果は、指定した距離を走行するために必要な総エネルギー量、充電ロスを考慮したバッテリーへの充電量、そしてそれにかかる総コストを表示します。マイルあたりのコストを参考に、ガソリン車との燃料費を比較することができます。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>EV充電コスト計算機について</h2><p>このツールは、電気自動車（EV）の充電にかかる費用を正確に計算するために設計されています。走行距離、車両の効率、電気代単価、そして充電時のロス率を入力するだけで、総充電コストとマイルあたりのコストを素早く算出できます。</p><h2>走行距離の入力</h2><p>走行予定の総距離をマイル単位で入力してください。日帰りの通勤から長距離ドライブまで、任意の距離に対応しています。例えば、100マイルの走行を計画している場合は「100」と入力します。</p><h2>車両効率の設定</h2><p>車両効率はマイル/kWhで表され、1kWhのエネルギーでどれだけの距離を走行できるかを示します。テスラやニッサンなど、車種によって効率が異なります。一般的には2.5～4.5マイル/kWhの範囲です。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>電気代単価の入力</h2><p>お住まいの地域の1kWhあたりの電気代をドル単位で入力してください。米国の平均は約$0.12～$0.15ですが、地域や時間帯によって変動します。詳しくは電力会社の料金表をご確認ください。</p><h2>充電ロス率の考慮</h2><p>充電プロセスでは、バッテリーへの充電時にエネルギーロスが発生します。一般的には5～15%の範囲で、充電器の種類や環境温度によって変わります。より正確な計算のため、この値を設定することをお勧めします。</p><h2>計算結果の活用</h2><p>結果から得られるマイルあたりのコストは、ガソリン車の燃費コストと直接比較することができます。これにより、EVへの乗り換えの経済性を評価できます。また、電気代が安い時間帯に充電することで、さらにコストを削減できる可能性があります。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">車両効率（マイル/kWh）はどこで確認できますか？</div><div class="faq-a">車両効率は、車種のスペックシートやメーカーの公式ウェブサイトで確認できます。また、実際の走行データから計算することもできます。走行距離をバッテリー消費量で割ることで、正確な効率を知ることができます。</div></div>
+  <div class="faq-item"><div class="faq-q">充電ロスは何ですか？</div><div class="faq-a">充電ロスは、グリッドからバッテリーへのエネルギー転送時に失われるエネルギーです。AC充電では約10～15%、DC急速充電では5～10%程度のロスが一般的です。より効率的な充電器を使用することでロスを減らせます。</div></div>
+  <div class="faq-item"><div class="faq-q">計算結果は正確ですか？</div><div class="faq-a">このツールの計算は基本的な公式に基づいており、一般的な条件下では非常に正確です。ただし、実際のコストは天候、運転スタイル、バッテリー温度などの要因に影響されるため、参考値としてご利用ください。</div></div>
+  <div class="faq-item"><div class="faq-q">ガソリン車との費用を比較するにはどうすればよいですか？</div><div class="faq-a">このツールで算出したマイルあたりのコストと、ガソリン車のマイルあたりの燃料費を比較してください。EVの方が1マイルあたりのコストが低い場合、長期的には経済的です。</div></div>
+  <div class="faq-item"><div class="faq-q">異なる時間帯の電気代を反映させることができますか？</div><div class="faq-a">可能です。お住まいの地域がタイムオブユース（TOU）料金を提供している場合、充電予定の時間帯の電気代を入力してください。複数の時間帯での充電コストを比較することで、最も経済的な充電時間を見つけることができます。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">Roi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">Risk Reward</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">Position Size</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">Pe Ratio</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/ev-charging-cost.html" class="lang-btn">English</a>
+    <a href="/tools/ev-charging-cost.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/ev-charging-cost.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/ev-charging-cost.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/ev-charging-cost.html" class="lang-btn">Français</a>
+    <a href="/tools/es/ev-charging-cost.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/ev-charging-cost.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/ev-charging-cost.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/ev-charging-cost.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/ev-charging-cost.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const distanceInput = document.getElementById('distance');
+  const efficiencyInput = document.getElementById('efficiency');
+  const electricityRateInput = document.getElementById('electricity_rate');
+  const chargingLossInput = document.getElementById('charging_loss');
+  
+  const distance = parseFloat(distanceInput.value);
+  const efficiency = parseFloat(efficiencyInput.value);
+  const electricityRate = parseFloat(electricityRateInput.value);
+  const chargingLoss = parseFloat(chargingLossInput.value);
+  
+  if (!distance || !efficiency || !electricityRate || chargingLoss === '' || distance <= 0 || efficiency <= 0 || electricityRate <= 0 || chargingLoss < 0) {
+    alert('Please enter valid positive numbers for all fields');
+    return;
+  }
+  
+  const kwhNeeded = distance / efficiency;
+  const lossMultiplier = 1 + (chargingLoss / 100);
+  const kwhWithLoss = kwhNeeded * lossMultiplier;
+  const totalCost = kwhWithLoss * electricityRate;
+  const costPerMile = totalCost / distance;
+  
+  document.getElementById('kwh_needed').textContent = kwhNeeded.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('kwh_with_loss').textContent = kwhWithLoss.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('total_cost').textContent = totalCost.toLocaleString('en-US', {style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('cost_per_mile').textContent = costPerMile.toLocaleString('en-US', {style: 'currency', currency: 'USD', minimumFractionDigits: 4, maximumFractionDigits: 4});
+  
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|ev-charging-cost|2026-07-09 -->

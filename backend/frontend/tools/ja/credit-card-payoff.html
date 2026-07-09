@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>クレジットカード返済計算機 - 完済期間と利息を算出</title>
+<meta name="description" content="クレジットカードの現在の残高、金利、月々の返済額から、完済までの期間と総利息を計算できます。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/credit-card-payoff.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/credit-card-payoff.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/credit-card-payoff.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/credit-card-payoff.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/credit-card-payoff.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/credit-card-payoff.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/credit-card-payoff.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/credit-card-payoff.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/credit-card-payoff.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/credit-card-payoff.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/credit-card-payoff.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/credit-card-payoff.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "クレジットカード返済計算機", "url": "https://softglow-ai.com/tools/ja/credit-card-payoff.html", "description": "クレジットカードの現在の残高、金利、月々の返済額から、完済までの期間と総利息を計算できます。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "月々の返済額を増やすとどのような効果がありますか？", "acceptedAnswer": {"@type": "Answer", "text": "月々の返済額を増やすと、完済までの期間が短くなり、支払う利息の総額が大幅に減少します。例えば、月¥250から月¥500に倍にすれば、完済期間はほぼ半分になり、利息の節約額も非常に大きくなります。"}}, {"@type": "Question", "name": "予想完済日はどのように計算されますか？", "acceptedAnswer": {"@type": "Answer", "text": "予想完済日は、本日から計算された返済月数を加えることで算出されます。毎月の返済日が異なる場合や、利息計算方法により若干の変動が生じる可能性があります。"}}, {"@type": "Question", "name": "最低返済額のみで返済するとどうなりますか？", "acceptedAnswer": {"@type": "Answer", "text": "最低返済額のみで返済すると、完済までに非常に長期間（数年以上）かかる可能性があります。その間、膨大な利息が発生し、総返済額が大幅に増加します。可能な限り最低返済額以上の返済をお勧めします。"}}, {"@type": "Question", "name": "この計算は実際の請求と異なる場合があります。なぜですか？", "acceptedAnswer": {"@type": "Answer", "text": "この計算機は一般的なクレジットカードの利息計算方法を使用しています。実際の請求は、利息の計算方法、手数料、利率変更、支払日などの要因により異なる可能性があります。正確な情報はカード発行会社にご確認ください。"}}, {"@type": "Question", "name": "複数のクレジットカード残高がある場合、どのカードから返済すべきですか？", "acceptedAnswer": {"@type": "Answer", "text": "一般的には、最も高い年利率のカードから優先的に返済することが効果的です。これにより、発生する利息を最小限に抑えることができます。ただし、心理的なモチベーションのため、最も低い残高のカードから返済する戦略もあります。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > クレジットカード返済計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>クレジットカード返済計算機</h1>
+    <p class="calc-subtitle">クレジットカード債務の返済期間と支払利息を計算します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="creditCardBalance">現在のクレジットカード残高</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="creditCardBalance" placeholder="5000"  value="5000" step="0.01"></div>
+</div>
+  <small class="input-help">返済する必要があるクレジットカードの現在の残高を入力してください</small>
+<div class="input-group">
+  <label for="interestRate">年利率（APR）</label>
+  <div class="input-row"><input type="number" id="interestRate" placeholder="18.5"  value="18.5" step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">クレジットカードの年利率（年率）をパーセンテージで入力してください</small>
+<div class="input-group">
+  <label for="monthlyPayment">月々の返済額</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="monthlyPayment" placeholder="250"  value="250" step="0.01"></div>
+</div>
+  <small class="input-help">毎月返済する予定の金額を入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">返済月数</span><span class="result-value" id="payoffMonths">—</span></div>
+<div class="result-item"><span class="result-label">返済年数</span><span class="result-value" id="payoffYears">—</span></div>
+<div class="result-item"><span class="result-label">予想完済日</span><span class="result-value" id="payoffDate">—</span></div>
+<div class="result-highlight"><span class="result-label">推定利息総額</span><span class="result-value" id="totalInterest">—</span></div>
+<div class="result-highlight"><span class="result-label">総返済額</span><span class="result-value" id="totalPaid">—</span></div>
+<div class="result-item"><span class="result-label">一般的な最低月額返済額（残高の2%）</span><span class="result-value" id="minimumPayment">—</span></div>
+<div class="result-highlight"><span class="result-label">最低返済額との利息節約額</span><span class="result-value" id="interestSavings">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> この計算機は、入力した月々の返済額でクレジットカード債務を完済するまでの期間と、支払うことになる総利息を示します。最低返済額で返済した場合と比較して、追加返済によってどれだけ利息を節約できるかも表示されます。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>クレジットカード返済計算機について</h2><p>クレジットカードの返済は、多くの人にとって財務管理の重要な部分です。この計算機は、あなたの現在の残高、年利率、月々の返済額に基づいて、完済までにかかる時間と総利息を正確に計算します。</p><h2>返済期間の計算方法</h2><p>返済月数は、毎月の返済額が現在の残高と発生する利息をどのようにカバーするかに基づいて計算されます。月々の返済額が多いほど、完済までの期間は短くなり、支払う利息も少なくなります。例えば、¥5,000の残高で年利18.5%の場合、月¥250の返済では約24ヶ月かかりますが、月¥500に増やすと期間はかなり短くなります。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>利息の仕組み</h2><p>クレジットカードの利息は日々発生し、残高に対して計算されます。毎月の返済額のうち、最初は大部分が利息に充てられ、残りが元本の返済に充てられます。返済が進むにつれて、利息部分は減少し、元本の返済部分が増加していきます。</p><h2>最低返済額との比較</h2><p>多くのクレジットカード発行会社は、最低返済額を残高の約2%に設定しています。この計算機では、あなたの実際の月々返済額と最低返済額との比較を表示し、追加返済によってどれだけの利息を節約できるかを示します。最低返済額のみで返済する場合、完済までに非常に長い時間がかかり、膨大な利息を支払うことになる可能性があります。</p><h2>完済戦略のポイント</h2><p>クレジットカード債務を効率的に返済するには、可能な限り月々の返済額を増やすことが重要です。わずかな追加返済でも、長期的には大きな利息節約につながります。また、複数のカードがある場合は、高い金利のカードから優先的に返済することをお勧めします。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">月々の返済額を増やすとどのような効果がありますか？</div><div class="faq-a">月々の返済額を増やすと、完済までの期間が短くなり、支払う利息の総額が大幅に減少します。例えば、月¥250から月¥500に倍にすれば、完済期間はほぼ半分になり、利息の節約額も非常に大きくなります。</div></div>
+  <div class="faq-item"><div class="faq-q">予想完済日はどのように計算されますか？</div><div class="faq-a">予想完済日は、本日から計算された返済月数を加えることで算出されます。毎月の返済日が異なる場合や、利息計算方法により若干の変動が生じる可能性があります。</div></div>
+  <div class="faq-item"><div class="faq-q">最低返済額のみで返済するとどうなりますか？</div><div class="faq-a">最低返済額のみで返済すると、完済までに非常に長期間（数年以上）かかる可能性があります。その間、膨大な利息が発生し、総返済額が大幅に増加します。可能な限り最低返済額以上の返済をお勧めします。</div></div>
+  <div class="faq-item"><div class="faq-q">この計算は実際の請求と異なる場合があります。なぜですか？</div><div class="faq-a">この計算機は一般的なクレジットカードの利息計算方法を使用しています。実際の請求は、利息の計算方法、手数料、利率変更、支払日などの要因により異なる可能性があります。正確な情報はカード発行会社にご確認ください。</div></div>
+  <div class="faq-item"><div class="faq-q">複数のクレジットカード残高がある場合、どのカードから返済すべきですか？</div><div class="faq-a">一般的には、最も高い年利率のカードから優先的に返済することが効果的です。これにより、発生する利息を最小限に抑えることができます。ただし、心理的なモチベーションのため、最も低い残高のカードから返済する戦略もあります。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/car-loan.html">自動車ローン計算機</a>
+      <a class="tool-pill" href="/tools/ja/student-loan.html">Student Loan</a>
+      <a class="tool-pill" href="/tools/ja/debt-consolidation.html">Debt Consolidation</a>
+      <a class="tool-pill" href="/tools/ja/business-loan-calc.html">ビジネスローン計算機</a>
+      <a class="tool-pill" href="/tools/ja/balloon-payment.html">バルーンペイメント計算機</a>
+      <a class="tool-pill" href="/tools/ja/0-percent-financing.html">0%ファイナンス計算機</a>
+      <a class="tool-pill" href="/tools/ja/debt-to-income.html">Debt To Income</a>
+      <a class="tool-pill" href="/tools/ja/personal-loan.html">Personal Loan</a>
+      <a class="tool-pill" href="/tools/ja/loan-comparison.html">Loan Comparison</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/credit-card-payoff.html" class="lang-btn">English</a>
+    <a href="/tools/credit-card-payoff.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/credit-card-payoff.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/credit-card-payoff.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/credit-card-payoff.html" class="lang-btn">Français</a>
+    <a href="/tools/es/credit-card-payoff.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/credit-card-payoff.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/credit-card-payoff.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/credit-card-payoff.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/credit-card-payoff.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() { const balanceInput = document.getElementById('creditCardBalance'); const rateInput = document.getElementById('interestRate'); const paymentInput = document.getElementById('monthlyPayment'); if (!balanceInput.value || !rateInput.value || !paymentInput.value) { alert('Please fill in all fields'); return; } let balance = parseFloat(balanceInput.value); const monthlyRate = parseFloat(rateInput.value) / 100 / 12; const payment = parseFloat(paymentInput.value); if (balance <= 0 || monthlyRate < 0 || payment <= 0) { alert('Please enter valid positive numbers'); return; } if (payment < balance * monthlyRate) { alert('Monthly payment is too low to pay off the card. Increase payment amount.'); return; } let months = 0; let totalInterest = 0; let tempBalance = balance; while (tempBalance > 0 && months < 600) { const interestCharge = tempBalance * monthlyRate; totalInterest += interestCharge; tempBalance = tempBalance + interestCharge - payment; months++; } const years = (months / 12).toFixed(2); const payoffDate = new Date(); payoffDate.setMonth(payoffDate.getMonth() + months); const minimumPayment = balance * 0.02; let minBalance = balance; let minMonths = 0; let minTotalInterest = 0; while (minBalance > 0 && minMonths < 600) { const minPaymentActual = Math.max(minimumPayment, minBalance * 0.02); const interestCharge = minBalance * monthlyRate; minTotalInterest += interestCharge; minBalance = minBalance + interestCharge - minPaymentActual; minMonths++; } const interestSavings = minTotalInterest - totalInterest; document.getElementById('payoffMonths').textContent = months.toLocaleString('en-US'); document.getElementById('payoffYears').textContent = parseFloat(years).toLocaleString('en-US'); document.getElementById('payoffDate').textContent = payoffDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }); document.getElementById('totalInterest').textContent = totalInterest.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); document.getElementById('totalPaid').textContent = (balance + totalInterest).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); document.getElementById('minimumPayment').textContent = minimumPayment.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); document.getElementById('interestSavings').textContent = interestSavings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); document.getElementById('results').classList.add('show'); }
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|credit-card-payoff|2026-07-09 -->

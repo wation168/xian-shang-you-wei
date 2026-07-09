@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>給与税計算機 - 手取り給与を即座に計算</title>
+<meta name="description" content="年間給与から税金、国民保険、年金を自動計算。雇用者負担金と手取り給与をリアルタイム算出します。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/payroll-tax.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/payroll-tax.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/payroll-tax.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/payroll-tax.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/payroll-tax.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/payroll-tax.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/payroll-tax.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/payroll-tax.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/payroll-tax.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/payroll-tax.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/payroll-tax.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/payroll-tax.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "給与税計算機", "url": "https://softglow-ai.com/tools/ja/payroll-tax.html", "description": "年間給与から税金、国民保険、年金を自動計算。雇用者負担金と手取り給与をリアルタイム算出します。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "税コード（Personal Allowance）とは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "税コードは英国税務庁（HMRC）が発行する個人の税控除額を示すコードです。例えば1257Lは、年間£12,570までの給与に対して所得税が非課税であることを意味します。税コードは個人の状況によって異なり、給与明細に記載されています。"}}, {"@type": "Question", "name": "月間給与と月間手取り給与の違いは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "月間給与（総給与）は、年間給与を12で割った基本給です。月間手取り給与は、税金、国民保険料、年金拠出などのすべての控除を差し引いた後に実際に受け取る金額です。"}}, {"@type": "Question", "name": "国民保険カテゴリーにはどのような種類がありますか？", "acceptedAnswer": {"@type": "Answer", "text": "国民保険カテゴリーは、従業員の雇用状況に基づいて分類されます。最も一般的なのはカテゴリーAで、標準的な被雇用者を対象としています。その他のカテゴリーには、自営業者向けのカテゴリーや特定の状況向けの特別カテゴリーがあります。"}}, {"@type": "Question", "name": "年金拠出は税控除の対象になりますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、確定拠出年金への拠出は通常、給与から控除される前に計算されるため、所得税の対象額が減少します。これにより、実質的な税優遇措置が得られます。"}}, {"@type": "Question", "name": "このツールの計算結果は給与明細と一致しますか？", "acceptedAnswer": {"@type": "Answer", "text": "このツールは標準的な給与計算に基づいて計算されていますが、個別の事情（扶養家族控除、住宅ローン控除など）によって実際の計算が異なる場合があります。正確な情報については、雇用主の給与計算部門に確認することをお勧めします。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 給与税計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>給与税計算機</h1>
+    <p class="calc-subtitle">雇用者負担金、従業員控除、手取り給与を即座に計算</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="grossSalary">年間総給与</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="grossSalary" placeholder="30000"  value="30000" step="1"></div>
+</div>
+  <small class="input-help">年間の総給与額をポンドで入力してください</small>
+<div class="input-group">
+  <label for="payFrequency">給与支給頻度</label>
+  <div class="input-row"><input type="text" id="payFrequency" value="annual"></div>
+</div>
+  <small class="input-help">給与の支給頻度を選択してください（月次、週次など）</small>
+<div class="input-group">
+  <label for="taxCode">税コード（個人控除額）</label>
+  <div class="input-row"><input type="number" id="taxCode" placeholder="1257L"  value="1257" step="1"></div>
+</div>
+  <small class="input-help">英国の税コードを入力してください（例：1257L）</small>
+<div class="input-group">
+  <label for="studentLoan">学生ローン返済</label>
+  <div class="input-row"><input type="text" id="studentLoan" value="none"></div>
+</div>
+  <small class="input-help">学生ローン返済がある場合は選択してください</small>
+<div class="input-group">
+  <label for="pensionContribution">年金拠出率（%）</label>
+  <div class="input-row"><input type="number" id="pensionContribution" placeholder="5"  value="5" step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">年金拠出率をパーセンテージで入力してください</small>
+<div class="input-group">
+  <label for="niCategory">国民保険カテゴリー</label>
+  <div class="input-row"><input type="text" id="niCategory" value="A"></div>
+</div>
+  <small class="input-help">国民保険のカテゴリーを選択してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">月間総給与</span><span class="result-value" id="monthlyGross">—</span></div>
+<div class="result-item"><span class="result-label">年間所得税</span><span class="result-value" id="incomeTax">—</span></div>
+<div class="result-item"><span class="result-label">年間従業員国民保険</span><span class="result-value" id="employeeNI">—</span></div>
+<div class="result-item"><span class="result-label">年間学生ローン返済</span><span class="result-value" id="studentLoanDeduction">—</span></div>
+<div class="result-item"><span class="result-label">年間年金拠出</span><span class="result-value" id="pensionAmount">—</span></div>
+<div class="result-highlight"><span class="result-label">年間手取り給与（実際の受取額）</span><span class="result-value" id="annualNetPay">—</span></div>
+<div class="result-highlight"><span class="result-label">月間手取り給与</span><span class="result-value" id="monthlyNetPay">—</span></div>
+<div class="result-item"><span class="result-label">年間雇用者国民保険拠出</span><span class="result-value" id="employerNI">—</span></div>
+<div class="result-item"><span class="result-label">総雇用コスト（雇用者負担+総給与）</span><span class="result-value" id="totalCost">—</span></div>
+<div class="result-item"><span class="result-label">実効税率</span><span class="result-value" id="effectiveTaxRate">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 計算結果は、年間給与から税金や保険料などすべての控除を差し引いた手取り給与を示します。月間手取り給与は毎月実際に受け取る金額で、実効税率は総給与に対する税負担の割合です。雇用者が負担する総コストには、給与と雇用者国民保険拠出が含まれます。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>給与税計算機について</h2><p>給与税計算機は、英国の給与計算制度に基づいて、従業員の手取り給与と雇用者負担金を正確に計算するツールです。年間総給与から所得税、国民保険料、年金拠出、学生ローン返済などを自動的に差し引きます。</p><h2>主な機能</h2><p>このツールは、個人の税コード、給与支給頻度、年金拠出率、国民保険カテゴリーを考慮して計算を行います。月間給与と年間給与の両方を表示し、雇用者にとって必要な国民保険拠出額も算出します。さらに、実効税率を計算することで、実際の税負担の程度を理解できます。</p><h2>所得税と国民保険料</h2><p>所得税は税コードに基づいた個人控除額を超える部分に対して段階的に課税されます。国民保険料は従業員と雇用者の両方が負担し、カテゴリーによって異なります。これらは給与から自動的に控除され、給与明細に記載されます。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>年金拠出と学生ローン</h2><p>確定拠出年金への拠出は、給与から控除される前の税務上の優遇措置があります。学生ローン返済がある場合は、年間手取り給与から別途差し引かれます。これらの控除を含めることで、より正確な手取り給与を計算できます。</p><h2>雇用者コストの理解</h2><p>総雇用コストは、従業員に支払う給与と雇用者が負担する国民保険料を合計したものです。これは人事管理や予算策定の際に重要な指標となります。実効税率は総給与に対する税および保険料の比率を示し、異なる給与レベルでの比較に役立ちます。</p><h2>給与計算の正確性</h2><p>このツールは英国の2024年度の税率と控除額に基づいて計算されています。ただし、個別の事情によって実際の計算が異なる場合があります。詳細な給与計算については、会計士や給与計算専門家に相談することをお勧めします。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">税コード（Personal Allowance）とは何ですか？</div><div class="faq-a">税コードは英国税務庁（HMRC）が発行する個人の税控除額を示すコードです。例えば1257Lは、年間£12,570までの給与に対して所得税が非課税であることを意味します。税コードは個人の状況によって異なり、給与明細に記載されています。</div></div>
+  <div class="faq-item"><div class="faq-q">月間給与と月間手取り給与の違いは何ですか？</div><div class="faq-a">月間給与（総給与）は、年間給与を12で割った基本給です。月間手取り給与は、税金、国民保険料、年金拠出などのすべての控除を差し引いた後に実際に受け取る金額です。</div></div>
+  <div class="faq-item"><div class="faq-q">国民保険カテゴリーにはどのような種類がありますか？</div><div class="faq-a">国民保険カテゴリーは、従業員の雇用状況に基づいて分類されます。最も一般的なのはカテゴリーAで、標準的な被雇用者を対象としています。その他のカテゴリーには、自営業者向けのカテゴリーや特定の状況向けの特別カテゴリーがあります。</div></div>
+  <div class="faq-item"><div class="faq-q">年金拠出は税控除の対象になりますか？</div><div class="faq-a">はい、確定拠出年金への拠出は通常、給与から控除される前に計算されるため、所得税の対象額が減少します。これにより、実質的な税優遇措置が得られます。</div></div>
+  <div class="faq-item"><div class="faq-q">このツールの計算結果は給与明細と一致しますか？</div><div class="faq-a">このツールは標準的な給与計算に基づいて計算されていますが、個別の事情（扶養家族控除、住宅ローン控除など）によって実際の計算が異なる場合があります。正確な情報については、雇用主の給与計算部門に確認することをお勧めします。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/capital-gains-tax.html">譲渡所得税計算機</a>
+      <a class="tool-pill" href="/tools/ja/effective-tax-rate.html">実効税率計算機</a>
+      <a class="tool-pill" href="/tools/ja/bonus-tax.html">ボーナス税計算機</a>
+      <a class="tool-pill" href="/tools/ja/self-employment-tax.html">Self Employment Tax</a>
+      <a class="tool-pill" href="/tools/ja/tax-bracket.html">Tax Bracket</a>
+      <a class="tool-pill" href="/tools/ja/income-tax.html">所得税計算機</a>
+      <a class="tool-pill" href="/tools/ja/vat-calculator.html">Vat Calculator</a>
+      <a class="tool-pill" href="/tools/ja/sales-tax.html">Sales Tax</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/payroll-tax.html" class="lang-btn">English</a>
+    <a href="/tools/payroll-tax.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/payroll-tax.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/payroll-tax.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/payroll-tax.html" class="lang-btn">Français</a>
+    <a href="/tools/es/payroll-tax.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/payroll-tax.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/payroll-tax.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/payroll-tax.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/payroll-tax.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() { const grossSalaryInput = document.getElementById('grossSalary'); const payFrequencySelect = document.getElementById('payFrequency'); const taxCodeInput = document.getElementById('taxCode'); const studentLoanSelect = document.getElementById('studentLoan'); const pensionInput = document.getElementById('pensionContribution'); const niCategorySelect = document.getElementById('niCategory'); if (!grossSalaryInput.value || !taxCodeInput.value) { alert('Please enter all required fields'); return; } const payFrequency = payFrequencySelect.value; let annualGross = parseFloat(grossSalaryInput.value); if (payFrequency === 'monthly') { annualGross *= 12; } else if (payFrequency === 'weekly') { annualGross *= 52; } const personalAllowance = parseFloat(taxCodeInput.value) || 0; const pensionPercent = parseFloat(pensionInput.value) || 0; const pensionAmount = annualGross * (pensionPercent / 100); const taxableIncome = Math.max(0, annualGross - personalAllowance); let incomeTax = 0; if (taxableIncome > 50270) { incomeTax += (taxableIncome - 50270) * 0.45; incomeTax += (50270 - 12570) * 0.40; } else if (taxableIncome > 12570) { incomeTax += (taxableIncome - 12570) * 0.20; } const niCategory = niCategorySelect.value; let employeeNI = 0; let employerNI = 0; const niableEarnings = annualGross - pensionAmount; const niThreshold = 12570; const niUpperLimit = 50270; if (niCategory === 'A') { if (niableEarnings > niThreshold) { const nicableEarnings = Math.min(niableEarnings, niUpperLimit) - niThreshold; employeeNI = nicableEarnings * 0.08; if (niableEarnings > niUpperLimit) { employeeNI += (niableEarnings - niUpperLimit) * 0.02; } } if (niableEarnings > 9100) { const employerNicable = niableEarnings - 9100; employerNI = employerNicable * 0.138; } } else if (niCategory === 'H') { if (niableEarnings > niThreshold) { const nicableEarnings = Math.min(niableEarnings, niUpperLimit) - niThreshold; employeeNI = nicableEarnings * 0.04; if (niableEarnings > niUpperLimit) { employeeNI += (niableEarnings - niUpperLimit) * 0.02; } } } let studentLoanDeduction = 0; const studentLoanType = studentLoanSelect.value; if (studentLoanType === 'plan1') { const threshold = 22015; if (annualGross > threshold) { studentLoanDeduction = (annualGross - threshold) * 0.09; } } else if (studentLoanType === 'plan2') { const threshold = 27660; if (annualGross > threshold) { studentLoanDeduction = (annualGross - threshold) * 0.09; } } const annualNetPay = annualGross - incomeTax - employeeNI - studentLoanDeduction - pensionAmount; const monthlyGross = annualGross / 12; const monthlyNetPay = annualNetPay / 12; const totalCost = annualGross + employerNI; const effectiveTaxRate = annualGross > 0 ? ((incomeTax + employeeNI) / annualGross) * 100 : 0; document.getElementById('monthlyGross').textContent = '£' + monthlyGross.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2}); document.getElementById('incomeTax').textContent = '£' + incomeTax.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2}); document.getElementById('employeeNI').textContent = '£' + employeeNI.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2}); document.getElementById('studentLoanDeduction').textContent = '£' + studentLoanDeduction.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2}); document.getElementById('pensionAmount').textContent = '£' + pensionAmount.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2}); document.getElementById('annualNetPay').textContent = '£' + annualNetPay.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2}); document.getElementById('monthlyNetPay').textContent = '£' + monthlyNetPay.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2}); document.getElementById('employerNI').textContent = '£' + employerNI.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2}); document.getElementById('totalCost').textContent = '£' + totalCost.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2}); document.getElementById('effectiveTaxRate').textContent = effectiveTaxRate.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2}) + '%'; document.getElementById('resultsDiv').classList.add('show'); }
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|payroll-tax|2026-07-09 -->

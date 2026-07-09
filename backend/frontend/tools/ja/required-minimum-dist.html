@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RMD計算機 - 必須最小分配額を簡単計算</title>
+<meta name="description" content="退職口座の必須最小分配額（RMD）を年齢と口座残高から計算。IRS規則に基づいた正確な計算ツール。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/required-minimum-dist.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/required-minimum-dist.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/required-minimum-dist.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/required-minimum-dist.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/required-minimum-dist.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/required-minimum-dist.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/required-minimum-dist.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/required-minimum-dist.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/required-minimum-dist.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/required-minimum-dist.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/required-minimum-dist.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/required-minimum-dist.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "RMD計算機", "url": "https://softglow-ai.com/tools/ja/required-minimum-dist.html", "description": "退職口座の必須最小分配額（RMD）を年齢と口座残高から計算。IRS規則に基づいた正確な計算ツール。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "RMDを引き出さないとどうなりますか？", "acceptedAnswer": {"@type": "Answer", "text": "RMDを期限までに引き出さないと、引き出すべき金額の25%のペナルティ税が課せられます。これは非常に厳しい罰則のため、期限厳守が重要です。"}}, {"@type": "Question", "name": "複数のIRA口座がある場合、各口座から引き出す必要がありますか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ。複数のIRA口座がある場合、合計RMDを計算してから、任意の配分で引き出すことができます。ただし401(k)などの計画は個別計算が必要です。"}}, {"@type": "Question", "name": "Roth IRAはRMDの対象になりますか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ。Roth IRAの所有者は生存中はRMDの対象になりません。これはRoth IRAの大きな利点で、柔軟な資産管理が可能です。"}}, {"@type": "Question", "name": "初回のRMDはいつから必要ですか？", "acceptedAnswer": {"@type": "Answer", "text": "通常、72歳に達した年の翌年4月1日までに初回のRMDを引き出す必要があります。その後は毎年12月31日までです。"}}, {"@type": "Question", "name": "RMDの計算に使用する年齢はいつの時点の年齢ですか？", "acceptedAnswer": {"@type": "Answer", "text": "RMDの計算には、その年の12月31日時点のあなたの年齢を使用します。誕生日が12月31日の場合は別の規則が適用されることがあります。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > RMD計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>RMD計算機</h1>
+    <p class="calc-subtitle">退職口座からの必須最小分配額（RMD）を計算します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="accountBalance">前年12月31日時点の口座残高</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="accountBalance" placeholder="250000"  value="250000" step="1"></div>
+</div>
+  <small class="input-help">前年の12月31日時点での退職口座の残高を入力してください</small>
+<div class="input-group">
+  <label for="yourAge">あなたの年齢</label>
+  <div class="input-row"><input type="number" id="yourAge" placeholder="72"  value="72" step="1"><span class="input-suffix">歳</span></div>
+</div>
+  <small class="input-help">現在のあなたの年齢を入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">平均余命係数</span><span class="result-value" id="distributionFactor">—</span></div>
+<div class="result-highlight"><span class="result-label">必須最小分配額（RMD）</span><span class="result-value" id="rmdAmount">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 平均余命係数はIRSが定めた年齢別の係数で、口座残高をこの係数で割ることで必須最小分配額が計算されます。必須最小分配額（RMD）は、その年に最低限引き出す必要がある金額です。この金額以上を引き出さないと、税務ペナルティが課せられる可能性があります。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>RMD計算機について</h2><p>RMD計算機は、退職口座から毎年引き出す必要がある必須最小分配額（Required Minimum Distribution）を計算するツールです。アメリカ国税庁（IRS）の規則により、従来型IRA、SEP IRA、SIMPLE IRA、401(k)などの退職口座の所有者は、特定の年齢に達すると毎年一定額以上を引き出す必要があります。</p><h2>計算方法</h2><p>RMDの計算は非常にシンプルです。前年の12月31日時点での口座残高をIRSの平均余命係数で割るだけです。平均余命係数は年齢によって決められており、年齢が高いほど係数は小さくなり、引き出し額が増加します。例えば、72歳の場合の係数は27.4ですので、口座残高を27.4で割った金額がRMDとなります。</p><h2>重要な期限と罰則</h2><p>RMDの引き出しには厳しい期限があります。通常、毎年12月31日までに引き出しを完了する必要があります。初回のRMD引き出しは、72歳に達した年の翌年4月1日までという猶予がありますが、その後は毎年期限内に引き出す必要があります。期限を守らないと、引き出すべき金額の25%のペナルティ税が課せられます。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>複数の退職口座がある場合</h2><p>複数のIRA口座を持っている場合、合計RMDを計算してから、任意の配分で引き出すことができます。ただし、401(k)などの雇用主スポンサー計画は個別に計算する必要があります。各口座の残高を正確に把握し、合計RMDを超える引き出しを計画することが重要です。</p><h2>税務上の考慮事項</h2><p>RMDとして引き出した金額は、通常、普通所得として課税されます。退職金を効率的に管理するため、税理士やファイナンシャルアドバイザーに相談し、最適な引き出し戦略を立てることをお勧めします。また、寄付控除の対象となる慈善寄付金の利用や、税効率的な投資配置の変更なども検討の価値があります。</p><h2>特例と除外</h2><p>Roth IRAの所有者は、生存中はRMDの対象になりません。これはRoth IRAの大きな利点の一つです。また、まだ就職している場合で、会社の401(k)プランの株式を保有していない限り、その会社のプランからのRMDは延期できる可能性があります。自分の状況が特例に該当するかどうかを確認することが大切です。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">RMDを引き出さないとどうなりますか？</div><div class="faq-a">RMDを期限までに引き出さないと、引き出すべき金額の25%のペナルティ税が課せられます。これは非常に厳しい罰則のため、期限厳守が重要です。</div></div>
+  <div class="faq-item"><div class="faq-q">複数のIRA口座がある場合、各口座から引き出す必要がありますか？</div><div class="faq-a">いいえ。複数のIRA口座がある場合、合計RMDを計算してから、任意の配分で引き出すことができます。ただし401(k)などの計画は個別計算が必要です。</div></div>
+  <div class="faq-item"><div class="faq-q">Roth IRAはRMDの対象になりますか？</div><div class="faq-a">いいえ。Roth IRAの所有者は生存中はRMDの対象になりません。これはRoth IRAの大きな利点で、柔軟な資産管理が可能です。</div></div>
+  <div class="faq-item"><div class="faq-q">初回のRMDはいつから必要ですか？</div><div class="faq-a">通常、72歳に達した年の翌年4月1日までに初回のRMDを引き出す必要があります。その後は毎年12月31日までです。</div></div>
+  <div class="faq-item"><div class="faq-q">RMDの計算に使用する年齢はいつの時点の年齢ですか？</div><div class="faq-a">RMDの計算には、その年の12月31日時点のあなたの年齢を使用します。誕生日が12月31日の場合は別の規則が適用されることがあります。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">Roi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">Risk Reward</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">ポジションサイズ計算機</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">P/Eレシオ計算機</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">証拠金計算機</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/required-minimum-dist.html" class="lang-btn">English</a>
+    <a href="/tools/required-minimum-dist.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/required-minimum-dist.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/required-minimum-dist.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/required-minimum-dist.html" class="lang-btn">Français</a>
+    <a href="/tools/es/required-minimum-dist.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/required-minimum-dist.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/required-minimum-dist.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/required-minimum-dist.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/required-minimum-dist.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const accountBalance = document.getElementById('accountBalance').value;
+  const yourAge = document.getElementById('yourAge').value;
+  
+  if (!accountBalance || !yourAge) {
+    alert('Please enter both account balance and age');
+    return;
+  }
+  
+  const balance = parseFloat(accountBalance);
+  const age = parseInt(yourAge);
+  
+  if (isNaN(balance) || isNaN(age) || balance < 0 || age < 72) {
+    alert('Please enter valid values (age must be 72+)');
+    return;
+  }
+  
+  const ageFactors = {
+    72: 27.4,
+    73: 26.5,
+    74: 25.5,
+    75: 24.6,
+    76: 23.7,
+    77: 22.9,
+    78: 22.0,
+    79: 21.1,
+    80: 20.2,
+    81: 19.4,
+    82: 18.5,
+    83: 17.7,
+    84: 16.8,
+    85: 16.0,
+    86: 15.2,
+    87: 14.4,
+    88: 13.6,
+    89: 12.8,
+    90: 12.0,
+    91: 11.3,
+    92: 10.5,
+    93: 9.8,
+    94: 9.1,
+    95: 8.4,
+    96: 7.8,
+    97: 7.1,
+    98: 6.6,
+    99: 6.0,
+    100: 5.5,
+    101: 5.0,
+    102: 4.6,
+    103: 4.1,
+    104: 3.7,
+    105: 3.4,
+    106: 3.0,
+    107: 2.7,
+    108: 2.4,
+    109: 2.1,
+    110: 1.9,
+    111: 1.6,
+    112: 1.4,
+    113: 1.1,
+    114: 1.0,
+    115: 1.0
+  };
+  
+  let factor = ageFactors[age];
+  if (!factor) {
+    if (age > 115) {
+      factor = 1.0;
+    } else if (age < 72) {
+      alert('RMD calculations apply at age 72 and older');
+      return;
+    }
+  }
+  
+  const rmd = balance / factor;
+  
+  document.getElementById('distributionFactor').textContent = factor.toFixed(1);
+  document.getElementById('rmdAmount').textContent = '$' + rmd.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|required-minimum-dist|2026-07-09 -->

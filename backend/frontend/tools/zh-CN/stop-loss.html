@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>止损计算器 - 计算最大损失和止损价格</title>
+<meta name="description" content="使用止损计算器快速计算交易的最大损失、每股损失和损失百分比。优化您的风险管理策略。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/zh-CN/stop-loss.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/stop-loss.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/stop-loss.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/stop-loss.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/stop-loss.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/stop-loss.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/stop-loss.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/stop-loss.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/stop-loss.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/stop-loss.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/stop-loss.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/stop-loss.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "止损计算器", "url": "https://softglow-ai.com/tools/zh-CN/stop-loss.html", "description": "使用止损计算器快速计算交易的最大损失、每股损失和损失百分比。优化您的风险管理策略。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "止损计算器如何计算最大损失？", "acceptedAnswer": {"@type": "Answer", "text": "最大损失通过将股份数量乘以入场价与止损价的差额计算得出。例如：100股 × (¥50.00 - ¥45.00) = ¥500.00。"}}, {"@type": "Question", "name": "什么是最优的止损百分比？", "acceptedAnswer": {"@type": "Answer", "text": "最优止损百分比取决于您的交易风格和风险承受能力。日内交易者通常使用2-5%的止损，而摇摆交易者可能使用5-10%。长期投资者可能使用更大的止损范围。"}}, {"@type": "Question", "name": "止损价格应该设在哪里？", "acceptedAnswer": {"@type": "Answer", "text": "止损应设在技术支撑位之下，或基于您愿意承受的最大损失百分比。考虑股票的历史波动性，避免在正常市场波动中被误触发。"}}, {"@type": "Question", "name": "我可以在交易中途改变止损吗？", "acceptedAnswer": {"@type": "Answer", "text": "可以。许多交易者使用追踪止损，随着价格上升而提高止损价格。但要避免在亏损时将止损设得太远，这会增加风险。"}}, {"@type": "Question", "name": "止损计算器对所有资产类别都适用吗？", "acceptedAnswer": {"@type": "Answer", "text": "是的，这个计算器可用于股票、期货、外汇和其他可以设定止损的交易产品。计算逻辑对所有资产类别都相同。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/zh-CN/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 止损计算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>止损计算器</h1>
+    <p class="calc-subtitle">计算您的最大损失并确定任何交易的最优止损水平</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="numberOfShares">股份数量</label>
+  <div class="input-row"><input type="number" id="numberOfShares" placeholder="100"  step="1"><span class="input-suffix">股</span></div>
+</div>
+  <small class="input-help">输入您购买的总股份数</small>
+<div class="input-group">
+  <label for="entryPrice">入场价格</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="entryPrice" placeholder="50.00"  step="0.01"></div>
+</div>
+  <small class="input-help">输入您购买该股票时的价格</small>
+<div class="input-group">
+  <label for="stopLossPrice">止损价格</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="stopLossPrice" placeholder="45.00"  step="0.01"></div>
+</div>
+  <small class="input-help">输入您设定的止损价格水平</small></div>
+    <button class="btn-calc" onclick="calculate()">计算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">最大损失</span><span class="result-value" id="maxLossResult">—</span></div>
+<div class="result-item"><span class="result-label">每股损失</span><span class="result-value" id="lossPerShareResult">—</span></div>
+<div class="result-item"><span class="result-label">损失百分比</span><span class="result-value" id="percentageLossResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>这代表什么？</strong> 最大损失显示您在止损触发时会损失的总金额。每股损失是入场价与止损价的差额。损失百分比表示相对于入场价的损失比例，帮助您评估交易风险是否可接受。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 打印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什么是止损计算器？</h2><p>止损计算器是一个专业的交易工具，用于帮助投资者计算在特定止损水平触发时的最大可能损失。通过输入股份数量、入场价格和止损价格，您可以立即了解潜在的财务风险。</p><h2>如何使用止损计算器</h2><p>首先输入您购买的股份总数，然后输入购买时的入场价格，最后设定您的止损价格。计算器将自动计算三个关键指标：总损失金额、每股的损失价格，以及损失占入场价的百分比。这些数据帮助您做出更明智的交易决策。</p><h2>理解计算结果</h2><p>最大损失（¥）表示如果止损被触发，您会损失的总金额。每股损失（¥）是入场价与止损价之间的差额。损失百分比（%）显示这个损失相对于您初始投资的百分比，方便您与其他交易进行比较。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>风险管理的重要性</h2><p>止损是专业交易者进行风险管理的基本工具。通过提前设定止损价格，您可以限制潜在损失，保护您的交易资本。止损计算器帮助您评估每笔交易的风险回报比，确保您的交易策略与风险承受能力相符。</p><h2>优化止损策略</h2><p>有效的止损策略应该基于技术分析、市场波动性和您的风险管理政策。止损不应该设得太紧密，以免被正常波动触发，也不应该太远，以致风险过大。使用本计算器比较不同的止损水平，找到适合您交易风格的最佳位置。</p><h2>实际应用示例</h2><p>假设您以¥50.00的价格购买了100股，设定止损价为¥45.00。计算器显示最大损失为¥500.00，每股损失¥5.00，损失百分比为10%。这个信息帮助您决定这笔交易是否符合您的风险参数。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸阅读</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常见问题</h2><div class="faq-item"><div class="faq-q">止损计算器如何计算最大损失？</div><div class="faq-a">最大损失通过将股份数量乘以入场价与止损价的差额计算得出。例如：100股 × (¥50.00 - ¥45.00) = ¥500.00。</div></div>
+  <div class="faq-item"><div class="faq-q">什么是最优的止损百分比？</div><div class="faq-a">最优止损百分比取决于您的交易风格和风险承受能力。日内交易者通常使用2-5%的止损，而摇摆交易者可能使用5-10%。长期投资者可能使用更大的止损范围。</div></div>
+  <div class="faq-item"><div class="faq-q">止损价格应该设在哪里？</div><div class="faq-a">止损应设在技术支撑位之下，或基于您愿意承受的最大损失百分比。考虑股票的历史波动性，避免在正常市场波动中被误触发。</div></div>
+  <div class="faq-item"><div class="faq-q">我可以在交易中途改变止损吗？</div><div class="faq-a">可以。许多交易者使用追踪止损，随着价格上升而提高止损价格。但要避免在亏损时将止损设得太远，这会增加风险。</div></div>
+  <div class="faq-item"><div class="faq-q">止损计算器对所有资产类别都适用吗？</div><div class="faq-a">是的，这个计算器可用于股票、期货、外汇和其他可以设定止损的交易产品。计算逻辑对所有资产类别都相同。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/zh-CN/compound-interest.html">复利计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/roi-calculator.html">投资回报率 (ROI) 计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/risk-reward.html">风险收益比计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/position-size.html">头寸规模计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dividend-yield.html">股息收益率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/pe-ratio.html">市盈率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dca-calculator.html">定期定额投资计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/cagr.html">复合年增长率(CAGR)计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/margin-calculator.html">保证金计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stock-gain-loss.html">股票盈亏计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/break-even.html">损益平衡点计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/rule-of-72.html">72法则计算器</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/stop-loss.html" class="lang-btn">English</a>
+    <a href="/tools/stop-loss.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/stop-loss.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/stop-loss.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/stop-loss.html" class="lang-btn">Français</a>
+    <a href="/tools/es/stop-loss.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/stop-loss.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/stop-loss.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/stop-loss.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/stop-loss.html" class="lang-btn active">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相关工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const shares = parseFloat(document.getElementById('numberOfShares').value);
+  const entry = parseFloat(document.getElementById('entryPrice').value);
+  const stopLoss = parseFloat(document.getElementById('stopLossPrice').value);
+  
+  if (!shares || !entry || !stopLoss || shares <= 0 || entry <= 0 || stopLoss < 0) {
+    alert('Please enter valid positive numbers for all fields');
+    return;
+  }
+  
+  if (stopLoss >= entry) {
+    alert('Stop Loss price must be lower than Entry price');
+    return;
+  }
+  
+  const lossPerShare = entry - stopLoss;
+  const maxLoss = shares * lossPerShare;
+  const percentageLoss = (lossPerShare / entry) * 100;
+  
+  document.getElementById('maxLossResult').textContent = maxLoss.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('lossPerShareResult').textContent = lossPerShare.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('percentageLossResult').textContent = percentageLoss.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已复制！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-CN|stop-loss|2026-07-09 -->

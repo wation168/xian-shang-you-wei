@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ピップ値計算機 - FX取引の利益損失計算</title>
+<meta name="description" content="FX取引のピップ値を簡単に計算できます。現在の為替レートとロットサイズから、1ピップあたりの通貨価値を自動算出します。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/pip-value.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/pip-value.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/pip-value.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/pip-value.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/pip-value.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/pip-value.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/pip-value.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/pip-value.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/pip-value.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/pip-value.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/pip-value.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/pip-value.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "ピップ値計算機", "url": "https://softglow-ai.com/tools/ja/pip-value.html", "description": "FX取引のピップ値を簡単に計算できます。現在の為替レートとロットサイズから、1ピップあたりの通貨価値を自動算出します。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "ピップとは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "ピップ（Pip）は「Percentage in Point」の略で、為替レートの最小変動単位です。ほとんどの通貨ペアでは1ピップ=0.0001の変動を表します。ただしJPY関連のペアでは1ピップ=0.01となることもあります。"}}, {"@type": "Question", "name": "なぜピップ値を計算する必要があるのですか？", "acceptedAnswer": {"@type": "Answer", "text": "ピップ値を知ることで、トレーディング時のリスク管理が正確になります。1ピップあたりの損益額を事前に計算することで、損切りや利確のレベルを設定する際に、具体的な金額ベースで判断できるようになります。"}}, {"@type": "Question", "name": "ロットサイズはどのように選べばいいですか？", "acceptedAnswer": {"@type": "Answer", "text": "ロットサイズは口座資金とリスク許容度に基づいて決めるべきです。一般的には、1トレードあたりの最大損失が口座全体の1～2%を超えないように設定することが推奨されています。初心者はマイクロロット（1,000ユニット）から始めることをお勧めします。"}}, {"@type": "Question", "name": "異なる通貨ペアでピップ値は変わりますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、変わります。ピップ値は為替レートに反比例するため、為替レートが高い通貨ペアほどピップ値は低くなります。同じロットサイズでも、異なる通貨ペアではピップあたりの損益額が異なるため、注意が必要です。"}}, {"@type": "Question", "name": "この計算機の結果をトレーディング戦略に活かすには？", "acceptedAnswer": {"@type": "Answer", "text": "損切りと利確のレベルを設定する際に、ピップ値を利用してください。例えば、100ドルのリスクを取りたい場合、ピップ値で割ることで必要な損切りピップ数が分かります。これにより、科学的で計画的なトレーディングが可能になります。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > ピップ値計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>ピップ値計算機</h1>
+    <p class="calc-subtitle">FX取引における各ピップの通貨価値を計算します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="exchangeRate">為替レート（現在の市場価格）</label>
+  <div class="input-row"><input type="number" id="exchangeRate" placeholder="1.2500"  value="1.2500" step="0.0001"></div>
+</div>
+  <small class="input-help">現在の通貨ペアの為替レートを入力してください</small>
+<div class="input-group">
+  <label for="lotSize">ロットサイズ（基軸通貨単位）</label>
+  <div class="input-row"><input type="number" id="lotSize" placeholder="100000"  value="100000" step="1"><span class="input-suffix">ユニット</span></div>
+</div>
+  <small class="input-help">取引するロットサイズ（基軸通貨の単位数）を入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">ピップ値</span><span class="result-value" id="pipValue">—</span></div>
+<div class="result-item"><span class="result-label">0.01%変動時の値</span><span class="result-value" id="pipValuePercentage">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> ピップ値は、為替レートが1ピップ（0.0001）変動した時の通貨価値を表しています。この値にポジションサイズを掛けることで、1ピップの損益を計算できます。0.01%変動時の値は、より大きな価格変動における総損益の目安となります。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>ピップ値計算機について</h2><p>ピップ値計算機は、FX（外国為替）取引における最も基本的なツールの一つです。ピップ（Pip）は「Percentage in Point」の略で、為替レートの最小変動単位を表します。通常、ほとんどの通貨ペアでは1ピップ=0.0001の変動を指します。</p><h2>ピップ値の計算方法</h2><p>ピップ値の計算式は以下の通りです：ピップ値 = ロットサイズ × 0.0001 ÷ 為替レート。例えば、EUR/USDで為替レートが1.2500、ロットサイズが100,000ユニットの場合、1ピップの価値は約8ドルになります。この計算により、各トレーダーは自分のポジションのリスク管理をより正確に行うことができます。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>ロットサイズと取引リスク</h2><p>ロットサイズは取引のリスクに直結する重要な要素です。標準ロットは100,000ユニット、マイクロロットは1,000ユニット、ナノロットは100ユニットなど、ブローカーによって異なります。小さいロットサイズを選択することで、1ピップあたりの損失額を減らし、初心者でもリスク管理がしやすくなります。</p><h2>0.01%変動時の値について</h2><p>0.01%変動時の値は、より大きな価格変動における総損益の目安を示します。これは複数ピップの変動を考慮した計算で、より実際的なシナリオに基づいています。トレーディング戦略を立案する際に、この数値を参考にすることで、より現実的なリスク・リワードの計算ができます。</p><h2>実践的なリスク管理</h2><p>FX取引では、ピップ値の理解がリスク管理の基本となります。損切りレベルと利確レベルを設定する際に、ピップ値を参考にすることで、事前に最大損失額を決定できます。例えば、50ピップの損切りを設定する場合、50 × ピップ値で総損失額が計算できます。常にリスクとリワードのバランスを取ることが、持続的な利益につながります。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/candlestick-patterns.html">Candlestick Patterns<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/support-resistance.html">Support & Resistance<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/moving-average-guide.html">Moving Average Guide<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">ピップとは何ですか？</div><div class="faq-a">ピップ（Pip）は「Percentage in Point」の略で、為替レートの最小変動単位です。ほとんどの通貨ペアでは1ピップ=0.0001の変動を表します。ただしJPY関連のペアでは1ピップ=0.01となることもあります。</div></div>
+  <div class="faq-item"><div class="faq-q">なぜピップ値を計算する必要があるのですか？</div><div class="faq-a">ピップ値を知ることで、トレーディング時のリスク管理が正確になります。1ピップあたりの損益額を事前に計算することで、損切りや利確のレベルを設定する際に、具体的な金額ベースで判断できるようになります。</div></div>
+  <div class="faq-item"><div class="faq-q">ロットサイズはどのように選べばいいですか？</div><div class="faq-a">ロットサイズは口座資金とリスク許容度に基づいて決めるべきです。一般的には、1トレードあたりの最大損失が口座全体の1～2%を超えないように設定することが推奨されています。初心者はマイクロロット（1,000ユニット）から始めることをお勧めします。</div></div>
+  <div class="faq-item"><div class="faq-q">異なる通貨ペアでピップ値は変わりますか？</div><div class="faq-a">はい、変わります。ピップ値は為替レートに反比例するため、為替レートが高い通貨ペアほどピップ値は低くなります。同じロットサイズでも、異なる通貨ペアではピップあたりの損益額が異なるため、注意が必要です。</div></div>
+  <div class="faq-item"><div class="faq-q">この計算機の結果をトレーディング戦略に活かすには？</div><div class="faq-a">損切りと利確のレベルを設定する際に、ピップ値を利用してください。例えば、100ドルのリスクを取りたい場合、ピップ値で割ることで必要な損切りピップ数が分かります。これにより、科学的で計画的なトレーディングが可能になります。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/fibonacci-retracement.html">フィボナッチリトレースメント計算機</a>
+      <a class="tool-pill" href="/tools/ja/pivot-point.html">Pivot Point</a>
+      <a class="tool-pill" href="/tools/ja/rsi-calculator.html">Rsi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/macd-calculator.html">MACD計算機</a>
+      <a class="tool-pill" href="/tools/ja/bollinger-bands.html">ボリンジャーバンド計算機</a>
+      <a class="tool-pill" href="/tools/ja/atr-calculator.html">ATR計算機</a>
+      <a class="tool-pill" href="/tools/ja/ma-crossover.html">MA クロスオーバー計算機</a>
+      <a class="tool-pill" href="/tools/ja/candlestick-identifier.html">ローソク足パターン識別器</a>
+      <a class="tool-pill" href="/tools/ja/support-resistance.html">Support Resistance</a>
+      <a class="tool-pill" href="/tools/ja/options-profit.html">オプション損益計算機</a>
+      <a class="tool-pill" href="/tools/ja/stock-split.html">Stock Split</a>
+      <a class="tool-pill" href="/tools/ja/trading-fee.html">Trading Fee</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/pip-value.html" class="lang-btn">English</a>
+    <a href="/tools/pip-value.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/pip-value.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/pip-value.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/pip-value.html" class="lang-btn">Français</a>
+    <a href="/tools/es/pip-value.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/pip-value.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/pip-value.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/pip-value.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/pip-value.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const exchangeRateInput = document.getElementById('exchangeRate');
+  const lotSizeInput = document.getElementById('lotSize');
+  const pipValueResult = document.getElementById('pipValue');
+  const pipValuePercentageResult = document.getElementById('pipValuePercentage');
+  const resultsDiv = document.querySelector('.results');
+
+  if (!exchangeRateInput.value || !lotSizeInput.value) {
+    alert('Please fill in all fields');
+    return;
+  }
+
+  const exchangeRate = parseFloat(exchangeRateInput.value);
+  const lotSize = parseFloat(lotSizeInput.value);
+
+  if (exchangeRate <= 0 || lotSize <= 0) {
+    alert('Exchange rate and lot size must be positive numbers');
+    return;
+  }
+
+  const pipValue = (0.0001 / exchangeRate) * lotSize;
+  const pipValuePercentage = (0.0001 / exchangeRate) * lotSize;
+
+  pipValueResult.textContent = '$' + pipValue.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 4
+  });
+
+  pipValuePercentageResult.textContent = '$' + pipValuePercentage.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 4
+  });
+
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|pip-value|2026-07-09 -->

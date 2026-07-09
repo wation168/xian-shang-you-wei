@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MA クロスオーバー計算機 - トレーディングシグナル</title>
+<meta name="description" content="移動平均線のクロスオーバーを分析し、買いシグナルと売りシグナルを自動判定します。テクニカル分析ツール。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/ma-crossover.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/ma-crossover.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/ma-crossover.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/ma-crossover.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/ma-crossover.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/ma-crossover.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/ma-crossover.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/ma-crossover.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/ma-crossover.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/ma-crossover.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/ma-crossover.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/ma-crossover.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "MA クロスオーバー計算機", "url": "https://softglow-ai.com/tools/ja/ma-crossover.html", "description": "移動平均線のクロスオーバーを分析し、買いシグナルと売りシグナルを自動判定します。テクニカル分析ツール。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "ゴールデンクロスとデッドクロスの違いは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "ゴールデンクロスは短期移動平均線が長期移動平均線を下から上へ突破する現象で、買いシグナルと見なされます。デッドクロスは逆に短期MAが長期MAを上から下へ突破する現象で、売りシグナルです。"}}, {"@type": "Question", "name": "どの期間の移動平均線を使用すべきですか？", "acceptedAnswer": {"@type": "Answer", "text": "スキャルピングなら5日と10日、デイトレードなら12日と26日、スイングトレードなら20日と50日、中長期投資なら50日と200日がよく使用されます。市場や銘柄の特性に応じて調整してください。"}}, {"@type": "Question", "name": "MA間の距離が大きい場合と小さい場合で何が違いますか？", "acceptedAnswer": {"@type": "Answer", "text": "MA間の距離が大きい場合はトレンドが強く確立している状態です。一方、距離が小さい場合はトレンドが弱まっているか、次のクロスオーバーが近い可能性があります。"}}, {"@type": "Question", "name": "クロスオーバーシグナルだけで取引判断をしてもいいですか？", "acceptedAnswer": {"@type": "Answer", "text": "クロスオーバーは有用なシグナルですが、単独では不十分です。RSIやMACD、サポート・レジスタンスレベルなど、他の指標と組み合わせて判断することをお勧めします。"}}, {"@type": "Question", "name": "ダマシのクロスオーバーを避けるにはどうしたらいいですか？", "acceptedAnswer": {"@type": "Answer", "text": "ボリンジャーバンドやストキャスティクスなどのオシレーター系指標で過買い・過売り状態を確認したり、より長期の移動平均線を組み合わせたりすることで、ダマシの可能性を低減できます。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > MA クロスオーバー計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>MA クロスオーバー計算機</h1>
+    <p class="calc-subtitle">移動平均線がクロスする際のトレーディングシグナルを識別します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="shortMAPeriod">短期移動平均線の期間（日数）</label>
+  <div class="input-row"><input type="number" id="shortMAPeriod" placeholder="12"  value="12" step="1"></div>
+</div>
+  <small class="input-help">短期MAsの計算日数を入力してください</small>
+<div class="input-group">
+  <label for="longMAPeriod">長期移動平均線の期間（日数）</label>
+  <div class="input-row"><input type="number" id="longMAPeriod" placeholder="26"  value="26" step="1"></div>
+</div>
+  <small class="input-help">長期MAsの計算日数を入力してください</small>
+<div class="input-group">
+  <label for="shortMAValue">現在の短期移動平均値</label>
+  <div class="input-row"><input type="number" id="shortMAValue" placeholder="2450.50"  step="0.01"></div>
+</div>
+  <small class="input-help">現在の短期移動平均線の値を入力してください</small>
+<div class="input-group">
+  <label for="longMAValue">現在の長期移動平均値</label>
+  <div class="input-row"><input type="number" id="longMAValue" placeholder="2400.75"  step="0.01"></div>
+</div>
+  <small class="input-help">現在の長期移動平均線の値を入力してください</small>
+<div class="input-group">
+  <label for="previousShortMA">前回の短期移動平均値</label>
+  <div class="input-row"><input type="number" id="previousShortMA" placeholder="2448.20"  step="0.01"></div>
+</div>
+  <small class="input-help">前回の短期移動平均線の値を入力してください</small>
+<div class="input-group">
+  <label for="previousLongMA">前回の長期移動平均値</label>
+  <div class="input-row"><input type="number" id="previousLongMA" placeholder="2401.30"  step="0.01"></div>
+</div>
+  <small class="input-help">前回の長期移動平均線の値を入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">クロスオーバーシグナル</span><span class="result-value" id="crossoverSignal">—</span></div>
+<div class="result-highlight"><span class="result-label">シグナルタイプ</span><span class="result-value" id="signalType">—</span></div>
+<div class="result-item"><span class="result-label">MA間の距離</span><span class="result-value" id="maDistance">—</span></div>
+<div class="result-item"><span class="result-label">パーセンテージ差</span><span class="result-value" id="percentageDiff">—</span></div>
+<div class="result-item"><span class="result-label">前回のMA間距離</span><span class="result-value" id="previousDistance">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> クロスオーバーシグナルは現在の移動平均線の関係を示します。短期MAが長期MAを上抜けする場合は買いシグナル（ゴールデンクロス）、下抜ける場合は売りシグナル（デッドクロス）です。MA間の距離とパーセンテージ差により、トレンドの強さを確認できます。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>MA クロスオーバー計算機について</h2><p>移動平均線（Moving Average）のクロスオーバーは、テクニカル分析における最も基本的でありながら効果的なトレーディングシグナルです。短期移動平均線が長期移動平均線を上向きに突破する「ゴールデンクロス」は買いシグナル、下向きに突破する「デッドクロス」は売りシグナルとされています。</p><h2>クロスオーバーの種類</h2><p>本計算機では2種類のシグナルを判定します。ゴールデンクロスは上昇トレンドの開始を示唆し、短期的な買い機会を提供します。一方、デッドクロスは下降トレンドへの転換を示唆し、売却や損切りのタイミングとなります。また、クロスオーバーが発生していない場合は「クロスなし」と判定されます。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>MA間の距離の意味</h2><p>2本の移動平均線の間の距離とパーセンテージ差は、トレンドの強さを示す重要な指標です。距離が大きいほどトレンドが強く、小さいほどクロスオーバーが近い可能性があります。前回との距離の比較により、トレンドの加速または減速を判断できます。</p><h2>実践的な使用方法</h2><p>短期MA（例：12日）と長期MA（例：26日）を組み合わせることで、より信頼性の高いシグナルが得られます。ただし、クロスオーバーシグナルのみに依存するのではなく、他のテクニカル指標やファンダメンタル分析と組み合わせることが重要です。</p><h2>注意点</h2><p>市場の変動が激しい局面では、ダマシのクロスオーバーが発生することがあります。特にボックス相場では頻繁なシグナルが発生し、利益機会が減少する場合があります。リスク管理と適切なストップロス設定を常に心がけてください。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/candlestick-patterns.html">Candlestick Patterns<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/support-resistance.html">Support & Resistance<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/moving-average-guide.html">Moving Average Guide<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">ゴールデンクロスとデッドクロスの違いは何ですか？</div><div class="faq-a">ゴールデンクロスは短期移動平均線が長期移動平均線を下から上へ突破する現象で、買いシグナルと見なされます。デッドクロスは逆に短期MAが長期MAを上から下へ突破する現象で、売りシグナルです。</div></div>
+  <div class="faq-item"><div class="faq-q">どの期間の移動平均線を使用すべきですか？</div><div class="faq-a">スキャルピングなら5日と10日、デイトレードなら12日と26日、スイングトレードなら20日と50日、中長期投資なら50日と200日がよく使用されます。市場や銘柄の特性に応じて調整してください。</div></div>
+  <div class="faq-item"><div class="faq-q">MA間の距離が大きい場合と小さい場合で何が違いますか？</div><div class="faq-a">MA間の距離が大きい場合はトレンドが強く確立している状態です。一方、距離が小さい場合はトレンドが弱まっているか、次のクロスオーバーが近い可能性があります。</div></div>
+  <div class="faq-item"><div class="faq-q">クロスオーバーシグナルだけで取引判断をしてもいいですか？</div><div class="faq-a">クロスオーバーは有用なシグナルですが、単独では不十分です。RSIやMACD、サポート・レジスタンスレベルなど、他の指標と組み合わせて判断することをお勧めします。</div></div>
+  <div class="faq-item"><div class="faq-q">ダマシのクロスオーバーを避けるにはどうしたらいいですか？</div><div class="faq-a">ボリンジャーバンドやストキャスティクスなどのオシレーター系指標で過買い・過売り状態を確認したり、より長期の移動平均線を組み合わせたりすることで、ダマシの可能性を低減できます。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/fibonacci-retracement.html">フィボナッチリトレースメント計算機</a>
+      <a class="tool-pill" href="/tools/ja/pivot-point.html">Pivot Point</a>
+      <a class="tool-pill" href="/tools/ja/rsi-calculator.html">Rsi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/macd-calculator.html">Macd Calculator</a>
+      <a class="tool-pill" href="/tools/ja/bollinger-bands.html">ボリンジャーバンド計算機</a>
+      <a class="tool-pill" href="/tools/ja/atr-calculator.html">ATR計算機</a>
+      <a class="tool-pill" href="/tools/ja/candlestick-identifier.html">ローソク足パターン識別器</a>
+      <a class="tool-pill" href="/tools/ja/support-resistance.html">Support Resistance</a>
+      <a class="tool-pill" href="/tools/ja/pip-value.html">Pip Value</a>
+      <a class="tool-pill" href="/tools/ja/options-profit.html">Options Profit</a>
+      <a class="tool-pill" href="/tools/ja/stock-split.html">Stock Split</a>
+      <a class="tool-pill" href="/tools/ja/trading-fee.html">Trading Fee</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/ma-crossover.html" class="lang-btn">English</a>
+    <a href="/tools/ma-crossover.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/ma-crossover.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/ma-crossover.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/ma-crossover.html" class="lang-btn">Français</a>
+    <a href="/tools/es/ma-crossover.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/ma-crossover.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/ma-crossover.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/ma-crossover.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/ma-crossover.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const shortMAPeriod = parseFloat(document.getElementById('shortMAPeriod').value);
+  const longMAPeriod = parseFloat(document.getElementById('longMAPeriod').value);
+  const shortMAValue = parseFloat(document.getElementById('shortMAValue').value);
+  const longMAValue = parseFloat(document.getElementById('longMAValue').value);
+  const previousShortMA = parseFloat(document.getElementById('previousShortMA').value);
+  const previousLongMA = parseFloat(document.getElementById('previousLongMA').value);
+
+  if (isNaN(shortMAPeriod) || isNaN(longMAPeriod) || isNaN(shortMAValue) || isNaN(longMAValue) || isNaN(previousShortMA) || isNaN(previousLongMA)) {
+    alert('Please fill in all fields with valid numbers');
+    return;
+  }
+
+  if (shortMAPeriod >= longMAPeriod) {
+    alert('Short MA period must be less than Long MA period');
+    return;
+  }
+
+  const currentDistance = shortMAValue - longMAValue;
+  const previousDistance = previousShortMA - previousLongMA;
+  const percentageDiff = ((currentDistance / longMAValue) * 100).toFixed(2);
+
+  let crossoverSignal = 'No Crossover';
+  let signalType = 'None';
+
+  if (previousDistance < 0 && currentDistance > 0) {
+    crossoverSignal = 'Yes - Bullish Crossover Detected';
+    signalType = 'BUY SIGNAL (Golden Cross)';
+  } else if (previousDistance > 0 && currentDistance < 0) {
+    crossoverSignal = 'Yes - Bearish Crossover Detected';
+    signalType = 'SELL SIGNAL (Death Cross)';
+  } else if (previousDistance === 0 || currentDistance === 0) {
+    crossoverSignal = 'Potential Crossover Point';
+    signalType = 'Watch Closely';
+  } else {
+    crossoverSignal = 'No';
+    signalType = 'MAs moving in same direction';
+  }
+
+  document.getElementById('crossoverSignal').textContent = crossoverSignal;
+  document.getElementById('signalType').textContent = signalType;
+  document.getElementById('maDistance').textContent = currentDistance.toFixed(2);
+  document.getElementById('percentageDiff').textContent = Math.abs(percentageDiff);
+  document.getElementById('previousDistance').textContent = previousDistance.toFixed(2);
+
+  document.getElementById('resultsSection').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|ma-crossover|2026-07-09 -->

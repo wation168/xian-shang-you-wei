@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>風險報酬計算機 - 交易比例分析工具</title>
+<meta name="description" content="免費風險報酬計算機，快速計算R:R比例、風險金額和報酬金額，幫助您評估交易機會的可行性。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/risk-reward.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/risk-reward.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/risk-reward.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/risk-reward.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/risk-reward.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/risk-reward.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/risk-reward.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/risk-reward.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/risk-reward.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/risk-reward.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/risk-reward.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/risk-reward.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "風險報酬計算機", "url": "https://softglow-ai.com/tools/risk-reward.html", "description": "免費風險報酬計算機，快速計算R:R比例、風險金額和報酬金額，幫助您評估交易機會的可行性。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "什麼是健康的風險報酬比？", "acceptedAnswer": {"@type": "Answer", "text": "大多數專業交易者尋求至少1:2或更好的比例（如1:3或1:4）。這確保潛在利潤明顯超過潛在虧損，為您的交易提供數學優勢。"}}, {"@type": "Question", "name": "風險報酬比1:1是否可接受？", "acceptedAnswer": {"@type": "Answer", "text": "1:1的比例意味著您冒同等的風險和報酬。這通常不夠理想，因為交易成本和滑點會侵蝕您的利潤。尋求至少1:2的比例會更好。"}}, {"@type": "Question", "name": "如何在實際交易中應用這些計算？", "acceptedAnswer": {"@type": "Answer", "text": "在下單前，先確定您的進場點、止損點和目標價格。使用此計算機驗證R:R比例。只有當比例符合您的交易策略標準時，才執行交易。"}}, {"@type": "Question", "name": "較高的風險報酬比是否總是更好？", "acceptedAnswer": {"@type": "Answer", "text": "不一定。雖然更高的比例（如1:5）看起來吸引，但通常意味著目標價格更遠，達成的概率可能更低。選擇平衡的比例，結合市場現實和您的分析。"}}, {"@type": "Question", "name": "風險報酬計算是否保證利潤？", "acceptedAnswer": {"@type": "Answer", "text": "不，它只是提供數學優勢。還需要正確的進場時機、風險管理和交易紀律。高R:R比例配合良好的勝率才能產生真實的利潤。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 風險報酬計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>風險報酬計算機</h1>
+    <p class="calc-subtitle">計算風險與報酬比例，評估交易可行性</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="entryPrice">進場價格</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="entryPrice" placeholder="1.2500"  step="0.01"></div>
+</div>
+  <small class="input-help">輸入您計畫進場的價格水位</small>
+<div class="input-group">
+  <label for="stopPrice">止損價格</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="stopPrice" placeholder="1.2450"  step="0.01"></div>
+</div>
+  <small class="input-help">輸入您的止損點位，用以限制虧損</small>
+<div class="input-group">
+  <label for="targetPrice">目標價格</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="targetPrice" placeholder="1.2600"  step="0.01"></div>
+</div>
+  <small class="input-help">輸入您的目標獲利價格</small></div>
+    <button class="btn-calc" onclick="calculate()">計算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">風險報酬比(R:R)</span><span class="result-value" id="riskRewardRatio">—</span></div>
+<div class="result-item"><span class="result-label">風險金額</span><span class="result-value" id="riskAmount">—</span></div>
+<div class="result-item"><span class="result-label">報酬金額</span><span class="result-value" id="rewardAmount">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> 風險報酬比顯示每承擔1單位風險可獲得多少報酬。比例越高（如1:3）表示交易機會越吸引。風險金額是止損與進場的差額，報酬金額是目標與進場的差額。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 列印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什麼是風險報酬比？</h2><p>風險報酬比(Risk-Reward Ratio，簡稱R:R)是衡量交易品質的關鍵指標。它反映了您在單筆交易中為了賺取£1的利潤，願意承擔多少£的虧損風險。例如1:3的比例表示您冒£1的風險來賺取£3的利潤。</p><h2>如何使用風險報酬計算機</h2><p>輸入三個價格點位：進場價格是您開始交易的位置；止損價格是您願意承受虧損的底線；目標價格是您期望的獲利水位。計算機會自動計算風險與報酬的絕對金額，以及它們之間的比例關係。</p><h2>理想的風險報酬比</h2><p>大多數專業交易者尋求至少1:2或1:3的風險報酬比。這意味著潛在的利潤至少是潛在虧損的2倍或3倍。比例越高，交易的吸引力越大，因為較小的成功率就能實現整體的正期望值。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>風險金額與報酬金額</h2><p>風險金額計算方式為進場價格減去止損價格的絕對值。報酬金額則是目標價格減去進場價格。這兩個數字直接決定了您的R:R比例。永遠確保報酬金額超過風險金額。</p><h2>提高交易成功率</h2><p>高風險報酬比不保證利潤，但它提供了數學優勢。即使您只有40%的交易成功率，1:3的比例也能帶來正期望值。結合堅實的交易計畫和風險管理，風險報酬計算是每位交易者必備的工具。</p><h2>常見應用場景</h2><p>此工具適用於外匯交易、股票、加密貨幣和期貨等各類市場。在開始任何交易前，都應該先評估其風險報酬比。這個簡單的檢查可以幫助您篩除低機率交易，只專注於高品質的交易機會。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">什麼是健康的風險報酬比？</div><div class="faq-a">大多數專業交易者尋求至少1:2或更好的比例（如1:3或1:4）。這確保潛在利潤明顯超過潛在虧損，為您的交易提供數學優勢。</div></div>
+  <div class="faq-item"><div class="faq-q">風險報酬比1:1是否可接受？</div><div class="faq-a">1:1的比例意味著您冒同等的風險和報酬。這通常不夠理想，因為交易成本和滑點會侵蝕您的利潤。尋求至少1:2的比例會更好。</div></div>
+  <div class="faq-item"><div class="faq-q">如何在實際交易中應用這些計算？</div><div class="faq-a">在下單前，先確定您的進場點、止損點和目標價格。使用此計算機驗證R:R比例。只有當比例符合您的交易策略標準時，才執行交易。</div></div>
+  <div class="faq-item"><div class="faq-q">較高的風險報酬比是否總是更好？</div><div class="faq-a">不一定。雖然更高的比例（如1:5）看起來吸引，但通常意味著目標價格更遠，達成的概率可能更低。選擇平衡的比例，結合市場現實和您的分析。</div></div>
+  <div class="faq-item"><div class="faq-q">風險報酬計算是否保證利潤？</div><div class="faq-a">不，它只是提供數學優勢。還需要正確的進場時機、風險管理和交易紀律。高R:R比例配合良好的勝率才能產生真實的利潤。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/roi-calculator.html">ROI 計算機</a>
+      <a class="tool-pill" href="/tools/position-size.html">部位規模計算器</a>
+      <a class="tool-pill" href="/tools/stop-loss.html">停損計算機</a>
+      <a class="tool-pill" href="/tools/dividend-yield.html">股息收益率計算機</a>
+      <a class="tool-pill" href="/tools/pe-ratio.html">本益比計算機</a>
+      <a class="tool-pill" href="/tools/dca-calculator.html">定期定額投資計算機</a>
+      <a class="tool-pill" href="/tools/cagr.html">年複合成長率計算器</a>
+      <a class="tool-pill" href="/tools/margin-calculator.html">保證金計算器</a>
+      <a class="tool-pill" href="/tools/stock-gain-loss.html">股票損益計算機</a>
+      <a class="tool-pill" href="/tools/break-even.html">損益平衡點計算機</a>
+      <a class="tool-pill" href="/tools/rule-of-72.html">72法則計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/risk-reward.html" class="lang-btn">English</a>
+    <a href="/tools/risk-reward.html" class="lang-btn active">繁體中文</a>
+    <a href="/tools/ja/risk-reward.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/risk-reward.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/risk-reward.html" class="lang-btn">Français</a>
+    <a href="/tools/es/risk-reward.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/risk-reward.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/risk-reward.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/risk-reward.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/risk-reward.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const entryPrice = parseFloat(document.getElementById('entryPrice').value);
+  const stopPrice = parseFloat(document.getElementById('stopPrice').value);
+  const targetPrice = parseFloat(document.getElementById('targetPrice').value);
+
+  if (!entryPrice || !stopPrice || !targetPrice) {
+    alert('Please fill in all fields with valid numbers');
+    return;
+  }
+
+  if (entryPrice === stopPrice) {
+    alert('Entry price and stop loss price cannot be the same');
+    return;
+  }
+
+  if (entryPrice === targetPrice) {
+    alert('Entry price and target price cannot be the same');
+    return;
+  }
+
+  const riskAmount = Math.abs(entryPrice - stopPrice);
+  const rewardAmount = Math.abs(targetPrice - entryPrice);
+
+  if (riskAmount === 0) {
+    alert('Risk amount cannot be zero');
+    return;
+  }
+
+  const riskRewardRatio = rewardAmount / riskAmount;
+
+  document.getElementById('riskRewardRatio').textContent = riskRewardRatio.toFixed(2);
+  document.getElementById('riskAmount').textContent = '£' + riskAmount.toFixed(4);
+  document.getElementById('rewardAmount').textContent = '£' + rewardAmount.toFixed(4);
+
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-TW|risk-reward|2026-07-09 -->

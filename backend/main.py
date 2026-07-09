@@ -212,7 +212,7 @@ async def lifespan(app: FastAPI):
                             f'<div style="background:#fff8e1;border-radius:12px;padding:24px;margin-bottom:20px;border:1px solid #fcd34d">'
                             f'<h2 style="margin:0 0 12px;font-size:18px;color:#92400e">⏰ 訂閱即將到期</h2>'
                             f'<p style="color:#555;margin:0 0 16px">您的訂閱將於 <b>{m["expire_at"]}</b> 到期（剩 3 天），請把握時間續訂，避免服務中斷。</p>'
-                            f'<a href="{FRONTEND_URL}/landing.html#pricing" style="background:#f59e0b;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:700">立即續訂</a></div>'
+                            f'<a href="{FRONTEND_URL}/stock/landing#pricing" style="background:#f59e0b;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:700">立即續訂</a></div>'
                             + _SOFTGLOW_AD +
                             f'<div style="border-top:1px solid #e5e7eb;padding-top:16px;text-align:center;color:#9ca3af;font-size:12px">'
                             f'<p style="margin:0">如有問題請聯繫客服：<a href="mailto:watione@yahoo.com.tw" style="color:#1D9E75">watione@yahoo.com.tw</a></p>'
@@ -226,7 +226,7 @@ async def lifespan(app: FastAPI):
                             f'<div style="background:#fef2f2;border-radius:12px;padding:24px;margin-bottom:20px;border:1px solid #fca5a5">'
                             f'<h2 style="margin:0 0 12px;font-size:18px;color:#991b1b">📅 訂閱已到期</h2>'
                             f'<p style="color:#555;margin:0 0 16px">您的訂閱已於今日（{today_str}）到期，部分功能已暫停。續訂後立即恢復所有功能。</p>'
-                            f'<a href="{FRONTEND_URL}/landing.html#pricing" style="background:#ef4444;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:700">立即續訂</a></div>'
+                            f'<a href="{FRONTEND_URL}/stock/landing#pricing" style="background:#ef4444;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:700">立即續訂</a></div>'
                             + _SOFTGLOW_AD +
                             f'<div style="border-top:1px solid #e5e7eb;padding-top:16px;text-align:center;color:#9ca3af;font-size:12px">'
                             f'<p style="margin:0">如有問題請聯繫客服：<a href="mailto:watione@yahoo.com.tw" style="color:#1D9E75">watione@yahoo.com.tw</a></p>'
@@ -434,6 +434,53 @@ async def lifespan(app: FastAPI):
         _bg_scheduler.add_job(_run_batch_report_job,    "cron",     hour=18, minute=30)
         _bg_scheduler.start()
         print("   ✅ APScheduler 排程已啟動（開盤熱門股 09:06、盤中到價提醒每5分鐘、到期通知 09:00、報價快取清除 09:00、補單 08:00）")
+
+        # 啟動時補跑深度選股（若今日尚未產出）
+        try:
+            from zoneinfo import ZoneInfo as _ZI
+            _now_tp = datetime.now(_ZI("Asia/Taipei"))
+            _is_weekday = _now_tp.weekday() < 5
+            _after_17 = _now_tp.hour >= 17
+            if _is_weekday and _after_17:
+                _dc2 = _db_conn()
+                _row2 = _dc2.execute(
+                    "SELECT updated_at FROM html_pages WHERE key='deep_analysis'"
+                ).fetchone()
+                _dc2.close()
+                _today_str = _now_tp.strftime("%Y-%m-%d")
+                _already_ran = _row2 and str(_row2["updated_at"]).startswith(_today_str)
+                if not _already_ran:
+                    print("   ⚠️ 今日深度選股尚未產出，啟動補跑...")
+                    import threading as _th
+                    _th.Thread(target=_run_deep_analysis_job, daemon=True).start()
+                else:
+                    print("   ✅ 今日深度選股已產出，不需補跑")
+        except Exception as _ce:
+            print(f"   ⚠️ 補跑深度選股檢查失敗：{_ce}")
+
+        # 啟動時補跑開盤熱門股（若今日尚未產出且在交易時段內）
+        try:
+            from zoneinfo import ZoneInfo as _ZI_op
+            _now_op = datetime.now(_ZI_op("Asia/Taipei"))
+            _is_wd_op = _now_op.weekday() < 5
+            _after_0906 = _now_op.hour > 9 or (_now_op.hour == 9 and _now_op.minute >= 6)
+            _before_1400 = _now_op.hour < 14
+            if _is_wd_op and _after_0906 and _before_1400:
+                _today_op = _now_op.strftime("%Y-%m-%d")
+                _dc_op = _db_conn()
+                _row_op = _dc_op.execute(
+                    "SELECT date FROM opening_picks WHERE date=?", (_today_op,)
+                ).fetchone()
+                _dc_op.close()
+                if not _row_op:
+                    print("   ⚠️ 今日開盤熱門股尚未產出，啟動補跑...")
+                    import threading as _th_op
+                    _th_op.Thread(target=_run_opening_scan_job, daemon=True).start()
+                else:
+                    print("   ✅ 今日開盤熱門股已產出，不需補跑")
+        except Exception as _ce_op:
+            print(f"   ⚠️ 補跑開盤熱門股檢查失敗：{_ce_op}")
+
     except ImportError:
         print("   ⚠️ apscheduler 未安裝，選股排程請以 scheduler.py 獨立執行")
     except Exception as _sch_err:
@@ -471,9 +518,140 @@ app.add_middleware(
 _FRONTEND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend")
 
 @app.get("/", include_in_schema=False)
-async def serve_index():
+async def serve_homepage(request: Request):
+    from fastapi.responses import FileResponse, RedirectResponse
+    # 如果帶有台股 SPA 的參數，自動跳到 /stock/
+    qs = str(request.query_params)
+    if qs and ("stock=" in qs or "report=" in qs or "tab=" in qs):
+        return RedirectResponse(f"/stock/?{qs}", status_code=302)
+    return FileResponse(os.path.join(_FRONTEND_DIR, "homepage.html"))
+
+@app.get("/stock", include_in_schema=False)
+@app.get("/stock/", include_in_schema=False)
+async def serve_stock_app():
     from fastapi.responses import FileResponse
     return FileResponse(os.path.join(_FRONTEND_DIR, "index.html"))
+
+@app.get("/stock/landing", include_in_schema=False)
+@app.get("/stock/landing.html", include_in_schema=False)
+async def serve_stock_landing():
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "landing.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/landing", include_in_schema=False)
+@app.get("/landing.html", include_in_schema=False)
+async def redirect_old_landing():
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse("/stock/landing", status_code=301)
+
+@app.get("/patterns/{filename}.html", include_in_schema=False)
+async def serve_patterns_html(filename: str):
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "patterns", f"{filename}.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/patterns/{locale}/{filename}.html", include_in_schema=False)
+async def serve_patterns_locale_html(locale: str, filename: str):
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "patterns", locale, f"{filename}.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/blog/{filename}.html", include_in_schema=False)
+async def serve_blog_html(filename: str):
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "blog", f"{filename}.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/blog", include_in_schema=False)
+@app.get("/blog/", include_in_schema=False)
+async def serve_blog_index():
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "blog", "index.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/blog/{locale}/{filename}.html", include_in_schema=False)
+async def serve_blog_locale_html(locale: str, filename: str):
+    from fastapi.responses import FileResponse
+    import os as _os
+    if locale not in ("en", "ja", "ko"):
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    path = _os.path.join(_FRONTEND_DIR, "blog", locale, f"{filename}.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/blog/{locale}", include_in_schema=False)
+@app.get("/blog/{locale}/", include_in_schema=False)
+async def serve_blog_locale_index(locale: str):
+    from fastapi.responses import FileResponse
+    import os as _os
+    if locale not in ("en", "ja", "ko"):
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    path = _os.path.join(_FRONTEND_DIR, "blog", locale, "index.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+# ---- Tools 路由 ----
+_TOOLS_LOCALES = ("en","ja","ko","es","pt","id","vi","th","de")
+
+@app.get("/tools/{filename}.html", include_in_schema=False)
+async def serve_tools_html(filename: str):
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "tools", f"{filename}.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/tools", include_in_schema=False)
+@app.get("/tools/", include_in_schema=False)
+async def serve_tools_index():
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "tools", "index.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/tools/{locale}/{filename}.html", include_in_schema=False)
+async def serve_tools_locale_html(locale: str, filename: str):
+    from fastapi.responses import FileResponse
+    import os as _os
+    if locale not in _TOOLS_LOCALES:
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    path = _os.path.join(_FRONTEND_DIR, "tools", locale, f"{filename}.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/tools/{locale}", include_in_schema=False)
+@app.get("/tools/{locale}/", include_in_schema=False)
+async def serve_tools_locale_index(locale: str):
+    from fastapi.responses import FileResponse
+    import os as _os
+    if locale not in _TOOLS_LOCALES:
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    path = _os.path.join(_FRONTEND_DIR, "tools", locale, "index.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
 
 @app.get("/{filename}.html", include_in_schema=False)
 async def serve_html(filename: str):
@@ -497,7 +675,7 @@ async def serve_manifest():
         "name": "線上有位",
         "short_name": "線上有位",
         "description": "台股技術分析輔助工具",
-        "start_url": "/",
+        "start_url": "/stock/",
         "display": "standalone",
         "background_color": "#1a1a18",
         "theme_color": "#1D9E75",
@@ -516,7 +694,7 @@ async def serve_favicon():
 @app.get("/robots.txt", include_in_schema=False)
 async def serve_robots():
     from fastapi.responses import PlainTextResponse
-    return PlainTextResponse("User-agent: *\nAllow: /\nSitemap: https://softglow-ai.com/sitemap.xml")
+    return PlainTextResponse("User-agent: *\nAllow: /\n\nSitemap: https://softglow-ai.com/sitemap.xml")
 
 
 # ══════════════════════════════════════════════════════════
@@ -546,10 +724,8 @@ def safe_float(v):
 
 
 def calc_ma(closes: np.ndarray, period: int) -> np.ndarray:
-    ma = np.full(len(closes), np.nan)
-    for i in range(period - 1, len(closes)):
-        ma[i] = closes[i - period + 1: i + 1].mean()
-    return ma
+    # A3: 用 pandas rolling 取代 Python loop，大量 K 棒時快 10 倍
+    return pd.Series(closes).rolling(period).mean().values
 
 
 
@@ -588,6 +764,12 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
         df["Date"] = pd.to_datetime(df["Date"])
         df = df.set_index("Date").sort_index()
         df = df[["Open", "High", "Low", "Close", "Volume"]].astype(float)
+
+        # ── 過濾暫停交易日（開高低收任一為 0，視為無效 K 棒）──
+        df = df[(df["Open"] > 0) & (df["High"] > 0) & (df["Low"] > 0) & (df["Close"] > 0)]
+
+        # ── 過濾週末 K 棒（FinMind 偶爾回傳週六資料）──
+        df = df[df.index.dayofweek < 5]
 
         # ── 盤中補今日 K 棒（FinMind tick_snapshot）──
         tz = ZoneInfo("Asia/Taipei")
@@ -779,30 +961,8 @@ def get_stock_name(symbol: str) -> str:
     if code in _name_cache:
         return _name_cache[code]
 
-    # 3. 快取沒命中，嘗試即時查 FinMind（可能是新上市股票）
-    try:
-        import urllib.request as _ureq, json as _json
-        url = (f"https://api.finmindtrade.com/api/v4/data"
-               f"?dataset=TaiwanStockInfo&token={FINMIND_TOKEN}")
-        req = _ureq.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with _ureq.urlopen(req, timeout=5) as resp:
-            data = _json.loads(resp.read())
-        if data.get("status") == 200:
-            for item in data.get("data", []):
-                sid = str(item.get("stock_id", ""))
-                sname = str(item.get("stock_name", ""))
-                stype = str(item.get("type", "")).lower()
-                if sid and sname:
-                    _name_cache[sid] = sname
-                    _name_to_code[sname] = sid
-                if sid and stype:
-                    _market_cache[sid] = stype
-        if code in _name_cache:
-            return _name_cache[code]
-    except Exception:
-        pass
-
-    # 4. 都找不到，直接回傳代號（不走 yfinance 避免亂碼）
+    # 3. 快取沒命中 → 直接回傳代號（A4: 不再打全量 API，啟動時已預載）
+    # 若真的是新上市股票，下次重啟服務時 lifespan 會自動載入
     return code
 
 
@@ -1072,6 +1232,21 @@ def find_support_resistance(highs, lows, closes, volumes, price, channel_support
         "hollow_volume":      2,
         "ma20": 1, "ma60": 1,
     }
+
+    # T2: 根據均線趨勢動態調整權重
+    _ma20 = np.mean(closes[-20:]) if len(closes) >= 20 else None
+    _ma60 = np.mean(closes[-60:]) if len(closes) >= 60 else None
+    _trend_up = _ma20 is not None and _ma60 is not None and _ma20 > _ma60
+    _trend_dn = _ma20 is not None and _ma60 is not None and _ma20 < _ma60
+    _dyn_adj = {}
+    if _trend_up:
+        # 上升趨勢：均線支撐更可靠
+        _dyn_adj = {"ma20": 3, "ma60": 3, "channel_low": 5}
+    elif _trend_dn:
+        # 下降趨勢：只有放量止跌才有意義
+        _dyn_adj = {"volume_surge": 5, "pullback_low_surge": 7, "ma20": 0, "ma60": 0}
+    # 盤整：platform_low 更重要（已有高權重，不需額外調整）
+
     below = [(p, src, desc) for p, src, desc in candidates if p < price]
 
     if below:
@@ -1079,7 +1254,7 @@ def find_support_resistance(highs, lows, closes, volumes, price, channel_support
         price_range = (price - min(prices_only)) or 1
         def score(item):
             p, src, _ = item
-            w = SOURCE_WEIGHT.get(src, 1)
+            w = _dyn_adj.get(src, SOURCE_WEIGHT.get(src, 1))  # T2: 動態權重優先
             # proximity 只做次要排序，權重極小（0~0.1），不會蓋過來源強度差異
             proximity = (p - min(prices_only)) / price_range * 0.1
             return w + proximity
@@ -1093,6 +1268,7 @@ def find_support_resistance(highs, lows, closes, volumes, price, channel_support
     # ── 壓力：轉折高點優先，再看近期最高 ──
     # 壓力選擇：現價以上最近的轉折高點，若多個則取最近且最低的（最容易被測試）
     valid_hi_idx = [i for i in hi_idx if highs[i] > price * 1.001]
+    _res_vol_confirmed = False  # T3: 壓力量能確認
     if valid_hi_idx:
         # 取最近30根內的轉折高點，沒有就取最近的一個
         recent_hi = [i for i in valid_hi_idx if i >= n - 60]
@@ -1100,7 +1276,12 @@ def find_support_resistance(highs, lows, closes, volumes, price, channel_support
         # 最近且最低的（最近壓力）
         nearest_hi = min(pool, key=lambda i: (highs[i], -(i)))
         resistance = round(float(highs[nearest_hi]), 2)
-        resistance_desc = f"轉折高點（{n - nearest_hi}根前）"
+        # T3: 檢查壓力點的成交量是否爆量（> 均量 1.5 倍）
+        _avg_vol = float(np.mean(volumes[max(0,nearest_hi-20):nearest_hi+1])) if nearest_hi > 0 else 1
+        _hi_vol = float(volumes[nearest_hi]) if nearest_hi < len(volumes) else 0
+        _res_vol_confirmed = _hi_vol > _avg_vol * 1.5
+        _vol_tag = "，爆量高點" if _res_vol_confirmed else ""
+        resistance_desc = f"轉折高點（{n - nearest_hi}根前{_vol_tag}）"
     else:
         # 排除今天（最後一根），避免今日創高時壓力 = 現價
         hist_highs = highs[:-1] if len(highs) > 20 else highs
@@ -1588,11 +1769,12 @@ def detect_triangle_channel(highs, lows, closes):
     }
 
 
-def detect_reversal_pattern(highs, lows, closes):
+def detect_reversal_pattern(highs, lows, closes, volumes=None):
     """偵測反轉型態：W底、M頭、頭肩底、頭肩頂"""
     LOOKBACK = min(len(closes), 120)
     _offset  = len(closes) - LOOKBACK
     _h = highs[-LOOKBACK:]; _l = lows[-LOOKBACK:]
+    _v = volumes[-LOOKBACK:] if volumes is not None and len(volumes) >= LOOKBACK else None
     n  = LOOKBACK; price = closes[-1]
     order = max(3, min(8, n // 20))
     lo_idx = argrelextrema(_l, np.less_equal,    order=order)[0].tolist()
@@ -1610,10 +1792,20 @@ def detect_reversal_pattern(highs, lows, closes):
             if price >= neck * 0.98:
                 target = round(neck + (neck - min(v1, v2)), 2)
                 broken = bool(price >= neck * 1.005)
+                # T8: 量能驗證 — 第二底量應比第一底少（量縮止跌），突破頸線應放量
+                _vol_confirmed = True
+                _vol_note = ""
+                if _v is not None:
+                    _vol_bot1 = float(_v[l1]) if l1 < len(_v) else 0
+                    _vol_bot2 = float(_v[l2]) if l2 < len(_v) else 0
+                    if _vol_bot2 > _vol_bot1 * 1.1:
+                        _vol_confirmed = False
+                        _vol_note = "，量能未確認（第二底量未縮）"
                 return {
                     "type": "double_bottom", "desc": "W底（雙底）",
                     "neckline": round(neck, 2), "target": float(target), "broken": broken,
-                    "position_desc": f"{'已突破頸線' if broken else '接近頸線'} {neck:.1f}，目標 {target}",
+                    "vol_confirmed": _vol_confirmed,  # T8
+                    "position_desc": f"{'已突破頸線' if broken else '接近頸線'} {neck:.1f}，目標 {target}{_vol_note}",
                     "support_now": round(min(v1, v2)*0.99, 2), "resist_now": round(neck, 2),
                     "support_line": None, "resist_line": None,
                     "channel_width": round(neck-min(v1, v2), 2),
@@ -1779,7 +1971,13 @@ def detect_gann_recross(closes, highs, lows, volumes, ma_period=20, max_bars=2):
             trigger_b1 = i
             break
     if trigger_b1 is not None and (n - 1 - trigger_b1) <= max_bars:
+        # T5: 站回均線當天量能過濾
+        _avg_vol_20 = float(np.mean(volumes[max(0,trigger_b1-20):trigger_b1])) if trigger_b1 > 0 else 1
+        _trigger_vol = float(volumes[trigger_b1])
+        _vol_weak = _trigger_vol < _avg_vol_20 * 0.8  # 縮量站回
         buy_type = "買1（站回均線）" if ma[-1] >= ma[-(min(5, n))] else "買4（超跌反彈）"
+        if _vol_weak:
+            buy_type += "⚠縮量，需量增確認"
         return True, round(float(curr_ma), 2), name, stop, buy_type
 
     # ── 買2：收盤在均線上方，低點觸碰均線後反彈 ──
@@ -1934,6 +2132,21 @@ def _db_conn():
     conn.row_factory = sqlite3.Row
     return conn
 
+# B5: context manager 版本，自動 close + commit（新程式碼優先用這個）
+from contextlib import contextmanager as _contextmanager
+@_contextmanager
+def _db():
+    """用法：with _db() as conn: conn.execute(...)"""
+    conn = _db_conn()
+    try:
+        yield conn
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
 def _db_init():
     conn = _db_conn()
     c = conn.cursor()
@@ -2077,6 +2290,24 @@ def _db_init():
             account_name TEXT NOT NULL DEFAULT '',
             created_at   TEXT DEFAULT (datetime('now','+8 hours'))
         );
+        CREATE TABLE IF NOT EXISTS forum_posts (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id    INTEGER DEFAULT NULL,
+            nickname   TEXT NOT NULL DEFAULT '匿名',
+            title      TEXT NOT NULL,
+            content    TEXT NOT NULL,
+            stock_code TEXT DEFAULT '',
+            created_at TEXT DEFAULT (datetime('now','+8 hours')),
+            updated_at TEXT DEFAULT (datetime('now','+8 hours'))
+        );
+        CREATE TABLE IF NOT EXISTS forum_comments (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            post_id    INTEGER NOT NULL,
+            user_id    INTEGER DEFAULT NULL,
+            nickname   TEXT NOT NULL DEFAULT '匿名',
+            content    TEXT NOT NULL,
+            created_at TEXT DEFAULT (datetime('now','+8 hours'))
+        );
     """)
     conn.commit()
 
@@ -2109,8 +2340,9 @@ def _db_init():
             pass  # 欄位已存在，忽略
 
     # 自動建立管理員帳號（已存在則不覆蓋）
-    ADMIN_EMAIL = "watione@yahoo.com.tw"
-    ADMIN_PWD   = "630428"
+    # B4: 密碼改從環境變數讀取，不再寫死在原始碼
+    ADMIN_EMAIL  = os.environ.get("ADMIN_EMAIL", "watione@yahoo.com.tw")
+    ADMIN_PWD    = os.environ.get("ADMIN_DEFAULT_PWD", "630428")
     ADMIN_EXPIRE = "2099-12-31"
     existing = conn.execute("SELECT id FROM members WHERE email=?", (ADMIN_EMAIL,)).fetchone()
     if not existing:
@@ -2674,13 +2906,18 @@ def _do_analyze(stock_id: str, tf: str = "D",
     ma_periods = [p for p in [ma1, ma2, ma3, ma4, ma5] if p and p > 0]
     ma_values = {f"ma{p}": safe_float(calc_ma(closes, p)[-1]) for p in ma_periods}
 
-    # 趨勢
-    avail = [(p, calc_ma(closes, p)[-1]) for p in sorted(ma_periods)
-             if not np.isnan(calc_ma(closes, p)[-1])]
-    trend = "觀察中"
-    if len(avail) >= 2:
-        s, l = avail[0][1], avail[-1][1]
-        trend = "上升趨勢" if s > l * 1.005 else "下降趨勢" if s < l * 0.995 else "盤整"
+    # 趨勢（統一用 MA20 vs MA60，與多空雷達①趨勢一致）
+    _ma20_last = calc_ma(closes, 20)[-1]
+    _ma60_last = calc_ma(closes, 60)[-1]
+    if not np.isnan(_ma20_last) and not np.isnan(_ma60_last):
+        trend = "上升趨勢" if _ma20_last > _ma60_last * 1.005 else "下降趨勢" if _ma20_last < _ma60_last * 0.995 else "盤整"
+    else:
+        avail = [(p, calc_ma(closes, p)[-1]) for p in sorted(ma_periods)
+                 if not np.isnan(calc_ma(closes, p)[-1])]
+        trend = "觀察中"
+        if len(avail) >= 2:
+            s, l = avail[0][1], avail[-1][1]
+            trend = "上升趨勢" if s > l * 1.005 else "下降趨勢" if s < l * 0.995 else "盤整"
 
     # 趨勢軌道（先算，軌道下緣納入支撐候選競爭）
     channel = find_trend_channel(highs, lows, closes)
@@ -2704,7 +2941,7 @@ def _do_analyze(stock_id: str, tf: str = "D",
     near_bot = price < ch_lo * 1.03
 
     # 反轉型態（W底/M頭/頭肩）— 優先級最高，若找到則覆蓋軌道
-    reversal = detect_reversal_pattern(highs, lows, closes)
+    reversal = detect_reversal_pattern(highs, lows, closes, volumes)
     if reversal:
         # 反轉型態找到時，整合進 channel 但保留軌道線顯示
         reversal_desc = reversal["desc"]
@@ -2802,8 +3039,8 @@ def _do_analyze(stock_id: str, tf: str = "D",
     else:
         pattern, pattern_sub = detect_pattern(price, support, resistance, ch_lo, ch_hi)
 
-    # K棒型態辨識
-    kbar_pattern, kbar_warning, kbar_dir = detect_kbar_pattern(opens, highs, lows, closes)
+    # K棒型態辨識（B3: 統一為單一函式，同時回傳型態名、預警、方向、勝率）
+    kbar_pattern, kbar_warning, kbar_dir, kbar_win_rate = detect_kbar_pattern(opens, highs, lows, closes)
 
     # 葛蘭碧（加量能過濾）
     ma20_arr = calc_ma(closes, 20)
@@ -2842,9 +3079,11 @@ def _do_analyze(stock_id: str, tf: str = "D",
         raw_stop = round(price * 0.95, 2)
     else:
         raw_stop = round(support * 0.985, 2)
-    min_stop  = round(price * 0.98, 2)   # 最近不能超過現價 2%
-    max_stop  = round(price * 0.90, 2)   # 最遠不超過現價 10%
-    stop_loss = min(min_stop, max(raw_stop, max_stop))
+    min_stop  = round(price * 0.98, 2)   # 最近不能超過現價 -2%（太緊容易被洗）
+    max_stop  = round(price * 0.90, 2)   # 最遠不超過現價 -10%（太遠失去意義）
+    # B2: 修正邏輯 — raw_stop 夾在 max_stop ~ min_stop 之間
+    # 原寫法 min(min_stop, max(...)) 會讓結果永遠 ≤ min_stop，防守位被壓死在 -2%
+    stop_loss = max(max_stop, min(raw_stop, min_stop))
 
     # 目標價
     target1 = resistance
@@ -2864,10 +3103,9 @@ def _do_analyze(stock_id: str, tf: str = "D",
     risk_level, risk_label, risk_color = calc_risk_level(
         price, support, resistance, rr_ratio, near_top, near_bot, pattern)
 
-    # K 線型態大數據勝率
-    k_pattern, h_win_rate = detect_kline_patterns(
-        closes.tolist(), opens.tolist(), highs.tolist(), lows.tolist(), volumes.tolist()
-    )
+    # B3: K 線型態勝率統一從 detect_kbar_pattern 取得（不再呼叫 detect_kline_patterns）
+    k_pattern = kbar_pattern or "常態 K 線（無觸發極端型態）"
+    h_win_rate = kbar_win_rate
 
     # 條列摘要
     summary_lines = build_summary(
@@ -3072,6 +3310,8 @@ def _do_analyze(stock_id: str, tf: str = "D",
         "kbar_dir": kbar_dir, "kbar_action": kbar_action,
         "gann_recross": gann_recross,
         "today_breakout": today_breakout, "prev_high": prev_high,
+        "today_open": round(float(opens[-1]), 2) if len(opens) > 0 else None,
+        "today_low":  round(float(lows[-1]),  2) if len(lows)  > 0 else None,
         "near_top": near_top, "near_bot": near_bot,
         "ma_values": ma_values, "buy_signals": buy_idx, "sell_signals": sell_idx,
         "buy_stops": buy_stops, "channel": channel,
@@ -3107,6 +3347,133 @@ def _do_analyze(stock_id: str, tf: str = "D",
         result["eps_yoy"]        = _fund.get("eps_yoy")
     except Exception as _fe:
         result["per"] = result["pbr"] = result["dividend_yield"] = result["eps_ttm"] = result["eps_yoy"] = None
+
+    # T10: 基本面納入風險調整
+    _fund_risk_adj = 0  # 正值=風險增加, 負值=風險降低
+    _fund_notes = []
+    try:
+        _per = result.get("per")
+        _div_yield = result.get("dividend_yield")
+        if _per is not None and float(_per) > 30 and near_top:
+            _fund_risk_adj += 1
+            _fund_notes.append(f"本益比偏高({_per})且靠近壓力，留意估值風險")
+        if _div_yield is not None and float(_div_yield) > 5.0 and near_bot:
+            _fund_risk_adj -= 1
+            _fund_notes.append(f"殖利率{_div_yield}%且靠近支撐，基本面支持")
+        if _per is not None and float(_per) < 0:
+            _fund_risk_adj += 1
+            _fund_notes.append("EPS 為負，基本面偏弱")
+    except Exception:
+        pass
+    result["fund_risk_adj"] = _fund_risk_adj
+    result["fund_notes"] = _fund_notes
+
+    # T10: 基本面風險提示附加到結論
+    if _fund_notes:
+        result["warning"] = result.get("warning", "") + "。" + "；".join(_fund_notes)
+
+    # T6: 有效損益比（用 K 棒型態勝率加權）
+    _effective_rr = round(rr_ratio * (h_win_rate / 0.5), 2) if h_win_rate and rr_ratio else rr_ratio
+    result["effective_rr"] = _effective_rr
+
+
+    # ── 多空雷達（線上有位版）────────────────────────────
+    try:
+        _ma5_v  = ma_values.get("ma5")
+        _ma20_v = ma_values.get("ma20")
+        _ma60_v = ma_values.get("ma60")
+        _hist_v = float(macd_hist[-1]) if len(macd_hist) > 0 and not np.isnan(macd_hist[-1]) else 0.0
+        _vol_r  = vol_analysis.get("ratio", 1.0)
+
+        # 雷達一：趨勢 — MA20 > MA60（月線站季線上方）
+        _tp_trend = bool(_ma20_v and _ma60_v and _ma20_v > _ma60_v)
+
+        # T4: 趨勢斜率判斷 — MA20 近 5 根的方向
+        _ma20_arr = calc_ma(closes, 20)
+        _ma20_slope = "flat"
+        if len(_ma20_arr) >= 5 and not np.isnan(_ma20_arr[-1]) and not np.isnan(_ma20_arr[-5]):
+            _slope_pct = (_ma20_arr[-1] - _ma20_arr[-5]) / _ma20_arr[-5] * 100
+            if _slope_pct > 0.3:
+                _ma20_slope = "up"
+            elif _slope_pct < -0.3:
+                _ma20_slope = "down"
+
+        # 雷達二：MACD — 配合 KD 方向判斷
+        try:
+            _hist_prev = float(macd_hist[-2]) if len(macd_hist) > 1 else 0.0
+            if np.isnan(_hist_prev): _hist_prev = 0.0
+        except Exception:
+            _hist_prev = 0.0
+        _kd_golden = kd_status.get("golden_cross", False)
+        _kd_death  = kd_status.get("death_cross", False)
+        _k_now     = kd_status.get("k") or 50
+        _d_now     = kd_status.get("d") or 50
+        if _k_now > _d_now:
+            _tp_macd = bool(_hist_v > _hist_prev)   # KD 多頭排列：柱體往上就配合
+        elif _k_now < _d_now:
+            _tp_macd = bool(_hist_v < _hist_prev)   # KD 空頭排列：柱體往下就配合
+        else:
+            _tp_macd = bool(_hist_v > 0)             # 無法判斷，維持原條件
+
+        # 雷達三：資金籌碼 — 近5日均量 > 20日均量（量能放大）
+        _tp_vol   = bool(float(_vol_r) >= 1.2)
+
+        # T1: 雷達四：位置 — MA5 乖離 -3%~+3%（剛站上均線，未過熱）
+        _bias5  = round((price - float(_ma5_v))  / float(_ma5_v)  * 100, 2) if _ma5_v  and float(_ma5_v)  > 0 else None
+        _bias20 = round((price - float(_ma20_v)) / float(_ma20_v) * 100, 2) if _ma20_v and float(_ma20_v) > 0 else None
+        _tp_position = bool(_bias5 is not None and -3.0 <= _bias5 <= 3.0)
+
+        _tp_score = int(bool(_tp_trend)) + int(bool(_tp_macd)) + int(bool(_tp_vol)) + int(bool(_tp_position))
+        _tp_label = {4: "雷達全亮🔥", 3: "差一格⚡", 2: "訊號弱👀", 1: "雷達靜默", 0: "雷達靜默"}.get(_tp_score, "")
+
+        # 進場訊號：雷達四格全亮
+        _bias_entry = bool(_tp_score == 4)
+
+        # T7: 出場訊號（加入 MA5 跌破 MA20）
+        _ma5_arr = calc_ma(closes, 20)  # 這裡要用 ma5
+        _ma5_cross_below_ma20 = False
+        if _ma5_v and _ma20_v and float(_ma5_v) < float(_ma20_v):
+            # 確認前一天 MA5 還在 MA20 上方（今天剛跌破）
+            _ma5_full = calc_ma(closes, 5)
+            if len(_ma5_full) >= 2 and len(_ma20_arr) >= 2:
+                _prev_ma5 = _ma5_full[-2] if not np.isnan(_ma5_full[-2]) else None
+                _prev_ma20 = _ma20_arr[-2] if not np.isnan(_ma20_arr[-2]) else None
+                if _prev_ma5 and _prev_ma20 and _prev_ma5 >= _prev_ma20:
+                    _ma5_cross_below_ma20 = True
+
+        # 出場訊號四級警示
+        if _bias5 is not None and _bias5 > 10.0:
+            _bias_exit_warning = "大"
+        elif _bias5 is not None and _bias5 > 5.0:
+            _bias_exit_warning = "中"
+        elif _ma5_cross_below_ma20:
+            _bias_exit_warning = "中"   # T7: MA5 跌破 MA20 視為中級警示
+        elif _kd_death and _hist_v < _hist_prev:
+            _bias_exit_warning = "小"
+        else:
+            _bias_exit_warning = False
+
+        result["radar"] = {
+            "trend":     _tp_trend,
+            "macd":      _tp_macd,
+            "volume":    _tp_vol,
+            "position":  _tp_position,     # T1: 第四格
+            "score":     _tp_score,
+            "label":     _tp_label,
+            "ma5":       round(float(_ma5_v),  2) if _ma5_v  else None,
+            "ma20":      round(float(_ma20_v), 2) if _ma20_v else None,
+            "ma60":      round(float(_ma60_v), 2) if _ma60_v else None,
+            "vol_ratio": round(float(_vol_r), 2),
+            "macd_hist": round(_hist_v, 4),
+            "bias5":     _bias5,
+            "bias20":    _bias20,
+            "bias_entry":           _bias_entry,
+            "bias_exit_warning":    _bias_exit_warning,
+            "ma20_slope":           _ma20_slope,           # T4: 趨勢斜率
+            "ma5_cross_below_ma20": _ma5_cross_below_ma20, # T7: 均線死叉
+        }
+    except Exception as _tpe:
+        result["radar"] = {"score": 0, "label": "計算失敗", "error": str(_tpe)}
 
     _cache_set(_cache_key, result)
 
@@ -3415,6 +3782,12 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
     """
     import urllib.request as _ur, json as _json
 
+    def _safe_print(msg):
+        try:
+            print(msg.encode("utf-8", errors="replace").decode("utf-8", errors="replace"))
+        except Exception:
+            pass
+
     code = stock_id.strip().replace(".TW", "").replace(".TWO", "").upper()
     now_ts = _time_mod.time()
     in_session = _is_trading_session()
@@ -3458,7 +3831,7 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
                 if not twse_data:
                     twse_data = arr[0]
         except Exception as _mis_e:
-            print(f"[QUOTE] {code} TWSE MIS {ex}_ 呼叫失敗：{_mis_e}")
+            _safe_print(f"[QUOTE] {code} TWSE MIS {ex}_ 呼叫失敗：{_mis_e}")
             continue
 
     def _val(k):
@@ -3476,7 +3849,7 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
         vol_raw      = _val("v")
         vol_val      = int(float(vol_raw) * 1000) if vol_raw else None
         price_source = "twse_z"
-        print(f"[QUOTE] {code} twse_z price={price_val}")
+        _safe_print(f"[QUOTE] {code} twse_z price={price_val}")
     else:
         # z="-" 時改用委買第一檔（b）與委賣第一檔（a）的中間價
         try:
@@ -3507,7 +3880,7 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
                 vol_raw      = _val("v")
                 vol_val      = int(float(vol_raw) * 1000) if vol_raw else None
                 price_source = "twse_mid"
-                print(f"[QUOTE] {code} twse_mid b={b1} a={a1} mid={price_val}")
+                _safe_print(f"[QUOTE] {code} twse_mid b={b1} a={a1} mid={price_val}")
             else:
                 # 漲停（a='-'）或跌停（b='-'）：用 u/w 欄位直接取極限價
                 u_val = _sf(_val("u"))  # 漲停參考價
@@ -3523,7 +3896,7 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
                     vol_raw      = _val("v")
                     vol_val      = int(float(vol_raw) * 1000) if vol_raw else None
                     price_source = "twse_limit_up"
-                    print(f"[QUOTE] {code} 漲停 price={price_val}")
+                    _safe_print(f"[QUOTE] {code} 漲停 price={price_val}")
                 elif b1 is None and w_val and l_val and abs(l_val - w_val) < 0.01:
                     # 跌停：委買消失 + 今日最低 = 跌停價
                     price_val    = w_val
@@ -3533,13 +3906,13 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
                     vol_raw      = _val("v")
                     vol_val      = int(float(vol_raw) * 1000) if vol_raw else None
                     price_source = "twse_limit_down"
-                    print(f"[QUOTE] {code} 跌停 price={price_val}")
+                    _safe_print(f"[QUOTE] {code} 跌停 price={price_val}")
                 elif in_session:
                     z_raw_dbg = twse_data.get("z", "NO_FIELD") if twse_data else "NO_DATA"
                     n_dbg     = twse_data.get("n", "?")         if twse_data else "?"
-                    print(f"[QUOTE] {code}（{n_dbg}）b/a 無有效值 z='{z_raw_dbg}'，需走 FinMind 備援")
+                    _safe_print(f"[QUOTE] {code}（{n_dbg}）b/a 無有效值 z='{z_raw_dbg}'，需走 FinMind 備援")
         except Exception as _mid_e:
-            print(f"[QUOTE] {code} twse_mid 計算失敗：{_mid_e}")
+            _safe_print(f"[QUOTE] {code} twse_mid 計算失敗：{_mid_e}")
 
     # 2. FinMind tick_snapshot（備援，盤中即時，消耗額度）
     if price_val is None:
@@ -3560,9 +3933,9 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
                     low_val      = _sf(r.get("low")   or cp)
                     vol_val      = _sf(r.get("total_volume") or r.get("volume"))
                     price_source = "tick_snapshot"
-                    print(f"[QUOTE] {code} tick_snapshot price={price_val}")
+                    _safe_print(f"[QUOTE] {code} tick_snapshot price={price_val}")
         except Exception as _e:
-            print(f"[QUOTE] tick_snapshot 失敗 {code}：{_e}")
+            _safe_print(f"[QUOTE] tick_snapshot 失敗 {code}：{_e}")
 
     # 3. FinMind TaiwanStockPrice（最終 fallback，盤後收盤價）
     if price_val is None:
@@ -3579,17 +3952,25 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
                 rows = _json.loads(r.read()).get("data", [])
             if rows:
                 latest = rows[-1]
-                price_val    = _sf(latest.get("close"))
-                open_val     = _sf(latest.get("open"))
-                high_val     = _sf(latest.get("max"))
-                low_val      = _sf(latest.get("min"))
-                vol_val      = _sf(latest.get("Trading_Volume"))
+                from zoneinfo import ZoneInfo as _ZI2
+                _fm_today = datetime.now(_ZI2("Asia/Taipei")).strftime("%Y-%m-%d")
+                _is_today_fm = str(latest.get("date", ""))[:10] == _fm_today
+                if _is_today_fm:
+                    price_val    = _sf(latest.get("close"))
+                    open_val     = _sf(latest.get("open"))
+                    high_val     = _sf(latest.get("max"))
+                    low_val      = _sf(latest.get("min"))
+                    vol_val      = _sf(latest.get("Trading_Volume"))
+                    price_source = "finmind_close"
+                    _safe_print(f"[QUOTE] {code} finmind_close price={price_val}")
+                else:
+                    _safe_print(f"[QUOTE] {code} finmind 尚無今日資料，僅補 y_val")
                 if not y_val and len(rows) >= 2:
                     y_val = _sf(rows[-2].get("close"))
-                price_source = "finmind_close"
-                print(f"[QUOTE] {code} finmind_close price={price_val}")
+                elif not y_val and not _is_today_fm:
+                    y_val = _sf(latest.get("close"))
         except Exception as _e:
-            print(f"[QUOTE] FinMind TaiwanStockPrice 失敗 {code}：{_e}")
+            _safe_print(f"[QUOTE] FinMind TaiwanStockPrice 失敗 {code}：{_e}")
 
     # ── 漲跌幅（以昨收 y_val 為基準）──
     change = change_pct = None
@@ -3991,7 +4372,7 @@ def admin_prebuild_reports(key: str = ""):
                 d = _do_analyze(sid, "D", user=None)
                 stock_name = d.get("stock_name", sid)
                 news_items = _fetch_stock_news(sid)
-                html = _build_report_html(sid, stock_name, report_date, d, news_items)
+                html = _inject_report_ads(_build_report_html(sid, stock_name, report_date, d, news_items))
                 conn = _db_conn()
                 conn.execute(
                     "INSERT OR REPLACE INTO stock_reports (stock_id, report_date, stock_name, report_html) VALUES (?,?,?,?)",
@@ -4046,11 +4427,7 @@ def api_page_view():
     _record_visit()
     return {"ok": True}
 
-@app.get("/")
-def root():
-    from fastapi.responses import RedirectResponse
-    return RedirectResponse(url="/picks")
-
+# B1: 重複根路由已刪除，首頁由第 520 行 serve_homepage() 處理（回傳 homepage.html）
 
 # ── 批次分析端點（關注頁用）──
 from pydantic import BaseModel as _BaseModel
@@ -4407,7 +4784,23 @@ def detect_kbar_pattern(opens, highs, lows, closes):
                else "bearish" if any(k in pattern_str for k in bearish_keys) \
                else "neutral"
 
-    return pattern_str, warning_str, kbar_dir
+    # B3: 統一勝率對照表（與原 detect_kline_patterns 一致，消除兩套判斷矛盾）
+    _WIN_RATE_MAP = {
+        "大紅棒": 0.62, "大黑棒": 0.62,
+        "三紅兵": 0.60, "三烏鴉": 0.60,
+        "早晨之星": 0.60, "黃昏之星": 0.60,
+        "多頭吞噬": 0.58, "空頭吞噬": 0.58,
+        "錘頭": 0.53, "射擊之星": 0.53,
+        "穿刺線": 0.55, "烏雲蓋頂": 0.55,
+        "十字星": 0.52, "孕線": 0.52,
+    }
+    win_rate = 0.50
+    for key, rate in _WIN_RATE_MAP.items():
+        if key in pattern_str:
+            win_rate = rate
+            break
+
+    return pattern_str, warning_str, kbar_dir, win_rate
 
 
 # ══════════════════════════════════════════════════════════
@@ -4867,7 +5260,7 @@ def get_referral_status(user: dict = Depends(require_user)):
     conn.close()
     return {
         "code": code,
-        "invite_link": f"{FRONTEND_URL}/landing.html?ref={code}",
+        "invite_link": f"{FRONTEND_URL}/stock/landing?ref={code}",
         "completed_count": completed,
         "required_count": 3,
         "rewarded_count": user.get("referral_rewarded_count", 0),
@@ -4986,9 +5379,9 @@ async def pay_result(request: Request):
     body = await request.form()
     rtn_code = body.get("RtnCode", "0")
     if rtn_code == "1":
-        return RedirectResponse(url=f"{FRONTEND_URL}/landing.html?pay=done", status_code=303)
+        return RedirectResponse(url=f"{FRONTEND_URL}/stock/landing?pay=done", status_code=303)
     else:
-        return RedirectResponse(url=f"{FRONTEND_URL}/landing.html?pay=fail", status_code=303)
+        return RedirectResponse(url=f"{FRONTEND_URL}/stock/landing?pay=fail", status_code=303)
 
 @app.post("/create_order")
 async def create_order(request: Request):
@@ -5010,7 +5403,7 @@ async def create_order(request: Request):
         raise HTTPException(status_code=400, detail="Email 格式不正確")
 
     plan_info = {
-        "monthly":   {"name": "線上有位月費方案", "amount": 399,  "days": 30},
+        "monthly":   {"name": "線上有位月費方案", "amount": 499,  "days": 30},
         "quarterly": {"name": "線上有位季費方案", "amount": 999,  "days": 90},
         "yearly":    {"name": "線上有位年費方案", "amount": 3688, "days": 365},
         "test":      {"name": "線上有位測試方案", "amount": 6,    "days": 1},
@@ -5031,7 +5424,7 @@ async def create_order(request: Request):
         "ItemName":          info["name"],
         "ReturnURL":         f"{BACKEND_URL}/webhook/ecpay",
         "OrderResultURL":    f"{BACKEND_URL}/pay/result",
-        "ClientBackURL":     f"{FRONTEND_URL}/landing.html?pay=fail",
+        "ClientBackURL":     f"{FRONTEND_URL}/stock/landing?pay=fail",
         "ChoosePayment":     "ALL",
         "EncryptType":       "1",
         "CustomField1":      email,
@@ -5069,44 +5462,82 @@ async def create_order(request: Request):
 
 
 def _fetch_opening_volume_top20() -> list:
-    """抓台股成交量前20名（TWSE STOCK_DAY_ALL，完全免費，不耗 FinMind 額度）
-    欄位：[代號, 名稱, 成交股數, 成交金額, 開盤, 最高, 最低, 收盤, 漲跌(+/-合一), 成交筆數]
+    """抓台股成交量前20名（TWSE STOCK_DAY_ALL CSV 格式）
+    v8.12 修正：移除 ?response=json（海外IP被擋403），改用 CSV 解析
+    CSV 欄位：日期(0), 代號(1), 名稱(2), 成交股數(3), 成交金額(4),
+              開盤(5), 最高(6), 最低(7), 收盤(8), 漲跌(9), 成交筆數(10)
     """
-    import urllib.request as _ur2, json as _j2
-    url = "https://www.twse.com.tw/rwd/zh/afterTrading/STOCK_DAY_ALL?response=json"
-    req = _ur2.Request(url, headers={
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-        "Referer":    "https://www.twse.com.tw/",
-    })
-    with _ur2.urlopen(req, timeout=12, context=_TWSE_SSL_CTX) as r:
-        raw = _j2.loads(r.read())
-    rows = raw.get("data", [])
+    import urllib.request as _ur2, csv as _csv2, io as _io2
+
     results = []
-    for row in rows:
+
+    # ── 方法一：TWSE CSV（不帶 ?response=json，同 crawler.py v8.12 修法）──
+    try:
+        url = "https://www.twse.com.tw/rwd/zh/afterTrading/STOCK_DAY_ALL"
+        req = _ur2.Request(url, headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+            "Referer":    "https://www.twse.com.tw/",
+        })
+        with _ur2.urlopen(req, timeout=15, context=_TWSE_SSL_CTX) as r:
+            raw_text = r.read().decode("utf-8-sig", errors="replace")
+        reader = _csv2.reader(_io2.StringIO(raw_text))
+        rows = list(reader)
+        for row in rows:
+            try:
+                if len(row) < 10:
+                    continue
+                code = str(row[1]).strip().strip('="')
+                name = str(row[2]).strip().strip('="')
+                if not code.isdigit() or len(code) != 4:
+                    continue
+                vol_str    = str(row[3]).strip().strip('="').replace(",", "")
+                close_str  = str(row[8]).strip().strip('="').replace(",", "")
+                change_str = str(row[9]).strip().strip('="').replace(",", "")
+                if not vol_str or vol_str in ("--", "X", ""):
+                    continue
+                vol    = int(float(vol_str)) // 1000       # 股 → 張
+                close  = float(close_str)  if close_str  not in ("--", "X", "") else 0
+                change = float(change_str) if change_str not in ("--", "X", "") else 0
+                prev   = close - change
+                change_pct = round(change / prev * 100, 2) if prev > 0 else 0
+                results.append({
+                    "stock_id":   code,
+                    "name":       name,
+                    "volume":     vol,
+                    "price":      close,
+                    "change_pct": change_pct,
+                })
+            except Exception:
+                continue
+        if results:
+            print(f"[OPENING] TWSE CSV 成功，{len(results)} 支")
+    except Exception as _e1:
+        print(f"[OPENING] TWSE CSV 失敗：{_e1}")
+
+    # ── 方法二：fallback 用 crawler.py 的 fetch_twse_volume_top ──
+    if not results:
         try:
-            code = str(row[0]).strip()
-            name = str(row[1]).strip()
-            if not code.isdigit() or len(code) != 4:
-                continue
-            vol_str    = str(row[2]).replace(",", "")
-            close_str  = str(row[7]).replace(",", "")
-            change_str = str(row[8]).replace(",", "").strip()
-            if not vol_str or vol_str in ("--", "X", ""):
-                continue
-            vol    = int(float(vol_str)) // 1000       # 股 → 張
-            close  = float(close_str)  if close_str  not in ("--", "X", "") else 0
-            change = float(change_str) if change_str not in ("--", "X", "") else 0
-            prev   = close - change
-            change_pct = round(change / prev * 100, 2) if prev > 0 else 0
-            results.append({
-                "stock_id":   code,
-                "name":       name,
-                "volume":     vol,
-                "price":      close,
-                "change_pct": change_pct,
-            })
-        except Exception:
-            continue
+            import sys as _sys2, os as _os2
+            _sys2.path.insert(0, _os2.path.join(_os2.path.dirname(_os2.path.abspath(__file__)), "stock_picker"))
+            from crawler import fetch_twse_volume_top as _ftvt
+            top_ids, name_dict = _ftvt(n=20)
+            if top_ids:
+                for _code in top_ids:
+                    results.append({
+                        "stock_id":   _code,
+                        "name":       name_dict.get(_code, _code),
+                        "volume":     0,
+                        "price":      0,
+                        "change_pct": 0,
+                    })
+                print(f"[OPENING] crawler.py fallback 成功，{len(results)} 支")
+        except Exception as _e2:
+            print(f"[OPENING] crawler.py fallback 也失敗：{_e2}")
+
+    if not results:
+        print("[OPENING] 所有方法均失敗，回傳空")
+        return []
+
     results.sort(key=lambda x: x["volume"], reverse=True)
     top20 = results[:20]
 
@@ -5196,6 +5627,8 @@ def _run_opening_scan_job():
         print(f"[OPENING_SCAN] 完成，{len(data)} 筆，量No.1={first}")
     except Exception as _e:
         print(f"[OPENING_SCAN] 失敗：{_e}")
+        import traceback
+        traceback.print_exc()
 
 
 @app.get("/api/picks/opening")
@@ -5309,7 +5742,7 @@ async def webhook_ecpay(request: Request):
         <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:16px;margin:20px 0;text-align:center">
           <p style="margin:0 0 8px;font-weight:700;color:#166534">💡 升級年費方案，省更多！</p>
           <p style="margin:0 0 12px;font-size:13px;color:#15803d">年費 $3,688 = 月費 9.2 個月的價格，多送近 3 個月</p>
-          <a href="https://softglow-ai.com/landing.html" style="background:#16a34a;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:700">立即升級年費</a>
+          <a href="https://softglow-ai.com/stock/landing" style="background:#16a34a;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:700">立即升級年費</a>
         </div>"""
         _send_email(email, "【線上有位】升級成功！您的方案已開通",
             f"""<div style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px">
@@ -5396,7 +5829,7 @@ async def webhook_ecpay(request: Request):
               <div style="background:#fff8e1;border-radius:8px;padding:16px;margin-bottom:16px">
                 <p style="margin:0 0 8px;font-weight:700;color:#92400e">💡 升級年費，省更多！</p>
                 <p style="margin:0 0 12px;font-size:13px;color:#78350f">年費 $3,688 相當於月費 9.2 個月，多享近 3 個月服務</p>
-                <a href="https://softglow-ai.com/landing.html" style="background:#f59e0b;color:#fff;padding:8px 20px;border-radius:6px;text-decoration:none;font-weight:700;font-size:13px">了解年費方案</a>
+                <a href="https://softglow-ai.com/stock/landing" style="background:#f59e0b;color:#fff;padding:8px 20px;border-radius:6px;text-decoration:none;font-weight:700;font-size:13px">了解年費方案</a>
               </div>
               <div style="background:#eff6ff;border-radius:8px;padding:16px;margin-bottom:20px">
                 <p style="margin:0 0 8px;font-weight:700;color:#1e40af">📢 推薦好友，一起分析台股</p>
@@ -5418,7 +5851,7 @@ async def webhook_ecpay(request: Request):
 
     # 寄管理員通知信
     try:
-        _amt_map = {399: "月費方案", 999: "季費方案", 3688: "年費方案", 6: "測試方案"}
+        _amt_map = {499: "月費方案", 999: "季費方案", 3688: "年費方案", 6: "測試方案"}
         _amt_int = int(amount) if str(amount).isdigit() else 0
         _plan_name = _amt_map.get(_amt_int, f"未知方案（NT${amount}）")
         _inv_type = (_po["invoice_type"] or "") if _po else ""
@@ -5742,6 +6175,59 @@ def _fetch_stock_news(stock_id: str, max_results: int = 3) -> list:
         return []
 
 
+
+# === AdSense 報告頁廣告注入 ===
+def _inject_report_ads(html: str) -> str:
+    """在報告頁 HTML 注入 AdSense 廣告"""
+    PUB = "ca-pub-1768270548115739"
+    SLOT_ARTICLE = "2793159185"
+    SLOT_BOTTOM = "4182262477"
+
+    preconnect = '<link rel="preconnect" href="https://pagead2.googlesyndication.com">\n'
+    html = html.replace('</head>', preconnect + '</head>', 1)
+
+    in_article_ad = (
+        '<div style="margin:20px auto;text-align:center;max-width:728px;">'
+        '<ins class="adsbygoogle" style="display:block;text-align:center;min-height:250px;"'
+        ' data-ad-layout="in-article" data-ad-format="fluid"'
+        f' data-ad-client="{PUB}" data-ad-slot="{SLOT_ARTICLE}"></ins>'
+        '<script>try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}</script>'
+        '</div>'
+    )
+
+    parts = html.split('</section>')
+    if len(parts) > 4:
+        parts[3] = parts[3] + in_article_ad
+        html = '</section>'.join(parts)
+
+    bottom_ad = (
+        '<div style="margin:24px auto;text-align:center;max-width:728px;">'
+        '<ins class="adsbygoogle" style="display:block;min-height:250px;"'
+        f' data-ad-client="{PUB}" data-ad-slot="{SLOT_BOTTOM}"'
+        ' data-ad-format="auto" data-full-width-responsive="true"></ins>'
+        '<script>try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}</script>'
+        '</div>'
+    )
+
+    body_pos = html.rfind('</body>')
+    if body_pos > 0:
+        html = html[:body_pos] + bottom_ad + html[body_pos:]
+
+    ad_script = (
+        '<script>'
+        'setTimeout(function(){var s=document.createElement("script");s.async=true;'
+        f's.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={PUB}";'
+        's.crossOrigin="anonymous";document.head.appendChild(s);},2000);'
+        '</script>'
+    )
+
+    body_pos = html.rfind('</body>')
+    if body_pos > 0:
+        html = html[:body_pos] + ad_script + html[body_pos:]
+
+    return html
+# === End AdSense 報告頁廣告注入 ===
+
 def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict,
                        news_items: list = None) -> str:
     # ── 取欄位 ──
@@ -5756,6 +6242,10 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
     kbar_pattern  = d.get("kbar_pattern", "")
     kbar_action   = d.get("kbar_action", "")
     kbar_warning  = d.get("kbar_warning", "")
+    today_breakout = d.get("today_breakout", False)
+    today_open    = d.get("today_open")
+    today_low     = d.get("today_low")
+    prev_high     = d.get("prev_high")
     kline_pattern = d.get("kline_pattern", "")
     win_rate      = d.get("win_rate", 0.5)
     supp_desc     = d.get("support_desc", "")
@@ -5785,16 +6275,86 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
                    "bearish": "#f87171", "slightly_bearish": "#fca5a5"}.get(macd_dir, "#8faabf")
     vol_text    = vol_analysis.get("text", "")
     rr_color    = "#4ade80" if rr_ratio >= 2 else ("#fbbf24" if rr_ratio >= 1 else "#f87171")
-    wr_pct      = int(win_rate * 100)
-    wr_color    = "#4ade80" if wr_pct >= 56 else ("#fbbf24" if wr_pct >= 52 else "#8faabf")
-    kp_bullish  = any(x in kline_pattern for x in ["多頭", "早晨", "錘子", "突破", "量增大紅", "連三紅"])
-    kp_bearish  = any(x in kline_pattern for x in ["空頭", "黃昏", "流星", "跌破", "量增大黑", "連三黑"])
-    kp_color    = "#4ade80" if kp_bullish else ("#f87171" if kp_bearish else "#fbbf24")
+
+    # ── 多空雷達變數 ──
+    _tp        = d.get("radar") or {}
+    tp_trend   = _tp.get("trend", False)
+    tp_macd    = _tp.get("macd",  False)
+    tp_vol     = _tp.get("volume", False)
+    tp_pos     = _tp.get("position", False)   # T1: 第四格
+    tp_score   = _tp.get("score", 0)
+    tp_label   = _tp.get("label", "計算中...")
+    tp_ma20    = _tp.get("ma20", "-")
+    tp_ma60    = _tp.get("ma60", "-")
+    tp_hist    = _tp.get("macd_hist", 0)
+    tp_vol_ratio = _tp.get("vol_ratio", 1.0)
+    tp_stars   = "⭐" * tp_score + "☆" * (4 - tp_score)   # T1: 滿分 4 格
+    tp_bias5   = _tp.get("bias5")
+    tp_bias20  = _tp.get("bias20")
+    tp_bias_entry        = _tp.get("bias_entry", False)
+    tp_bias_exit_warning = _tp.get("bias_exit_warning", False)
+    tp_ma20_slope        = _tp.get("ma20_slope", "flat")    # T4: 趨勢斜率
+    tp_ma5_cross         = _tp.get("ma5_cross_below_ma20", False)  # T7: 均線死叉
+
+    _tp_colors = {4: ("#dcfce7","#166534"), 3: ("#dcfce7","#166534"), 2: ("#fef9c3","#854d0e"), 1: ("#f3f4f6","#374151"), 0: ("#fee2e2","#991b1b")}
+    tp_badge_bg, tp_badge_color = _tp_colors.get(tp_score, ("#f3f4f6","#374151"))
+
+    tp_trend_icon  = "✅" if tp_trend else "❌"
+    tp_macd_icon   = "✅" if tp_macd  else "❌"
+    tp_vol_icon    = "✅" if tp_vol   else "❌"
+    tp_pos_icon    = "✅" if tp_pos   else "❌"    # T1
+    tp_trend_color = "#16a34a" if tp_trend else "#dc2626"
+    tp_macd_color  = "#16a34a" if tp_macd  else "#dc2626"
+    tp_vol_color   = "#16a34a" if tp_vol   else "#dc2626"
+    tp_pos_color   = "#16a34a" if tp_pos   else "#dc2626"  # T1
+    tp_trend_bg    = "#f0fdf4" if tp_trend else "#fff1f2"
+    tp_macd_bg     = "#f0fdf4" if tp_macd  else "#fff1f2"
+    tp_vol_bg      = "#f0fdf4" if tp_vol   else "#fff1f2"
+    tp_pos_bg      = "#f0fdf4" if tp_pos   else "#fff1f2"  # T1
 
     # ── 距離 % ──
     sup_dist  = round((price - support)    / price * 100, 1) if price and support    else 0
     res_dist  = round((resistance - price) / price * 100, 1) if price and resistance else 0
     stop_dist = round((price - stop_loss)  / price * 100, 1) if price and stop_loss  else 0
+
+    # ── 多空雷達 + 位置綜合判斷 ──
+    if tp_score == 4:
+        if sup_dist <= 5 and res_dist >= 5:
+            tp_position_icon  = "🎯"
+            tp_position_text  = f"雷達全亮且靠近支撐（距支撐 -{sup_dist}%），進場時機相對佳"
+            tp_position_color = "#16a34a"
+            tp_position_bg    = "#f0fdf4"
+        elif res_dist < 5:
+            tp_position_icon  = "⚠️"
+            tp_position_text  = f"雷達全亮但已漲一段（距壓力僅 +{res_dist}%），追高風險高，等回測支撐 {support} 再進場"
+            tp_position_color = "#d97706"
+            tp_position_bg    = "#fffbeb"
+        else:
+            tp_position_icon  = "👀"
+            tp_position_text  = f"雷達全亮，位於中段（距支撐 -{sup_dist}%，距壓力 +{res_dist}%），可持有，不追高"
+            tp_position_color = "#2563eb"
+            tp_position_bg    = "#eff6ff"
+    elif tp_score == 3:
+        if sup_dist <= 5:
+            tp_position_icon  = "👀"
+            tp_position_text  = f"三格亮，靠近支撐（距支撐 -{sup_dist}%），等第四格補齊再進場"
+            tp_position_color = "#2563eb"
+            tp_position_bg    = "#eff6ff"
+        else:
+            tp_position_icon  = "⏳"
+            tp_position_text  = f"三格亮，差一格，耐心等待雷達全亮"
+            tp_position_color = "#6b7280"
+            tp_position_bg    = "#f9fafb"
+    else:
+        tp_position_icon  = "🚫"
+        tp_position_text  = f"多空雷達未齊（{tp_score}/4），暫不適合進場，持續觀察"
+        tp_position_color = "#dc2626"
+        tp_position_bg    = "#fff1f2"
+    wr_pct      = int(win_rate * 100)
+    wr_color    = "#4ade80" if wr_pct >= 56 else ("#fbbf24" if wr_pct >= 52 else "#8faabf")
+    kp_bullish  = any(x in kline_pattern for x in ["多頭", "早晨", "錘子", "突破", "量增大紅", "連三紅"])
+    kp_bearish  = any(x in kline_pattern for x in ["空頭", "黃昏", "流星", "跌破", "量增大黑", "連三黑"])
+    kp_color    = "#4ade80" if kp_bullish else ("#f87171" if kp_bearish else "#fbbf24")
 
     # ── 趨勢文字 ──
     if trend == "上升趨勢":
@@ -5805,14 +6365,66 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
         trend_desc = "均線糾結，多空交戰，方向未明；宜等待均線方向明確或突破關鍵位後再跟進。"
 
     # ── 操作建議文字 ──
+    # 突破型態：開高走低風險判斷
+    _report_time = datetime.now(ZoneInfo("Asia/Taipei"))
+    _report_date_str = _report_time.strftime("%Y-%m-%d")
+    _report_time_str = _report_time.strftime("%Y-%m-%d %H:%M")
+    _breakout_risk_text = ""
+    if today_breakout and today_open and today_low and price:
+        _is_open_high_walk_low = float(today_open) > float(price) * 1.005  # 開盤比現價高 0.5% 以上視為開高走低
+        if _is_open_high_walk_low:
+            _breakout_risk_text = (
+                f"\n\n⚠️ 風險提示（{_report_time_str} 資料）：今日出現開高走低，需留意賣壓湧現假突破風險。"
+                f"明日若收盤跌破今日低點 {today_low}，視為突破失敗訊號，應出場。"
+            )
+
     if kbar_action:
-        op_text = kbar_action
+        op_text = kbar_action + _breakout_risk_text
+    elif today_breakout:
+        op_text = (f"今日突破前高 {prev_high}，突破型態確立。可持有，防守位 {stop_loss}，目標壓力 {resistance}，損益比 {rr_ratio:.2f}。"
+                   + _breakout_risk_text)
+    elif tp_score == 0:
+        op_text = f"多空雷達三格全滅，技術面偏弱，暫不適合進場。等待趨勢翻多、MACD 翻正、量能放大後再評估。"
+    elif tp_score <= 1:
+        op_text = f"多空雷達訊號不足，觀望為主。防守位 {stop_loss}，待雷達訊號補齊後再考慮進場。"
     elif trend == "上升趨勢" and rr_ratio >= 2:
-        op_text = f"趨勢向上，損益比 {rr_ratio:.2f} 合理。可在支撐 {support} 附近設防守位 {stop_loss} 試多，目標壓力 {resistance}。"
+        op_text = f"趨勢向上，損益比 {rr_ratio:.2f} 合理。防守位 {stop_loss}，目標壓力 {resistance}。"
     elif trend == "下降趨勢" or rr_ratio < 1:
         op_text = f"趨勢偏弱或損益比 {rr_ratio:.2f} 不理想，建議觀望。等待趨勢反轉訊號，跌破 {stop_loss} 嚴格停損。"
     else:
         op_text = f"趨勢盤整，等待方向確認。關注能否突破壓力 {resistance}，防守位 {stop_loss}，損益比 {rr_ratio:.2f}。"
+
+    # ── 乖離率進出場提示 ──
+    _bias_text = ""
+    _bias5_str  = f"{tp_bias5:+.1f}%" if tp_bias5 is not None else "-"
+    _bias20_str = f"{tp_bias20:+.1f}%" if tp_bias20 is not None else "-"
+    _bias5_color  = "#f87171" if tp_bias5 and tp_bias5 > 10 else ("#facc15" if tp_bias5 and tp_bias5 > 5 else ("#4ade80" if tp_bias5 and tp_bias5 < -3 else "var(--text)"))
+    _bias20_color = "#f87171" if tp_bias20 and tp_bias20 > 8 else ("#4ade80" if tp_bias20 and tp_bias20 < -8 else "var(--text)")
+    if tp_bias_entry:
+        _bias_text = f"\n\n✅ 乖離率進場訊號：雷達全亮，MA5 乖離 {_bias5_str}（剛站上均線，未過熱），為相對佳進場位。"
+    elif tp_bias_exit_warning == "大":
+        _bias_text = f"\n\n🔴 出場風險【大】：MA5 正乖離 {_bias5_str} 已超過 +10%，股價嚴重偏離均線，高檔風險極高，建議減碼或出場。"
+    elif tp_bias_exit_warning == "中":
+        _bias_text = f"\n\n🟡 出場風險【中】：MA5 正乖離 {_bias5_str} 介於 5%~10%，股價偏離均線，若出現黑K或量縮應注意出場。"
+    elif tp_bias_exit_warning == "小":
+        _bias_text = f"\n\n🟢 出場風險【小】：KD 死叉且 MACD 動能向下，趨勢轉弱初期，建議提高警覺，設好防守位 {stop_loss}。"
+    op_text = op_text + _bias_text
+
+    # ── 多空雷達補充說明 ──
+    _tp_missing = []
+    if not tp_trend: _tp_missing.append(f"趨勢（需 MA20 {tp_ma20} > MA60 {tp_ma60}）")
+    if not tp_macd:  _tp_missing.append(f"MACD（需柱體翻正，目前 {tp_hist}）")
+    if not tp_vol:   _tp_missing.append(f"量能（需量比 ≥1.2，目前 {tp_vol_ratio}x）")
+    if tp_score == 3:
+        tp_supplement_html = ""
+    elif _tp_missing:
+        _missing_str = "、".join(_tp_missing)
+        tp_supplement_html = (
+            f'<div style="margin-top:10px;padding:10px 12px;background:#fefce8;border-radius:8px;border-left:3px solid #fbbf24;font-size:12px;color:#78350f;line-height:1.7">'
+            f'📋 <b>多空雷達尚缺：</b>{_missing_str}，補齊後進場訊號更強。</div>'
+        )
+    else:
+        tp_supplement_html = ""
 
     # kbar tag 顏色：依多頭/空頭/中性
     _kbar_bullish_keys = ["錘頭","多頭吞噬","早晨之星","三紅兵","穿刺線","大紅棒"]
@@ -6008,6 +6620,37 @@ function toggleTheme(){{
         <div class="stat-value" style="color:{rr_color}">{rr_ratio:.2f}</div>
       </div>
     </div>
+    <!-- 多空雷達 -->
+    <div style="margin-top:16px;padding:14px;background:var(--bg2,#f8f8f8);border-radius:12px">
+      <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px">
+        多空雷達
+        <span style="margin-left:8px;font-size:15px">{tp_stars}</span>
+        <span style="margin-left:6px;font-size:12px;padding:2px 10px;border-radius:20px;background:{tp_badge_bg};color:{tp_badge_color};font-weight:700">{tp_label}</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div style="flex:1;min-width:100px;padding:8px 12px;border-radius:8px;background:{tp_trend_bg};text-align:center">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">① 趨勢</div>
+          <div style="font-size:12px;font-weight:600;color:{tp_trend_color}">月線{'>' if tp_trend else '<'}季線 {tp_trend_icon}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">MA20={tp_ma20} / MA60={tp_ma60}</div>
+        </div>
+        <div style="flex:1;min-width:100px;padding:8px 12px;border-radius:8px;background:{tp_macd_bg};text-align:center">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">② MACD</div>
+          <div style="font-size:12px;font-weight:600;color:{tp_macd_color}">柱體{'正' if tp_macd else '負'} {tp_macd_icon}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">Histogram={tp_hist}</div>
+        </div>
+        <div style="flex:1;min-width:100px;padding:8px 12px;border-radius:8px;background:{tp_vol_bg};text-align:center">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">③ 資金籌碼</div>
+          <div style="font-size:12px;font-weight:600;color:{tp_vol_color}">量{'放大' if tp_vol else '縮'} {tp_vol_icon}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">量比={tp_vol_ratio}x</div>
+        </div>
+        <div style="flex:1;min-width:100px;padding:8px 12px;border-radius:8px;background:{tp_pos_bg};text-align:center">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px">④ 位置</div>
+          <div style="font-size:12px;font-weight:600;color:{tp_pos_color}">{'適中' if tp_pos else '偏離'} {tp_pos_icon}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">MA5乖離={tp_bias5 if tp_bias5 is not None else '-'}%</div>
+        </div>
+      </div>
+      {f'<div style="margin-top:8px;padding:6px 10px;border-radius:6px;background:#fffbeb;font-size:11px;color:#92400e">T4 趨勢斜率：MA20 方向{"↗ 向上" if tp_ma20_slope == "up" else "↘ 向下" if tp_ma20_slope == "down" else "→ 持平"}{"，短均跌破中均 ⚠" if tp_ma5_cross else ""}</div>' if tp_ma20_slope != "flat" or tp_ma5_cross else ''}
+    </div>
   </section>
 
 
@@ -6081,10 +6724,34 @@ function toggleTheme(){{
     <ul style="list-style:none">{risk_items_html}</ul>
   </section>
 
+  <!-- 多空雷達判斷 -->
+  <section class="card" style="border-left:4px solid {tp_position_color};background:{tp_position_bg}">
+    <div style="display:flex;align-items:flex-start;gap:10px">
+      <span style="font-size:22px;line-height:1">{tp_position_icon}</span>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:{tp_position_color};margin-bottom:4px">
+          多空雷達判斷 {tp_stars}
+          <span style="margin-left:6px;font-size:11px;padding:2px 8px;border-radius:20px;background:{tp_badge_bg};color:{tp_badge_color}">{tp_label}</span>
+        </div>
+        <div style="font-size:13px;color:var(--text);line-height:1.6">{tp_position_text}</div>
+        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;font-size:11px">
+          <span style="padding:2px 8px;border-radius:20px;background:{tp_trend_bg};color:{tp_trend_color}">① 趨勢 {tp_trend_icon}</span>
+          <span style="padding:2px 8px;border-radius:20px;background:{tp_macd_bg};color:{tp_macd_color}">② MACD {tp_macd_icon}</span>
+          <span style="padding:2px 8px;border-radius:20px;background:{tp_vol_bg};color:{tp_vol_color}">③ 量能 {tp_vol_icon}</span>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--text3)">
+          MA5 乖離：<strong style="color:{_bias5_color}">{_bias5_str}</strong>
+          &nbsp;｜&nbsp;MA20 乖離：<strong style="color:{_bias20_color}">{_bias20_str}</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- 7. 操作建議 -->
   <section class="card" id="operation-advice">
     <h2>操作建議</h2>
-    <div style="font-size:14px;line-height:1.8;color:var(--text);padding:12px;background:var(--stat-bg);border-radius:10px">{op_text}</div>
+    <div style="font-size:14px;line-height:1.8;color:var(--text);padding:12px;background:var(--stat-bg);border-radius:10px;white-space:pre-line">{op_text}</div>
+    {tp_supplement_html}
     <div style="margin-top:12px;display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--text3)">
       <span>停損：<strong style="color:#f87171">{stop_loss}</strong></span>
       <span>支撐：<strong style="color:#3b82f6">{support}</strong></span>
@@ -6440,7 +7107,7 @@ def report_generate(req: ReportReq, user: dict = Depends(require_user)):
 
     stock_name = d.get("stock_name", stock_id)
     news_items = _fetch_stock_news(stock_id)
-    report_html = _build_report_html(stock_id, stock_name, report_date, d, news_items)
+    report_html = _inject_report_ads(_build_report_html(stock_id, stock_name, report_date, d, news_items))
 
     conn = _db_conn()
     try:
@@ -6456,6 +7123,11 @@ def report_generate(req: ReportReq, user: dict = Depends(require_user)):
 
     return {"ok": True, "url": f"{BACKEND_URL}/report/{stock_id}-{report_date}"}
 
+
+@app.get("/report/", include_in_schema=False)
+def get_report_empty():
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url=FRONTEND_URL, status_code=301)
 
 @app.get("/report/{slug}")
 def get_report(slug: str):
@@ -6499,7 +7171,7 @@ def get_report(slug: str):
         d = _do_analyze(stock_id, "D", user=None)
         stock_name = d.get("stock_name", stock_id)
         news_items = _fetch_stock_news(stock_id)
-        html = _build_report_html(stock_id, stock_name, report_date, d, news_items)
+        html = _inject_report_ads(_build_report_html(stock_id, stock_name, report_date, d, news_items))
         conn = _db_conn()
         try:
             conn.execute(
@@ -6583,18 +7255,29 @@ def picks_page():
                 bg, fg = _sig_color(sg)
                 sig_tags += (f'<span style="font-size:10px;padding:2px 9px;border-radius:20px;'
                              f'background:{bg};color:{fg};font-weight:600">{sg}</span> ')
+            is_buy2_only = p.get("is_buy2", False)
+            entry_sigs = p.get("entry_signals", [])
+            entry_tag = ""
+            if "buy1" in entry_sigs:
+                entry_tag += '<span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(0,229,160,.15);color:#00e5a0;font-weight:600;margin-left:4px">買1</span>'
+            if "buy2" in entry_sigs:
+                entry_tag += '<span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(251,191,36,.15);color:#fbbf24;font-weight:600;margin-left:4px">買2</span>'
+            risk_row = ""
+            if is_buy2_only:
+                _sup = p.get("support", "-")
+                risk_row = f'<tr><td colspan="4" style="padding:0 14px 10px;font-size:12px;color:#fbbf24">⚠️ 高風險突破型態，建議停損設於近期低點 {_sup} 元以下，嚴守停損。</td></tr>'
             rows_html += f"""
 <tr onclick="location.href='{stock_url}'" style="cursor:pointer">
   <td class="r-num">{i}</td>
   <td class="r-stock">
     <a href="{stock_url}">{sid}</a>
-    <span class="r-name">{sname}</span>
+    <span class="r-name">{sname}</span>{entry_tag}
   </td>
   <td style="text-align:right">
     <span style="font-size:15px;font-weight:700;color:{sc}">{score}</span>
   </td>
   <td style="padding-right:14px">{sig_tags}</td>
-</tr>"""
+</tr>{risk_row}{f'<tr><td colspan="4" style="padding:0 14px 10px;font-size:12px;color:#a89fc0;line-height:1.6">{p.get("ai_summary","")}</td></tr>' if p.get("ai_summary") else ""}"""
     else:
         rows_html = '<tr><td colspan="4" style="text-align:center;color:#999;padding:32px">尚無選股資料，待每日 16:30 更新</td></tr>'
 
@@ -6675,7 +7358,7 @@ td{{padding:12px 12px;vertical-align:middle}}
   <ins class="adsbygoogle"
        style="display:block;margin:24px 0"
        data-ad-client="ca-pub-1768270548115739"
-       data-ad-slot="auto"
+       data-ad-slot="2793159185"
        data-ad-format="auto"
        data-full-width-responsive="true"></ins>
   <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
@@ -6719,8 +7402,68 @@ def sitemap():
         all_stock_ids = _SEO_HARDCODED_STOCKS
 
     locs = []
-    for u in [FRONTEND_URL + "/", FRONTEND_URL + "/landing.html", FRONTEND_URL + "/rankings"]:
+    for u in [FRONTEND_URL + "/", FRONTEND_URL + "/stock/", FRONTEND_URL + "/rankings"]:
         locs.append(f"  <url><loc>{u}</loc><changefreq>daily</changefreq><priority>0.8</priority></url>")
+
+    # ── Tools 工具頁（動態掃描磁碟，避免硬編碼漏頁）──
+    _tools_base = os.path.join(os.path.dirname(__file__), "frontend", "tools")
+    # zh-TW 根目錄
+    locs.append(f"  <url><loc>{FRONTEND_URL}/tools/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>")
+    if os.path.isdir(_tools_base):
+        for _tf in sorted(os.listdir(_tools_base)):
+            if _tf.endswith(".html") and _tf != "index.html":
+                _slug = _tf.replace(".html", "")
+                locs.append(f"  <url><loc>{FRONTEND_URL}/tools/{_tf}</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>")
+        # 子語言目錄
+        for _lang_dir in sorted(os.listdir(_tools_base)):
+            _lang_path = os.path.join(_tools_base, _lang_dir)
+            if os.path.isdir(_lang_path) and _lang_dir not in (".", ".."):
+                locs.append(f"  <url><loc>{FRONTEND_URL}/tools/{_lang_dir}/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>")
+                for _tf in sorted(os.listdir(_lang_path)):
+                    if _tf.endswith(".html") and _tf != "index.html":
+                        locs.append(f"  <url><loc>{FRONTEND_URL}/tools/{_lang_dir}/{_tf}</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>")
+
+    # ── 必備頁面（AdSense 審查加分）──
+    for pg in ["about.html", "contact.html", "privacy.html", "terms.html", "disclaimer.html", "refund.html"]:
+        locs.append(f"  <url><loc>{FRONTEND_URL}/{pg}</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>")
+
+    # ── Blog 教學文章（繁中 + en/ja/ko）──
+    _blog_files = ["kd-indicator","macd-indicator","rsi-indicator","moving-average-guide",
+                   "candlestick-patterns","support-resistance","stop-loss-guide",
+                   "profit-loss-ratio","position-risk","institutional-investors","stock-selection-guide"]
+    locs.append(f"  <url><loc>{FRONTEND_URL}/blog/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>")
+    for _bf in _blog_files:
+        locs.append(f"  <url><loc>{FRONTEND_URL}/blog/{_bf}.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>")
+    for _bl in ("en", "ja", "ko"):
+        locs.append(f"  <url><loc>{FRONTEND_URL}/blog/{_bl}/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>")
+        for _bf in _blog_files:
+            locs.append(f"  <url><loc>{FRONTEND_URL}/blog/{_bl}/{_bf}.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>")
+
+    # ── K棒型態教學（與磁碟檔案完全一致，修正 404）──
+    _pattern_files = [
+        "big-bullish","big-bearish","bullish-engulfing","bearish-engulfing",
+        "morning-star","evening-star","hammer","inverted-hammer","hanging-man","shooting-star",
+        "doji","long-legged-doji","dragonfly-doji","gravestone-doji","spinning-top",
+        "bullish-marubozu","bearish-marubozu","bullish-harami","bearish-harami",
+        "tweezer-top","tweezer-bottom","three-white-soldiers","three-black-crows",
+        "piercing-line","dark-cloud",
+        "three-inside-up","three-inside-down",
+        "kicker-bullish",
+        "abandoned-baby-bull",
+        "morning-doji-star","evening-doji-star",
+        "double-bottom","double-top","triple-bottom","triple-top",
+        "head-shoulders-top","inverse-head-shoulders",
+        "ascending-triangle","descending-triangle","triangle-symmetrical",
+        "cup-handle","flag-bull","bear-flag","pennant",
+        "wedge-rising","wedge-falling","rectangle-bull",
+        "gap-up","gap-down","on-neck",
+    ]
+    for _idx_pg in ["index.html", "en.html", "ja.html", "ko.html"]:
+        locs.append(f"  <url><loc>{FRONTEND_URL}/patterns/{_idx_pg}</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>")
+    for _pf in _pattern_files:
+        locs.append(f"  <url><loc>{FRONTEND_URL}/patterns/{_pf}.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>")
+        for _pl in ("en", "ja", "ko"):
+            locs.append(f"  <url><loc>{FRONTEND_URL}/patterns/{_pl}/{_pf}.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>")
     # 熱門股優先 priority 0.8，其餘 0.6
     hardcoded_set = set(_SEO_HARDCODED_STOCKS)
     for sid in all_stock_ids:
@@ -6924,7 +7667,7 @@ td{{padding:11px 12px;vertical-align:middle}}
   <ins class="adsbygoogle"
        style="display:block;margin:24px 0"
        data-ad-client="ca-pub-1768270548115739"
-       data-ad-slot="auto"
+       data-ad-slot="2793159185"
        data-ad-format="auto"
        data-full-width-responsive="true"></ins>
   <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
@@ -6966,7 +7709,7 @@ async def create_order_recurring(request: Request):
         raise HTTPException(status_code=400, detail="Email 格式不正確")
 
     plan_info = {
-        "monthly":    {"name": "線上有位月費訂閱", "amount": 399,  "days": 30,  "freq": "M", "exec_times": 99},
+        "monthly":    {"name": "線上有位月費訂閱", "amount": 499,  "days": 30,  "freq": "M", "exec_times": 99},
         "quarterly":  {"name": "線上有位季費訂閱", "amount": 999,  "days": 90,  "freq": "M", "exec_times": 99, "frequency": "3"},
         "yearly":     {"name": "線上有位年費訂閱", "amount": 3688, "days": 365, "freq": "Y", "exec_times": 99},
         "daily_test": {"name": "線上有位每日測試", "amount": 30,   "days": 1,   "freq": "D", "exec_times": 5},
@@ -6989,7 +7732,7 @@ async def create_order_recurring(request: Request):
         "ChoosePayment":       "Credit",
         "EncryptType":         "1",
         "ReturnURL":           f"{BACKEND_URL}/webhook/ecpay_recurring",
-        "ClientBackURL":       f"{FRONTEND_URL}/landing.html?pay=done",
+        "ClientBackURL":       f"{FRONTEND_URL}/stock/landing?pay=done",
         "TotalAmount":         str(info["amount"]),
         "TradeDesc":           "線上有位定期訂閱",
         "ItemName":            info["name"],
@@ -7070,9 +7813,11 @@ async def webhook_ecpay_recurring(request: Request):
         (f"R_{trade_no_w}_{payment_date}",)
     ).fetchone()
     _po = _tmp.execute(
-        "SELECT hashed_password FROM pending_orders WHERE merchant_trade_no=?", (trade_no_w,)
+        "SELECT hashed_password, invoice_type, invoice_carrier FROM pending_orders WHERE merchant_trade_no=?", (trade_no_w,)
     ).fetchone()
     _tmp.close()
+    _inv_type    = (_po["invoice_type"]    or "電子發票") if _po else "電子發票"
+    _inv_carrier = (_po["invoice_carrier"] or "未提供")   if _po else "未提供"
 
     if _already:
         print(f"[定期定額] ⚠️ 重複 Webhook {trade_no_w} exec={exec_log}")
@@ -7117,6 +7862,8 @@ async def webhook_ecpay_recurring(request: Request):
                   <tr><td style="padding:8px 0;color:#888;font-size:13px">方案</td><td style="padding:8px 0;font-weight:700">{plan_label}</td></tr>
                   <tr><td style="padding:8px 0;color:#888;font-size:13px">扣款金額</td><td style="padding:8px 0;font-weight:700">NT${amount}</td></tr>
                   <tr><td style="padding:8px 0;color:#888;font-size:13px">新到期日</td><td style="padding:8px 0;font-weight:700">{new_expire}</td></tr>
+                  <tr><td style="padding:8px 0;color:#888;font-size:13px">發票開立方式</td><td style="padding:8px 0;font-weight:700">{_inv_type}</td></tr>
+                  <tr><td style="padding:8px 0;color:#888;font-size:13px">載具/統編</td><td style="padding:8px 0;font-weight:700">{_inv_carrier}</td></tr>
                 </table>
               </div>
               <div style="margin-top:24px;text-align:center">
@@ -7151,6 +7898,8 @@ async def webhook_ecpay_recurring(request: Request):
                   <tr><td style="padding:8px 0;color:#888;font-size:13px">方案</td><td style="padding:8px 0;font-weight:700">{plan_label}</td></tr>
                   <tr><td style="padding:8px 0;color:#888;font-size:13px">扣款金額</td><td style="padding:8px 0;font-weight:700">NT${amount}</td></tr>
                   <tr><td style="padding:8px 0;color:#888;font-size:13px">到期日</td><td style="padding:8px 0;font-weight:700">{new_expire}</td></tr>
+                  <tr><td style="padding:8px 0;color:#888;font-size:13px">發票開立方式</td><td style="padding:8px 0;font-weight:700">{_inv_type}</td></tr>
+                  <tr><td style="padding:8px 0;color:#888;font-size:13px">載具/統編</td><td style="padding:8px 0;font-weight:700">{_inv_carrier}</td></tr>
                 </table>
               </div>
               <div style="margin-top:24px;text-align:center">
@@ -7730,6 +8479,173 @@ async def websocket_chat(ws: WebSocket, token: str = ""):
 
 
 # ──────────────────────────────────────────
+# 留言板 API
+# ──────────────────────────────────────────
+
+@app.get("/forum/posts")
+async def forum_get_posts(
+    stock_code: str = "",
+    page: int = 1,
+    user: dict | None = Depends(get_current_user)
+):
+    """取得主題列表（非會員可看標題，付費會員看全文）"""
+    limit = 20
+    offset = (page - 1) * limit
+    conn = _db_conn()
+    if stock_code:
+        rows = conn.execute(
+            "SELECT p.id, p.nickname, p.title, p.content, p.stock_code, p.created_at, "
+            "(SELECT COUNT(*) FROM forum_comments c WHERE c.post_id=p.id) as comment_count "
+            "FROM forum_posts p WHERE p.stock_code=? ORDER BY p.id DESC LIMIT ? OFFSET ?",
+            (stock_code.upper(), limit, offset)
+        ).fetchall()
+        total = conn.execute("SELECT COUNT(*) FROM forum_posts WHERE stock_code=?", (stock_code.upper(),)).fetchone()[0]
+    else:
+        rows = conn.execute(
+            "SELECT p.id, p.nickname, p.title, p.content, p.stock_code, p.created_at, "
+            "(SELECT COUNT(*) FROM forum_comments c WHERE c.post_id=p.id) as comment_count "
+            "FROM forum_posts p ORDER BY p.id DESC LIMIT ? OFFSET ?",
+            (limit, offset)
+        ).fetchall()
+        total = conn.execute("SELECT COUNT(*) FROM forum_posts").fetchone()[0]
+    conn.close()
+
+    is_paid = False
+    if user:
+        today = _date_cls.today().isoformat()
+        is_paid = (user.get("plan") != "free" and user.get("expire_at", "") >= today) or _is_referral_active(user)
+
+    posts = []
+    for r in rows:
+        post = {
+            "id": r[0],
+            "nickname": r[1],
+            "title": r[2],
+            "stock_code": r[4],
+            "created_at": r[5][:16] if r[5] else "",
+            "comment_count": r[6],
+        }
+        if is_paid:
+            post["content"] = r[3]
+        posts.append(post)
+
+    return {"posts": posts, "total": total, "page": page, "is_paid": is_paid}
+
+
+@app.post("/forum/posts")
+async def forum_create_post(
+    request: Request,
+    user: dict = Depends(require_paid_user)
+):
+    """發表新主題（需付費會員）"""
+    data = await request.json()
+    title = str(data.get("title", "")).strip()[:100]
+    content = str(data.get("content", "")).strip()[:2000]
+    stock_code = str(data.get("stock_code", "")).strip()[:10].upper()
+    nickname = str(data.get("nickname", "")).strip()[:20] or user.get("nickname") or user["email"].split("@")[0]
+
+    if not title or not content:
+        raise HTTPException(status_code=400, detail="標題和內容不能為空")
+
+    conn = _db_conn()
+    conn.execute(
+        "INSERT INTO forum_posts (user_id, nickname, title, content, stock_code) VALUES (?,?,?,?,?)",
+        (user["id"], nickname, title, content, stock_code)
+    )
+    conn.commit()
+    post_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+    conn.close()
+    return {"ok": True, "post_id": post_id}
+
+
+@app.get("/forum/posts/{post_id}")
+async def forum_get_post(post_id: int, user: dict | None = Depends(get_current_user)):
+    """取得單篇主題和留言（需付費會員）"""
+    conn = _db_conn()
+    row = conn.execute("SELECT * FROM forum_posts WHERE id=?", (post_id,)).fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="找不到此主題")
+
+    is_paid = False
+    if user:
+        today = _date_cls.today().isoformat()
+        is_paid = (user.get("plan") != "free" and user.get("expire_at", "") >= today) or _is_referral_active(user)
+
+    if not is_paid:
+        conn.close()
+        raise HTTPException(status_code=403, detail="需付費會員才能查看內容")
+
+    comments = conn.execute(
+        "SELECT id, nickname, content, created_at FROM forum_comments WHERE post_id=? ORDER BY id ASC",
+        (post_id,)
+    ).fetchall()
+    conn.close()
+
+    return {
+        "post": {
+            "id": row["id"],
+            "nickname": row["nickname"],
+            "title": row["title"],
+            "content": row["content"],
+            "stock_code": row["stock_code"],
+            "created_at": row["created_at"][:16] if row["created_at"] else "",
+        },
+        "comments": [
+            {"id": c[0], "nickname": c[1], "content": c[2], "created_at": c[3][:16] if c[3] else ""}
+            for c in comments
+        ]
+    }
+
+
+@app.post("/forum/posts/{post_id}/comments")
+async def forum_create_comment(
+    post_id: int,
+    request: Request,
+    user: dict = Depends(require_paid_user)
+):
+    """新增留言（需付費會員）"""
+    data = await request.json()
+    content = str(data.get("content", "")).strip()[:1000]
+    nickname = str(data.get("nickname", "")).strip()[:20] or user.get("nickname") or user["email"].split("@")[0]
+
+    if not content:
+        raise HTTPException(status_code=400, detail="留言不能為空")
+
+    conn = _db_conn()
+    row = conn.execute("SELECT id FROM forum_posts WHERE id=?", (post_id,)).fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="找不到此主題")
+
+    conn.execute(
+        "INSERT INTO forum_comments (post_id, user_id, nickname, content) VALUES (?,?,?,?)",
+        (post_id, user["id"], nickname, content)
+    )
+    conn.commit()
+    conn.close()
+    return {"ok": True}
+
+
+@app.get("/forum/stock-discussion-count")
+async def forum_stock_discussion_count(codes: str = ""):
+    """查詢多支股票的討論數（分析頁提示用）codes=2330,2317"""
+    if not codes:
+        return {"counts": {}}
+    code_list = [c.strip().upper() for c in codes.split(",") if c.strip()][:10]
+    conn = _db_conn()
+    result = {}
+    for code in code_list:
+        count = conn.execute(
+            "SELECT COUNT(*) FROM forum_posts WHERE stock_code=?", (code,)
+        ).fetchone()[0]
+        if count > 0:
+            result[code] = count
+    conn.close()
+    return {"counts": result}
+
+
+# ──────────────────────────────────────────
 # 批次預產生報告頁（SEO 用）
 # ──────────────────────────────────────────
 
@@ -7761,7 +8677,7 @@ def _run_batch_report_job():
             try:
                 d = _do_analyze(sid, "D", user=None)
                 news_items = _fetch_stock_news(sid)
-                report_html = _build_report_html(sid, sname, today, d, news_items)
+                report_html = _inject_report_ads(_build_report_html(sid, sname, today, d, news_items))
                 conn = _db_conn()
                 conn.execute(
                     "INSERT OR REPLACE INTO stock_reports (stock_id, report_date, stock_name, report_html) VALUES (?,?,?,?)",
@@ -7813,7 +8729,7 @@ async def admin_batch_generate_reports(
                         continue
                     d = _do_analyze(sid, "D", user=None)
                     news_items = _fetch_stock_news(sid)
-                    report_html = _build_report_html(sid, sname, today, d, news_items)
+                    report_html = _inject_report_ads(_build_report_html(sid, sname, today, d, news_items))
                     conn = _db_conn()
                     conn.execute(
                         "INSERT OR REPLACE INTO stock_reports (stock_id, report_date, stock_name, report_html) VALUES (?,?,?,?)",

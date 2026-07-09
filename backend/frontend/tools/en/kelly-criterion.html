@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kelly Criterion Calculator - Optimal Bet Sizing</title>
+<meta name="description" content="Use the Kelly Criterion formula to determine the optimal percentage of your bankroll to bet. Calculate ideal bet sizes based on odds and win probability.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/en/kelly-criterion.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/kelly-criterion.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/kelly-criterion.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/kelly-criterion.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/kelly-criterion.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/kelly-criterion.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/kelly-criterion.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/kelly-criterion.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/kelly-criterion.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/kelly-criterion.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/kelly-criterion.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/kelly-criterion.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Kelly Criterion Calculator", "url": "https://softglow-ai.com/tools/en/kelly-criterion.html", "description": "Use the Kelly Criterion formula to determine the optimal percentage of your bankroll to bet. Calculate ideal bet sizes based on odds and win probability.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What does a negative Kelly Criterion value mean?", "acceptedAnswer": {"@type": "Answer", "text": "A negative f value indicates that the bet has negative expected value. The odds don't sufficiently compensate for your probability of winning. You should avoid making this bet, as the mathematics show it will lose money over time. Only wager on bets with positive Kelly values when using this strategy."}}, {"@type": "Question", "name": "Should I always bet the full Kelly percentage?", "acceptedAnswer": {"@type": "Answer", "text": "Not necessarily. While full Kelly maximizes long-term growth, it can be psychologically and emotionally challenging due to variance. Many professionals use fractional Kelly (like half Kelly) to reduce volatility while still capturing substantial growth benefits. Choose a fraction that matches your risk tolerance and bankroll size."}}, {"@type": "Question", "name": "How accurate do my probability estimates need to be?", "acceptedAnswer": {"@type": "Answer", "text": "Very accurate. The Kelly Criterion is only as good as your probability estimates. Small errors in probability assessment can lead to significantly incorrect bet sizing. Spend time analyzing data and validating your edge before committing real money. When uncertain, use a fractional Kelly approach for safety."}}, {"@type": "Question", "name": "Can I use Kelly Criterion for sports betting, poker, and trading?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The Kelly Criterion applies wherever you have repeatable bets or decisions with known odds and estimable probabilities. It's used in sports betting, poker, options trading, and other domains. The key requirement is identifying a genuine edge and accurately estimating your win probability."}}, {"@type": "Question", "name": "What's the difference between decimal odds and other odds formats?", "acceptedAnswer": {"@type": "Answer", "text": "Decimal odds represent your total return per dollar bet, including your original stake. For example, 2.5 decimal odds mean you get $2.50 back for every $1 wagered (profit of $1.50). American odds and fractional odds are different formats for expressing the same betting probability. Always convert to decimal odds for Kelly Criterion calculations."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/en/">Tools</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/en/">Tools</a> > Kelly Criterion Calculator</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Kelly Criterion Calculator</h1>
+    <p class="calc-subtitle">Calculate the optimal fraction of your bankroll to wager on each bet</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="winProbability">Probability of Winning (as decimal)</label>
+  <div class="input-row"><input type="number" id="winProbability" placeholder="0.55"  step="0.01"></div>
+</div>
+  <small class="input-help">Enter your estimated probability of winning as a decimal between 0 and 1 (e.g., 0.55 for 55%)</small>
+<div class="input-group">
+  <label for="oddsDecimal">Odds (decimal format)</label>
+  <div class="input-row"><input type="number" id="oddsDecimal" placeholder="2.5"  step="0.01"></div>
+</div>
+  <small class="input-help">Enter the decimal odds offered for this bet (e.g., 2.5 means you win $2.50 for every $1 wagered)</small>
+<div class="input-group">
+  <label for="bankroll">Starting Bankroll</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="bankroll" placeholder="1000"  step="1"></div>
+</div>
+  <small class="input-help">Enter your total starting bankroll or account balance in dollars</small></div>
+    <button class="btn-calc" onclick="calculate()">Calculate</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Kelly Criterion (f value)</span><span class="result-value" id="kellyCriterion">—</span></div>
+<div class="result-highlight"><span class="result-label">Optimal Bet Amount</span><span class="result-value" id="optimalBetAmount">—</span></div>
+<div class="result-item"><span class="result-label">Risk Assessment</span><span class="result-value" id="riskLevel">—</span></div>
+<div class="result-item"><span class="result-label">Expected Value per Bet</span><span class="result-value" id="expectedValue">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>What does this mean?</strong> The Kelly Criterion (f value) shows the optimal percentage of your bankroll to wager on this bet. The Optimal Bet Amount converts this percentage into actual dollars. The Risk Assessment indicates whether this bet aligns with responsible gambling practices, and the Expected Value per Bet shows your average profit per wager based on the probability and odds provided.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Print</button>
+        <button onclick="shareResult()">&#x1f4e4; Share</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>Understanding the Kelly Criterion</h2><p>The Kelly Criterion is a mathematical formula used to determine the optimal size of a series of bets to maximize long-term wealth growth while minimizing the risk of ruin. Developed by John L. Kelly Jr. in 1956, this formula has become essential for professional bettors, traders, and investors who want to manage their capital efficiently. Rather than betting a fixed amount or a fixed percentage of your bankroll, the Kelly Criterion calculates a dynamic bet size based on your edge in the wager.</p><p>The formula is: f* = (bp - q) / b, where f* is the fraction of bankroll to bet, b is the decimal odds minus 1, p is the probability of winning, and q is the probability of losing (1 - p). This elegant formula balances growth potential with risk management, helping you avoid both under-betting (leaving money on the table) and over-betting (risking catastrophic losses).</p><h2>How to Use the Kelly Criterion Calculator</h2><p>Using our calculator is straightforward. First, enter your estimated probability of winning the bet as a decimal. For example, if you believe you have a 55% chance of winning, enter 0.55. Next, input the decimal odds being offered. Decimal odds represent your total return per dollar wagered, including your original stake. For instance, odds of 2.5 mean you'll receive $2.50 for every $1 bet (netting $1.50 profit). Finally, enter your starting bankroll—the total amount of money you're willing to allocate to betting.</p><p>The calculator will immediately show you four key results: the Kelly Criterion percentage (f value), your optimal bet amount in dollars, a risk assessment based on your edge, and the expected value per bet. These metrics work together to guide your betting decisions and ensure you're maximizing your long-term profitability.</p><h2>Interpreting Your Results</h2><p>The Kelly Criterion percentage tells you what fraction of your bankroll to wager. A result of 5% means you should bet 5% of your total bankroll on this opportunity. This percentage is crucial because it scales with your bankroll—as you win and your bankroll grows, your optimal bet size grows proportionally. Conversely, if you experience losses, your bet sizes decrease, protecting you from catastrophic ruin.</p><p>The Optimal Bet Amount converts this percentage into actual dollars. If your bankroll is $1,000 and the Kelly Criterion suggests 5%, your optimal bet is $50. This dollar amount serves as your practical guide for placing the wager. The Risk Assessment evaluates whether your edge is sufficient to justify the bet under Kelly principles. A positive f value indicates an edge, while a negative value suggests the bet has negative expected value and should be avoided entirely.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>The Mathematics Behind Kelly</h2><p>The Kelly Criterion's elegance lies in its mathematical properties. By betting exactly the Kelly percentage, you maximize the expected logarithm of your wealth, leading to the highest geometric growth rate over time. This differs from maximizing expected monetary value, which would lead to over-betting and eventual ruin. The formula inherently penalizes over-confidence by requiring strong edges to justify larger bets.</p><p>Consider an example: with a 55% win probability and 2.5 decimal odds, the Kelly Criterion f value is approximately 4.76%. This means you should bet 4.76% of your bankroll. With a $1,000 bankroll, this translates to a $47.60 bet. Your expected value per bet is positive because you have an edge—your probability of winning exceeds what the odds would suggest.</p><h2>Risk Management with Kelly</h2><p>While the full Kelly Criterion is mathematically optimal for long-term wealth growth, many professional bettors use fractional Kelly (betting only a portion of the Kelly percentage) to reduce volatility and the psychological stress of variance. Half Kelly (50% of the Kelly percentage) is popular because it still captures substantial growth benefits while cutting maximum drawdown in half.</p><p>Never ignore a negative Kelly Criterion value. If the calculator shows a negative f value, this means the bet has negative expected value—the odds don't sufficiently compensate for your win probability. Passing on such bets is crucial for long-term success. Additionally, always ensure your probability estimates are realistic and not overconfident, as inflated probability estimates are the primary cause of betting failure.</p><h2>Practical Betting Strategies</h2><p>Implement Kelly Criterion betting across a portfolio of bets rather than in isolation. A single Kelly-sized bet might experience variance, but multiple bets following Kelly principles compound favorably over time. Track your actual results against expected values to validate your probability estimates. If reality consistently differs from your estimates, adjust your methodology.</p><p>Remember that the Kelly Criterion assumes you have an informational edge—that your probability estimates are more accurate than the market's. Without a genuine edge, Kelly bets still lose money on average. Use this calculator as part of a comprehensive betting or investment strategy that includes edge identification, bankroll discipline, and emotional control. The mathematical elegance of Kelly only translates to real wealth if applied with patience and realism.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Related Articles</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>FAQ</h2><div class="faq-item"><div class="faq-q">What does a negative Kelly Criterion value mean?</div><div class="faq-a">A negative f value indicates that the bet has negative expected value. The odds don't sufficiently compensate for your probability of winning. You should avoid making this bet, as the mathematics show it will lose money over time. Only wager on bets with positive Kelly values when using this strategy.</div></div>
+  <div class="faq-item"><div class="faq-q">Should I always bet the full Kelly percentage?</div><div class="faq-a">Not necessarily. While full Kelly maximizes long-term growth, it can be psychologically and emotionally challenging due to variance. Many professionals use fractional Kelly (like half Kelly) to reduce volatility while still capturing substantial growth benefits. Choose a fraction that matches your risk tolerance and bankroll size.</div></div>
+  <div class="faq-item"><div class="faq-q">How accurate do my probability estimates need to be?</div><div class="faq-a">Very accurate. The Kelly Criterion is only as good as your probability estimates. Small errors in probability assessment can lead to significantly incorrect bet sizing. Spend time analyzing data and validating your edge before committing real money. When uncertain, use a fractional Kelly approach for safety.</div></div>
+  <div class="faq-item"><div class="faq-q">Can I use Kelly Criterion for sports betting, poker, and trading?</div><div class="faq-a">Yes. The Kelly Criterion applies wherever you have repeatable bets or decisions with known odds and estimable probabilities. It's used in sports betting, poker, options trading, and other domains. The key requirement is identifying a genuine edge and accurately estimating your win probability.</div></div>
+  <div class="faq-item"><div class="faq-q">What's the difference between decimal odds and other odds formats?</div><div class="faq-a">Decimal odds represent your total return per dollar bet, including your original stake. For example, 2.5 decimal odds mean you get $2.50 back for every $1 wagered (profit of $1.50). American odds and fractional odds are different formats for expressing the same betting probability. Always convert to decimal odds for Kelly Criterion calculations.</div></div></section>
+  <div class="more-tools"><h3>More Tools</h3><div class="tools-grid"><a class="tool-pill" href="/tools/en/compound-interest.html">Compound Interest Calculator</a>
+      <a class="tool-pill" href="/tools/en/roi-calculator.html">ROI Calculator</a>
+      <a class="tool-pill" href="/tools/en/risk-reward.html">Risk Reward Calculator</a>
+      <a class="tool-pill" href="/tools/en/position-size.html">Position Size Calculator</a>
+      <a class="tool-pill" href="/tools/en/stop-loss.html">Stop Loss Calculator</a>
+      <a class="tool-pill" href="/tools/en/dividend-yield.html">Dividend Yield Calculator</a>
+      <a class="tool-pill" href="/tools/en/pe-ratio.html">P/E Ratio Calculator</a>
+      <a class="tool-pill" href="/tools/en/dca-calculator.html">DCA Calculator</a>
+      <a class="tool-pill" href="/tools/en/cagr.html">CAGR Calculator</a>
+      <a class="tool-pill" href="/tools/en/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/en/stock-gain-loss.html">Stock Gain/Loss Calculator</a>
+      <a class="tool-pill" href="/tools/en/break-even.html">Break Even Calculator</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/kelly-criterion.html" class="lang-btn active">English</a>
+    <a href="/tools/kelly-criterion.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/kelly-criterion.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/kelly-criterion.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/kelly-criterion.html" class="lang-btn">Français</a>
+    <a href="/tools/es/kelly-criterion.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/kelly-criterion.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/kelly-criterion.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/kelly-criterion.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/kelly-criterion.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Related Tools</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const winProb = parseFloat(document.getElementById('winProbability').value);
+  const odds = parseFloat(document.getElementById('oddsDecimal').value);
+  const bankroll = parseFloat(document.getElementById('bankroll').value);
+
+  if (!winProb || !odds || !bankroll) {
+    alert('Please fill in all fields with valid numbers');
+    return;
+  }
+
+  if (winProb <= 0 || winProb > 1) {
+    alert('Probability must be between 0 and 1 (0.01 to 0.99)');
+    return;
+  }
+
+  if (odds < 1) {
+    alert('Odds must be greater than or equal to 1');
+    return;
+  }
+
+  if (bankroll <= 0) {
+    alert('Bankroll must be a positive number');
+    return;
+  }
+
+  const lossProb = 1 - winProb;
+  const b = odds - 1;
+  const kellyCriterion = (b * winProb - lossProb) / b;
+
+  let riskAssessment = 'Moderate';
+  let displayKelly = kellyCriterion;
+
+  if (kellyCriterion < 0) {
+    riskAssessment = 'Avoid bet (negative edge)';
+    displayKelly = 0;
+  } else if (kellyCriterion > 0.25) {
+    riskAssessment = 'High volatility risk';
+  } else if (kellyCriterion < 0.01) {
+    riskAssessment = 'Very conservative';
+  }
+
+  const optimalBet = bankroll * displayKelly;
+  const expectedValue = optimalBet * (winProb * (odds - 1) - lossProb);
+
+  document.getElementById('kellyCriterion').textContent = (displayKelly * 100).toLocaleString('en-US', {maximumFractionDigits: 2});
+  document.getElementById('optimalBetAmount').textContent = optimalBet.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('riskLevel').textContent = riskAssessment;
+  document.getElementById('expectedValue').textContent = expectedValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copied!';setTimeout(function(){b.textContent='Share'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|en|kelly-criterion|2026-07-09 -->

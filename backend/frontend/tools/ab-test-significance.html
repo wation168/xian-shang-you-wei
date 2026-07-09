@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A/B 測試顯著性計算器 - 統計分析工具</title>
+<meta name="description" content="免費的 A/B 測試顯著性計算器，幫助您判斷轉換率測試結果是否具有統計意義，支持自定義信心水平。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ab-test-significance.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/ab-test-significance.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/ab-test-significance.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/ab-test-significance.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/ab-test-significance.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/ab-test-significance.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/ab-test-significance.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/ab-test-significance.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/ab-test-significance.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/ab-test-significance.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/ab-test-significance.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/ab-test-significance.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "A/B 測試顯著性計算器", "url": "https://softglow-ai.com/tools/ab-test-significance.html", "description": "免費的 A/B 測試顯著性計算器，幫助您判斷轉換率測試結果是否具有統計意義，支持自定義信心水平。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "什麼是統計顯著性？", "acceptedAnswer": {"@type": "Answer", "text": "統計顯著性表示測試結果不是由隨機因素造成的概率。在 A/B 測試中，95% 的信心水平意味著有 95% 的把握認為觀察到的差異是真實的，而不是偶然發生的。"}}, {"@type": "Question", "name": "多少樣本量才足夠？", "acceptedAnswer": {"@type": "Answer", "text": "樣本量取決於基準轉換率、預期效果大小和所需的信心水平。通常，樣本量越大，結果越可靠。建議每個變體至少有 100-1,000 次轉換。"}}, {"@type": "Question", "name": "P 值多少才是顯著的？", "acceptedAnswer": {"@type": "Answer", "text": "在 95% 信心水平下，P 值小於 0.05 表示結果具有統計顯著性。在 99% 信心水平下，P 值應小於 0.01。P 值越小，結果越可信。"}}, {"@type": "Question", "name": "轉換率提升是什麼意思？", "acceptedAnswer": {"@type": "Answer", "text": "轉換率提升表示變體版本相比對照版本的性能改變幅度，以百分比表示。正值表示變體更好，負值表示對照組更好。例如，提升 20% 表示轉換率增加了 20%。"}}, {"@type": "Question", "name": "我應該多久進行一次 A/B 測試？", "acceptedAnswer": {"@type": "Answer", "text": "建議持續進行 A/B 測試來優化轉換率。每個測試應至少運行 1-2 週以覆蓋不同的用戶行為模式。達到統計顯著性後停止測試，然後開始新的測試。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > A/B 測試顯著性計算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>A/B 測試顯著性計算器</h1>
+    <p class="calc-subtitle">判斷您的 A/B 測試結果是否具有統計顯著性</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="controlConversions">對照組轉換數</label>
+  <div class="input-row"><input type="number" id="controlConversions" placeholder="例如，245"  step="1"></div>
+</div>
+  <small class="input-help">輸入對照組中完成轉換的訪客數量</small>
+<div class="input-group">
+  <label for="controlVisitors">對照組訪客數</label>
+  <div class="input-row"><input type="number" id="controlVisitors" placeholder="例如，5000"  step="1"></div>
+</div>
+  <small class="input-help">輸入對照組的總訪客數</small>
+<div class="input-group">
+  <label for="variantConversions">變體組轉換數</label>
+  <div class="input-row"><input type="number" id="variantConversions" placeholder="例如，310"  step="1"></div>
+</div>
+  <small class="input-help">輸入變體組中完成轉換的訪客數量</small>
+<div class="input-group">
+  <label for="variantVisitors">變體組訪客數</label>
+  <div class="input-row"><input type="number" id="variantVisitors" placeholder="例如，5100"  step="1"></div>
+</div>
+  <small class="input-help">輸入變體組的總訪客數</small>
+<div class="input-group">
+  <label for="confidenceLevel">信心水平</label>
+  <div class="input-row"><input type="number" id="confidenceLevel" placeholder="95"  value="95" step="1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">選擇所需的信心水平（通常為 95% 或 99%）</small></div>
+    <button class="btn-calc" onclick="calculate()">計算</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">對照組轉換率</span><span class="result-value" id="controlConversionRate">—</span></div>
+<div class="result-item"><span class="result-label">變體組轉換率</span><span class="result-value" id="variantConversionRate">—</span></div>
+<div class="result-item"><span class="result-label">轉換率提升</span><span class="result-value" id="conversionLift">—</span></div>
+<div class="result-item"><span class="result-label">Z 分數</span><span class="result-value" id="zScore">—</span></div>
+<div class="result-item"><span class="result-label">P 值</span><span class="result-value" id="pValue">—</span></div>
+<div class="result-highlight"><span class="result-label">統計顯著性</span><span class="result-value" id="significance">—</span></div>
+<div class="result-highlight"><span class="result-label">結果</span><span class="result-value" id="result">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> 轉換率提升顯示變體組相比對照組的性能改變幅度。P 值越小表示結果越可靠。當 P 值小於 (1 - 信心水平) 時，結果具有統計顯著性，意味著差異不是由隨機因素造成的。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 列印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什麼是 A/B 測試顯著性？</h2><p>A/B 測試顯著性是指測試結果不是由隨機因素造成的概率。統計顯著性幫助營銷人員確定測試結果是否可靠，以及是否應該實施變體版本。通常使用 95% 的信心水平，這意味著我們有 95% 的把握認為觀察到的差異是真實的。</p><h2>如何計算轉換率</h2><p>轉換率是通過將轉換數除以總訪客數來計算的。例如，如果對照組有 245 次轉換，訪客總數為 5,000，則轉換率為 4.9%。這個指標反映了有多大比例的訪客完成了目標行動。</p><h2>理解 Z 分數和 P 值</h2><p>Z 分數衡量兩個轉換率之間的差異有多大，單位為標準差。P 值表示在零假設下（即兩組沒有真實差異）觀察到這樣結果的概率。P 值越小，結果越顯著。如果 P 值小於 0.05（對應 95% 信心水平），我們認為結果具有統計顯著性。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>何時停止 A/B 測試</h2><p>達到統計顯著性後，您應該停止測試並實施獲勝的變體。繼續測試可能導致「窺視問題」，影響結果的可靠性。同時確保測試運行足夠長的時間以收集有意義的數據。</p><h2>常見的 A/B 測試錯誤</h2><p>避免在達到統計顯著性之前停止測試、樣本量過小、測試時間過短或多次比較同一數據。這些錯誤會增加假陽性的風險。始終預先定義成功標準和測試時長。</p><h2>優化轉換率的最佳實踐</h2><p>進行 A/B 測試時，一次只改變一個元素，如標題、按鈕顏色或頁面佈局。充足的樣本量和測試時長對獲得可靠結果至關重要。定期測試並根據數據做出決策，而不是基於直覺或假設。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">什麼是統計顯著性？</div><div class="faq-a">統計顯著性表示測試結果不是由隨機因素造成的概率。在 A/B 測試中，95% 的信心水平意味著有 95% 的把握認為觀察到的差異是真實的，而不是偶然發生的。</div></div>
+  <div class="faq-item"><div class="faq-q">多少樣本量才足夠？</div><div class="faq-a">樣本量取決於基準轉換率、預期效果大小和所需的信心水平。通常，樣本量越大，結果越可靠。建議每個變體至少有 100-1,000 次轉換。</div></div>
+  <div class="faq-item"><div class="faq-q">P 值多少才是顯著的？</div><div class="faq-a">在 95% 信心水平下，P 值小於 0.05 表示結果具有統計顯著性。在 99% 信心水平下，P 值應小於 0.01。P 值越小，結果越可信。</div></div>
+  <div class="faq-item"><div class="faq-q">轉換率提升是什麼意思？</div><div class="faq-a">轉換率提升表示變體版本相比對照版本的性能改變幅度，以百分比表示。正值表示變體更好，負值表示對照組更好。例如，提升 20% 表示轉換率增加了 20%。</div></div>
+  <div class="faq-item"><div class="faq-q">我應該多久進行一次 A/B 測試？</div><div class="faq-a">建議持續進行 A/B 測試來優化轉換率。每個測試應至少運行 1-2 週以覆蓋不同的用戶行為模式。達到統計顯著性後停止測試，然後開始新的測試。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/roi-calculator.html">ROI 計算機</a>
+      <a class="tool-pill" href="/tools/risk-reward.html">風險報酬計算機</a>
+      <a class="tool-pill" href="/tools/position-size.html">部位規模計算器</a>
+      <a class="tool-pill" href="/tools/stop-loss.html">停損計算機</a>
+      <a class="tool-pill" href="/tools/dividend-yield.html">股息收益率計算機</a>
+      <a class="tool-pill" href="/tools/pe-ratio.html">本益比計算機</a>
+      <a class="tool-pill" href="/tools/dca-calculator.html">定期定額投資計算機</a>
+      <a class="tool-pill" href="/tools/cagr.html">年複合成長率計算器</a>
+      <a class="tool-pill" href="/tools/margin-calculator.html">保證金計算器</a>
+      <a class="tool-pill" href="/tools/stock-gain-loss.html">股票損益計算機</a>
+      <a class="tool-pill" href="/tools/break-even.html">損益平衡點計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/ab-test-significance.html" class="lang-btn">English</a>
+    <a href="/tools/ab-test-significance.html" class="lang-btn active">繁體中文</a>
+    <a href="/tools/ja/ab-test-significance.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/ab-test-significance.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/ab-test-significance.html" class="lang-btn">Français</a>
+    <a href="/tools/es/ab-test-significance.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/ab-test-significance.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/ab-test-significance.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/ab-test-significance.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/ab-test-significance.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const controlConversions = parseFloat(document.getElementById('controlConversions').value);
+  const controlVisitors = parseFloat(document.getElementById('controlVisitors').value);
+  const variantConversions = parseFloat(document.getElementById('variantConversions').value);
+  const variantVisitors = parseFloat(document.getElementById('variantVisitors').value);
+  const confidenceLevel = parseFloat(document.getElementById('confidenceLevel').value);
+
+  if (!controlConversions || !controlVisitors || !variantConversions || !variantVisitors || !confidenceLevel) {
+    alert('Please fill in all fields with valid numbers');
+    return;
+  }
+
+  if (controlConversions > controlVisitors || variantConversions > variantVisitors) {
+    alert('Conversions cannot exceed visitors');
+    return;
+  }
+
+  const controlRate = (controlConversions / controlVisitors) * 100;
+  const variantRate = (variantConversions / variantVisitors) * 100;
+  const lift = ((variantRate - controlRate) / controlRate) * 100;
+
+  const pooledConversions = controlConversions + variantConversions;
+  const pooledVisitors = controlVisitors + variantVisitors;
+  const pooledRate = pooledConversions / pooledVisitors;
+
+  const standardError = Math.sqrt(
+    pooledRate * (1 - pooledRate) * (1 / controlVisitors + 1 / variantVisitors)
+  );
+
+  const zScore = ((variantRate / 100) - (controlRate / 100)) / standardError;
+  const pValue = 2 * (1 - normalCDF(Math.abs(zScore)));
+
+  let significancePercent = 0;
+  if (pValue < 0.001) {
+    significancePercent = 99.9;
+  } else if (pValue < 0.01) {
+    significancePercent = 99;
+  } else if (pValue < 0.05) {
+    significancePercent = 95;
+  } else if (pValue < 0.1) {
+    significancePercent = 90;
+  } else {
+    significancePercent = (1 - pValue) * 100;
+  }
+
+  const isSignificant = significancePercent >= confidenceLevel;
+
+  document.getElementById('controlConversionRate').textContent = controlRate.toFixed(2);
+  document.getElementById('variantConversionRate').textContent = variantRate.toFixed(2);
+  document.getElementById('conversionLift').textContent = lift.toFixed(2);
+  document.getElementById('zScore').textContent = zScore.toFixed(4);
+  document.getElementById('pValue').textContent = pValue.toFixed(6);
+  document.getElementById('significance').textContent = significancePercent.toFixed(2);
+  document.getElementById('result').textContent = isSignificant ? 'SIGNIFICANT' : 'NOT SIGNIFICANT';
+
+  if (isSignificant) {
+    document.getElementById('result').style.color = '#27ae60';
+  } else {
+    document.getElementById('result').style.color = '#e74c3c';
+  }
+
+  document.getElementById('results').classList.add('show');
+}
+
+function normalCDF(z) {
+  const a1 = 0.254829592;
+  const a2 = -0.284496736;
+  const a3 = 1.421413741;
+  const a4 = -1.453152027;
+  const a5 = 1.061405429;
+  const p = 0.3275911;
+
+  const sign = z < 0 ? -1 : 1;
+  z = Math.abs(z) / Math.sqrt(2);
+
+  const t = 1.0 / (1.0 + p * z);
+  const y = 1.0 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-z * z);
+
+  return 0.5 * (1.0 + sign * y);
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-TW|ab-test-significance|2026-07-09 -->

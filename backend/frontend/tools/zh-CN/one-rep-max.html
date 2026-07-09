@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>一次最大举重量计算器 - Epley公式</title>
+<meta name="description" content="免费的一次最大举重量计算器,使用经过验证的Epley公式帮助您快速准确地计算最大举重能力。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/zh-CN/one-rep-max.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/one-rep-max.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/one-rep-max.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/one-rep-max.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/one-rep-max.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/one-rep-max.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/one-rep-max.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/one-rep-max.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/one-rep-max.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/one-rep-max.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/one-rep-max.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/one-rep-max.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "一次最大举重量计算器", "url": "https://softglow-ai.com/tools/zh-CN/one-rep-max.html", "description": "免费的一次最大举重量计算器,使用经过验证的Epley公式帮助您快速准确地计算最大举重能力。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Epley公式对所有举重运动都适用吗?", "acceptedAnswer": {"@type": "Answer", "text": "Epley公式最适用于杠铃深蹲、卧推和硬拉等大型复合运动。对于孤立运动或较高重复次数(超过10次),准确性可能会降低。"}}, {"@type": "Question", "name": "一次最大举重量计算与实际测试结果不符怎么办?", "acceptedAnswer": {"@type": "Answer", "text": "Epley公式是理论估算,实际结果可能因个人差异而异。如果差异超过10%,可能需要调整公式参数或考虑其他计算方法。"}}, {"@type": "Question", "name": "多久应该重新测试一次最大举重量?", "acceptedAnswer": {"@type": "Answer", "text": "建议每4-6周进行一次重新测试,以追踪您的进度。如果您在此期间进行了密集的力量训练,提前测试也是合理的。"}}, {"@type": "Question", "name": "初学者应该尝试计算一次最大举重量吗?", "acceptedAnswer": {"@type": "Answer", "text": "初学者可以使用此计算器,但不建议立即尝试实际的一次最大举重量测试。建议先进行至少4-6周的基础训练,掌握正确姿态后再进行测试。"}}, {"@type": "Question", "name": "女性和男性使用相同的公式吗?", "acceptedAnswer": {"@type": "Answer", "text": "Epley公式对男性和女性都适用,没有差异。一次最大举重量的绝对值可能不同,但计算方法和公式保持一致。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/zh-CN/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 一次最大举重量计算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>一次最大举重量计算器</h1>
+    <p class="calc-subtitle">使用Epley公式计算您的最大举重力量</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="weight">举起的重量</label>
+  <div class="input-row"><input type="number" id="weight" placeholder="输入重量"  step="0.5"><span class="input-suffix">磅</span></div>
+</div>
+  <small class="input-help">输入您能举起的重量(以磅为单位)</small>
+<div class="input-group">
+  <label for="reps">重复次数</label>
+  <div class="input-row"><input type="number" id="reps" placeholder="输入次数"  step="1"><span class="input-suffix">次</span></div>
+</div>
+  <small class="input-help">输入您能完成的重复次数</small></div>
+    <button class="btn-calc" onclick="calculate()">计算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">您的一次最大举重量</span><span class="result-value" id="oneRepMax">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>这代表什么？</strong> 计算结果显示您理论上能够举起的最大重量。这是基于Epley公式,利用您当前举起的重量和重复次数来估算一次最大举重量。使用此结果来规划您的训练计划和设定举重目标。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 打印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什么是一次最大举重量?</h2><p>一次最大举重量(1RM)是指在保持正确姿态的情况下,您能够举起一次的最大重量。这是衡量力量水平的重要指标,也是制定有效训练计划的基础。</p><h2>Epley公式如何工作?</h2><p>Epley公式由美国运动生理学家Matt Epley开发,是计算一次最大举重量最准确的方法之一。公式为:1RM = 举重重量 × (1 + 重复次数÷30)。这个公式特别适用于1-10次重复范围内的计算。</p><h2>如何使用计算器</h2><p>输入您能够连续完成的举重重量(以磅为单位)和重复次数,计算器将自动计算您的一次最大举重量。例如,如果您能举起200磅进行5次重复,系统会估算您的最大举重量约为230磅。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>计算结果的准确性</h2><p>Epley公式提供的是理论估算值,实际的一次最大举重量可能存在±5-10%的偏差。偏差主要取决于个人的肌肉类型、训练经验和技术水平。建议通过实际测试来验证结果。</p><h2>安全举重建议</h2><p>在尝试新的最大举重量时,始终优先考虑安全。使用正确的姿态,从较低的重量开始逐步增加,必要时寻求专业教练的指导。过度训练可能导致受伤。</p><h2>优化您的训练计划</h2><p>了解您的一次最大举重量后,可以据此设定具体的训练目标。通常建议以70-85%的一次最大举重量进行肌肉力量训练,以60-70%的一次最大举重量进行肌肉耐力训练。定期重新测试可以追踪进度。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸阅读</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常见问题</h2><div class="faq-item"><div class="faq-q">Epley公式对所有举重运动都适用吗?</div><div class="faq-a">Epley公式最适用于杠铃深蹲、卧推和硬拉等大型复合运动。对于孤立运动或较高重复次数(超过10次),准确性可能会降低。</div></div>
+  <div class="faq-item"><div class="faq-q">一次最大举重量计算与实际测试结果不符怎么办?</div><div class="faq-a">Epley公式是理论估算,实际结果可能因个人差异而异。如果差异超过10%,可能需要调整公式参数或考虑其他计算方法。</div></div>
+  <div class="faq-item"><div class="faq-q">多久应该重新测试一次最大举重量?</div><div class="faq-a">建议每4-6周进行一次重新测试,以追踪您的进度。如果您在此期间进行了密集的力量训练,提前测试也是合理的。</div></div>
+  <div class="faq-item"><div class="faq-q">初学者应该尝试计算一次最大举重量吗?</div><div class="faq-a">初学者可以使用此计算器,但不建议立即尝试实际的一次最大举重量测试。建议先进行至少4-6周的基础训练,掌握正确姿态后再进行测试。</div></div>
+  <div class="faq-item"><div class="faq-q">女性和男性使用相同的公式吗?</div><div class="faq-a">Epley公式对男性和女性都适用,没有差异。一次最大举重量的绝对值可能不同,但计算方法和公式保持一致。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/zh-CN/compound-interest.html">复利计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/roi-calculator.html">投资回报率 (ROI) 计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/risk-reward.html">风险收益比计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/position-size.html">头寸规模计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stop-loss.html">止损计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dividend-yield.html">股息收益率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/pe-ratio.html">市盈率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dca-calculator.html">定期定额投资计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/cagr.html">复合年增长率(CAGR)计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/margin-calculator.html">保证金计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stock-gain-loss.html">股票盈亏计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/break-even.html">损益平衡点计算器</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/one-rep-max.html" class="lang-btn">English</a>
+    <a href="/tools/one-rep-max.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/one-rep-max.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/one-rep-max.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/one-rep-max.html" class="lang-btn">Français</a>
+    <a href="/tools/es/one-rep-max.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/one-rep-max.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/one-rep-max.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/one-rep-max.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/one-rep-max.html" class="lang-btn active">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相关工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() { const weightInput = document.getElementById('weight'); const repsInput = document.getElementById('reps'); const resultDiv = document.getElementById('results'); const oneRepMaxResult = document.getElementById('oneRepMax'); if (!weightInput.value || !repsInput.value) { alert('Please enter both weight and number of reps'); return; } const weight = parseFloat(weightInput.value); const reps = parseInt(repsInput.value); if (weight <= 0 || reps <= 0) { alert('Please enter valid positive numbers'); return; } const oneRepMax = weight * (1 + reps / 30); oneRepMaxResult.textContent = oneRepMax.toLocaleString('en-US', { maximumFractionDigits: 1 }); resultDiv.classList.add('show'); }
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已复制！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-CN|one-rep-max|2026-07-09 -->

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>燃气账单计算器 - 快速计算月度和年度费用</title>
+<meta name="description" content="免费燃气账单计算器。输入用量、单价和基础费用，立即计算您的燃气账单总额。包含增值税计算。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/zh-CN/gas-bill.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/gas-bill.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/gas-bill.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/gas-bill.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/gas-bill.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/gas-bill.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/gas-bill.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/gas-bill.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/gas-bill.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/gas-bill.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/gas-bill.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/gas-bill.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "燃气账单计算器", "url": "https://softglow-ai.com/tools/zh-CN/gas-bill.html", "description": "免费燃气账单计算器。输入用量、单价和基础费用，立即计算您的燃气账单总额。包含增值税计算。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "燃气账单计算器的计算结果准确吗？", "acceptedAnswer": {"@type": "Answer", "text": "是的，只要您输入的数据准确，计算器会根据您提供的信息准确计算燃气账单。建议使用最近的账单或您的供应商提供的官方费率来获得最准确的结果。"}}, {"@type": "Question", "name": "计费周期通常是多少天？", "acceptedAnswer": {"@type": "Answer", "text": "计费周期通常为28、29、30或31天，取决于您的供应商和账单周期安排。大多数供应商使用标准的每月账单周期。请查看您的账单来确认具体周期。"}}, {"@type": "Question", "name": "基础费用和用量费用有什么区别？", "acceptedAnswer": {"@type": "Answer", "text": "用量费用是根据您实际消耗的燃气量计算的，会随着使用量变化。基础费用（也称为固定费用或站点费用）是每天的固定金额，与消耗量无关，用于维护燃气供应网络。"}}, {"@type": "Question", "name": "我如何找到我的燃气单位费率？", "acceptedAnswer": {"@type": "Answer", "text": "您可以在最近的燃气账单上找到单位费率，通常以每kWh或每立方米的价格表示。您也可以登录供应商的在线账户或致电客服团队获取此信息。"}}, {"@type": "Question", "name": "增值税率在所有地区都相同吗？", "acceptedAnswer": {"@type": "Answer", "text": "不同，增值税率因国家和地区而异。英国的标准增值税率为20%，但某些能源供应可能有不同的税率。请查看您所在地区的具体税率，或在您的账单上查找。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/zh-CN/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 燃气账单计算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>燃气账单计算器</h1>
+    <p class="calc-subtitle">根据用量和当地费率计算您每月或每年的燃气账单</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="gasUsage">燃气用量</label>
+  <div class="input-row"><input type="number" id="gasUsage" placeholder="输入用量金额"  value="250" step="0.1"><span class="input-suffix">kWh</span></div>
+</div>
+  <small class="input-help">输入您的燃气消耗量（千瓦时）</small>
+<div class="input-group">
+  <label for="ratePerUnit">单位费率</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="ratePerUnit" placeholder="输入费率"  value="0.07" step="0.001"><span class="input-suffix">每kWh</span></div>
+</div>
+  <small class="input-help">输入每单位燃气的费率</small>
+<div class="input-group">
+  <label for="standingCharge">基础费用</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="standingCharge" placeholder="固定日费用"  value="0.50" step="0.01"><span class="input-suffix">每天</span></div>
+</div>
+  <small class="input-help">每日固定费用金额</small>
+<div class="input-group">
+  <label for="billingDays">计费周期</label>
+  <div class="input-row"><input type="number" id="billingDays" placeholder="天数"  value="30" step="1"><span class="input-suffix">天</span></div>
+</div>
+  <small class="input-help">计费周期的天数</small>
+<div class="input-group">
+  <label for="taxRate">增值税率</label>
+  <div class="input-row"><input type="number" id="taxRate" placeholder="税率百分比"  value="5" step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">适用的增值税百分比</small></div>
+    <button class="btn-calc" onclick="calculate()">计算</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">用量费用</span><span class="result-value" id="usageCost">—</span></div>
+<div class="result-item"><span class="result-label">基础费用</span><span class="result-value" id="standingCost">—</span></div>
+<div class="result-item"><span class="result-label">小计（增值税前）</span><span class="result-value" id="subtotal">—</span></div>
+<div class="result-item"><span class="result-label">增值税金额</span><span class="result-value" id="taxAmount">—</span></div>
+<div class="result-highlight"><span class="result-label">燃气账单总额</span><span class="result-value" id="totalBill">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>这代表什么？</strong> 用量费用是根据您的消耗量乘以单位费率计算的。基础费用是固定日费用乘以计费周期天数。小计是这两项的合计，增值税金额是按照指定的增值税率应用于小计，最终总额包括所有费用和税款。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 打印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什么是燃气账单计算器？</h2><p>燃气账单计算器是一个便捷的工具，可帮助您准确计算每月或每年的燃气费用。通过输入实际燃气用量、当地单位费率和基础费用，您可以迅速了解应支付的总费用，包括增值税。</p><h2>如何使用燃气账单计算器？</h2><p>使用步骤简单明了：首先输入您的燃气消耗量（单位为kWh），然后输入您所在地区的每kWh费率。接着填入每日的基础费用（固定费用），输入计费周期的天数，最后输入适用的增值税率百分比。点击计算按钮，即可获得详细的费用分解。</p><h2>燃气费用包含哪些部分？</h2><p>燃气账单通常包括三个主要部分：用量费用（根据实际消耗计算）、基础费用（固定日费用）和增值税。用量费用由消耗量乘以单位费率得出，基础费用由每日固定费用乘以计费天数得出。这两部分的合计为增值税前的小计，增值税最终应用于小计。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>如何降低燃气账单？</h2><p>降低燃气账单的有效方法包括：改善家庭隔热以减少供暖需求、定期维护燃气设备确保高效运行、在不需要时关闭供暖、使用可编程恒温器、修复任何燃气泄漏，以及比较不同供应商的费率以获得最佳交易。即使在冬季，这些措施也能显著降低消耗量和费用。</p><h2>增值税如何计算？</h2><p>增值税是在燃气账单小计（用量费用加基础费用）的基础上计算的。计算方法为：小计乘以增值税率百分比。例如，如果小计为£100，增值税率为20%，则增值税金额为£20，最终账单为£120。不同国家和地区的增值税率可能不同。</p><h2>为什么要使用燃气账单计算器？</h2><p>使用燃气账单计算器可以帮助您进行预算规划、验证账单的准确性、比较不同费率方案，以及了解各项费用的具体构成。这个工具特别有用于评估供应商变更的潜在节省或规划季节性用量变化的影响。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸阅读</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常见问题</h2><div class="faq-item"><div class="faq-q">燃气账单计算器的计算结果准确吗？</div><div class="faq-a">是的，只要您输入的数据准确，计算器会根据您提供的信息准确计算燃气账单。建议使用最近的账单或您的供应商提供的官方费率来获得最准确的结果。</div></div>
+  <div class="faq-item"><div class="faq-q">计费周期通常是多少天？</div><div class="faq-a">计费周期通常为28、29、30或31天，取决于您的供应商和账单周期安排。大多数供应商使用标准的每月账单周期。请查看您的账单来确认具体周期。</div></div>
+  <div class="faq-item"><div class="faq-q">基础费用和用量费用有什么区别？</div><div class="faq-a">用量费用是根据您实际消耗的燃气量计算的，会随着使用量变化。基础费用（也称为固定费用或站点费用）是每天的固定金额，与消耗量无关，用于维护燃气供应网络。</div></div>
+  <div class="faq-item"><div class="faq-q">我如何找到我的燃气单位费率？</div><div class="faq-a">您可以在最近的燃气账单上找到单位费率，通常以每kWh或每立方米的价格表示。您也可以登录供应商的在线账户或致电客服团队获取此信息。</div></div>
+  <div class="faq-item"><div class="faq-q">增值税率在所有地区都相同吗？</div><div class="faq-a">不同，增值税率因国家和地区而异。英国的标准增值税率为20%，但某些能源供应可能有不同的税率。请查看您所在地区的具体税率，或在您的账单上查找。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/zh-CN/compound-interest.html">复利计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/roi-calculator.html">投资回报率 (ROI) 计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/risk-reward.html">风险收益比计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/position-size.html">头寸规模计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stop-loss.html">止损计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dividend-yield.html">股息收益率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/pe-ratio.html">市盈率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dca-calculator.html">定期定额投资计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/cagr.html">复合年增长率(CAGR)计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/margin-calculator.html">保证金计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stock-gain-loss.html">股票盈亏计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/break-even.html">损益平衡点计算器</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/gas-bill.html" class="lang-btn">English</a>
+    <a href="/tools/gas-bill.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/gas-bill.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/gas-bill.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/gas-bill.html" class="lang-btn">Français</a>
+    <a href="/tools/es/gas-bill.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/gas-bill.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/gas-bill.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/gas-bill.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/gas-bill.html" class="lang-btn active">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相关工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const gasUsage = parseFloat(document.getElementById('gasUsage').value);
+  const ratePerUnit = parseFloat(document.getElementById('ratePerUnit').value);
+  const standingCharge = parseFloat(document.getElementById('standingCharge').value);
+  const billingDays = parseFloat(document.getElementById('billingDays').value);
+  const taxRate = parseFloat(document.getElementById('taxRate').value);
+
+  if (isNaN(gasUsage) || isNaN(ratePerUnit) || isNaN(standingCharge) || isNaN(billingDays) || isNaN(taxRate)) {
+    alert('Please enter valid numbers in all fields');
+    return;
+  }
+
+  if (gasUsage < 0 || ratePerUnit < 0 || standingCharge < 0 || billingDays < 0 || taxRate < 0) {
+    alert('Please enter positive values only');
+    return;
+  }
+
+  const usageCost = gasUsage * ratePerUnit;
+  const standingCost = standingCharge * billingDays;
+  const subtotal = usageCost + standingCost;
+  const taxAmount = subtotal * (taxRate / 100);
+  const totalBill = subtotal + taxAmount;
+
+  document.getElementById('usageCost').textContent = '£' + usageCost.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('standingCost').textContent = '£' + standingCost.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('subtotal').textContent = '£' + subtotal.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('taxAmount').textContent = '£' + taxAmount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('totalBill').textContent = '£' + totalBill.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已复制！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-CN|gas-bill|2026-07-09 -->

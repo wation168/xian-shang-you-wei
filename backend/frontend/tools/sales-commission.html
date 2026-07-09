@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>銷售佣金計算機 - 多階層結構快速計算</title>
+<meta name="description" content="輕鬆計算分層銷售佣金。支持多個佣金級別和上限設定，適合銷售團隊和管理者快速估算獎金。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/sales-commission.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/sales-commission.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/sales-commission.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/sales-commission.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/sales-commission.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/sales-commission.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/sales-commission.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/sales-commission.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/sales-commission.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/sales-commission.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/sales-commission.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/sales-commission.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "銷售佣金計算機", "url": "https://softglow-ai.com/tools/sales-commission.html", "description": "輕鬆計算分層銷售佣金。支持多個佣金級別和上限設定，適合銷售團隊和管理者快速估算獎金。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "如果銷售額沒有達到第二階層上限怎麼辦？", "acceptedAnswer": {"@type": "Answer", "text": "系統會自動計算已達到的階層佣金。例如銷售額為30,000元，只有不超過第一階層上限的部分按第一階層率計算，超出部分按第二階層率計算，第三階層佣金為0。"}}, {"@type": "Question", "name": "分層佣金與單一佣金率有什麼區別？", "acceptedAnswer": {"@type": "Answer", "text": "分層佣金根據銷售額度分段計算，不同段位適用不同佣金率，能更好地激勵高績效。單一佣金率對所有銷售額使用相同比例，結構較簡單但激勵效果可能較弱。"}}, {"@type": "Question", "name": "有效佣金率為什麼會變化？", "acceptedAnswer": {"@type": "Answer", "text": "有效佣金率取決於銷售額在各階層的分布。銷售額越高，越多部分適用高佣金率，因此有效佣金率會提高。相反，若銷售額較低，大部分額度按低佣金率計算，有效佣金率會較低。"}}, {"@type": "Question", "name": "可以設定超過三個階層嗎？", "acceptedAnswer": {"@type": "Answer", "text": "此計算機設計了三個階層。若需要更多階層，可多次使用計算機調整參數，或將第三階層作為包含所有超額部分的階層。"}}, {"@type": "Question", "name": "如何確保佣金結構對員工是公平的？", "acceptedAnswer": {"@type": "Answer", "text": "建議參考行業標準和員工的績效數據，確保佣金結構既能激勵銷售增長，又不會過度支付。定期審視實際銷售分布和佣金支出，根據業務發展調整階層設定。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 銷售佣金計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>銷售佣金計算機</h1>
+    <p class="calc-subtitle">即時計算多階層佣金結構的銷售獎金</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="salesAmount">總銷售額</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="salesAmount" placeholder="50000"  step="0.01"></div>
+</div>
+  <small class="input-help">輸入該期間的總銷售金額</small>
+<div class="input-group">
+  <label for="tier1Rate">第一階層佣金率 (%)</label>
+  <div class="input-row"><input type="number" id="tier1Rate" placeholder="5"  value="5" step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">設定第一階層的佣金百分比</small>
+<div class="input-group">
+  <label for="tier1Limit">第一階層上限 ($)</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="tier1Limit" placeholder="20000"  value="20000" step="0.01"></div>
+</div>
+  <small class="input-help">設定第一階層的銷售上限金額</small>
+<div class="input-group">
+  <label for="tier2Rate">第二階層佣金率 (%)</label>
+  <div class="input-row"><input type="number" id="tier2Rate" placeholder="7"  value="7" step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">設定第二階層的佣金百分比</small>
+<div class="input-group">
+  <label for="tier2Limit">第二階層上限 ($)</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="tier2Limit" placeholder="50000"  value="50000" step="0.01"></div>
+</div>
+  <small class="input-help">設定第二階層的銷售上限金額</small>
+<div class="input-group">
+  <label for="tier3Rate">第三階層佣金率 (%)</label>
+  <div class="input-row"><input type="number" id="tier3Rate" placeholder="10"  value="10" step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">設定第三階層的佣金百分比（超過上限部分適用）</small></div>
+    <button class="btn-calc" onclick="calculate()">計算</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">第一階層佣金</span><span class="result-value" id="tier1Commission">—</span></div>
+<div class="result-item"><span class="result-label">第二階層佣金</span><span class="result-value" id="tier2Commission">—</span></div>
+<div class="result-item"><span class="result-label">第三階層佣金</span><span class="result-value" id="tier3Commission">—</span></div>
+<div class="result-highlight"><span class="result-label">總佣金</span><span class="result-value" id="totalCommission">—</span></div>
+<div class="result-item"><span class="result-label">有效佣金率</span><span class="result-value" id="effectiveRate">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> 計算結果顯示各階層的佣金分配情況及總佣金額。有效佣金率是實際佣金與總銷售額的比例，幫助您了解平均佣金水準。根據銷售額在各階層的分布，系統自動計算相應的獎金。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 列印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什麼是分層銷售佣金？</h2><p>分層銷售佣金是根據銷售額度不同而採用不同佣金率的獎勵機制。銷售人員在較低的銷售額段獲得較低的佣金率，隨著銷售額增加，更高額度的銷售部分會按照更高的佣金率計算。這種結構能夠有效激勵銷售團隊提高業績。</p><h2>如何使用銷售佣金計算機</h2><p>首先輸入總銷售額和各階層的佣金率及上限。系統會根據設定自動計算每個階層內的銷售額度，然後按對應的佣金率計算獎金。例如，若第一階層上限為20,000元，佣金率為5%，銷售額超過20,000元的部分則進入第二階層，按更高的佣金率計算。</p><h2>階層佣金的計算邏輯</h2><p>系統按順序計算各階層佣金：首先計算第一階層（0至上限）的佣金，然後計算第二階層（上一個上限至本階層上限）的佣金，最後計算超出所有上限部分的第三階層佣金。每個階層只計算該階層範圍內的銷售額乘以對應的佣金率。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>有效佣金率的意義</h2><p>有效佣金率等於總佣金除以總銷售額，表示實際獲得的平均佣金百分比。這個指標可以幫助您評估佣金結構是否合理，以及員工的實際收益情況。較高的銷售額通常會提高有效佣金率，因為更多銷售額適用於更高的佣金率。</p><h2>優化佣金結構的建議</h2><p>根據業務目標調整各階層的上限和佣金率。若想激勵快速增長，可降低第一階層上限並提高第二、三階層佣金率；若想穩定績效，可設置相對平穩的佣金結構。定期檢視員工的銷售數據和佣金分布，以確保激勵機制有效達成目標。</p><h2>常見應用場景</h2><p>此計算機適用於零售、房地產、保險、軟體銷售等多個行業。無論是管理者制定薪酬政策，還是銷售人員預估收入，都可以利用此工具快速得到精確的佣金數據。企業也可根據市場狀況靈活調整佣金結構，以保持競爭力並激勵團隊表現。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">如果銷售額沒有達到第二階層上限怎麼辦？</div><div class="faq-a">系統會自動計算已達到的階層佣金。例如銷售額為30,000元，只有不超過第一階層上限的部分按第一階層率計算，超出部分按第二階層率計算，第三階層佣金為0。</div></div>
+  <div class="faq-item"><div class="faq-q">分層佣金與單一佣金率有什麼區別？</div><div class="faq-a">分層佣金根據銷售額度分段計算，不同段位適用不同佣金率，能更好地激勵高績效。單一佣金率對所有銷售額使用相同比例，結構較簡單但激勵效果可能較弱。</div></div>
+  <div class="faq-item"><div class="faq-q">有效佣金率為什麼會變化？</div><div class="faq-a">有效佣金率取決於銷售額在各階層的分布。銷售額越高，越多部分適用高佣金率，因此有效佣金率會提高。相反，若銷售額較低，大部分額度按低佣金率計算，有效佣金率會較低。</div></div>
+  <div class="faq-item"><div class="faq-q">可以設定超過三個階層嗎？</div><div class="faq-a">此計算機設計了三個階層。若需要更多階層，可多次使用計算機調整參數，或將第三階層作為包含所有超額部分的階層。</div></div>
+  <div class="faq-item"><div class="faq-q">如何確保佣金結構對員工是公平的？</div><div class="faq-a">建議參考行業標準和員工的績效數據，確保佣金結構既能激勵銷售增長，又不會過度支付。定期審視實際銷售分布和佣金支出，根據業務發展調整階層設定。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/roi-calculator.html">ROI 計算機</a>
+      <a class="tool-pill" href="/tools/risk-reward.html">風險報酬計算機</a>
+      <a class="tool-pill" href="/tools/position-size.html">部位規模計算器</a>
+      <a class="tool-pill" href="/tools/stop-loss.html">停損計算機</a>
+      <a class="tool-pill" href="/tools/dividend-yield.html">股息收益率計算機</a>
+      <a class="tool-pill" href="/tools/pe-ratio.html">本益比計算機</a>
+      <a class="tool-pill" href="/tools/dca-calculator.html">定期定額投資計算機</a>
+      <a class="tool-pill" href="/tools/cagr.html">年複合成長率計算器</a>
+      <a class="tool-pill" href="/tools/margin-calculator.html">保證金計算器</a>
+      <a class="tool-pill" href="/tools/stock-gain-loss.html">股票損益計算機</a>
+      <a class="tool-pill" href="/tools/break-even.html">損益平衡點計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/sales-commission.html" class="lang-btn">English</a>
+    <a href="/tools/sales-commission.html" class="lang-btn active">繁體中文</a>
+    <a href="/tools/ja/sales-commission.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/sales-commission.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/sales-commission.html" class="lang-btn">Français</a>
+    <a href="/tools/es/sales-commission.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/sales-commission.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/sales-commission.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/sales-commission.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/sales-commission.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const salesAmount = parseFloat(document.getElementById('salesAmount').value);
+  const tier1Rate = parseFloat(document.getElementById('tier1Rate').value);
+  const tier1Limit = parseFloat(document.getElementById('tier1Limit').value);
+  const tier2Rate = parseFloat(document.getElementById('tier2Rate').value);
+  const tier2Limit = parseFloat(document.getElementById('tier2Limit').value);
+  const tier3Rate = parseFloat(document.getElementById('tier3Rate').value);
+  
+  if (!salesAmount || salesAmount < 0 || !tier1Rate || !tier1Limit || !tier2Rate || !tier2Limit || !tier3Rate) {
+    alert('Please enter all required values');
+    return;
+  }
+  
+  let tier1Commission = 0;
+  let tier2Commission = 0;
+  let tier3Commission = 0;
+  
+  if (salesAmount > 0) {
+    const tier1Amount = Math.min(salesAmount, tier1Limit);
+    tier1Commission = (tier1Amount * tier1Rate) / 100;
+  }
+  
+  if (salesAmount > tier1Limit) {
+    const tier2Amount = Math.min(salesAmount - tier1Limit, tier2Limit - tier1Limit);
+    tier2Commission = (tier2Amount * tier2Rate) / 100;
+  }
+  
+  if (salesAmount > tier2Limit) {
+    const tier3Amount = salesAmount - tier2Limit;
+    tier3Commission = (tier3Amount * tier3Rate) / 100;
+  }
+  
+  const totalCommission = tier1Commission + tier2Commission + tier3Commission;
+  const effectiveRate = (totalCommission / salesAmount) * 100;
+  
+  document.getElementById('tier1Commission').textContent = '$' + tier1Commission.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('tier2Commission').textContent = '$' + tier2Commission.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('tier3Commission').textContent = '$' + tier3Commission.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('totalCommission').textContent = '$' + totalCommission.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('effectiveRate').textContent = effectiveRate.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '%';
+  
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-TW|sales-commission|2026-07-09 -->

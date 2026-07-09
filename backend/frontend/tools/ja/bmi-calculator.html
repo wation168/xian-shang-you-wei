@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BMI計算機 - 体格指数を無料で計算</title>
+<meta name="description" content="BMI計算機を使用して、体重と身長から体格指数を計算し、健康状態のカテゴリーを確認できます。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/bmi-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/bmi-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/bmi-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/bmi-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/bmi-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/bmi-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/bmi-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/bmi-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/bmi-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/bmi-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/bmi-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/bmi-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "BMI計算機", "url": "https://softglow-ai.com/tools/ja/bmi-calculator.html", "description": "BMI計算機を使用して、体重と身長から体格指数を計算し、健康状態のカテゴリーを確認できます。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "BMIはどのように計算されますか？", "acceptedAnswer": {"@type": "Answer", "text": "BMIは体重（kg）を身長（m）の2乗で割った値です。計算式：BMI = 体重 ÷ (身長 × 身長)です。"}}, {"@type": "Question", "name": "BMIが高い場合はどうすればよいですか？", "acceptedAnswer": {"@type": "Answer", "text": "BMIが高い場合は、運動習慣の改善と栄養バランスの取れた食事を心がけることが重要です。医師の指導を受けることをお勧めします。"}}, {"@type": "Question", "name": "BMIが低い場合の対処法は？", "acceptedAnswer": {"@type": "Answer", "text": "BMIが低い場合は、栄養不良の可能性があります。医師に相談して、適切な栄養摂取計画を立てることが大切です。"}}, {"@type": "Question", "name": "子どもにもBMI計算機を使用できますか？", "acceptedAnswer": {"@type": "Answer", "text": "成人用のBMI基準は子どもには適用されません。子どもの場合は、年齢や性別に応じた専用の評価基準を使用する必要があります。"}}, {"@type": "Question", "name": "BMIの計算に影響を与える要因は何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "筋肉量、骨密度、体脂肪率などがBMIの解釈に影響を与えます。BMIはあくまで参考値であり、包括的な健康評価には医師の診察が必要です。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > BMI計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>BMI計算機</h1>
+    <p class="calc-subtitle">あなたの体格指数を即座に計算し、健康カテゴリーを確認してください</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="weight">体重</label>
+  <div class="input-row"><input type="number" id="weight" placeholder="70"  step="0.1"><span class="input-suffix">kg</span></div>
+</div>
+  <small class="input-help">体重をキログラム（kg）で入力してください</small>
+<div class="input-group">
+  <label for="height">身長</label>
+  <div class="input-row"><input type="number" id="height" placeholder="1.75"  step="0.01"><span class="input-suffix">m</span></div>
+</div>
+  <small class="input-help">身長をメートル（m）で入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">あなたのBMI</span><span class="result-value" id="bmiValue">—</span></div>
+<div class="result-highlight"><span class="result-label">カテゴリー</span><span class="result-value" id="bmiCategory">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> BMIは体重（kg）を身長（m）の2乗で割った値です。結果のカテゴリーにより、あなたの健康状態が「低体重」「普通体重」「過体重」「肥満」のいずれかに分類されます。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>BMI計算機について</h2><p>BMI（体格指数）は、体重と身長の関係から健康状態を評価する国際的な指標です。世界保健機関（WHO）によって定められた基準に基づいており、多くの医療機関で使用されています。</p><h2>BMIの計算方法</h2><p>BMIは以下の計算式で求められます：BMI = 体重（kg） ÷ 身長（m）²。例えば、体重70kg、身長1.75mの場合、BMIは70 ÷ (1.75 × 1.75) = 22.86となります。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>BMIのカテゴリー分類</h2><p>国際的な基準では、BMIが18.5未満は「低体重」、18.5～24.9は「普通体重」、25.0～29.9は「過体重」、30.0以上は「肥満」に分類されます。ただし、日本では25.0以上を肥満としている場合があります。</p><h2>BMIの限界</h2><p>BMIはあくまで体重と身長の関係を示す指標であり、筋肉量や骨密度などは考慮されません。アスリートや高齢者の場合、BMIだけでは正確な健康状態を判断できないことがあります。</p><h2>健康管理のポイント</h2><p>健康的な体重を維持するためには、バランスの取れた食事と適度な運動が重要です。BMIが標準範囲外の場合は、医師や栄養士に相談することをお勧めします。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">BMIはどのように計算されますか？</div><div class="faq-a">BMIは体重（kg）を身長（m）の2乗で割った値です。計算式：BMI = 体重 ÷ (身長 × 身長)です。</div></div>
+  <div class="faq-item"><div class="faq-q">BMIが高い場合はどうすればよいですか？</div><div class="faq-a">BMIが高い場合は、運動習慣の改善と栄養バランスの取れた食事を心がけることが重要です。医師の指導を受けることをお勧めします。</div></div>
+  <div class="faq-item"><div class="faq-q">BMIが低い場合の対処法は？</div><div class="faq-a">BMIが低い場合は、栄養不良の可能性があります。医師に相談して、適切な栄養摂取計画を立てることが大切です。</div></div>
+  <div class="faq-item"><div class="faq-q">子どもにもBMI計算機を使用できますか？</div><div class="faq-a">成人用のBMI基準は子どもには適用されません。子どもの場合は、年齢や性別に応じた専用の評価基準を使用する必要があります。</div></div>
+  <div class="faq-item"><div class="faq-q">BMIの計算に影響を与える要因は何ですか？</div><div class="faq-a">筋肉量、骨密度、体脂肪率などがBMIの解釈に影響を与えます。BMIはあくまで参考値であり、包括的な健康評価には医師の診察が必要です。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/bmr-calculator.html">Bmr Calculator</a>
+      <a class="tool-pill" href="/tools/ja/body-fat-calculator.html">Body Fat Calculator</a>
+      <a class="tool-pill" href="/tools/ja/calorie-calculator.html">Calorie Calculator</a>
+      <a class="tool-pill" href="/tools/ja/macro-calculator.html">Macro Calculator</a>
+      <a class="tool-pill" href="/tools/ja/protein-intake.html">Protein Intake</a>
+      <a class="tool-pill" href="/tools/ja/heart-rate-zone.html">Heart Rate Zone</a>
+      <a class="tool-pill" href="/tools/ja/blood-pressure-chart.html">血圧チェッカー</a>
+      <a class="tool-pill" href="/tools/ja/baby-growth.html">赤ちゃん成長パーセンタイル計算機</a>
+      <a class="tool-pill" href="/tools/ja/bac-calculator.html">BAC計算機</a>
+      <a class="tool-pill" href="/tools/ja/caffeine-calculator.html">Caffeine Calculator</a>
+      <a class="tool-pill" href="/tools/ja/hydration-calculator.html">Hydration Calculator</a>
+      <a class="tool-pill" href="/tools/ja/sleep-calculator.html">Sleep Calculator</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/bmi-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/bmi-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/bmi-calculator.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/bmi-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/bmi-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/bmi-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/bmi-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/bmi-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/bmi-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/bmi-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const weightInput = document.getElementById('weight');
+  const heightInput = document.getElementById('height');
+  const bmiValueResult = document.getElementById('bmiValue');
+  const bmiCategoryResult = document.getElementById('bmiCategory');
+  const resultsDiv = document.getElementById('results');
+
+  if (!weightInput.value || !heightInput.value) {
+    alert('Please enter both weight and height values');
+    return;
+  }
+
+  const weight = parseFloat(weightInput.value);
+  const height = parseFloat(heightInput.value);
+
+  if (weight <= 0 || height <= 0) {
+    alert('Weight and height must be greater than zero');
+    return;
+  }
+
+  if (weight > 500) {
+    alert('Please enter a realistic weight value');
+    return;
+  }
+
+  if (height > 3) {
+    alert('Please enter height in meters (e.g., 1.75)');
+    return;
+  }
+
+  const bmi = weight / (height * height);
+  let category = '';
+
+  if (bmi < 18.5) {
+    category = 'Underweight';
+  } else if (bmi >= 18.5 && bmi < 25) {
+    category = 'Normal Weight';
+  } else if (bmi >= 25 && bmi < 30) {
+    category = 'Overweight';
+  } else {
+    category = 'Obese';
+  }
+
+  bmiValueResult.textContent = bmi.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  bmiCategoryResult.textContent = category;
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|bmi-calculator|2026-07-09 -->

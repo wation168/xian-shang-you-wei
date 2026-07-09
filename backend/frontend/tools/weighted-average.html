@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>加權平均計算機 - 快速計算加權平均</title>
+<meta name="description" content="免費加權平均計算機，幫助您計算成績、投資組合和統計數據的加權平均值。輸入數值和權重即可獲得結果。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/weighted-average.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/weighted-average.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/weighted-average.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/weighted-average.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/weighted-average.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/weighted-average.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/weighted-average.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/weighted-average.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/weighted-average.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/weighted-average.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/weighted-average.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/weighted-average.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "加權平均計算機", "url": "https://softglow-ai.com/tools/weighted-average.html", "description": "免費加權平均計算機，幫助您計算成績、投資組合和統計數據的加權平均值。輸入數值和權重即可獲得結果。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "加權平均和簡單平均有什麼區別？", "acceptedAnswer": {"@type": "Answer", "text": "簡單平均將所有數值同等對待，而加權平均根據每個數值的重要性（權重）進行調整。例如，簡單平均：(85+90)÷2=87.5；加權平均（40%和60%）：(85×0.4+90×0.6)÷1=88。"}}, {"@type": "Question", "name": "權重應該如何設定？", "acceptedAnswer": {"@type": "Answer", "text": "權重取決於您的具體情況。在教育中，教師決定不同評估的權重。在投資中，權重通常是投資金額佔總投資的比例。權重應反映每個項目的實際重要性。"}}, {"@type": "Question", "name": "如果權重總和不是100會怎樣？", "acceptedAnswer": {"@type": "Answer", "text": "計算機仍會計算結果。加權平均公式會自動用權重總和進行除法。例如，如果權重總和為80而不是100，結果將相應調整。通常權重應總和為100%或1。"}}, {"@type": "Question", "name": "我可以有負數值或權重嗎？", "acceptedAnswer": {"@type": "Answer", "text": "可以。負數值在某些情況下是有效的，例如表示損失或虧損。權重通常為正數，但在某些統計應用中也可能為負。計算機將根據您輸入的值進行計算。"}}, {"@type": "Question", "name": "如何使用此計算機計算我的課程成績？", "acceptedAnswer": {"@type": "Answer", "text": "輸入每次考試或作業的成績作為數值，輸入該評估的權重百分比。例如，平時測驗85分（權重30%），期中考試90分（權重30%），期末考試88分（權重40%）。計算機將給出加權平均成績。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 加權平均計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>加權平均計算機</h1>
+    <p class="calc-subtitle">計算成績、投資和統計分析的精確加權平均值</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="valueInput">數值</label>
+  <div class="input-row"><input type="number" id="valueInput" placeholder="輸入數值"  step="0.01"></div>
+</div>
+  <small class="input-help">輸入要計算的數值（如成績分數或投資金額）</small>
+<div class="input-group">
+  <label for="weightInput">權重</label>
+  <div class="input-row"><input type="number" id="weightInput" placeholder="輸入權重"  step="0.01"></div>
+</div>
+  <small class="input-help">輸入該數值的權重比例（如百分比或係數）</small></div>
+    <button class="btn-calc" onclick="calculate()">計算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">加權平均</span><span class="result-value" id="weightedAvgResult">—</span></div>
+<div class="result-item"><span class="result-label">總權重</span><span class="result-value" id="totalWeightResult">—</span></div>
+<div class="result-item"><span class="result-label">數值×權重之和</span><span class="result-value" id="sumProductResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> 加權平均是根據各項數值的重要性（權重）計算出的平均值。總權重應為100或接近1，數值×權重之和除以總權重即為加權平均。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 列印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什麼是加權平均？</h2><p>加權平均是一種統計方法，用於計算當不同數據點具有不同重要性時的平均值。與簡單平均不同，加權平均會根據每個數值的權重進行調整，權重越高的數值對最終結果的影響越大。</p><h2>加權平均的計算公式</h2><p>加權平均 = (數值1×權重1 + 數值2×權重2 + ... + 數值n×權重n) ÷ (權重1 + 權重2 + ... + 權重n)。例如，如果您的考試成績為85分（權重40%）和90分（權重60%），加權平均 = (85×0.4 + 90×0.6) ÷ (0.4 + 0.6) = 88分。</p><h2>在教育中的應用</h2><p>學校經常使用加權平均來計算學生成績。平時測驗可能佔30%，期中考試佔30%，期末考試佔40%。透過加權平均，您可以了解不同評估方式對最終成績的貢獻程度，幫助學生和教師更準確地評估學習成果。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>在投資中的應用</h2><p>投資組合的回報率通常使用加權平均計算。如果您投資了50,000元在股票（年回報率8%）和30,000元在債券（年回報率4%），加權平均回報率 = (50,000×8% + 30,000×4%) ÷ 80,000 = 6.5%。這幫助投資者了解整體投資表現。</p><h2>在統計分析中的應用</h2><p>加權平均廣泛應用於各種統計分析場景。例如，不同地區的人口統計數據可能需要根據人口數量進行加權，或者在進行調查問卷分析時，可能需要根據樣本大小進行加權平均。</p><h2>使用技巧與注意事項</h2><p>使用加權平均計算機時，確保所有權重的總和為100（百分比形式）或1（小數形式）。如果權重總和不等於這些值，結果仍然有效，但代表不同的含義。重要的是要理解您的數據和權重的實際含義，確保它們準確反映了您想要測量的內容。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">加權平均和簡單平均有什麼區別？</div><div class="faq-a">簡單平均將所有數值同等對待，而加權平均根據每個數值的重要性（權重）進行調整。例如，簡單平均：(85+90)÷2=87.5；加權平均（40%和60%）：(85×0.4+90×0.6)÷1=88。</div></div>
+  <div class="faq-item"><div class="faq-q">權重應該如何設定？</div><div class="faq-a">權重取決於您的具體情況。在教育中，教師決定不同評估的權重。在投資中，權重通常是投資金額佔總投資的比例。權重應反映每個項目的實際重要性。</div></div>
+  <div class="faq-item"><div class="faq-q">如果權重總和不是100會怎樣？</div><div class="faq-a">計算機仍會計算結果。加權平均公式會自動用權重總和進行除法。例如，如果權重總和為80而不是100，結果將相應調整。通常權重應總和為100%或1。</div></div>
+  <div class="faq-item"><div class="faq-q">我可以有負數值或權重嗎？</div><div class="faq-a">可以。負數值在某些情況下是有效的，例如表示損失或虧損。權重通常為正數，但在某些統計應用中也可能為負。計算機將根據您輸入的值進行計算。</div></div>
+  <div class="faq-item"><div class="faq-q">如何使用此計算機計算我的課程成績？</div><div class="faq-a">輸入每次考試或作業的成績作為數值，輸入該評估的權重百分比。例如，平時測驗85分（權重30%），期中考試90分（權重30%），期末考試88分（權重40%）。計算機將給出加權平均成績。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/roi-calculator.html">ROI 計算機</a>
+      <a class="tool-pill" href="/tools/risk-reward.html">風險報酬計算機</a>
+      <a class="tool-pill" href="/tools/position-size.html">部位規模計算器</a>
+      <a class="tool-pill" href="/tools/stop-loss.html">停損計算機</a>
+      <a class="tool-pill" href="/tools/dividend-yield.html">股息收益率計算機</a>
+      <a class="tool-pill" href="/tools/pe-ratio.html">本益比計算機</a>
+      <a class="tool-pill" href="/tools/dca-calculator.html">定期定額投資計算機</a>
+      <a class="tool-pill" href="/tools/cagr.html">年複合成長率計算器</a>
+      <a class="tool-pill" href="/tools/margin-calculator.html">保證金計算器</a>
+      <a class="tool-pill" href="/tools/stock-gain-loss.html">股票損益計算機</a>
+      <a class="tool-pill" href="/tools/break-even.html">損益平衡點計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/weighted-average.html" class="lang-btn">English</a>
+    <a href="/tools/weighted-average.html" class="lang-btn active">繁體中文</a>
+    <a href="/tools/ja/weighted-average.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/weighted-average.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/weighted-average.html" class="lang-btn">Français</a>
+    <a href="/tools/es/weighted-average.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/weighted-average.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/weighted-average.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/weighted-average.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/weighted-average.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const valueInput = document.getElementById('valueInput');
+  const weightInput = document.getElementById('weightInput');
+  const weightedAvgResult = document.getElementById('weightedAvgResult');
+  const totalWeightResult = document.getElementById('totalWeightResult');
+  const sumProductResult = document.getElementById('sumProductResult');
+  const resultsDiv = document.getElementById('results');
+
+  const value = parseFloat(valueInput.value);
+  const weight = parseFloat(weightInput.value);
+
+  if (isNaN(value) || isNaN(weight)) {
+    alert('Please enter valid numbers for both value and weight.');
+    return;
+  }
+
+  if (weight <= 0) {
+    alert('Weight must be greater than zero.');
+    return;
+  }
+
+  const sumProduct = value * weight;
+  const totalWeight = weight;
+  const weightedAverage = sumProduct / totalWeight;
+
+  sumProductResult.textContent = sumProduct.toLocaleString('en-US', { maximumFractionDigits: 4, minimumFractionDigits: 2 });
+  totalWeightResult.textContent = totalWeight.toLocaleString('en-US', { maximumFractionDigits: 4, minimumFractionDigits: 2 });
+  weightedAvgResult.textContent = weightedAverage.toLocaleString('en-US', { maximumFractionDigits: 4, minimumFractionDigits: 2 });
+
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-TW|weighted-average|2026-07-09 -->

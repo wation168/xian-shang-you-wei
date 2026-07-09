@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>リスク・リワード計算機 - トレード比率分析</title>
+<meta name="description" content="エントリー価格、損切り価格、目標価格からリスク・リワード比率を自動計算。トレード実行可能性を素早く評価できます。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/risk-reward.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/risk-reward.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/risk-reward.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/risk-reward.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/risk-reward.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/risk-reward.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/risk-reward.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/risk-reward.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/risk-reward.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/risk-reward.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/risk-reward.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/risk-reward.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "リスク・リワード計算機", "url": "https://softglow-ai.com/tools/ja/risk-reward.html", "description": "エントリー価格、損切り価格、目標価格からリスク・リワード比率を自動計算。トレード実行可能性を素早く評価できます。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "リスク・リワード比率の最適な値は何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "一般的には1:2以上が推奨されます。1:3以上はより安全で理想的な比率です。この比率があれば、50%程度の勝率でも長期的には利益を得られます。"}}, {"@type": "Question", "name": "なぜリスク・リワード比率が重要なのですか？", "acceptedAnswer": {"@type": "Answer", "text": "トレードの成功は勝率だけではなく、各トレードの利益・損失のバランスが重要です。良好な比率を維持することで、勝率が低くても全体的に利益を上げることができます。"}}, {"@type": "Question", "name": "この計算機の結果をどう解釈すればよいですか？", "acceptedAnswer": {"@type": "Answer", "text": "R:R比率が1より大きいほど、そのトレードはより魅力的です。リスク額とリワード額を比較して、リワードがリスクを十分に上回っているか確認してください。"}}, {"@type": "Question", "name": "比率が1:1未満の場合、トレードすべきですか？", "acceptedAnswer": {"@type": "Answer", "text": "1:1未満の比率でトレードするには非常に高い勝率が必要です。例えば80%以上の勝率がない限り、避けることが推奨されます。より良い比率の機会を待つ方が賢明です。"}}, {"@type": "Question", "name": "複数のトレード機会がある場合はどうすればよいですか？", "acceptedAnswer": {"@type": "Answer", "text": "すべてのトレード機会をこの計算機で評価し、最もリスク・リワード比率が高いものから優先的に実行してください。統計的に有利なトレードのみを選別することが重要です。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > リスク・リワード計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>リスク・リワード計算機</h1>
+    <p class="calc-subtitle">リスク・リワード比率を計算してトレード実行の可能性を評価します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="entryPrice">エントリー価格</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="entryPrice" placeholder="1.2500"  step="0.01"></div>
+</div>
+  <small class="input-help">ポジションを開く予定の価格を入力してください</small>
+<div class="input-group">
+  <label for="stopPrice">損切り価格</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="stopPrice" placeholder="1.2450"  step="0.01"></div>
+</div>
+  <small class="input-help">損失を制限するための停止価格を入力してください</small>
+<div class="input-group">
+  <label for="targetPrice">目標価格</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="targetPrice" placeholder="1.2600"  step="0.01"></div>
+</div>
+  <small class="input-help">利益を確定する目標価格を入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">リスク・リワード比率（R:R）</span><span class="result-value" id="riskRewardRatio">—</span></div>
+<div class="result-item"><span class="result-label">リスク額</span><span class="result-value" id="riskAmount">—</span></div>
+<div class="result-item"><span class="result-label">リワード額</span><span class="result-value" id="rewardAmount">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> リスク・リワード比率は、1単位のリスクに対してどれだけのリターンが期待できるかを示します。比率が高いほど（例：1:3）、トレードの実行可能性が高くなります。リスク額とリワード額は、設定した価格に基づいて計算されたポイント数を通貨で表したものです。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>リスク・リワード比率とは</h2><p>リスク・リワード比率（R:R）は、トレーディングにおいて最も重要な指標の一つです。これは、1単位のリスクに対してどれだけの利益の可能性があるかを示します。例えば、1:3の比率は、£100のリスクに対して£300の利益が期待できることを意味します。</p><h2>比率の計算方法</h2><p>リスク・リワード比率は以下のように計算されます：リスク額はエントリー価格と損切り価格の差、リワード額はエントリー価格と目標価格の差です。その後、リワード額をリスク額で割ることで比率を得られます。例えば、エントリー1.2500、損切り1.2450、目標1.2600の場合、リスクは50ポイント、リワードは100ポイントとなり、比率は1:2になります。</p><h2>良好な比率の目安</h2><p>一般的に、1:2以上のリスク・リワード比率が望ましいとされています。これにより、勝率が50%程度であっても長期的には利益を得られます。1:3以上の比率はより優れており、より安全なトレード戦略を可能にします。逆に1:1以下の比率は、成功するためにはより高い勝率が必要なため、避けることが推奨されます。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>トレード計画での活用</h2><p>トレードを実行する前に、必ずリスク・リワード比率を確認してください。この計算機を使用することで、エントリー前に取引の実行可能性を迅速に評価できます。複数のトレード機会を比較する際にも便利です。</p><h2>リスク管理の重要性</h2><p>リスク・リワード比率は単なる数字ではなく、リスク管理の基本です。良好な比率を維持することで、損失の期間でも総資本を保護できます。常に損切りレベルを設定し、目標利益を明確にすることが重要です。</p><h2>実践的な例</h2><p>例えば、£10,000の資金で1トレードあたり£100のリスクを取る場合、1:3の比率があれば£300の利益目標となります。月間10トレードで6勝4敗の場合、利益は（6×£300）-（4×£100）=£1,400となり、着実に資金が増加します。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">リスク・リワード比率の最適な値は何ですか？</div><div class="faq-a">一般的には1:2以上が推奨されます。1:3以上はより安全で理想的な比率です。この比率があれば、50%程度の勝率でも長期的には利益を得られます。</div></div>
+  <div class="faq-item"><div class="faq-q">なぜリスク・リワード比率が重要なのですか？</div><div class="faq-a">トレードの成功は勝率だけではなく、各トレードの利益・損失のバランスが重要です。良好な比率を維持することで、勝率が低くても全体的に利益を上げることができます。</div></div>
+  <div class="faq-item"><div class="faq-q">この計算機の結果をどう解釈すればよいですか？</div><div class="faq-a">R:R比率が1より大きいほど、そのトレードはより魅力的です。リスク額とリワード額を比較して、リワードがリスクを十分に上回っているか確認してください。</div></div>
+  <div class="faq-item"><div class="faq-q">比率が1:1未満の場合、トレードすべきですか？</div><div class="faq-a">1:1未満の比率でトレードするには非常に高い勝率が必要です。例えば80%以上の勝率がない限り、避けることが推奨されます。より良い比率の機会を待つ方が賢明です。</div></div>
+  <div class="faq-item"><div class="faq-q">複数のトレード機会がある場合はどうすればよいですか？</div><div class="faq-a">すべてのトレード機会をこの計算機で評価し、最もリスク・リワード比率が高いものから優先的に実行してください。統計的に有利なトレードのみを選別することが重要です。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">Roi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">ポジションサイズ計算機</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">P/Eレシオ計算機</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">証拠金計算機</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a>
+      <a class="tool-pill" href="/tools/ja/rule-of-72.html">Rule Of 72</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/risk-reward.html" class="lang-btn">English</a>
+    <a href="/tools/risk-reward.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/risk-reward.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/risk-reward.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/risk-reward.html" class="lang-btn">Français</a>
+    <a href="/tools/es/risk-reward.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/risk-reward.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/risk-reward.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/risk-reward.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/risk-reward.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const entryPrice = parseFloat(document.getElementById('entryPrice').value);
+  const stopPrice = parseFloat(document.getElementById('stopPrice').value);
+  const targetPrice = parseFloat(document.getElementById('targetPrice').value);
+
+  if (!entryPrice || !stopPrice || !targetPrice) {
+    alert('Please fill in all fields with valid numbers');
+    return;
+  }
+
+  if (entryPrice === stopPrice) {
+    alert('Entry price and stop loss price cannot be the same');
+    return;
+  }
+
+  if (entryPrice === targetPrice) {
+    alert('Entry price and target price cannot be the same');
+    return;
+  }
+
+  const riskAmount = Math.abs(entryPrice - stopPrice);
+  const rewardAmount = Math.abs(targetPrice - entryPrice);
+
+  if (riskAmount === 0) {
+    alert('Risk amount cannot be zero');
+    return;
+  }
+
+  const riskRewardRatio = rewardAmount / riskAmount;
+
+  document.getElementById('riskRewardRatio').textContent = riskRewardRatio.toFixed(2);
+  document.getElementById('riskAmount').textContent = '£' + riskAmount.toFixed(4);
+  document.getElementById('rewardAmount').textContent = '£' + rewardAmount.toFixed(4);
+
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|risk-reward|2026-07-09 -->

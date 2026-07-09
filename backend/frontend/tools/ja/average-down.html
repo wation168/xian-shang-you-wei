@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>平均買値計算機 - 複数回購入の平均コスト計算</title>
+<meta name="description" content="複数回の株式購入から平均買値を簡単計算。投資戦略の分析に役立つ無料ツールです。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/average-down.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/average-down.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/average-down.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/average-down.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/average-down.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/average-down.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/average-down.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/average-down.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/average-down.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/average-down.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/average-down.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/average-down.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "平均買値計算機", "url": "https://softglow-ai.com/tools/ja/average-down.html", "description": "複数回の株式購入から平均買値を簡単計算。投資戦略の分析に役立つ無料ツールです。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "平均買値とは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "平均買値は、複数回の購入における1株あたりの平均的な購入価格です。全購入額を総株数で割った加重平均値となります。"}}, {"@type": "Question", "name": "第3回購入は入力する必要がありますか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ、第3回購入はオプションです。2回の購入のみの場合は、第3回目の欄を空白のままにしてください。"}}, {"@type": "Question", "name": "ナンピン買いとはどのような戦略ですか？", "acceptedAnswer": {"@type": "Answer", "text": "ナンピン買いは、株価が下がった時に追加で購入する戦略です。これにより平均買値を引き下げることができます。"}}, {"@type": "Question", "name": "このツールで税金や手数料は計算されますか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ、このツールは純粋な平均買値のみを計算します。実際の投資コストには取引手数料や税金が加わります。"}}, {"@type": "Question", "name": "計算結果はどのように活用できますか？", "acceptedAnswer": {"@type": "Answer", "text": "平均買値と現在の株価を比較して含み益・含み損を確認したり、今後の投資判断や損益分岐点の把握に活用できます。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 平均買値計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>平均買値計算機</h1>
+    <p class="calc-subtitle">複数回の株式購入における平均購入価格を計算します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="shares1">第1回購入 - 購入株数</label>
+  <div class="input-row"><input type="number" id="shares1" placeholder="100"  step="0.01"><span class="input-suffix">株</span></div>
+</div>
+  <small class="input-help">最初の購入時に取得した株式の総数を入力</small>
+<div class="input-group">
+  <label for="price1">第1回購入 - 1株あたりの価格</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="price1" placeholder="50.00"  step="0.01"></div>
+</div>
+  <small class="input-help">最初の購入時の1株あたりの購入価格を入力</small>
+<div class="input-group">
+  <label for="shares2">第2回購入 - 購入株数</label>
+  <div class="input-row"><input type="number" id="shares2" placeholder="50"  step="0.01"><span class="input-suffix">円</span></div>
+</div>
+  <small class="input-help">2番目の購入時に取得した株式の総数を入力</small>
+<div class="input-group">
+  <label for="price2">第2回購入 - 1株あたりの価格</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="price2" placeholder="40.00"  step="0.01"></div>
+</div>
+  <small class="input-help">2番目の購入時の1株あたりの購入価格を入力</small>
+<div class="input-group">
+  <label for="shares3">第3回購入 - 購入株数（オプション）</label>
+  <div class="input-row"><input type="number" id="shares3" placeholder="25"  step="0.01"><span class="input-suffix">shares</span></div>
+</div>
+  <small class="input-help">3番目の購入時に取得した株式の総数を入力（任意）</small>
+<div class="input-group">
+  <label for="price3">第3回購入 - 1株あたりの価格（オプション）</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="price3" placeholder="35.00"  step="0.01"></div>
+</div>
+  <small class="input-help">3番目の購入時の1株あたりの購入価格を入力（任意）</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">保有株式総数</span><span class="result-value" id="totalShares">—</span></div>
+<div class="result-item"><span class="result-label">投資総額</span><span class="result-value" id="totalCost">—</span></div>
+<div class="result-highlight"><span class="result-label">1株あたりの平均コスト</span><span class="result-value" id="averagePrice">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 保有株式総数は全購入回における株式数の合計です。投資総額は各購入での支出合計で、1株あたりの平均コストはあなたの平均的な買値を示します。この平均コストが現在の株価と比較することで、含み益・含み損を判断できます。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>平均買値計算機について</h2><p>平均買値計算機は、複数回にわたる株式購入の平均購入価格を簡単に計算できるツールです。ドルコスト平均法やナンピン買いなどの投資戦略を実践する際に、現在の平均的なポジションコストを把握することは非常に重要です。</p><h2>平均買値の重要性</h2><p>異なる価格で複数回購入した場合、平均買値を知ることで投資パフォーマンスを正確に評価できます。例えば、100株を50円で、50株を40円で購入した場合、単純な平均（45円）ではなく、加重平均によって実際の平均買値（46.67円）が計算されます。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>計算方法</h2><p>平均買値は、全購入による総投資額を総保有株数で割ることで求められます。式は以下の通りです：平均買値 = 総投資額 ÷ 総保有株数。このツールは最大3回の購入まで対応しており、第3回目の購入はオプションです。</p><h2>ドルコスト平均法での活用</h2><p>定期的に同じ金額を投資する戦略では、価格が下がった時にはより多くの株が購入でき、価格が上がった時には少ない株が購入されます。このツールを使えば、そうした複雑な計算を自動で行い、現在の平均コストを把握できます。</p><h2>投資判断への応用</h2><p>平均買値と現在の株価を比較することで、投資の判断材料が得られます。現在の株価が平均買値より高い場合は含み益、低い場合は含み損となります。これにより、今後の追加購入や売却時期の判断に役立ちます。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">平均買値とは何ですか？</div><div class="faq-a">平均買値は、複数回の購入における1株あたりの平均的な購入価格です。全購入額を総株数で割った加重平均値となります。</div></div>
+  <div class="faq-item"><div class="faq-q">第3回購入は入力する必要がありますか？</div><div class="faq-a">いいえ、第3回購入はオプションです。2回の購入のみの場合は、第3回目の欄を空白のままにしてください。</div></div>
+  <div class="faq-item"><div class="faq-q">ナンピン買いとはどのような戦略ですか？</div><div class="faq-a">ナンピン買いは、株価が下がった時に追加で購入する戦略です。これにより平均買値を引き下げることができます。</div></div>
+  <div class="faq-item"><div class="faq-q">このツールで税金や手数料は計算されますか？</div><div class="faq-a">いいえ、このツールは純粋な平均買値のみを計算します。実際の投資コストには取引手数料や税金が加わります。</div></div>
+  <div class="faq-item"><div class="faq-q">計算結果はどのように活用できますか？</div><div class="faq-a">平均買値と現在の株価を比較して含み益・含み損を確認したり、今後の投資判断や損益分岐点の把握に活用できます。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">Compound Interest</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">Roi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">Risk Reward</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">Position Size</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">Dividend Yield</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">Pe Ratio</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">Dca Calculator</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">Cagr</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">Break Even</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/average-down.html" class="lang-btn">English</a>
+    <a href="/tools/average-down.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/average-down.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/average-down.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/average-down.html" class="lang-btn">Français</a>
+    <a href="/tools/es/average-down.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/average-down.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/average-down.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/average-down.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/average-down.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const shares1 = parseFloat(document.getElementById('shares1').value);
+  const price1 = parseFloat(document.getElementById('price1').value);
+  const shares2 = parseFloat(document.getElementById('shares2').value);
+  const price2 = parseFloat(document.getElementById('price2').value);
+  const shares3 = parseFloat(document.getElementById('shares3').value) || 0;
+  const price3 = parseFloat(document.getElementById('price3').value) || 0;
+
+  if (!shares1 || !price1 || !shares2 || !price2) {
+    alert('Please enter at least two purchase records with both shares and price');
+    return;
+  }
+
+  if (shares1 < 0 || price1 < 0 || shares2 < 0 || price2 < 0 || shares3 < 0 || price3 < 0) {
+    alert('Values cannot be negative');
+    return;
+  }
+
+  const totalShares = shares1 + shares2 + (shares3 && price3 ? shares3 : 0);
+  const totalCost = (shares1 * price1) + (shares2 * price2) + (shares3 && price3 ? shares3 * price3 : 0);
+  const averagePrice = totalCost / totalShares;
+
+  document.getElementById('totalShares').textContent = totalShares.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 0});
+  document.getElementById('totalCost').textContent = totalCost.toLocaleString('en-US', {style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('averagePrice').textContent = averagePrice.toLocaleString('en-US', {style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|average-down|2026-07-09 -->

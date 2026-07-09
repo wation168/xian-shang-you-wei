@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>蜡烛图形态识别 - 技术分析工具</title>
+<meta name="description" content="快速识别和分类蜡烛图形态,包括看涨看跌信号强度分析,适合股票、期货、外汇技术分析。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/zh-CN/candlestick-identifier.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/candlestick-identifier.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/candlestick-identifier.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/candlestick-identifier.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/candlestick-identifier.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/candlestick-identifier.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/candlestick-identifier.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/candlestick-identifier.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/candlestick-identifier.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/candlestick-identifier.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/candlestick-identifier.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/candlestick-identifier.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "蜡烛图形态识别器", "url": "https://softglow-ai.com/tools/zh-CN/candlestick-identifier.html", "description": "快速识别和分类蜡烛图形态,包括看涨看跌信号强度分析,适合股票、期货、外汇技术分析。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "开盘价和收盘价相同时会发生什么?", "acceptedAnswer": {"@type": "Answer", "text": "当开盘价等于收盘价时,蜡烛图会形成十字星或四价十字形态,表示市场在该时段内犹豫不决,买卖力量基本平衡。这通常预示可能即将发生突破,是重要的反转信号。"}}, {"@type": "Question", "name": "上影线和下影线长度代表什么?", "acceptedAnswer": {"@type": "Answer", "text": "上影线长度表示在交易期间最高价位被拉高后又回落的幅度,反映卖方的压力;下影线长度表示在交易期间最低价位被压低后又反弹的幅度,反映买方的支撑力。较长的影线表示市场波动剧烈。"}}, {"@type": "Question", "name": "看涨和看跌信号强度如何计算?", "acceptedAnswer": {"@type": "Answer", "text": "信号强度基于蜡烛图形态的历史统计数据和结构特征计算。看涨信号强度考虑实体方向、影线长度、与前一根K线的关系等因素;看跌信号强度采用相反逻辑。数值越高表示该信号越可靠。"}}, {"@type": "Question", "name": "前收盘价有什么用途?", "acceptedAnswer": {"@type": "Answer", "text": "前收盘价用于识别跳空(Gap)等形态,以及判断蜡烛图与前一个交易日的关系。例如,如果今日开盘价高于前一日收盘价,可能形成向上跳空,这往往预示上升趋势的延续。"}}, {"@type": "Question", "name": "蜡烛图形态识别在不同时间周期上准确率如何?", "acceptedAnswer": {"@type": "Answer", "text": "蜡烛图形态在各种时间周期(分钟线、小时线、日线等)上都适用,但准确率会因周期而异。通常日线级别的形态更加可靠,因为包含更多参与者的决策。建议在多个时间周期上确认形态,提高交易胜率。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/zh-CN/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 蜡烛图形态识别器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>蜡烛图形态识别器</h1>
+    <p class="calc-subtitle">识别和分类蜡烛图形态用于技术分析</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="openPrice">开盘价</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="openPrice" placeholder="例如: 100"  step="0.01"></div>
+</div>
+  <small class="input-help">输入当前K线的开盘价格</small>
+<div class="input-group">
+  <label for="closePrice">收盘价</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="closePrice" placeholder="例如: 105"  step="0.01"></div>
+</div>
+  <small class="input-help">输入当前K线的收盘价格</small>
+<div class="input-group">
+  <label for="highPrice">最高价</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="highPrice" placeholder="例如: 108"  step="0.01"></div>
+</div>
+  <small class="input-help">输入当前K线的最高价格</small>
+<div class="input-group">
+  <label for="lowPrice">最低价</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="lowPrice" placeholder="例如: 98"  step="0.01"></div>
+</div>
+  <small class="input-help">输入当前K线的最低价格</small>
+<div class="input-group">
+  <label for="previousClosePrice">前收盘价</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="previousClosePrice" placeholder="例如: 102"  step="0.01"></div>
+</div>
+  <small class="input-help">输入前一个交易日的收盘价格</small></div>
+    <button class="btn-calc" onclick="calculate()">计算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">识别形态</span><span class="result-value" id="patternType">—</span></div>
+<div class="result-item"><span class="result-label">形态类别</span><span class="result-value" id="patternCategory">—</span></div>
+<div class="result-item"><span class="result-label">实体大小(价格范围)</span><span class="result-value" id="bodySize">—</span></div>
+<div class="result-item"><span class="result-label">上影线长度</span><span class="result-value" id="upperWick">—</span></div>
+<div class="result-item"><span class="result-label">下影线长度</span><span class="result-value" id="lowerWick">—</span></div>
+<div class="result-item"><span class="result-label">看涨信号强度</span><span class="result-value" id="bullishSignal">—</span></div>
+<div class="result-item"><span class="result-label">看跌信号强度</span><span class="result-value" id="bearishSignal">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>这代表什么？</strong> 形态识别结果显示当前蜡烛图属于的类型(如锤头线、吊颈线等)及其所属类别。实体大小表示开盘价与收盘价的差值,影线长度反映市场的波动性。看涨和看跌信号强度为百分比形式,数值越高表示该方向的信号越强。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 打印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什么是蜡烛图形态?</h2><p>蜡烛图形态是技术分析中的重要工具,通过分析单根或多根K线的形状来判断市场趋势和反转信号。每根蜡烛图由开盘价、收盘价、最高价和最低价四个价格组成,形成独特的视觉形态,帮助交易者做出决策。</p><h2>蜡烛图的基本成分</h2><p>蜡烛图主要由三部分组成:实体(开盘价到收盘价之间的矩形)、上影线(从实体顶部到最高价)和下影线(从实体底部到最低价)。实体大小反映买卖力度,影线长度表现市场试图突破的力度。看涨蜡烛(收盘价高于开盘价)通常为绿色或白色,看跌蜡烛(收盘价低于开盘价)通常为红色或黑色。</p><h2>常见的蜡烛图形态</h2><p>锤头线(Hammer)底部出现,下影线较长,预示反转;吊颈线(Hanging Man)顶部出现,结构相似但信号相反;十字星(Doji)开盘价和收盘价接近,表示市场犹豫;孕线(Engulfing)前一根K线被完全包含,显示力度转变;流星线(Shooting Star)顶部出现,上影线长,预示可能下跌。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>信号强度的含义</h2><p>看涨信号强度越高,表示该形态预示上升趋势的可能性越大;看跌信号强度越高,表示该形态预示下降趋势的可能性越大。两个信号强度不一定相加为100%,因为有些形态的信号特征较为中立。结合交易量、支撑阻力位等其他因素,可以提高形态识别的准确性。</p><h2>如何使用本工具</h2><p>输入当前K线的四个价格数据(开盘价、收盘价、最高价、最低价)以及前一个交易日的收盘价,工具将自动识别蜡烛图形态,计算实体大小和影线长度,评估看涨和看跌信号的强度。根据结果,结合其他技术指标和市场环境,做出更加明智的交易决策。</p><h2>风险提示</h2><p>单一蜡烛图形态不应作为唯一的交易依据。技术分析具有滞后性,市场变化迅速。建议将形态分析与趋势线、移动平均线、交易量等多种工具结合使用,同时严格遵守风险管理原则,设置止损止盈点,控制单笔交易风险。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸阅读</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/candlestick-patterns.html">Candlestick Patterns<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/support-resistance.html">Support & Resistance<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/moving-average-guide.html">Moving Average Guide<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常见问题</h2><div class="faq-item"><div class="faq-q">开盘价和收盘价相同时会发生什么?</div><div class="faq-a">当开盘价等于收盘价时,蜡烛图会形成十字星或四价十字形态,表示市场在该时段内犹豫不决,买卖力量基本平衡。这通常预示可能即将发生突破,是重要的反转信号。</div></div>
+  <div class="faq-item"><div class="faq-q">上影线和下影线长度代表什么?</div><div class="faq-a">上影线长度表示在交易期间最高价位被拉高后又回落的幅度,反映卖方的压力;下影线长度表示在交易期间最低价位被压低后又反弹的幅度,反映买方的支撑力。较长的影线表示市场波动剧烈。</div></div>
+  <div class="faq-item"><div class="faq-q">看涨和看跌信号强度如何计算?</div><div class="faq-a">信号强度基于蜡烛图形态的历史统计数据和结构特征计算。看涨信号强度考虑实体方向、影线长度、与前一根K线的关系等因素;看跌信号强度采用相反逻辑。数值越高表示该信号越可靠。</div></div>
+  <div class="faq-item"><div class="faq-q">前收盘价有什么用途?</div><div class="faq-a">前收盘价用于识别跳空(Gap)等形态,以及判断蜡烛图与前一个交易日的关系。例如,如果今日开盘价高于前一日收盘价,可能形成向上跳空,这往往预示上升趋势的延续。</div></div>
+  <div class="faq-item"><div class="faq-q">蜡烛图形态识别在不同时间周期上准确率如何?</div><div class="faq-a">蜡烛图形态在各种时间周期(分钟线、小时线、日线等)上都适用,但准确率会因周期而异。通常日线级别的形态更加可靠,因为包含更多参与者的决策。建议在多个时间周期上确认形态,提高交易胜率。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/zh-CN/fibonacci-retracement.html">斐波那契回调计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/pivot-point.html">枢纽点计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/rsi-calculator.html">RSI相对强弱指数计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/macd-calculator.html">MACD计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/bollinger-bands.html">布林带计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/atr-calculator.html">ATR计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/ma-crossover.html">均线交叉计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/support-resistance.html">支撑和阻力计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/pip-value.html">点值计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/options-profit.html">期权利润计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stock-split.html">股票拆分计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/trading-fee.html">交易费用计算器</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/candlestick-identifier.html" class="lang-btn">English</a>
+    <a href="/tools/candlestick-identifier.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/candlestick-identifier.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/candlestick-identifier.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/candlestick-identifier.html" class="lang-btn">Français</a>
+    <a href="/tools/es/candlestick-identifier.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/candlestick-identifier.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/candlestick-identifier.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/candlestick-identifier.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/candlestick-identifier.html" class="lang-btn active">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相关工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const openPrice = parseFloat(document.getElementById('openPrice').value);
+  const closePrice = parseFloat(document.getElementById('closePrice').value);
+  const highPrice = parseFloat(document.getElementById('highPrice').value);
+  const lowPrice = parseFloat(document.getElementById('lowPrice').value);
+  const previousClosePrice = parseFloat(document.getElementById('previousClosePrice').value);
+
+  if (isNaN(openPrice) || isNaN(closePrice) || isNaN(highPrice) || isNaN(lowPrice) || isNaN(previousClosePrice)) {
+    alert('Please enter all price values');
+    return;
+  }
+
+  if (lowPrice > openPrice || lowPrice > closePrice || highPrice < openPrice || highPrice < closePrice) {
+    alert('Invalid price configuration. High must be highest and Low must be lowest.');
+    return;
+  }
+
+  const bodySize = Math.abs(closePrice - openPrice);
+  const totalRange = highPrice - lowPrice;
+  const upperWick = highPrice - Math.max(closePrice, openPrice);
+  const lowerWick = Math.min(closePrice, openPrice) - lowPrice;
+  const bodyPercent = (bodySize / totalRange) * 100;
+  const isBullish = closePrice > openPrice;
+  const isBearish = closePrice < openPrice;
+  const isDoji = bodySize < (totalRange * 0.05);
+  const isHammer = (lowerWick > (bodySize * 2)) && (upperWick < (bodySize * 0.5)) && !isBullish;
+  const isInvertedHammer = (upperWick > (bodySize * 2)) && (lowerWick < (bodySize * 0.5)) && !isBearish;
+  const isMorningstar = closePrice > previousClosePrice && isBullish && bodySize > (totalRange * 0.3);
+  const isEveningStar = closePrice < previousClosePrice && isBearish && bodySize > (totalRange * 0.3);
+  const isSpinningTop = (bodyPercent < 30) && (upperWick > (bodySize * 1.5)) && (lowerWick > (bodySize * 1.5));
+  const isMarubozu = (upperWick < totalRange * 0.02) && (lowerWick < totalRange * 0.02);
+  const isGravestoneDoji = (isDoji && upperWick > (totalRange * 0.4)) && (lowerWick < totalRange * 0.1);
+  const isDragonflydoji = (isDoji && lowerWick > (totalRange * 0.4)) && (upperWick < totalRange * 0.1);
+
+  let patternType = 'Unidentified Pattern';
+  let patternCategory = 'Neutral';
+
+  if (isDoji) {
+    patternType = 'Doji';
+    patternCategory = 'Reversal / Indecision';
+  } else if (isGravestoneDoji) {
+    patternType = 'Gravestone Doji';
+    patternCategory = 'Bearish Reversal';
+  } else if (isDragonflydoji) {
+    patternType = 'Dragonfly Doji';
+    patternCategory = 'Bullish Reversal';
+  } else if (isHammer) {
+    patternType = 'Hammer';
+    patternCategory = 'Bullish Reversal';
+  } else if (isInvertedHammer) {
+    patternType = 'Inverted Hammer';
+    patternCategory = 'Bullish Reversal';
+  } else if (isSpinningTop) {
+    patternType = 'Spinning Top';
+    patternCategory = 'Indecision / Potential Reversal';
+  } else if (isMarubozu && isBullish) {
+    patternType = 'Bullish Marubozu';
+    patternCategory = 'Strong Bullish Continuation';
+  } else if (isMarubozu && isBearish) {
+    patternType = 'Bearish Marubozu';
+    patternCategory = 'Strong Bearish Continuation';
+  } else if (isBullish && bodySize > (totalRange * 0.6)) {
+    patternType = 'Strong Bullish Candle';
+    patternCategory = 'Bullish Continuation';
+  } else if (isBearish && bodySize > (totalRange * 0.6)) {
+    patternType = 'Strong Bearish Candle';
+    patternCategory = 'Bearish Continuation';
+  } else if (isBullish) {
+    patternType = 'Bullish Candle';
+    patternCategory = 'Bullish';
+  } else if (isBearish) {
+    patternType = 'Bearish Candle';
+    patternCategory = 'Bearish';
+  }
+
+  const bullishSignal = isBullish ? Math.min(100, (bodyPercent / 2)) : Math.max(0, 50 - (bodyPercent / 2));
+  const bearishSignal = isBearish ? Math.min(100, (bodyPercent / 2)) : Math.max(0, 50 - (bodyPercent / 2));
+
+  document.getElementById('patternType').textContent = patternType;
+  document.getElementById('patternCategory').textContent = patternCategory;
+  document.getElementById('bodySize').textContent = bodySize.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('upperWick').textContent = upperWick.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('lowerWick').textContent = lowerWick.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('bullishSignal').textContent = bullishSignal.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+  document.getElementById('bearishSignal').textContent = bearishSignal.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已复制！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-CN|candlestick-identifier|2026-07-09 -->

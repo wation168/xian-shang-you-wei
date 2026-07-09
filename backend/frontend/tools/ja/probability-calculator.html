@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>確率計算機 - 組み合わせ・順列を簡単計算</title>
+<meta name="description" content="確率計算機で組み合わせ、順列、確率を瞬時に計算できます。数学やビジネスの確率分析に役立つオンラインツール。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/probability-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/probability-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/probability-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/probability-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/probability-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/probability-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/probability-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/probability-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/probability-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/probability-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/probability-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/probability-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "確率計算機", "url": "https://softglow-ai.com/tools/ja/probability-calculator.html", "description": "確率計算機で組み合わせ、順列、確率を瞬時に計算できます。数学やビジネスの確率分析に役立つオンラインツール。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "組み合わせと順列の違いは何ですか?", "acceptedAnswer": {"@type": "Answer", "text": "組み合わせは選択順序を考慮せず、順列は選択順序を考慮します。例えば、AとBを選ぶ組み合わせは1つですが、順列ではAB、BAの2つになります。"}}, {"@type": "Question", "name": "このツールで計算できる最大値は?", "acceptedAnswer": {"@type": "Answer", "text": "このツールは一般的な確率計算に対応しており、大きな数値でも計算可能です。ただし、極端に大きな値の場合は計算時間がかかる場合があります。"}}, {"@type": "Question", "name": "確率計算の実用例を教えてください。", "acceptedAnswer": {"@type": "Answer", "text": "宝くじの当選確率、カードゲームの特定の手札が出る確率、サイコロで特定の数が出る確率など、日常的な確率計算に活用できます。"}}, {"@type": "Question", "name": "小数点以下の計算精度はどのくらいですか?", "acceptedAnswer": {"@type": "Answer", "text": "このツールは一般的に小数点以下10位まで正確に計算します。より高い精度が必要な場合は、専門的な統計ソフトウェアの使用を検討してください。"}}, {"@type": "Question", "name": "負の数や0を入力するとどうなりますか?", "acceptedAnswer": {"@type": "Answer", "text": "組み合わせと順列は非負の整数のみで定義されているため、負の数は入力できません。0は特殊なケースで、C(0,0)=1、P(0,0)=1となります。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 確率計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>確率計算機</h1>
+    <p class="calc-subtitle">組み合わせ、順列、確率の結果を瞬時に計算します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="totalItems">アイテムの総数 (n)</label>
+  <div class="input-row"><input type="number" id="totalItems" placeholder="10"  step="1"></div>
+</div>
+  <small class="input-help">全体のアイテム総数を入力してください</small>
+<div class="input-group">
+  <label for="selectItems">選択するアイテム数 (r)</label>
+  <div class="input-row"><input type="number" id="selectItems" placeholder="3"  step="1"></div>
+</div>
+  <small class="input-help">選択するアイテムの個数を入力してください</small>
+<div class="input-group">
+  <label for="calcType">計算タイプ</label>
+  <div class="input-row"><input type="text" id="calcType" value="combination"></div>
+</div>
+  <small class="input-help">計算する確率の種類を選択してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">結果</span><span class="result-value" id="resultValue">—</span></div>
+<div class="result-item"><span class="result-label">使用された公式</span><span class="result-value" id="resultFormula">—</span></div>
+<div class="result-item"><span class="result-label">説明</span><span class="result-value" id="resultExplanation">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 結果は選択した計算タイプに基づいて表示されます。組み合わせは順序を考慮しない場合の組み合わせ数、順列は順序を考慮した場合の組み合わせ数です。使用された公式と詳細な説明も表示されます。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>確率計算機について</h2><p>確率計算機は、数学や統計分析で頻繁に使用される組み合わせ、順列、確率を素早く計算するツールです。このツールを使用することで、複雑な計算を自動的に行い、数秒で正確な結果を得られます。</p><h2>組み合わせとは</h2><p>組み合わせ(Combination)は、n個のアイテムからr個を選択する場合の数で、選択順序は考慮しません。例えば、10個のボールから3個を選ぶ場合、どの順序で選んでも同じ組み合わせです。計算式はC(n,r) = n! / (r!(n-r)!)となります。</p><h2>順列とは</h2><p>順列(Permutation)は、n個のアイテムからr個を選択して並べる場合の数で、選択順序が重要です。例えば、10個のボールから3個を選んで一列に並べる場合、並べ方によって異なる順列となります。計算式はP(n,r) = n! / (n-r)!となります。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>確率の計算</h2><p>確率は特定の事象が起こる可能性を数値化したものです。0から1の間の値で表され、0は不可能、1は確実を意味します。このツールを使用して、様々なシナリオの確率を計算できます。</p><h2>実用的な応用例</h2><p>確率計算は宝くじの当選確率、カードゲームの役の出現確率、抽選で当選する確率など、日常生活の様々な場面で活用されます。ビジネスや学術研究でも重要な計算方法です。</p><h2>計算ツールの使い方</h2><p>総アイテム数と選択アイテム数を入力し、計算タイプを選択するだけで自動計算されます。結果には計算に使用された公式と詳細な説明も表示されるため、学習ツールとしても活用できます。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">組み合わせと順列の違いは何ですか?</div><div class="faq-a">組み合わせは選択順序を考慮せず、順列は選択順序を考慮します。例えば、AとBを選ぶ組み合わせは1つですが、順列ではAB、BAの2つになります。</div></div>
+  <div class="faq-item"><div class="faq-q">このツールで計算できる最大値は?</div><div class="faq-a">このツールは一般的な確率計算に対応しており、大きな数値でも計算可能です。ただし、極端に大きな値の場合は計算時間がかかる場合があります。</div></div>
+  <div class="faq-item"><div class="faq-q">確率計算の実用例を教えてください。</div><div class="faq-a">宝くじの当選確率、カードゲームの特定の手札が出る確率、サイコロで特定の数が出る確率など、日常的な確率計算に活用できます。</div></div>
+  <div class="faq-item"><div class="faq-q">小数点以下の計算精度はどのくらいですか?</div><div class="faq-a">このツールは一般的に小数点以下10位まで正確に計算します。より高い精度が必要な場合は、専門的な統計ソフトウェアの使用を検討してください。</div></div>
+  <div class="faq-item"><div class="faq-q">負の数や0を入力するとどうなりますか?</div><div class="faq-a">組み合わせと順列は非負の整数のみで定義されているため、負の数は入力できません。0は特殊なケースで、C(0,0)=1、P(0,0)=1となります。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">Roi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">Risk Reward</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">ポジションサイズ計算機</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">P/Eレシオ計算機</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">証拠金計算機</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/probability-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/probability-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/probability-calculator.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/probability-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/probability-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/probability-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/probability-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/probability-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/probability-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/probability-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const totalItems = document.getElementById('totalItems').value;
+  const selectItems = document.getElementById('selectItems').value;
+  const calcType = document.getElementById('calcType').value;
+  const resultDiv = document.getElementById('results');
+  
+  if (!totalItems || !selectItems) {
+    alert('Please enter both the total number of items and the number of items to select.');
+    return;
+  }
+  
+  const n = parseInt(totalItems);
+  const r = parseInt(selectItems);
+  
+  if (n < 0 || r < 0 || r > n) {
+    alert('Invalid input: r must be less than or equal to n, and both must be non-negative.');
+    return;
+  }
+  
+  function factorial(num) {
+    if (num === 0 || num === 1) return 1;
+    let result = 1;
+    for (let i = 2; i <= num; i++) {
+      result *= i;
+    }
+    return result;
+  }
+  
+  let result;
+  let formula;
+  let explanation;
+  
+  if (calcType === 'combination') {
+    result = factorial(n) / (factorial(r) * factorial(n - r));
+    formula = `C(${n},${r}) = ${n}! / (${r}! × ${n - r}!)`;
+    explanation = `There are ${Math.round(result).toLocaleString()} ways to choose ${r} items from ${n} items where the order does not matter.`;
+  } else {
+    result = factorial(n) / factorial(n - r);
+    formula = `P(${n},${r}) = ${n}! / (${n - r}!)`;
+    explanation = `There are ${Math.round(result).toLocaleString()} ways to arrange ${r} items from ${n} items where the order matters.`;
+  }
+  
+  document.getElementById('resultValue').textContent = Math.round(result).toLocaleString();
+  document.getElementById('resultFormula').textContent = formula;
+  document.getElementById('resultExplanation').textContent = explanation;
+  
+  resultDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|probability-calculator|2026-07-09 -->

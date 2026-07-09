@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compteur de Mots - Analysez votre texte gratuitement</title>
+<meta name="description" content="Outil gratuit pour compter les mots, caractères, phrases et paragraphes. Analysez la longueur moyenne des mots et le temps de lecture estimé.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/fr/word-count.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/word-count.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/word-count.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/word-count.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/word-count.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/word-count.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/word-count.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/word-count.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/word-count.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/word-count.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/word-count.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/word-count.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculateur de Compte de Mots", "url": "https://softglow-ai.com/tools/fr/word-count.html", "description": "Outil gratuit pour compter les mots, caractères, phrases et paragraphes. Analysez la longueur moyenne des mots et le temps de lecture estimé.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "fr"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Le calculateur compte-t-il les nombres comme des mots ?", "acceptedAnswer": {"@type": "Answer", "text": "Oui, notre calculateur compte les nombres isolés comme des mots. Par exemple, \"2024\" sera compté comme un mot. Cependant, les nombres qui font partie d'un mot (comme \"21ème\") sont généralement comptés différemment selon le contexte."}}, {"@type": "Question", "name": "Comment est estimé le temps de lecture ?", "acceptedAnswer": {"@type": "Answer", "text": "Le temps de lecture est estimé en fonction de la vitesse de lecture moyenne d'un adulte, généralement fixée à environ 200-250 mots par minute. Nous utilisons une moyenne de 225 mots par minute pour nos calculs."}}, {"@type": "Question", "name": "Puis-je utiliser cet outil pour les documents très longs ?", "acceptedAnswer": {"@type": "Answer", "text": "Absolument ! Notre calculateur n'a aucune limite de longueur. Vous pouvez analyser des documents de plusieurs milliers de mots ou même des livres entiers. Les résultats s'affichent instantanément peu importe la taille du texte."}}, {"@type": "Question", "name": "Quelle est la différence entre caractères avec et sans espaces ?", "acceptedAnswer": {"@type": "Answer", "text": "Les caractères sans espaces ne comptent pas les espaces entre les mots. C'est utile pour des limites spécifiques comme les SMS (160 caractères) ou les descriptions de réseaux sociaux. Les caractères avec espaces incluent tous les espaces, tabulations et sauts de ligne."}}, {"@type": "Question", "name": "Comment le calculateur définit-il une phrase ?", "acceptedAnswer": {"@type": "Answer", "text": "Une phrase est généralement définie comme un ensemble de mots se terminant par un point, un point d'interrogation ou un point d'exclamation. Les points de suspension et autres signes de ponctuation spécialisés peuvent ne pas être comptés comme fin de phrase selon le contexte."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/fr/">Outils</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/fr/">Outils</a> > Calculateur de Compte de Mots</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Calculateur de Compte de Mots</h1>
+    <p class="calc-subtitle">Comptez instantanément les mots, caractères et phrases de votre texte</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="textInput">Entrez votre texte</label>
+  <div class="input-row"><input type="textarea" id="textInput" placeholder="Collez ou tapez votre texte ici pour l'analyser..."  step="1"></div>
+</div>
+  <small class="input-help">Collez ou tapez le texte que vous souhaitez analyser pour obtenir des statistiques détaillées</small></div>
+    <button class="btn-calc" onclick="calculate()">Calculer</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Nombre Total de Mots</span><span class="result-value" id="wordCount">—</span></div>
+<div class="result-item"><span class="result-label">Nombre Total de Caractères (espaces inclus)</span><span class="result-value" id="characterCount">—</span></div>
+<div class="result-item"><span class="result-label">Nombre Total de Caractères (espaces exclus)</span><span class="result-value" id="characterCountNoSpaces">—</span></div>
+<div class="result-item"><span class="result-label">Nombre Total de Phrases</span><span class="result-value" id="sentenceCount">—</span></div>
+<div class="result-item"><span class="result-label">Nombre Total de Paragraphes</span><span class="result-value" id="paragraphCount">—</span></div>
+<div class="result-item"><span class="result-label">Longueur Moyenne des Mots</span><span class="result-value" id="averageWordLength">—</span></div>
+<div class="result-item"><span class="result-label">Temps de Lecture</span><span class="result-value" id="readingTime">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>Qu'est-ce que cela signifie ?</strong> Les résultats affichent une analyse complète de votre texte incluant le nombre de mots, de caractères et de phrases. Utilisez ces statistiques pour évaluer la longueur de votre contenu et le temps de lecture estimé pour vos lecteurs.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Imprimer</button>
+        <button onclick="shareResult()">&#x1f4e4; Partager</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>Qu'est-ce qu'un Calculateur de Compte de Mots ?</h2><p>Un calculateur de compte de mots est un outil en ligne qui analyse automatiquement votre texte et fournit des statistiques détaillées. Il compte non seulement les mots, mais aussi les caractères, les phrases et les paragraphes. Cet outil est essentiel pour les rédacteurs, les étudiants, les blogueurs et les professionnels qui ont besoin de respecter des limites de mots spécifiques dans leurs projets.</p><h2>Comment Utiliser le Calculateur de Compte de Mots ?</h2><p>Utiliser notre calculateur est extrêmement simple. Il suffit de copier et coller votre texte dans la zone de saisie prévue, ou de taper directement votre contenu. L'outil analyse instantanément votre texte et affiche les résultats en temps réel. Vous pouvez modifier votre texte à tout moment et voir les statistiques mises à jour automatiquement. Il n'y a aucune limite de caractères, vous pouvez donc analyser des documents de toute longueur.</p><h2>Comprendre les Statistiques Principales</h2><p>Le calculateur fournit plusieurs métriques importantes. Le nombre total de mots vous indique combien de mots contient votre texte. Le nombre de caractères peut être affiché avec ou sans espaces, ce qui est utile pour différents besoins (tweets, SMS, formulaires en ligne). Le nombre de phrases et de paragraphes vous aide à comprendre la structure de votre contenu. La longueur moyenne des mots indique la complexité linguistique de votre texte, tandis que le temps de lecture estimé donne une idée du temps nécessaire pour lire votre contenu.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Avantages pour les Différents Utilisateurs</h2><p>Pour les étudiants, cet outil est invaluable pour vérifier que leurs essais et dissertations respectent les exigences de nombre de mots. Les blogueurs et les journalistes l'utilisent pour optimiser la longueur de leurs articles pour le référencement et l'engagement des lecteurs. Les professionnels du marketing utilisent le calculateur pour maintenir la cohérence dans les descriptions de produits et les contenus publicitaires. Les traducteurs l'utilisent pour suivre la longueur de leurs traductions par rapport aux originaux.</p><h2>Optimisation pour le Référencement et le Contenu Web</h2><p>La longueur du contenu est un facteur important pour le référencement sur les moteurs de recherche. Notre calculateur vous aide à créer du contenu de la longueur appropriée pour votre audience cible. La plupart des articles de blog performants contiennent entre 1 500 et 2 500 mots. Le temps de lecture estimé permet également aux créateurs de contenu d'ajuster leur contenu pour maintenir l'attention des lecteurs. En utilisant ces statistiques, vous pouvez optimiser votre contenu pour un meilleur engagement et un meilleur classement dans les résultats de recherche.</p><h2>Fonctionnalités Avancées et Cas d'Usage</h2><p>Bien que cet outil soit simple à utiliser, il offre des insights précieux. Vous pouvez l'utiliser pour comparer la longueur de différentes versions de votre texte, analyser la lisibilité globale de votre contenu, ou évaluer si votre écriture est trop verbeux ou trop concise. C'est un compagnon parfait pour toute personne sérieuse à propos de la qualité et de l'efficacité de sa communication écrite, que ce soit pour un usage personnel, académique ou professionnel.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Articles connexes</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>Questions fréquentes</h2><div class="faq-item"><div class="faq-q">Le calculateur compte-t-il les nombres comme des mots ?</div><div class="faq-a">Oui, notre calculateur compte les nombres isolés comme des mots. Par exemple, "2024" sera compté comme un mot. Cependant, les nombres qui font partie d'un mot (comme "21ème") sont généralement comptés différemment selon le contexte.</div></div>
+  <div class="faq-item"><div class="faq-q">Comment est estimé le temps de lecture ?</div><div class="faq-a">Le temps de lecture est estimé en fonction de la vitesse de lecture moyenne d'un adulte, généralement fixée à environ 200-250 mots par minute. Nous utilisons une moyenne de 225 mots par minute pour nos calculs.</div></div>
+  <div class="faq-item"><div class="faq-q">Puis-je utiliser cet outil pour les documents très longs ?</div><div class="faq-a">Absolument ! Notre calculateur n'a aucune limite de longueur. Vous pouvez analyser des documents de plusieurs milliers de mots ou même des livres entiers. Les résultats s'affichent instantanément peu importe la taille du texte.</div></div>
+  <div class="faq-item"><div class="faq-q">Quelle est la différence entre caractères avec et sans espaces ?</div><div class="faq-a">Les caractères sans espaces ne comptent pas les espaces entre les mots. C'est utile pour des limites spécifiques comme les SMS (160 caractères) ou les descriptions de réseaux sociaux. Les caractères avec espaces incluent tous les espaces, tabulations et sauts de ligne.</div></div>
+  <div class="faq-item"><div class="faq-q">Comment le calculateur définit-il une phrase ?</div><div class="faq-a">Une phrase est généralement définie comme un ensemble de mots se terminant par un point, un point d'interrogation ou un point d'exclamation. Les points de suspension et autres signes de ponctuation spécialisés peuvent ne pas être comptés comme fin de phrase selon le contexte.</div></div></section>
+  <div class="more-tools"><h3>Plus d'outils</h3><div class="tools-grid"><a class="tool-pill" href="/tools/fr/compound-interest.html">Calculatrice d'Intérêts Composés</a>
+      <a class="tool-pill" href="/tools/fr/roi-calculator.html">Calculatrice de ROI</a>
+      <a class="tool-pill" href="/tools/fr/risk-reward.html">Calculateur Risque-Récompense</a>
+      <a class="tool-pill" href="/tools/fr/position-size.html">Calculateur de Taille de Position</a>
+      <a class="tool-pill" href="/tools/fr/stop-loss.html">Calculatrice de Stop Loss</a>
+      <a class="tool-pill" href="/tools/fr/dividend-yield.html">Calculateur de Rendement de Dividende</a>
+      <a class="tool-pill" href="/tools/fr/pe-ratio.html">Calculateur de Ratio P/E</a>
+      <a class="tool-pill" href="/tools/fr/dca-calculator.html">Calculatrice d'Investissement Progressif</a>
+      <a class="tool-pill" href="/tools/fr/cagr.html">Calculatrice TCAC</a>
+      <a class="tool-pill" href="/tools/fr/margin-calculator.html">Calculatrice de Marge</a>
+      <a class="tool-pill" href="/tools/fr/stock-gain-loss.html">Calculateur de Gain/Perte en Bourse</a>
+      <a class="tool-pill" href="/tools/fr/break-even.html">Calculatrice du Seuil de Rentabilité</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/word-count.html" class="lang-btn">English</a>
+    <a href="/tools/word-count.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/word-count.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/word-count.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/word-count.html" class="lang-btn active">Français</a>
+    <a href="/tools/es/word-count.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/word-count.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/word-count.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/word-count.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/word-count.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Outils connexes</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const textInput = document.getElementById('textInput');
+  const text = textInput.value;
+  
+  if (!text || text.trim().length === 0) {
+    alert('Please enter some text to analyze');
+    return;
+  }
+  
+  const trimmedText = text.trim();
+  
+  // Word count
+  const words = trimmedText.split(/\s+/).filter(word => word.length > 0);
+  const wordCount = words.length;
+  
+  // Character count (with spaces)
+  const characterCount = text.length;
+  
+  // Character count (without spaces)
+  const characterCountNoSpaces = text.replace(/\s/g, '').length;
+  
+  // Sentence count - split by period, exclamation, question mark
+  const sentences = trimmedText.split(/[.!?]+/).filter(sentence => sentence.trim().length > 0);
+  const sentenceCount = sentences.length;
+  
+  // Paragraph count - split by double newline or single newline
+  const paragraphs = trimmedText.split(/\n\n+|\n/).filter(para => para.trim().length > 0);
+  const paragraphCount = paragraphs.length;
+  
+  // Average word length
+  const averageWordLength = wordCount > 0 ? (characterCountNoSpaces / wordCount).toFixed(2) : 0;
+  
+  // Reading time (average reading speed is 200 words per minute)
+  const readingTime = wordCount > 0 ? Math.ceil(wordCount / 200) : 0;
+  
+  // Display results
+  document.getElementById('wordCount').textContent = wordCount.toLocaleString();
+  document.getElementById('characterCount').textContent = characterCount.toLocaleString();
+  document.getElementById('characterCountNoSpaces').textContent = characterCountNoSpaces.toLocaleString();
+  document.getElementById('sentenceCount').textContent = sentenceCount.toLocaleString();
+  document.getElementById('paragraphCount').textContent = paragraphCount.toLocaleString();
+  document.getElementById('averageWordLength').textContent = averageWordLength;
+  document.getElementById('readingTime').textContent = readingTime;
+  
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copié !';setTimeout(function(){b.textContent='Partager'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|fr|word-count|2026-07-09 -->

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer LTV Calculator - Lifetime Value Tool</title>
+<meta name="description" content="Calculate Customer Lifetime Value (LTV) based on ARPU, profit margin, and customer lifespan. Understand your customer's total worth.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/en/ltv-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/ltv-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/ltv-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/ltv-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/ltv-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/ltv-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/ltv-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/ltv-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/ltv-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/ltv-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/ltv-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/ltv-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Customer LTV Calculator", "url": "https://softglow-ai.com/tools/en/ltv-calculator.html", "description": "Calculate Customer Lifetime Value (LTV) based on ARPU, profit margin, and customer lifespan. Understand your customer's total worth.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is a good Customer Lifetime Value?", "acceptedAnswer": {"@type": "Answer", "text": "A good LTV depends on your industry and business model. The key benchmark is your LTV-to-CAC ratio—ideally, LTV should be at least 3x your Customer Acquisition Cost. For a $600 LTV, you'd want a CAC under $200. Additionally, compare your LTV against competitors and industry standards in your sector."}}, {"@type": "Question", "name": "How do I calculate ARPU if I have different customer tiers?", "acceptedAnswer": {"@type": "Answer", "text": "Calculate a weighted average ARPU. Multiply each tier's annual revenue by the percentage of customers in that tier, then sum the results. For example, if 70% of customers spend $400/year and 30% spend $1,000/year, your ARPU is (0.7 × $400) + (0.3 × $1,000) = $580."}}, {"@type": "Question", "name": "Should I use gross profit margin or net profit margin?", "acceptedAnswer": {"@type": "Answer", "text": "Use gross profit margin if you want to understand value contribution before operating expenses, which is useful for production-focused businesses. Use net profit margin for a complete picture including all costs. Many SaaS companies use contribution margin, which includes variable costs but excludes fixed overhead."}}, {"@type": "Question", "name": "How do I determine customer lifespan?", "acceptedAnswer": {"@type": "Answer", "text": "Calculate the average customer lifespan by analyzing historical data. If you're a new business, use industry benchmarks or estimates. Common approaches include tracking cohort retention rates over time or calculating 1 divided by monthly churn rate. Continuously refine this number as you gather more data."}}, {"@type": "Question", "name": "How often should I recalculate LTV?", "acceptedAnswer": {"@type": "Answer", "text": "Recalculate LTV quarterly or semi-annually to track trends. Recalculate immediately after major business changes like pricing adjustments, product launches, or churn improvements. Regular monitoring helps you identify whether your retention and monetization strategies are working effectively."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/en/">Tools</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/en/">Tools</a> > Customer LTV Calculator</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Customer LTV Calculator</h1>
+    <p class="calc-subtitle">Calculate the total value a customer brings to your business over their lifetime</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="arpu">Average Revenue Per User (ARPU)</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="arpu" placeholder="500"  step="0.01"></div>
+</div>
+  <small class="input-help">Enter the average annual revenue generated per customer</small>
+<div class="input-group">
+  <label for="margin">Profit Margin</label>
+  <div class="input-row"><input type="number" id="margin" placeholder="40"  step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">Enter your profit margin as a percentage of revenue</small>
+<div class="input-group">
+  <label for="lifespan">Customer Lifespan</label>
+  <div class="input-row"><input type="number" id="lifespan" placeholder="3"  step="0.1"><span class="input-suffix">years</span></div>
+</div>
+  <small class="input-help">Enter the average number of years a customer remains active</small></div>
+    <button class="btn-calc" onclick="calculate()">Calculate</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Customer Lifetime Value (LTV)</span><span class="result-value" id="ltv_result">—</span></div>
+<div class="result-item"><span class="result-label">Annual Customer Value</span><span class="result-value" id="annual_value">—</span></div>
+<div class="result-item"><span class="result-label">Monthly Customer Value</span><span class="result-value" id="monthly_value">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>What does this mean?</strong> Customer Lifetime Value (LTV) represents the total profit a customer generates over their entire relationship with your business. Annual Customer Value shows yearly profit per customer, while Monthly Customer Value breaks this down further. Use these metrics to determine how much you can spend on customer acquisition while maintaining profitability.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Print</button>
+        <button onclick="shareResult()">&#x1f4e4; Share</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>Understanding Customer Lifetime Value (LTV)</h2><p>Customer Lifetime Value is one of the most critical metrics in modern business. It represents the total revenue or profit a customer is expected to generate during their entire relationship with your company. By calculating LTV, you gain insight into the long-term financial impact of your customer relationships and can make informed decisions about marketing spend, customer retention strategies, and business growth.</p><h2>How the LTV Calculation Works</h2><p>The Customer LTV Calculator uses three essential inputs to determine customer value. First, Average Revenue Per User (ARPU) represents the total revenue generated per customer annually. This could be $500 for a SaaS company charging monthly subscriptions, or higher for enterprise clients. Second, Profit Margin indicates what percentage of that revenue becomes actual profit after expenses. A 40% profit margin means that for every dollar earned, $0.40 remains as profit. Finally, Customer Lifespan measures how many years, on average, a customer remains active and generates revenue. The calculator multiplies these three factors together to provide your Customer Lifetime Value.</p><h2>Interpreting Your Results</h2><p>The calculator provides three key metrics. Customer Lifetime Value (LTV) is your primary metric—it shows the total profit a single customer will generate over their lifetime with your business. For example, with an ARPU of $500, 40% profit margin, and 3-year lifespan, your LTV would be $600. Annual Customer Value divides this by the lifespan to show yearly profit per customer. Monthly Customer Value further breaks this down, showing the monthly profit contribution. These granular metrics help you understand customer profitability at different time intervals and inform your marketing budget allocation.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Using LTV for Business Decisions</h2><p>Understanding your LTV enables strategic business decisions. A fundamental rule is that your Customer Acquisition Cost (CAC) should not exceed your LTV—ideally, your CAC should be 25-30% of LTV or lower. If your LTV is $600, you shouldn't spend more than $150-180 acquiring that customer. This ratio ensures sustainable growth and profitability. Additionally, LTV helps identify which customer segments are most valuable, enabling you to focus marketing efforts on acquiring similar high-value customers. It also informs product development and service improvements, as increasing customer lifespan directly increases LTV.</p><h2>Improving Your LTV</h2><p>There are three ways to increase Customer Lifetime Value. First, increase ARPU through upselling, cross-selling, or raising prices. Second, improve profit margins by reducing operational costs or increasing efficiency. Third, extend customer lifespan through better retention strategies, improved customer service, and product value enhancement. Even small improvements in any of these areas compound significantly over time. For instance, extending average customer lifespan from 3 to 4 years increases LTV by 33% without acquiring a single new customer.</p><h2>Industry Benchmarks and Best Practices</h2><p>LTV varies dramatically across industries. SaaS companies typically aim for LTVs that are 3-5x their CAC. E-commerce businesses often see lower multiples of 2-3x. High-ticket B2B services may achieve 10x or higher. Understanding your industry benchmarks helps you assess whether your LTV is competitive. Additionally, track LTV trends over time—improving LTV indicates strengthening customer relationships and business health, while declining LTV may signal product issues or market saturation requiring strategic adjustments.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Related Articles</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>FAQ</h2><div class="faq-item"><div class="faq-q">What is a good Customer Lifetime Value?</div><div class="faq-a">A good LTV depends on your industry and business model. The key benchmark is your LTV-to-CAC ratio—ideally, LTV should be at least 3x your Customer Acquisition Cost. For a $600 LTV, you'd want a CAC under $200. Additionally, compare your LTV against competitors and industry standards in your sector.</div></div>
+  <div class="faq-item"><div class="faq-q">How do I calculate ARPU if I have different customer tiers?</div><div class="faq-a">Calculate a weighted average ARPU. Multiply each tier's annual revenue by the percentage of customers in that tier, then sum the results. For example, if 70% of customers spend $400/year and 30% spend $1,000/year, your ARPU is (0.7 × $400) + (0.3 × $1,000) = $580.</div></div>
+  <div class="faq-item"><div class="faq-q">Should I use gross profit margin or net profit margin?</div><div class="faq-a">Use gross profit margin if you want to understand value contribution before operating expenses, which is useful for production-focused businesses. Use net profit margin for a complete picture including all costs. Many SaaS companies use contribution margin, which includes variable costs but excludes fixed overhead.</div></div>
+  <div class="faq-item"><div class="faq-q">How do I determine customer lifespan?</div><div class="faq-a">Calculate the average customer lifespan by analyzing historical data. If you're a new business, use industry benchmarks or estimates. Common approaches include tracking cohort retention rates over time or calculating 1 divided by monthly churn rate. Continuously refine this number as you gather more data.</div></div>
+  <div class="faq-item"><div class="faq-q">How often should I recalculate LTV?</div><div class="faq-a">Recalculate LTV quarterly or semi-annually to track trends. Recalculate immediately after major business changes like pricing adjustments, product launches, or churn improvements. Regular monitoring helps you identify whether your retention and monetization strategies are working effectively.</div></div></section>
+  <div class="more-tools"><h3>More Tools</h3><div class="tools-grid"><a class="tool-pill" href="/tools/en/compound-interest.html">Compound Interest Calculator</a>
+      <a class="tool-pill" href="/tools/en/roi-calculator.html">ROI Calculator</a>
+      <a class="tool-pill" href="/tools/en/risk-reward.html">Risk Reward Calculator</a>
+      <a class="tool-pill" href="/tools/en/position-size.html">Position Size Calculator</a>
+      <a class="tool-pill" href="/tools/en/stop-loss.html">Stop Loss Calculator</a>
+      <a class="tool-pill" href="/tools/en/dividend-yield.html">Dividend Yield Calculator</a>
+      <a class="tool-pill" href="/tools/en/pe-ratio.html">P/E Ratio Calculator</a>
+      <a class="tool-pill" href="/tools/en/dca-calculator.html">DCA Calculator</a>
+      <a class="tool-pill" href="/tools/en/cagr.html">CAGR Calculator</a>
+      <a class="tool-pill" href="/tools/en/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/en/stock-gain-loss.html">Stock Gain/Loss Calculator</a>
+      <a class="tool-pill" href="/tools/en/break-even.html">Break Even Calculator</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/ltv-calculator.html" class="lang-btn active">English</a>
+    <a href="/tools/ltv-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/ltv-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/ltv-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/ltv-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/ltv-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/ltv-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/ltv-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/ltv-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/ltv-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Related Tools</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const arpuInput = document.getElementById('arpu');
+  const marginInput = document.getElementById('margin');
+  const lifespanInput = document.getElementById('lifespan');
+  
+  if (!arpuInput.value || !marginInput.value || !lifespanInput.value) {
+    alert('Please fill in all fields');
+    return;
+  }
+  
+  const arpu = parseFloat(arpuInput.value);
+  const margin = parseFloat(marginInput.value);
+  const lifespan = parseFloat(lifespanInput.value);
+  
+  if (arpu <= 0 || margin < 0 || margin > 100 || lifespan <= 0) {
+    alert('Please enter valid values: ARPU > 0, Margin 0-100%, Lifespan > 0');
+    return;
+  }
+  
+  const marginDecimal = margin / 100;
+  const ltv = arpu * marginDecimal * lifespan;
+  const annualValue = arpu * marginDecimal;
+  const monthlyValue = annualValue / 12;
+  
+  document.getElementById('ltv_result').textContent = ltv.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('annual_value').textContent = annualValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('monthly_value').textContent = monthlyValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  
+  document.getElementById('results_section').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copied!';setTimeout(function(){b.textContent='Share'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|en|ltv-calculator|2026-07-09 -->

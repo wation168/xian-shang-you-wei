@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>燃氣帳單計算機 - 快速計算月度和年度費用</title>
+<meta name="description" content="免費燃氣帳單計算機。輸入用量、單位費率和固定費用，立即計算您的燃氣帳單總額，包括增值稅。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/gas-bill.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/gas-bill.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/gas-bill.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/gas-bill.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/gas-bill.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/gas-bill.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/gas-bill.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/gas-bill.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/gas-bill.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/gas-bill.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/gas-bill.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/gas-bill.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "燃氣帳單計算機", "url": "https://softglow-ai.com/tools/gas-bill.html", "description": "免費燃氣帳單計算機。輸入用量、單位費率和固定費用，立即計算您的燃氣帳單總額，包括增值稅。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "燃氣帳單中的固定費用是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "固定費用是供應商每天收取的標準費用，無論您使用多少燃氣都需要支付。這通常涵蓋維護和分配成本。"}}, {"@type": "Question", "name": "增值稅（VAT）是如何計算的？", "acceptedAnswer": {"@type": "Answer", "text": "增值稅根據小計金額乘以適用的稅率計算。例如，若小計為£100，增值稅率為5%，則增值稅為£5。"}}, {"@type": "Question", "name": "如何找到我的燃氣用量和費率？", "acceptedAnswer": {"@type": "Answer", "text": "您可以在最近的燃氣帳單上找到這些信息，或登錄您的燃氣供應商帳戶查看詳細信息。智能儀表也會顯示實時用量數據。"}}, {"@type": "Question", "name": "計費周期通常是多長？", "acceptedAnswer": {"@type": "Answer", "text": "大多數燃氣帳單的計費周期為28至31天。您可以在帳單上查找具體周期，或與您的供應商確認。"}}, {"@type": "Question", "name": "如果我想估算年度費用怎麼辦？", "acceptedAnswer": {"@type": "Answer", "text": "將計費周期設置為365天，或計算月度費用後乘以12。請注意，季節變化可能導致實際費用略有不同。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 燃氣帳單計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>燃氣帳單計算機</h1>
+    <p class="calc-subtitle">根據用量和當地費率計算您的每月或每年燃氣帳單</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="gasUsage">燃氣用量</label>
+  <div class="input-row"><input type="number" id="gasUsage" placeholder="輸入用量"  value="250" step="0.1"><span class="input-suffix">kWh</span></div>
+</div>
+  <small class="input-help">輸入您的燃氣消耗量（以kWh計）</small>
+<div class="input-group">
+  <label for="ratePerUnit">單位費率</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="ratePerUnit" placeholder="輸入費率"  value="0.07" step="0.001"><span class="input-suffix">每kWh</span></div>
+</div>
+  <small class="input-help">輸入每個單位的費率</small>
+<div class="input-group">
+  <label for="standingCharge">固定費用</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="standingCharge" placeholder="每日固定費用"  value="0.50" step="0.01"><span class="input-suffix">每天</span></div>
+</div>
+  <small class="input-help">輸入每日固定費用</small>
+<div class="input-group">
+  <label for="billingDays">計費周期</label>
+  <div class="input-row"><input type="number" id="billingDays" placeholder="計費天數"  value="30" step="1"><span class="input-suffix">天</span></div>
+</div>
+  <small class="input-help">輸入計費周期的天數</small>
+<div class="input-group">
+  <label for="taxRate">增值稅率</label>
+  <div class="input-row"><input type="number" id="taxRate" placeholder="稅率百分比"  value="5" step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">輸入適用的增值稅百分比</small></div>
+    <button class="btn-calc" onclick="calculate()">計算</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">用量費用</span><span class="result-value" id="usageCost">—</span></div>
+<div class="result-item"><span class="result-label">固定費用成本</span><span class="result-value" id="standingCost">—</span></div>
+<div class="result-item"><span class="result-label">小計（未計VAT）</span><span class="result-value" id="subtotal">—</span></div>
+<div class="result-item"><span class="result-label">增值稅金額</span><span class="result-value" id="taxAmount">—</span></div>
+<div class="result-highlight"><span class="result-label">燃氣帳單總額</span><span class="result-value" id="totalBill">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> 用量費用是根據實際用量乘以單位費率計算得出。固定費用成本是每日固定費用乘以計費天數。小計是這兩項費用的總和，增值稅則按小計金額計算，最終的燃氣帳單總額包含所有費用和稅款。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 列印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>燃氣帳單計算機使用指南</h2><p>我們的燃氣帳單計算機可幫助您快速準確地計算每月或每年的燃氣費用。只需輸入您的燃氣用量（以千瓦時計）、適用的單位費率、固定日費用和增值稅率，即可獲得完整的帳單明細。</p><h2>計算方式</h2><p>燃氣帳單由兩部分組成：用量費用和固定費用。用量費用 = 燃氣用量 × 單位費率；固定費用 = 每日費用 × 計費天數。小計是這兩項的總和，然後根據適用的增值稅率計算稅款，最終帳單總額 = 小計 + 增值稅。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>輸入參數說明</h2><p>燃氣用量以千瓦時（kWh）為單位，可在您的帳單或智能儀表上找到。單位費率通常由您的燃氣供應商提供，以每kWh的價格表示。固定費用是每日的標準費用，不管您使用多少燃氣都需要支付。計費周期是指您此次帳單涵蓋的天數，通常為30至31天。增值稅率根據地區而異，英國通常為5%。</p><h2>節省燃氣費用的建議</h2><p>定期檢查您的燃氣用量，設置更高效的恆溫器溫度，確保家中的隔熱和密封良好，以及定期維護您的燃氣設備。比較不同供應商的費率，以確保您獲得最佳價格。</p><h2>常見問題</h2><p>如果您對計算結果有任何疑問，請參考下方常見問題解答。我們提供了有關如何使用此計算機以及理解燃氣帳單各部分的詳細信息。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">燃氣帳單中的固定費用是什麼？</div><div class="faq-a">固定費用是供應商每天收取的標準費用，無論您使用多少燃氣都需要支付。這通常涵蓋維護和分配成本。</div></div>
+  <div class="faq-item"><div class="faq-q">增值稅（VAT）是如何計算的？</div><div class="faq-a">增值稅根據小計金額乘以適用的稅率計算。例如，若小計為£100，增值稅率為5%，則增值稅為£5。</div></div>
+  <div class="faq-item"><div class="faq-q">如何找到我的燃氣用量和費率？</div><div class="faq-a">您可以在最近的燃氣帳單上找到這些信息，或登錄您的燃氣供應商帳戶查看詳細信息。智能儀表也會顯示實時用量數據。</div></div>
+  <div class="faq-item"><div class="faq-q">計費周期通常是多長？</div><div class="faq-a">大多數燃氣帳單的計費周期為28至31天。您可以在帳單上查找具體周期，或與您的供應商確認。</div></div>
+  <div class="faq-item"><div class="faq-q">如果我想估算年度費用怎麼辦？</div><div class="faq-a">將計費周期設置為365天，或計算月度費用後乘以12。請注意，季節變化可能導致實際費用略有不同。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/roi-calculator.html">ROI 計算機</a>
+      <a class="tool-pill" href="/tools/risk-reward.html">風險報酬計算機</a>
+      <a class="tool-pill" href="/tools/position-size.html">部位規模計算器</a>
+      <a class="tool-pill" href="/tools/stop-loss.html">停損計算機</a>
+      <a class="tool-pill" href="/tools/dividend-yield.html">股息收益率計算機</a>
+      <a class="tool-pill" href="/tools/pe-ratio.html">本益比計算機</a>
+      <a class="tool-pill" href="/tools/dca-calculator.html">定期定額投資計算機</a>
+      <a class="tool-pill" href="/tools/cagr.html">年複合成長率計算器</a>
+      <a class="tool-pill" href="/tools/margin-calculator.html">保證金計算器</a>
+      <a class="tool-pill" href="/tools/stock-gain-loss.html">股票損益計算機</a>
+      <a class="tool-pill" href="/tools/break-even.html">損益平衡點計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/gas-bill.html" class="lang-btn">English</a>
+    <a href="/tools/gas-bill.html" class="lang-btn active">繁體中文</a>
+    <a href="/tools/ja/gas-bill.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/gas-bill.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/gas-bill.html" class="lang-btn">Français</a>
+    <a href="/tools/es/gas-bill.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/gas-bill.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/gas-bill.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/gas-bill.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/gas-bill.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const gasUsage = parseFloat(document.getElementById('gasUsage').value);
+  const ratePerUnit = parseFloat(document.getElementById('ratePerUnit').value);
+  const standingCharge = parseFloat(document.getElementById('standingCharge').value);
+  const billingDays = parseFloat(document.getElementById('billingDays').value);
+  const taxRate = parseFloat(document.getElementById('taxRate').value);
+
+  if (isNaN(gasUsage) || isNaN(ratePerUnit) || isNaN(standingCharge) || isNaN(billingDays) || isNaN(taxRate)) {
+    alert('Please enter valid numbers in all fields');
+    return;
+  }
+
+  if (gasUsage < 0 || ratePerUnit < 0 || standingCharge < 0 || billingDays < 0 || taxRate < 0) {
+    alert('Please enter positive values only');
+    return;
+  }
+
+  const usageCost = gasUsage * ratePerUnit;
+  const standingCost = standingCharge * billingDays;
+  const subtotal = usageCost + standingCost;
+  const taxAmount = subtotal * (taxRate / 100);
+  const totalBill = subtotal + taxAmount;
+
+  document.getElementById('usageCost').textContent = '£' + usageCost.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('standingCost').textContent = '£' + standingCost.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('subtotal').textContent = '£' + subtotal.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('taxAmount').textContent = '£' + taxAmount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('totalBill').textContent = '£' + totalBill.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-TW|gas-bill|2026-07-09 -->

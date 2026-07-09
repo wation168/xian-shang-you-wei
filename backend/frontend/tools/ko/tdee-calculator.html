@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TDEE 계산기 - 일일 칼로리 필요량 계산</title>
+<meta name="description" content="나이, 성별, 키, 체중, 활동 수준을 입력하여 기초대사량과 일일 에너지 소비량을 계산하세요.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ko/tdee-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/tdee-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/tdee-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/tdee-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/tdee-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/tdee-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/tdee-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/tdee-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/tdee-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/tdee-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/tdee-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/tdee-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "TDEE 계산기", "url": "https://softglow-ai.com/tools/ko/tdee-calculator.html", "description": "나이, 성별, 키, 체중, 활동 수준을 입력하여 기초대사량과 일일 에너지 소비량을 계산하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "BMR과 TDEE의 차이는 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "BMR(기초대사량)은 휴식 중에만 소모하는 칼로리이고, TDEE(일일 에너지 소비량)는 일상 활동과 운동까지 포함한 총 소비 칼로리입니다. TDEE = BMR × 활동 계수로 계산됩니다."}}, {"@type": "Question", "name": "활동 수준은 어떻게 선택해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "거의 운동하지 않으면 '좌식', 주 1~3회 운동하면 '약간 활동적', 주 3~5회 운동하면 '활동적', 매일 운동하면 '매우 활동적'을 선택하세요. 자신의 실제 활동량에 맞게 선택하는 것이 정확한 계산의 핵심입니다."}}, {"@type": "Question", "name": "체중 감량을 위해 얼마나 칼로리를 줄여야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "건강한 체중 감량을 위해서는 일일 500칼로리 부족(주당 약 0.5kg 감량)이 적절합니다. 1,000칼로리 이상 부족하면 근손실, 피로, 영양 결핍 등의 부작용이 발생할 수 있으므로 피해야 합니다."}}, {"@type": "Question", "name": "계산 결과가 부정확할 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "이 계산기는 평균 공식을 기반으로 하며, 개인의 대사율, 근육량, 호르몬 등에 따라 실제값과 5~10% 차이가 날 수 있습니다. 2~3주 실행 후 체중 변화를 관찰하여 칼로리 섭취량을 조정하세요."}}, {"@type": "Question", "name": "운동하지 않는 날에도 같은 칼로리를 섭취해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "계산된 TDEE는 일주일 평균이므로, 운동하지 않는 날에도 같은 칼로리를 섭취하면 됩니다. 또는 운동하는 날에는 더 먹고 운동하지 않는 날에는 덜 먹어도 되지만, 일주일 총 섭취 칼로리를 맞추는 것이 중요합니다."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ko/">도구</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > TDEE 계산기</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>TDEE 계산기</h1>
+    <p class="calc-subtitle">활동 수준에 따른 일일 칼로리 필요량을 계산하세요</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="age">나이</label>
+  <div class="input-row"><input type="number" id="age" placeholder="30"  step="1"><span class="input-suffix">세</span></div>
+</div>
+  <small class="input-help">현재 나이를 입력하세요</small>
+<div class="input-group">
+  <label for="gender">성별</label>
+  <div class="input-row"><select id="gender"><option value="male" selected>남성</option><option value="female">여성</option></select></div>
+</div>
+  <small class="input-help">남성 또는 여성을 선택하세요</small>
+<div class="input-group">
+  <label for="height">키</label>
+  <div class="input-row"><input type="number" id="height" placeholder="175"  step="1"><span class="input-suffix">cm</span></div>
+</div>
+  <small class="input-help">센티미터 단위로 키를 입력하세요</small>
+<div class="input-group">
+  <label for="weight">체중</label>
+  <div class="input-row"><input type="number" id="weight" placeholder="75"  step="0.1"><span class="input-suffix">kg</span></div>
+</div>
+  <small class="input-help">킬로그램 단위로 체중을 입력하세요</small>
+<div class="input-group">
+  <label for="activity">활동 수준</label>
+  <div class="input-row"><input type="text" id="activity" value="1.55"></div>
+</div>
+  <small class="input-help">주당 운동 빈도를 선택하세요</small></div>
+    <button class="btn-calc" onclick="calculate()">계산하기</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">기초대사량(BMR)</span><span class="result-value" id="bmrResult">—</span></div>
+<div class="result-highlight"><span class="result-label">일일 에너지 소비량(TDEE)</span><span class="result-value" id="tdeeResult">—</span></div>
+<div class="result-item"><span class="result-label">체중 감량용(500칼로리 부족)</span><span class="result-value" id="deficitResult">—</span></div>
+<div class="result-item"><span class="result-label">체중 증가용(500칼로리 초과)</span><span class="result-value" id="surplusResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>이것은 무엇을 의미합니까?</strong> 기초대사량(BMR)은 휴식 중에 소모하는 칼로리이며, TDEE는 활동을 포함한 일일 총 소비 칼로리입니다. 체중 감량을 원하면 TDEE에서 500칼로리를 빼고, 체중 증가를 원하면 500칼로리를 더하여 식단을 구성하세요. 개인차가 있으므로 결과를 기준으로 조정하며 진행하세요.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 인쇄</button>
+        <button onclick="shareResult()">&#x1f4e4; 공유</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>TDEE 계산기란?</h2><p>TDEE(Total Daily Energy Expenditure)는 하루 동안 소모하는 총 칼로리량입니다. 이는 기초대사량(BMR)에 활동 수준을 곱하여 계산됩니다. TDEE를 알면 체중 관리 목표에 맞는 적절한 칼로리 섭취량을 결정할 수 있습니다.</p><h2>기초대사량(BMR) 이해하기</h2><p>기초대사량은 아무 활동을 하지 않고 휴식 중에도 신체가 생명을 유지하기 위해 소모하는 칼로리입니다. 나이, 성별, 키, 체중에 따라 달라지며, 근육량이 많을수록 기초대사량도 높아집니다. 일반적으로 성인 남성의 기초대사량은 1,600~1,800칼로리, 여성은 1,400~1,600칼로리 정도입니다.</p><h2>활동 수준의 중요성</h2><p>활동 수준은 TDEE 계산에 가장 큰 영향을 미칩니다. 좌식 생활을 하는 경우 1.2배, 주 3~4회 운동하는 경우 1.55배, 매일 운동하는 경우 1.725배 등으로 기초대사량에 곱해집니다. 정확한 활동 수준 선택이 신뢰할 수 있는 TDEE 계산의 핵심입니다.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>체중 감량 및 증가 계획</h2><p>체중 1kg을 감량하려면 약 7,700칼로리의 부족이 필요하므로, 주당 0.5kg 감량을 목표로 하면 일일 500칼로리 부족을 유지해야 합니다. 반대로 체중을 증가시키려면 일일 500칼로리 초과 섭취를 유지하면 됩니다. 단, 과도한 칼로리 제한은 대사를 떨어뜨릴 수 있으므로 점진적인 조정이 필요합니다.</p><h2>계산 결과 활용 방법</h2><p>계산된 TDEE는 평균값이므로 개인차가 존재합니다. 2~3주간 권장 칼로리로 식단을 구성한 후 체중 변화를 관찰하고, 필요에 따라 칼로리 섭취량을 100~200칼로리씩 조정하세요. 운동 강도나 근육량 변화에 따라 TDEE도 변할 수 있으므로 정기적으로 재계산하는 것이 좋습니다.</p><h2>식단과 운동의 균형</h2><p>칼로리 계산만으로는 건강한 체중 관리를 할 수 없습니다. 단백질, 탄수화물, 지방의 적절한 비율 유지와 함께 저항 운동과 유산소 운동을 병행하는 것이 중요합니다. 특히 체중 감량 중에는 근손실을 방지하기 위해 충분한 단백질 섭취와 규칙적인 운동이 필수적입니다.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 관련 기사</h3><div class="blog-grid"><a class="blog-card" href="/blog/ko/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ko/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ko/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>자주 묻는 질문</h2><div class="faq-item"><div class="faq-q">BMR과 TDEE의 차이는 무엇인가요?</div><div class="faq-a">BMR(기초대사량)은 휴식 중에만 소모하는 칼로리이고, TDEE(일일 에너지 소비량)는 일상 활동과 운동까지 포함한 총 소비 칼로리입니다. TDEE = BMR × 활동 계수로 계산됩니다.</div></div>
+  <div class="faq-item"><div class="faq-q">활동 수준은 어떻게 선택해야 하나요?</div><div class="faq-a">거의 운동하지 않으면 '좌식', 주 1~3회 운동하면 '약간 활동적', 주 3~5회 운동하면 '활동적', 매일 운동하면 '매우 활동적'을 선택하세요. 자신의 실제 활동량에 맞게 선택하는 것이 정확한 계산의 핵심입니다.</div></div>
+  <div class="faq-item"><div class="faq-q">체중 감량을 위해 얼마나 칼로리를 줄여야 하나요?</div><div class="faq-a">건강한 체중 감량을 위해서는 일일 500칼로리 부족(주당 약 0.5kg 감량)이 적절합니다. 1,000칼로리 이상 부족하면 근손실, 피로, 영양 결핍 등의 부작용이 발생할 수 있으므로 피해야 합니다.</div></div>
+  <div class="faq-item"><div class="faq-q">계산 결과가 부정확할 수 있나요?</div><div class="faq-a">이 계산기는 평균 공식을 기반으로 하며, 개인의 대사율, 근육량, 호르몬 등에 따라 실제값과 5~10% 차이가 날 수 있습니다. 2~3주 실행 후 체중 변화를 관찰하여 칼로리 섭취량을 조정하세요.</div></div>
+  <div class="faq-item"><div class="faq-q">운동하지 않는 날에도 같은 칼로리를 섭취해야 하나요?</div><div class="faq-a">계산된 TDEE는 일주일 평균이므로, 운동하지 않는 날에도 같은 칼로리를 섭취하면 됩니다. 또는 운동하는 날에는 더 먹고 운동하지 않는 날에는 덜 먹어도 되지만, 일주일 총 섭취 칼로리를 맞추는 것이 중요합니다.</div></div></section>
+  <div class="more-tools"><h3>더 많은 도구</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ko/compound-interest.html">복리 이자 계산기</a>
+      <a class="tool-pill" href="/tools/ko/roi-calculator.html">ROI 계산기</a>
+      <a class="tool-pill" href="/tools/ko/risk-reward.html">위험-수익 계산기</a>
+      <a class="tool-pill" href="/tools/ko/position-size.html">포지션 크기 계산기</a>
+      <a class="tool-pill" href="/tools/ko/stop-loss.html">손절매 계산기</a>
+      <a class="tool-pill" href="/tools/ko/dividend-yield.html">배당 수익률 계산기</a>
+      <a class="tool-pill" href="/tools/ko/pe-ratio.html">P/E 비율 계산기</a>
+      <a class="tool-pill" href="/tools/ko/dca-calculator.html">DCA 계산기</a>
+      <a class="tool-pill" href="/tools/ko/cagr.html">CAGR 계산기</a>
+      <a class="tool-pill" href="/tools/ko/margin-calculator.html">마진 계산기</a>
+      <a class="tool-pill" href="/tools/ko/stock-gain-loss.html">주식 수익/손실 계산기</a>
+      <a class="tool-pill" href="/tools/ko/break-even.html">손익분기점 계산기</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/tdee-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/tdee-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/tdee-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/tdee-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/tdee-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/tdee-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/tdee-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/tdee-calculator.html" class="lang-btn active">한국어</a>
+    <a href="/tools/id/tdee-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/tdee-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>관련 계산기</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const age = parseFloat(document.getElementById('age').value);
+  const gender = document.getElementById('gender').value;
+  const height = parseFloat(document.getElementById('height').value);
+  const weight = parseFloat(document.getElementById('weight').value);
+  const activity = parseFloat(document.getElementById('activity').value);
+
+  if (!age || !height || !weight || isNaN(age) || isNaN(height) || isNaN(weight)) {
+    alert('Please fill in all fields with valid numbers');
+    return;
+  }
+
+  if (age <= 0 || age > 120 || height <= 50 || height > 250 || weight <= 20 || weight > 500) {
+    alert('Please enter realistic values');
+    return;
+  }
+
+  let bmr;
+  if (gender === 'male') {
+    bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+  } else {
+    bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+  }
+
+  const tdee = Math.round(bmr * activity);
+  const deficit = Math.round(tdee - 500);
+  const surplus = Math.round(tdee + 500);
+
+  document.getElementById('bmrResult').textContent = Math.round(bmr).toLocaleString();
+  document.getElementById('tdeeResult').textContent = tdee.toLocaleString();
+  document.getElementById('deficitResult').textContent = deficit.toLocaleString();
+  document.getElementById('surplusResult').textContent = surplus.toLocaleString();
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='복사됨!';setTimeout(function(){b.textContent='공유'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ko|tdee-calculator|2026-07-09 -->

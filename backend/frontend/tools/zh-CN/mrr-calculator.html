@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MRR计算器 - 计算月度经常性收入</title>
+<meta name="description" content="免费MRR计算器，快速计算月度经常性收入、年度经常性收入和日度经常性收入。适合SaaS和订阅制业务。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/zh-CN/mrr-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/mrr-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/mrr-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/mrr-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/mrr-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/mrr-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/mrr-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/mrr-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/mrr-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/mrr-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/mrr-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/mrr-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "MRR计算器", "url": "https://softglow-ai.com/tools/zh-CN/mrr-calculator.html", "description": "免费MRR计算器，快速计算月度经常性收入、年度经常性收入和日度经常性收入。适合SaaS和订阅制业务。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "MRR和ARR有什么区别？", "acceptedAnswer": {"@type": "Answer", "text": "MRR(月度经常性收入)是您每月的稳定收入，而ARR(年度经常性收入)是年化收入，等于MRR乘以12。ARR用于长期财务规划和融资估值，MRR用于短期业务监控。"}}, {"@type": "Question", "name": "我应该如何提高我的MRR？", "acceptedAnswer": {"@type": "Answer", "text": "提高MRR有两种方法：1)增加订阅者数量，通过改进营销、销售和客户获取；2)提高ARPU，通过调整定价、推荐高级套餐或扩展销售现有客户。"}}, {"@type": "Question", "name": "ARPU包括一次性费用吗？", "acceptedAnswer": {"@type": "Answer", "text": "ARPU应该只包括经常性的月度收入，不应该包括一次性费用、实施费或其他非经常性收入。这样才能准确反映可预测的经常性收益。"}}, {"@type": "Question", "name": "如何计算DRR有什么作用？", "acceptedAnswer": {"@type": "Answer", "text": "DRR(日度经常性收入)是MRR除以30得出的日均收入。它用于短期现金流预测、日常业务监控和快速评估商业健康状况。"}}, {"@type": "Question", "name": "新创业公司应该关注MRR吗？", "acceptedAnswer": {"@type": "Answer", "text": "是的，任何基于订阅或经常性收入模式的业务都应该从早期就关注MRR。MRR帮助您理解业务增长、客户留存和收入可持续性，是制定增长策略的关键指标。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/zh-CN/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > MRR计算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>MRR计算器</h1>
+    <p class="calc-subtitle">根据订阅者数量和平均每用户收入计算月度经常性收入</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="subscribers">订阅者数量</label>
+  <div class="input-row"><input type="number" id="subscribers" placeholder="1000"  step="1"><span class="input-suffix">个订阅者</span></div>
+</div>
+  <small class="input-help">输入您当前拥有的活跃订阅者总数</small>
+<div class="input-group">
+  <label for="arpu">平均每用户收入 (ARPU)</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="arpu" placeholder="50"  step="0.01"><span class="input-suffix">/月</span></div>
+</div>
+  <small class="input-help">输入每个用户平均每月为您贡献的收入金额</small></div>
+    <button class="btn-calc" onclick="calculate()">计算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">月度经常性收入 (MRR)</span><span class="result-value" id="mrrResult">—</span></div>
+<div class="result-item"><span class="result-label">年度经常性收入 (ARR)</span><span class="result-value" id="annualResult">—</span></div>
+<div class="result-item"><span class="result-label">日度经常性收入 (DRR)</span><span class="result-value" id="dailyResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>这代表什么？</strong> 月度经常性收入(MRR)是您每月稳定的经常性收入总额。年度经常性收入(ARR)是MRR乘以12个月的年化收入。日度经常性收入(DRR)是日均预期收入，用于短期收入预测。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 打印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什么是MRR？</h2><p>月度经常性收入(MRR)是指企业从订阅用户获得的每月稳定、可预测的收入。对于SaaS公司、订阅制服务和其他基于订阅的业务模式，MRR是最重要的业务指标之一。MRR反映了您的业务的基础健康状况和可持续增长能力。</p><h2>如何计算MRR</h2><p>MRR的计算公式很简单：MRR = 订阅者数量 × 平均每用户收入(ARPU)。例如，如果您有1000个订阅者，每个用户平均每月贡献50元收入，那么您的MRR就是¥50,000。</p><h2>理解ARPU</h2><p>平均每用户收入(ARPU)是衡量每个用户价值的关键指标。它通过将总收入除以用户数量计算得出。ARPU高的公司通常意味着产品定价合理或客户层级分化明显。优化ARPU可以通过提价、提升用户、交叉销售或升级销售来实现。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>MRR、ARR和DRR的关系</h2><p>这三个指标相互关联。ARR是MRR乘以12，代表年化收入。DRR是MRR除以30，代表日均收入。这些指标帮助您从不同时间维度理解业务表现。当您需要进行月度、季度或年度规划时，这些数据都非常有价值。</p><h2>为什么MRR很重要</h2><p>MRR是投资者和管理者最关注的SaaS公司指标。它显示了您的业务增长轨迹和可持续性。稳定或增长的MRR表明客户获取、留存和扩展都在良好运作。相比之下，MRR下降则意味着客户流失或平均收入下降，需要立即采取行动。</p><h2>优化MRR的策略</h2><p>提升MRR有两个主要途径：增加订阅者数量或提高ARPU。增加订阅者数量需要更好的营销和销售策略。提高ARPU可以通过优化定价模型、推荐高级计划、添加高价值功能或改进客户体验来实现。大多数成功的SaaS公司同时关注这两个方面。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸阅读</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常见问题</h2><div class="faq-item"><div class="faq-q">MRR和ARR有什么区别？</div><div class="faq-a">MRR(月度经常性收入)是您每月的稳定收入，而ARR(年度经常性收入)是年化收入，等于MRR乘以12。ARR用于长期财务规划和融资估值，MRR用于短期业务监控。</div></div>
+  <div class="faq-item"><div class="faq-q">我应该如何提高我的MRR？</div><div class="faq-a">提高MRR有两种方法：1)增加订阅者数量，通过改进营销、销售和客户获取；2)提高ARPU，通过调整定价、推荐高级套餐或扩展销售现有客户。</div></div>
+  <div class="faq-item"><div class="faq-q">ARPU包括一次性费用吗？</div><div class="faq-a">ARPU应该只包括经常性的月度收入，不应该包括一次性费用、实施费或其他非经常性收入。这样才能准确反映可预测的经常性收益。</div></div>
+  <div class="faq-item"><div class="faq-q">如何计算DRR有什么作用？</div><div class="faq-a">DRR(日度经常性收入)是MRR除以30得出的日均收入。它用于短期现金流预测、日常业务监控和快速评估商业健康状况。</div></div>
+  <div class="faq-item"><div class="faq-q">新创业公司应该关注MRR吗？</div><div class="faq-a">是的，任何基于订阅或经常性收入模式的业务都应该从早期就关注MRR。MRR帮助您理解业务增长、客户留存和收入可持续性，是制定增长策略的关键指标。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/zh-CN/compound-interest.html">复利计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/roi-calculator.html">投资回报率 (ROI) 计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/risk-reward.html">风险收益比计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/position-size.html">头寸规模计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stop-loss.html">止损计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dividend-yield.html">股息收益率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/pe-ratio.html">市盈率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dca-calculator.html">定期定额投资计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/cagr.html">复合年增长率(CAGR)计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/margin-calculator.html">保证金计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stock-gain-loss.html">股票盈亏计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/break-even.html">损益平衡点计算器</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/mrr-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/mrr-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/mrr-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/mrr-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/mrr-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/mrr-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/mrr-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/mrr-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/mrr-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/mrr-calculator.html" class="lang-btn active">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相关工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const subscribersInput = document.getElementById('subscribers');
+  const arpuInput = document.getElementById('arpu');
+  const mrrResult = document.getElementById('mrrResult');
+  const arrResult = document.getElementById('annualResult');
+  const drrResult = document.getElementById('dailyResult');
+  const resultsDiv = document.querySelector('.results');
+
+  const subscribers = parseFloat(subscribersInput.value);
+  const arpu = parseFloat(arpuInput.value);
+
+  if (!subscribersInput.value || !arpuInput.value) {
+    alert('Please fill in all fields');
+    return;
+  }
+
+  if (subscribers < 0 || arpu < 0) {
+    alert('Please enter positive numbers');
+    return;
+  }
+
+  const mrr = subscribers * arpu;
+  const arr = mrr * 12;
+  const drr = mrr / 30.44;
+
+  mrrResult.textContent = '$' + mrr.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  arrResult.textContent = '$' + arr.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  drrResult.textContent = '$' + drr.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已复制！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-CN|mrr-calculator|2026-07-09 -->

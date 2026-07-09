@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>タイル計算機 - 必要枚数を瞬時に計算</title>
+<meta name="description" content="プロジェクト面積とタイルサイズから必要なタイル枚数を計算。廃棄物率を考慮した正確な見積もりが可能です。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/tile-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/tile-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/tile-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/tile-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/tile-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/tile-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/tile-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/tile-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/tile-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/tile-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/tile-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/tile-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "タイル計算機", "url": "https://softglow-ai.com/tools/ja/tile-calculator.html", "description": "プロジェクト面積とタイルサイズから必要なタイル枚数を計算。廃棄物率を考慮した正確な見積もりが可能です。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "廃棄物率は何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "廃棄物率はタイル施工時に発生する破損、カット時の損失、施工誤差などを考慮したパーセンテージです。通常は5～15%が目安で、複雑な形状の施工ほど高くなります。"}}, {"@type": "Question", "name": "単一タイルの面積をどう計算しますか？", "acceptedAnswer": {"@type": "Answer", "text": "タイルの縦幅と横幅をメートル単位で測定し、掛け算することで面積が算出されます。例えば、30cm×30cmのタイルは0.3m×0.3m=0.09m²となります。"}}, {"@type": "Question", "name": "プロジェクト面積には何を含めるべきですか？", "acceptedAnswer": {"@type": "Answer", "text": "施工予定の全面積を含めてください。複数の壁や床がある場合は、それぞれの面積を合計した値を入力します。ドアや窓の開口部は通常除外します。"}}, {"@type": "Question", "name": "計算後に余ったタイルはどうするべきですか？", "acceptedAnswer": {"@type": "Answer", "text": "余ったタイルは将来の修理や補修に備えて保管しておくことをお勧めします。同じロット番号のタイルを保存することで、色合いの一致が保証されます。"}}, {"@type": "Question", "name": "異なるサイズのタイルを混在させる場合はどうしますか？", "acceptedAnswer": {"@type": "Answer", "text": "異なるサイズを使用する場合は、各サイズごとに計算機を実行し、それぞれの必要枚数を算出してください。その後、全ての結果を合算することで総必要枚数が得られます。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > タイル計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>タイル計算機</h1>
+    <p class="calc-subtitle">廃棄物を含めたタイルの必要枚数を計算します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="projectArea">プロジェクト面積</label>
+  <div class="input-row"><input type="number" id="projectArea" placeholder="平方メートル単位で面積を入力"  step="0.01"><span class="input-suffix">m²</span></div>
+</div>
+  <small class="input-help">施工予定面積を平方メートル単位で入力してください</small>
+<div class="input-group">
+  <label for="tileArea">単一タイルの面積</label>
+  <div class="input-row"><input type="number" id="tileArea" placeholder="平方メートル単位でタイル面積を入力"  step="0.0001"><span class="input-suffix">m²</span></div>
+</div>
+  <small class="input-help">1枚のタイルの面積を平方メートル単位で入力してください</small>
+<div class="input-group">
+  <label for="wasteFactor">廃棄物率</label>
+  <div class="input-row"><input type="number" id="wasteFactor" placeholder="パーセンテージで入力（5～15が目安）"  value="10" step="0.5"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">廃棄物率をパーセンテージで入力してください（通常5～15%）</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">必要なタイル総枚数</span><span class="result-value" id="tilesNeeded">—</span></div>
+<div class="result-item"><span class="result-label">基本数量（廃棄物なし）</span><span class="result-value" id="baseQuantity">—</span></div>
+<div class="result-item"><span class="result-label">廃棄物考慮分</span><span class="result-value" id="wasteQuantity">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 基本数量は廃棄物を考慮しない場合の必要枚数、廃棄物考慮分は廃棄や損傷に備えた追加分です。必要なタイル総枚数は、これら2つの合計値で、実際に購入するべき枚数です。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>タイル計算機について</h2><p>タイル計算機は、床や壁のタイル貼り工事に必要な正確な材料量を算出するための専門ツールです。プロジェクトの面積、使用するタイルのサイズ、そして廃棄物率を入力するだけで、購入すべきタイル枚数を瞬時に計算できます。</p><h2>必要な情報の入力方法</h2><p>まずプロジェクト面積を平方メートル単位で入力します。次に単一タイルの面積を同じく平方メートル単位で入力し、廃棄物率（通常は5～15%）を指定してください。廃棄物率は、施工中の破損、カット時の損失、施工誤差などを考慮した値です。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>計算結果の見方</h2><p>基本数量は理論上の必要枚数で、廃棄物を一切考慮しない場合の値です。廃棄物考慮分は指定した廃棄物率に基づいて計算された追加枚数で、この分を含めた必要なタイル総枚数が実際に購入すべき数量になります。</p><h2>廃棄物率の選択について</h2><p>廃棄物率は施工の難易度によって変わります。単純な矩形施工で5%、複雑な形状や配置の場合は10～15%を目安にしてください。高級なタイルほど破損時の影響が大きいため、余裕を持った廃棄物率の設定をお勧めします。</p><h2>施工前の確認事項</h2><p>計算後は必ず在庫確認を行い、同じロット番号のタイルを揃えることをお勧めします。タイルの色や質感はロットごとにわずかな違いが生じることがあるため、施工面積に対して十分な余裕を持った購入が重要です。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">廃棄物率は何ですか？</div><div class="faq-a">廃棄物率はタイル施工時に発生する破損、カット時の損失、施工誤差などを考慮したパーセンテージです。通常は5～15%が目安で、複雑な形状の施工ほど高くなります。</div></div>
+  <div class="faq-item"><div class="faq-q">単一タイルの面積をどう計算しますか？</div><div class="faq-a">タイルの縦幅と横幅をメートル単位で測定し、掛け算することで面積が算出されます。例えば、30cm×30cmのタイルは0.3m×0.3m=0.09m²となります。</div></div>
+  <div class="faq-item"><div class="faq-q">プロジェクト面積には何を含めるべきですか？</div><div class="faq-a">施工予定の全面積を含めてください。複数の壁や床がある場合は、それぞれの面積を合計した値を入力します。ドアや窓の開口部は通常除外します。</div></div>
+  <div class="faq-item"><div class="faq-q">計算後に余ったタイルはどうするべきですか？</div><div class="faq-a">余ったタイルは将来の修理や補修に備えて保管しておくことをお勧めします。同じロット番号のタイルを保存することで、色合いの一致が保証されます。</div></div>
+  <div class="faq-item"><div class="faq-q">異なるサイズのタイルを混在させる場合はどうしますか？</div><div class="faq-a">異なるサイズを使用する場合は、各サイズごとに計算機を実行し、それぞれの必要枚数を算出してください。その後、全ての結果を合算することで総必要枚数が得られます。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">ROI計算機</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">リスク・リワード計算機</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">ポジションサイズ計算機</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">ストップロス計算機</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">P/Eレシオ計算機</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">証拠金計算機</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">株式利益損失計算機</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/tile-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/tile-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/tile-calculator.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/tile-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/tile-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/tile-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/tile-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/tile-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/tile-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/tile-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const projectAreaInput = document.getElementById('projectArea');
+  const tileAreaInput = document.getElementById('tileArea');
+  const wasteFactorInput = document.getElementById('wasteFactor');
+  
+  const projectArea = parseFloat(projectAreaInput.value);
+  const tileArea = parseFloat(tileAreaInput.value);
+  const wasteFactor = parseFloat(wasteFactorInput.value);
+  
+  if (!projectArea || !tileArea || projectArea <= 0 || tileArea <= 0) {
+    alert('Please enter valid positive numbers for project area and tile area');
+    return;
+  }
+  
+  if (wasteFactor < 0) {
+    alert('Waste factor cannot be negative');
+    return;
+  }
+  
+  const baseQuantity = projectArea / tileArea;
+  const wasteQuantity = baseQuantity * (wasteFactor / 100);
+  const totalTiles = baseQuantity + wasteQuantity;
+  
+  document.getElementById('baseQuantity').textContent = Math.ceil(baseQuantity).toLocaleString('en-GB');
+  document.getElementById('wasteQuantity').textContent = Math.ceil(wasteQuantity).toLocaleString('en-GB');
+  document.getElementById('tilesNeeded').textContent = Math.ceil(totalTiles).toLocaleString('en-GB');
+  
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|tile-calculator|2026-07-09 -->

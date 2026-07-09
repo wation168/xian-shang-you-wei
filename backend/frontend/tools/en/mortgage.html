@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mortgage Calculator - Monthly Payments & Interest</title>
+<meta name="description" content="Free mortgage calculator to estimate monthly payments, total interest costs, and amortization schedules. Plan your home loan with precision.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/en/mortgage.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/mortgage.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/mortgage.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/mortgage.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/mortgage.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/mortgage.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/mortgage.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/mortgage.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/mortgage.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/mortgage.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/mortgage.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/mortgage.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Mortgage Calculator", "url": "https://softglow-ai.com/tools/en/mortgage.html", "description": "Free mortgage calculator to estimate monthly payments, total interest costs, and amortization schedules. Plan your home loan with precision.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is the difference between principal and interest?", "acceptedAnswer": {"@type": "Answer", "text": "Principal is the original amount of money you borrowed for your home purchase. Interest is the additional cost charged by the lender for lending you that money. In early mortgage payments, a larger portion goes toward interest, while later payments apply more toward reducing the principal balance."}}, {"@type": "Question", "name": "How does a shorter loan term affect my payments?", "acceptedAnswer": {"@type": "Answer", "text": "A shorter loan term (e.g., 15 years instead of 30 years) increases your monthly payment but significantly reduces the total interest you'll pay over the life of the loan. This is a good option if you can afford higher monthly payments and want to save on interest costs."}}, {"@type": "Question", "name": "Why does the interest rate matter so much?", "acceptedAnswer": {"@type": "Answer", "text": "Even small differences in interest rates can result in substantial changes to your total interest paid. For example, a 1% difference on a £250,000 loan over 25 years can add tens of thousands of pounds in additional interest costs, making interest rate shopping crucial."}}, {"@type": "Question", "name": "What costs does this calculator not include?", "acceptedAnswer": {"@type": "Answer", "text": "This calculator shows only the principal and interest portions of your mortgage payment. It doesn't include property taxes, home insurance, homeowner association fees, or mortgage insurance (PMI). Your actual monthly housing expense will be higher than the calculated payment."}}, {"@type": "Question", "name": "Can I pay off my mortgage early?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, most mortgages allow early repayment. Making extra payments toward principal reduces your total interest paid and shortens your loan term. However, check your mortgage agreement for any prepayment penalties before committing to this strategy."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/en/">Tools</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/en/">Tools</a> > Mortgage Calculator</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Mortgage Calculator</h1>
+    <p class="calc-subtitle">Calculate monthly mortgage payments and total interest costs instantly</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="loanAmount">Loan Amount (Principal)</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="loanAmount" placeholder="250000"  value="250000" step="1000"></div>
+</div>
+  <small class="input-help">Enter the total amount you're borrowing for your home purchase</small>
+<div class="input-group">
+  <label for="annualRate">Annual Interest Rate</label>
+  <div class="input-row"><input type="number" id="annualRate" placeholder="5.5"  value="5.5" step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">Enter the annual interest rate offered by your lender as a percentage</small>
+<div class="input-group">
+  <label for="loanTerm">Loan Term</label>
+  <div class="input-row"><input type="number" id="loanTerm" placeholder="25"  value="25" step="1"><span class="input-suffix">£</span></div>
+</div>
+  <small class="input-help">Enter the number of years over which you'll repay the loan</small></div>
+    <button class="btn-calc" onclick="calculate()">Calculate</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Monthly Payment</span><span class="result-value" id="monthlyPayment">—</span></div>
+<div class="result-item"><span class="result-label">Total Amount Paid</span><span class="result-value" id="totalPayment">—</span></div>
+<div class="result-item"><span class="result-label">Total Interest Paid</span><span class="result-value" id="totalInterest">—</span></div>
+<div class="result-item"><span class="result-label">Interest as % of Loan</span><span class="result-value" id="interestPercentage">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>What does this mean?</strong> The monthly payment shows what you'll pay each month toward your mortgage. The total amount paid represents the complete cost of your loan, while total interest paid shows the extra cost of borrowing. The interest percentage helps you understand the true cost of the loan relative to the original amount borrowed.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Print</button>
+        <button onclick="shareResult()">&#x1f4e4; Share</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>Understanding Mortgage Payments</h2><p>A mortgage calculator is an essential tool for anyone considering purchasing a home. It helps you understand the financial commitment required and allows you to explore different loan scenarios before committing to a specific mortgage product. By entering your loan amount, interest rate, and loan term, you can instantly see what your monthly obligations will be and calculate the total cost of your borrowing.</p><h2>How the Calculator Works</h2><p>The mortgage calculator uses a standard amortization formula to determine your monthly payment. The formula accounts for the principal amount borrowed, the interest rate applied by your lender, and the number of monthly payments you'll make over the life of the loan. Your monthly payment remains consistent throughout the loan period, though the proportion of principal versus interest changes over time—early payments are weighted toward interest, while later payments are weighted toward principal repayment.</p><h2>Breaking Down the Results</h2><p>Your monthly payment is the fixed amount you'll pay each month to your lender. This payment covers both principal repayment and interest charges. The total amount paid represents the cumulative sum of all monthly payments made over the entire loan term. The total interest paid is calculated by subtracting the original loan amount from the total amount paid, showing exactly how much you'll spend on interest. The interest as a percentage of the loan gives you a quick understanding of how expensive the borrowing is relative to the amount you're financing.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Factors Affecting Your Monthly Payment</h2><p>Three primary factors determine your monthly mortgage payment: the loan amount (principal), the interest rate, and the loan term. A larger principal increases your monthly payment proportionally. A higher interest rate increases your payment and the total interest you'll pay over the life of the loan. A longer loan term spreads the payments over more months, lowering the monthly payment but increasing total interest paid. Conversely, a shorter loan term increases monthly payments but reduces total interest costs.</p><h2>Using This Calculator for Financial Planning</h2><p>Use this calculator to compare different mortgage scenarios. Try adjusting the loan amount to see how a larger down payment affects your monthly obligations. Experiment with different interest rates to understand how rate increases impact your payments. Compare 15-year, 20-year, and 30-year loan terms to find the balance between affordable monthly payments and minimizing total interest costs. This exploration helps you make informed decisions about your home purchase and determine what price range of homes you can realistically afford.</p><h2>Additional Mortgage Considerations</h2><p>Remember that your actual monthly housing cost will likely exceed the mortgage payment shown here. You'll also need to budget for property taxes, homeowner's insurance, and potentially private mortgage insurance (PMI) if your down payment is less than 20%. Additionally, if you have a mortgage with an adjustable rate, your interest rate and monthly payment may change after an initial fixed period. Always obtain a detailed loan estimate from your lender before making final decisions.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Related Articles</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>FAQ</h2><div class="faq-item"><div class="faq-q">What is the difference between principal and interest?</div><div class="faq-a">Principal is the original amount of money you borrowed for your home purchase. Interest is the additional cost charged by the lender for lending you that money. In early mortgage payments, a larger portion goes toward interest, while later payments apply more toward reducing the principal balance.</div></div>
+  <div class="faq-item"><div class="faq-q">How does a shorter loan term affect my payments?</div><div class="faq-a">A shorter loan term (e.g., 15 years instead of 30 years) increases your monthly payment but significantly reduces the total interest you'll pay over the life of the loan. This is a good option if you can afford higher monthly payments and want to save on interest costs.</div></div>
+  <div class="faq-item"><div class="faq-q">Why does the interest rate matter so much?</div><div class="faq-a">Even small differences in interest rates can result in substantial changes to your total interest paid. For example, a 1% difference on a £250,000 loan over 25 years can add tens of thousands of pounds in additional interest costs, making interest rate shopping crucial.</div></div>
+  <div class="faq-item"><div class="faq-q">What costs does this calculator not include?</div><div class="faq-a">This calculator shows only the principal and interest portions of your mortgage payment. It doesn't include property taxes, home insurance, homeowner association fees, or mortgage insurance (PMI). Your actual monthly housing expense will be higher than the calculated payment.</div></div>
+  <div class="faq-item"><div class="faq-q">Can I pay off my mortgage early?</div><div class="faq-a">Yes, most mortgages allow early repayment. Making extra payments toward principal reduces your total interest paid and shortens your loan term. However, check your mortgage agreement for any prepayment penalties before committing to this strategy.</div></div></section>
+  <div class="more-tools"><h3>More Tools</h3><div class="tools-grid"><a class="tool-pill" href="/tools/en/down-payment.html">Down Payment Calculator</a>
+      <a class="tool-pill" href="/tools/en/refinance-calc.html">Refinance Calc</a>
+      <a class="tool-pill" href="/tools/en/home-affordability.html">Home Affordability Calculator</a>
+      <a class="tool-pill" href="/tools/en/rent-vs-buy.html">Rent vs Buy Calculator</a>
+      <a class="tool-pill" href="/tools/en/cap-rate.html">Cap Rate Calculator</a>
+      <a class="tool-pill" href="/tools/en/cash-on-cash.html">Cash-on-Cash Return Calculator</a>
+      <a class="tool-pill" href="/tools/en/property-tax.html">Property Tax Calculator</a>
+      <a class="tool-pill" href="/tools/en/stamp-duty.html">Stamp Duty Calculator</a>
+      <a class="tool-pill" href="/tools/en/heloc-calculator.html">Heloc Calculator</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/mortgage.html" class="lang-btn active">English</a>
+    <a href="/tools/mortgage.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/mortgage.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/mortgage.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/mortgage.html" class="lang-btn">Français</a>
+    <a href="/tools/es/mortgage.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/mortgage.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/mortgage.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/mortgage.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/mortgage.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Related Tools</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const loanAmountInput = document.getElementById('loanAmount');
+  const annualRateInput = document.getElementById('annualRate');
+  const loanTermInput = document.getElementById('loanTerm');
+  
+  if (!loanAmountInput.value || !annualRateInput.value || !loanTermInput.value) {
+    alert('Please fill in all fields');
+    return;
+  }
+  
+  const P = parseFloat(loanAmountInput.value);
+  const annualRate = parseFloat(annualRateInput.value);
+  const years = parseFloat(loanTermInput.value);
+  
+  if (P <= 0 || annualRate < 0 || years <= 0) {
+    alert('Please enter valid positive numbers');
+    return;
+  }
+  
+  const monthlyRate = annualRate / 100 / 12;
+  const numberOfPayments = years * 12;
+  
+  let monthlyPayment = 0;
+  if (monthlyRate === 0) {
+    monthlyPayment = P / numberOfPayments;
+  } else {
+    monthlyPayment = (P * (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments))) / (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
+  }
+  
+  const totalPayment = monthlyPayment * numberOfPayments;
+  const totalInterest = totalPayment - P;
+  const interestPercentage = (totalInterest / P) * 100;
+  
+  document.getElementById('monthlyPayment').textContent = monthlyPayment.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('totalPayment').textContent = totalPayment.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('totalInterest').textContent = totalInterest.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('interestPercentage').textContent = interestPercentage.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copied!';setTimeout(function(){b.textContent='Share'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|en|mortgage|2026-07-09 -->

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Work Days Calculator - Business Days Counter</title>
+<meta name="description" content="Calculate working days between two dates. Exclude weekends and holidays automatically. Perfect for project planning and deadline tracking.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/en/work-days.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/work-days.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/work-days.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/work-days.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/work-days.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/work-days.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/work-days.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/work-days.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/work-days.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/work-days.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/work-days.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/work-days.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Work Days Calculator", "url": "https://softglow-ai.com/tools/en/work-days.html", "description": "Calculate working days between two dates. Exclude weekends and holidays automatically. Perfect for project planning and deadline tracking.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What date format should I use?", "acceptedAnswer": {"@type": "Answer", "text": "Use the YYYY-MM-DD format (for example, 2025-01-15). This format is internationally recognized and prevents date confusion between different regional conventions."}}, {"@type": "Question", "name": "Can I include multiple holidays?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, you can include as many holidays as needed. Simply enter each date on a separate line in the Holidays field. The calculator will automatically exclude all listed dates from your working days count."}}, {"@type": "Question", "name": "Are weekends always Saturday and Sunday?", "acceptedAnswer": {"@type": "Answer", "text": "This calculator assumes a standard Monday-Friday work week with Saturday and Sunday as weekends. If your organization operates on a different schedule, use the holidays field to exclude your actual non-working days."}}, {"@type": "Question", "name": "Does the calculator include the start and end dates?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, both the start and end dates are included in the calculation. If you need to exclude either date, you can adjust them by one day accordingly."}}, {"@type": "Question", "name": "How can I use this for project planning?", "acceptedAnswer": {"@type": "Answer", "text": "Determine your project duration by identifying start and end dates, add all relevant holidays and company closures, then use the working days result to calculate realistic timelines. Divide total project hours by available working days to determine daily resource requirements."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/en/">Tools</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/en/">Tools</a> > Work Days Calculator</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Work Days Calculator</h1>
+    <p class="calc-subtitle">Calculate business days between two dates, excluding weekends and holidays</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="startDate">Start Date</label>
+  <div class="input-row"><input type="date" id="startDate" placeholder="2025-01-01"  value="2025-01-01" step="1"></div>
+</div>
+  <small class="input-help">Enter the beginning date for your calculation period</small>
+<div class="input-group">
+  <label for="endDate">End Date</label>
+  <div class="input-row"><input type="date" id="endDate" placeholder="2025-12-31"  value="2025-12-31" step="1"></div>
+</div>
+  <small class="input-help">Enter the ending date for your calculation period</small>
+<div class="input-group">
+  <label for="holidays">Holidays (one date per line)</label>
+  <div class="input-row"><input type="textarea" id="holidays" placeholder="2025-01-01
+2025-04-25
+2025-12-25"  value="2025-01-01
+2025-04-25
+2025-12-25
+2025-12-26" step="1"></div>
+</div>
+  <small class="input-help">List all holidays to exclude, with each date on a separate line</small></div>
+    <button class="btn-calc" onclick="calculate()">Calculate</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">Total Calendar Days</span><span class="result-value" id="totalDays">—</span></div>
+<div class="result-item"><span class="result-label">Weekend Days</span><span class="result-value" id="weekendDays">—</span></div>
+<div class="result-item"><span class="result-label">Holiday Days</span><span class="result-value" id="holidayDays">—</span></div>
+<div class="result-highlight"><span class="result-label">Working Days</span><span class="result-value" id="workingDays">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>What does this mean?</strong> The calculator breaks down your date range into four components: total calendar days includes every day in your range, weekend days counts Saturdays and Sundays, holiday days shows your custom holidays, and working days is the final count of actual business days available. Use the working days result for accurate project timelines and deadline planning.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Print</button>
+        <button onclick="shareResult()">&#x1f4e4; Share</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>Understanding the Work Days Calculator</h2><p>The Work Days Calculator is an essential tool for project managers, HR professionals, and business planners who need accurate calculations of available working time between two dates. Unlike a simple day counter, this calculator intelligently excludes weekends and customizable holidays to give you the true number of business days available.</p><h2>How to Use the Calculator</h2><p>Using the Work Days Calculator is straightforward. First, enter your start date in the designated field—this should be the first day of your project or time period. Next, input your end date, which marks the conclusion of your analysis period. If you need to account for holidays, enter each holiday date on a separate line in the holidays field. The calculator then processes all this information and provides a detailed breakdown of your time period.</p><h2>Understanding Your Results</h2><p>The calculator provides four key metrics. Total Calendar Days represents every single day between your dates, including weekends and holidays. Weekend Days counts all Saturdays and Sundays in your range, typically excluding them from work calculations. Holiday Days shows how many days you've marked as holidays or non-working days. Finally, Working Days is the most important figure—it's your actual available business days, calculated by subtracting weekends and holidays from the total calendar days.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Why Accurate Work Day Calculations Matter</h2><p>Precise work day calculations are crucial for business operations. When planning project timelines, you need to know exactly how many working days you have available, not just calendar days. This prevents overestimating capacity and helps set realistic deadlines. For HR departments, calculating work days is essential for tracking accrued leave, calculating notice periods, and managing employee schedules. Financial institutions use work day calculations for settlement periods and transaction processing timelines.</p><h2>Common Use Cases</h2><p>Project managers frequently use this calculator to determine if a project can be completed within a given timeframe. Freelancers and contractors use it to quote accurate delivery dates based on available working hours. HR departments rely on it for calculating statutory notice periods, redundancy calculations, and leave accruals. Legal professionals use work day calculations for compliance deadlines and contract fulfillment periods. Financial analysts need precise work day counts for trading days, settlement periods, and financial reporting deadlines.</p><h2>Tips for Accurate Calculations</h2><p>Always include regional holidays relevant to your location—the calculator allows unlimited custom holidays. Remember that some organizations observe different holidays than others, so customize accordingly. If your business operates on a different schedule (such as Saturday-Sunday working with different days off), use the custom holidays field to adjust appropriately. Always double-check your dates are in the correct format (YYYY-MM-DD) to ensure accurate processing. For international projects, consider time zones and regional holiday calendars when planning.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Related Articles</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>FAQ</h2><div class="faq-item"><div class="faq-q">What date format should I use?</div><div class="faq-a">Use the YYYY-MM-DD format (for example, 2025-01-15). This format is internationally recognized and prevents date confusion between different regional conventions.</div></div>
+  <div class="faq-item"><div class="faq-q">Can I include multiple holidays?</div><div class="faq-a">Yes, you can include as many holidays as needed. Simply enter each date on a separate line in the Holidays field. The calculator will automatically exclude all listed dates from your working days count.</div></div>
+  <div class="faq-item"><div class="faq-q">Are weekends always Saturday and Sunday?</div><div class="faq-a">This calculator assumes a standard Monday-Friday work week with Saturday and Sunday as weekends. If your organization operates on a different schedule, use the holidays field to exclude your actual non-working days.</div></div>
+  <div class="faq-item"><div class="faq-q">Does the calculator include the start and end dates?</div><div class="faq-a">Yes, both the start and end dates are included in the calculation. If you need to exclude either date, you can adjust them by one day accordingly.</div></div>
+  <div class="faq-item"><div class="faq-q">How can I use this for project planning?</div><div class="faq-a">Determine your project duration by identifying start and end dates, add all relevant holidays and company closures, then use the working days result to calculate realistic timelines. Divide total project hours by available working days to determine daily resource requirements.</div></div></section>
+  <div class="more-tools"><h3>More Tools</h3><div class="tools-grid"><a class="tool-pill" href="/tools/en/compound-interest.html">Compound Interest Calculator</a>
+      <a class="tool-pill" href="/tools/en/roi-calculator.html">ROI Calculator</a>
+      <a class="tool-pill" href="/tools/en/risk-reward.html">Risk Reward Calculator</a>
+      <a class="tool-pill" href="/tools/en/position-size.html">Position Size Calculator</a>
+      <a class="tool-pill" href="/tools/en/stop-loss.html">Stop Loss Calculator</a>
+      <a class="tool-pill" href="/tools/en/dividend-yield.html">Dividend Yield Calculator</a>
+      <a class="tool-pill" href="/tools/en/pe-ratio.html">P/E Ratio Calculator</a>
+      <a class="tool-pill" href="/tools/en/dca-calculator.html">DCA Calculator</a>
+      <a class="tool-pill" href="/tools/en/cagr.html">CAGR Calculator</a>
+      <a class="tool-pill" href="/tools/en/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/en/stock-gain-loss.html">Stock Gain/Loss Calculator</a>
+      <a class="tool-pill" href="/tools/en/break-even.html">Break Even Calculator</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/work-days.html" class="lang-btn active">English</a>
+    <a href="/tools/work-days.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/work-days.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/work-days.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/work-days.html" class="lang-btn">Français</a>
+    <a href="/tools/es/work-days.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/work-days.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/work-days.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/work-days.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/work-days.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Related Tools</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const startDateInput = document.getElementById('startDate').value;
+  const endDateInput = document.getElementById('endDate').value;
+  const holidaysInput = document.getElementById('holidays').value;
+
+  if (!startDateInput || !endDateInput) {
+    alert('Please enter both start and end dates.');
+    return;
+  }
+
+  const startDate = new Date(startDateInput);
+  const endDate = new Date(endDateInput);
+
+  if (startDate > endDate) {
+    alert('Start date must be before or equal to end date.');
+    return;
+  }
+
+  const holidayDates = holidaysInput
+    .trim()
+    .split('\n')
+    .map(d => d.trim())
+    .filter(d => d.length > 0)
+    .map(d => new Date(d));
+
+  let currentDate = new Date(startDate);
+  let workingDays = 0;
+  let weekendDays = 0;
+  let holidayCount = 0;
+
+  while (currentDate <= endDate) {
+    const dayOfWeek = currentDate.getDay();
+    const dateString = currentDate.toISOString().split('T')[0];
+    const isHoliday = holidayDates.some(h => h.toISOString().split('T')[0] === dateString);
+
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      weekendDays++;
+    } else if (isHoliday) {
+      holidayCount++;
+    } else {
+      workingDays++;
+    }
+
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  const totalDays = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+
+  document.getElementById('totalDays').textContent = totalDays.toLocaleString('en-GB');
+  document.getElementById('weekendDays').textContent = weekendDays.toLocaleString('en-GB');
+  document.getElementById('holidayDays').textContent = holidayCount.toLocaleString('en-GB');
+  document.getElementById('workingDays').textContent = workingDays.toLocaleString('en-GB');
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copied!';setTimeout(function(){b.textContent='Share'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|en|work-days|2026-07-09 -->

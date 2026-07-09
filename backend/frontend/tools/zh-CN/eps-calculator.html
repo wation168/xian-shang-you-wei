@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>每股收益EPS计算器 - 在线财务分析工具</title>
+<meta name="description" content="免费的每股收益计算器，帮助您快速计算公司的EPS，评估投资价值和盈利能力。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/zh-CN/eps-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/eps-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/eps-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/eps-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/eps-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/eps-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/eps-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/eps-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/eps-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/eps-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/eps-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/eps-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "每股收益(EPS)计算器", "url": "https://softglow-ai.com/tools/zh-CN/eps-calculator.html", "description": "免费的每股收益计算器，帮助您快速计算公司的EPS，评估投资价值和盈利能力。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "什么是每股收益(EPS)?", "acceptedAnswer": {"@type": "Answer", "text": "每股收益是将公司的净利润除以流通股数得出的指标。它表示公司每一股普通股在特定时期内产生的利润，是衡量公司盈利能力的重要指标。"}}, {"@type": "Question", "name": "EPS高好还是低好?", "acceptedAnswer": {"@type": "Answer", "text": "一般来说EPS越高越好，说明公司的盈利能力越强。但要注意与同行业其他公司对比，以及观察EPS的增长趋势，单纯看绝对值可能具有欺骗性。"}}, {"@type": "Question", "name": "如何获取计算所需的数据?", "acceptedAnswer": {"@type": "Answer", "text": "净收入可以在公司的财务报表(损益表)中找到，流通股数可在股权结构信息或最新的财务披露文件中获得。上市公司通常在官方投资者关系网站公开这些数据。"}}, {"@type": "Question", "name": "基本EPS和稀释EPS有什么区别?", "acceptedAnswer": {"@type": "Answer", "text": "基本EPS只考虑已发行的普通股，而稀释EPS还考虑了可能转换为普通股的其他证券(如员工股票期权、可转债等)的潜在稀释效应。稀释EPS通常更保守。"}}, {"@type": "Question", "name": "EPS适合用来比较不同公司吗?", "acceptedAnswer": {"@type": "Answer", "text": "直接比较不同公司的EPS绝对值意义不大，因为公司规模不同。更好的方法是使用市盈率(P/E Ratio)或EPS增长率来进行同行业公司之间的比较。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/zh-CN/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 每股收益(EPS)计算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>每股收益(EPS)计算器</h1>
+    <p class="calc-subtitle">计算每股收益以评估公司盈利能力</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="netIncome">净收入</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="netIncome" placeholder="1000000"  step="0.01"></div>
+</div>
+  <small class="input-help">输入公司的净利润金额（单位：英镑）</small>
+<div class="input-group">
+  <label for="sharesOutstanding">流通股数</label>
+  <div class="input-row"><input type="number" id="sharesOutstanding" placeholder="50000000"  step="1"><span class="input-suffix">股</span></div>
+</div>
+  <small class="input-help">输入公司流通在外的股票总数</small></div>
+    <button class="btn-calc" onclick="calculate()">计算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">每股收益(EPS)</span><span class="result-value" id="epsResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>这代表什么？</strong> 每股收益(EPS)越高，说明公司每股产生的利润越多，盈利能力越强。投资者通常用EPS来评估公司的盈利质量和股票投资价值。与同行业公司对比可以更好地理解该指标的含义。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 打印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什么是每股收益(EPS)</h2><p>每股收益(Earnings Per Share, EPS)是衡量公司盈利能力的重要财务指标。它表示公司在特定时期内每股普通股产生的净利润。EPS越高，说明公司的盈利能力越强，每股股票为投资者创造的价值越大。</p><h2>EPS计算公式</h2><p>每股收益的计算公式为：EPS = 净收入 ÷ 流通股数。例如，如果一家公司的年度净收入为100万英镑，流通股数为500万股，那么EPS = 100万 ÷ 500万 = 0.20英镑/股。</p><h2>如何使用本计算器</h2><p>只需在输入框中填入公司的净收入(以英镑为单位)和流通股数，计算器会自动为您计算出每股收益。净收入通常可以在公司的财务报表中找到，流通股数可在股权结构信息中获得。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>EPS的应用意义</h2><p>投资者和分析师广泛使用EPS来评估公司的投资价值。通过比较不同公司或同一公司不同时期的EPS，可以了解公司盈利能力的变化趋势。较高且稳定增长的EPS通常被视为积极信号。</p><h2>EPS与其他指标的关系</h2><p>EPS经常与市盈率(P/E Ratio)结合使用，市盈率 = 股价 ÷ EPS。这样可以帮助投资者判断股票是否被高估或低估。同时还应考虑公司的增长率、行业前景等因素。</p><h2>注意事项</h2><p>计算EPS时要注意使用正确的时期数据，通常以年度或季度为单位。同时要区分基本EPS和稀释EPS的区别，稀释EPS考虑了可转换证券的潜在稀释效应，更能准确反映实际情况。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸阅读</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常见问题</h2><div class="faq-item"><div class="faq-q">什么是每股收益(EPS)?</div><div class="faq-a">每股收益是将公司的净利润除以流通股数得出的指标。它表示公司每一股普通股在特定时期内产生的利润，是衡量公司盈利能力的重要指标。</div></div>
+  <div class="faq-item"><div class="faq-q">EPS高好还是低好?</div><div class="faq-a">一般来说EPS越高越好，说明公司的盈利能力越强。但要注意与同行业其他公司对比，以及观察EPS的增长趋势，单纯看绝对值可能具有欺骗性。</div></div>
+  <div class="faq-item"><div class="faq-q">如何获取计算所需的数据?</div><div class="faq-a">净收入可以在公司的财务报表(损益表)中找到，流通股数可在股权结构信息或最新的财务披露文件中获得。上市公司通常在官方投资者关系网站公开这些数据。</div></div>
+  <div class="faq-item"><div class="faq-q">基本EPS和稀释EPS有什么区别?</div><div class="faq-a">基本EPS只考虑已发行的普通股，而稀释EPS还考虑了可能转换为普通股的其他证券(如员工股票期权、可转债等)的潜在稀释效应。稀释EPS通常更保守。</div></div>
+  <div class="faq-item"><div class="faq-q">EPS适合用来比较不同公司吗?</div><div class="faq-a">直接比较不同公司的EPS绝对值意义不大，因为公司规模不同。更好的方法是使用市盈率(P/E Ratio)或EPS增长率来进行同行业公司之间的比较。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/zh-CN/compound-interest.html">复利计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/roi-calculator.html">投资回报率 (ROI) 计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/risk-reward.html">风险收益比计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/position-size.html">头寸规模计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stop-loss.html">止损计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dividend-yield.html">股息收益率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/pe-ratio.html">市盈率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dca-calculator.html">定期定额投资计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/cagr.html">复合年增长率(CAGR)计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/margin-calculator.html">保证金计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stock-gain-loss.html">股票盈亏计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/break-even.html">损益平衡点计算器</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/eps-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/eps-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/eps-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/eps-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/eps-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/eps-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/eps-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/eps-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/eps-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/eps-calculator.html" class="lang-btn active">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相关工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const netIncomeInput = document.getElementById('netIncome');
+  const sharesOutstandingInput = document.getElementById('sharesOutstanding');
+  const epsResultEl = document.getElementById('epsResult');
+  const resultsDiv = document.getElementById('results');
+
+  const netIncome = parseFloat(netIncomeInput.value);
+  const sharesOutstanding = parseFloat(sharesOutstandingInput.value);
+
+  if (!netIncomeInput.value || !sharesOutstandingInput.value) {
+    alert('Please enter both Net Income and Shares Outstanding');
+    return;
+  }
+
+  if (isNaN(netIncome) || isNaN(sharesOutstanding)) {
+    alert('Please enter valid numbers');
+    return;
+  }
+
+  if (sharesOutstanding <= 0) {
+    alert('Shares Outstanding must be greater than zero');
+    return;
+  }
+
+  const eps = netIncome / sharesOutstanding;
+
+  epsResultEl.textContent = eps.toLocaleString('en-GB', {
+    style: 'currency',
+    currency: 'GBP',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 4
+  });
+
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已复制！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-CN|eps-calculator|2026-07-09 -->

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meeting Cost Calculator - Business Meeting Expenses</title>
+<meta name="description" content="Calculate the real cost of your business meetings instantly. See total expenses, per-minute costs, and per-attendee breakdowns.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/en/meeting-cost.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/meeting-cost.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/meeting-cost.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/meeting-cost.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/meeting-cost.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/meeting-cost.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/meeting-cost.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/meeting-cost.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/meeting-cost.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/meeting-cost.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/meeting-cost.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/meeting-cost.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Meeting Cost Calculator", "url": "https://softglow-ai.com/tools/en/meeting-cost.html", "description": "Calculate the real cost of your business meetings instantly. See total expenses, per-minute costs, and per-attendee breakdowns.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Should I include benefits and overheads in the hourly rate?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, the most accurate calculation includes salary plus estimated benefits and overheads (typically 25-35% of salary). This reflects the true cost of having that person unavailable for productive work during the meeting."}}, {"@type": "Question", "name": "How do I calculate the average hourly rate for a mixed group?", "acceptedAnswer": {"@type": "Answer", "text": "Add up the hourly rates of all attendees and divide by the number of people. For example, if you have 2 people at £80/hour and 3 people at £40/hour, the average is (160 + 120) / 5 = £56/hour."}}, {"@type": "Question", "name": "Should I count travel time to meetings in the calculation?", "acceptedAnswer": {"@type": "Answer", "text": "If travel is required for your meeting, add that time to the meeting duration. For a meeting requiring 30 minutes travel time on both ends, add 1 hour to your meeting duration in the calculator."}}, {"@type": "Question", "name": "How often should I review my meeting costs?", "acceptedAnswer": {"@type": "Answer", "text": "Review meeting costs quarterly, especially for recurring meetings. As salaries change and team composition shifts, recalculate to ensure your estimates remain accurate."}}, {"@type": "Question", "name": "Can this calculator help justify virtual meetings?", "acceptedAnswer": {"@type": "Answer", "text": "Absolutely. Virtual meetings often eliminate travel time and allow for more flexible attendance, reducing overall costs. You can calculate the savings by comparing in-person meeting costs to virtual meeting costs."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/en/">Tools</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/en/">Tools</a> > Meeting Cost Calculator</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Meeting Cost Calculator</h1>
+    <p class="calc-subtitle">Calculate the true financial impact of your business meetings</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="attendees">Number of Attendees</label>
+  <div class="input-row"><input type="number" id="attendees" placeholder="5"  step="1"><span class="input-suffix">people</span></div>
+</div>
+  <small class="input-help">Enter the total number of people attending the meeting</small>
+<div class="input-group">
+  <label for="avg_hourly_rate">Average Hourly Rate</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="avg_hourly_rate" placeholder="50"  step="0.01"><span class="input-suffix">/min</span></div>
+</div>
+  <small class="input-help">Enter the average hourly salary or billing rate per person</small>
+<div class="input-group">
+  <label for="duration">Meeting Duration</label>
+  <div class="input-row"><input type="number" id="duration" placeholder="1"  step="0.25"><span class="input-suffix">hours</span></div>
+</div>
+  <small class="input-help">Enter the meeting length in hours</small></div>
+    <button class="btn-calc" onclick="calculate()">Calculate</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Total Meeting Cost</span><span class="result-value" id="totalMeetingCost">—</span></div>
+<div class="result-item"><span class="result-label">Cost Per Minute</span><span class="result-value" id="costPerMinute">—</span></div>
+<div class="result-item"><span class="result-label">Cost Per Attendee</span><span class="result-value" id="costPerAttendee">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>What does this mean?</strong> The Total Meeting Cost shows the combined expense of all attendees for the entire meeting duration. Cost Per Minute breaks down the hourly expense into individual minutes, helping you understand the real-time financial impact. Cost Per Attendee divides the total by the number of participants to show how much each person's time cost the organization.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Print</button>
+        <button onclick="shareResult()">&#x1f4e4; Share</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>Understanding Your Meeting Costs</h2><p>Meetings are essential to business operations, but they come with a significant financial price tag that many organizations overlook. By understanding the true cost of your meetings, you can make better decisions about meeting frequency, duration, and attendee lists. This calculator helps you visualize the direct expenses associated with bringing multiple people together for discussions and decision-making.</p><h2>How to Use the Meeting Cost Calculator</h2><p>Using this tool is straightforward. First, enter the number of people attending your meeting—include everyone who will be present, from junior staff to executives. Second, input the average hourly rate, which should represent the blended cost of all attendees' salaries and benefits. For executive meetings, you might use £150/hour, while team meetings might average £45/hour. Finally, enter the meeting duration in hours. A one-hour meeting would be entered as 1, while a 30-minute meeting would be 0.5.</p><h2>Interpreting Your Results</h2><p>The calculator provides three key metrics. The Total Meeting Cost represents the complete financial outlay—what that meeting actually costs your organization. For example, a meeting with 8 attendees at an average rate of £60/hour lasting 1.5 hours costs £720. The Cost Per Minute shows this expense broken into minute-by-minute increments, which can be eye-opening when you realize each minute costs £12. The Cost Per Attendee (£90 in this example) helps you understand individual contribution costs and can inform decisions about who truly needs to attend.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Why Meeting Costs Matter</h2><p>Many businesses waste thousands of pounds annually on unnecessary or poorly managed meetings. Unnecessary attendees, meetings that could have been emails, and meetings that run over schedule all contribute to hidden costs. When you can see that a 2-hour meeting with 12 people at an average of £55/hour costs £1,320, you start asking whether everyone needs to be there or if the meeting could have been shorter. This awareness drives more efficient meeting practices across your organization.</p><h2>Strategies to Reduce Meeting Costs</h2><p>Once you understand your meeting expenses, you can implement strategies to reduce them. Consider whether each attendee truly needs to participate—removing unnecessary attendees from a recurring meeting can save thousands annually. Set clear agendas and time limits to prevent meetings from running over. Combine multiple smaller meetings into one well-organized session. Use asynchronous communication like email or project management tools instead of live meetings when appropriate. For large meetings, consider whether a recording or summary could replace live attendance for some participants.</p><h2>Making Data-Driven Meeting Decisions</h2><p>Use this calculator before scheduling major meetings or reviews. If you're considering a quarterly all-hands meeting with 50 employees at an average rate of £50/hour for 2 hours, that's a £5,000 investment. Knowing this figure helps you justify the expense through improved communication and alignment, or decide to make it shorter or less frequent. For one-on-one meetings with clients or stakeholders, understanding the cost reinforces the importance of being fully prepared and respecting everyone's time.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Related Articles</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>FAQ</h2><div class="faq-item"><div class="faq-q">Should I include benefits and overheads in the hourly rate?</div><div class="faq-a">Yes, the most accurate calculation includes salary plus estimated benefits and overheads (typically 25-35% of salary). This reflects the true cost of having that person unavailable for productive work during the meeting.</div></div>
+  <div class="faq-item"><div class="faq-q">How do I calculate the average hourly rate for a mixed group?</div><div class="faq-a">Add up the hourly rates of all attendees and divide by the number of people. For example, if you have 2 people at £80/hour and 3 people at £40/hour, the average is (160 + 120) / 5 = £56/hour.</div></div>
+  <div class="faq-item"><div class="faq-q">Should I count travel time to meetings in the calculation?</div><div class="faq-a">If travel is required for your meeting, add that time to the meeting duration. For a meeting requiring 30 minutes travel time on both ends, add 1 hour to your meeting duration in the calculator.</div></div>
+  <div class="faq-item"><div class="faq-q">How often should I review my meeting costs?</div><div class="faq-a">Review meeting costs quarterly, especially for recurring meetings. As salaries change and team composition shifts, recalculate to ensure your estimates remain accurate.</div></div>
+  <div class="faq-item"><div class="faq-q">Can this calculator help justify virtual meetings?</div><div class="faq-a">Absolutely. Virtual meetings often eliminate travel time and allow for more flexible attendance, reducing overall costs. You can calculate the savings by comparing in-person meeting costs to virtual meeting costs.</div></div></section>
+  <div class="more-tools"><h3>More Tools</h3><div class="tools-grid"><a class="tool-pill" href="/tools/en/compound-interest.html">Compound Interest Calculator</a>
+      <a class="tool-pill" href="/tools/en/roi-calculator.html">ROI Calculator</a>
+      <a class="tool-pill" href="/tools/en/risk-reward.html">Risk Reward Calculator</a>
+      <a class="tool-pill" href="/tools/en/position-size.html">Position Size Calculator</a>
+      <a class="tool-pill" href="/tools/en/stop-loss.html">Stop Loss Calculator</a>
+      <a class="tool-pill" href="/tools/en/dividend-yield.html">Dividend Yield Calculator</a>
+      <a class="tool-pill" href="/tools/en/pe-ratio.html">P/E Ratio Calculator</a>
+      <a class="tool-pill" href="/tools/en/dca-calculator.html">DCA Calculator</a>
+      <a class="tool-pill" href="/tools/en/cagr.html">CAGR Calculator</a>
+      <a class="tool-pill" href="/tools/en/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/en/stock-gain-loss.html">Stock Gain/Loss Calculator</a>
+      <a class="tool-pill" href="/tools/en/break-even.html">Break Even Calculator</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/meeting-cost.html" class="lang-btn active">English</a>
+    <a href="/tools/meeting-cost.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/meeting-cost.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/meeting-cost.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/meeting-cost.html" class="lang-btn">Français</a>
+    <a href="/tools/es/meeting-cost.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/meeting-cost.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/meeting-cost.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/meeting-cost.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/meeting-cost.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Related Tools</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const attendeesInput = document.getElementById('attendees');
+  const rateInput = document.getElementById('avg_hourly_rate');
+  const durationInput = document.getElementById('duration');
+  
+  const attendees = parseFloat(attendeesInput.value);
+  const rate = parseFloat(rateInput.value);
+  const duration = parseFloat(durationInput.value);
+  
+  if (!attendees || !rate || !duration || attendees <= 0 || rate <= 0 || duration <= 0) {
+    alert('Please enter valid positive numbers for all fields');
+    return;
+  }
+  
+  const totalCost = attendees * rate * duration;
+  const costPerMinute = totalCost / (duration * 60);
+  const costPerAttendee = totalCost / attendees;
+  
+  document.getElementById('totalMeetingCost').textContent = '£' + totalCost.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('costPerMinute').textContent = '£' + costPerMinute.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('costPerAttendee').textContent = '£' + costPerAttendee.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  
+  document.getElementById('resultsSection').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copied!';setTimeout(function(){b.textContent='Share'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|en|meeting-cost|2026-07-09 -->

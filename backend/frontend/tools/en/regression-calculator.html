@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linear Regression Calculator - Find Best Fit Line</title>
+<meta name="description" content="Calculate linear regression, slope, y-intercept, and correlation coefficient. Analyze relationships between variables with our free online calculator.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/en/regression-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/regression-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/regression-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/regression-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/regression-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/regression-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/regression-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/regression-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/regression-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/regression-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/regression-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/regression-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Linear Regression Calculator", "url": "https://softglow-ai.com/tools/en/regression-calculator.html", "description": "Calculate linear regression, slope, y-intercept, and correlation coefficient. Analyze relationships between variables with our free online calculator.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What does the slope mean in linear regression?", "acceptedAnswer": {"@type": "Answer", "text": "The slope (m) represents the rate of change between your variables. It tells you how much y changes for every one-unit increase in x. A slope of 2 means y increases by 2 units for each unit increase in x, while a negative slope indicates an inverse relationship."}}, {"@type": "Question", "name": "How do I interpret the R-squared value?", "acceptedAnswer": {"@type": "Answer", "text": "R-squared (R²) ranges from 0 to 1 and represents the percentage of variance explained by your model. An R² of 0.75 means 75% of the variation in y is explained by x. Higher values indicate a better fit, though context matters—some fields naturally have lower R² values."}}, {"@type": "Question", "name": "Can I use linear regression for prediction?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, once you have your regression equation (y = mx + b), you can substitute any x-value to predict the corresponding y-value. However, predictions are most reliable within the range of your original data. Predictions far outside this range become increasingly uncertain."}}, {"@type": "Question", "name": "What's the difference between correlation and causation?", "acceptedAnswer": {"@type": "Answer", "text": "Correlation measures the strength of a relationship between variables, but it doesn't prove that one causes the other. Two variables might be correlated due to coincidence, a third variable affecting both, or reverse causation. Always investigate the logical mechanism before claiming causation."}}, {"@type": "Question", "name": "How many data points do I need for reliable linear regression?", "acceptedAnswer": {"@type": "Answer", "text": "While you technically need at least 2 points to draw a line, reliable regression typically requires at least 30 observations. With fewer data points, your estimates become less stable and more vulnerable to outliers. More data generally provides better and more trustworthy results."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/en/">Tools</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/en/">Tools</a> > Linear Regression Calculator</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Linear Regression Calculator</h1>
+    <p class="calc-subtitle">Calculate the line of best fit using the y = mx + b formula</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="xValues">X Values (comma-separated)</label>
+  <div class="input-row"><input type="text" id="xValues" placeholder="1, 2, 3, 4, 5"  step="1"></div>
+</div>
+  <small class="input-help">Enter your independent variable values separated by commas</small>
+<div class="input-group">
+  <label for="yValues">Y Values (comma-separated)</label>
+  <div class="input-row"><input type="text" id="yValues" placeholder="2, 4, 5, 4, 6"  step="1"></div>
+</div>
+  <small class="input-help">Enter your dependent variable values separated by commas</small></div>
+    <button class="btn-calc" onclick="calculate()">Calculate</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Slope (m)</span><span class="result-value" id="slopeResult">—</span></div>
+<div class="result-highlight"><span class="result-label">Y-Intercept (b)</span><span class="result-value" id="interceptResult">—</span></div>
+<div class="result-highlight"><span class="result-label">Regression Equation</span><span class="result-value" id="equationResult">—</span></div>
+<div class="result-item"><span class="result-label">Correlation Coefficient (R)</span><span class="result-value" id="correlationResult">—</span></div>
+<div class="result-item"><span class="result-label">R-Squared (R²)</span><span class="result-value" id="rSquaredResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>What does this mean?</strong> The slope (m) represents the rate of change between variables, while the y-intercept (b) is where the line crosses the y-axis. The correlation coefficient (R) ranges from -1 to 1, indicating the strength and direction of the relationship, and R² shows what percentage of variance is explained by the model.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Print</button>
+        <button onclick="shareResult()">&#x1f4e4; Share</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>Understanding Linear Regression</h2><p>Linear regression is a fundamental statistical method used to model the relationship between two variables. By fitting a straight line through a set of data points, we can predict future values and understand how changes in one variable affect another. The equation y = mx + b represents this line, where m is the slope and b is the y-intercept.</p><h2>Key Components Explained</h2><p>The slope (m) indicates how much the y-value changes for each unit increase in x. A positive slope means variables move in the same direction, while a negative slope indicates an inverse relationship. The y-intercept (b) is the predicted value of y when x equals zero. Together, these form your regression equation, which can be used for predictions.</p><h2>Interpreting Correlation and R-Squared</h2><p>The correlation coefficient (R) measures the strength and direction of the linear relationship, ranging from -1 to 1. Values close to 1 or -1 indicate strong relationships, while values near 0 suggest weak relationships. R-squared (R²) represents the proportion of variance in the dependent variable explained by the independent variable, expressed as a percentage. For example, an R² of 0.85 means 85% of the variation is explained by your model.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Practical Applications</h2><p>Linear regression is widely used in business forecasting, economics, finance, and science. Businesses use it to predict sales based on marketing spend, economists analyze GDP growth trends, and researchers examine cause-and-effect relationships in experiments. Understanding how to calculate and interpret these values helps make data-driven decisions across industries.</p><h2>Quality of Your Model</h2><p>A good linear regression model should have a high R² value (typically above 0.70) and a correlation coefficient close to -1 or 1. However, R² alone doesn't guarantee a good model. You should also examine scatter plots visually, check for outliers, and ensure the linear assumption is appropriate for your data. Sometimes data exhibits non-linear patterns requiring other analytical approaches.</p><h2>Tips for Best Results</h2><p>Ensure you have paired x and y values of equal length. Remove or investigate outliers that may skew results. Consider the context of your data—correlation does not imply causation. If R² is low, the relationship may not be linear, or other important variables might be missing. Always validate your regression model with new data when possible to confirm its predictive power.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Related Articles</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>FAQ</h2><div class="faq-item"><div class="faq-q">What does the slope mean in linear regression?</div><div class="faq-a">The slope (m) represents the rate of change between your variables. It tells you how much y changes for every one-unit increase in x. A slope of 2 means y increases by 2 units for each unit increase in x, while a negative slope indicates an inverse relationship.</div></div>
+  <div class="faq-item"><div class="faq-q">How do I interpret the R-squared value?</div><div class="faq-a">R-squared (R²) ranges from 0 to 1 and represents the percentage of variance explained by your model. An R² of 0.75 means 75% of the variation in y is explained by x. Higher values indicate a better fit, though context matters—some fields naturally have lower R² values.</div></div>
+  <div class="faq-item"><div class="faq-q">Can I use linear regression for prediction?</div><div class="faq-a">Yes, once you have your regression equation (y = mx + b), you can substitute any x-value to predict the corresponding y-value. However, predictions are most reliable within the range of your original data. Predictions far outside this range become increasingly uncertain.</div></div>
+  <div class="faq-item"><div class="faq-q">What's the difference between correlation and causation?</div><div class="faq-a">Correlation measures the strength of a relationship between variables, but it doesn't prove that one causes the other. Two variables might be correlated due to coincidence, a third variable affecting both, or reverse causation. Always investigate the logical mechanism before claiming causation.</div></div>
+  <div class="faq-item"><div class="faq-q">How many data points do I need for reliable linear regression?</div><div class="faq-a">While you technically need at least 2 points to draw a line, reliable regression typically requires at least 30 observations. With fewer data points, your estimates become less stable and more vulnerable to outliers. More data generally provides better and more trustworthy results.</div></div></section>
+  <div class="more-tools"><h3>More Tools</h3><div class="tools-grid"><a class="tool-pill" href="/tools/en/compound-interest.html">Compound Interest Calculator</a>
+      <a class="tool-pill" href="/tools/en/roi-calculator.html">ROI Calculator</a>
+      <a class="tool-pill" href="/tools/en/risk-reward.html">Risk Reward Calculator</a>
+      <a class="tool-pill" href="/tools/en/position-size.html">Position Size Calculator</a>
+      <a class="tool-pill" href="/tools/en/stop-loss.html">Stop Loss Calculator</a>
+      <a class="tool-pill" href="/tools/en/dividend-yield.html">Dividend Yield Calculator</a>
+      <a class="tool-pill" href="/tools/en/pe-ratio.html">P/E Ratio Calculator</a>
+      <a class="tool-pill" href="/tools/en/dca-calculator.html">DCA Calculator</a>
+      <a class="tool-pill" href="/tools/en/cagr.html">CAGR Calculator</a>
+      <a class="tool-pill" href="/tools/en/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/en/stock-gain-loss.html">Stock Gain/Loss Calculator</a>
+      <a class="tool-pill" href="/tools/en/break-even.html">Break Even Calculator</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/regression-calculator.html" class="lang-btn active">English</a>
+    <a href="/tools/regression-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/regression-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/regression-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/regression-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/regression-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/regression-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/regression-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/regression-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/regression-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Related Tools</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const xInput = document.getElementById('xValues').value.trim();
+  const yInput = document.getElementById('yValues').value.trim();
+  
+  if (!xInput || !yInput) {
+    alert('Please enter both X and Y values');
+    return;
+  }
+  
+  const xValues = xInput.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+  const yValues = yInput.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+  
+  if (xValues.length === 0 || yValues.length === 0) {
+    alert('Please enter valid numeric values');
+    return;
+  }
+  
+  if (xValues.length !== yValues.length) {
+    alert('X and Y must have the same number of values');
+    return;
+  }
+  
+  if (xValues.length < 2) {
+    alert('Please enter at least 2 data points');
+    return;
+  }
+  
+  const n = xValues.length;
+  const sumX = xValues.reduce((a, b) => a + b, 0);
+  const sumY = yValues.reduce((a, b) => a + b, 0);
+  const sumXY = xValues.reduce((sum, x, i) => sum + x * yValues[i], 0);
+  const sumX2 = xValues.reduce((sum, x) => sum + x * x, 0);
+  const sumY2 = yValues.reduce((sum, y) => sum + y * y, 0);
+  
+  const meanX = sumX / n;
+  const meanY = sumY / n;
+  
+  const numerator = n * sumXY - sumX * sumY;
+  const denominator = n * sumX2 - sumX * sumX;
+  
+  if (denominator === 0) {
+    alert('Cannot calculate regression with these values');
+    return;
+  }
+  
+  const slope = numerator / denominator;
+  const intercept = meanY - slope * meanX;
+  
+  const rNumerator = numerator;
+  const rDenominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+  const correlation = rDenominator === 0 ? 0 : rNumerator / rDenominator;
+  const rSquared = correlation * correlation;
+  
+  const slopeFormatted = slope.toFixed(4);
+  const interceptFormatted = intercept.toFixed(4);
+  const equationText = `y = ${slopeFormatted}x + ${interceptFormatted}`;
+  const correlationFormatted = correlation.toFixed(4);
+  const rSquaredFormatted = rSquared.toFixed(4);
+  
+  document.getElementById('slopeResult').textContent = slopeFormatted;
+  document.getElementById('interceptResult').textContent = interceptFormatted;
+  document.getElementById('equationResult').textContent = equationText;
+  document.getElementById('correlationResult').textContent = correlationFormatted;
+  document.getElementById('rSquaredResult').textContent = rSquaredFormatted;
+  
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copied!';setTimeout(function(){b.textContent='Share'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|en|regression-calculator|2026-07-09 -->

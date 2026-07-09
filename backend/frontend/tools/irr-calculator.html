@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IRR計算器 - 內部報酬率投資分析工具</title>
+<meta name="description" content="免費IRR計算器，快速計算投資的內部報酬率。支援多年現金流分析，幫助評估投資回報率。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/irr-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/irr-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/irr-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/irr-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/irr-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/irr-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/irr-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/irr-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/irr-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/irr-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/irr-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/irr-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "內部報酬率(IRR)計算器", "url": "https://softglow-ai.com/tools/irr-calculator.html", "description": "免費IRR計算器，快速計算投資的內部報酬率。支援多年現金流分析，幫助評估投資回報率。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "IRR和ROI有什麼區別?", "acceptedAnswer": {"@type": "Answer", "text": "IRR(內部報酬率)和ROI(投資回報率)都是衡量投資回報的指標，但計算方法不同。ROI是簡單的百分比計算，不考慮時間因素；而IRR考慮了時間價值和現金流的時序分佈，更適合分析多年投資專案。"}}, {"@type": "Question", "name": "為什麼NPV在IRR折現率下接近零?", "acceptedAnswer": {"@type": "Answer", "text": "根據IRR的定義，IRR就是使投資淨現值為零的折現率。因此，當使用IRR作為折現率計算NPV時，結果應該非常接近零(可能由於四捨五入而略有偏差)。"}}, {"@type": "Question", "name": "負的IRR意味著什麼?", "acceptedAnswer": {"@type": "Answer", "text": "負的IRR表示投資不僅沒有獲利，反而造成虧損。在這種情況下，投資專案會摧毀價值，不應該進行這項投資，除非有特殊的戰略考慮。"}}, {"@type": "Question", "name": "如何使用IRR進行投資決策?", "acceptedAnswer": {"@type": "Answer", "text": "通常將IRR與企業的成本資本進行比較。如果IRR高於成本資本，投資被認為是可接受的；如果IRR低於成本資本，投資應被拒絕。在比較多個專案時，選擇IRR最高的專案(在風險相當的前提下)。"}}, {"@type": "Question", "name": "計算器支援多少年的現金流?", "acceptedAnswer": {"@type": "Answer", "text": "目前計算器支援初始投資加上5年的現金流預測(總共6個時期)。如果您的投資專案時間更長，可以使用年均現金流或在第5年後進行終值計算作為替代方案。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 內部報酬率(IRR)計算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>內部報酬率(IRR)計算器</h1>
+    <p class="calc-subtitle">用於投資分析的內部報酬率計算工具</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="initialInvestment">初始投資(第0年)</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="initialInvestment" placeholder="例如: -50000"  value="-50000" step="1"></div>
+</div>
+  <small class="input-help">輸入初期投資金額，通常為負數</small>
+<div class="input-group">
+  <label for="year1CashFlow">第1年現金流</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="year1CashFlow" placeholder="例如: 10000"  value="10000" step="1"></div>
+</div>
+  <small class="input-help">輸入第1年預期現金流入或流出</small>
+<div class="input-group">
+  <label for="year2CashFlow">第2年現金流</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="year2CashFlow" placeholder="例如: 15000"  value="15000" step="1"></div>
+</div>
+  <small class="input-help">輸入第2年預期現金流入或流出</small>
+<div class="input-group">
+  <label for="year3CashFlow">第3年現金流</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="year3CashFlow" placeholder="例如: 12000"  value="12000" step="1"></div>
+</div>
+  <small class="input-help">輸入第3年預期現金流入或流出</small>
+<div class="input-group">
+  <label for="year4CashFlow">第4年現金流</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="year4CashFlow" placeholder="例如: 18000"  value="18000" step="1"></div>
+</div>
+  <small class="input-help">輸入第4年預期現金流入或流出</small>
+<div class="input-group">
+  <label for="year5CashFlow">第5年現金流</label>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="year5CashFlow" placeholder="例如: 20000"  value="20000" step="1"></div>
+</div>
+  <small class="input-help">輸入第5年預期現金流入或流出</small></div>
+    <button class="btn-calc" onclick="calculate()">計算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">內部報酬率(IRR)</span><span class="result-value" id="irrResult">—</span></div>
+<div class="result-item"><span class="result-label">NPV(按IRR折現率)</span><span class="result-value" id="npvAtZero">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> 內部報酬率(IRR)代表投資的年均回報率，以百分比表示。NPV(淨現值)在IRR折現率下應接近零。IRR越高表示投資回報潛力越大，但需與風險和其他投資機會進行比較。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 列印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什麼是內部報酬率(IRR)?</h2><p>內部報酬率(Internal Rate of Return, IRR)是一個財務指標，用於衡量投資專案的收益率。它代表使投資專案的淨現值(NPV)等於零的折現率。換句話說，IRR是投資的年化回報率，考慮了時間價值和所有現金流。</p><h2>如何計算IRR?</h2><p>IRR的計算基於現金流分析。首先列出所有現金流(包括初始投資和未來現金流)，然後找到使得所有現金流的現值之和為零的折現率。這通常需要使用數值方法進行計算，因為沒有簡單的代數解。我們的計算器使用迭代算法自動計算IRR。</p><h2>IRR的應用場景</h2><p>IRR廣泛應用於投資決策、專案評估和資本預算編制中。當比較多個投資機會時，IRR較高的投資通常被認為更具吸引力。企業在決定是否進行某項投資時，通常會將IRR與其資本成本(加權平均資本成本WACC)進行比較。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>IRR與NPV的關係</h2><p>NPV(淨現值)和IRR是相關的投資評估指標。NPV衡量的是投資帶來的絕對價值增加，而IRR衡量的是相對回報率。當NPV為正時，對應的折現率會低於IRR。在進行投資決策時，應同時考慮這兩個指標。</p><h2>IRR的優點與限制</h2><p>IRR的優點是易於理解和比較，但它也有限制。首先，IRR假設所有現金流都以IRR的速率再投資，這在實際中可能不成立。其次，對於非常規現金流(如多個正負交替的現金流)，可能存在多個IRR值。因此，在使用IRR時應結合其他指標進行綜合分析。</p><h2>實務建議</h2><p>在使用IRR進行投資決策時，應考慮投資的風險、時間框架和整體財務目標。高IRR可能伴隨高風險，低IRR可能是穩定但低回報的投資。建議使用情景分析和敏感性分析來評估不同假設下的IRR結果，以做出更明智的投資決策。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">IRR和ROI有什麼區別?</div><div class="faq-a">IRR(內部報酬率)和ROI(投資回報率)都是衡量投資回報的指標，但計算方法不同。ROI是簡單的百分比計算，不考慮時間因素；而IRR考慮了時間價值和現金流的時序分佈，更適合分析多年投資專案。</div></div>
+  <div class="faq-item"><div class="faq-q">為什麼NPV在IRR折現率下接近零?</div><div class="faq-a">根據IRR的定義，IRR就是使投資淨現值為零的折現率。因此，當使用IRR作為折現率計算NPV時，結果應該非常接近零(可能由於四捨五入而略有偏差)。</div></div>
+  <div class="faq-item"><div class="faq-q">負的IRR意味著什麼?</div><div class="faq-a">負的IRR表示投資不僅沒有獲利，反而造成虧損。在這種情況下，投資專案會摧毀價值，不應該進行這項投資，除非有特殊的戰略考慮。</div></div>
+  <div class="faq-item"><div class="faq-q">如何使用IRR進行投資決策?</div><div class="faq-a">通常將IRR與企業的成本資本進行比較。如果IRR高於成本資本，投資被認為是可接受的；如果IRR低於成本資本，投資應被拒絕。在比較多個專案時，選擇IRR最高的專案(在風險相當的前提下)。</div></div>
+  <div class="faq-item"><div class="faq-q">計算器支援多少年的現金流?</div><div class="faq-a">目前計算器支援初始投資加上5年的現金流預測(總共6個時期)。如果您的投資專案時間更長，可以使用年均現金流或在第5年後進行終值計算作為替代方案。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/roi-calculator.html">ROI 計算機</a>
+      <a class="tool-pill" href="/tools/risk-reward.html">風險報酬計算機</a>
+      <a class="tool-pill" href="/tools/position-size.html">部位規模計算器</a>
+      <a class="tool-pill" href="/tools/stop-loss.html">停損計算機</a>
+      <a class="tool-pill" href="/tools/dividend-yield.html">股息收益率計算機</a>
+      <a class="tool-pill" href="/tools/pe-ratio.html">本益比計算機</a>
+      <a class="tool-pill" href="/tools/dca-calculator.html">定期定額投資計算機</a>
+      <a class="tool-pill" href="/tools/cagr.html">年複合成長率計算器</a>
+      <a class="tool-pill" href="/tools/margin-calculator.html">保證金計算器</a>
+      <a class="tool-pill" href="/tools/stock-gain-loss.html">股票損益計算機</a>
+      <a class="tool-pill" href="/tools/break-even.html">損益平衡點計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/irr-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/irr-calculator.html" class="lang-btn active">繁體中文</a>
+    <a href="/tools/ja/irr-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/irr-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/irr-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/irr-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/irr-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/irr-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/irr-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/irr-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const cf0 = parseFloat(document.getElementById('initialInvestment').value);
+  const cf1 = parseFloat(document.getElementById('year1CashFlow').value);
+  const cf2 = parseFloat(document.getElementById('year2CashFlow').value);
+  const cf3 = parseFloat(document.getElementById('year3CashFlow').value);
+  const cf4 = parseFloat(document.getElementById('year4CashFlow').value);
+  const cf5 = parseFloat(document.getElementById('year5CashFlow').value);
+
+  if (isNaN(cf0) || isNaN(cf1) || isNaN(cf2) || isNaN(cf3) || isNaN(cf4) || isNaN(cf5)) {
+    alert('Please enter all cash flow values');
+    return;
+  }
+
+  const cashFlows = [cf0, cf1, cf2, cf3, cf4, cf5];
+
+  function npv(rate, flows) {
+    let sum = 0;
+    for (let i = 0; i < flows.length; i++) {
+      sum += flows[i] / Math.pow(1 + rate, i);
+    }
+    return sum;
+  }
+
+  let irr = 0.1;
+  let low = -0.99;
+  let high = 10;
+  let tolerance = 0.0001;
+
+  for (let i = 0; i < 1000; i++) {
+    const npvValue = npv(irr, cashFlows);
+    if (Math.abs(npvValue) < tolerance) {
+      break;
+    }
+    if (npvValue > 0) {
+      low = irr;
+    } else {
+      high = irr;
+    }
+    irr = (low + high) / 2;
+  }
+
+  const irrPercent = (irr * 100).toFixed(2);
+  const npvValue = npv(irr, cashFlows).toFixed(2);
+
+  document.getElementById('irrResult').textContent = parseFloat(irrPercent).toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('npvAtZero').textContent = parseFloat(npvValue).toLocaleString('en-GB', {style: 'currency', currency: 'GBP', minimumFractionDigits: 2});
+
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-TW|irr-calculator|2026-07-09 -->

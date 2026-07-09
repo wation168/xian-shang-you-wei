@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>閱讀時間計算機 - 快速計算閱讀耗時</title>
+<meta name="description" content="輸入文章字數和閱讀速度，立即計算閱讀時間。幫助您規劃閱讀計畫，提高時間管理效率。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/reading-time.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/reading-time.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/reading-time.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/reading-time.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/reading-time.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/reading-time.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/reading-time.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/reading-time.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/reading-time.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/reading-time.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/reading-time.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/reading-time.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "閱讀時間計算機", "url": "https://softglow-ai.com/tools/reading-time.html", "description": "輸入文章字數和閱讀速度，立即計算閱讀時間。幫助您規劃閱讀計畫，提高時間管理效率。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "閱讀速度應該如何計算？", "acceptedAnswer": {"@type": "Answer", "text": "您可以閱讀一篇 1,000 字的文章，記錄所用的時間（分鐘），然後用 1,000 除以時間，得到您的每分鐘閱讀字數。重複幾次以獲得平均值。"}}, {"@type": "Question", "name": "不同類型的文章閱讀速度會不同嗎？", "acceptedAnswer": {"@type": "Answer", "text": "是的。技術文檔和學術論文通常需要更慢的閱讀速度，而新聞文章或小說可能讀得較快。本工具使用平均閱讀速度估算，實際時間可能會有所不同。"}}, {"@type": "Question", "name": "如何快速計算中文文章的字數？", "acceptedAnswer": {"@type": "Answer", "text": "大多數文本編輯器和文字處理軟件都有字數統計功能。在 Word 或 Google Docs 中，您可以在工具菜單中找到字數統計選項。線上工具也可以幫助您快速計數。"}}, {"@type": "Question", "name": "這個計算結果準確嗎？", "acceptedAnswer": {"@type": "Answer", "text": "該計算基於平均閱讀速度。實際閱讀時間取決於內容難度、個人專注力、閱讀目的等因素。結果應視為估算值，而非絕對準確的時間。"}}, {"@type": "Question", "name": "我應該選擇多少字/分的閱讀速度？", "acceptedAnswer": {"@type": "Answer", "text": "一般成年人的閱讀速度為 200-250 字/分。快速閱讀者可達 300-400 字/分，而仔細閱讀時可能只有 100-150 字/分。根據您的實際能力和閱讀目的選擇合適的數值。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 閱讀時間計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>閱讀時間計算機</h1>
+    <p class="calc-subtitle">立即計算閱讀任何內容需要多少時間</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="wordCount">字數</label>
+  <div class="input-row"><input type="number" id="wordCount" placeholder="輸入內容總字數"  step="1"><span class="input-suffix">字</span></div>
+</div>
+  <small class="input-help">輸入文章或內容的總字數</small>
+<div class="input-group">
+  <label for="readingSpeed">閱讀速度（每分鐘字數）</label>
+  <div class="input-row"><input type="number" id="readingSpeed" placeholder="平均為 200-250 字/分鐘"  value="225" step="1"><span class="input-suffix">字/分</span></div>
+</div>
+  <small class="input-help">平均閱讀速度為 200-250 字/分鐘</small></div>
+    <button class="btn-calc" onclick="calculate()">計算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">閱讀時間</span><span class="result-value" id="totalMinutes">—</span></div>
+<div class="result-item"><span class="result-label">時間格式</span><span class="result-value" id="hoursMinutes">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> 根據您輸入的字數和閱讀速度，計算機會自動生成所需的閱讀時間。結果以分鐘和小時兩種格式顯示，幫助您準確安排閱讀時間。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 列印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什麼是閱讀時間計算機？</h2><p>閱讀時間計算機是一個簡單實用的工具，可以幫助您估算閱讀任何文章、報告或內容所需的時間。只需輸入文章的總字數和您的閱讀速度，計算機就會自動計算出所需的閱讀時間。</p><h2>如何使用本工具？</h2><p>使用非常簡單：第一步，計算或輸入您要閱讀的內容的總字數；第二步，輸入您的平均閱讀速度（以每分鐘字數計）；第三步，點擊計算按鈕，工具會立即顯示所需的閱讀時間。</p><h2>什麼是平均閱讀速度？</h2><p>平均閱讀速度是指一個人在一分鐘內能夠閱讀的字數。大多數成年人的閱讀速度在 200-250 字/分鐘之間。專業人士和經常閱讀的人可能速度更快，而初學者的速度可能較慢。您可以根據自己的實際閱讀速度調整數值。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>為什麼要計算閱讀時間？</h2><p>計算閱讀時間對於時間管理非常重要。它幫助您在安排日程時留出足夠的時間閱讀重要文件，提高工作效率。教師和學生也可以使用此工具來評估作業或教材所需的時間。</p><h2>如何提高閱讀速度？</h2><p>提高閱讀速度需要持續練習。建議經常閱讀不同類型的文章，減少回視習慣，增加集中力。隨著練習的增加，您會發現自己的閱讀速度會逐漸提升。</p><h2>使用本工具的好處</h2><p>本工具完全免費，無需安裝軟件，直接在瀏覽器中使用。它適用於各種場景，包括學習、工作、內容策劃等。通過準確計算閱讀時間，您可以更有效地管理時間和提高生產力。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">閱讀速度應該如何計算？</div><div class="faq-a">您可以閱讀一篇 1,000 字的文章，記錄所用的時間（分鐘），然後用 1,000 除以時間，得到您的每分鐘閱讀字數。重複幾次以獲得平均值。</div></div>
+  <div class="faq-item"><div class="faq-q">不同類型的文章閱讀速度會不同嗎？</div><div class="faq-a">是的。技術文檔和學術論文通常需要更慢的閱讀速度，而新聞文章或小說可能讀得較快。本工具使用平均閱讀速度估算，實際時間可能會有所不同。</div></div>
+  <div class="faq-item"><div class="faq-q">如何快速計算中文文章的字數？</div><div class="faq-a">大多數文本編輯器和文字處理軟件都有字數統計功能。在 Word 或 Google Docs 中，您可以在工具菜單中找到字數統計選項。線上工具也可以幫助您快速計數。</div></div>
+  <div class="faq-item"><div class="faq-q">這個計算結果準確嗎？</div><div class="faq-a">該計算基於平均閱讀速度。實際閱讀時間取決於內容難度、個人專注力、閱讀目的等因素。結果應視為估算值，而非絕對準確的時間。</div></div>
+  <div class="faq-item"><div class="faq-q">我應該選擇多少字/分的閱讀速度？</div><div class="faq-a">一般成年人的閱讀速度為 200-250 字/分。快速閱讀者可達 300-400 字/分，而仔細閱讀時可能只有 100-150 字/分。根據您的實際能力和閱讀目的選擇合適的數值。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/roi-calculator.html">ROI 計算機</a>
+      <a class="tool-pill" href="/tools/risk-reward.html">風險報酬計算機</a>
+      <a class="tool-pill" href="/tools/position-size.html">部位規模計算器</a>
+      <a class="tool-pill" href="/tools/stop-loss.html">停損計算機</a>
+      <a class="tool-pill" href="/tools/dividend-yield.html">股息收益率計算機</a>
+      <a class="tool-pill" href="/tools/pe-ratio.html">本益比計算機</a>
+      <a class="tool-pill" href="/tools/dca-calculator.html">定期定額投資計算機</a>
+      <a class="tool-pill" href="/tools/cagr.html">年複合成長率計算器</a>
+      <a class="tool-pill" href="/tools/margin-calculator.html">保證金計算器</a>
+      <a class="tool-pill" href="/tools/stock-gain-loss.html">股票損益計算機</a>
+      <a class="tool-pill" href="/tools/break-even.html">損益平衡點計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/reading-time.html" class="lang-btn">English</a>
+    <a href="/tools/reading-time.html" class="lang-btn active">繁體中文</a>
+    <a href="/tools/ja/reading-time.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/reading-time.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/reading-time.html" class="lang-btn">Français</a>
+    <a href="/tools/es/reading-time.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/reading-time.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/reading-time.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/reading-time.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/reading-time.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const wordCountInput = document.getElementById('wordCount');
+  const readingSpeedInput = document.getElementById('readingSpeed');
+  const totalMinutesResult = document.getElementById('totalMinutes');
+  const hoursMinutesResult = document.getElementById('hoursMinutes');
+  const resultsDiv = document.querySelector('.results');
+
+  const wordCount = parseFloat(wordCountInput.value);
+  const readingSpeed = parseFloat(readingSpeedInput.value);
+
+  if (!wordCount || wordCount <= 0) {
+    alert('Please enter a valid word count');
+    return;
+  }
+
+  if (!readingSpeed || readingSpeed <= 0) {
+    alert('Please enter a valid reading speed (WPM)');
+    return;
+  }
+
+  const totalMinutes = Math.ceil(wordCount / readingSpeed);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  totalMinutesResult.textContent = totalMinutes.toLocaleString('en-US');
+
+  if (hours > 0) {
+    hoursMinutesResult.textContent = hours + ' hour' + (hours > 1 ? 's' : '') + ' ' + minutes + ' minute' + (minutes !== 1 ? 's' : '');
+  } else {
+    hoursMinutesResult.textContent = minutes + ' minute' + (minutes !== 1 ? 's' : '');
+  }
+
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-TW|reading-time|2026-07-09 -->

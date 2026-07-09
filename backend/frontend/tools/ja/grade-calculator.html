@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>成績計算機 - 加重平均成績の自動計算</title>
+<meta name="description" content="課題とテストの点数と配点から加重平均成績を自動計算。Letter gradeも同時表示。学生向け無料ツール。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/grade-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/grade-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/grade-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/grade-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/grade-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/grade-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/grade-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/grade-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/grade-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/grade-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/grade-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/grade-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "成績計算機", "url": "https://softglow-ai.com/tools/ja/grade-calculator.html", "description": "課題とテストの点数と配点から加重平均成績を自動計算。Letter gradeも同時表示。学生向け無料ツール。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "配点の合計が100％でない場合はどうなりますか？", "acceptedAnswer": {"@type": "Answer", "text": "配点の合計が100％でない場合、計算機は実際の配点を合計に正規化して計算します。例えば、配点の合計が80％の場合、それらを100％に正規化した上で加重平均を計算します。"}}, {"@type": "Question", "name": "課題4は必ず入力する必要がありますか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ、課題4はオプションです。3つの課題のみで計算する場合は、課題4のフィールドを空欄のままにしてください。計算機は自動的に入力されたデータのみを使用します。"}}, {"@type": "Question", "name": "小数点第一位までの点数を入力できますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、小数点を含む点数を入力できます。例えば、85.5や92.3などの入力が可能です。より正確な成績計算ができます。"}}, {"@type": "Question", "name": "Letter成績の基準は何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "一般的な基準は以下の通りです：A（90-100点）、B（80-89点）、C（70-79点）、D（60-69点）、F（60点未満）。ただし、学校によって基準が異なる場合があります。"}}, {"@type": "Question", "name": "複数の学期の成績を計算したい場合はどうすればよいですか？", "acceptedAnswer": {"@type": "Answer", "text": "計算機を何度も使用して、各学期ごとの成績を別々に計算することができます。複数学期の総合成績を計算したい場合は、各学期の結果をそれぞれ課題として新たに計算してください。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ja/">ツール</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 成績計算機</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>成績計算機</h1>
+    <p class="calc-subtitle">課題とテストの加重平均成績を計算します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="assignment1Name">課題1の名前</label>
+  <div class="input-row"><input type="text" id="assignment1Name" placeholder="例：宿題1"  value="Assignment 1" step="1"></div>
+</div>
+  <small class="input-help">課題またはテストの名前を入力してください</small>
+<div class="input-group">
+  <label for="assignment1Score">課題1の点数</label>
+  <div class="input-row"><input type="number" id="assignment1Score" placeholder="85"  step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">その課題で獲得した点数を入力してください</small>
+<div class="input-group">
+  <label for="assignment1Weight">課題1の配点</label>
+  <div class="input-row"><input type="number" id="assignment1Weight" placeholder="10"  step="1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">この課題の全体に占める配点の割合（％）を入力してください</small>
+<div class="input-group">
+  <label for="assignment2Name">課題2の名前</label>
+  <div class="input-row"><input type="text" id="assignment2Name" placeholder="例：中間試験"  value="Assignment 2" step="1"></div>
+</div>
+  <small class="input-help">2番目の課題またはテストの名前を入力してください</small>
+<div class="input-group">
+  <label for="assignment2Score">課題2の点数</label>
+  <div class="input-row"><input type="number" id="assignment2Score" placeholder="78"  step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">2番目の課題で獲得した点数を入力してください</small>
+<div class="input-group">
+  <label for="assignment2Weight">課題2の配点</label>
+  <div class="input-row"><input type="number" id="assignment2Weight" placeholder="25"  step="1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">2番目の課題の全体に占める配点の割合（％）を入力してください</small>
+<div class="input-group">
+  <label for="assignment3Name">課題3の名前</label>
+  <div class="input-row"><input type="text" id="assignment3Name" placeholder="例：最終プロジェクト"  value="Assignment 3" step="1"></div>
+</div>
+  <small class="input-help">3番目の課題またはテストの名前を入力してください</small>
+<div class="input-group">
+  <label for="assignment3Score">課題3の点数</label>
+  <div class="input-row"><input type="number" id="assignment3Score" placeholder="92"  step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">3番目の課題で獲得した点数を入力してください</small>
+<div class="input-group">
+  <label for="assignment3Weight">課題3の配点</label>
+  <div class="input-row"><input type="number" id="assignment3Weight" placeholder="30"  step="1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">3番目の課題の全体に占める配点の割合（％）を入力してください</small>
+<div class="input-group">
+  <label for="assignment4Name">課題4の名前（オプション）</label>
+  <div class="input-row"><input type="text" id="assignment4Name" placeholder="例：期末試験"  value="Assignment 4" step="1"></div>
+</div>
+  <small class="input-help">4番目の課題の名前を入力してください（任意）</small>
+<div class="input-group">
+  <label for="assignment4Score">課題4の点数</label>
+  <div class="input-row"><input type="number" id="assignment4Score" placeholder="88"  step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">4番目の課題で獲得した点数を入力してください</small>
+<div class="input-group">
+  <label for="assignment4Weight">課題4の配点</label>
+  <div class="input-row"><input type="number" id="assignment4Weight" placeholder="35"  step="1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">4番目の課題の全体に占める配点の割合（％）を入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">加重平均成績</span><span class="result-value" id="weightedGradeResult">—</span></div>
+<div class="result-highlight"><span class="result-label">Letter成績</span><span class="result-value" id="letterGradeResult">—</span></div>
+<div class="result-item"><span class="result-label">使用した配点合計</span><span class="result-value" id="totalWeightResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 加重平均成績は、各課題の点数にその配点を掛けて合計したものです。Letter成績は一般的なアメリカの成績評価基準に基づいています。使用した配点合計が100％に達することを確認してください。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>成績計算機について</h2><p>成績計算機は、複数の課題やテストの点数から加重平均成績を自動計算するツールです。各課題に異なる配点がある場合、単純平均ではなく加重平均を計算することで、より正確な成績評価ができます。</p><h2>加重平均成績の計算方法</h2><p>加重平均成績は、各課題の点数に配点を掛けて合計し、配点の総合計で割ることで算出されます。例えば、課題1が85点で配点10％、課題2が78点で配点25％の場合、(85×0.10 + 78×0.25) ÷ (0.10 + 0.25) という計算になります。</p><h2>Letter成績について</h2><p>Letter成績は、アメリカの大学や高校で一般的に使用される成績評価方式です。A（優秀）、B（良好）、C（平均）、D（合格）、F（不合格）の5段階で、さらに細分化されることもあります。通常、90点以上がA、80点以上がB、70点以上がC、60点以上がDとされています。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>配点設定のコツ</h2><p>配点を設定する際は、各課題の重要度を考慮してください。期末試験が最も重要な場合は配点を高く（例：35％）、日々の宿題は低く（例：10％）設定するのが一般的です。配点の合計が100％になることを必ず確認してください。</p><h2>オプション課題の活用</h2><p>4番目の課題はオプションなので、3つの課題のみで計算することも、4つすべて使用することもできます。追加課題がある場合は、それに応じて各課題の配点を調整してください。</p><h2>成績改善のポイント</h2><p>配点の高い課題から重点的に取り組むことで、効率的に成績を改善できます。計算機を使って異なるシナリオをシミュレートし、目標成績を達成するために各課題でどの程度の点数が必要かを計画しましょう。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">配点の合計が100％でない場合はどうなりますか？</div><div class="faq-a">配点の合計が100％でない場合、計算機は実際の配点を合計に正規化して計算します。例えば、配点の合計が80％の場合、それらを100％に正規化した上で加重平均を計算します。</div></div>
+  <div class="faq-item"><div class="faq-q">課題4は必ず入力する必要がありますか？</div><div class="faq-a">いいえ、課題4はオプションです。3つの課題のみで計算する場合は、課題4のフィールドを空欄のままにしてください。計算機は自動的に入力されたデータのみを使用します。</div></div>
+  <div class="faq-item"><div class="faq-q">小数点第一位までの点数を入力できますか？</div><div class="faq-a">はい、小数点を含む点数を入力できます。例えば、85.5や92.3などの入力が可能です。より正確な成績計算ができます。</div></div>
+  <div class="faq-item"><div class="faq-q">Letter成績の基準は何ですか？</div><div class="faq-a">一般的な基準は以下の通りです：A（90-100点）、B（80-89点）、C（70-79点）、D（60-69点）、F（60点未満）。ただし、学校によって基準が異なる場合があります。</div></div>
+  <div class="faq-item"><div class="faq-q">複数の学期の成績を計算したい場合はどうすればよいですか？</div><div class="faq-a">計算機を何度も使用して、各学期ごとの成績を別々に計算することができます。複数学期の総合成績を計算したい場合は、各学期の結果をそれぞれ課題として新たに計算してください。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">Roi Calculator</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">Risk Reward</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">Position Size</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">Pe Ratio</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/grade-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/grade-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/grade-calculator.html" class="lang-btn active">日本語</a>
+    <a href="/tools/de/grade-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/grade-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/grade-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/grade-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/grade-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/grade-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/grade-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const assignments = [];
+  let totalWeight = 0;
+  let weightedSum = 0;
+  
+  for (let i = 1; i <= 4; i++) {
+    const scoreElement = document.getElementById('assignment' + i + 'Score');
+    const weightElement = document.getElementById('assignment' + i + 'Weight');
+    
+    if (scoreElement && weightElement) {
+      const score = parseFloat(scoreElement.value);
+      const weight = parseFloat(weightElement.value);
+      
+      if (!isNaN(score) && !isNaN(weight) && score >= 0 && weight >= 0) {
+        if (score > 100 || score < 0) {
+          alert('Assignment ' + i + ' score must be between 0 and 100');
+          return;
+        }
+        assignments.push({ score: score, weight: weight });
+        totalWeight += weight;
+        weightedSum += (score * weight);
+      }
+    }
+  }
+  
+  if (assignments.length === 0) {
+    alert('Please enter at least one assignment with both score and weight');
+    return;
+  }
+  
+  if (totalWeight === 0) {
+    alert('Total weight cannot be zero. Please enter weight values');
+    return;
+  }
+  
+  const weightedAverage = weightedSum / totalWeight;
+  
+  let letterGrade = 'F';
+  if (weightedAverage >= 97) letterGrade = 'A+';
+  else if (weightedAverage >= 93) letterGrade = 'A';
+  else if (weightedAverage >= 90) letterGrade = 'A-';
+  else if (weightedAverage >= 87) letterGrade = 'B+';
+  else if (weightedAverage >= 83) letterGrade = 'B';
+  else if (weightedAverage >= 80) letterGrade = 'B-';
+  else if (weightedAverage >= 77) letterGrade = 'C+';
+  else if (weightedAverage >= 73) letterGrade = 'C';
+  else if (weightedAverage >= 70) letterGrade = 'C-';
+  else if (weightedAverage >= 67) letterGrade = 'D+';
+  else if (weightedAverage >= 63) letterGrade = 'D';
+  else if (weightedAverage >= 60) letterGrade = 'D-';
+  
+  document.getElementById('weightedGradeResult').textContent = weightedAverage.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('letterGradeResult').textContent = letterGrade;
+  document.getElementById('totalWeightResult').textContent = totalWeight.toLocaleString('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|grade-calculator|2026-07-09 -->

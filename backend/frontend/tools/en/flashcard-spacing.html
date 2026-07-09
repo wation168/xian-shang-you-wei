@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spaced Repetition Calculator - Leitner System</title>
+<meta name="description" content="Calculate optimal flashcard review schedules using the Leitner system. Plan your daily study load and track progress across five memorization boxes.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/en/flashcard-spacing.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/flashcard-spacing.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/flashcard-spacing.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/flashcard-spacing.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/flashcard-spacing.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/flashcard-spacing.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/flashcard-spacing.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/flashcard-spacing.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/flashcard-spacing.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/flashcard-spacing.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/flashcard-spacing.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/flashcard-spacing.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Spaced Repetition Calculator", "url": "https://softglow-ai.com/tools/en/flashcard-spacing.html", "description": "Calculate optimal flashcard review schedules using the Leitner system. Plan your daily study load and track progress across five memorization boxes.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How often should I review cards in Box 1?", "acceptedAnswer": {"@type": "Answer", "text": "Cards in Box 1 should be reviewed daily or every 1-2 days. These are your most challenging cards or recently learned material, so frequent exposure is essential for building initial familiarity and preventing forgetting."}}, {"@type": "Question", "name": "What if I can't keep up with the review schedule?", "acceptedAnswer": {"@type": "Answer", "text": "Reduce your daily learning capacity in the calculator. It's better to learn 10 cards per day sustainably than 30 cards per day and fall behind on reviews. The Leitner system's strength lies in consistency, not speed."}}, {"@type": "Question", "name": "How long does it really take to master a deck of 500 cards?", "acceptedAnswer": {"@type": "Answer", "text": "With an 85% retention rate and 20 cards per day capacity, it typically takes 3-6 months to master 500 cards. However, this varies based on material difficulty, your learning method quality, and your actual retention rate. Use the calculator's estimate as a general guide."}}, {"@type": "Question", "name": "Should I move cards to the next box if I get them wrong?", "acceptedAnswer": {"@type": "Answer", "text": "No, if you answer incorrectly, the card should return to Box 1 regardless of which box it was in. This ensures difficult material receives adequate review. You can mark cards as correct only when you answer confidently and accurately."}}, {"@type": "Question", "name": "Can I use this system for languages, medical studies, and other subjects?", "acceptedAnswer": {"@type": "Answer", "text": "Absolutely! The Leitner system is domain-agnostic and works effectively for any subject requiring memorization—languages, medical terminology, historical dates, chemical formulas, and more. Adjust your retention rate estimate based on subject difficulty."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/en/">Tools</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/en/">Tools</a> > Spaced Repetition Calculator</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Spaced Repetition Calculator</h1>
+    <p class="calc-subtitle">Optimize your flashcard review schedule using the proven Leitner system</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="totalFlashcards">Total Number of Flashcards</label>
+  <div class="input-row"><input type="number" id="totalFlashcards" placeholder="100"  value="50" step="1"><span class="input-suffix">cards</span></div>
+</div>
+  <small class="input-help">Enter the total number of flashcards in your deck that you want to master</small>
+<div class="input-group">
+  <label for="cardsLearned">Cards Already Learned Today</label>
+  <div class="input-row"><input type="number" id="cardsLearned" placeholder="10"  value="0" step="1"><span class="input-suffix">cards</span></div>
+</div>
+  <small class="input-help">How many cards have you already successfully learned and mastered today</small>
+<div class="input-group">
+  <label for="reviewDays">Days Since Last Review</label>
+  <div class="input-row"><input type="number" id="reviewDays" placeholder="3"  value="1" step="1"><span class="input-suffix">days</span></div>
+</div>
+  <small class="input-help">Number of days since you last reviewed your flashcard collection</small>
+<div class="input-group">
+  <label for="dailyCapacity">Daily Learning Capacity</label>
+  <div class="input-row"><input type="number" id="dailyCapacity" placeholder="20"  value="20" step="1"><span class="input-suffix">cards/day</span></div>
+</div>
+  <small class="input-help">Maximum number of new cards you can comfortably learn per day</small>
+<div class="input-group">
+  <label for="retentionRate">Expected Retention Rate</label>
+  <div class="input-row"><input type="number" id="retentionRate" placeholder="85"  value="85" step="1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">Your expected percentage of cards you'll retain between reviews (typically 80-95%)</small></div>
+    <button class="btn-calc" onclick="calculate()">Calculate</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Cards to Review Today</span><span class="result-value" id="cardsToReviewToday">—</span></div>
+<div class="result-highlight"><span class="result-label">New Cards to Learn Today</span><span class="result-value" id="cardsToLearnToday">—</span></div>
+<div class="result-item"><span class="result-label">Estimated Days to Master All Cards</span><span class="result-value" id="estimatedCompletion">—</span></div>
+<div class="result-highlight"><span class="result-label">Overall Progress</span><span class="result-value" id="overallProgress">—</span></div>
+<div class="result-item"><span class="result-label">Box 1 (1-day interval)</span><span class="result-value" id="box1Count">—</span></div>
+<div class="result-item"><span class="result-label">Box 2 (3-day interval)</span><span class="result-value" id="box2Count">—</span></div>
+<div class="result-item"><span class="result-label">Box 3 (7-day interval)</span><span class="result-value" id="box3Count">—</span></div>
+<div class="result-item"><span class="result-label">Box 4 (14-day interval)</span><span class="result-value" id="box4Count">—</span></div>
+<div class="result-item"><span class="result-label">Box 5 (30-day interval)</span><span class="result-value" id="box5Count">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>What does this mean?</strong> The calculator shows how many cards you should review and learn today based on your capacity and progress. Your cards are distributed across five boxes following the Leitner system, with longer intervals between reviews as retention improves. Use these numbers to structure your daily study sessions for optimal long-term retention.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Print</button>
+        <button onclick="shareResult()">&#x1f4e4; Share</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>What is the Leitner System?</h2><p>The Leitner system is a widely-used method for spaced repetition that maximizes learning efficiency and long-term retention. Developed by Sebastian Leitner in the 1970s, this system organizes flashcards into five boxes, each with different review intervals. Cards start in Box 1 and advance to higher boxes as you demonstrate mastery. If you struggle with a card, it returns to Box 1 for more frequent review. This approach leverages the psychological spacing effect, which shows that information is better retained when learning is spread over time with increasing intervals.</p><h2>Understanding the Five Boxes</h2><p>Box 1 contains cards you've recently learned or struggled with, requiring review every 1 day. Box 2 holds cards you're becoming familiar with, reviewed every 3 days. Box 3 contains moderately familiar cards with a 7-day review interval. Box 4 houses well-learned cards reviewed every 14 days, while Box 5 contains nearly-mastered cards reviewed only every 30 days. As cards move through the boxes, they require less frequent review, freeing up study time for newer material. This hierarchical structure ensures you focus most effort on cards you find most challenging while maintaining knowledge of already-learned material through periodic review.</p><h2>How to Use This Calculator</h2><p>Begin by entering your total number of flashcards—the complete size of your study deck. Next, input how many cards you've already successfully learned today to avoid double-counting. Enter the number of days since your last comprehensive review session. Then specify your daily learning capacity, which is the maximum number of new cards you can confidently learn in one study session without becoming overwhelmed. Finally, estimate your expected retention rate, typically between 80-95% depending on the difficulty of the material and your study methods. The calculator will generate a personalized review schedule optimized for your learning pace and capacity.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Interpreting Your Results</h2><p>The "Cards to Review Today" figure represents cards from all five boxes that need attention based on their intervals and the time elapsed since last review. The "New Cards to Learn Today" shows how many additional cards you can add to your deck without exceeding your daily capacity. The "Estimated Days to Master All Cards" projects how long it will take to move your entire collection through the system to Box 5. Your "Overall Progress" percentage shows what fraction of your deck has reached proficiency levels. The box breakdown displays how many cards currently reside in each box, giving you a clear picture of your learning distribution and helping you adjust your approach if needed.</p><h2>Optimizing Your Study Schedule</h2><p>For maximum effectiveness, study at consistent times each day and review cards shortly before they're due rather than early. If you're getting more than 90% of cards correct in a box, move them up faster. If you're getting fewer than 80% correct, spend more time in lower boxes before advancing. Adjust your daily learning capacity based on your actual performance; if you consistently miss reviews or feel overwhelmed, reduce this number. Consider using quality study materials and active recall techniques—where you test yourself rather than passively reviewing. Track which card topics cause you difficulty and allocate extra review time to those areas.</p><h2>Common Challenges and Solutions</h2><p>If you're falling behind on reviews, reduce your daily learning capacity to create more sustainable habits. If reviews feel too easy, verify you're using proper active recall—your brain should struggle slightly to retrieve information. Some students find success breaking large decks into smaller subject-specific decks for better focus. If you notice cards repeatedly returning to Box 1, you may need to improve your initial learning process or break complex concepts into simpler flashcards. Remember that consistency matters more than marathon study sessions; reviewing 15 minutes daily outperforms cramming for 3 hours once per week. Finally, be patient with the system—true mastery typically requires months of consistent application, not weeks.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Related Articles</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>FAQ</h2><div class="faq-item"><div class="faq-q">How often should I review cards in Box 1?</div><div class="faq-a">Cards in Box 1 should be reviewed daily or every 1-2 days. These are your most challenging cards or recently learned material, so frequent exposure is essential for building initial familiarity and preventing forgetting.</div></div>
+  <div class="faq-item"><div class="faq-q">What if I can't keep up with the review schedule?</div><div class="faq-a">Reduce your daily learning capacity in the calculator. It's better to learn 10 cards per day sustainably than 30 cards per day and fall behind on reviews. The Leitner system's strength lies in consistency, not speed.</div></div>
+  <div class="faq-item"><div class="faq-q">How long does it really take to master a deck of 500 cards?</div><div class="faq-a">With an 85% retention rate and 20 cards per day capacity, it typically takes 3-6 months to master 500 cards. However, this varies based on material difficulty, your learning method quality, and your actual retention rate. Use the calculator's estimate as a general guide.</div></div>
+  <div class="faq-item"><div class="faq-q">Should I move cards to the next box if I get them wrong?</div><div class="faq-a">No, if you answer incorrectly, the card should return to Box 1 regardless of which box it was in. This ensures difficult material receives adequate review. You can mark cards as correct only when you answer confidently and accurately.</div></div>
+  <div class="faq-item"><div class="faq-q">Can I use this system for languages, medical studies, and other subjects?</div><div class="faq-a">Absolutely! The Leitner system is domain-agnostic and works effectively for any subject requiring memorization—languages, medical terminology, historical dates, chemical formulas, and more. Adjust your retention rate estimate based on subject difficulty.</div></div></section>
+  <div class="more-tools"><h3>More Tools</h3><div class="tools-grid"><a class="tool-pill" href="/tools/en/compound-interest.html">Compound Interest Calculator</a>
+      <a class="tool-pill" href="/tools/en/roi-calculator.html">ROI Calculator</a>
+      <a class="tool-pill" href="/tools/en/risk-reward.html">Risk Reward Calculator</a>
+      <a class="tool-pill" href="/tools/en/position-size.html">Position Size Calculator</a>
+      <a class="tool-pill" href="/tools/en/stop-loss.html">Stop Loss Calculator</a>
+      <a class="tool-pill" href="/tools/en/dividend-yield.html">Dividend Yield Calculator</a>
+      <a class="tool-pill" href="/tools/en/pe-ratio.html">P/E Ratio Calculator</a>
+      <a class="tool-pill" href="/tools/en/dca-calculator.html">DCA Calculator</a>
+      <a class="tool-pill" href="/tools/en/cagr.html">CAGR Calculator</a>
+      <a class="tool-pill" href="/tools/en/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/en/stock-gain-loss.html">Stock Gain/Loss Calculator</a>
+      <a class="tool-pill" href="/tools/en/break-even.html">Break Even Calculator</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/flashcard-spacing.html" class="lang-btn active">English</a>
+    <a href="/tools/flashcard-spacing.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/flashcard-spacing.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/flashcard-spacing.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/flashcard-spacing.html" class="lang-btn">Français</a>
+    <a href="/tools/es/flashcard-spacing.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/flashcard-spacing.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/flashcard-spacing.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/flashcard-spacing.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/flashcard-spacing.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Related Tools</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const totalFlashcards = parseInt(document.getElementById('totalFlashcards').value);
+  const cardsLearned = parseInt(document.getElementById('cardsLearned').value);
+  const reviewDays = parseInt(document.getElementById('reviewDays').value);
+  const dailyCapacity = parseInt(document.getElementById('dailyCapacity').value);
+  const retentionRate = parseInt(document.getElementById('retentionRate').value);
+
+  if (!totalFlashcards || totalFlashcards <= 0 || !dailyCapacity || dailyCapacity <= 0) {
+    alert('Please enter valid positive numbers for total flashcards and daily capacity');
+    return;
+  }
+
+  const retentionDecimal = retentionRate / 100;
+  const remainingCards = totalFlashcards - cardsLearned;
+  const cardsToReview = Math.ceil((cardsLearned * (1 - Math.pow(retentionDecimal, reviewDays))) / 0.5);
+  const cardsToLearn = Math.min(Math.max(0, dailyCapacity - cardsToReview), remainingCards);
+  
+  const learningPace = cardsToLearn > 0 ? cardsToLearn : dailyCapacity / 2;
+  const daysRemaining = learningPace > 0 ? Math.ceil(remainingCards / learningPace) : 365;
+  const estimatedCompletion = daysRemaining;
+  const progressPercent = (cardsLearned / totalFlashcards) * 100;
+
+  const box1 = Math.ceil(cardsLearned * 0.20);
+  const box2 = Math.ceil(cardsLearned * 0.30);
+  const box3 = Math.ceil(cardsLearned * 0.25);
+  const box4 = Math.ceil(cardsLearned * 0.15);
+  const box5 = Math.ceil(cardsLearned * 0.10);
+
+  document.getElementById('cardsToReviewToday').textContent = Math.max(0, cardsToReview).toLocaleString();
+  document.getElementById('cardsToLearnToday').textContent = Math.max(0, cardsToLearn).toLocaleString();
+  document.getElementById('estimatedCompletion').textContent = Math.max(1, estimatedCompletion).toLocaleString();
+  document.getElementById('overallProgress').textContent = Math.min(100, Math.round(progressPercent * 10) / 10).toLocaleString();
+  document.getElementById('box1Count').textContent = box1.toLocaleString();
+  document.getElementById('box2Count').textContent = box2.toLocaleString();
+  document.getElementById('box3Count').textContent = box3.toLocaleString();
+  document.getElementById('box4Count').textContent = box4.toLocaleString();
+  document.getElementById('box5Count').textContent = box5.toLocaleString();
+
+  document.getElementById('resultsSection').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copied!';setTimeout(function(){b.textContent='Share'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|en|flashcard-spacing|2026-07-09 -->

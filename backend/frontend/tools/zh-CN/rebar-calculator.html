@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>钢筋计算器 - 快速计算钢筋用量和重量</title>
+<meta name="description" content="免费在线钢筋计算器，快速计算建筑工程所需的钢筋数量、总长度、总重量和单位重量。支持自定义间距和直径。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/zh-CN/rebar-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/rebar-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/rebar-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/rebar-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/rebar-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/rebar-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/rebar-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/rebar-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/rebar-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/rebar-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/rebar-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/rebar-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "钢筋计算器", "url": "https://softglow-ai.com/tools/zh-CN/rebar-calculator.html", "description": "免费在线钢筋计算器，快速计算建筑工程所需的钢筋数量、总长度、总重量和单位重量。支持自定义间距和直径。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "如何计算钢筋总根数？", "acceptedAnswer": {"@type": "Answer", "text": "钢筋总根数 = (结构总长度 ÷ 钢筋间距 + 1) × 钢筋排数。例如100米长的结构，间距0.15米，2排钢筋，则总根数 = (100÷0.15+1)×2 = 1,335根。"}}, {"@type": "Question", "name": "钢筋重量如何计算？", "acceptedAnswer": {"@type": "Answer", "text": "根据国家标准，钢筋重量（kg）= 直径²（mm²）×长度（m）×0.00617。例如16mm直径的钢筋，每米重量约0.16kg。总重量=单位重量×总长度。"}}, {"@type": "Question", "name": "为什么计算结果中要加上1？", "acceptedAnswer": {"@type": "Answer", "text": "加1是因为在等间距排列中，n个间距会产生n+1根钢筋。例如间距为0.15米，长度100米，共有667个间距，因此产生668根钢筋。"}}, {"@type": "Question", "name": "施工中需要考虑损耗吗？", "acceptedAnswer": {"@type": "Answer", "text": "是的，建议在计算结果基础上增加3-5%的损耗率作为备用量。这样可以应对施工中的切割损耗、折弯报废等情况，确保材料充足。"}}, {"@type": "Question", "name": "不同直径的钢筋重量差异大吗？", "acceptedAnswer": {"@type": "Answer", "text": "差异很大。因为钢筋重量与直径的平方成正比，所以直径越大，重量增长越快。例如16mm钢筋比12mm钢筋重约78%，25mm钢筋比16mm钢筋重约88%。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/zh-CN/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 钢筋计算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>钢筋计算器</h1>
+    <p class="calc-subtitle">计算建筑工程项目所需的钢筋数量和重量</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="totalLength">结构总长度</label>
+  <div class="input-row"><input type="number" id="totalLength" placeholder="100"  step="0.1"><span class="input-suffix">米</span></div>
+</div>
+  <small class="input-help">输入建筑结构的总长度，单位为米</small>
+<div class="input-group">
+  <label for="spacing">钢筋间距</label>
+  <div class="input-row"><input type="number" id="spacing" placeholder="0.15"  step="0.01"><span class="input-suffix">米</span></div>
+</div>
+  <small class="input-help">输入相邻钢筋之间的间距，单位为米</small>
+<div class="input-group">
+  <label for="barDiameter">钢筋直径</label>
+  <div class="input-row"><input type="number" id="barDiameter" placeholder="16"  step="1"><span class="input-suffix">毫米</span></div>
+</div>
+  <small class="input-help">输入钢筋的公称直径，单位为毫米</small>
+<div class="input-group">
+  <label for="barsRequired">钢筋排数</label>
+  <div class="input-row"><input type="number" id="barsRequired" placeholder="2"  step="1"><span class="input-suffix">排</span></div>
+</div>
+  <small class="input-help">输入平行排列的钢筋总排数</small></div>
+    <button class="btn-calc" onclick="calculate()">计算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">钢筋总根数</span><span class="result-value" id="totalBars">—</span></div>
+<div class="result-item"><span class="result-label">钢筋总长度</span><span class="result-value" id="totalBarLength">—</span></div>
+<div class="result-highlight"><span class="result-label">钢筋总重量</span><span class="result-value" id="totalWeight">—</span></div>
+<div class="result-item"><span class="result-label">单位重量</span><span class="result-value" id="weightPerMeter">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>这代表什么？</strong> 计算结果显示了所需钢筋的总根数、总长度（米）和总重量（千克）。单位重量表示每米钢筋的平均重量，用于验证采购数量的准确性。根据计算结果可以精确采购和安排施工材料。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 打印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>钢筋计算器使用指南</h2><p>钢筋计算器是建筑工程施工中必不可少的工具，用于快速精确计算所需的钢筋数量和重量。通过输入结构尺寸、钢筋间距、直径和排数等参数，系统会自动计算出钢筋的总根数、总长度、总重量和单位重量。</p><h2>如何使用钢筋计算器</h2><p>首先输入建筑结构的总长度（米），然后设定相邻钢筋之间的间距。接着输入钢筋的公称直径（毫米），最后指定平行排列的钢筋总排数。系统将根据标准钢筋重量表自动计算结果，为您提供精确的材料用量数据。</p><h2>钢筋间距的重要性</h2><p>钢筋间距的设置直接影响到混凝土结构的强度和耐久性。合理的间距能够确保混凝土的充分填充和均匀分布，提高结构的承载能力。间距过小会浪费材料，间距过大则会降低结构强度。一般工程中常用的间距为100-300毫米。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>钢筋直径的选择</h2><p>常用的钢筋直径包括8、10、12、16、20、25、32毫米等规格。不同直径的钢筋适用于不同的工程部位和承重要求。直径越大，单位长度的重量越大，承载能力越强。在设计阶段应根据结构计算确定合适的钢筋规格。</p><h2>重量计算方法</h2><p>钢筋重量的计算基于国家标准GB/T 1499.2-2018。对于圆钢筋，重量（kg）= 直径²（mm²）× 长度（m）× 密度系数0.00617。例如16毫米直径、100米长的钢筋，总重量约为1,587千克。准确的重量计算有利于运输、成本核算和库存管理。</p><h2>工程应用建议</h2><p>使用计算器得到的数据时，应考虑施工中的损耗率（一般为3-5%），预留一定的备用量。同时要根据现场实际情况和设计图纸进行校验，确保计算的准确性。大型工程建议由专业工程师进行核对，以确保材料采购的准确性和工程质量。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸阅读</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常见问题</h2><div class="faq-item"><div class="faq-q">如何计算钢筋总根数？</div><div class="faq-a">钢筋总根数 = (结构总长度 ÷ 钢筋间距 + 1) × 钢筋排数。例如100米长的结构，间距0.15米，2排钢筋，则总根数 = (100÷0.15+1)×2 = 1,335根。</div></div>
+  <div class="faq-item"><div class="faq-q">钢筋重量如何计算？</div><div class="faq-a">根据国家标准，钢筋重量（kg）= 直径²（mm²）×长度（m）×0.00617。例如16mm直径的钢筋，每米重量约0.16kg。总重量=单位重量×总长度。</div></div>
+  <div class="faq-item"><div class="faq-q">为什么计算结果中要加上1？</div><div class="faq-a">加1是因为在等间距排列中，n个间距会产生n+1根钢筋。例如间距为0.15米，长度100米，共有667个间距，因此产生668根钢筋。</div></div>
+  <div class="faq-item"><div class="faq-q">施工中需要考虑损耗吗？</div><div class="faq-a">是的，建议在计算结果基础上增加3-5%的损耗率作为备用量。这样可以应对施工中的切割损耗、折弯报废等情况，确保材料充足。</div></div>
+  <div class="faq-item"><div class="faq-q">不同直径的钢筋重量差异大吗？</div><div class="faq-a">差异很大。因为钢筋重量与直径的平方成正比，所以直径越大，重量增长越快。例如16mm钢筋比12mm钢筋重约78%，25mm钢筋比16mm钢筋重约88%。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/zh-CN/compound-interest.html">复利计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/roi-calculator.html">投资回报率 (ROI) 计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/risk-reward.html">风险收益比计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/position-size.html">头寸规模计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stop-loss.html">止损计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dividend-yield.html">股息收益率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/pe-ratio.html">市盈率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dca-calculator.html">定期定额投资计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/cagr.html">复合年增长率(CAGR)计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/margin-calculator.html">保证金计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stock-gain-loss.html">股票盈亏计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/break-even.html">损益平衡点计算器</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/rebar-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/rebar-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/rebar-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/rebar-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/rebar-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/rebar-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/rebar-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/rebar-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/rebar-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/rebar-calculator.html" class="lang-btn active">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相关工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const totalLengthInput = document.getElementById('totalLength');
+  const spacingInput = document.getElementById('spacing');
+  const barDiameterInput = document.getElementById('barDiameter');
+  const barsRequiredInput = document.getElementById('barsRequired');
+
+  if (!totalLengthInput.value || !spacingInput.value || !barDiameterInput.value || !barsRequiredInput.value) {
+    alert('Please fill in all fields');
+    return;
+  }
+
+  const totalLength = parseFloat(totalLengthInput.value);
+  const spacing = parseFloat(spacingInput.value);
+  const barDiameter = parseFloat(barDiameterInput.value);
+  const barsRequired = parseFloat(barsRequiredInput.value);
+
+  if (totalLength <= 0 || spacing <= 0 || barDiameter <= 0 || barsRequired <= 0) {
+    alert('Please enter valid positive numbers');
+    return;
+  }
+
+  const barsPerLine = Math.ceil(totalLength / spacing) + 1;
+  const totalBars = barsPerLine * barsRequired;
+  const totalBarLength = totalBars * totalLength;
+
+  const weightPerMeterTable = {
+    6: 0.222,
+    8: 0.395,
+    10: 0.617,
+    12: 0.888,
+    14: 1.21,
+    16: 1.58,
+    18: 2.0,
+    20: 2.47,
+    22: 2.98,
+    25: 3.86,
+    28: 4.83,
+    32: 6.31,
+    36: 7.99,
+    40: 9.87
+  };
+
+  const weightPerMeter = weightPerMeterTable[barDiameter] || (barDiameter * barDiameter * 0.00617);
+  const totalWeight = totalBarLength * weightPerMeter;
+
+  document.getElementById('totalBars').textContent = totalBars.toLocaleString('en-US', {maximumFractionDigits: 0});
+  document.getElementById('totalBarLength').textContent = totalBarLength.toLocaleString('en-US', {maximumFractionDigits: 2});
+  document.getElementById('totalWeight').textContent = totalWeight.toLocaleString('en-US', {maximumFractionDigits: 2});
+  document.getElementById('weightPerMeter').textContent = weightPerMeter.toLocaleString('en-US', {maximumFractionDigits: 3});
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已复制！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-CN|rebar-calculator|2026-07-09 -->

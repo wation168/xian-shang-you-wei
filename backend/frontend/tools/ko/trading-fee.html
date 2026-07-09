@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>거래 수수료 계산기 - 즉시 계산</title>
+<meta name="description" content="거래 금액과 수수료율을 입력하면 거래 수수료, 순액, 총액을 즉시 계산할 수 있습니다.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ko/trading-fee.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/trading-fee.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/trading-fee.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/trading-fee.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/trading-fee.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/trading-fee.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/trading-fee.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/trading-fee.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/trading-fee.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/trading-fee.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/trading-fee.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/trading-fee.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "거래 수수료 계산기", "url": "https://softglow-ai.com/tools/ko/trading-fee.html", "description": "거래 금액과 수수료율을 입력하면 거래 수수료, 순액, 총액을 즉시 계산할 수 있습니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "거래 수수료율은 어디서 찾을 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "거래 수수료율은 거래 플랫폼이나 증권사의 웹사이트에서 확인할 수 있습니다. 보통 수수료 정책 페이지에 자세히 나와 있으며, 고객 지원팀에 문의할 수도 있습니다."}}, {"@type": "Question", "name": "순액과 총액의 차이는 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "순액은 거래 후 받을 금액(거래 금액 - 수수료)이고, 총액은 거래에 필요한 전체 비용(거래 금액 + 수수료)입니다. 판매할 때는 순액을, 매수할 때는 총액을 참고하면 됩니다."}}, {"@type": "Question", "name": "음수 수수료율을 입력할 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "기술적으로는 가능하지만, 음수 수수료율은 현실의 거래 상황을 반영하지 않습니다. 일반적으로 수수료는 양수이며, 특별한 경우 캐시백이나 리베이트는 별도로 계산합니다."}}, {"@type": "Question", "name": "여러 거래의 총 수수료를 계산할 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "이 계산기는 한 번에 하나의 거래만 계산합니다. 여러 거래를 계산하려면 각각 따로 입력한 후 결과를 합산하거나, 스프레드시트를 사용하면 편리합니다."}}, {"@type": "Question", "name": "수수료율이 0%라면 어떻게 되나요?", "acceptedAnswer": {"@type": "Answer", "text": "수수료율이 0%인 경우, 거래 수수료는 0이 되고 순액은 거래 금액과 같으며, 총액도 거래 금액과 동일합니다. 수수료 없는 거래를 계산할 때 유용합니다."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/ko/">도구</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 거래 수수료 계산기</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>거래 수수료 계산기</h1>
+    <p class="calc-subtitle">모든 거래 금액의 수수료를 즉시 계산하세요</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="tradeAmount">거래 금액</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="tradeAmount" placeholder="10000"  step="0.01"></div>
+</div>
+  <small class="input-help">거래하려는 총 금액을 입력하세요</small>
+<div class="input-group">
+  <label for="feeRate">수수료율</label>
+  <div class="input-row"><input type="number" id="feeRate" placeholder="0.1"  step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">적용될 수수료 비율을 입력하세요</small></div>
+    <button class="btn-calc" onclick="calculate()">계산하기</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">거래 수수료</span><span class="result-value" id="tradingFeeResult">—</span></div>
+<div class="result-item"><span class="result-label">순액 (수수료 차감)</span><span class="result-value" id="netAmountResult">—</span></div>
+<div class="result-item"><span class="result-label">총액 (금액 + 수수료)</span><span class="result-value" id="totalCostResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>이것은 무엇을 의미합니까?</strong> 거래 수수료는 거래 금액에 수수료율을 곱한 값입니다. 순액은 거래 금액에서 수수료를 뺀 실제 받을 금액이며, 총액은 거래 금액과 수수료를 합친 전체 비용입니다.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 인쇄</button>
+        <button onclick="shareResult()">&#x1f4e4; 공유</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>거래 수수료 계산기란?</h2><p>거래 수수료 계산기는 주식, 암호화폐, 외환 등 모든 종류의 거래에서 발생하는 수수료를 빠르게 계산하는 도구입니다. 거래 금액과 수수료율만 입력하면 정확한 수수료와 순액을 즉시 확인할 수 있습니다.</p><h2>수수료 계산 방법</h2><p>거래 수수료는 다음 공식으로 계산됩니다: 거래 수수료 = 거래 금액 × (수수료율 ÷ 100). 예를 들어, 10,000달러에 0.1% 수수료가 적용되면 10달러의 수수료가 발생합니다.</p><h2>순액 이해하기</h2><p>순액(수수료 차감)은 거래 후 실제로 받을 수 있는 금액입니다. 이는 거래 금액에서 수수료를 뺀 값으로, 투자자가 최종적으로 보유하게 될 실제 자산의 가치를 나타냅니다.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>총액의 의미</h2><p>총액은 거래에 필요한 전체 비용으로, 원래 거래 금액과 수수료를 합친 것입니다. 매수 시 실제로 지불해야 할 총 금액을 알고 싶을 때 유용합니다.</p><h2>다양한 거래 수수료</h2><p>수수료율은 거래 플랫폼, 자산 종류, 거래량 등에 따라 다양합니다. 주식은 보통 0.01~0.5%, 암호화폐는 0.1~1%, 외환은 0.001~0.1% 정도의 수수료가 적용됩니다.</p><h2>거래 계획 수립</h2><p>이 계산기를 사용하면 거래 전에 정확한 비용을 파악할 수 있어, 보다 효율적인 거래 계획을 수립할 수 있습니다. 수수료를 미리 계산하면 투자 수익성을 더 정확히 예측할 수 있습니다.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 관련 기사</h3><div class="blog-grid"><a class="blog-card" href="/blog/ko/candlestick-patterns.html">Candlestick Patterns<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ko/support-resistance.html">Support & Resistance<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ko/moving-average-guide.html">Moving Average Guide<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>자주 묻는 질문</h2><div class="faq-item"><div class="faq-q">거래 수수료율은 어디서 찾을 수 있나요?</div><div class="faq-a">거래 수수료율은 거래 플랫폼이나 증권사의 웹사이트에서 확인할 수 있습니다. 보통 수수료 정책 페이지에 자세히 나와 있으며, 고객 지원팀에 문의할 수도 있습니다.</div></div>
+  <div class="faq-item"><div class="faq-q">순액과 총액의 차이는 무엇인가요?</div><div class="faq-a">순액은 거래 후 받을 금액(거래 금액 - 수수료)이고, 총액은 거래에 필요한 전체 비용(거래 금액 + 수수료)입니다. 판매할 때는 순액을, 매수할 때는 총액을 참고하면 됩니다.</div></div>
+  <div class="faq-item"><div class="faq-q">음수 수수료율을 입력할 수 있나요?</div><div class="faq-a">기술적으로는 가능하지만, 음수 수수료율은 현실의 거래 상황을 반영하지 않습니다. 일반적으로 수수료는 양수이며, 특별한 경우 캐시백이나 리베이트는 별도로 계산합니다.</div></div>
+  <div class="faq-item"><div class="faq-q">여러 거래의 총 수수료를 계산할 수 있나요?</div><div class="faq-a">이 계산기는 한 번에 하나의 거래만 계산합니다. 여러 거래를 계산하려면 각각 따로 입력한 후 결과를 합산하거나, 스프레드시트를 사용하면 편리합니다.</div></div>
+  <div class="faq-item"><div class="faq-q">수수료율이 0%라면 어떻게 되나요?</div><div class="faq-a">수수료율이 0%인 경우, 거래 수수료는 0이 되고 순액은 거래 금액과 같으며, 총액도 거래 금액과 동일합니다. 수수료 없는 거래를 계산할 때 유용합니다.</div></div></section>
+  <div class="more-tools"><h3>더 많은 도구</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ko/fibonacci-retracement.html">피보나치 되돌림 계산기</a>
+      <a class="tool-pill" href="/tools/ko/pivot-point.html">피벗 포인트 계산기</a>
+      <a class="tool-pill" href="/tools/ko/rsi-calculator.html">RSI 계산기</a>
+      <a class="tool-pill" href="/tools/ko/macd-calculator.html">MACD 계산기</a>
+      <a class="tool-pill" href="/tools/ko/bollinger-bands.html">볼린저 밴드 계산기</a>
+      <a class="tool-pill" href="/tools/ko/atr-calculator.html">ATR 계산기</a>
+      <a class="tool-pill" href="/tools/ko/ma-crossover.html">이동평균 교차 계산기</a>
+      <a class="tool-pill" href="/tools/ko/candlestick-identifier.html">캔들스틱 패턴 식별자</a>
+      <a class="tool-pill" href="/tools/ko/support-resistance.html">지지선과 저항선 계산기</a>
+      <a class="tool-pill" href="/tools/ko/pip-value.html">핍 값 계산기</a>
+      <a class="tool-pill" href="/tools/ko/options-profit.html">옵션 수익 계산기</a>
+      <a class="tool-pill" href="/tools/ko/stock-split.html">주식 분할 계산기</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/trading-fee.html" class="lang-btn">English</a>
+    <a href="/tools/trading-fee.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/trading-fee.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/trading-fee.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/trading-fee.html" class="lang-btn">Français</a>
+    <a href="/tools/es/trading-fee.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/trading-fee.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/trading-fee.html" class="lang-btn active">한국어</a>
+    <a href="/tools/id/trading-fee.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/trading-fee.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>관련 계산기</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const tradeAmountInput = document.getElementById('tradeAmount');
+  const feeRateInput = document.getElementById('feeRate');
+  const tradingFeeResult = document.getElementById('tradingFeeResult');
+  const netAmountResult = document.getElementById('netAmountResult');
+  const totalCostResult = document.getElementById('totalCostResult');
+  const resultsDiv = document.querySelector('.results');
+
+  if (!tradeAmountInput.value || !feeRateInput.value) {
+    alert('Please enter both trade amount and fee rate');
+    return;
+  }
+
+  const tradeAmount = parseFloat(tradeAmountInput.value);
+  const feeRate = parseFloat(feeRateInput.value);
+
+  if (tradeAmount <= 0 || feeRate < 0) {
+    alert('Please enter valid positive numbers');
+    return;
+  }
+
+  const tradingFee = tradeAmount * (feeRate / 100);
+  const netAmount = tradeAmount - tradingFee;
+  const totalCost = tradeAmount + tradingFee;
+
+  tradingFeeResult.textContent = '$' + tradingFee.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  netAmountResult.textContent = '$' + netAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  totalCostResult.textContent = '$' + totalCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='복사됨!';setTimeout(function(){b.textContent='공유'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|ko|trading-fee|2026-07-09 -->

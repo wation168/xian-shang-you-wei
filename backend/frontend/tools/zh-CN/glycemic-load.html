@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>血糖负荷计算器 - 快速评估食物对血糖的影响</title>
+<meta name="description" content="免费血糖负荷计算器，输入血糖指数和碳水化合物含量，快速计算食物的血糖负荷值，帮助您制定更健康的饮食计划。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/zh-CN/glycemic-load.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/glycemic-load.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/glycemic-load.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/glycemic-load.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/glycemic-load.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/glycemic-load.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/glycemic-load.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/glycemic-load.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/glycemic-load.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/glycemic-load.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/glycemic-load.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/glycemic-load.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "血糖生成指数计算器", "url": "https://softglow-ai.com/tools/zh-CN/glycemic-load.html", "description": "免费血糖负荷计算器，输入血糖指数和碳水化合物含量，快速计算食物的血糖负荷值，帮助您制定更健康的饮食计划。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "什么是血糖指数（GI）？", "acceptedAnswer": {"@type": "Answer", "text": "血糖指数是衡量含碳水化合物食物对血糖影响速度的指标，范围为0-100。高GI食物会导致血糖快速上升，而低GI食物则上升较慢。GI是计算GL的重要组成部分。"}}, {"@type": "Question", "name": "血糖负荷和血糖指数有什么区别？", "acceptedAnswer": {"@type": "Answer", "text": "GI只考虑食物中碳水化合物的质量，而GL同时考虑了GI和实际的碳水化合物含量。例如，西瓜虽然GI较高，但碳水化合物含量低，所以GL值反而较低，更适合食用。"}}, {"@type": "Question", "name": "我应该选择所有GL值低的食物吗？", "acceptedAnswer": {"@type": "Answer", "text": "虽然低GL食物是健康选择，但均衡饮食同样重要。应该结合蛋白质、健康脂肪、纤维和其他营养素。即使某些食物GL较高，也可以通过与其他食物搭配来降低整体膳食的GL值。"}}, {"@type": "Question", "name": "GL值多少才算安全？", "acceptedAnswer": {"@type": "Answer", "text": "一般来说，单份食物的GL值≤10被认为是低的，11-19为中等，≥20为高。全天的总GL值建议不超过100。具体数值应根据个人的健康状况和医生建议而定。"}}, {"@type": "Question", "name": "这个计算器适用于所有人吗？", "acceptedAnswer": {"@type": "Answer", "text": "血糖负荷计算器特别对糖尿病患者、血糖控制不良者和想要改善饮食的人有帮助。但对于特殊健康情况，建议咨询医生或注册营养师以获得个性化建议。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/zh-CN/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 血糖生成指数计算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>血糖生成指数计算器</h1>
+    <p class="calc-subtitle">计算食物的血糖负荷，了解其对血糖水平的影响</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="glycemicIndex">血糖指数 (GI)</label>
+  <div class="input-row"><input type="number" id="glycemicIndex" placeholder="例如，55"  step="1"></div>
+</div>
+  <small class="input-help">输入食物的血糖指数值，范围通常为0-100</small>
+<div class="input-group">
+  <label for="carbohydrates">碳水化合物</label>
+  <div class="input-row"><input type="number" id="carbohydrates" placeholder="例如，30"  step="0.1"><span class="input-suffix">克</span></div>
+</div>
+  <small class="input-help">输入食物中碳水化合物的含量</small></div>
+    <button class="btn-calc" onclick="calculate()">计算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">血糖负荷 (GL)</span><span class="result-value" id="glycemicLoadResult">—</span></div>
+<div class="result-item"><span class="result-label">解释</span><span class="result-value" id="glInterpretation">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>这代表什么？</strong> 血糖负荷（GL）是通过将血糖指数乘以碳水化合物含量再除以100来计算的。GL值越低，食物对血糖的影响越小，越适合血糖管理。根据GL值，食物可分为低、中、高三个等级，帮助您做出更明智的饮食选择。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 打印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什么是血糖负荷（GL）？</h2><p>血糖负荷是衡量食物对血糖影响程度的指标。它综合考虑了食物的血糖指数（GI）和碳水化合物含量，提供了比单独使用GI更准确的评估。GL值越低，食物引起血糖快速升高的可能性就越小。</p><h2>血糖负荷的计算方法</h2><p>血糖负荷计算公式为：GL = (GI × 碳水化合物克数) ÷ 100。例如，一份食物的GI为60，含有30克碳水化合物，则其GL值为18。这个数值可以帮助您更准确地了解食物对血糖的实际影响。</p><h2>GL值的分类标准</h2><p>血糖负荷通常分为三个等级：低GL（≤10）表示食物对血糖影响较小，适合频繁食用；中GL（11-19）表示食物中等影响血糖，需适量食用；高GL（≥20）表示食物显著影响血糖，应限制摄入。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>为什么GL比GI更重要</h2><p>虽然GI反映了食物中碳水化合物的质量，但GL还考虑了实际的碳水化合物含量。这意味着某些高GI食物，如西瓜，由于碳水化合物含量较低，其GL值仍然较低。因此，GL提供了更全面的血糖影响评估。</p><h2>血糖负荷与糖尿病管理</h2><p>对于糖尿病患者和需要控制血糖的人群，选择低GL的食物可以更好地维持血糖稳定。结合适量运动和均衡饮食，低GL食物选择可以显著改善血糖控制和整体健康状况。</p><h2>日常应用建议</h2><p>在日常生活中，尽量选择GL值较低的全谷物、豆类、蔬菜和新鲜水果。避免加工食品和高糖饮料，因为它们通常有较高的GL值。咨询营养师可以帮助您制定个性化的低GL饮食计划。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸阅读</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常见问题</h2><div class="faq-item"><div class="faq-q">什么是血糖指数（GI）？</div><div class="faq-a">血糖指数是衡量含碳水化合物食物对血糖影响速度的指标，范围为0-100。高GI食物会导致血糖快速上升，而低GI食物则上升较慢。GI是计算GL的重要组成部分。</div></div>
+  <div class="faq-item"><div class="faq-q">血糖负荷和血糖指数有什么区别？</div><div class="faq-a">GI只考虑食物中碳水化合物的质量，而GL同时考虑了GI和实际的碳水化合物含量。例如，西瓜虽然GI较高，但碳水化合物含量低，所以GL值反而较低，更适合食用。</div></div>
+  <div class="faq-item"><div class="faq-q">我应该选择所有GL值低的食物吗？</div><div class="faq-a">虽然低GL食物是健康选择，但均衡饮食同样重要。应该结合蛋白质、健康脂肪、纤维和其他营养素。即使某些食物GL较高，也可以通过与其他食物搭配来降低整体膳食的GL值。</div></div>
+  <div class="faq-item"><div class="faq-q">GL值多少才算安全？</div><div class="faq-a">一般来说，单份食物的GL值≤10被认为是低的，11-19为中等，≥20为高。全天的总GL值建议不超过100。具体数值应根据个人的健康状况和医生建议而定。</div></div>
+  <div class="faq-item"><div class="faq-q">这个计算器适用于所有人吗？</div><div class="faq-a">血糖负荷计算器特别对糖尿病患者、血糖控制不良者和想要改善饮食的人有帮助。但对于特殊健康情况，建议咨询医生或注册营养师以获得个性化建议。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/zh-CN/compound-interest.html">复利计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/roi-calculator.html">投资回报率 (ROI) 计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/risk-reward.html">风险收益比计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/position-size.html">头寸规模计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stop-loss.html">止损计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dividend-yield.html">股息收益率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/pe-ratio.html">市盈率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dca-calculator.html">定期定额投资计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/cagr.html">复合年增长率(CAGR)计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/margin-calculator.html">保证金计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stock-gain-loss.html">股票盈亏计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/break-even.html">损益平衡点计算器</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/glycemic-load.html" class="lang-btn">English</a>
+    <a href="/tools/glycemic-load.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/glycemic-load.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/glycemic-load.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/glycemic-load.html" class="lang-btn">Français</a>
+    <a href="/tools/es/glycemic-load.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/glycemic-load.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/glycemic-load.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/glycemic-load.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/glycemic-load.html" class="lang-btn active">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相关工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const giInput = document.getElementById('glycemicIndex');
+  const carbsInput = document.getElementById('carbohydrates');
+  const glResult = document.getElementById('glycemicLoadResult');
+  const interpretResult = document.getElementById('glInterpretation');
+  const resultsDiv = document.getElementById('results');
+
+  if (!giInput.value || !carbsInput.value) {
+    alert('Please enter both Glycemic Index and Carbohydrates values');
+    return;
+  }
+
+  const gi = parseFloat(giInput.value);
+  const carbs = parseFloat(carbsInput.value);
+
+  if (gi < 0 || gi > 100 || carbs < 0) {
+    alert('Please enter valid values. GI should be 0-100, carbs should be positive');
+    return;
+  }
+
+  const gl = (gi * carbs) / 100;
+
+  glResult.textContent = gl.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+  let interpretation = '';
+  if (gl < 10) {
+    interpretation = 'Low GL - Minimal blood sugar impact';
+  } else if (gl < 20) {
+    interpretation = 'Medium GL - Moderate blood sugar impact';
+  } else {
+    interpretation = 'High GL - Significant blood sugar impact';
+  }
+
+  interpretResult.textContent = interpretation;
+  resultsDiv.classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已复制！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-CN|glycemic-load|2026-07-09 -->

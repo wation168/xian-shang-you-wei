@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>皮爾遜相關係數計算器 - 線上統計工具</title>
+<meta name="description" content="免費線上相關性計算器,快速計算兩個變數間的皮爾遜相關係數、R平方值和相關強度。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/correlation-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/correlation-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/correlation-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/correlation-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/correlation-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/correlation-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/correlation-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/correlation-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/correlation-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/correlation-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/correlation-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/correlation-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "相關性計算器", "url": "https://softglow-ai.com/tools/correlation-calculator.html", "description": "免費線上相關性計算器,快速計算兩個變數間的皮爾遜相關係數、R平方值和相關強度。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "皮爾遜相關係數和斯皮爾曼相關係數有什麼區別?", "acceptedAnswer": {"@type": "Answer", "text": "皮爾遜相關係數衡量線性關係,適用於連續數據;斯皮爾曼相關係數衡量單調關係,基於排序數據,更適合非線性或有異常值的數據。"}}, {"@type": "Question", "name": "相關性係數為 0 是否意味著沒有關係?", "acceptedAnswer": {"@type": "Answer", "text": "不一定。係數為 0 表示沒有線性關係,但可能存在非線性關係。例如,二次函數關係的相關係數可能為 0,但變數間仍有明確的數學關係。"}}, {"@type": "Question", "name": "需要多少樣本量才能進行可靠的相關性分析?", "acceptedAnswer": {"@type": "Answer", "text": "一般建議樣本量至少 30,但具體要求取決於研究目的和效應大小。樣本量越大,相關係數的估計越穩定可靠。"}}, {"@type": "Question", "name": "相關係數的負值是否比正值更差?", "acceptedAnswer": {"@type": "Answer", "text": "不是。負相關和正相關一樣有效,只是表示變數間的關係方向相反。係數的絕對值決定相關強度,符號只表示方向。"}}, {"@type": "Question", "name": "如何判斷相關性是否具有統計意義?", "acceptedAnswer": {"@type": "Answer", "text": "查看 P 值,若 P 值 < 0.05,通常認為相關性在 95% 信心水準下具有統計顯著性。同時應考慮樣本量和實際應用意義。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 相關性計算器</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>相關性計算器</h1>
+    <p class="calc-subtitle">立即計算兩個變數之間的皮爾遜相關係數</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="xvalues">X 數值 (逗號分隔)</label>
+  <div class="input-row"><input type="text" id="xvalues" placeholder="例如: 1, 2, 3, 4, 5"  step="1"></div>
+</div>
+  <small class="input-help">輸入第一組變數的數值,以逗號分隔,例如: 1, 2, 3, 4, 5</small>
+<div class="input-group">
+  <label for="yvalues">Y 數值 (逗號分隔)</label>
+  <div class="input-row"><input type="text" id="yvalues" placeholder="例如: 2, 4, 5, 4, 6"  step="1"></div>
+</div>
+  <small class="input-help">輸入第二組變數的數值,以逗號分隔,數值個數需與第一組相同</small></div>
+    <button class="btn-calc" onclick="calculate()">計算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">皮爾遜相關係數 (r)</span><span class="result-value" id="correlationResult">—</span></div>
+<div class="result-item"><span class="result-label">R平方值 (決定係數)</span><span class="result-value" id="rSquaredResult">—</span></div>
+<div class="result-item"><span class="result-label">相關強度</span><span class="result-value" id="strengthResult">—</span></div>
+<div class="result-item"><span class="result-label">近似 P 值</span><span class="result-value" id="pvalueResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> 皮爾遜相關係數 (r) 的值介於 -1 到 1 之間,越接近 ±1 表示相關性越強。R平方值表示一個變數的變異能被另一個變數解釋的百分比。P 值用於判斷相關性是否具有統計顯著性。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 列印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>什麼是皮爾遜相關係數?</h2><p>皮爾遜相關係數 (Pearson Correlation Coefficient) 是統計學中測量兩個連續變數之間線性關係強度和方向的指標。係數值介於 -1 到 1 之間,其中 1 表示完全正相關,-1 表示完全負相關,0 表示無相關。</p><h2>相關係數的解讀</h2><p>相關係數 r 的絕對值越接近 1,表示兩個變數間的線性關係越強。一般來說,|r| > 0.7 為強相關,0.3 至 0.7 為中等相關,|r| < 0.3 為弱相關。正值表示正相關(一個變數增加時另一個也增加),負值表示負相關。</p><h2>R平方值的意義</h2><p>R平方 (R²) 是相關係數的平方,表示因變數變異中能被自變數解釋的比例。例如,R² = 0.64 表示 64% 的變異可被解釋,剩餘 36% 由其他因素決定。R² 值越高,說明回歸模型的擬合度越好。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>P 值與統計顯著性</h2><p>P 值用於檢驗相關係數是否具有統計顯著性。當 P 值小於 0.05 時,通常認為相關性在 95% 的信心水準下具有統計顯著性。較小的 P 值表示相關性不太可能由隨機因素造成。</p><h2>實際應用場景</h2><p>相關性分析廣泛應用於金融投資(資產組合相關性)、醫學研究(變數間關係)、市場分析(銷售與廣告費用的關係)等領域。計算器可幫助快速識別兩個變數間的關係,為決策提供數據支持。</p><h2>使用建議</h2><p>進行相關性分析時,應確保數據質量良好且樣本數量充足。注意相關性不等同於因果性,相關係數高並不意味著一個變數會導致另一個變數的變化。對結果進行合理解釋,結合領域知識和業務背景做出決策。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">皮爾遜相關係數和斯皮爾曼相關係數有什麼區別?</div><div class="faq-a">皮爾遜相關係數衡量線性關係,適用於連續數據;斯皮爾曼相關係數衡量單調關係,基於排序數據,更適合非線性或有異常值的數據。</div></div>
+  <div class="faq-item"><div class="faq-q">相關性係數為 0 是否意味著沒有關係?</div><div class="faq-a">不一定。係數為 0 表示沒有線性關係,但可能存在非線性關係。例如,二次函數關係的相關係數可能為 0,但變數間仍有明確的數學關係。</div></div>
+  <div class="faq-item"><div class="faq-q">需要多少樣本量才能進行可靠的相關性分析?</div><div class="faq-a">一般建議樣本量至少 30,但具體要求取決於研究目的和效應大小。樣本量越大,相關係數的估計越穩定可靠。</div></div>
+  <div class="faq-item"><div class="faq-q">相關係數的負值是否比正值更差?</div><div class="faq-a">不是。負相關和正相關一樣有效,只是表示變數間的關係方向相反。係數的絕對值決定相關強度,符號只表示方向。</div></div>
+  <div class="faq-item"><div class="faq-q">如何判斷相關性是否具有統計意義?</div><div class="faq-a">查看 P 值,若 P 值 < 0.05,通常認為相關性在 95% 信心水準下具有統計顯著性。同時應考慮樣本量和實際應用意義。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/roi-calculator.html">ROI 計算機</a>
+      <a class="tool-pill" href="/tools/risk-reward.html">風險報酬計算機</a>
+      <a class="tool-pill" href="/tools/position-size.html">部位規模計算器</a>
+      <a class="tool-pill" href="/tools/stop-loss.html">停損計算機</a>
+      <a class="tool-pill" href="/tools/dividend-yield.html">股息收益率計算機</a>
+      <a class="tool-pill" href="/tools/pe-ratio.html">本益比計算機</a>
+      <a class="tool-pill" href="/tools/dca-calculator.html">定期定額投資計算機</a>
+      <a class="tool-pill" href="/tools/cagr.html">年複合成長率計算器</a>
+      <a class="tool-pill" href="/tools/margin-calculator.html">保證金計算器</a>
+      <a class="tool-pill" href="/tools/stock-gain-loss.html">股票損益計算機</a>
+      <a class="tool-pill" href="/tools/break-even.html">損益平衡點計算機</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/correlation-calculator.html" class="lang-btn">English</a>
+    <a href="/tools/correlation-calculator.html" class="lang-btn active">繁體中文</a>
+    <a href="/tools/ja/correlation-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/correlation-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/correlation-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/correlation-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/correlation-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/correlation-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/correlation-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/correlation-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const xInput = document.getElementById('xvalues').value.trim();
+  const yInput = document.getElementById('yvalues').value.trim();
+  
+  if (!xInput || !yInput) {
+    alert('Please enter values for both X and Y variables');
+    return;
+  }
+  
+  const xValues = xInput.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+  const yValues = yInput.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+  
+  if (xValues.length !== yValues.length) {
+    alert('X and Y must have the same number of values');
+    return;
+  }
+  
+  if (xValues.length < 2) {
+    alert('Please enter at least 2 value pairs');
+    return;
+  }
+  
+  const n = xValues.length;
+  const meanX = xValues.reduce((a, b) => a + b, 0) / n;
+  const meanY = yValues.reduce((a, b) => a + b, 0) / n;
+  
+  let numerator = 0;
+  let sumSqX = 0;
+  let sumSqY = 0;
+  
+  for (let i = 0; i < n; i++) {
+    const dx = xValues[i] - meanX;
+    const dy = yValues[i] - meanY;
+    numerator += dx * dy;
+    sumSqX += dx * dx;
+    sumSqY += dy * dy;
+  }
+  
+  const denominator = Math.sqrt(sumSqX * sumSqY);
+  
+  if (denominator === 0) {
+    alert('Cannot calculate correlation: one variable has no variance');
+    return;
+  }
+  
+  const r = numerator / denominator;
+  const rSquared = r * r;
+  
+  let strengthText = '';
+  const absR = Math.abs(r);
+  if (absR >= 0.9) strengthText = 'Very Strong';
+  else if (absR >= 0.7) strengthText = 'Strong';
+  else if (absR >= 0.5) strengthText = 'Moderate';
+  else if (absR >= 0.3) strengthText = 'Weak';
+  else strengthText = 'Very Weak';
+  
+  const tStat = r * Math.sqrt(n - 2) / Math.sqrt(1 - r * r);
+  const df = n - 2;
+  const pvalue = 2 * (1 - tcdf(Math.abs(tStat), df));
+  
+  document.getElementById('correlationResult').textContent = r.toFixed(4);
+  document.getElementById('rSquaredResult').textContent = rSquared.toFixed(4);
+  document.getElementById('strengthResult').textContent = strengthText + ' (' + (r >= 0 ? 'Positive' : 'Negative') + ')';
+  document.getElementById('pvalueResult').textContent = pvalue.toFixed(4);
+  
+  document.getElementById('resultsDiv').classList.add('show');
+}
+
+function tcdf(t, df) {
+  const x = df / (df + t * t);
+  return ibeta(x, df / 2, 0.5);
+}
+
+function ibeta(x, a, b) {
+  if (x === 0) return 0;
+  if (x === 1) return 1;
+  const lbeta = (a + b - 1.5) * Math.log(x) + (b - 0.5) * Math.log(1 - x) - 0.5 * Math.log(2 * Math.PI) + lgamma(a) + lgamma(b) - lgamma(a + b);
+  return Math.exp(lbeta) * (a + b) / (a * (1 - x) + b * x);
+}
+
+function lgamma(x) {
+  const g = 7;
+  const coef = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+  if (x < 0.5) return Math.log(Math.PI) - Math.log(Math.sin(Math.PI * x)) - lgamma(1 - x);
+  x -= 1;
+  let a = coef[0];
+  const t = x + g + 0.5;
+  for (let i = 1; i < coef.length; i++) {
+    a += coef[i] / (x + i);
+  }
+  return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-TW|correlation-calculator|2026-07-09 -->

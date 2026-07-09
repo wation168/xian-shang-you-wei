@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RSI Calculator - Technical Analysis Tool</title>
+<meta name="description" content="Free RSI calculator for technical analysis. Calculate Relative Strength Index, identify overbought/oversold conditions, and generate trading signals.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/en/rsi-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/rsi-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/rsi-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/rsi-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/rsi-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/rsi-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/rsi-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/rsi-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/rsi-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/rsi-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/rsi-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/rsi-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "RSI Calculator", "url": "https://softglow-ai.com/tools/en/rsi-calculator.html", "description": "Free RSI calculator for technical analysis. Calculate Relative Strength Index, identify overbought/oversold conditions, and generate trading signals.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is a good RSI value for trading?", "acceptedAnswer": {"@type": "Answer", "text": "RSI values above 70 typically indicate overbought conditions (potential sell signal), while values below 30 indicate oversold conditions (potential buy signal). Values between 30 and 70 represent neutral market conditions. However, the best RSI value depends on your trading strategy, market conditions, and risk tolerance. Always combine RSI with other technical indicators for confirmation."}}, {"@type": "Question", "name": "Why is 14 days the standard RSI period?", "acceptedAnswer": {"@type": "Answer", "text": "J. Welles Wilder Jr., the RSI creator, originally recommended 14 days as the default period. This period balances responsiveness to recent price changes with enough historical data to avoid false signals. However, traders often adjust the period based on their timeframe: shorter periods (5-7 days) for day trading and longer periods (21-25 days) for swing or position trading."}}, {"@type": "Question", "name": "Can RSI predict price reversals?", "acceptedAnswer": {"@type": "Answer", "text": "RSI is useful for identifying potential reversal points, especially when it diverges from price action. When price reaches a new high but RSI fails to reach a new high, it signals weakening momentum and potential reversal. However, RSI should not be used as the sole basis for reversal predictions. Combine it with support/resistance levels, candlestick patterns, and other indicators for more reliable signals."}}, {"@type": "Question", "name": "How often should I calculate RSI?", "acceptedAnswer": {"@type": "Answer", "text": "If you're using daily charts, recalculate RSI daily after market close to incorporate the new day's price data. For intraday trading, update RSI after each new candle closes. Many trading platforms update RSI automatically in real-time. For manual calculations using this tool, update when you have new closing price data relevant to your trading timeframe."}}, {"@type": "Question", "name": "What's the difference between Average Gain and Average Loss?", "acceptedAnswer": {"@type": "Answer", "text": "Average Gain represents the mean of all upward price movements over the RSI period, while Average Loss represents the mean of all downward price movements. When Average Gain is higher, it indicates stronger bullish momentum. The RSI formula uses the ratio of these values to determine whether the market has stronger buying or selling pressure, helping identify overbought and oversold conditions."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/en/">Tools</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/en/">Tools</a> > RSI Calculator</div>
+<div class="container"><div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>RSI Calculator</h1>
+    <p class="calc-subtitle">Calculate Relative Strength Index for technical analysis and trading signals</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="closingPrices">Closing Prices (comma-separated)</label>
+  <div class="input-row"><input type="text" id="closingPrices" placeholder="100, 102, 101, 103, 105, 104, 106"  step="0.01"></div>
+</div>
+  <small class="input-help">Enter historical closing prices separated by commas in chronological order</small>
+<div class="input-group">
+  <label for="period">RSI Period (days)</label>
+  <div class="input-row"><input type="number" id="period" placeholder="14"  value="14" step="1"><span class="input-suffix">days</span></div>
+</div>
+  <small class="input-help">Specify the number of days for the RSI calculation period (typically 14 days)</small></div>
+    <button class="btn-calc" onclick="calculate()">Calculate</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">RSI Value</span><span class="result-value" id="rsiValue">—</span></div>
+<div class="result-item"><span class="result-label">Market Condition</span><span class="result-value" id="rsiCondition">—</span></div>
+<div class="result-item"><span class="result-label">Average Gain</span><span class="result-value" id="avgGain">—</span></div>
+<div class="result-item"><span class="result-label">Average Loss</span><span class="result-value" id="avgLoss">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>What does this mean?</strong> The RSI value ranges from 0 to 100, where values above 70 indicate overbought conditions (potential sell signals) and values below 30 indicate oversold conditions (potential buy signals). Average Gain and Average Loss show the mean upward and downward price movements over the specified period, helping traders understand market momentum and strength.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Print</button>
+        <button onclick="shareResult()">&#x1f4e4; Share</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>What is the Relative Strength Index (RSI)?</h2><p>The Relative Strength Index (RSI) is a momentum oscillator that measures the magnitude of recent price changes to evaluate overbought or oversold conditions in the market. Developed by J. Welles Wilder Jr. in 1978, the RSI has become one of the most widely used technical indicators in trading. It oscillates between 0 and 100, providing traders with clear signals about market conditions and potential reversal points. The RSI is particularly useful for identifying trend exhaustion and potential entry and exit points in various financial markets.</p><h2>How the RSI Calculator Works</h2><p>The RSI calculator operates by analyzing closing prices over a specified period, typically 14 days. The calculation involves computing the average gain and average loss during this period, then applying a formula to determine the RSI value. The formula is: RSI = 100 - (100 / (1 + RS)), where RS is the ratio of average gain to average loss. This mathematical approach ensures consistent and objective measurement of price momentum, removing emotional bias from trading decisions.</p><h2>Understanding RSI Values and Market Conditions</h2><p>RSI values provide clear guidance on market conditions. An RSI above 70 signals overbought conditions, suggesting that an asset may be overvalued and due for a correction or pullback. Conversely, an RSI below 30 indicates oversold conditions, suggesting the asset may be undervalued and ready for a bounce or reversal. RSI values between 30 and 70 represent neutral territory, where the asset is neither overbought nor oversold. Advanced traders often use divergences between price and RSI to identify potential trend reversals before they occur in the market.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Practical Trading Applications</h2><p>The RSI calculator serves multiple trading strategies and timeframes. Day traders use RSI with shorter periods (5-7 days) for quick trading signals, while swing traders prefer the standard 14-day period for capturing medium-term moves. Long-term investors may use longer RSI periods (21-25 days) to filter out noise and focus on major trend changes. The tool helps traders confirm other technical signals, manage risk more effectively, and improve overall trading discipline by providing objective entry and exit criteria.</p><h2>Average Gain and Average Loss Interpretation</h2><p>The Average Gain and Average Loss values calculated by this tool provide insight into the underlying price dynamics. A high Average Gain relative to Average Loss indicates strong upward momentum, suggesting bullish market conditions. Conversely, when Average Loss significantly exceeds Average Gain, it signals bearish momentum. These values help traders understand not just whether the market is overbought or oversold, but also the relative strength of upward versus downward movements, providing a more nuanced understanding of market dynamics.</p><h2>Best Practices for Using the RSI Calculator</h2><p>To maximize the effectiveness of the RSI calculator, combine it with other technical indicators such as moving averages, support and resistance levels, and volume analysis. Avoid using RSI as a standalone indicator for trading decisions, as it can generate false signals in strongly trending markets. Use the calculator regularly to track changes in momentum over time, and adjust your RSI period based on your trading timeframe and market conditions. Document your trading decisions based on RSI signals to identify patterns and improve your trading strategy over time.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Related Articles</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/candlestick-patterns.html">Candlestick Patterns<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/support-resistance.html">Support & Resistance<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/moving-average-guide.html">Moving Average Guide<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>FAQ</h2><div class="faq-item"><div class="faq-q">What is a good RSI value for trading?</div><div class="faq-a">RSI values above 70 typically indicate overbought conditions (potential sell signal), while values below 30 indicate oversold conditions (potential buy signal). Values between 30 and 70 represent neutral market conditions. However, the best RSI value depends on your trading strategy, market conditions, and risk tolerance. Always combine RSI with other technical indicators for confirmation.</div></div>
+  <div class="faq-item"><div class="faq-q">Why is 14 days the standard RSI period?</div><div class="faq-a">J. Welles Wilder Jr., the RSI creator, originally recommended 14 days as the default period. This period balances responsiveness to recent price changes with enough historical data to avoid false signals. However, traders often adjust the period based on their timeframe: shorter periods (5-7 days) for day trading and longer periods (21-25 days) for swing or position trading.</div></div>
+  <div class="faq-item"><div class="faq-q">Can RSI predict price reversals?</div><div class="faq-a">RSI is useful for identifying potential reversal points, especially when it diverges from price action. When price reaches a new high but RSI fails to reach a new high, it signals weakening momentum and potential reversal. However, RSI should not be used as the sole basis for reversal predictions. Combine it with support/resistance levels, candlestick patterns, and other indicators for more reliable signals.</div></div>
+  <div class="faq-item"><div class="faq-q">How often should I calculate RSI?</div><div class="faq-a">If you're using daily charts, recalculate RSI daily after market close to incorporate the new day's price data. For intraday trading, update RSI after each new candle closes. Many trading platforms update RSI automatically in real-time. For manual calculations using this tool, update when you have new closing price data relevant to your trading timeframe.</div></div>
+  <div class="faq-item"><div class="faq-q">What's the difference between Average Gain and Average Loss?</div><div class="faq-a">Average Gain represents the mean of all upward price movements over the RSI period, while Average Loss represents the mean of all downward price movements. When Average Gain is higher, it indicates stronger bullish momentum. The RSI formula uses the ratio of these values to determine whether the market has stronger buying or selling pressure, helping identify overbought and oversold conditions.</div></div></section>
+  <div class="more-tools"><h3>More Tools</h3><div class="tools-grid"><a class="tool-pill" href="/tools/en/fibonacci-retracement.html">Fibonacci Retracement Calculator</a>
+      <a class="tool-pill" href="/tools/en/pivot-point.html">Pivot Point Calculator</a>
+      <a class="tool-pill" href="/tools/en/macd-calculator.html">MACD Calculator</a>
+      <a class="tool-pill" href="/tools/en/bollinger-bands.html">Bollinger Bands Calculator</a>
+      <a class="tool-pill" href="/tools/en/atr-calculator.html">ATR Calculator</a>
+      <a class="tool-pill" href="/tools/en/ma-crossover.html">MA Crossover Calculator</a>
+      <a class="tool-pill" href="/tools/en/candlestick-identifier.html">Candlestick Pattern Identifier</a>
+      <a class="tool-pill" href="/tools/en/support-resistance.html">Support & Resistance Calculator</a>
+      <a class="tool-pill" href="/tools/en/pip-value.html">Pip Value Calculator</a>
+      <a class="tool-pill" href="/tools/en/options-profit.html">Options Profit Calculator</a>
+      <a class="tool-pill" href="/tools/en/stock-split.html">Stock Split Calculator</a>
+      <a class="tool-pill" href="/tools/en/trading-fee.html">Trading Fee Calculator</a></div></div>
+  <div class="lang-bar"><a href="/tools/en/rsi-calculator.html" class="lang-btn active">English</a>
+    <a href="/tools/rsi-calculator.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/rsi-calculator.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/rsi-calculator.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/rsi-calculator.html" class="lang-btn">Français</a>
+    <a href="/tools/es/rsi-calculator.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/rsi-calculator.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/rsi-calculator.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/rsi-calculator.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/rsi-calculator.html" class="lang-btn">简体中文</a></div>
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Related Tools</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const closingPricesInput = document.getElementById('closingPrices').value.trim();
+  const periodInput = document.getElementById('period').value.trim();
+  
+  if (!closingPricesInput || !periodInput) {
+    alert('Please enter closing prices and RSI period');
+    return;
+  }
+  
+  const prices = closingPricesInput.split(',').map(p => parseFloat(p.trim()));
+  const period = parseInt(periodInput);
+  
+  if (prices.length < period + 1 || prices.some(isNaN)) {
+    alert('Please enter valid prices. You need at least ' + (period + 1) + ' prices.');
+    return;
+  }
+  
+  const changes = [];
+  for (let i = 1; i < prices.length; i++) {
+    changes.push(prices[i] - prices[i - 1]);
+  }
+  
+  let gainSum = 0;
+  let lossSum = 0;
+  
+  for (let i = 0; i < period; i++) {
+    if (changes[i] > 0) {
+      gainSum += changes[i];
+    } else {
+      lossSum += Math.abs(changes[i]);
+    }
+  }
+  
+  let avgGain = gainSum / period;
+  let avgLoss = lossSum / period;
+  
+  for (let i = period; i < changes.length; i++) {
+    if (changes[i] > 0) {
+      avgGain = (avgGain * (period - 1) + changes[i]) / period;
+      avgLoss = (avgLoss * (period - 1)) / period;
+    } else {
+      avgGain = (avgGain * (period - 1)) / period;
+      avgLoss = (avgLoss * (period - 1) + Math.abs(changes[i])) / period;
+    }
+  }
+  
+  let rsi;
+  if (avgLoss === 0) {
+    rsi = avgGain === 0 ? 50 : 100;
+  } else {
+    const rs = avgGain / avgLoss;
+    rsi = 100 - (100 / (1 + rs));
+  }
+  
+  let condition = '';
+  if (rsi >= 70) {
+    condition = 'Overbought - Consider selling';
+  } else if (rsi <= 30) {
+    condition = 'Oversold - Consider buying';
+  } else {
+    condition = 'Neutral - Monitor for signals';
+  }
+  
+  document.getElementById('rsiValue').textContent = rsi.toFixed(2);
+  document.getElementById('rsiCondition').textContent = condition;
+  document.getElementById('avgGain').textContent = avgGain.toFixed(4);
+  document.getElementById('avgLoss').textContent = avgLoss.toFixed(4);
+  
+  document.getElementById('resultsDiv').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copied!';setTimeout(function(){b.textContent='Share'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|en|rsi-calculator|2026-07-09 -->
