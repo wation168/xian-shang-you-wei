@@ -520,11 +520,16 @@ _FRONTEND_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fronte
 @app.get("/", include_in_schema=False)
 async def serve_homepage(request: Request):
     from fastapi.responses import FileResponse, RedirectResponse
+    import os as _os
     # 如果帶有台股 SPA 的參數，自動跳到 /stock/
     qs = str(request.query_params)
     if qs and ("stock=" in qs or "report=" in qs or "tab=" in qs):
         return RedirectResponse(f"/stock/?{qs}", status_code=302)
-    return FileResponse(os.path.join(_FRONTEND_DIR, "homepage.html"))
+    # 優先回傳 homepage.html，不存在則 fallback 到 index.html
+    hp = _os.path.join(_FRONTEND_DIR, "homepage.html")
+    if _os.path.isfile(hp):
+        return FileResponse(hp)
+    return FileResponse(_os.path.join(_FRONTEND_DIR, "index.html"))
 
 @app.get("/stock", include_in_schema=False)
 @app.get("/stock/", include_in_schema=False)
@@ -653,10 +658,16 @@ async def serve_tools_locale_html(locale: str, filename: str):
 @app.get("/tools/{locale}", include_in_schema=False)
 @app.get("/tools/{locale}/", include_in_schema=False)
 async def serve_tools_locale_index(locale: str):
-    from fastapi.responses import RedirectResponse
+    from fastapi.responses import FileResponse, RedirectResponse
+    import os as _os
     if locale not in _TOOLS_LOCALES:
         return JSONResponse({"detail": "Not Found"}, status_code=404)
-    return RedirectResponse(url="/tools/", status_code=301)
+    # 優先回傳該語言的 index.html
+    path = _os.path.join(_FRONTEND_DIR, "tools", locale, "index.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    # 沒有則 fallback 到主索引
+    return RedirectResponse(url="/tools/", status_code=302)
 
 @app.get("/{filename}.html", include_in_schema=False)
 async def serve_html(filename: str):
