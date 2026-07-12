@@ -1,0 +1,102 @@
+{
+  "_description": "Generator 欄位對照表：每個 HTML 位置從哪裡取值",
+
+  "html_head": {
+    "title":           { "source": "content", "field": "seo_title" },
+    "meta_description": { "source": "content", "field": "seo_description" },
+    "lang":            { "source": "locale-config", "field": "locales.{lang}.html_lang" },
+    "canonical":       { "source": "computed", "rule": "/patterns/{lang_path}{slug}.html" },
+    "hreflang":        { "source": "computed", "rule": "10 langs + x-default from locale-config" },
+    "schema_article":  { "source": "computed", "rule": "Article JSON-LD from content fields" },
+    "schema_faq":      { "source": "computed", "rule": "FAQPage from content.faq + shared_faq" },
+    "schema_breadcrumb": { "source": "computed", "rule": "BreadcrumbList: Home > Patterns > {hero_title}" }
+  },
+
+  "nav": {
+    "logo":            { "source": "static", "value": "SoftGlow" },
+    "links":           { "source": "locale-config", "field": "locales.{lang}.nav" },
+    "search_button":   { "source": "static", "value": "shared JS" },
+    "bookmark_button": { "source": "static", "value": "shared JS" },
+    "share_button":    { "source": "static", "value": "shared JS" },
+    "print_button":    { "source": "static", "value": "shared JS" }
+  },
+
+  "breadcrumb": {
+    "home":            { "source": "locale-config", "field": "locales.{lang}.nav.home" },
+    "patterns":        { "source": "locale-config", "field": "locales.{lang}.nav.patterns" },
+    "current":         { "source": "content", "field": "hero_title" }
+  },
+
+  "hero_section": {
+    "title":           { "source": "content", "field": "hero_title" },
+    "subtitle":        { "source": "content", "field": "hero_subtitle" },
+    "sentence":        { "source": "content", "field": "hero_sentence" },
+    "reliability":     { "source": "catalog", "field": "reliability" },
+    "reliability_label": { "source": "locale-config", "field": "locales.{lang}.ui.reliability_{value}" },
+    "difficulty":      { "source": "catalog", "field": "difficulty" },
+    "difficulty_label": { "source": "locale-config", "field": "locales.{lang}.ui.difficulty_{value}" },
+    "best_market":     { "source": "catalog", "field": "best_market" },
+    "signal":          { "source": "catalog", "field": "signal" },
+    "signal_label":    { "source": "locale-config", "field": "locales.{lang}.bullish_label / bearish_label" },
+    "candles_count":   { "source": "catalog", "field": "candles" },
+    "svg_diagram":     { "source": "catalog", "field": "candle_data", "renderer": "svg-renderer.js" },
+    "lang_switcher":   { "source": "locale-config", "field": "locales.*.label" }
+  },
+
+  "content_sections": {
+    "quick_summary":   { "source": "content", "field": "quick_summary", "h2": "locale-config.ui.quick_summary_title" },
+    "structure":       { "source": "content", "field": "structure", "h2": "locale-config.ui.structure_title" },
+    "psychology":      { "source": "content", "field": "psychology", "h2": "locale-config.ui.psychology_title" },
+    "trading_rules":   { "source": "content+catalog", "note": "Catalog 定義邏輯 key，Content 提供白話翻譯",
+      "entry":         { "label": "locale-config.ui.entry", "text": "content.trading_rules.entry" },
+      "stop_loss":     { "label": "locale-config.ui.stop_loss", "text": "content.trading_rules.stop_loss" },
+      "take_profit":   { "label": "locale-config.ui.take_profit", "text": "content.trading_rules.take_profit" },
+      "invalidation":  { "label": "locale-config.ui.invalidation", "text": "content.trading_rules.invalidation" }
+    },
+    "confirmation":    { "source": "content", "field": "confirmation", "h2": "locale-config.ui.confirmation_title" },
+    "common_mistakes": { "source": "content", "field": "common_mistakes", "h2": "locale-config.ui.common_mistakes_title" },
+    "checklist":       { "source": "content", "field": "checklist", "h2": "locale-config.ui.checklist_title" }
+  },
+
+  "ad_slots": {
+    "ad_1": { "position": "hero 下方", "id": "ad-hero" },
+    "ad_2": { "position": "trading_rules 和 confirmation 之間", "id": "ad-mid" },
+    "ad_3": { "position": "FAQ 上方", "id": "ad-faq" },
+    "ad_4": { "position": "footer 上方", "id": "ad-footer" },
+    "ad_sidebar": { "position": "側欄頂部，固定不捲動", "id": "ad-side" }
+  },
+
+  "faq_section": {
+    "title":           { "source": "locale-config", "field": "locales.{lang}.ui.faq_title" },
+    "pattern_faq":     { "source": "content", "field": "faq", "count": 3 },
+    "shared_faq":      { "source": "shared-faq/{category}_{lang}.json", "count": 2, "note": "根據 catalog.shared_faq_pool 取分類共用 FAQ" },
+    "schema":          { "source": "computed", "rule": "合併 3+2 題產生 FAQPage JSON-LD" }
+  },
+
+  "sidebar": {
+    "ad":              { "source": "ad_slots.ad_sidebar" },
+    "related_patterns": {
+      "title":         { "source": "locale-config", "field": "locales.{lang}.ui.related_patterns" },
+      "items":         { "source": "catalog", "field": "related_patterns", "note": "用各語言的 hero_title 顯示名稱" }
+    },
+    "related_tools": {
+      "title":         { "source": "locale-config", "field": "locales.{lang}.ui.related_tools" },
+      "items":         { "source": "catalog", "field": "related_tools", "note": "連結到 /tools/{lang}/{slug}.html" }
+    },
+    "related_articles": {
+      "title":         { "source": "locale-config", "field": "locales.{lang}.ui.related_articles" },
+      "items":         { "source": "catalog", "field": "related_blog", "note": "連結到 /blog/{lang}/{slug}.html" }
+    }
+  },
+
+  "footer": {
+    "disclaimer":      { "source": "locale-config", "field": "locales.{lang}.ui.disclaimer" },
+    "last_updated":    { "source": "catalog", "field": "updated_at", "label": "locale-config.ui.last_updated" },
+    "links":           { "source": "static", "value": ["about.html", "contact.html", "privacy.html", "terms.html"] }
+  },
+
+  "mobile_responsive": {
+    "sidebar_related": { "note": "桌機在側欄，手機移到 FAQ 下方變完整區塊" },
+    "ad_sidebar":      { "note": "桌機固定側欄，手機隱藏（只保留 4 個內容廣告）" }
+  }
+}

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>폴링 쓰리 메서드 캔들 패턴 | 하락 추세 분석</title>
+<meta name="description" content="폴링 쓰리 메서드 패턴의 구조, 거래 규칙, 진입 신호를 배우세요. 고급 기술 분석으로 하락 추세 확인.">
+<meta name="robots" content="index, follow">
+<meta name="sg-slug" content="falling-three-methods">
+<meta name="sg-type" content="pattern">
+<meta name="sg-lang" content="ko">
+<link rel="canonical" href="https://softglow-ai.com/patterns/ko/falling-three-methods.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/patterns/falling-three-methods.html"/>
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/patterns/en/falling-three-methods.html"/>
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/patterns/ja/falling-three-methods.html"/>
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/patterns/ko/falling-three-methods.html"/>
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/patterns/de/falling-three-methods.html"/>
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/patterns/fr/falling-three-methods.html"/>
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/patterns/es/falling-three-methods.html"/>
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/patterns/pt/falling-three-methods.html"/>
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/patterns/id/falling-three-methods.html"/>
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/patterns/zh-CN/falling-three-methods.html"/>
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/patterns/en/falling-three-methods.html"/>
+<link rel="stylesheet" href="/common/softglow-common.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "폴링 쓰리 메서드(Falling Three Methods) 캔들 패턴", "description": "폴링 쓰리 메서드 패턴의 구조, 거래 규칙, 진입 신호를 배우세요. 고급 기술 분석으로 하락 추세 확인.", "author": {"@type": "Organization", "name": "SoftGlow"}, "publisher": {"@type": "Organization", "name": "SoftGlow", "url": "https://softglow-ai.com"}, "datePublished": "2026-07-11", "dateModified": "2026-07-12", "mainEntityOfPage": "https://softglow-ai.com/patterns/ko/falling-three-methods.html", "image": "https://softglow-ai.com/images/patterns/falling-three-methods.svg"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "홈", "item": "https://softglow-ai.com"}, {"@type": "ListItem", "position": 2, "name": "캔들스틱 패턴", "item": "https://softglow-ai.com/patterns/ko.html"}, {"@type": "ListItem", "position": 3, "name": "폴링 쓰리 메서드(Falling Three Methods) 캔들 패턴"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "폴링 쓰리 메서드와 라이징 쓰리 메서드의 차이점은 무엇입니까?", "acceptedAnswer": {"@type": "Answer", "text": "폴링 쓰리 메서드는 하락 추세 중의 패턴이며, 강한 음봉으로 시작하고 약한 양봉들 이후 강한 음봉으로 끝납니다. 반면 라이징 쓰리 메서드는 상승 추세 중의 패턴이며, 강한 양봉으로 시작하고 약한 음봉들 이후 강한 양봉으로 끝납니다. 두 패턴 모두 추세 지속 신호이지만 방향이 반대입니다."}}, {"@type": "Question", "name": "폴링 쓰리 메서드에서 다섯 번째 캔들이 첫 번째 캔들의 종가와 정확히 같은 수준에서 닫으면 어떻게 해야 합니까?", "acceptedAnswer": {"@type": "Answer", "text": "이상적으로는 다섯 번째 캔들이 첫 번째 캔들의 종가 아래로 닫아야 신호가 성립합니다. 정확히 같은 수준에서 닫으면 신호가 약해지므로, 한 계단 아래에서 확인 신호를 기다리거나 패턴을 스킵하는 것이 더 안전합니다. 엄격한 패턴 기준을 유지할수록 신뢰성이 높아집니다."}}, {"@type": "Question", "name": "폴링 쓰리 메서드를 더 큰 시간대에서 거래하는 것이 더 신뢰할 수 있습니까?", "acceptedAnswer": {"@type": "Answer", "text": "네, 일반적으로 더 큰 시간대(예: 4시간, 일봉, 주봉)에서 패턴을 거래할 때 신뢰성이 높습니다. 더 큰 시간대에서는 노이즈가 적고, 진정한 추세를 대표할 확률이 높으며, 거래량 데이터도 더 신뢰할 수 있습니다. 초단기 시간대(1분, 5분)에서는 잘못된 신호가 많을 수 있습니다."}}, {"@type": "Question", "name": "캔들 패턴만으로는 거래하지 않는 것이 좋은 이유는 무엇입니까?", "acceptedAnswer": {"@type": "Answer", "text": "캔들 패턴은 강력한 시각적 신호를 제공하지만, 단독으로 사용하면 잘못된 신호가 발생할 수 있습니다. 거래량, 지지 저항, 모멘텀 지표, 추세선 등 다양한 도구와 함께 사용할 때 신뢰성이 극대화됩니다. 다중 확인(multiple confirmation)은 거래 성공률을 높이는 핵심 원칙입니다."}}, {"@type": "Question", "name": "손절매가 촉발된 후 가격이 예상 방향으로 계속 움직이면 어떻게 해야 합니까?", "acceptedAnswer": {"@type": "Answer", "text": "손절매 촉발 후 가격이 예상 방향으로 움직인다 해도, 그것은 패턴이 실제로 무효화되었다는 의미입니다. 이 경우 재진입하려고 하지 말고, 다음 기회를 기다리거나 다른 패턴이 형성될 때까지 기다려야 합니다. 손절매 규칙을 엄격하게 따르는 것이 장기적 성공의 핵심이며, 개별 거래에서의 손실이 전체 포트폴리오를 보호합니다."}}]}</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:#2D3748;background:#fff;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:#2563EB;text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* Nav */
+.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);border-bottom:1px solid #E2E8F0}
+.nav-inner{max-width:1080px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px}
+.nav-logo{font-size:17px;font-weight:700;color:#2D3748;letter-spacing:-0.5px}
+.nav-logo span{color:#2563EB}
+.nav-links{display:flex;gap:16px;align-items:center}
+.nav-links a{font-size:13px;color:#4A5568;font-weight:500}
+.nav-links a:hover{color:#2563EB;text-decoration:none}
+.breadcrumb{max-width:1080px;margin:0 auto;padding:12px 20px;font-size:13px;color:#A0AEC0}
+.breadcrumb a{color:#718096}
+
+/* Layout */
+.container{max-width:1080px;margin:0 auto;padding:0 20px}
+.layout{display:grid;grid-template-columns:1fr 300px;gap:32px;align-items:start}
+
+/* Hero */
+.hero{background:#F7FAFC;border:1px solid #E2E8F0;border-radius:16px;padding:28px 32px;margin-bottom:24px}
+.hero h1{font-size:26px;font-weight:700;color:#1A202C;margin-bottom:8px}
+.hero-liner{font-size:15px;color:#4A5568;margin-bottom:16px;line-height:1.6}
+.hero-meta{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px}
+.meta-tag{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 12px;border-radius:20px;background:#EBF5FF;color:#2B6CB0;font-weight:500}
+.meta-tag.signal-bullish{background:#E1F5EE;color:#085041}
+.meta-tag.signal-bearish{background:#FCEBEB;color:#791F1F}
+.meta-tag.reliability-high{background:#E1F5EE;color:#085041}
+.meta-tag.reliability-medium{background:#FFF8E1;color:#92650D}
+.meta-tag.reliability-low{background:#FCEBEB;color:#791F1F}
+.hero-flex{display:flex;gap:24px;align-items:flex-start}
+.hero-text{flex:1}
+.hero-svg{width:180px;flex-shrink:0}
+.hero-svg svg{width:100%;height:auto}
+
+/* Section headings */
+.section{margin-bottom:32px}
+.section h2{font-size:20px;font-weight:700;color:#1A202C;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #E2E8F0}
+
+/* Article content */
+.content p{margin-bottom:14px;color:#4A5568;line-height:1.8;font-size:15px}
+.content ul,.content ol{margin:10px 0 16px 24px;color:#4A5568;font-size:15px}
+.content li{margin-bottom:6px;line-height:1.7}
+.content strong{color:#2D3748}
+
+/* Trading Rules */
+.rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.rule-card{background:#F7FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:16px 20px}
+.rule-card h3{font-size:14px;font-weight:700;color:#2563EB;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
+.rule-card p{font-size:14px;color:#4A5568;line-height:1.7;margin:0}
+.rule-card.entry{border-left:3px solid #22AB94}
+.rule-card.stoploss{border-left:3px solid #E24B4A}
+.rule-card.takeprofit{border-left:3px solid #2563EB}
+.rule-card.invalidation{border-left:3px solid #A0AEC0}
+
+/* Mistakes */
+.mistake-item{background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:14px 18px;margin-bottom:12px}
+.mistake-item h3{font-size:15px;font-weight:600;color:#92400E;margin-bottom:6px}
+.mistake-item p{font-size:14px;color:#78350F;line-height:1.7;margin:0}
+
+/* Checklist */
+.checklist{list-style:none;padding:0;margin:0}
+.checklist li{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #EDF2F7;font-size:14px;color:#4A5568;line-height:1.6}
+.checklist li:last-child{border-bottom:none}
+.checklist li::before{content:"☐";font-size:16px;color:#2563EB;flex-shrink:0;margin-top:1px}
+
+/* FAQ */
+.faq-item{border-bottom:1px solid #E2E8F0;padding:14px 0}
+.faq-q{font-size:15px;font-weight:600;color:#2D3748;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.faq-q::after{content:"＋";font-size:18px;color:#A0AEC0;transition:transform 0.2s}
+.faq-item.open .faq-q::after{content:"－"}
+.faq-a{font-size:14px;color:#718096;line-height:1.7;max-height:0;overflow:hidden;transition:max-height 0.3s,padding 0.3s}
+.faq-item.open .faq-a{max-height:500px;padding-top:10px}
+
+/* Sidebar */
+.sidebar{position:sticky;top:68px}
+.ad-slot{background:#F7FAFC;border:1px dashed #CBD5E0;border-radius:8px;min-height:250px;display:flex;align-items:center;justify-content:center;color:#A0AEC0;font-size:12px;margin-bottom:20px}
+.related-card{background:#F7FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:20px;margin-bottom:16px}
+.related-card h3{font-size:15px;font-weight:600;margin-bottom:12px;color:#1A202C}
+.related-link{display:block;padding:7px 0;border-bottom:1px solid #EDF2F7;font-size:13px;color:#2563EB}
+.related-link:last-child{border-bottom:none}
+.related-link:hover{text-decoration:none;color:#1D4ED8}
+
+/* Lang switcher */
+.lang-bar{display:flex;gap:6px;flex-wrap:wrap;margin:20px 0}
+.lang-btn{font-size:12px;padding:4px 12px;border-radius:20px;background:#F7FAFC;border:1px solid #E2E8F0;color:#718096}
+.lang-btn:hover{background:#EBF5FF;border-color:#BEE3F8;text-decoration:none}
+.lang-btn.active{background:#2563EB;color:#fff;border-color:#2563EB}
+
+/* Disclaimer */
+.disclaimer{background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:12px 16px;font-size:12px;color:#92400E;line-height:1.6;margin:24px 0}
+
+/* Footer */
+.footer{border-top:1px solid #E2E8F0;padding:24px 0;margin-top:40px}
+.footer-inner{max-width:1080px;margin:0 auto;padding:0 20px;display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:#A0AEC0}
+.footer-inner a{color:#718096}
+
+/* Mobile related (shown on mobile only) */
+.mobile-related{display:none}
+
+/* Responsive */
+@media(max-width:768px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{position:static;display:none}
+  .mobile-related{display:block}
+  .hero{padding:20px}
+  .hero h1{font-size:22px}
+  .hero-flex{flex-direction:column}
+  .hero-svg{width:140px;margin:0 auto}
+  .rules-grid{grid-template-columns:1fr}
+  .hero-meta{gap:8px}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/ko/">도구</a>
+    <a href="/patterns/ko.html">캔들스틱 패턴</a>
+    <a href="/blog/">블로그</a>
+    <a href="/">홈</a>
+  </div>
+  <div class="nav-actions">
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
+
+<div class="breadcrumb">
+  <a href="/">홈</a> › <a href="/patterns/ko.html">캔들스틱 패턴</a> › 폴링 쓰리 메서드(Falling Three Methods) 캔들 패턴
+</div>
+
+<div class="container">
+<div class="layout">
+
+<!-- Main Content -->
+<div class="main">
+
+  <!-- 1. Hero -->
+  <div class="hero">
+    <div class="hero-flex">
+      <div class="hero-text">
+        <h1>폴링 쓰리 메서드(Falling Three Methods) 캔들 패턴</h1>
+        <p class="hero-liner">폴링 쓰리 메서드는 강한 하락 추세 중에 나타나는 5개 캔들 패턴으로, 매도자의 지배력이 계속되며 추세가 재개될 것을 신호합니다.</p>
+        <div class="hero-meta">
+          <span class="meta-tag signal-bearish">신호: 약세</span>
+          <span class="meta-tag reliability-high">신뢰도: 높음</span>
+          <span class="meta-tag">난이도: 고급</span>
+          <span class="meta-tag">캔들 수: 5</span>
+          <span class="meta-tag">적합 시장: 하락 추세</span>
+        </div>
+      </div>
+      <div class="hero-svg">
+        <svg viewBox="0 0 180 140" xmlns="http://www.w3.org/2000/svg">
+<rect width="180" height="140" fill="#F7FAFC" rx="8"/>
+<line x1="-22.0" y1="15.0" x2="-22.0" y2="85.0" stroke="#22AB94" stroke-width="2"/>
+<rect x="-40.0" y="22.499999999999996" width="36" height="57.5" fill="#22AB94" rx="2"/>
+<text x="-22.0" y="101.0" text-anchor="middle" font-size="11" fill="#718096" font-weight="500">1</text>
+<line x1="34.0" y1="59.99999999999999" x2="34.0" y2="80.0" stroke="#E24B4A" stroke-width="2"/>
+<rect x="16.0" y="65.0" width="36" height="10.0" fill="#E24B4A" rx="2"/>
+<line x1="90.0" y1="47.49999999999999" x2="90.0" y2="67.5" stroke="#E24B4A" stroke-width="2"/>
+<rect x="72.0" y="52.5" width="36" height="10.0" fill="#E24B4A" rx="2"/>
+<line x1="146.0" y1="40.0" x2="146.0" y2="55.0" stroke="#E24B4A" stroke-width="2"/>
+<rect x="128.0" y="45.0" width="36" height="5.0" fill="#E24B4A" rx="2"/>
+<line x1="202.0" y1="45.0" x2="202.0" y2="115.0" stroke="#22AB94" stroke-width="2"/>
+<rect x="184.0" y="50.0" width="36" height="60.0" fill="#22AB94" rx="2"/>
+<text x="202.0" y="131.0" text-anchor="middle" font-size="11" fill="#718096" font-weight="500">5</text>
+</svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Quick Summary -->
+  <div class="section">
+    <h2>30초 요약</h2>
+    <div class="content"><p>폴링 쓰리 메서드는 5개 캔들로 구성된 하락 추세 지속 패턴입니다. 강한 음봉으로 시작하여 3개의 작은 상승 캔들이 나타난 후, 마지막 음봉이 첫 번째 캔들의 종가 아래로 닫으면서 매도 압력이 재개됨을 보여줍니다. 이 패턴은 고급 거래자들이 기존 하락 추세 내에서 통합 구간을 확인하고 계속된 하락을 거래하는 데 사용됩니다.</p></div>
+  </div>
+
+  <!-- Ad slot 1 -->
+  <div class="ad-slot" id="ad-1" aria-hidden="true"></div>
+
+  <!-- 3. Structure -->
+  <div class="section">
+    <h2>패턴 구조 및 식별</h2>
+    <div class="content"><p><strong>폴링 쓰리 메서드는 5개 캔들로 구성됩니다.</strong> 첫 번째 캔들은 강한 음봉(긴 몸통)이며, 이는 현재의 하락 추세가 강함을 보여줍니다. 두 번째, 세 번째, 네 번째 캔들은 상대적으로 작은 몸통을 가진 양봉들입니다. 이 세 개의 캔들은 첫 번째 음봉의 고가 아래에 머물면서 강한 저항을 받고 있음을 나타냅니다.</p><p><strong>다섯 번째 캔들은 강한 음봉</strong>으로 나타나며, 첫 번째 캔들의 종가 아래로 닫아야 합니다. 이는 매수자들의 시도가 실패하고 매도 압력이 다시 우위를 차지했음을 확인시켜줍니다. 패턴 전체는 마치 강한 매도 → 약한 매수 시도 → 강한 매도 재개의 구조를 보여줍니다.</p><p>패턴의 신뢰성을 높이기 위해서는 <strong>첫 번째 캔들의 고가가 명확한 저항 수준에 위치</strong>해야 하며, 세 개의 중간 캔들들이 좁은 범위 내에서 움직여야 합니다. 보합 구간이 너무 크거나 중간 캔들 중 하나가 첫 번째 음봉의 저가 아래로 내려가면 패턴의 신뢰성이 감소합니다.</p></div>
+  </div>
+
+  <!-- 4. Market Psychology -->
+  <div class="section">
+    <h2>시장 심리 분석</h2>
+    <div class="content"><p><strong>폴링 쓰리 메서드의 심리적 배경은 강한 하락 추세 중의 일시적 매수 압력입니다.</strong> 첫 번째 강한 음봉 이후, 일부 투자자들이 저점이라고 생각하고 매수를 시도합니다. 하지만 이 매수 시도는 약하고 지속되지 않습니다. 세 개의 작은 양봉으로 나타나는 이 과정은 매수자들의 신념이 약함을 보여주며, 결국 매도자들이 다시 통제권을 되찾습니다.</p><p>다섯 번째 캔들에서 매도자들이 공격적으로 돌아오면서 <strong>기존 하락 추세가 여전히 강하다는 신호</strong>를 보냅니다. 매도자들이 매수 시도를 체계적으로 격퇴함으로써 약세 추세의 내구성을 증명하는 것입니다. 이는 기술적으로는 '보합'으로 보이지만, 실질적으로는 매도 압력의 확인입니다.</p><p>거래자 관점에서, 이 패턴은 <strong>약한 반등을 정확하게 식별</strong>하고 추세 방향으로 안정적으로 거래할 기회를 제공합니다. 매수자들의 실패를 목격한 후 진입하므로, 하락 추세가 재개될 확률이 상대적으로 높습니다.</p></div>
+  </div>
+
+  <!-- Ad slot 2 -->
+  <div class="ad-slot" id="ad-2" aria-hidden="true"></div>
+
+  <!-- 5. Trading Rules -->
+  <div class="section">
+    <h2>트레이딩 규칙</h2>
+    <div class="rules-grid">
+      <div class="rule-card entry">
+        <h3>진입</h3>
+        <p>다섯 번째 캔들이 첫 번째 캔들의 종가 아래로 닫아야 진입 신호가 성립합니다. 보수적인 거래자는 다섯 번째 캔들의 저가를 돌파하여 닫을 때까지 기다린 후 매도 포지션을 개설합니다. 추가 확인을 위해 거래량이 다섯 번째 캔들에서 증가하는 것을 확인하면 신뢰성이 높아집니다.</p>
+      </div>
+      <div class="rule-card stoploss">
+        <h3>손절</h3>
+        <p>손절매는 패턴 전체의 고가, 즉 첫 번째 음봉의 고가 위에 설정합니다. 일부 거래자는 약간의 여유(예: 5-10핍)를 더하여 설정하기도 합니다. 이는 패턴이 무효화되는 지점(가격이 첫 번째 캔들의 고가 위로 올라가는 경우)과 일치합니다.</p>
+      </div>
+      <div class="rule-card takeprofit">
+        <h3>익절</h3>
+        <p>목표가는 측정된 이동(measured move) 방식으로 계산하거나, 위험 대비 수익(리스크 대 리워드 비율 2:1) 목표를 사용합니다. 측정된 이동은 첫 번째 캔들의 길이를 다섯 번째 캔들의 종가에서 아래로 투영하는 방식입니다. 지지 수준이나 이전 저점도 좋은 목표가 지점이 될 수 있습니다.</p>
+      </div>
+      <div class="rule-card invalidation">
+        <h3>무효 조건</h3>
+        <p>패턴이 무효화되는 조건은 가격이 첫 번째 캔들의 고가 위로 닫는 경우입니다. 또한 다섯 번째 캔들이 첫 번째 캔들의 종가 위로 닫으면 하락 신호가 약해지거나 무효화됩니다. 이러한 경우 포지션을 종료하거나 거래 계획을 재평가해야 합니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Confirmation Indicators -->
+  <div class="section">
+    <h2>확인 지표</h2>
+    <div class="content"><p><strong>RSI(Relative Strength Index)는 폴링 쓰리 메서드의 강력한 확인 지표입니다.</strong> 다섯 번째 캔들에서 RSI가 30 이하의 과매도 영역에 있거나 하락하는 중이라면, 계속된 약세 신호가 강합니다. 또한 RSI가 최근 고점 대비 낮은 고점을 기록하면 약세 추세의 내구성을 확인할 수 있습니다.</p><p><strong>MACD와 거래량도 중요한 확인 지표입니다.</strong> MACD의 히스토그램이 음수 영역에서 계속 감소하거나, 시그널선 아래에 있으면 하락 모멘텀이 유지되고 있습니다. 거래량 측면에서는 첫 번째 음봉과 다섯 번째 음봉의 거래량이 중간의 양봉들보다 현저히 높아야 진정한 매도 압력을 나타냅니다.</p><p><strong>지지 및 저항 수준도 패턴 신뢰성을 높입니다.</strong> 패턴이 주요 저항선 바로 아래에서 형성되거나, 다섯 번째 캔들이 이전의 중요 지지선을 목표로 하락하고 있다면 거래 신뢰도가 높아집니다. 하락 추세선이 패턴을 통과하면서 저항이 강해지는 것을 확인하면 추가 확인이 됩니다.</div>
+  </div>
+
+  <!-- Ad slot 3 -->
+  <div class="ad-slot" id="ad-3" aria-hidden="true"></div>
+
+  <!-- 7. Common Mistakes -->
+  <div class="section">
+    <h2>흔한 실수</h2>
+    <div class="mistake-item"><h3>패턴 형성 과정에서 조기 진입</h3><p>많은 거래자가 다섯 번째 캔들이 완전히 형성되기 전에 진입하려고 시도합니다. 패턴이 완성되지 않으면 신뢰할 수 없으므로, 반드시 다섯 번째 캔들이 첫 번째 캔들의 종가 아래로 닫을 때까지 기다려야 합니다. 조기 진입은 잘못된 신호로 인한 손실을 초래할 수 있습니다.</p></div>
+<div class="mistake-item"><h3>상승 추세에서 패턴 거래하기</h3><p>폴링 쓰리 메서드는 하락 추세에서만 유효한 지속 패턴입니다. 상승 추세나 보합장에서 이 패턴을 거래하면 신뢰성이 급격히 떨어집니다. 먼저 명확한 하락 추세가 있는지 확인하고, 패턴이 그 추세의 일부인지 검증해야 합니다.</p></div>
+<div class="mistake-item"><h3>중간 캔들의 크기를 과도하게 무시</h3><p>세 개의 중간 캔들이 너무 크거나 첫 번째 음봉의 저가 아래로 내려가는 경우, 패턴의 신뢰성이 감소합니다. 이를 무시하고 거래하면 실제로는 약한 신호에서 진입하게 됩니다. 중간 캔들들이 원래 캔들 범위 내에 머물지 않으면 패턴을 스킵하는 것이 낫습니다.</p></div>
+<div class="mistake-item"><h3>거래량 확인 무시</h3><p>거래량이 패턴의 신뢰성을 크게 높이지만, 많은 거래자가 이를 무시합니다. 첫 번째와 다섯 번째 음봉의 거래량이 낮으면 매도 압력이 약할 수 있습니다. 항상 거래량을 확인하고, 부족하면 신호를 스킵하는 것이 현명합니다.</p></div>
+<div class="mistake-item"><h3>손절매 설정 위치 오류</h3><p>손절매를 패턴의 고가에 너무 가깝게 설정하면 정상적인 변동성에 의해 손절매가 자주 발동됩니다. 충분한 여유 공간(5-10핍)을 두거나, 그 이상의 저항선을 기준으로 설정해야 합니다. 손절매가 너무 타이트하면 거래 성공률이 떨어집니다.</p></div>
+  </div>
+
+  <!-- 8. Checklist -->
+  <div class="section">
+    <h2>트레이딩 체크리스트</h2>
+    <ul class="checklist">
+      <li>현재 가격이 명확한 하락 추세에 있는지 확인하고, 최근의 고점들이 하락하는 중인지 검증</li>
+<li>첫 번째 캔들이 강한 음봉이고 긴 몸통을 가지고 있는지, 그리고 하락 추세의 흐름을 따르는지 확인</li>
+<li>두 번째, 세 번째, 네 번째 캔들이 모두 작은 양봉이고 첫 번째 음봉의 고가 아래에 머물러 있는지 검증</li>
+<li>다섯 번째 캔들이 강한 음봉이고 첫 번째 캔들의 종가 아래로 닫는지 확인하고, 캔들이 완전히 형성될 때까지 기다리기</li>
+<li>첫 번째와 다섯 번째 음봉의 거래량이 중간의 양봉들보다 현저히 높은지 확인하여 신호 강도 검증</li>
+<li>RSI, MACD, 또는 다른 모멘텀 지표에서 약세 신호가 나타나고 있는지 추가 확인</li>
+<li>손절매를 패턴의 고가 위에 설정하고, 목표가를 측정된 이동 또는 2:1 리스크 대 리워드 비율로 계산</li>
+    </ul>
+  </div>
+
+  <!-- Ad slot 4 -->
+  <div class="ad-slot" id="ad-4" aria-hidden="true"></div>
+
+  <!-- 9. FAQ -->
+  <div class="section">
+    <h2>자주 묻는 질문</h2>
+    <div class="faq-item"><div class="faq-q">폴링 쓰리 메서드와 라이징 쓰리 메서드의 차이점은 무엇입니까?</div><div class="faq-a">폴링 쓰리 메서드는 하락 추세 중의 패턴이며, 강한 음봉으로 시작하고 약한 양봉들 이후 강한 음봉으로 끝납니다. 반면 라이징 쓰리 메서드는 상승 추세 중의 패턴이며, 강한 양봉으로 시작하고 약한 음봉들 이후 강한 양봉으로 끝납니다. 두 패턴 모두 추세 지속 신호이지만 방향이 반대입니다.</div></div>
+<div class="faq-item"><div class="faq-q">폴링 쓰리 메서드에서 다섯 번째 캔들이 첫 번째 캔들의 종가와 정확히 같은 수준에서 닫으면 어떻게 해야 합니까?</div><div class="faq-a">이상적으로는 다섯 번째 캔들이 첫 번째 캔들의 종가 아래로 닫아야 신호가 성립합니다. 정확히 같은 수준에서 닫으면 신호가 약해지므로, 한 계단 아래에서 확인 신호를 기다리거나 패턴을 스킵하는 것이 더 안전합니다. 엄격한 패턴 기준을 유지할수록 신뢰성이 높아집니다.</div></div>
+<div class="faq-item"><div class="faq-q">폴링 쓰리 메서드를 더 큰 시간대에서 거래하는 것이 더 신뢰할 수 있습니까?</div><div class="faq-a">네, 일반적으로 더 큰 시간대(예: 4시간, 일봉, 주봉)에서 패턴을 거래할 때 신뢰성이 높습니다. 더 큰 시간대에서는 노이즈가 적고, 진정한 추세를 대표할 확률이 높으며, 거래량 데이터도 더 신뢰할 수 있습니다. 초단기 시간대(1분, 5분)에서는 잘못된 신호가 많을 수 있습니다.</div></div>
+<div class="faq-item"><div class="faq-q">캔들 패턴만으로는 거래하지 않는 것이 좋은 이유는 무엇입니까?</div><div class="faq-a">캔들 패턴은 강력한 시각적 신호를 제공하지만, 단독으로 사용하면 잘못된 신호가 발생할 수 있습니다. 거래량, 지지 저항, 모멘텀 지표, 추세선 등 다양한 도구와 함께 사용할 때 신뢰성이 극대화됩니다. 다중 확인(multiple confirmation)은 거래 성공률을 높이는 핵심 원칙입니다.</div></div>
+<div class="faq-item"><div class="faq-q">손절매가 촉발된 후 가격이 예상 방향으로 계속 움직이면 어떻게 해야 합니까?</div><div class="faq-a">손절매 촉발 후 가격이 예상 방향으로 움직인다 해도, 그것은 패턴이 실제로 무효화되었다는 의미입니다. 이 경우 재진입하려고 하지 말고, 다음 기회를 기다리거나 다른 패턴이 형성될 때까지 기다려야 합니다. 손절매 규칙을 엄격하게 따르는 것이 장기적 성공의 핵심이며, 개별 거래에서의 손실이 전체 포트폴리오를 보호합니다.</div></div>
+  </div>
+
+  <!-- 10. Related (mobile version) -->
+  <div class="mobile-related">
+    <div class="related-card"><h3>관련 패턴</h3>
+<a class="related-link" href="/patterns/ko/rising-three-methods.html">상승 3법(Rising Three Methods)</a>
+<a class="related-link" href="/patterns/ko/three-black-crows.html">스리 블랙 크로우(Three Black Crows) 캔들 패턴</a>
+<a class="related-link" href="/patterns/ko/bearish-engulfing.html">베어리시 엔걸핑 패턴</a>
+<a class="related-link" href="/patterns/ko/bearish-belt-hold.html">베어리시 벨트홀드(Bearish Belt Hold)</a>
+<a class="related-link" href="/patterns/ko/mat-hold.html">매트 홀드(Mat Hold) 캔들스틱 패턴</a>
+</div>
+<div class="related-card"><h3>관련 도구</h3>
+<a class="related-link" href="/tools/ko/macd-calculator.html">Macd Calculator</a>
+<a class="related-link" href="/tools/ko/ma-crossover.html">Ma Crossover</a>
+<a class="related-link" href="/tools/ko/rsi-calculator.html">Rsi Calculator</a>
+<a class="related-link" href="/tools/ko/atr-calculator.html">Atr Calculator</a>
+<a class="related-link" href="/tools/ko/support-resistance.html">Support Resistance</a>
+</div>
+<div class="related-card"><h3>블로그 글</h3>
+<a class="related-link" href="/blog/ko/candlestick-patterns.html">Candlestick Patterns</a>
+<a class="related-link" href="/blog/ko/moving-average-guide.html">Moving Average Guide</a>
+<a class="related-link" href="/blog/ko/stop-loss-guide.html">Stop Loss Guide</a>
+</div>
+  </div>
+
+  <!-- Disclaimer -->
+  <div class="disclaimer">
+    이 페이지는 교육 목적으로만 제공되며 투자 조언이 아닙니다. 거래에는 위험이 수반됩니다. 본인의 판단에 따라 결정하십시오. — 최종 업데이트: 2026-07-12
+  </div>
+
+  <!-- Language switcher -->
+  <div class="lang-bar">
+    <a class="lang-btn" href="https://softglow-ai.com/patterns/falling-three-methods.html">繁體中文</a>
+<a class="lang-btn" href="https://softglow-ai.com/patterns/en/falling-three-methods.html">English</a>
+<a class="lang-btn" href="https://softglow-ai.com/patterns/ja/falling-three-methods.html">日本語</a>
+<a class="lang-btn active" href="https://softglow-ai.com/patterns/ko/falling-three-methods.html">한국어</a>
+<a class="lang-btn" href="https://softglow-ai.com/patterns/de/falling-three-methods.html">Deutsch</a>
+<a class="lang-btn" href="https://softglow-ai.com/patterns/fr/falling-three-methods.html">Français</a>
+<a class="lang-btn" href="https://softglow-ai.com/patterns/es/falling-three-methods.html">Español</a>
+<a class="lang-btn" href="https://softglow-ai.com/patterns/pt/falling-three-methods.html">Português</a>
+<a class="lang-btn" href="https://softglow-ai.com/patterns/id/falling-three-methods.html">Bahasa Indonesia</a>
+<a class="lang-btn" href="https://softglow-ai.com/patterns/zh-CN/falling-three-methods.html">简体中文</a>
+  </div>
+
+</div>
+
+<!-- Sidebar (desktop) -->
+<aside class="sidebar">
+  <!-- Ad slot 5 (sidebar) -->
+  <div class="ad-slot" id="ad-side" aria-hidden="true"></div>
+  <div class="related-card"><h3>관련 패턴</h3>
+<a class="related-link" href="/patterns/ko/rising-three-methods.html">상승 3법(Rising Three Methods)</a>
+<a class="related-link" href="/patterns/ko/three-black-crows.html">스리 블랙 크로우(Three Black Crows) 캔들 패턴</a>
+<a class="related-link" href="/patterns/ko/bearish-engulfing.html">베어리시 엔걸핑 패턴</a>
+<a class="related-link" href="/patterns/ko/bearish-belt-hold.html">베어리시 벨트홀드(Bearish Belt Hold)</a>
+<a class="related-link" href="/patterns/ko/mat-hold.html">매트 홀드(Mat Hold) 캔들스틱 패턴</a>
+</div>
+<div class="related-card"><h3>관련 도구</h3>
+<a class="related-link" href="/tools/ko/macd-calculator.html">Macd Calculator</a>
+<a class="related-link" href="/tools/ko/ma-crossover.html">Ma Crossover</a>
+<a class="related-link" href="/tools/ko/rsi-calculator.html">Rsi Calculator</a>
+<a class="related-link" href="/tools/ko/atr-calculator.html">Atr Calculator</a>
+<a class="related-link" href="/tools/ko/support-resistance.html">Support Resistance</a>
+</div>
+<div class="related-card"><h3>블로그 글</h3>
+<a class="related-link" href="/blog/ko/candlestick-patterns.html">Candlestick Patterns</a>
+<a class="related-link" href="/blog/ko/moving-average-guide.html">Moving Average Guide</a>
+<a class="related-link" href="/blog/ko/stop-loss-guide.html">Stop Loss Guide</a>
+</div>
+</aside>
+
+</div>
+</div>
+
+<footer class="footer">
+<div class="footer-inner">
+  <a href="/about.html">About</a>
+  <a href="/contact.html">Contact</a>
+  <a href="/privacy.html">Privacy</a>
+  <a href="/terms.html">Terms</a>
+  <span style="margin-left:auto">© 2026 SoftGlow</span>
+</div>
+</footer>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script>
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});
+});
+</script>
+
+<!-- AdSense delayed load: 2s after page load -->
+<script>
+setTimeout(function(){
+  var s=document.createElement('script');
+  s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';
+  s.async=true;s.crossOrigin='anonymous';
+  document.head.appendChild(s);
+},2000);
+</script>
+
+<!-- Generator Metadata
+version: 1.0
+build_time: 2026-07-12T08:45:35.168733+00:00
+model: claude-haiku-4-5-20251001
+slug: falling-three-methods
+lang: ko
+-->
+</body>
+</html>

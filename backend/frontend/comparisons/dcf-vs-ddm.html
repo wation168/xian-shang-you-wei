@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DCF估值 vs 股息折現模型：投資者必知的差異</title>
+<meta name="description" content="深入比較DCF估值和股息折現模型，瞭解兩種估值方法的優缺點、應用場景和綜合策略。">
+<meta name="robots" content="index, follow">
+<meta name="sg-slug" content="dcf-vs-ddm">
+<meta name="sg-type" content="comparison">
+<meta name="sg-lang" content="zh-TW">
+<link rel="canonical" href="https://softglow-ai.com/comparisons/dcf-vs-ddm.html">
+<link rel="alternate" hreflang="zh-tw" href="https://softglow-ai.com/comparisons/dcf-vs-ddm.html">
+<link rel="alternate" hreflang="zh-cn" href="https://softglow-ai.com/comparisons/zh-CN/dcf-vs-ddm.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/comparisons/en/dcf-vs-ddm.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/comparisons/ja/dcf-vs-ddm.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/comparisons/ko/dcf-vs-ddm.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/comparisons/fr/dcf-vs-ddm.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/comparisons/de/dcf-vs-ddm.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/comparisons/es/dcf-vs-ddm.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/comparisons/pt/dcf-vs-ddm.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/comparisons/id/dcf-vs-ddm.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/comparisons/en/dcf-vs-ddm.html">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "DCF估值 vs 股息折現模型 — 完整比較指南", "description": "深入比較DCF估值和股息折現模型，瞭解兩種估值方法的優缺點、應用場景和綜合策略。", "url": "https://softglow-ai.com/comparisons/dcf-vs-ddm.html", "publisher": {"@type": "Organization", "name": "SoftGlow", "url": "https://softglow-ai.com"}, "dateModified": "2026-07-12"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "首頁", "item": "https://softglow-ai.com/"}, {"@type": "ListItem", "position": 2, "name": "比較分析", "item": "https://softglow-ai.com/comparisons/"}, {"@type": "ListItem", "position": 3, "name": "DCF估值 vs 股息折現模型 — 完整比較指南", "item": "https://softglow-ai.com/comparisons/dcf-vs-ddm.html"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "DCF估值和股息折現模型的根本區別是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "DCF估值基於企業的所有自由現金流，而股息折現模型只關注派給股東的現金。DCF適用於所有企業，而DDM僅適用於有穩定派息的公司。簡言之，DCF看的是企業能產生多少現金，DDM看的是企業願意分配給股東多少現金。"}}, {"@type": "Question", "name": "為什麼不能用股息折現模型評估蘋果或特斯拉這樣的科技股？", "acceptedAnswer": {"@type": "Answer", "text": "蘋果和特斯拉多年不派息或派息極少，它們將利潤用於研發、回購和擴張。股息折現模型無法捕捉這些現金用途對股東價值的貢獻。此時應該用DCF模型，將自由現金流和股票回購都計入估值。"}}, {"@type": "Question", "name": "DCF估值中的「終值」為什麼這麼重要且容易出錯？", "acceptedAnswer": {"@type": "Answer", "text": "終值代表預測期後企業的價值，通常佔DCF總估值的60-80%。終值計算基於對企業永久增長率的假設，即使增長率假設偏差1%，也可能使估值相差數倍。這是DCF方法最大的風險，需要保守估算和敏感性測試。"}}, {"@type": "Question", "name": "股息折現模型對股息增長率預測的敏感性有多高？", "acceptedAnswer": {"@type": "Answer", "text": "非常高。在DDM公式中，股息增長率的小幅變化會對估值產生巨大影響。例如，將增長率從3%提高到5%，可能使估值翻倍。因此使用DDM時必須謹慎預測股息增長率，最好基於歷史數據和行業趨勢進行保守估計。"}}, {"@type": "Question", "name": "如何判斷一家公司是否適合用股息折現模型評估？", "acceptedAnswer": {"@type": "Answer", "text": "檢查以下條件：（1）公司至少有10年的派息歷史；（2）派息金額相對穩定且呈增長趨勢；（3）派息佔利潤的比例合理（通常30-60%）；（4）公司處於成熟階段，增長前景可預測。如果不滿足這些條件，應優先使用DCF模型。"}}]}</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:#2D3748;background:#fff;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:#2563EB;text-decoration:none}
+a:hover{text-decoration:underline}
+
+.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);border-bottom:1px solid #E2E8F0}
+.nav-inner{max-width:1080px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px}
+.nav-logo{font-size:17px;font-weight:700;color:#2D3748;letter-spacing:-0.5px}
+.nav-logo span{color:#2563EB}
+.nav-links{display:flex;gap:16px;align-items:center}
+.nav-links a{font-size:13px;color:#4A5568;font-weight:500}
+.nav-links a:hover{color:#2563EB;text-decoration:none}
+.nav-actions{display:flex;gap:4px;align-items:center}
+.act-btn{background:none;border:none;cursor:pointer;padding:6px;border-radius:6px;display:flex;align-items:center}
+.act-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.act-btn.primary{color:#2563EB}.act-btn.primary:hover{background:#EBF5FF}
+.act-btn.secondary{color:#A0AEC0}.act-btn.secondary:hover{background:#F7FAFC;color:#4A5568}
+.lang-select{font-size:12px;padding:4px 8px;border:1px solid #E2E8F0;border-radius:6px;background:#fff;color:#4A5568;cursor:pointer;margin-left:4px}
+.breadcrumb{max-width:1080px;margin:0 auto;padding:12px 20px;font-size:13px;color:#A0AEC0}
+.breadcrumb a{color:#718096}
+
+.container{max-width:1080px;margin:0 auto;padding:0 20px}
+.layout{display:grid;grid-template-columns:1fr 300px;gap:32px;align-items:start}
+
+.hero{background:linear-gradient(135deg,#EBF5FF 0%,#F7FAFC 100%);border:1px solid #BEE3F8;border-radius:16px;padding:28px 32px;margin-bottom:24px}
+.hero h1{font-size:26px;font-weight:800;color:#1A202C;margin-bottom:8px;line-height:1.3}
+.hero-subtitle{font-size:15px;color:#4A5568;margin-bottom:16px}
+.hero-badges{display:flex;gap:8px;flex-wrap:wrap}
+.badge{font-size:12px;padding:4px 12px;border-radius:20px;background:#fff;border:1px solid #E2E8F0;color:#4A5568;font-weight:500}
+.badge-a{background:#DBEAFE;border-color:#93C5FD;color:#1E40AF}
+.badge-b{background:#FEF3C7;border-color:#FCD34D;color:#92400E}
+
+.section{margin-bottom:32px}
+.section h2{font-size:20px;font-weight:700;color:#1A202C;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #E2E8F0}
+.content p{margin-bottom:14px;color:#4A5568;line-height:1.8;font-size:15px}
+.content strong{color:#2D3748}
+
+.table-wrap{overflow-x:auto;margin:16px 0;border-radius:12px;border:1px solid #E2E8F0}
+.comp-table{width:100%;border-collapse:collapse;font-size:14px}
+.comp-table th{text-align:left;padding:12px 16px;background:#F7FAFC;font-weight:600;color:#2D3748;border-bottom:1px solid #E2E8F0}
+.comp-table td{padding:12px 16px;border-bottom:1px solid #EDF2F7;color:#4A5568;vertical-align:top}
+.comp-table thead th{background:#2563EB;color:#fff;font-size:13px;text-transform:uppercase;letter-spacing:0.5px}
+.comp-table thead th:first-child{border-radius:12px 0 0 0}
+.comp-table thead th:last-child{border-radius:0 12px 0 0}
+.comp-table tbody tr:hover{background:#F7FAFC}
+.comp-table tbody th{background:#F7FAFC;font-weight:600;color:#2D3748;min-width:120px}
+
+.when-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+.when-card{padding:20px;border-radius:12px;border:1px solid #E2E8F0;font-size:14px;color:#4A5568;line-height:1.7}
+.when-card-a{background:#EFF6FF;border-color:#BFDBFE}
+.when-card-b{background:#FFFBEB;border-color:#FDE68A}
+.when-card h3{font-size:16px;font-weight:600;margin:0 0 8px;color:#1A202C}
+
+.tool-cta{display:inline-block;padding:10px 24px;margin:4px 8px 4px 0;background:#2563EB;color:#fff!important;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none!important}
+.tool-cta:hover{background:#1D4ED8}
+
+.ad-slot{background:#F7FAFC;border:1px dashed #CBD5E0;border-radius:8px;min-height:250px;display:flex;align-items:center;justify-content:center;color:#A0AEC0;font-size:12px;margin-bottom:20px}
+
+.sidebar{position:sticky;top:68px}
+.related-card{background:#F7FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:20px;margin-bottom:16px}
+.related-card h3{font-size:15px;font-weight:600;margin-bottom:12px;color:#1A202C}
+.related-link{display:block;padding:7px 0;border-bottom:1px solid #EDF2F7;font-size:13px;color:#2563EB}
+.related-link:last-child{border-bottom:none}
+.related-link:hover{text-decoration:none;color:#1D4ED8}
+
+.faq-item{border-bottom:1px solid #E2E8F0;padding:14px 0}
+.faq-q{font-size:15px;font-weight:600;color:#2D3748;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.faq-q::after{content:"＋";font-size:18px;color:#A0AEC0;transition:transform 0.2s}
+.faq-item.open .faq-q::after{content:"－"}
+.faq-a{font-size:14px;color:#718096;line-height:1.7;max-height:0;overflow:hidden;transition:max-height 0.3s,padding 0.3s}
+.faq-item.open .faq-a{max-height:500px;padding-top:10px}
+
+.disclaimer{background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:12px 16px;font-size:12px;color:#92400E;line-height:1.6;margin:24px 0}
+.lang-bar{display:flex;gap:6px;flex-wrap:wrap;margin:20px 0}
+.lang-btn{font-size:12px;padding:4px 12px;border-radius:20px;background:#F7FAFC;border:1px solid #E2E8F0;color:#718096}
+.lang-btn:hover{background:#EBF5FF;border-color:#BEE3F8;text-decoration:none}
+.lang-btn.active{background:#2563EB;color:#fff;border-color:#2563EB}
+.mobile-related{display:none}
+
+.footer{border-top:1px solid #E2E8F0;padding:24px 0;margin-top:40px}
+.footer-inner{max-width:1080px;margin:0 auto;padding:0 20px;display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:#A0AEC0}
+.footer-inner a{color:#718096}
+
+@media(max-width:768px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{position:static;display:none}
+  .mobile-related{display:block}
+  .hero{padding:20px}
+  .hero h1{font-size:20px}
+  .when-cards{grid-template-columns:1fr}
+  .comp-table{font-size:13px}
+  .comp-table th,.comp-table td{padding:10px 12px}
+  .nav-links{gap:10px}
+  .lang-select{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/">工具</a>
+    <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
+    <a href="/">首頁</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="if(this.value)window.location.href=this.value">
+      <option value="https://softglow-ai.com/comparisons/dcf-vs-ddm.html" selected>繁體中文</option>
+<option value="https://softglow-ai.com/comparisons/zh-CN/dcf-vs-ddm.html">简体中文</option>
+<option value="https://softglow-ai.com/comparisons/en/dcf-vs-ddm.html">English</option>
+<option value="https://softglow-ai.com/comparisons/ja/dcf-vs-ddm.html">日本語</option>
+<option value="https://softglow-ai.com/comparisons/ko/dcf-vs-ddm.html">한국어</option>
+<option value="https://softglow-ai.com/comparisons/fr/dcf-vs-ddm.html">Français</option>
+<option value="https://softglow-ai.com/comparisons/de/dcf-vs-ddm.html">Deutsch</option>
+<option value="https://softglow-ai.com/comparisons/es/dcf-vs-ddm.html">Español</option>
+<option value="https://softglow-ai.com/comparisons/pt/dcf-vs-ddm.html">Português</option>
+<option value="https://softglow-ai.com/comparisons/id/dcf-vs-ddm.html">Bahasa Indonesia</option>
+    </select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
+
+<div class="breadcrumb">
+  <a href="/">首頁</a> › <a href="/comparisons/">比較分析</a> › DCF估值 vs 股息折現模型 — 完整比較指南
+</div>
+
+<div class="container">
+<div class="layout">
+
+<div class="main">
+
+  <div class="hero">
+    <h1>DCF估值 vs 股息折現模型 — 完整比較指南</h1>
+    <p class="hero-subtitle">深入比較DCF估值和股息折現模型，瞭解兩種估值方法的優缺點、應用場景和綜合策略。</p>
+    <div class="hero-badges">
+      <span class="badge badge-a">DCF Valuation</span>
+      <span class="badge">vs</span>
+      <span class="badge badge-b">Dividend Discount Model</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>概述</h2>
+    <div class="content">{intro_html}</div>
+  </div>
+
+  <div class="ad-slot" id="ad-1" aria-hidden="true"></div>
+
+  <div class="section">
+    <h2>完整比較</h2>
+    <div class="table-wrap"><table class="comp-table">
+<thead><tr><th>比較維度</th><th>DCF估值法</th><th>股息折現模型</th></tr></thead>
+<tbody>
+<tr><th>基本定義</th><td>將企業未來自由現金流折現至現值，反映公司整體內在價值</td><td>將企業未來股息支付折現至現值，用於評估股票的合理價格</td></tr>
+<tr><th>計算基礎</th><td>自由現金流（FCF）= 營業現金流 - 資本支出，適用於所有企業</td><td>預期股息 + 股價增長率，僅適用於有穩定派息的公司</td></tr>
+<tr><th>適用企業類型</th><td>適用於所有盈利企業，包括不派息、派息不穩定或派息比例低的公司</td><td>僅適用於有持續穩定派息歷史的成熟企業，如公用事業和藍籌股</td></tr>
+<tr><th>時間跨度</th><td>通常預測5-10年，需要估算終值，對長期預測敏感性高</td><td>可用於長期估值，但對股息增長率假設高度敏感</td></tr>
+<tr><th>主要優勢</th><td>涵蓋所有現金流，不受派息政策限制；靈活性強；適合科技、成長型企業評估</td><td>邏輯簡潔清晰；數據易取得；適合保守投資者；降低預測誤差</td></tr>
+<tr><th>主要劣勢</th><td>參數假設多；終值估算困難；對長期增長率預測要求高；初創企業不適用</td><td>限制條件多；無法評估不派息公司；派息率變化會大幅影響結果</td></tr>
+<tr><th>計算難度</th><td>中高難度，需要深入財務分析和行業研究，專業知識要求高</td><td>低難度，公式簡單，但需準確預測股息增長率</td></tr>
+<tr><th>最適用場景</th><td>評估科技股、成長型企業、併購交易定價、私有企業估值</td><td>評估公用事業股、房地產信託（REITs）、成熟的藍籌股</td></tr>
+</tbody></table></div>
+  </div>
+
+  <div class="section">
+    <div class="when-cards">
+      <div class="when-card when-card-a">
+        <h3>何時選擇 DCF Valuation</h3>
+        <p>{when_a_text}</p>
+      </div>
+      <div class="when-card when-card-b">
+        <h3>何時選擇 Dividend Discount Model</h3>
+        <p>{when_b_text}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="ad-slot" id="ad-2" aria-hidden="true"></div>
+
+  <div class="section">
+    <h2>搭配使用策略</h2>
+    <div class="content">{combined_html}</div>
+  </div>
+
+  <div class="section" style="text-align:center;margin:24px 0">
+    <a href="/tools/dcf-calculator.html" class="tool-cta">DCF Valuation → 立即試算</a>
+<a href="/tools/intrinsic-value.html" class="tool-cta">Dividend Discount Model → 立即試算</a>
+
+  </div>
+
+  <div class="ad-slot" id="ad-3" aria-hidden="true"></div>
+
+  <div class="section">
+    <h2>常見問題</h2>
+    <div class="faq-item">
+<div class="faq-q">DCF估值和股息折現模型的根本區別是什麼？</div>
+<div class="faq-a">DCF估值基於企業的所有自由現金流，而股息折現模型只關注派給股東的現金。DCF適用於所有企業，而DDM僅適用於有穩定派息的公司。簡言之，DCF看的是企業能產生多少現金，DDM看的是企業願意分配給股東多少現金。</div>
+</div>
+<div class="faq-item">
+<div class="faq-q">為什麼不能用股息折現模型評估蘋果或特斯拉這樣的科技股？</div>
+<div class="faq-a">蘋果和特斯拉多年不派息或派息極少，它們將利潤用於研發、回購和擴張。股息折現模型無法捕捉這些現金用途對股東價值的貢獻。此時應該用DCF模型，將自由現金流和股票回購都計入估值。</div>
+</div>
+<div class="faq-item">
+<div class="faq-q">DCF估值中的「終值」為什麼這麼重要且容易出錯？</div>
+<div class="faq-a">終值代表預測期後企業的價值，通常佔DCF總估值的60-80%。終值計算基於對企業永久增長率的假設，即使增長率假設偏差1%，也可能使估值相差數倍。這是DCF方法最大的風險，需要保守估算和敏感性測試。</div>
+</div>
+<div class="faq-item">
+<div class="faq-q">股息折現模型對股息增長率預測的敏感性有多高？</div>
+<div class="faq-a">非常高。在DDM公式中，股息增長率的小幅變化會對估值產生巨大影響。例如，將增長率從3%提高到5%，可能使估值翻倍。因此使用DDM時必須謹慎預測股息增長率，最好基於歷史數據和行業趨勢進行保守估計。</div>
+</div>
+<div class="faq-item">
+<div class="faq-q">如何判斷一家公司是否適合用股息折現模型評估？</div>
+<div class="faq-a">檢查以下條件：（1）公司至少有10年的派息歷史；（2）派息金額相對穩定且呈增長趨勢；（3）派息佔利潤的比例合理（通常30-60%）；（4）公司處於成熟階段，增長前景可預測。如果不滿足這些條件，應優先使用DCF模型。</div>
+</div>
+
+  </div>
+
+  <div class="ad-slot" id="ad-4" aria-hidden="true"></div>
+
+  <div class="section">
+    <h2>結論與建議</h2>
+    <div class="content">{verdict_html}</div>
+  </div>
+
+  <div class="mobile-related">
+    <div class="related-card">
+      <h3>相關工具</h3>
+      <a href="/tools/dcf-calculator.html" class="related-link">DCF Valuation</a>
+<a href="/tools/intrinsic-value.html" class="related-link">Dividend Discount Model</a>
+
+    </div>
+    <div class="related-card">
+      <h3>相關比較</h3>
+      <a href="https://softglow-ai.com/comparisons/15yr-vs-30yr-mortgage.html" class="related-link">15Yr vs 30Yr Mortgage</a>
+<a href="https://softglow-ai.com/comparisons/active-vs-passive.html" class="related-link">Active vs Passive</a>
+<a href="https://softglow-ai.com/comparisons/bollinger-vs-atr.html" class="related-link">Bollinger vs Atr</a>
+<a href="https://softglow-ai.com/comparisons/cagr-vs-roi.html" class="related-link">Cagr vs Roi</a>
+<a href="https://softglow-ai.com/comparisons/day-trading-vs-swing.html" class="related-link">Day Trading vs Swing</a>
+
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    本頁面僅供教育參考，不構成任何投資建議。交易有風險，請根據自身情況做出判斷。 — 最後更新: 2026-07-12
+  </div>
+
+  <div class="lang-bar">
+    <a href="https://softglow-ai.com/comparisons/dcf-vs-ddm.html" class="lang-btn  active">繁體中文</a>
+<a href="https://softglow-ai.com/comparisons/zh-CN/dcf-vs-ddm.html" class="lang-btn">简体中文</a>
+<a href="https://softglow-ai.com/comparisons/en/dcf-vs-ddm.html" class="lang-btn">English</a>
+<a href="https://softglow-ai.com/comparisons/ja/dcf-vs-ddm.html" class="lang-btn">日本語</a>
+<a href="https://softglow-ai.com/comparisons/ko/dcf-vs-ddm.html" class="lang-btn">한국어</a>
+<a href="https://softglow-ai.com/comparisons/fr/dcf-vs-ddm.html" class="lang-btn">Français</a>
+<a href="https://softglow-ai.com/comparisons/de/dcf-vs-ddm.html" class="lang-btn">Deutsch</a>
+<a href="https://softglow-ai.com/comparisons/es/dcf-vs-ddm.html" class="lang-btn">Español</a>
+<a href="https://softglow-ai.com/comparisons/pt/dcf-vs-ddm.html" class="lang-btn">Português</a>
+<a href="https://softglow-ai.com/comparisons/id/dcf-vs-ddm.html" class="lang-btn">Bahasa Indonesia</a>
+  </div>
+
+</div>
+
+<aside class="sidebar">
+  <div class="ad-slot" id="ad-side" aria-hidden="true"></div>
+  <div class="related-card">
+    <h3>相關工具</h3>
+    <a href="/tools/dcf-calculator.html" class="related-link">DCF Valuation</a>
+<a href="/tools/intrinsic-value.html" class="related-link">Dividend Discount Model</a>
+
+  </div>
+  <div class="related-card">
+    <h3>相關比較</h3>
+    <a href="https://softglow-ai.com/comparisons/15yr-vs-30yr-mortgage.html" class="related-link">15Yr vs 30Yr Mortgage</a>
+<a href="https://softglow-ai.com/comparisons/active-vs-passive.html" class="related-link">Active vs Passive</a>
+<a href="https://softglow-ai.com/comparisons/bollinger-vs-atr.html" class="related-link">Bollinger vs Atr</a>
+<a href="https://softglow-ai.com/comparisons/cagr-vs-roi.html" class="related-link">Cagr vs Roi</a>
+<a href="https://softglow-ai.com/comparisons/day-trading-vs-swing.html" class="related-link">Day Trading vs Swing</a>
+
+  </div>
+</aside>
+
+</div>
+</div>
+
+<footer class="footer">
+<div class="footer-inner">
+  <a href="/about.html">About</a>
+  <a href="/contact.html">Contact</a>
+  <a href="/privacy.html">Privacy</a>
+  <a href="/terms.html">Terms</a>
+  <span style="margin-left:auto">© 2026 SoftGlow</span>
+</div>
+</footer>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">清除全部</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script>
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});
+});
+</script>
+
+<!-- AdSense delayed load: 2s after page load -->
+<script>
+setTimeout(function(){
+  var s=document.createElement('script');
+  s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';
+  s.async=true;s.crossOrigin='anonymous';
+  document.head.appendChild(s);
+},2000);
+</script>
+
+<!-- Generator Metadata
+version: 1.0
+build_time: 2026-07-12T13:40:45Z
+model: claude-haiku-4-5-20251001
+slug: dcf-vs-ddm
+lang: zh-TW
+-->
+</body>
+</html>

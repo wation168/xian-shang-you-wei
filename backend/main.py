@@ -669,6 +669,66 @@ async def serve_tools_locale_index(locale: str):
     # 沒有則 fallback 到主索引
     return RedirectResponse(url="/tools/", status_code=302)
 
+# ---- Comparisons 路由 ----
+_COMP_LOCALES = ("en","ja","ko","es","pt","id","de","fr","zh-CN","zh-TW")
+
+@app.get("/comparisons/{filename}.html", include_in_schema=False)
+async def serve_comparisons_html(filename: str):
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "comparisons", f"{filename}.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/comparisons", include_in_schema=False)
+@app.get("/comparisons/", include_in_schema=False)
+async def serve_comparisons_index():
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "comparisons", "index.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/comparisons/{locale}/{filename}.html", include_in_schema=False)
+async def serve_comparisons_locale_html(locale: str, filename: str):
+    from fastapi.responses import FileResponse
+    import os as _os
+    if locale not in _COMP_LOCALES:
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    path = _os.path.join(_FRONTEND_DIR, "comparisons", locale, f"{filename}.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/comparisons/{locale}", include_in_schema=False)
+@app.get("/comparisons/{locale}/", include_in_schema=False)
+async def serve_comparisons_locale_index(locale: str):
+    from fastapi.responses import FileResponse
+    import os as _os
+    if locale not in _COMP_LOCALES:
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    path = _os.path.join(_FRONTEND_DIR, "comparisons", locale, "index.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+# ---- Common 靜態檔路由 (CSS/JS/JSON) ----
+@app.get("/common/{filename}", include_in_schema=False)
+async def serve_common_file(filename: str):
+    from fastapi.responses import FileResponse
+    import os as _os
+    # Only allow known extensions
+    if not filename.endswith((".css", ".js", ".json")):
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    path = _os.path.join(_FRONTEND_DIR, "common", filename)
+    if _os.path.isfile(path):
+        _media = {"css": "text/css", "js": "application/javascript", "json": "application/json"}
+        ext = filename.rsplit(".", 1)[-1]
+        return FileResponse(path, media_type=_media.get(ext, "application/octet-stream"))
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
 @app.get("/{filename}.html", include_in_schema=False)
 async def serve_html(filename: str):
     from fastapi.responses import FileResponse
@@ -6821,6 +6881,24 @@ function toggleTheme(){{
   </div>
   <div style="font-size:11px;color:var(--text3);text-align:center;margin-bottom:16px">全館滿 2000 元免運 · 新會員首購 95 折</div>
 
+  <!-- 延伸工具推薦 (SEO internal links) -->
+  <div style="margin:20px 0;padding:16px 20px;background:var(--card-bg);border:1px solid var(--border);border-radius:12px">
+    <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:10px">📊 延伸工具推薦</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:8px">搭配以下免費工具，讓分析更完整：</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+      <a href="/tools/stop-loss.html" style="display:inline-block;padding:6px 12px;background:rgba(59,130,246,.1);border-radius:16px;font-size:12px;color:#3b82f6;text-decoration:none">停損計算器</a>
+      <a href="/tools/risk-reward.html" style="display:inline-block;padding:6px 12px;background:rgba(59,130,246,.1);border-radius:16px;font-size:12px;color:#3b82f6;text-decoration:none">風險報酬比</a>
+      <a href="/tools/position-size.html" style="display:inline-block;padding:6px 12px;background:rgba(59,130,246,.1);border-radius:16px;font-size:12px;color:#3b82f6;text-decoration:none">部位大小計算器</a>
+      <a href="/tools/rsi-calculator.html" style="display:inline-block;padding:6px 12px;background:rgba(59,130,246,.1);border-radius:16px;font-size:12px;color:#3b82f6;text-decoration:none">RSI 計算器</a>
+      <a href="/tools/macd-calculator.html" style="display:inline-block;padding:6px 12px;background:rgba(59,130,246,.1);border-radius:16px;font-size:12px;color:#3b82f6;text-decoration:none">MACD 計算器</a>
+      <a href="/tools/bollinger-bands.html" style="display:inline-block;padding:6px 12px;background:rgba(59,130,246,.1);border-radius:16px;font-size:12px;color:#3b82f6;text-decoration:none">布林通道</a>
+      <a href="/tools/fibonacci-retracement.html" style="display:inline-block;padding:6px 12px;background:rgba(59,130,246,.1);border-radius:16px;font-size:12px;color:#3b82f6;text-decoration:none">費波那契回撤</a>
+      <a href="/tools/pe-ratio.html" style="display:inline-block;padding:6px 12px;background:rgba(59,130,246,.1);border-radius:16px;font-size:12px;color:#3b82f6;text-decoration:none">本益比計算器</a>
+      <a href="/tools/dividend-yield.html" style="display:inline-block;padding:6px 12px;background:rgba(59,130,246,.1);border-radius:16px;font-size:12px;color:#3b82f6;text-decoration:none">殖利率計算器</a>
+      <a href="/tools/support-resistance.html" style="display:inline-block;padding:6px 12px;background:rgba(59,130,246,.1);border-radius:16px;font-size:12px;color:#3b82f6;text-decoration:none">支撐壓力分析</a>
+    </div>
+  </div>
+
   <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:8px;line-height:1.6">
     &#9888; 本報告僅供參考，不構成買賣建議。投資有風險，請自行評估。
   </div>
@@ -7378,6 +7456,17 @@ td{{padding:12px 12px;vertical-align:middle}}
        data-ad-format="auto"
        data-full-width-responsive="true"></ins>
   <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
+  <div style="margin:20px 0;padding:14px 18px;background:#f0f7ff;border-radius:10px">
+    <div style="font-size:13px;font-weight:600;margin-bottom:8px">📊 延伸工具</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+      <a href="/tools/stop-loss.html" style="padding:5px 10px;background:#fff;border-radius:14px;font-size:12px;color:#2563EB;text-decoration:none;border:1px solid #dbeafe">停損計算器</a>
+      <a href="/tools/risk-reward.html" style="padding:5px 10px;background:#fff;border-radius:14px;font-size:12px;color:#2563EB;text-decoration:none;border:1px solid #dbeafe">風險報酬比</a>
+      <a href="/tools/position-size.html" style="padding:5px 10px;background:#fff;border-radius:14px;font-size:12px;color:#2563EB;text-decoration:none;border:1px solid #dbeafe">部位大小</a>
+      <a href="/tools/rsi-calculator.html" style="padding:5px 10px;background:#fff;border-radius:14px;font-size:12px;color:#2563EB;text-decoration:none;border:1px solid #dbeafe">RSI</a>
+      <a href="/tools/macd-calculator.html" style="padding:5px 10px;background:#fff;border-radius:14px;font-size:12px;color:#2563EB;text-decoration:none;border:1px solid #dbeafe">MACD</a>
+      <a href="/tools/pe-ratio.html" style="padding:5px 10px;background:#fff;border-radius:14px;font-size:12px;color:#2563EB;text-decoration:none;border:1px solid #dbeafe">本益比</a>
+    </div>
+  </div>
   <p class="disclaimer">⚠️ 本頁面資料僅供參考，不構成任何買賣建議。投資有風險，請自行評估。資料來源：FinMind / TWSE</p>
 </div>
 </body>
@@ -7455,31 +7544,35 @@ def sitemap():
         for _bf in _blog_files:
             locs.append(f"  <url><loc>{FRONTEND_URL}/blog/{_bl}/{_bf}.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>")
 
-    # ── K棒型態教學（與磁碟檔案完全一致，修正 404）──
-    _pattern_files = [
-        "big-bullish","big-bearish","bullish-engulfing","bearish-engulfing",
-        "morning-star","evening-star","hammer","inverted-hammer","hanging-man","shooting-star",
-        "doji","long-legged-doji","dragonfly-doji","gravestone-doji","spinning-top",
-        "bullish-marubozu","bearish-marubozu","bullish-harami","bearish-harami",
-        "tweezer-top","tweezer-bottom","three-white-soldiers","three-black-crows",
-        "piercing-line","dark-cloud",
-        "three-inside-up","three-inside-down",
-        "kicker-bullish",
-        "abandoned-baby-bull",
-        "morning-doji-star","evening-doji-star",
-        "double-bottom","double-top","triple-bottom","triple-top",
-        "head-shoulders-top","inverse-head-shoulders",
-        "ascending-triangle","descending-triangle","triangle-symmetrical",
-        "cup-handle","flag-bull","bear-flag","pennant",
-        "wedge-rising","wedge-falling","rectangle-bull",
-        "gap-up","gap-down","on-neck",
-    ]
-    for _idx_pg in ["index.html", "en.html", "ja.html", "ko.html"]:
-        locs.append(f"  <url><loc>{FRONTEND_URL}/patterns/{_idx_pg}</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>")
-    for _pf in _pattern_files:
-        locs.append(f"  <url><loc>{FRONTEND_URL}/patterns/{_pf}.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>")
-        for _pl in ("en", "ja", "ko"):
-            locs.append(f"  <url><loc>{FRONTEND_URL}/patterns/{_pl}/{_pf}.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>")
+    # ── K棒型態教學（V3 動態掃描磁碟，10 語言）──
+    _patterns_base = os.path.join(os.path.dirname(__file__), "frontend", "patterns")
+    if os.path.isdir(_patterns_base):
+        # zh-TW root patterns
+        for _pf in sorted(os.listdir(_patterns_base)):
+            if _pf.endswith(".html"):
+                locs.append(f"  <url><loc>{FRONTEND_URL}/patterns/{_pf}</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>")
+        # Sub-language directories
+        for _lang_dir in sorted(os.listdir(_patterns_base)):
+            _lang_path = os.path.join(_patterns_base, _lang_dir)
+            if os.path.isdir(_lang_path) and _lang_dir not in (".", ".."):
+                for _pf in sorted(os.listdir(_lang_path)):
+                    if _pf.endswith(".html"):
+                        locs.append(f"  <url><loc>{FRONTEND_URL}/patterns/{_lang_dir}/{_pf}</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>")
+
+    # ── Comparison 比較頁（V3 動態掃描磁碟，10 語言）──
+    _comp_base = os.path.join(os.path.dirname(__file__), "frontend", "comparisons")
+    if os.path.isdir(_comp_base):
+        # zh-TW root comparisons
+        for _cf in sorted(os.listdir(_comp_base)):
+            if _cf.endswith(".html"):
+                locs.append(f"  <url><loc>{FRONTEND_URL}/comparisons/{_cf}</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>")
+        # Sub-language directories
+        for _lang_dir in sorted(os.listdir(_comp_base)):
+            _lang_path = os.path.join(_comp_base, _lang_dir)
+            if os.path.isdir(_lang_path) and _lang_dir not in (".", ".."):
+                for _cf in sorted(os.listdir(_lang_path)):
+                    if _cf.endswith(".html"):
+                        locs.append(f"  <url><loc>{FRONTEND_URL}/comparisons/{_lang_dir}/{_cf}</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>")
     # 熱門股優先 priority 0.8，其餘 0.6
     hardcoded_set = set(_SEO_HARDCODED_STOCKS)
     for sid in all_stock_ids:
@@ -7677,6 +7770,17 @@ td{{padding:11px 12px;vertical-align:middle}}
       <thead><tr><th>#</th><th>股票</th><th style="text-align:right">現價</th><th style="text-align:right">漲跌幅</th><th style="text-align:right">成交量</th></tr></thead>
       <tbody>{volume_html}</tbody>
     </table>
+  </div>
+  <div style="margin:20px 0;padding:14px 18px;background:#f0f7ff;border-radius:10px">
+    <div style="font-size:13px;font-weight:600;margin-bottom:8px">📊 延伸工具</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+      <a href="/tools/stop-loss.html" style="padding:5px 10px;background:#fff;border-radius:14px;font-size:12px;color:#2563EB;text-decoration:none;border:1px solid #dbeafe">停損計算器</a>
+      <a href="/tools/risk-reward.html" style="padding:5px 10px;background:#fff;border-radius:14px;font-size:12px;color:#2563EB;text-decoration:none;border:1px solid #dbeafe">風險報酬比</a>
+      <a href="/tools/position-size.html" style="padding:5px 10px;background:#fff;border-radius:14px;font-size:12px;color:#2563EB;text-decoration:none;border:1px solid #dbeafe">部位大小</a>
+      <a href="/tools/rsi-calculator.html" style="padding:5px 10px;background:#fff;border-radius:14px;font-size:12px;color:#2563EB;text-decoration:none;border:1px solid #dbeafe">RSI</a>
+      <a href="/tools/macd-calculator.html" style="padding:5px 10px;background:#fff;border-radius:14px;font-size:12px;color:#2563EB;text-decoration:none;border:1px solid #dbeafe">MACD</a>
+      <a href="/tools/pe-ratio.html" style="padding:5px 10px;background:#fff;border-radius:14px;font-size:12px;color:#2563EB;text-decoration:none;border:1px solid #dbeafe">本益比</a>
+    </div>
   </div>
   <p class="disclaimer">⚠️ 本頁面資料僅供參考，不構成任何買賣建議。投資有風險，請自行評估。<br>資料來源：FinMind</p>
   <!-- AdSense 廣告 -->
