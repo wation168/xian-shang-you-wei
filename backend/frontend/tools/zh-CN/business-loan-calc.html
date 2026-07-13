@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "商业贷款计算器", "url": "https://softglow-ai.com/tools/zh-CN/business-loan-calc.html", "description": "免费商业贷款计算器，快速计算月付款额、总利息和有效年利率。输入贷款金额、利率和期限即可获得详细分析。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "如何使用商业贷款计算器？", "acceptedAnswer": {"@type": "Answer", "text": "只需填入三个基本信息：贷款金额（您需要借入的本金）、年利率（贷款的利息比率）和贷款期限（以月为单位）。点击计算后，系统会自动显示您的月付款额、总还款金额、总利息支付和有效年利率。"}}, {"@type": "Question", "name": "月付款额和总利息支付有什么区别？", "acceptedAnswer": {"@type": "Answer", "text": "月付款额是您每个月需要支付的固定金额，包含本金和利息。总利息支付是整个贷款期间所支付利息的总和。如果您贷款50,000元，年利率7.5%，期限60个月，月付款额约为992元，而总利息可能超过9,500元。"}}, {"@type": "Question", "name": "什么是有效年利率？", "acceptedAnswer": {"@type": "Answer", "text": "有效年利率（APR）是贷款的真实年成本，比名义年利率更准确。它包括利息和其他费用，以年百分率表示。这个指标帮助您更真实地了解借款成本，特别是在比较不同银行的贷款产品时。"}}, {"@type": "Question", "name": "贷款期限长短如何影响总成本？", "acceptedAnswer": {"@type": "Answer", "text": "贷款期限越长，月付款额越低，但总利息越高。例如同样50,000元的贷款，60个月的总利息可能比36个月多出数千元。相反，缩短贷款期限会增加月付款压力，但能显著降低总利息支付。选择时需平衡月度现金流和长期成本。"}}, {"@type": "Question", "name": "如何使用此计算器进行贷款比较？", "acceptedAnswer": {"@type": "Answer", "text": "您可以分别输入不同银行或贷款产品的条件，比较它们的月付款额、总利息和有效年利率。这样可以快速识别最经济的贷款方案。还可以调整贷款期限和利率，看不同组合对总成本的影响，帮助您做出最优财务决策。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="business-loan-calc">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/business-loan-calc.html">繁中</option><option value="/tools/en/business-loan-calc.html">EN</option><option value="/tools/ja/business-loan-calc.html">日本語</option><option value="/tools/ko/business-loan-calc.html">한국어</option><option value="/tools/de/business-loan-calc.html">DE</option><option value="/tools/fr/business-loan-calc.html">FR</option><option value="/tools/es/business-loan-calc.html">ES</option><option value="/tools/pt/business-loan-calc.html">PT</option><option value="/tools/id/business-loan-calc.html">ID</option><option value="/tools/zh-CN/business-loan-calc.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/business-loan-calc.html">繁中</option><option value="/tools/en/business-loan-calc.html">EN</option><option value="/tools/ja/business-loan-calc.html">日本語</option><option value="/tools/ko/business-loan-calc.html">한국어</option><option value="/tools/de/business-loan-calc.html">DE</option><option value="/tools/fr/business-loan-calc.html">FR</option><option value="/tools/es/business-loan-calc.html">ES</option><option value="/tools/pt/business-loan-calc.html">PT</option><option value="/tools/id/business-loan-calc.html">ID</option><option value="/tools/zh-CN/business-loan-calc.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 商业贷款计算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/business-loan-calc.html">繁中</option><option value="/tools/en/business-loan-calc.html">EN</option><option value="/tools/ja/business-loan-calc.html">日本語</option><option value="/tools/ko/business-loan-calc.html">한국어</option><option value="/tools/de/business-loan-calc.html">DE</option><option value="/tools/fr/business-loan-calc.html">FR</option><option value="/tools/es/business-loan-calc.html">ES</option><option value="/tools/pt/business-loan-calc.html">PT</option><option value="/tools/id/business-loan-calc.html">ID</option><option value="/tools/zh-CN/business-loan-calc.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -145,6 +159,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

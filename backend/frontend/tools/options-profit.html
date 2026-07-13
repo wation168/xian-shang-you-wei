@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "期權損益計算器", "url": "https://softglow-ai.com/tools/options-profit.html", "description": "免費期權損益計算器，輸入現貨價格、履約價、權利金和合約數，立即計算損益、損益平衡點和投資回報率。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "期權計算器如何計算每股損益？", "acceptedAnswer": {"@type": "Answer", "text": "每股損益通過以下公式計算：對於買入期權，損益 = (現貨價格 - 履約價格 - 權利金)；對於賣出期權，損益 = (履約價格 - 現貨價格 + 權利金)。結果為正表示利潤，為負表示虧損。"}}, {"@type": "Question", "name": "損益平衡點是什麼意思？", "acceptedAnswer": {"@type": "Answer", "text": "損益平衡點是標的資產必須達到的價格，使您的期權交易既不盈利也不虧損。對於買入期權，平衡點 = 履約價格 + 權利金；對於賣出期權，平衡點 = 履約價格 - 權利金。"}}, {"@type": "Question", "name": "投資回報率如何計算？", "acceptedAnswer": {"@type": "Answer", "text": "投資回報率 (ROI) = (總損益 / 總投資金額) × 100%。這表示您的利潤相對於已投入資金的百分比回報。更高的投資回報率表示更有效的投資，但需平衡風險考慮。"}}, {"@type": "Question", "name": "一份期權合約代表多少股票？", "acceptedAnswer": {"@type": "Answer", "text": "在美國和許多其他市場，一份標準期權合約代表100股標的資產。因此，如果計算結果顯示每股損益為$1，總損益應乘以合約數和100。"}}, {"@type": "Question", "name": "計算器可用於所有類型的期權嗎？", "acceptedAnswer": {"@type": "Answer", "text": "是的，此計算器可用於股票期權、指數期權和其他標準期權。只需輸入相應的現貨價格、履約價和權利金即可。但需注意，特殊期權（如美式期權提前行使）可能需要更複雜的計算。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="options-profit">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/options-profit.html" selected>繁中</option><option value="/tools/en/options-profit.html">EN</option><option value="/tools/ja/options-profit.html">日本語</option><option value="/tools/ko/options-profit.html">한국어</option><option value="/tools/de/options-profit.html">DE</option><option value="/tools/fr/options-profit.html">FR</option><option value="/tools/es/options-profit.html">ES</option><option value="/tools/pt/options-profit.html">PT</option><option value="/tools/id/options-profit.html">ID</option><option value="/tools/zh-CN/options-profit.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/options-profit.html" selected>繁中</option><option value="/tools/en/options-profit.html">EN</option><option value="/tools/ja/options-profit.html">日本語</option><option value="/tools/ko/options-profit.html">한국어</option><option value="/tools/de/options-profit.html">DE</option><option value="/tools/fr/options-profit.html">FR</option><option value="/tools/es/options-profit.html">ES</option><option value="/tools/pt/options-profit.html">PT</option><option value="/tools/id/options-profit.html">ID</option><option value="/tools/zh-CN/options-profit.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 期權損益計算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/options-profit.html" selected>繁中</option><option value="/tools/en/options-profit.html">EN</option><option value="/tools/ja/options-profit.html">日本語</option><option value="/tools/ko/options-profit.html">한국어</option><option value="/tools/de/options-profit.html">DE</option><option value="/tools/fr/options-profit.html">FR</option><option value="/tools/es/options-profit.html">ES</option><option value="/tools/pt/options-profit.html">PT</option><option value="/tools/id/options-profit.html">ID</option><option value="/tools/zh-CN/options-profit.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -143,6 +157,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

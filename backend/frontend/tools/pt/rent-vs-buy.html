@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculadora de Aluguel vs Compra", "url": "https://softglow-ai.com/tools/pt/rent-vs-buy.html", "description": "Calcule o custo total de alugar versus comprar uma propriedade. Compare hipotecas, juros, manutenção e retorno do investimento.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "pt"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Qual é a diferença entre custo total de compra e valor líquido após venda?", "acceptedAnswer": {"@type": "Answer", "text": "O custo total de compra inclui todas as despesas: entrada, pagamentos de hipoteca, juros, impostos, seguros e manutenção. O valor líquido após venda é o que você realmente possui em patrimônio depois de vender a propriedade, após subtrair custos de venda. A diferença entre esses valores mostra seu ganho ou perda líquida real ao comprar."}}, {"@type": "Question", "name": "O que significa VPL Diferença (Compra - Aluguel)?", "acceptedAnswer": {"@type": "Answer", "text": "Este valor compara o custo presente de ambas as opções. Um número negativo significa que alugar é mais economicamente viável; um número positivo significa que comprar é melhor. Quanto maior a diferença em valor absoluto, mais clara é a vantagem de uma opção sobre a outra."}}, {"@type": "Question", "name": "Como devo estimar a taxa de apreciação da propriedade?", "acceptedAnswer": {"@type": "Answer", "text": "A apreciação histórica varia, mas frequentemente fica entre 2-4% anualmente. Pesquise valores de propriedade históricos na sua região ou país. Mercados mais quentes podem apreciar mais rápido, enquanto mercados mais lentos apreciam menos. É conservador usar 2-3% a menos que haja motivos específicos para esperar mais."}}, {"@type": "Question", "name": "Devo usar meu próprio retorno de investimento ou uma taxa padrão?", "acceptedAnswer": {"@type": "Answer", "text": "Use a taxa que você poderia alcançar investindo esse dinheiro em alternativas seguras, como fundos de índice, títulos ou contas poupança de alto rendimento. Se você é um investidor agressivo, 7-8% é razoável. Para investidores conservadores, 3-5% é mais apropriado. Esta taxa afeta significativamente a comparação VPL."}}, {"@type": "Question", "name": "Por que o período de análise importa tanto?", "acceptedAnswer": {"@type": "Answer", "text": "A compra geralmente tem custos iniciais altos (entrada, taxas de transação) e custos contínuos, mas oferece benefícios a longo prazo através de apreciação e construção de patrimônio. Períodos mais curtos favorecem o aluguel; períodos mais longos (10+ anos) tendem a favorecer a compra. O período ideal para análise deve corresponder a quanto tempo você realmente planeja ficar na propriedade."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="rent-vs-buy">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="pt">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/pt/">Ferramentas</a>
-    <a href="/blog/pt/index.html">Blog</a>
     <a href="/patterns/pt.html">Padrões</a>
+    <a href="/blog/pt/index.html">Blog</a>
     <a href="/">Início</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/rent-vs-buy.html">繁中</option><option value="/tools/en/rent-vs-buy.html">EN</option><option value="/tools/ja/rent-vs-buy.html">日本語</option><option value="/tools/ko/rent-vs-buy.html">한국어</option><option value="/tools/de/rent-vs-buy.html">DE</option><option value="/tools/fr/rent-vs-buy.html">FR</option><option value="/tools/es/rent-vs-buy.html">ES</option><option value="/tools/pt/rent-vs-buy.html" selected>PT</option><option value="/tools/id/rent-vs-buy.html">ID</option><option value="/tools/zh-CN/rent-vs-buy.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/rent-vs-buy.html">繁中</option><option value="/tools/en/rent-vs-buy.html">EN</option><option value="/tools/ja/rent-vs-buy.html">日本語</option><option value="/tools/ko/rent-vs-buy.html">한국어</option><option value="/tools/de/rent-vs-buy.html">DE</option><option value="/tools/fr/rent-vs-buy.html">FR</option><option value="/tools/es/rent-vs-buy.html">ES</option><option value="/tools/pt/rent-vs-buy.html" selected>PT</option><option value="/tools/id/rent-vs-buy.html">ID</option><option value="/tools/zh-CN/rent-vs-buy.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/pt/">Ferramentas</a> > Calculadora de Aluguel vs Compra</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/rent-vs-buy.html">繁中</option><option value="/tools/en/rent-vs-buy.html">EN</option><option value="/tools/ja/rent-vs-buy.html">日本語</option><option value="/tools/ko/rent-vs-buy.html">한국어</option><option value="/tools/de/rent-vs-buy.html">DE</option><option value="/tools/fr/rent-vs-buy.html">FR</option><option value="/tools/es/rent-vs-buy.html">ES</option><option value="/tools/pt/rent-vs-buy.html" selected>PT</option><option value="/tools/id/rent-vs-buy.html">ID</option><option value="/tools/zh-CN/rent-vs-buy.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -255,6 +269,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Pesquisar ferramentas, padrões, artigos…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Favoritos</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Limpar tudo</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

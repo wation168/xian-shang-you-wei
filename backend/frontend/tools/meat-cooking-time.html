@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "肉類烹飪時間計算器", "url": "https://softglow-ai.com/tools/meat-cooking-time.html", "description": "快速計算各類肉品的烹飪時間。輸入肉類類型和重量，即可獲得精確的烹飪時間和目標內部溫度建議。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "為什麼烹飪後需要靜置肉類？", "acceptedAnswer": {"@type": "Answer", "text": "靜置時間允許肉汁在肉塊內部重新分佈。如果立即切割，肉汁會流出，導致肉質變乾。通常靜置10至20分鐘可以顯著改善肉質口感。"}}, {"@type": "Question", "name": "如何確保肉類安全食用？", "acceptedAnswer": {"@type": "Answer", "text": "使用食品溫度計在肉塊最厚部分測量內部溫度。不同肉類有不同的安全溫度標準：雞肉165°C、豬肉145°C、牛肉根據熟度而定。"}}, {"@type": "Question", "name": "計算器的時間準不準確？", "acceptedAnswer": {"@type": "Answer", "text": "計算器提供的是基於標準條件的估計值。實際烹飪時間可能因爐火強度、肉塊形狀、初始溫度和烹飪方法而異。請使用溫度計作為最終判斷標準。"}}, {"@type": "Question", "name": "不同肉類為什麼需要不同的烹飪時間？", "acceptedAnswer": {"@type": "Answer", "text": "不同肉類的密度、脂肪含量和結構不同，因此需要不同的烹飪時間。家禽需要完全熟透以確保安全，而牛肉和羊肉可以選擇不同的熟度。"}}, {"@type": "Question", "name": "如何準確測量肉類重量？", "acceptedAnswer": {"@type": "Answer", "text": "使用廚房電子秤測量肉類重量，確保精確度。如果沒有秤，可以參考包裝上的重量信息。記住要計算的是去除骨頭後的凈重（如適用）。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="meat-cooking-time">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/meat-cooking-time.html" selected>繁中</option><option value="/tools/en/meat-cooking-time.html">EN</option><option value="/tools/ja/meat-cooking-time.html">日本語</option><option value="/tools/ko/meat-cooking-time.html">한국어</option><option value="/tools/de/meat-cooking-time.html">DE</option><option value="/tools/fr/meat-cooking-time.html">FR</option><option value="/tools/es/meat-cooking-time.html">ES</option><option value="/tools/pt/meat-cooking-time.html">PT</option><option value="/tools/id/meat-cooking-time.html">ID</option><option value="/tools/zh-CN/meat-cooking-time.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/meat-cooking-time.html" selected>繁中</option><option value="/tools/en/meat-cooking-time.html">EN</option><option value="/tools/ja/meat-cooking-time.html">日本語</option><option value="/tools/ko/meat-cooking-time.html">한국어</option><option value="/tools/de/meat-cooking-time.html">DE</option><option value="/tools/fr/meat-cooking-time.html">FR</option><option value="/tools/es/meat-cooking-time.html">ES</option><option value="/tools/pt/meat-cooking-time.html">PT</option><option value="/tools/id/meat-cooking-time.html">ID</option><option value="/tools/zh-CN/meat-cooking-time.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 肉類烹飪時間計算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/meat-cooking-time.html" selected>繁中</option><option value="/tools/en/meat-cooking-time.html">EN</option><option value="/tools/ja/meat-cooking-time.html">日本語</option><option value="/tools/ko/meat-cooking-time.html">한국어</option><option value="/tools/de/meat-cooking-time.html">DE</option><option value="/tools/fr/meat-cooking-time.html">FR</option><option value="/tools/es/meat-cooking-time.html">ES</option><option value="/tools/pt/meat-cooking-time.html">PT</option><option value="/tools/id/meat-cooking-time.html">ID</option><option value="/tools/zh-CN/meat-cooking-time.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -145,6 +159,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

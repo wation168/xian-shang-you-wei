@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "일일 비타민 계산기", "url": "https://softglow-ai.com/tools/ko/vitamin-calculator.html", "description": "나이와 성별에 따른 권장 일일 비타민 섭취량을 계산하고 각 비타민의 식품 공급원을 확인하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "일일 비타민 필요량은 왜 중요한가요?", "acceptedAnswer": {"@type": "Answer", "text": "비타민은 면역력 강화, 에너지 생성, 뼈 건강 유지 등 신체의 여러 기능에 필수적입니다. 권장량을 충족하지 못하면 결핍증이 발생할 수 있으므로, 개인의 필요량을 파악하는 것이 중요합니다."}}, {"@type": "Question", "name": "나이와 성별에 따라 비타민 필요량이 다른 이유는 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "신진대사율, 호르몬 수치, 신체 구성의 차이로 인해 나이와 성별에 따라 영양 필요량이 달라집니다. 특히 여성의 폐경과 남성의 나이 증가에 따라 특정 비타민의 필요량이 변할 수 있습니다."}}, {"@type": "Question", "name": "음식으로만 필요한 비타민을 모두 섭취할 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "대부분의 경우 균형 잡힌 식단으로 필요한 비타민을 섭취할 수 있습니다. 그러나 특정 질환이나 식이 제한이 있는 경우에는 의료 전문가의 지도 하에 보충제 복용을 고려할 수 있습니다."}}, {"@type": "Question", "name": "비타민 보충제를 복용할 때 주의할 점은 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "과다 섭취는 독성을 유발할 수 있으므로, 반드시 권장량을 지키셔야 합니다. 특히 지용성 비타민(A, D, E, K)은 체내에 축적되므로 주의가 필요합니다. 의료 전문가와 상담 후 복용하세요."}}, {"@type": "Question", "name": "비타민 흡수를 증진하는 방법은 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "균형 잡힌 식단, 충분한 수면, 규칙적인 운동, 스트레스 관리가 비타민 흡수를 돕습니다. 특정 비타민은 특정 영양소와 함께 섭취할 때 흡수가 더 잘되므로, 식단 구성이 중요합니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="vitamin-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/vitamin-calculator.html">繁中</option><option value="/tools/en/vitamin-calculator.html">EN</option><option value="/tools/ja/vitamin-calculator.html">日本語</option><option value="/tools/ko/vitamin-calculator.html" selected>한국어</option><option value="/tools/de/vitamin-calculator.html">DE</option><option value="/tools/fr/vitamin-calculator.html">FR</option><option value="/tools/es/vitamin-calculator.html">ES</option><option value="/tools/pt/vitamin-calculator.html">PT</option><option value="/tools/id/vitamin-calculator.html">ID</option><option value="/tools/zh-CN/vitamin-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/vitamin-calculator.html">繁中</option><option value="/tools/en/vitamin-calculator.html">EN</option><option value="/tools/ja/vitamin-calculator.html">日本語</option><option value="/tools/ko/vitamin-calculator.html" selected>한국어</option><option value="/tools/de/vitamin-calculator.html">DE</option><option value="/tools/fr/vitamin-calculator.html">FR</option><option value="/tools/es/vitamin-calculator.html">ES</option><option value="/tools/pt/vitamin-calculator.html">PT</option><option value="/tools/id/vitamin-calculator.html">ID</option><option value="/tools/zh-CN/vitamin-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 일일 비타민 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/vitamin-calculator.html">繁中</option><option value="/tools/en/vitamin-calculator.html">EN</option><option value="/tools/ja/vitamin-calculator.html">日本語</option><option value="/tools/ko/vitamin-calculator.html" selected>한국어</option><option value="/tools/de/vitamin-calculator.html">DE</option><option value="/tools/fr/vitamin-calculator.html">FR</option><option value="/tools/es/vitamin-calculator.html">ES</option><option value="/tools/pt/vitamin-calculator.html">PT</option><option value="/tools/id/vitamin-calculator.html">ID</option><option value="/tools/zh-CN/vitamin-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -289,6 +303,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

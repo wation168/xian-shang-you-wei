@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "样本量计算器", "url": "https://softglow-ai.com/tools/zh-CN/sample-size.html", "description": "免费样本量计算器，输入置信度、总体比例和误差幅度，快速计算研究所需的最小样本量。适用于问卷调查和统计研究。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Z值1.96和2.58分别代表什么？", "acceptedAnswer": {"@type": "Answer", "text": "Z值1.96对应95%的置信度，在学术和市场调查中最常使用。Z值2.58对应99%的置信度，用于要求更高准确性的研究。Z值1.645对应90%的置信度，用于对准确性要求较低的情况。"}}, {"@type": "Question", "name": "总体比例p应该如何确定？", "acceptedAnswer": {"@type": "Answer", "text": "如果已知总体中具有某特征的比例，应直接输入该数值。如果不确定，建议设为0.5，这样可以确保计算出最大所需样本量，从而保证研究的可信度。不同的p值会影响所需样本量，但不会超过p=0.5时的样本量。"}}, {"@type": "Question", "name": "误差幅度e设置多少合适？", "acceptedAnswer": {"@type": "Answer", "text": "误差幅度通常设为0.05（5%）或0.03（3%）。5%的误差幅度适用于大多数商业调查和初步研究；3%的误差幅度用于要求更高准确性的研究，但所需样本量会显著增加。误差幅度越小，所需样本量呈二次方增长。"}}, {"@type": "Question", "name": "计算出的样本量是否一定要达到？", "acceptedAnswer": {"@type": "Answer", "text": "计算结果是理论最小值。实际调查中应该考虑问卷回收率（通常60%-80%）、数据有效性等因素，适当增加样本量。例如，计算结果为400，若预期回收率为80%，应至少发放500份问卷。"}}, {"@type": "Question", "name": "提高置信度或降低误差幅度需要多少样本量增加？", "acceptedAnswer": {"@type": "Answer", "text": "根据公式n = Z² × p × (1-p) / e²，置信度和误差幅度的变化会显著影响样本量。Z值增大1倍，样本量增加4倍；误差幅度减半，样本量增加4倍。这说明获得更高准确性需要付出很大的成本代价。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="sample-size">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/sample-size.html">繁中</option><option value="/tools/en/sample-size.html">EN</option><option value="/tools/ja/sample-size.html">日本語</option><option value="/tools/ko/sample-size.html">한국어</option><option value="/tools/de/sample-size.html">DE</option><option value="/tools/fr/sample-size.html">FR</option><option value="/tools/es/sample-size.html">ES</option><option value="/tools/pt/sample-size.html">PT</option><option value="/tools/id/sample-size.html">ID</option><option value="/tools/zh-CN/sample-size.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/sample-size.html">繁中</option><option value="/tools/en/sample-size.html">EN</option><option value="/tools/ja/sample-size.html">日本語</option><option value="/tools/ko/sample-size.html">한국어</option><option value="/tools/de/sample-size.html">DE</option><option value="/tools/fr/sample-size.html">FR</option><option value="/tools/es/sample-size.html">ES</option><option value="/tools/pt/sample-size.html">PT</option><option value="/tools/id/sample-size.html">ID</option><option value="/tools/zh-CN/sample-size.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 样本量计算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/sample-size.html">繁中</option><option value="/tools/en/sample-size.html">EN</option><option value="/tools/ja/sample-size.html">日本語</option><option value="/tools/ko/sample-size.html">한국어</option><option value="/tools/de/sample-size.html">DE</option><option value="/tools/fr/sample-size.html">FR</option><option value="/tools/es/sample-size.html">ES</option><option value="/tools/pt/sample-size.html">PT</option><option value="/tools/id/sample-size.html">ID</option><option value="/tools/zh-CN/sample-size.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -133,6 +147,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Lernzeit-Planer", "url": "https://softglow-ai.com/tools/de/study-time.html", "description": "Berechnen Sie mit dem Lernzeit-Planer die benötigte Lernzeit für Ihre Lesezuweisungen basierend auf Seitenzahl und Lesegeschwindigkeit.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "de"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Wie kann ich meine genaue Lesegeschwindigkeit ermitteln?", "acceptedAnswer": {"@type": "Answer", "text": "Wählen Sie einen typischen Text, den Sie studieren müssen, und lesen Sie ihn für genau fünf Minuten. Zählen Sie die Wörter, die Sie gelesen haben, und teilen Sie diese Zahl durch fünf. Das Ergebnis ist Ihre Lesegeschwindigkeit in Wörtern pro Minute. Um die Seiten pro Stunde zu berechnen, können Sie diesen Wert durch die durchschnittliche Wortanzahl pro Seite teilen (üblicherweise 250-300 Wörter)."}}, {"@type": "Question", "name": "Sollte ich Pausen in meinen Lernplan einbeziehen?", "acceptedAnswer": {"@type": "Answer", "text": "Ja, definitiv. Die vom Lernzeit-Planer berechnete Zeit bezieht sich auf die aktive Lernzeit. Es ist empfohlen, regelmäßige Pausen von 5-10 Minuten nach jeder Stunde einzuplanen, um die Konzentration zu bewahren und Müdigkeit zu vermeiden. Dies trägt nicht nur zu besserer Retention bei, sondern auch zu besseren Langzeitergebnissen."}}, {"@type": "Question", "name": "Warum brauche ich zusätzliche Wiederholungszeit?", "acceptedAnswer": {"@type": "Answer", "text": "Wiederholung ist entscheidend für das Gedächtnis und das Verständnis. Das bloße Lesen eines Textes reicht oft nicht aus, um Informationen langfristig zu behalten. Durch Notizen, Zusammenfassungen und das Überprüfen von Verständnis während der Wiederholungszeit verstärken Sie das Gelernte und bereiten sich besser auf Prüfungen vor."}}, {"@type": "Question", "name": "Was ist, wenn ich schneller oder langsamer bin als die eingegebene Lesegeschwindigkeit?", "acceptedAnswer": {"@type": "Answer", "text": "Der Lernzeit-Planer ist flexibel – geben Sie einfach Ihre persönliche Lesegeschwindigkeit ein. Dies könnte unterschiedlich sein je nach Material: technische Texte erfordern langsamere Lesegeschwindigkeit als leichte Lektüre. Mit der Zeit werden Sie lernen, Ihre durchschnittliche Geschwindigkeit besser zu kennen und kann den Rechner entsprechend anpassen."}}, {"@type": "Question", "name": "Kann ich diesen Rechner für alle Arten von Lesematerial verwenden?", "acceptedAnswer": {"@type": "Answer", "text": "Ja, der Lernzeit-Planer kann für die meisten Arten von Lesezuweisungen verwendet werden – von Lehrbüchern über wissenschaftliche Artikel bis hin zu Fachliteratur. Beachten Sie jedoch, dass komplexere oder technischere Texte möglicherweise eine langsamere Lesegeschwindigkeit erfordern, daher sollten Sie Ihre Eingabe entsprechend anpassen."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="study-time">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="de">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/de/">Tools</a>
-    <a href="/blog/de/index.html">Blog</a>
     <a href="/patterns/de.html">Muster</a>
+    <a href="/blog/de/index.html">Blog</a>
     <a href="/">Startseite</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/study-time.html">繁中</option><option value="/tools/en/study-time.html">EN</option><option value="/tools/ja/study-time.html">日本語</option><option value="/tools/ko/study-time.html">한국어</option><option value="/tools/de/study-time.html" selected>DE</option><option value="/tools/fr/study-time.html">FR</option><option value="/tools/es/study-time.html">ES</option><option value="/tools/pt/study-time.html">PT</option><option value="/tools/id/study-time.html">ID</option><option value="/tools/zh-CN/study-time.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/study-time.html">繁中</option><option value="/tools/en/study-time.html">EN</option><option value="/tools/ja/study-time.html">日本語</option><option value="/tools/ko/study-time.html">한국어</option><option value="/tools/de/study-time.html" selected>DE</option><option value="/tools/fr/study-time.html">FR</option><option value="/tools/es/study-time.html">ES</option><option value="/tools/pt/study-time.html">PT</option><option value="/tools/id/study-time.html">ID</option><option value="/tools/zh-CN/study-time.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/de/">Werkzeuge</a> > Lernzeit-Planer</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/study-time.html">繁中</option><option value="/tools/en/study-time.html">EN</option><option value="/tools/ja/study-time.html">日本語</option><option value="/tools/ko/study-time.html">한국어</option><option value="/tools/de/study-time.html" selected>DE</option><option value="/tools/fr/study-time.html">FR</option><option value="/tools/es/study-time.html">ES</option><option value="/tools/pt/study-time.html">PT</option><option value="/tools/id/study-time.html">ID</option><option value="/tools/zh-CN/study-time.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -138,6 +152,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Tools, Muster, Artikel suchen…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Lesezeichen</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Alle löschen</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

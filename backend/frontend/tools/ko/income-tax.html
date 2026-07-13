@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "소득세 계산기", "url": "https://softglow-ai.com/tools/ko/income-tax.html", "description": "연간 총소득, 신고 상태, 부양가족 수를 입력하여 연방 및 주 소득세를 정확하게 계산하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "표준공제액이란 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "표준공제액은 IRS가 정한 금액으로, 총소득에서 차감하여 과세 소득을 계산합니다. 2024년 기준 미혼은 $14,600, 기혼 공동신고는 $29,200입니다. 신고 상태와 나이에 따라 달라집니다."}}, {"@type": "Question", "name": "자녀 세액공제와 부양가족 공제의 차이는?", "acceptedAnswer": {"@type": "Answer", "text": "부양가족 공제는 총소득에서 차감하여 과세 소득을 줄이는 것이고, 자녀 세액공제는 계산된 세금에서 직접 차감되는 것입니다. 세액공제가 직접 세금을 감소시키므로 일반적으로 더 유리합니다."}}, {"@type": "Question", "name": "실효 세율이 높으면 안 좋은 건가요?", "acceptedAnswer": {"@type": "Answer", "text": "실효 세율 자체가 높다고 반드시 나쁜 것은 아닙니다. 소득이 높을수록 누진세에 따라 실효 세율도 높아지는 것이 정상입니다. 중요한 것은 세금 납부 후 충분한 세후 소득이 남아 있는지 여부입니다."}}, {"@type": "Question", "name": "주 소득세가 없는 주도 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "네, 텍사스, 플로리다, 와이오밍, 알래스카, 남다코타, 네바다 등 일부 주는 개인 소득세를 부과하지 않습니다. 이 경우 주 소득세는 $0이 됩니다."}}, {"@type": "Question", "name": "이 계산기 결과를 세무신고에 바로 사용할 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "이 계산기는 개략적인 추정치를 제공합니다. 정확한 세무신고를 위해서는 전문 세무사나 공인 회계사의 자문을 받으세요. 특히 복잡한 소득 구조나 특수한 상황이 있을 때는 더욱 필요합니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="income-tax">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/income-tax.html">繁中</option><option value="/tools/en/income-tax.html">EN</option><option value="/tools/ja/income-tax.html">日本語</option><option value="/tools/ko/income-tax.html" selected>한국어</option><option value="/tools/de/income-tax.html">DE</option><option value="/tools/fr/income-tax.html">FR</option><option value="/tools/es/income-tax.html">ES</option><option value="/tools/pt/income-tax.html">PT</option><option value="/tools/id/income-tax.html">ID</option><option value="/tools/zh-CN/income-tax.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/income-tax.html">繁中</option><option value="/tools/en/income-tax.html">EN</option><option value="/tools/ja/income-tax.html">日本語</option><option value="/tools/ko/income-tax.html" selected>한국어</option><option value="/tools/de/income-tax.html">DE</option><option value="/tools/fr/income-tax.html">FR</option><option value="/tools/es/income-tax.html">ES</option><option value="/tools/pt/income-tax.html">PT</option><option value="/tools/id/income-tax.html">ID</option><option value="/tools/zh-CN/income-tax.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 소득세 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/income-tax.html">繁中</option><option value="/tools/en/income-tax.html">EN</option><option value="/tools/ja/income-tax.html">日本語</option><option value="/tools/ko/income-tax.html" selected>한국어</option><option value="/tools/de/income-tax.html">DE</option><option value="/tools/fr/income-tax.html">FR</option><option value="/tools/es/income-tax.html">ES</option><option value="/tools/pt/income-tax.html">PT</option><option value="/tools/id/income-tax.html">ID</option><option value="/tools/zh-CN/income-tax.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -220,6 +234,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

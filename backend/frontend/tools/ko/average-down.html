@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "평균 매입가 계산기", "url": "https://softglow-ai.com/tools/ko/average-down.html", "description": "여러 번의 주식 매입 기록을 입력하여 평균 매입가를 쉽게 계산하세요. 나이팅게일 투자 전략에 필수적인 도구입니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "평균 매입가가 중요한 이유는 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "평균 매입가는 현재 투자의 손익분기점을 나타내는 중요한 지표입니다. 현재 주가를 평균 매입가와 비교하면 수익 또는 손실 상태를 정확히 파악할 수 있고, 추가 매입이나 매도 결정을 더 합리적으로 할 수 있습니다."}}, {"@type": "Question", "name": "나이팅게일 투자법이란 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "나이팅게일 투자법은 주가가 하락할 때 추가로 매입하여 평균 매입가를 낮추는 투자 전략입니다. 이를 통해 손익분기점을 낮춰서 나중에 수익을 더 쉽게 거둘 수 있습니다. 하지만 과도한 추가 매입은 손실을 증가시킬 수 있으므로 신중해야 합니다."}}, {"@type": "Question", "name": "3개 이상의 매입 기록이 있다면 어떻게 계산하나요?", "acceptedAnswer": {"@type": "Answer", "text": "이 계산기는 최대 3개의 매입을 동시에 입력할 수 있습니다. 4개 이상의 매입이 있다면, 먼저 2-3개를 계산한 후 그 결과(총 주식 수와 총 투자액)를 새로운 첫 번째 매입으로 입력하고, 나머지 매입들을 추가하여 다시 계산하면 됩니다."}}, {"@type": "Question", "name": "세금 신고 시 평균 매입가를 어떻게 사용하나요?", "acceptedAnswer": {"@type": "Answer", "text": "주식 매도 시 자본 이득(손실)은 매도가에서 평균 매입가를 뺀 값입니다. 이 금액에 따라 세금 납부 여부와 금액이 결정되므로, 정확한 평균 매입가 기록이 매우 중요합니다. 국세청에 신고할 때 필요할 수 있으니 항상 기록을 보관하세요."}}, {"@type": "Question", "name": "평균 매입가 계산기의 결과를 신뢰할 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "네, 정확한 정보를 입력하면 신뢰할 수 있는 결과를 얻을 수 있습니다. 다만, 주식 수와 가격을 정확히 입력했는지 다시 한 번 확인하세요. 거래 수수료나 세금은 이 계산기에 포함되지 않으므로, 필요시 따로 고려해야 합니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="average-down">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/average-down.html">繁中</option><option value="/tools/en/average-down.html">EN</option><option value="/tools/ja/average-down.html">日本語</option><option value="/tools/ko/average-down.html" selected>한국어</option><option value="/tools/de/average-down.html">DE</option><option value="/tools/fr/average-down.html">FR</option><option value="/tools/es/average-down.html">ES</option><option value="/tools/pt/average-down.html">PT</option><option value="/tools/id/average-down.html">ID</option><option value="/tools/zh-CN/average-down.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/average-down.html">繁中</option><option value="/tools/en/average-down.html">EN</option><option value="/tools/ja/average-down.html">日本語</option><option value="/tools/ko/average-down.html" selected>한국어</option><option value="/tools/de/average-down.html">DE</option><option value="/tools/fr/average-down.html">FR</option><option value="/tools/es/average-down.html">ES</option><option value="/tools/pt/average-down.html">PT</option><option value="/tools/id/average-down.html">ID</option><option value="/tools/zh-CN/average-down.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 평균 매입가 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/average-down.html">繁中</option><option value="/tools/en/average-down.html">EN</option><option value="/tools/ja/average-down.html">日本語</option><option value="/tools/ko/average-down.html" selected>한국어</option><option value="/tools/de/average-down.html">DE</option><option value="/tools/fr/average-down.html">FR</option><option value="/tools/es/average-down.html">ES</option><option value="/tools/pt/average-down.html">PT</option><option value="/tools/id/average-down.html">ID</option><option value="/tools/zh-CN/average-down.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -151,6 +165,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

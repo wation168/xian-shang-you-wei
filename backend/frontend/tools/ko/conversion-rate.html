@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "전환율 계산기", "url": "https://softglow-ai.com/tools/ko/conversion-rate.html", "description": "전환율 계산기로 총 전환수와 총 방문자수를 입력하여 방문자의 행동 완료 비율을 쉽게 계산할 수 있습니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "전환율과 클릭률의 차이는 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "클릭률(CTR)은 광고나 링크를 클릭한 사람의 비율이고, 전환율(CR)은 실제로 원하는 행동(구매, 회원가입 등)을 완료한 사람의 비율입니다. 클릭률은 높지만 전환율이 낮다면 방문 후 구매로 이어지지 않는다는 의미입니다."}}, {"@type": "Question", "name": "좋은 전환율은 몇 퍼센트인가요?", "acceptedAnswer": {"@type": "Answer", "text": "산업에 따라 다르지만, 일반적으로 1~5%를 평균으로 봅니다. 전자상거래는 1~3%, 리드 생성은 2~5%, 소프트웨어는 2~10%가 평균입니다. 자신의 산업 평균보다 높으면 좋은 성과라고 할 수 있습니다."}}, {"@type": "Question", "name": "전환수에 무엇을 포함시켜야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "전환수는 설정한 목표에 따라 달라집니다. 전자상거래라면 구매 완료, 웹사이트라면 회원가입 또는 연락처 제출, 블로그라면 뉴스레터 구독 등을 포함시킵니다. 목표를 명확히 정의해야 정확한 전환율을 계산할 수 있습니다."}}, {"@type": "Question", "name": "모바일과 데스크톱 전환율을 따로 계산해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "네, 디바이스별로 전환율이 크게 달라질 수 있습니다. 모바일과 데스크톱의 전환율을 따로 추적하면 어느 플랫폼에서 최적화가 필요한지 파악하고, 더 효과적인 마케팅 전략을 수립할 수 있습니다."}}, {"@type": "Question", "name": "전환율을 높이는 가장 효과적인 방법은 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "A/B 테스트를 통해 랜딩 페이지를 지속적으로 개선하는 것이 가장 효과적입니다. 페이지 속도 최적화, 명확한 가치 제안, 신뢰 신호(리뷰, 보안 배지), 간단한 체크아웃 프로세스도 전환율 향상에 큰 도움이 됩니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="conversion-rate">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/conversion-rate.html">繁中</option><option value="/tools/en/conversion-rate.html">EN</option><option value="/tools/ja/conversion-rate.html">日本語</option><option value="/tools/ko/conversion-rate.html" selected>한국어</option><option value="/tools/de/conversion-rate.html">DE</option><option value="/tools/fr/conversion-rate.html">FR</option><option value="/tools/es/conversion-rate.html">ES</option><option value="/tools/pt/conversion-rate.html">PT</option><option value="/tools/id/conversion-rate.html">ID</option><option value="/tools/zh-CN/conversion-rate.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/conversion-rate.html">繁中</option><option value="/tools/en/conversion-rate.html">EN</option><option value="/tools/ja/conversion-rate.html">日本語</option><option value="/tools/ko/conversion-rate.html" selected>한국어</option><option value="/tools/de/conversion-rate.html">DE</option><option value="/tools/fr/conversion-rate.html">FR</option><option value="/tools/es/conversion-rate.html">ES</option><option value="/tools/pt/conversion-rate.html">PT</option><option value="/tools/id/conversion-rate.html">ID</option><option value="/tools/zh-CN/conversion-rate.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 전환율 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/conversion-rate.html">繁中</option><option value="/tools/en/conversion-rate.html">EN</option><option value="/tools/ja/conversion-rate.html">日本語</option><option value="/tools/ko/conversion-rate.html" selected>한국어</option><option value="/tools/de/conversion-rate.html">DE</option><option value="/tools/fr/conversion-rate.html">FR</option><option value="/tools/es/conversion-rate.html">ES</option><option value="/tools/pt/conversion-rate.html">PT</option><option value="/tools/id/conversion-rate.html">ID</option><option value="/tools/zh-CN/conversion-rate.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -142,6 +156,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

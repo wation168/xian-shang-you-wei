@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "装修预算估算器", "url": "https://softglow-ai.com/tools/zh-CN/renovation-cost.html", "description": "使用装修预算估算器快速计算您的装修项目成本。输入面积、质量等级和本地单价，即可获得准确的预算估算。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "装修预算估算器的准确度如何？", "acceptedAnswer": {"@type": "Answer", "text": "该工具基于行业标准数据和本地市场价格进行计算，通常准确度在90%以上。最终成本可能因具体情况、承包商选择和市场波动而有所不同。建议使用此工具作为初步预算参考，最终应获得多个专业报价。"}}, {"@type": "Question", "name": "质量等级与装修档次有什么区别？", "acceptedAnswer": {"@type": "Answer", "text": "质量等级从1到5，代表装修材料、工艺和设计复杂度的递进。等级1是基础实用装修，等级5是顶级豪华装修。每提高一个等级，成本通常增加20-30%。您应根据实际需求和预算选择合适的等级。"}}, {"@type": "Question", "name": "如何确定准确的本地单价？", "acceptedAnswer": {"@type": "Answer", "text": "可以通过三种方式获取本地单价：1)咨询当地装修公司获取行情；2)查阅行业报告和市场调研数据；3)参考类似项目的实际成本。确保所用单价包括材料、人工、管理和利润等所有成本要素。"}}, {"@type": "Question", "name": "预算中应该包括哪些费用？", "acceptedAnswer": {"@type": "Answer", "text": "完整的装修预算应包括：材料费、人工费、设计费、许可证费、临时设施费、废弃物处理费和应急资金。本工具主要计算核心装修成本。其他附加费用应单独考虑并加入总预算。"}}, {"@type": "Question", "name": "装修期间费用超支时该怎么办？", "acceptedAnswer": {"@type": "Answer", "text": "首先，确保预算中包含10-15%的应急资金。如果仍有超支，可以考虑：调整非关键项目的质量等级、推迟某些装修内容、寻找成本更低的替代材料。始终与承包商沟通，及时调整计划，避免更大的成本问题。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="renovation-cost">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/renovation-cost.html">繁中</option><option value="/tools/en/renovation-cost.html">EN</option><option value="/tools/ja/renovation-cost.html">日本語</option><option value="/tools/ko/renovation-cost.html">한국어</option><option value="/tools/de/renovation-cost.html">DE</option><option value="/tools/fr/renovation-cost.html">FR</option><option value="/tools/es/renovation-cost.html">ES</option><option value="/tools/pt/renovation-cost.html">PT</option><option value="/tools/id/renovation-cost.html">ID</option><option value="/tools/zh-CN/renovation-cost.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/renovation-cost.html">繁中</option><option value="/tools/en/renovation-cost.html">EN</option><option value="/tools/ja/renovation-cost.html">日本語</option><option value="/tools/ko/renovation-cost.html">한국어</option><option value="/tools/de/renovation-cost.html">DE</option><option value="/tools/fr/renovation-cost.html">FR</option><option value="/tools/es/renovation-cost.html">ES</option><option value="/tools/pt/renovation-cost.html">PT</option><option value="/tools/id/renovation-cost.html">ID</option><option value="/tools/zh-CN/renovation-cost.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 装修预算估算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/renovation-cost.html">繁中</option><option value="/tools/en/renovation-cost.html">EN</option><option value="/tools/ja/renovation-cost.html">日本語</option><option value="/tools/ko/renovation-cost.html">한국어</option><option value="/tools/de/renovation-cost.html">DE</option><option value="/tools/fr/renovation-cost.html">FR</option><option value="/tools/es/renovation-cost.html">ES</option><option value="/tools/pt/renovation-cost.html">PT</option><option value="/tools/id/renovation-cost.html">ID</option><option value="/tools/zh-CN/renovation-cost.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -137,6 +151,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

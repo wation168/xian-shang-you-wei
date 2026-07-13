@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Business Valuation Calculator", "url": "https://softglow-ai.com/tools/en/valuation-calculator.html", "description": "Calculate your business value using revenue multiples or DCF analysis. Estimate company worth based on revenue, growth rate, and discount rate.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is the difference between the Revenue Multiple and DCF valuation methods?", "acceptedAnswer": {"@type": "Answer", "text": "The Revenue Multiple method multiplies annual revenue by an industry-standard multiple for a quick, simple valuation. The DCF method projects future cash flows, discounts them to present value, and provides a more detailed analysis that accounts for profitability and growth rates. DCF is generally more accurate for growing businesses, while Revenue Multiple is faster for initial estimates."}}, {"@type": "Question", "name": "What is a reasonable revenue multiple for my business?", "acceptedAnswer": {"@type": "Answer", "text": "Revenue multiples vary significantly by industry. SaaS companies typically trade at 5x-10x revenue, e-commerce at 1x-3x, professional services at 1x-2x, and retail at 0.5x-1.5x. Your specific multiple depends on growth rate, profitability, customer retention, and competitive positioning. Research comparable company sales in your industry for accurate benchmarking."}}, {"@type": "Question", "name": "What discount rate (WACC) should I use?", "acceptedAnswer": {"@type": "Answer", "text": "WACC typically ranges from 8-15% depending on business risk. Stable, established businesses might use 8-10%, while growing startups could use 15-25%. Calculate WACC by weighting the cost of debt and cost of equity. Cost of equity reflects risk—use the risk-free rate (5% for Treasury bonds) plus a risk premium reflecting your business's specific risks and growth potential."}}, {"@type": "Question", "name": "Why is terminal growth rate important in DCF valuations?", "acceptedAnswer": {"@type": "Answer", "text": "Terminal growth rate represents your business's perpetual growth rate after the projection period and significantly impacts valuation because it determines the value of all future cash flows beyond your detailed forecast. A typical range is 2-3%, aligned with long-term GDP growth. Using rates above 3% is rarely justified and can dramatically inflate valuations. Conservative assumptions provide more defensible valuations."}}, {"@type": "Question", "name": "How often should I recalculate my business valuation?", "acceptedAnswer": {"@type": "Answer", "text": "Recalculate valuation quarterly or at least annually to track business growth and adjust for changing market conditions. More frequent recalculations are valuable when pursuing financing or preparing for sale. Update assumptions based on actual performance, revised growth projections, and changes in your discount rate or industry multiples. Regular valuations help identify trends and inform strategic decision-making."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="valuation-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="en">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/en/">Tools</a>
-    <a href="/blog/en/index.html">Blog</a>
     <a href="/patterns/en.html">Patterns</a>
+    <a href="/blog/en/index.html">Blog</a>
     <a href="/">Home</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/valuation-calculator.html">繁中</option><option value="/tools/en/valuation-calculator.html" selected>EN</option><option value="/tools/ja/valuation-calculator.html">日本語</option><option value="/tools/ko/valuation-calculator.html">한국어</option><option value="/tools/de/valuation-calculator.html">DE</option><option value="/tools/fr/valuation-calculator.html">FR</option><option value="/tools/es/valuation-calculator.html">ES</option><option value="/tools/pt/valuation-calculator.html">PT</option><option value="/tools/id/valuation-calculator.html">ID</option><option value="/tools/zh-CN/valuation-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/valuation-calculator.html">繁中</option><option value="/tools/en/valuation-calculator.html" selected>EN</option><option value="/tools/ja/valuation-calculator.html">日本語</option><option value="/tools/ko/valuation-calculator.html">한국어</option><option value="/tools/de/valuation-calculator.html">DE</option><option value="/tools/fr/valuation-calculator.html">FR</option><option value="/tools/es/valuation-calculator.html">ES</option><option value="/tools/pt/valuation-calculator.html">PT</option><option value="/tools/id/valuation-calculator.html">ID</option><option value="/tools/zh-CN/valuation-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/en/">Tools</a> > Business Valuation Calculator</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/valuation-calculator.html">繁中</option><option value="/tools/en/valuation-calculator.html" selected>EN</option><option value="/tools/ja/valuation-calculator.html">日本語</option><option value="/tools/ko/valuation-calculator.html">한국어</option><option value="/tools/de/valuation-calculator.html">DE</option><option value="/tools/fr/valuation-calculator.html">FR</option><option value="/tools/es/valuation-calculator.html">ES</option><option value="/tools/pt/valuation-calculator.html">PT</option><option value="/tools/id/valuation-calculator.html">ID</option><option value="/tools/zh-CN/valuation-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -190,6 +204,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Search tools, patterns, articles…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Bookmarks</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Clear all</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

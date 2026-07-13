@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "特許費用見積もりツール", "url": "https://softglow-ai.com/tools/ja/patent-cost.html", "description": "特許出願費、審査費、維持費を入力して、20年間の総費用を自動計算。弁理士費用も含めた正確な見積もりが可能です。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "特許維持費はいつ支払う必要がありますか？", "acceptedAnswer": {"@type": "Answer", "text": "特許期間中に複数回の支払いが必要です。通常3.5年目、7.5年目、11.5～16年目に支払う必要があります。各国の特許庁から通知が届きますので、期限内に支払わないと特許権が失効します。"}}, {"@type": "Question", "name": "弁理士費用を節約することはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "出願書類を自分で作成することで費用を削減できますが、専門知識がないと特許査定率が低下する可能性があります。小規模企業向けの支援制度や無料相談サービスを利用することも検討してください。"}}, {"@type": "Question", "name": "複数国での特許出願の場合、費用はどうなりますか？", "acceptedAnswer": {"@type": "Answer", "text": "各国での出願・維持費が加算されるため、総費用は大幅に増加します。国際特許出願（PCT）を利用すると手続きが簡素化される場合があります。"}}, {"@type": "Question", "name": "特許期間終了後はどうなりますか？", "acceptedAnswer": {"@type": "Answer", "text": "特許期間は最大20年です。期間終了後は誰でもその発明を使用できるようになり、独占権は失われます。継続的な保護が必要な場合は、新たな特許出願を検討してください。"}}, {"@type": "Question", "name": "このツールの計算に含まれないコストはありますか？", "acceptedAnswer": {"@type": "Answer", "text": "このツールは基本的な費用を計算しますが、複数国出願の場合の追加費用、特許紛争時の訴訟費用、技術的なアドバイス費用などは含まれていません。詳細な見積もりは専門家に相談してください。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="patent-cost">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ja">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ja/">ツール</a>
-    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/patterns/ja.html">ローソク足</a>
+    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/">ホーム</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/patent-cost.html">繁中</option><option value="/tools/en/patent-cost.html">EN</option><option value="/tools/ja/patent-cost.html" selected>日本語</option><option value="/tools/ko/patent-cost.html">한국어</option><option value="/tools/de/patent-cost.html">DE</option><option value="/tools/fr/patent-cost.html">FR</option><option value="/tools/es/patent-cost.html">ES</option><option value="/tools/pt/patent-cost.html">PT</option><option value="/tools/id/patent-cost.html">ID</option><option value="/tools/zh-CN/patent-cost.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/patent-cost.html">繁中</option><option value="/tools/en/patent-cost.html">EN</option><option value="/tools/ja/patent-cost.html" selected>日本語</option><option value="/tools/ko/patent-cost.html">한국어</option><option value="/tools/de/patent-cost.html">DE</option><option value="/tools/fr/patent-cost.html">FR</option><option value="/tools/es/patent-cost.html">ES</option><option value="/tools/pt/patent-cost.html">PT</option><option value="/tools/id/patent-cost.html">ID</option><option value="/tools/zh-CN/patent-cost.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 特許費用見積もりツール</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/patent-cost.html">繁中</option><option value="/tools/en/patent-cost.html">EN</option><option value="/tools/ja/patent-cost.html" selected>日本語</option><option value="/tools/ko/patent-cost.html">한국어</option><option value="/tools/de/patent-cost.html">DE</option><option value="/tools/fr/patent-cost.html">FR</option><option value="/tools/es/patent-cost.html">ES</option><option value="/tools/pt/patent-cost.html">PT</option><option value="/tools/id/patent-cost.html">ID</option><option value="/tools/zh-CN/patent-cost.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -149,6 +163,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="ツール、パターン、記事を検索…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>ブックマーク</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全て削除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

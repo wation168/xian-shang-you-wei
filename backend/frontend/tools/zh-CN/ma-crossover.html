@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "均线交叉计算器", "url": "https://softglow-ai.com/tools/zh-CN/ma-crossover.html", "description": "使用均线交叉计算器识别短期和长期移动平均线的交叉信号，帮助您做出更明智的交易决策。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "什么是最常用的均线周期组合？", "acceptedAnswer": {"@type": "Answer", "text": "最流行的组合是12日和26日均线（用于短期交易）或50日和200日均线（用于长期趋势）。12/26组合更敏感，容易产生更多信号，而50/200组合更适合识别长期趋势。"}}, {"@type": "Question", "name": "金叉一定是买入信号吗？", "acceptedAnswer": {"@type": "Answer", "text": "金叉通常被视为看涨信号，但不是绝对的买入指标。需要结合价格位置、成交量和其他技术指标来确认。在弱势市场中，金叉也可能产生假信号。"}}, {"@type": "Question", "name": "如何区分真正的交叉和假交叉？", "acceptedAnswer": {"@type": "Answer", "text": "真正的交叉通常伴随较大的成交量，均线的距离也会扩大。假交叉可能只是短暂的接触，之后均线又返回原来的位置。观察几个交易周期的后续表现可以帮助确认信号的真实性。"}}, {"@type": "Question", "name": "均线交叉在哪些市场条件下最有效？", "acceptedAnswer": {"@type": "Answer", "text": "均线交叉在明显的趋势市场中最有效，无论是上升趋势还是下降趋势。在震荡盘整市场中，交叉信号可能产生较多假信号。趋势越明显，交叉信号的可靠性越高。"}}, {"@type": "Question", "name": "我应该立即执行均线交叉信号吗？", "acceptedAnswer": {"@type": "Answer", "text": "不应该立即执行。建议等待信号得到进一步确认，如价格的进一步运动、成交量的增加或其他指标的支持。这样可以减少假信号的风险，提高交易成功率。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="ma-crossover">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/ma-crossover.html">繁中</option><option value="/tools/en/ma-crossover.html">EN</option><option value="/tools/ja/ma-crossover.html">日本語</option><option value="/tools/ko/ma-crossover.html">한국어</option><option value="/tools/de/ma-crossover.html">DE</option><option value="/tools/fr/ma-crossover.html">FR</option><option value="/tools/es/ma-crossover.html">ES</option><option value="/tools/pt/ma-crossover.html">PT</option><option value="/tools/id/ma-crossover.html">ID</option><option value="/tools/zh-CN/ma-crossover.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/ma-crossover.html">繁中</option><option value="/tools/en/ma-crossover.html">EN</option><option value="/tools/ja/ma-crossover.html">日本語</option><option value="/tools/ko/ma-crossover.html">한국어</option><option value="/tools/de/ma-crossover.html">DE</option><option value="/tools/fr/ma-crossover.html">FR</option><option value="/tools/es/ma-crossover.html">ES</option><option value="/tools/pt/ma-crossover.html">PT</option><option value="/tools/id/ma-crossover.html">ID</option><option value="/tools/zh-CN/ma-crossover.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 均线交叉计算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/ma-crossover.html">繁中</option><option value="/tools/en/ma-crossover.html">EN</option><option value="/tools/ja/ma-crossover.html">日本語</option><option value="/tools/ko/ma-crossover.html">한국어</option><option value="/tools/de/ma-crossover.html">DE</option><option value="/tools/fr/ma-crossover.html">FR</option><option value="/tools/es/ma-crossover.html">ES</option><option value="/tools/pt/ma-crossover.html">PT</option><option value="/tools/id/ma-crossover.html">ID</option><option value="/tools/zh-CN/ma-crossover.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -172,6 +186,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

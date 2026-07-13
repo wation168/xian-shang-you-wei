@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "단백질 섭취량 계산기", "url": "https://softglow-ai.com/tools/ko/protein-calculator.html", "description": "체중과 활동 수준을 입력하여 맞춤형 일일 단백질 필요량을 계산하세요. 운동 목표 달성에 필요한 단백질 양을 알아보세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "일일 단백질 필요량이 높으면 건강에 해롭지 않을까요?", "acceptedAnswer": {"@type": "Answer", "text": "대부분의 건강한 성인에게는 높은 단백질 섭취가 안전합니다. 다만 신장 질환이 있는 사람은 의료 전문가와 상담 후 섭취량을 결정해야 합니다. 충분한 수분 섭취도 함께 권장됩니다."}}, {"@type": "Question", "name": "운동을 시작했을 때 활동 수준을 어떻게 선택해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "주당 운동 빈도를 기준으로 선택하세요. 주 1-3회 운동은 '가벼운 활동', 주 3-4회는 '중간 정도 활동', 주 5-6회는 '활발한 활동', 주 6-7회 고강도 운동은 '매우 활발한 활동'에 해당합니다."}}, {"@type": "Question", "name": "단백질을 모두 동물성으로 섭취해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "아닙니다. 식물성 단백질도 우수한 단백질 급원입니다. 콩류, 두부, 퀴노아, 견과류 등을 통해 필요한 단백질을 섭취할 수 있습니다. 다양한 급원에서 섭취하는 것이 영양 밸런스에 좋습니다."}}, {"@type": "Question", "name": "계산 결과보다 더 많은 단백질을 섭취해도 괜찮을까요?", "acceptedAnswer": {"@type": "Answer", "text": "과도한 단백질 섭취는 필요 없습니다. 권장량의 10-20% 범위 내 변동은 괜찮지만, 과다 섭취는 소화기관에 부담을 주고 불필요한 칼로리 섭취로 이어질 수 있습니다."}}, {"@type": "Question", "name": "나이가 많을수록 단백질을 더 많이 섭취해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "65세 이상의 노년층은 근손실 방지를 위해 체중 1kg당 1.0-1.2g의 단백질 섭취가 권장됩니다. 나이가 들수록 동등한 운동 효과를 위해 더 많은 단백질이 필요할 수 있습니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="protein-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/protein-calculator.html">繁中</option><option value="/tools/en/protein-calculator.html">EN</option><option value="/tools/ja/protein-calculator.html">日本語</option><option value="/tools/ko/protein-calculator.html" selected>한국어</option><option value="/tools/de/protein-calculator.html">DE</option><option value="/tools/fr/protein-calculator.html">FR</option><option value="/tools/es/protein-calculator.html">ES</option><option value="/tools/pt/protein-calculator.html">PT</option><option value="/tools/id/protein-calculator.html">ID</option><option value="/tools/zh-CN/protein-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/protein-calculator.html">繁中</option><option value="/tools/en/protein-calculator.html">EN</option><option value="/tools/ja/protein-calculator.html">日本語</option><option value="/tools/ko/protein-calculator.html" selected>한국어</option><option value="/tools/de/protein-calculator.html">DE</option><option value="/tools/fr/protein-calculator.html">FR</option><option value="/tools/es/protein-calculator.html">ES</option><option value="/tools/pt/protein-calculator.html">PT</option><option value="/tools/id/protein-calculator.html">ID</option><option value="/tools/zh-CN/protein-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 단백질 섭취량 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/protein-calculator.html">繁中</option><option value="/tools/en/protein-calculator.html">EN</option><option value="/tools/ja/protein-calculator.html">日本語</option><option value="/tools/ko/protein-calculator.html" selected>한국어</option><option value="/tools/de/protein-calculator.html">DE</option><option value="/tools/fr/protein-calculator.html">FR</option><option value="/tools/es/protein-calculator.html">ES</option><option value="/tools/pt/protein-calculator.html">PT</option><option value="/tools/id/protein-calculator.html">ID</option><option value="/tools/zh-CN/protein-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -130,6 +144,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

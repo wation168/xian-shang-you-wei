@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "燃油成本計算器", "url": "https://softglow-ai.com/tools/fuel-cost.html", "description": "免費燃油成本計算器，輸入里程數、油耗效率和油價，立即計算旅程所需燃油費用和每英里成本。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "燃油效率（MPG）是什麼意思？", "acceptedAnswer": {"@type": "Answer", "text": "MPG表示英里每加侖，即汽車用一加侖汽油能行駛的英里數。燃油效率越高，表示汽車越省油。您可以通過將行駛里程數除以加油時所加汽油的加侖數來計算您的實際燃油效率。"}}, {"@type": "Question", "name": "這個計算器是否考慮了交通狀況和地形因素？", "acceptedAnswer": {"@type": "Answer", "text": "不，這個計算器基於平均燃油效率進行計算。實際燃油消耗可能會因交通狀況、地形、天氣和駕駛習慣等因素而異。在城市駕駛中，燃油消耗通常比高速公路駕駛高15-30%。"}}, {"@type": "Question", "name": "我應該如何獲得準確的燃油效率數據？", "acceptedAnswer": {"@type": "Answer", "text": "您可以從車輛的用戶手冊中找到製造商提供的估計值，或者通過實際測試計算。方法是記錄加油時的里程數，行駛一段距離後再加油，然後用行駛里程數除以加油量。重複多次測試可獲得更準確的平均值。"}}, {"@type": "Question", "name": "計算結果中的「每英里成本」有什麼用？", "acceptedAnswer": {"@type": "Answer", "text": "每英里成本幫助您比較不同路線的燃油成本效益，或者比較不同車輛的經濟性。例如，如果您在考慮購買新車，可以使用這個指標來評估長期的燃油開支節省。它也有助於理解您日常駕駛的真實成本。"}}, {"@type": "Question", "name": "油價在計算中起多大的作用？", "acceptedAnswer": {"@type": "Answer", "text": "油價直接影響您的總燃油成本。即使燃油效率保持不變，油價上漲也會增加旅程費用。反之亦然。建議使用實時油價數據以獲得最準確的成本估算。油價波動可能導致預期成本與實際成本之間的差異。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="fuel-cost">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/fuel-cost.html" selected>繁中</option><option value="/tools/en/fuel-cost.html">EN</option><option value="/tools/ja/fuel-cost.html">日本語</option><option value="/tools/ko/fuel-cost.html">한국어</option><option value="/tools/de/fuel-cost.html">DE</option><option value="/tools/fr/fuel-cost.html">FR</option><option value="/tools/es/fuel-cost.html">ES</option><option value="/tools/pt/fuel-cost.html">PT</option><option value="/tools/id/fuel-cost.html">ID</option><option value="/tools/zh-CN/fuel-cost.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/fuel-cost.html" selected>繁中</option><option value="/tools/en/fuel-cost.html">EN</option><option value="/tools/ja/fuel-cost.html">日本語</option><option value="/tools/ko/fuel-cost.html">한국어</option><option value="/tools/de/fuel-cost.html">DE</option><option value="/tools/fr/fuel-cost.html">FR</option><option value="/tools/es/fuel-cost.html">ES</option><option value="/tools/pt/fuel-cost.html">PT</option><option value="/tools/id/fuel-cost.html">ID</option><option value="/tools/zh-CN/fuel-cost.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 燃油成本計算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/fuel-cost.html" selected>繁中</option><option value="/tools/en/fuel-cost.html">EN</option><option value="/tools/ja/fuel-cost.html">日本語</option><option value="/tools/ko/fuel-cost.html">한국어</option><option value="/tools/de/fuel-cost.html">DE</option><option value="/tools/fr/fuel-cost.html">FR</option><option value="/tools/es/fuel-cost.html">ES</option><option value="/tools/pt/fuel-cost.html">PT</option><option value="/tools/id/fuel-cost.html">ID</option><option value="/tools/zh-CN/fuel-cost.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -133,6 +147,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

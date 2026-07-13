@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "ROAS 계산기", "url": "https://softglow-ai.com/tools/ko/roas-calculator.html", "description": "광고 지출 대비 수익률(ROAS)을 계산하여 마케팅 캠페인의 효율성을 분석하세요. 무료 ROAS 계산기입니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "ROAS의 이상적인 수치는 얼마인가요?", "acceptedAnswer": {"@type": "Answer", "text": "업계와 비즈니스 모델에 따라 다르지만, 일반적으로 ROAS 3.0 이상은 건강한 수준입니다. E-커머스의 경우 3.0~5.0, SaaS는 5.0 이상이 목표입니다. 최소한 ROAS 2.0 이상이어야 수익성이 있습니다."}}, {"@type": "Question", "name": "ROAS와 ROI의 차이점은 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "ROAS는 광고 지출 1원당 얻은 수익(배수)을 나타내고, ROI는 광고 투자로 얻은 순이익의 백분율입니다. ROAS 4.0은 광고 1원당 4원의 수익을 의미하며, ROI 300%는 투자금의 3배 이익을 의미합니다."}}, {"@type": "Question", "name": "낮은 ROAS를 개선하려면 어떻게 해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "먼저 고성과 광고와 저성과 광고를 분석하고, 저성과 광고는 중단합니다. 타겟팅을 더 정밀하게 조정하고, 광고 창의물을 개선하며, 랜딩 페이지 최적화와 A/B 테스트를 실시하세요."}}, {"@type": "Question", "name": "ROAS 계산 시 포함해야 할 비용은 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "광고 플랫폼(페이스북, 구글 등)에 직접 지불하는 광고비용을 포함합니다. 마케팅 인력비, 대행사 수수료 등은 일반적으로 별도로 계산하지만, 종합적인 분석을 원하면 포함시킬 수 있습니다."}}, {"@type": "Question", "name": "여러 광고 채널의 ROAS를 비교할 때 주의사항은?", "acceptedAnswer": {"@type": "Answer", "text": "각 채널의 고객 생애 가치(LTV)를 함께 고려하세요. 초기 ROAS는 낮지만 고객 재구매율이 높은 채널이 있을 수 있습니다. 또한 채널 간 상호작용 효과(어트리뷰션)도 고려하여 전체적인 전략을 수립해야 합니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="roas-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/roas-calculator.html">繁中</option><option value="/tools/en/roas-calculator.html">EN</option><option value="/tools/ja/roas-calculator.html">日本語</option><option value="/tools/ko/roas-calculator.html" selected>한국어</option><option value="/tools/de/roas-calculator.html">DE</option><option value="/tools/fr/roas-calculator.html">FR</option><option value="/tools/es/roas-calculator.html">ES</option><option value="/tools/pt/roas-calculator.html">PT</option><option value="/tools/id/roas-calculator.html">ID</option><option value="/tools/zh-CN/roas-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/roas-calculator.html">繁中</option><option value="/tools/en/roas-calculator.html">EN</option><option value="/tools/ja/roas-calculator.html">日本語</option><option value="/tools/ko/roas-calculator.html" selected>한국어</option><option value="/tools/de/roas-calculator.html">DE</option><option value="/tools/fr/roas-calculator.html">FR</option><option value="/tools/es/roas-calculator.html">ES</option><option value="/tools/pt/roas-calculator.html">PT</option><option value="/tools/id/roas-calculator.html">ID</option><option value="/tools/zh-CN/roas-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > ROAS 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/roas-calculator.html">繁中</option><option value="/tools/en/roas-calculator.html">EN</option><option value="/tools/ja/roas-calculator.html">日本語</option><option value="/tools/ko/roas-calculator.html" selected>한국어</option><option value="/tools/de/roas-calculator.html">DE</option><option value="/tools/fr/roas-calculator.html">FR</option><option value="/tools/es/roas-calculator.html">ES</option><option value="/tools/pt/roas-calculator.html">PT</option><option value="/tools/id/roas-calculator.html">ID</option><option value="/tools/zh-CN/roas-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -130,6 +144,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

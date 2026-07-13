@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "家庭能源审计工具", "url": "https://softglow-ai.com/tools/zh-CN/home-energy-audit.html", "description": "使用家庭能源审计工具计算各种电器的月度能耗成本，识别高耗能设备，找到节能降费机会。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "如何找到家电的功率信息？", "acceptedAnswer": {"@type": "Answer", "text": "功率信息通常标注在电器的铭牌上，位于电器背面或底部。您也可以查看产品说明书或在网上搜索型号获取技术规格。功率通常以瓦特（W）或千瓦（kW）表示。"}}, {"@type": "Question", "name": "这个计算器的计算是否准确？", "acceptedAnswer": {"@type": "Answer", "text": "这个计算器基于标准使用模式进行估算。实际能耗可能因电器效率等级、使用方式和季节变化而异。建议与您实际的电费账单进行对比以验证准确性。"}}, {"@type": "Question", "name": "我可以通过哪些方式降低能源成本？", "acceptedAnswer": {"@type": "Answer", "text": "主要方式包括：使用节能电器、优化温度控制、利用峰值电价（避开高峰时段）、定期维护电器、改善房屋隔热，以及改变使用习惯（如减少不必要的电器使用时间）。"}}, {"@type": "Question", "name": "应该多久进行一次能源审计？", "acceptedAnswer": {"@type": "Answer", "text": "建议每月进行一次能源审计，跟踪成本变化。当您更换电器、改变使用习惯或进行房屋改造后，也应该立即进行审计以评估影响。季节性变化也会显著影响能源成本，特别是供暖和制冷费用。"}}, {"@type": "Question", "name": "新电器是否真的能省钱？", "acceptedAnswer": {"@type": "Answer", "text": "更换为能源效率等级更高（如能效标签A+++）的新电器，虽然初期投入较高，但能源消耗通常降低20-40%。这种投资通常在3-7年内通过电费节省收回成本。对于使用寿命较长的电器（如冰箱、热水器），升级特别值得考虑。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="home-energy-audit">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/home-energy-audit.html">繁中</option><option value="/tools/en/home-energy-audit.html">EN</option><option value="/tools/ja/home-energy-audit.html">日本語</option><option value="/tools/ko/home-energy-audit.html">한국어</option><option value="/tools/de/home-energy-audit.html">DE</option><option value="/tools/fr/home-energy-audit.html">FR</option><option value="/tools/es/home-energy-audit.html">ES</option><option value="/tools/pt/home-energy-audit.html">PT</option><option value="/tools/id/home-energy-audit.html">ID</option><option value="/tools/zh-CN/home-energy-audit.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/home-energy-audit.html">繁中</option><option value="/tools/en/home-energy-audit.html">EN</option><option value="/tools/ja/home-energy-audit.html">日本語</option><option value="/tools/ko/home-energy-audit.html">한국어</option><option value="/tools/de/home-energy-audit.html">DE</option><option value="/tools/fr/home-energy-audit.html">FR</option><option value="/tools/es/home-energy-audit.html">ES</option><option value="/tools/pt/home-energy-audit.html">PT</option><option value="/tools/id/home-energy-audit.html">ID</option><option value="/tools/zh-CN/home-energy-audit.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 家庭能源审计工具</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/home-energy-audit.html">繁中</option><option value="/tools/en/home-energy-audit.html">EN</option><option value="/tools/ja/home-energy-audit.html">日本語</option><option value="/tools/ko/home-energy-audit.html">한국어</option><option value="/tools/de/home-energy-audit.html">DE</option><option value="/tools/fr/home-energy-audit.html">FR</option><option value="/tools/es/home-energy-audit.html">ES</option><option value="/tools/pt/home-energy-audit.html">PT</option><option value="/tools/id/home-energy-audit.html">ID</option><option value="/tools/zh-CN/home-energy-audit.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -315,6 +329,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

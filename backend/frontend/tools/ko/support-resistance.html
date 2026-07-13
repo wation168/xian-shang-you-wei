@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "지지선과 저항선 계산기", "url": "https://softglow-ai.com/tools/ko/support-resistance.html", "description": "고가, 저가, 종가를 입력하여 피벗 포인트, 저항선, 지지선을 계산하세요. 외환 및 주식 거래 전략에 필수적입니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "피벗 포인트는 어떻게 거래에 사용하나요?", "acceptedAnswer": {"@type": "Answer", "text": "피벗 포인트는 주요 거래 수준을 식별하는 데 사용됩니다. 가격이 피벗 포인트 위에서 거래되면 상승 거래를 고려하고, 저항선(R1, R2) 근처에서 수익을 실현합니다. 반대로 가격이 아래에서 거래되면 하락 거래를 고려하고, 지지선(S1, S2) 근처에서 손절매를 설정합니다."}}, {"@type": "Question", "name": "R1과 R2, S1과 S2의 차이는 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "R1과 S1은 피벗 포인트에 가장 가까운 저항선과 지지선으로, 즉각적인 가격 움직임에서 중요합니다. R2와 S2는 더 먼 저항선과 지지선으로, 강한 추세 또는 높은 변동성 상황에서 더 중요한 역할을 합니다."}}, {"@type": "Question", "name": "어떤 시간대에 피벗 포인트를 사용해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "피벗 포인트는 4시간 차트와 일일(1D) 차트에서 가장 신뢰할 수 있습니다. 1시간 이하의 짧은 시간대에서는 정확도가 떨어질 수 있으며, 주간 또는 월간 차트에서는 장기 거래 전략에 유용합니다."}}, {"@type": "Question", "name": "피벗 포인트만으로 거래할 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "피벗 포인트는 강력한 도구이지만, 단독으로 사용하면 신호가 틀릴 수 있습니다. 이동평균선, RSI, MACD, 볼린저 밴드 등 다른 기술적 지표와 함께 사용하여 신뢰도를 높이는 것이 좋습니다."}}, {"@type": "Question", "name": "높은 변동성 시장에서 피벗 포인트가 덜 정확한 이유는?", "acceptedAnswer": {"@type": "Answer", "text": "높은 변동성에서는 가격이 예측된 저항선과 지지선을 빠르게 관통할 수 있습니다. 이런 경우 더 먼 저항선/지지선(R2, S2)이 더 중요하며, 거래자들은 더 넓은 손절매를 설정해야 합니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="support-resistance">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/support-resistance.html">繁中</option><option value="/tools/en/support-resistance.html">EN</option><option value="/tools/ja/support-resistance.html">日本語</option><option value="/tools/ko/support-resistance.html" selected>한국어</option><option value="/tools/de/support-resistance.html">DE</option><option value="/tools/fr/support-resistance.html">FR</option><option value="/tools/es/support-resistance.html">ES</option><option value="/tools/pt/support-resistance.html">PT</option><option value="/tools/id/support-resistance.html">ID</option><option value="/tools/zh-CN/support-resistance.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/support-resistance.html">繁中</option><option value="/tools/en/support-resistance.html">EN</option><option value="/tools/ja/support-resistance.html">日本語</option><option value="/tools/ko/support-resistance.html" selected>한국어</option><option value="/tools/de/support-resistance.html">DE</option><option value="/tools/fr/support-resistance.html">FR</option><option value="/tools/es/support-resistance.html">ES</option><option value="/tools/pt/support-resistance.html">PT</option><option value="/tools/id/support-resistance.html">ID</option><option value="/tools/zh-CN/support-resistance.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 지지선과 저항선 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/support-resistance.html">繁中</option><option value="/tools/en/support-resistance.html">EN</option><option value="/tools/ja/support-resistance.html">日本語</option><option value="/tools/ko/support-resistance.html" selected>한국어</option><option value="/tools/de/support-resistance.html">DE</option><option value="/tools/fr/support-resistance.html">FR</option><option value="/tools/es/support-resistance.html">ES</option><option value="/tools/pt/support-resistance.html">PT</option><option value="/tools/id/support-resistance.html">ID</option><option value="/tools/zh-CN/support-resistance.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -111,6 +125,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "生活費比較ツール", "url": "https://softglow-ai.com/tools/ja/cost-of-living.html", "description": "2つの都市の生活費指数、給与、家賃を比較して、実質的な購買力の差を計算します。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "生活費指数とは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "生活費指数は、基準都市（通常100）と比較した都市のコスト水準を示す指標です。食品、住宅、交通、娯楽などの商品やサービスの平均価格に基づいて計算されます。指数が高いほど、その都市の生活費が高いことを意味します。"}}, {"@type": "Question", "name": "給与調整額をどのように解釈すればよいですか？", "acceptedAnswer": {"@type": "Answer", "text": "給与調整額は、新しい都市で同じ生活水準を維持するために必要な給与の変更を示します。正の値は給与を増やす必要があることを、負の値は給与を減らしても同じ生活水準が保たれることを意味します。"}}, {"@type": "Question", "name": "なぜ家賃の割合が重要なのですか？", "acceptedAnswer": {"@type": "Answer", "text": "家賃は通常、月間支出の最大部分を占めるため、生活費の指標として重要です。家賃が給与に占める割合を知ることで、実際の月間家賃支出を計算し、生活費の内訳をより正確に理解できます。"}}, {"@type": "Question", "name": "購買力の差はどのように計算されますか？", "acceptedAnswer": {"@type": "Answer", "text": "購買力の差は、生活費指数の違いに基づいて計算されます。2つの都市の指数比を使用して、同じ金額で購入できる商品やサービスの相対的な量の違いを示します。高い指数の都市では購買力が低くなります。"}}, {"@type": "Question", "name": "このツールを給与交渉に使用できますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、このツールの結果は給与交渉の根拠として使用できます。新しい都市での同等の生活水準に必要な給与を計算することで、給与提案が妥当かどうかを客観的に評価できます。実際の求人市場の給与と比較して参考にしてください。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="cost-of-living">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ja">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ja/">ツール</a>
-    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/patterns/ja.html">ローソク足</a>
+    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/">ホーム</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/cost-of-living.html">繁中</option><option value="/tools/en/cost-of-living.html">EN</option><option value="/tools/ja/cost-of-living.html" selected>日本語</option><option value="/tools/ko/cost-of-living.html">한국어</option><option value="/tools/de/cost-of-living.html">DE</option><option value="/tools/fr/cost-of-living.html">FR</option><option value="/tools/es/cost-of-living.html">ES</option><option value="/tools/pt/cost-of-living.html">PT</option><option value="/tools/id/cost-of-living.html">ID</option><option value="/tools/zh-CN/cost-of-living.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/cost-of-living.html">繁中</option><option value="/tools/en/cost-of-living.html">EN</option><option value="/tools/ja/cost-of-living.html" selected>日本語</option><option value="/tools/ko/cost-of-living.html">한국어</option><option value="/tools/de/cost-of-living.html">DE</option><option value="/tools/fr/cost-of-living.html">FR</option><option value="/tools/es/cost-of-living.html">ES</option><option value="/tools/pt/cost-of-living.html">PT</option><option value="/tools/id/cost-of-living.html">ID</option><option value="/tools/zh-CN/cost-of-living.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 生活費比較ツール</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/cost-of-living.html">繁中</option><option value="/tools/en/cost-of-living.html">EN</option><option value="/tools/ja/cost-of-living.html" selected>日本語</option><option value="/tools/ko/cost-of-living.html">한국어</option><option value="/tools/de/cost-of-living.html">DE</option><option value="/tools/fr/cost-of-living.html">FR</option><option value="/tools/es/cost-of-living.html">ES</option><option value="/tools/pt/cost-of-living.html">PT</option><option value="/tools/id/cost-of-living.html">ID</option><option value="/tools/zh-CN/cost-of-living.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -164,6 +178,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="ツール、パターン、記事を検索…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>ブックマーク</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全て削除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

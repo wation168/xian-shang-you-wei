@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Battery Life Calculator", "url": "https://softglow-ai.com/tools/en/battery-calculator.html", "description": "Calculate battery runtime using capacity (mAh) and current draw (mA). Get precise battery life estimates in hours and minutes.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do I find my device's battery capacity?", "acceptedAnswer": {"@type": "Answer", "text": "Battery capacity is usually printed on the device or battery label, often listed in mAh (milliamp-hours). You can also check your device's specifications on the manufacturer's website or in the user manual. For smartphones, this information is typically found in Settings > Battery or similar menus."}}, {"@type": "Question", "name": "What is current draw and how do I measure it?", "acceptedAnswer": {"@type": "Answer", "text": "Current draw is the amount of electrical current your device consumes, measured in milliamps (mA). Many devices specify typical current draw in their technical specifications. You can measure it using a multimeter in series with the power circuit, though this requires technical knowledge. For most users, using manufacturer specifications is more practical."}}, {"@type": "Question", "name": "Why doesn't my actual battery life match the calculator result?", "acceptedAnswer": {"@type": "Answer", "text": "Real-world battery life varies due to several factors: battery age and health, temperature conditions, usage patterns varying from assumptions, inefficiencies in power conversion, and firmware optimizations. The calculator provides a theoretical estimate assuming constant current draw, while actual devices have fluctuating power consumption throughout operation."}}, {"@type": "Question", "name": "Can this calculator work for any battery-powered device?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, this calculator works for any device where you know the battery capacity and average current draw. This includes smartphones, tablets, laptops, drones, power banks, smartwatches, hearing aids, emergency lights, and any portable electronic device. As long as you have accurate specifications, the calculation applies universally."}}, {"@type": "Question", "name": "How can I extend my device's battery life?", "acceptedAnswer": {"@type": "Answer", "text": "Reduce screen brightness, disable unused wireless features (Bluetooth, WiFi, GPS), close background applications, enable battery saver mode, avoid extreme temperatures, keep your device updated with the latest firmware, and minimize processor-intensive tasks. These strategies effectively reduce current draw and extend operational time between charges."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="battery-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="en">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/en/">Tools</a>
-    <a href="/blog/en/index.html">Blog</a>
     <a href="/patterns/en.html">Patterns</a>
+    <a href="/blog/en/index.html">Blog</a>
     <a href="/">Home</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/battery-calculator.html">繁中</option><option value="/tools/en/battery-calculator.html" selected>EN</option><option value="/tools/ja/battery-calculator.html">日本語</option><option value="/tools/ko/battery-calculator.html">한국어</option><option value="/tools/de/battery-calculator.html">DE</option><option value="/tools/fr/battery-calculator.html">FR</option><option value="/tools/es/battery-calculator.html">ES</option><option value="/tools/pt/battery-calculator.html">PT</option><option value="/tools/id/battery-calculator.html">ID</option><option value="/tools/zh-CN/battery-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/battery-calculator.html">繁中</option><option value="/tools/en/battery-calculator.html" selected>EN</option><option value="/tools/ja/battery-calculator.html">日本語</option><option value="/tools/ko/battery-calculator.html">한국어</option><option value="/tools/de/battery-calculator.html">DE</option><option value="/tools/fr/battery-calculator.html">FR</option><option value="/tools/es/battery-calculator.html">ES</option><option value="/tools/pt/battery-calculator.html">PT</option><option value="/tools/id/battery-calculator.html">ID</option><option value="/tools/zh-CN/battery-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/en/">Tools</a> > Battery Life Calculator</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/battery-calculator.html">繁中</option><option value="/tools/en/battery-calculator.html" selected>EN</option><option value="/tools/ja/battery-calculator.html">日本語</option><option value="/tools/ko/battery-calculator.html">한국어</option><option value="/tools/de/battery-calculator.html">DE</option><option value="/tools/fr/battery-calculator.html">FR</option><option value="/tools/es/battery-calculator.html">ES</option><option value="/tools/pt/battery-calculator.html">PT</option><option value="/tools/id/battery-calculator.html">ID</option><option value="/tools/zh-CN/battery-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -129,6 +143,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Search tools, patterns, articles…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Bookmarks</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Clear all</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

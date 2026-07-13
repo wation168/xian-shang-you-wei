@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculadora de Rendimiento de Alquiler", "url": "https://softglow-ai.com/tools/es/rental-yield.html", "description": "Calcula el rendimiento anual de tu propiedad de alquiler. Determina el porcentaje de retorno sobre tu inversión inmobiliaria con nuestra herramienta gratuita.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "es"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "¿Qué es un buen rendimiento de alquiler?", "acceptedAnswer": {"@type": "Answer", "text": "Un rendimiento de alquiler entre 5% y 10% generalmente se considera bueno. Sin embargo, esto varía según la ubicación geográfica y el tipo de propiedad. Mercados como Londres pueden tener rendimientos más bajos (4-6%), mientras que otras regiones pueden alcanzar 8-12%. Siempre compara con el rendimiento promedio de tu área específica."}}, {"@type": "Question", "name": "¿Cómo afectan los gastos al rendimiento real?", "acceptedAnswer": {"@type": "Answer", "text": "Los gastos reducen significativamente tu rendimiento bruto. Incluyen mantenimiento, reparaciones, seguros, impuestos, servicios y gastos de gestión. Un rendimiento bruto del 8% podría reducirse a un 5% neto después de gastos. Siempre calcula estos costos para obtener una imagen real de tu rentabilidad."}}, {"@type": "Question", "name": "¿Puedo comparar rendimientos de diferentes propiedades?", "acceptedAnswer": {"@type": "Answer", "text": "Sí, la calculadora te ayuda a comparar rendimientos entre propiedades. Sin embargo, asegúrate de usar cifras consistentes. Si comparas una propiedad con rendimiento neto con otra bruto, los números no serán comparables. Usa siempre la misma metodología para ambas propiedades."}}, {"@type": "Question", "name": "¿Qué sucede si tengo periodos de vacío de alquiler?", "acceptedAnswer": {"@type": "Answer", "text": "Los periodos de vacío reducen tus ingresos anuales reales. Si tu propiedad está desocupada 2 meses al año, deberías reducir tu ingreso anual un 17%. Ajusta tus cifras según la tasa de ocupación histórica de tu propiedad para obtener cálculos más precisos."}}, {"@type": "Question", "name": "¿Debo invertir en una propiedad con bajo rendimiento?", "acceptedAnswer": {"@type": "Answer", "text": "No necesariamente. Algunos inversores aceptan rendimientos más bajos (4-5%) en propiedades ubicadas en áreas con alta apreciación. Si esperas que el valor de la propiedad aumente significativamente, el rendimiento bajo podría compensarse con ganancias de capital a largo plazo."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="rental-yield">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="es">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/es/">Herramientas</a>
-    <a href="/blog/es/index.html">Blog</a>
     <a href="/patterns/es.html">Patrones</a>
+    <a href="/blog/es/index.html">Blog</a>
     <a href="/">Inicio</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/rental-yield.html">繁中</option><option value="/tools/en/rental-yield.html">EN</option><option value="/tools/ja/rental-yield.html">日本語</option><option value="/tools/ko/rental-yield.html">한국어</option><option value="/tools/de/rental-yield.html">DE</option><option value="/tools/fr/rental-yield.html">FR</option><option value="/tools/es/rental-yield.html" selected>ES</option><option value="/tools/pt/rental-yield.html">PT</option><option value="/tools/id/rental-yield.html">ID</option><option value="/tools/zh-CN/rental-yield.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/rental-yield.html">繁中</option><option value="/tools/en/rental-yield.html">EN</option><option value="/tools/ja/rental-yield.html">日本語</option><option value="/tools/ko/rental-yield.html">한국어</option><option value="/tools/de/rental-yield.html">DE</option><option value="/tools/fr/rental-yield.html">FR</option><option value="/tools/es/rental-yield.html" selected>ES</option><option value="/tools/pt/rental-yield.html">PT</option><option value="/tools/id/rental-yield.html">ID</option><option value="/tools/zh-CN/rental-yield.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/es/">Herramientas</a> > Calculadora de Rendimiento de Alquiler</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/rental-yield.html">繁中</option><option value="/tools/en/rental-yield.html">EN</option><option value="/tools/ja/rental-yield.html">日本語</option><option value="/tools/ko/rental-yield.html">한국어</option><option value="/tools/de/rental-yield.html">DE</option><option value="/tools/fr/rental-yield.html">FR</option><option value="/tools/es/rental-yield.html" selected>ES</option><option value="/tools/pt/rental-yield.html">PT</option><option value="/tools/id/rental-yield.html">ID</option><option value="/tools/zh-CN/rental-yield.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -130,6 +144,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Buscar herramientas, patrones, artículos…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Favoritos</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Borrar todo</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

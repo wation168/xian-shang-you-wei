@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "의료비 비용 계산기", "url": "https://softglow-ai.com/tools/ko/medical-cost-estimator.html", "description": "의료 시술의 예상 비용을 계산하세요. 보험 보장률, 자기부담금, 공제액을 입력하여 실제 부담 비용을 확인할 수 있습니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "공제액과 자기부담금의 차이는 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "공제액은 보험 적용 전 환자가 전액 부담해야 하는 초기 금액입니다. 자기부담금은 공제액을 초과한 부분에서 환자가 일정 비율 또는 금액을 추가로 부담하는 것입니다."}}, {"@type": "Question", "name": "보험 보장률이 80%라는 것은 무엇을 의미하나요?", "acceptedAnswer": {"@type": "Answer", "text": "보험 보장률 80%는 공제액을 제외한 비용의 80%를 보험사가 부담하고, 나머지 20%는 환자가 자기부담금으로 지불한다는 의미입니다."}}, {"@type": "Question", "name": "최대 자기부담액을 초과하면 어떻게 되나요?", "acceptedAnswer": {"@type": "Answer", "text": "최대 자기부담액을 초과한 부분은 보험사가 전액 부담합니다. 따라서 환자의 실제 부담액은 최대 자기부담액을 넘지 않습니다."}}, {"@type": "Question", "name": "이 계산기의 결과가 정확하지 않을 수 있는 경우가 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "보험 정책, 병원 협약 여부, 특정 시술의 제한 사항 등에 따라 실제 청구액이 다를 수 있습니다. 정확한 정보는 보험사에 직접 문의하세요."}}, {"@type": "Question", "name": "여러 건의 의료 시술을 받을 경우는 어떻게 계산하나요?", "acceptedAnswer": {"@type": "Answer", "text": "각 시술별로 별도 계산을 하거나, 시술 비용을 모두 합산한 후 공제액을 한 번만 적용하여 계산할 수 있습니다. 보험 정책에 따라 방식이 다르므로 보험사에 확인하세요."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="medical-cost-estimator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/medical-cost-estimator.html">繁中</option><option value="/tools/en/medical-cost-estimator.html">EN</option><option value="/tools/ja/medical-cost-estimator.html">日本語</option><option value="/tools/ko/medical-cost-estimator.html" selected>한국어</option><option value="/tools/de/medical-cost-estimator.html">DE</option><option value="/tools/fr/medical-cost-estimator.html">FR</option><option value="/tools/es/medical-cost-estimator.html">ES</option><option value="/tools/pt/medical-cost-estimator.html">PT</option><option value="/tools/id/medical-cost-estimator.html">ID</option><option value="/tools/zh-CN/medical-cost-estimator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/medical-cost-estimator.html">繁中</option><option value="/tools/en/medical-cost-estimator.html">EN</option><option value="/tools/ja/medical-cost-estimator.html">日本語</option><option value="/tools/ko/medical-cost-estimator.html" selected>한국어</option><option value="/tools/de/medical-cost-estimator.html">DE</option><option value="/tools/fr/medical-cost-estimator.html">FR</option><option value="/tools/es/medical-cost-estimator.html">ES</option><option value="/tools/pt/medical-cost-estimator.html">PT</option><option value="/tools/id/medical-cost-estimator.html">ID</option><option value="/tools/zh-CN/medical-cost-estimator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 의료비 비용 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/medical-cost-estimator.html">繁中</option><option value="/tools/en/medical-cost-estimator.html">EN</option><option value="/tools/ja/medical-cost-estimator.html">日本語</option><option value="/tools/ko/medical-cost-estimator.html" selected>한국어</option><option value="/tools/de/medical-cost-estimator.html">DE</option><option value="/tools/fr/medical-cost-estimator.html">FR</option><option value="/tools/es/medical-cost-estimator.html">ES</option><option value="/tools/pt/medical-cost-estimator.html">PT</option><option value="/tools/id/medical-cost-estimator.html">ID</option><option value="/tools/zh-CN/medical-cost-estimator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -150,6 +164,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculadora ATR", "url": "https://softglow-ai.com/tools/es/atr-calculator.html", "description": "Calcula el Rango Verdadero Promedio (ATR) para analizar la volatilidad del mercado y mejorar tus estrategias de trading.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "es"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "¿Cuál es la diferencia entre ATR y el rango simple alto-bajo?", "acceptedAnswer": {"@type": "Answer", "text": "El rango simple solo mide la diferencia entre el máximo y mínimo del período actual. El ATR es más sofisticado porque incluye los gaps respecto al cierre anterior y promedia varios períodos, proporcionando una medida más completa y estable de la volatilidad."}}, {"@type": "Question", "name": "¿Cuál es el período estándar para calcular el ATR?", "acceptedAnswer": {"@type": "Answer", "text": "J. Welles Wilder, el creador del ATR, originalmente utilizó 14 períodos. Este sigue siendo el estándar en la mayoría de plataformas de trading, aunque algunos traders ajustan este valor según su estilo de trading (períodos más cortos para trading intradía, más largos para swing trading)."}}, {"@type": "Question", "name": "¿Puede el ATR predecir la dirección del movimiento del precio?", "acceptedAnswer": {"@type": "Answer", "text": "No, el ATR solo mide la volatilidad (magnitud de los movimientos), no la dirección. Un ATR alto significa que hay movimientos significativos, pero no indica si el precio subirá o bajará. Debes usar otros indicadores para determinar la dirección."}}, {"@type": "Question", "name": "¿Cómo utilizo el ATR para establecer stop-loss?", "acceptedAnswer": {"@type": "Answer", "text": "Una regla común es multiplicar el ATR por un factor (generalmente 1.5 a 2) y establecer el stop-loss a esa distancia desde tu punto de entrada. Por ejemplo, si el ATR es $2 y usas un factor de 2, tu stop-loss estaría $4 por debajo de tu entrada en una operación larga."}}, {"@type": "Question", "name": "¿Qué significa un ATR muy bajo?", "acceptedAnswer": {"@type": "Answer", "text": "Un ATR muy bajo indica que el activo tiene baja volatilidad en el período analizado, lo que significa movimientos de precio pequeños y predecibles. Algunos traders evitan estos mercados porque hay menos oportunidades de ganancias significativas, mientras que otros los prefieren por ser más estables."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="atr-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="es">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/es/">Herramientas</a>
-    <a href="/blog/es/index.html">Blog</a>
     <a href="/patterns/es.html">Patrones</a>
+    <a href="/blog/es/index.html">Blog</a>
     <a href="/">Inicio</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/atr-calculator.html">繁中</option><option value="/tools/en/atr-calculator.html">EN</option><option value="/tools/ja/atr-calculator.html">日本語</option><option value="/tools/ko/atr-calculator.html">한국어</option><option value="/tools/de/atr-calculator.html">DE</option><option value="/tools/fr/atr-calculator.html">FR</option><option value="/tools/es/atr-calculator.html" selected>ES</option><option value="/tools/pt/atr-calculator.html">PT</option><option value="/tools/id/atr-calculator.html">ID</option><option value="/tools/zh-CN/atr-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/atr-calculator.html">繁中</option><option value="/tools/en/atr-calculator.html">EN</option><option value="/tools/ja/atr-calculator.html">日本語</option><option value="/tools/ko/atr-calculator.html">한국어</option><option value="/tools/de/atr-calculator.html">DE</option><option value="/tools/fr/atr-calculator.html">FR</option><option value="/tools/es/atr-calculator.html" selected>ES</option><option value="/tools/pt/atr-calculator.html">PT</option><option value="/tools/id/atr-calculator.html">ID</option><option value="/tools/zh-CN/atr-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/es/">Herramientas</a> > Calculadora ATR</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/atr-calculator.html">繁中</option><option value="/tools/en/atr-calculator.html">EN</option><option value="/tools/ja/atr-calculator.html">日本語</option><option value="/tools/ko/atr-calculator.html">한국어</option><option value="/tools/de/atr-calculator.html">DE</option><option value="/tools/fr/atr-calculator.html">FR</option><option value="/tools/es/atr-calculator.html" selected>ES</option><option value="/tools/pt/atr-calculator.html">PT</option><option value="/tools/id/atr-calculator.html">ID</option><option value="/tools/zh-CN/atr-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -176,6 +190,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Buscar herramientas, patrones, artículos…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Favoritos</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Borrar todo</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

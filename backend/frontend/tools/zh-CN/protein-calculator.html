@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "蛋白质摄入计算器", "url": "https://softglow-ai.com/tools/zh-CN/protein-calculator.html", "description": "根据体重和运动水平快速计算每日蛋白质需求。了解每餐蛋白质摄入量和热量贡献。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "每天需要摄入多少蛋白质？", "acceptedAnswer": {"@type": "Answer", "text": "蛋白质需求取决于您的体重和运动水平。一般来说，久坐人群需要每公斤体重0.8克，而运动员可能需要1.6-2.2克每公斤体重。我们的计算器会根据您的具体情况提供个性化建议。"}}, {"@type": "Question", "name": "为什么要将蛋白质分散到每一餐？", "acceptedAnswer": {"@type": "Answer", "text": "将蛋白质均匀分散到一天的三餐中可以促进肌肉蛋白质合成，提高饱腹感，并帮助维持稳定的血糖水平。研究表明，每餐摄入20-40克蛋白质可以优化肌肉建设效果。"}}, {"@type": "Question", "name": "蛋白质热量是什么意思？", "acceptedAnswer": {"@type": "Answer", "text": "蛋白质提供的热量表示蛋白质为您每日总热量摄入的贡献。由于每克蛋白质提供4卡热量，计算器会显示您的蛋白质摄入对总热量的影响，帮助您进行全面的营养规划。"}}, {"@type": "Question", "name": "运动水平应该如何选择？", "acceptedAnswer": {"@type": "Answer", "text": "选择最接近您实际生活方式的运动水平。如果您每周锻炼少于3次，选择轻度活跃；如果每周3-5次，选择中度活跃；如果每周超过5次或进行专业训练，选择活跃或非常活跃。"}}, {"@type": "Question", "name": "摄入过多蛋白质有害吗？", "acceptedAnswer": {"@type": "Answer", "text": "对于健康的成年人，适度增加蛋白质摄入通常是安全的。然而，过量蛋白质摄入可能会增加肾脏负担。建议根据您的健康状况和医生建议来确定合适的蛋白质摄入量，尤其是在有肾脏疾病的情况下。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="protein-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/protein-calculator.html">繁中</option><option value="/tools/en/protein-calculator.html">EN</option><option value="/tools/ja/protein-calculator.html">日本語</option><option value="/tools/ko/protein-calculator.html">한국어</option><option value="/tools/de/protein-calculator.html">DE</option><option value="/tools/fr/protein-calculator.html">FR</option><option value="/tools/es/protein-calculator.html">ES</option><option value="/tools/pt/protein-calculator.html">PT</option><option value="/tools/id/protein-calculator.html">ID</option><option value="/tools/zh-CN/protein-calculator.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/protein-calculator.html">繁中</option><option value="/tools/en/protein-calculator.html">EN</option><option value="/tools/ja/protein-calculator.html">日本語</option><option value="/tools/ko/protein-calculator.html">한국어</option><option value="/tools/de/protein-calculator.html">DE</option><option value="/tools/fr/protein-calculator.html">FR</option><option value="/tools/es/protein-calculator.html">ES</option><option value="/tools/pt/protein-calculator.html">PT</option><option value="/tools/id/protein-calculator.html">ID</option><option value="/tools/zh-CN/protein-calculator.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 蛋白质摄入计算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/protein-calculator.html">繁中</option><option value="/tools/en/protein-calculator.html">EN</option><option value="/tools/ja/protein-calculator.html">日本語</option><option value="/tools/ko/protein-calculator.html">한국어</option><option value="/tools/de/protein-calculator.html">DE</option><option value="/tools/fr/protein-calculator.html">FR</option><option value="/tools/es/protein-calculator.html">ES</option><option value="/tools/pt/protein-calculator.html">PT</option><option value="/tools/id/protein-calculator.html">ID</option><option value="/tools/zh-CN/protein-calculator.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -130,6 +144,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

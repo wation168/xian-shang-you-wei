@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "壁紙計算機", "url": "https://softglow-ai.com/tools/wallpaper-calculator.html", "description": "使用我們的壁紙計算機，輸入牆壁高度、寬度和數量，立即計算所需的壁紙捲數。考慮浪費係數，精確規劃您的裝修預算。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "壁紙計算機如何計算所需的捲數？", "acceptedAnswer": {"@type": "Answer", "text": "計算機首先計算總牆壁面積（高度×寬度×牆壁數量），然後根據您輸入的浪費係數百分比增加面積，最後將結果除以每捲的可用面積，得出所需的捲數。結果會向上取整，確保您有足夠的材料。"}}, {"@type": "Question", "name": "浪費係數應該設定多少？", "acceptedAnswer": {"@type": "Answer", "text": "浪費係數取決於您的經驗和房間複雜度。初學者應設定15-20%，以補償切割和對齊的損耗。有經驗的裝修者可設定10%。如果房間有很多門窗或圖案壁紙需要對齊，應增加到20%或更多。"}}, {"@type": "Question", "name": "計算結果顯示4.2捲，我應該購買4捲還是5捲？", "acceptedAnswer": {"@type": "Answer", "text": "您應該購買5捲。捲數計算結果如果不是整數，應該始終向上取整。同時建議額外購買1捲作為備用，用於修補或將來需要。因此這個例子中最好購買6捲壁紙。"}}, {"@type": "Question", "name": "如何測量牆壁尺寸？", "acceptedAnswer": {"@type": "Answer", "text": "使用捲尺測量牆壁，從地面測量到天花板得到高度。寬度應該測量牆壁的整個長度。如果牆面不規則，測量最高點的高度。測量時保持捲尺拉直，記錄結果（單位為英尺或英寸，然後轉換為英尺）。"}}, {"@type": "Question", "name": "不同品牌的壁紙捲數規格相同嗎？", "acceptedAnswer": {"@type": "Answer", "text": "不同。壁紙的規格因品牌和類型而異。標準美式壁紙通常為27英寸寬×27英尺長（約54平方英尺），但歐式或進口壁紙可能更寬或更長。購買前必須檢查產品標籤上的實際可用面積，確保計算準確。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="wallpaper-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/wallpaper-calculator.html" selected>繁中</option><option value="/tools/en/wallpaper-calculator.html">EN</option><option value="/tools/ja/wallpaper-calculator.html">日本語</option><option value="/tools/ko/wallpaper-calculator.html">한국어</option><option value="/tools/de/wallpaper-calculator.html">DE</option><option value="/tools/fr/wallpaper-calculator.html">FR</option><option value="/tools/es/wallpaper-calculator.html">ES</option><option value="/tools/pt/wallpaper-calculator.html">PT</option><option value="/tools/id/wallpaper-calculator.html">ID</option><option value="/tools/zh-CN/wallpaper-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/wallpaper-calculator.html" selected>繁中</option><option value="/tools/en/wallpaper-calculator.html">EN</option><option value="/tools/ja/wallpaper-calculator.html">日本語</option><option value="/tools/ko/wallpaper-calculator.html">한국어</option><option value="/tools/de/wallpaper-calculator.html">DE</option><option value="/tools/fr/wallpaper-calculator.html">FR</option><option value="/tools/es/wallpaper-calculator.html">ES</option><option value="/tools/pt/wallpaper-calculator.html">PT</option><option value="/tools/id/wallpaper-calculator.html">ID</option><option value="/tools/zh-CN/wallpaper-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 壁紙計算機</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/wallpaper-calculator.html" selected>繁中</option><option value="/tools/en/wallpaper-calculator.html">EN</option><option value="/tools/ja/wallpaper-calculator.html">日本語</option><option value="/tools/ko/wallpaper-calculator.html">한국어</option><option value="/tools/de/wallpaper-calculator.html">DE</option><option value="/tools/fr/wallpaper-calculator.html">FR</option><option value="/tools/es/wallpaper-calculator.html">ES</option><option value="/tools/pt/wallpaper-calculator.html">PT</option><option value="/tools/id/wallpaper-calculator.html">ID</option><option value="/tools/zh-CN/wallpaper-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -119,6 +133,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

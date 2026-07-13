@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "단어 수 계산기", "url": "https://softglow-ai.com/tools/ko/word-count.html", "description": "텍스트의 단어, 문자, 문장, 단락을 빠르게 계산합니다. 읽기 시간도 확인할 수 있는 무료 온라인 도구입니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "공백이 단어 수에 포함되나요?", "acceptedAnswer": {"@type": "Answer", "text": "아니요, 공백은 단어로 계산되지 않습니다. 단어는 공백으로 구분되는 문자의 집합이므로, 공백 자체는 단어 수에 포함되지 않습니다. 다만 '총 문자 수(공백 포함)' 결과에는 모든 공백이 포함됩니다."}}, {"@type": "Question", "name": "문장 수는 어떻게 계산되나요?", "acceptedAnswer": {"@type": "Answer", "text": "마침표(.), 물음표(?), 느낌표(!)로 끝나는 단위를 하나의 문장으로 계산합니다. 줄임표나 기타 기호로 끝나는 경우는 문장의 끝으로 인식되지 않을 수 있습니다."}}, {"@type": "Question", "name": "읽기 시간이 정확한가요?", "acceptedAnswer": {"@type": "Answer", "text": "읽기 시간은 평균 읽기 속도(분당 약 200~250단어)를 기준으로 계산한 추정치입니다. 실제 읽기 시간은 개인의 읽기 속도, 텍스트의 난이도, 주의력 등의 요소에 따라 달라질 수 있습니다."}}, {"@type": "Question", "name": "대문자와 소문자가 계산에 영향을 미치나요?", "acceptedAnswer": {"@type": "Answer", "text": "아니요, 대문자와 소문자의 구분은 단어 수나 문자 수 계산에 영향을 주지 않습니다. 대소문자는 모두 동일하게 처리되며, 오직 문자의 개수만 중요합니다."}}, {"@type": "Question", "name": "이 도구는 무료인가요?", "acceptedAnswer": {"@type": "Answer", "text": "네, 이 단어 수 계산기는 완전히 무료로 제공됩니다. 가입이나 결제 없이 언제든 사용할 수 있으며, 개인정보도 수집하지 않습니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="word-count">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/word-count.html">繁中</option><option value="/tools/en/word-count.html">EN</option><option value="/tools/ja/word-count.html">日本語</option><option value="/tools/ko/word-count.html" selected>한국어</option><option value="/tools/de/word-count.html">DE</option><option value="/tools/fr/word-count.html">FR</option><option value="/tools/es/word-count.html">ES</option><option value="/tools/pt/word-count.html">PT</option><option value="/tools/id/word-count.html">ID</option><option value="/tools/zh-CN/word-count.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/word-count.html">繁中</option><option value="/tools/en/word-count.html">EN</option><option value="/tools/ja/word-count.html">日本語</option><option value="/tools/ko/word-count.html" selected>한국어</option><option value="/tools/de/word-count.html">DE</option><option value="/tools/fr/word-count.html">FR</option><option value="/tools/es/word-count.html">ES</option><option value="/tools/pt/word-count.html">PT</option><option value="/tools/id/word-count.html">ID</option><option value="/tools/zh-CN/word-count.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 단어 수 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/word-count.html">繁中</option><option value="/tools/en/word-count.html">EN</option><option value="/tools/ja/word-count.html">日本語</option><option value="/tools/ko/word-count.html" selected>한국어</option><option value="/tools/de/word-count.html">DE</option><option value="/tools/fr/word-count.html">FR</option><option value="/tools/es/word-count.html">ES</option><option value="/tools/pt/word-count.html">PT</option><option value="/tools/id/word-count.html">ID</option><option value="/tools/zh-CN/word-count.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -148,6 +162,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

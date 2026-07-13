@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "紗線支數轉換器", "url": "https://softglow-ai.com/tools/yarn-weight.html", "description": "快速轉換紗線支數單位。支援 Metric Count (Nm)、Tex Count、Denier 和 Cotton Count (Ne) 等多種測量標準。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Nm 和 Tex 有什麼區別？", "acceptedAnswer": {"@type": "Answer", "text": "Nm（公制支數）表示 1 克紗線的長度，數字越大紗線越細。Tex 表示 1000 公尺紗線的重量，數字越小紗線越細。兩者是反比關係，轉換公式為 Nm = 1000 / Tex。"}}, {"@type": "Question", "name": "丹尼爾 (Denier) 主要用於什麼？", "acceptedAnswer": {"@type": "Answer", "text": "丹尼爾是測量合成纖維（如聚酯、尼龍）粗細程度的標準單位，表示 9000 公尺紗線的重量。在絲綢和合成纖維行業廣泛使用，例如襪子和褲襪常標註為 15D 或 20D。"}}, {"@type": "Question", "name": "棉支數 (Ne) 為什麼不同於其他單位？", "acceptedAnswer": {"@type": "Answer", "text": "棉支數是英制系統，表示 1 磅紗線包含多少個 840 碼的單位長度。這是歷史遺留的測量方式，在棉紡行業和英語國家仍然廣泛使用。棉支數的計算基礎不同，因此需要特殊轉換公式。"}}, {"@type": "Question", "name": "我應該如何使用這個轉換器？", "acceptedAnswer": {"@type": "Answer", "text": "只需在四個輸入欄中的任意一個輸入紗線支數值，轉換器會自動計算並顯示其他三個單位的對應數值。例如，輸入 Nm 30，立即可看到對應的 Tex、Denier 和 Ne 值。"}}, {"@type": "Question", "name": "紗線支數越高越好嗎？", "acceptedAnswer": {"@type": "Answer", "text": "不一定。紗線支數的選擇取決於產品用途。製作高檔襯衫可能需要 Nm 80 或更高的細紗線，而製作毛衣則可能只需 Nm 10-20 的粗紗線。需要在品質、成本和生產能力之間找到平衡。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="yarn-weight">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/yarn-weight.html" selected>繁中</option><option value="/tools/en/yarn-weight.html">EN</option><option value="/tools/ja/yarn-weight.html">日本語</option><option value="/tools/ko/yarn-weight.html">한국어</option><option value="/tools/de/yarn-weight.html">DE</option><option value="/tools/fr/yarn-weight.html">FR</option><option value="/tools/es/yarn-weight.html">ES</option><option value="/tools/pt/yarn-weight.html">PT</option><option value="/tools/id/yarn-weight.html">ID</option><option value="/tools/zh-CN/yarn-weight.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/yarn-weight.html" selected>繁中</option><option value="/tools/en/yarn-weight.html">EN</option><option value="/tools/ja/yarn-weight.html">日本語</option><option value="/tools/ko/yarn-weight.html">한국어</option><option value="/tools/de/yarn-weight.html">DE</option><option value="/tools/fr/yarn-weight.html">FR</option><option value="/tools/es/yarn-weight.html">ES</option><option value="/tools/pt/yarn-weight.html">PT</option><option value="/tools/id/yarn-weight.html">ID</option><option value="/tools/zh-CN/yarn-weight.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 紗線支數轉換器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/yarn-weight.html" selected>繁中</option><option value="/tools/en/yarn-weight.html">EN</option><option value="/tools/ja/yarn-weight.html">日本語</option><option value="/tools/ko/yarn-weight.html">한국어</option><option value="/tools/de/yarn-weight.html">DE</option><option value="/tools/fr/yarn-weight.html">FR</option><option value="/tools/es/yarn-weight.html">ES</option><option value="/tools/pt/yarn-weight.html">PT</option><option value="/tools/id/yarn-weight.html">ID</option><option value="/tools/zh-CN/yarn-weight.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -181,6 +195,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "실효 세율 계산기", "url": "https://softglow-ai.com/tools/ko/effective-tax-rate.html", "description": "연간 소득과 납부한 세금으로 실효 세율을 계산하세요. 소득 대비 실제 세금 부담률을 쉽게 파악할 수 있습니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "실효 세율과 한계 세율의 차이는 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "실효 세율은 총소득에 대한 실제 세금 비율이고, 한계 세율은 추가 소득에 대해 적용되는 세율입니다. 예를 들어 ₩50,000 소득에서 한계 세율이 40%라도 실효 세율은 25%일 수 있습니다."}}, {"@type": "Question", "name": "실효 세율이 높으면 어떻게 되나요?", "acceptedAnswer": {"@type": "Answer", "text": "실효 세율이 높을수록 소득 대비 세금 납부액이 많다는 의미입니다. 이는 누진세 제도에서 높은 소득층이 더 많은 세금을 부담하도록 설계되어 있기 때문입니다."}}, {"@type": "Question", "name": "이 계산기로 절세 방안을 찾을 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "이 계산기는 현재 실효 세율을 파악하는 도구입니다. 절세 방안은 세무사나 재정 전문가와 상담하여 개인의 상황에 맞는 전략을 수립하는 것이 좋습니다."}}, {"@type": "Question", "name": "자영업자도 이 계산기를 사용할 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "네, 자영업자도 사용 가능합니다. 연간 순이익을 총소득으로, 납부한 모든 세금을 포함하여 계산하면 됩니다. 다만 사업 관련 공제액을 정확히 파악해야 합니다."}}, {"@type": "Question", "name": "실효 세율을 낮출 수 있는 합법적인 방법이 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "세금 공제, 기부금, 투자 손실 공제 등 여러 방법이 있습니다. 다만 이는 개인의 상황에 따라 다르므로 세무 전문가와 상담하여 합법적인 절세 방안을 찾아야 합니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="effective-tax-rate">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/effective-tax-rate.html">繁中</option><option value="/tools/en/effective-tax-rate.html">EN</option><option value="/tools/ja/effective-tax-rate.html">日本語</option><option value="/tools/ko/effective-tax-rate.html" selected>한국어</option><option value="/tools/de/effective-tax-rate.html">DE</option><option value="/tools/fr/effective-tax-rate.html">FR</option><option value="/tools/es/effective-tax-rate.html">ES</option><option value="/tools/pt/effective-tax-rate.html">PT</option><option value="/tools/id/effective-tax-rate.html">ID</option><option value="/tools/zh-CN/effective-tax-rate.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/effective-tax-rate.html">繁中</option><option value="/tools/en/effective-tax-rate.html">EN</option><option value="/tools/ja/effective-tax-rate.html">日本語</option><option value="/tools/ko/effective-tax-rate.html" selected>한국어</option><option value="/tools/de/effective-tax-rate.html">DE</option><option value="/tools/fr/effective-tax-rate.html">FR</option><option value="/tools/es/effective-tax-rate.html">ES</option><option value="/tools/pt/effective-tax-rate.html">PT</option><option value="/tools/id/effective-tax-rate.html">ID</option><option value="/tools/zh-CN/effective-tax-rate.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 실효 세율 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/effective-tax-rate.html">繁中</option><option value="/tools/en/effective-tax-rate.html">EN</option><option value="/tools/ja/effective-tax-rate.html">日本語</option><option value="/tools/ko/effective-tax-rate.html" selected>한국어</option><option value="/tools/de/effective-tax-rate.html">DE</option><option value="/tools/fr/effective-tax-rate.html">FR</option><option value="/tools/es/effective-tax-rate.html">ES</option><option value="/tools/pt/effective-tax-rate.html">PT</option><option value="/tools/id/effective-tax-rate.html">ID</option><option value="/tools/zh-CN/effective-tax-rate.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -139,6 +153,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

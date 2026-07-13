@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "月經常性收入計算機", "url": "https://softglow-ai.com/tools/mrr-calculator.html", "description": "免費計算月度經常性收入(MRR)、年度經常性收入(ARR)和每日經常性收入(DRR)。輸入訂閱者數量和平均每用戶收入即可快速獲得結果。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "MRR和ARR有什麼區別?", "acceptedAnswer": {"@type": "Answer", "text": "MRR(月度經常性收入)是每月的收入數字,而ARR(年度經常性收入)是MRR乘以12。ARR用於評估年度收入預期,而MRR更適合月度業務監控和短期目標設定。"}}, {"@type": "Question", "name": "如何計算不同定價層級的MRR?", "acceptedAnswer": {"@type": "Answer", "text": "對於有多個定價層級的業務,計算平均每用戶收入(ARPU)為:所有訂閱者的總月度收入除以訂閱者總數。然後將此ARPU乘以訂閱者總數即得MRR。"}}, {"@type": "Question", "name": "為什麼DRR(每日經常性收入)很重要?", "acceptedAnswer": {"@type": "Answer", "text": "DRR幫助您理解業務的日均收入水平,便於進行現金流預測和短期財務規劃。它也能幫助識別收入中的波動性和週期性趨勢。"}}, {"@type": "Question", "name": "如何提高我的MRR?", "acceptedAnswer": {"@type": "Answer", "text": "提高MRR的主要方法包括:增加新訂閱者(提高獲客)、提高ARPU(升級或提價)、降低流失率(改善客戶保留)。這三個方面的改進都能直接增加MRR。"}}, {"@type": "Question", "name": "MRR計算中是否應包括一次性費用?", "acceptedAnswer": {"@type": "Answer", "text": "不應該。MRR只計算經常性收入,即訂閱者定期支付的費用。一次性費用(如設置費或年度支付折扣)通常不包含在MRR計算中,但可單獨追蹤。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="mrr-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/mrr-calculator.html" selected>繁中</option><option value="/tools/en/mrr-calculator.html">EN</option><option value="/tools/ja/mrr-calculator.html">日本語</option><option value="/tools/ko/mrr-calculator.html">한국어</option><option value="/tools/de/mrr-calculator.html">DE</option><option value="/tools/fr/mrr-calculator.html">FR</option><option value="/tools/es/mrr-calculator.html">ES</option><option value="/tools/pt/mrr-calculator.html">PT</option><option value="/tools/id/mrr-calculator.html">ID</option><option value="/tools/zh-CN/mrr-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/mrr-calculator.html" selected>繁中</option><option value="/tools/en/mrr-calculator.html">EN</option><option value="/tools/ja/mrr-calculator.html">日本語</option><option value="/tools/ko/mrr-calculator.html">한국어</option><option value="/tools/de/mrr-calculator.html">DE</option><option value="/tools/fr/mrr-calculator.html">FR</option><option value="/tools/es/mrr-calculator.html">ES</option><option value="/tools/pt/mrr-calculator.html">PT</option><option value="/tools/id/mrr-calculator.html">ID</option><option value="/tools/zh-CN/mrr-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 月經常性收入計算機</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/mrr-calculator.html" selected>繁中</option><option value="/tools/en/mrr-calculator.html">EN</option><option value="/tools/ja/mrr-calculator.html">日本語</option><option value="/tools/ko/mrr-calculator.html">한국어</option><option value="/tools/de/mrr-calculator.html">DE</option><option value="/tools/fr/mrr-calculator.html">FR</option><option value="/tools/es/mrr-calculator.html">ES</option><option value="/tools/pt/mrr-calculator.html">PT</option><option value="/tools/id/mrr-calculator.html">ID</option><option value="/tools/zh-CN/mrr-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -134,6 +148,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

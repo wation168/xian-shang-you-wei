@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "內在價值計算器", "url": "https://softglow-ai.com/tools/intrinsic-value.html", "description": "免費使用葛拉漢內在價值公式，快速計算股票的合理價值。輸入每股盈餘和成長率即可獲得估值結果。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "每股盈餘 (EPS) 在哪裡可以找到？", "acceptedAnswer": {"@type": "Answer", "text": "每股盈餘通常在公司的財務報表、季度或年度報告中可以找到。您也可以在財經網站如Yahoo Finance、Google Finance或台灣的CMoney等地查詢。"}}, {"@type": "Question", "name": "預期成長率應該如何估計？", "acceptedAnswer": {"@type": "Answer", "text": "可以參考公司過去5-10年的平均成長率，或查看分析師對未來成長的預測。對於成熟公司，可以使用行業平均成長率。保守投資者通常使用較低的成長率估計。"}}, {"@type": "Question", "name": "內在價值計算結果一定準確嗎？", "acceptedAnswer": {"@type": "Answer", "text": "不一定。葛拉漢公式是一個簡化的估值模型，基於特定假設。實際股票價值還受多種因素影響，如市場情況、公司管理層、經濟環境等。建議結合其他估值方法使用。"}}, {"@type": "Question", "name": "如果成長率很高，公式是否仍然適用？", "acceptedAnswer": {"@type": "Answer", "text": "對於成長率非常高的公司（如新興科技公司），葛拉漢公式可能不太適用，因為公式假設成長率會逐漸穩定。在這種情況下，應該考慮使用其他估值方法如現金流貼現模型。"}}, {"@type": "Question", "name": "市價與內在價值差異很大時應該如何做？", "acceptedAnswer": {"@type": "Answer", "text": "如果市價遠低於內在價值，可能是買入機會，但應進一步調查原因。如果市價遠高於內在價值，可能表示股票被過度高估。無論哪種情況，都應該進行更深入的基本面分析，而不是僅憑單一公式決策。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="intrinsic-value">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/intrinsic-value.html" selected>繁中</option><option value="/tools/en/intrinsic-value.html">EN</option><option value="/tools/ja/intrinsic-value.html">日本語</option><option value="/tools/ko/intrinsic-value.html">한국어</option><option value="/tools/de/intrinsic-value.html">DE</option><option value="/tools/fr/intrinsic-value.html">FR</option><option value="/tools/es/intrinsic-value.html">ES</option><option value="/tools/pt/intrinsic-value.html">PT</option><option value="/tools/id/intrinsic-value.html">ID</option><option value="/tools/zh-CN/intrinsic-value.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/intrinsic-value.html" selected>繁中</option><option value="/tools/en/intrinsic-value.html">EN</option><option value="/tools/ja/intrinsic-value.html">日本語</option><option value="/tools/ko/intrinsic-value.html">한국어</option><option value="/tools/de/intrinsic-value.html">DE</option><option value="/tools/fr/intrinsic-value.html">FR</option><option value="/tools/es/intrinsic-value.html">ES</option><option value="/tools/pt/intrinsic-value.html">PT</option><option value="/tools/id/intrinsic-value.html">ID</option><option value="/tools/zh-CN/intrinsic-value.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 內在價值計算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/intrinsic-value.html" selected>繁中</option><option value="/tools/en/intrinsic-value.html">EN</option><option value="/tools/ja/intrinsic-value.html">日本語</option><option value="/tools/ko/intrinsic-value.html">한국어</option><option value="/tools/de/intrinsic-value.html">DE</option><option value="/tools/fr/intrinsic-value.html">FR</option><option value="/tools/es/intrinsic-value.html">ES</option><option value="/tools/pt/intrinsic-value.html">PT</option><option value="/tools/id/intrinsic-value.html">ID</option><option value="/tools/zh-CN/intrinsic-value.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -128,6 +142,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

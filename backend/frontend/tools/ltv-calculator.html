@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "客戶終身價值計算機", "url": "https://softglow-ai.com/tools/ltv-calculator.html", "description": "使用我們的客戶終身價值計算機，根據平均收入、利潤率和客戶壽命快速計算LTV。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "ARPU是什麼意思?", "acceptedAnswer": {"@type": "Answer", "text": "ARPU代表平均每位使用者收入(Average Revenue Per User)。這是您每個客戶平均每年為您的業務產生的總收入金額。計算方法是：總收入除以活躍客戶數。"}}, {"@type": "Question", "name": "我應該如何確定正確的利潤率?", "acceptedAnswer": {"@type": "Answer", "text": "利潤率應基於您的實際業務財務。計算方法是：(總收入 - 總成本) / 總收入 × 100%。這包括所有營運成本、人力成本和其他費用。不同行業的利潤率可能差異很大。"}}, {"@type": "Question", "name": "客戶生命週期如何計算?", "acceptedAnswer": {"@type": "Answer", "text": "客戶生命週期是客戶與您的業務保持關係的平均年限。您可以查看歷史數據，計算客戶平均保留的時間。如果還沒有足夠的歷史數據，可以根據行業標準或保守的估計開始。"}}, {"@type": "Question", "name": "LTV計算結果代表什麼?", "acceptedAnswer": {"@type": "Answer", "text": "LTV代表您能從一個客戶身上期望賺取的總利潤。月度和年度客戶價值幫助您了解收入如何分配在不同時間段內。使用這些數字來評估您在客戶獲取和保留上的投資是否合理。"}}, {"@type": "Question", "name": "如何使用LTV改進業務決策?", "acceptedAnswer": {"@type": "Answer", "text": "使用LTV來確定合理的客戶獲取成本預算（通常不超過LTV的30%），識別最有價值的客戶群體，以及優先考慮客戶保留策略。定期重新計算以追蹤業務健康狀況並調整策略。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="ltv-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/ltv-calculator.html" selected>繁中</option><option value="/tools/en/ltv-calculator.html">EN</option><option value="/tools/ja/ltv-calculator.html">日本語</option><option value="/tools/ko/ltv-calculator.html">한국어</option><option value="/tools/de/ltv-calculator.html">DE</option><option value="/tools/fr/ltv-calculator.html">FR</option><option value="/tools/es/ltv-calculator.html">ES</option><option value="/tools/pt/ltv-calculator.html">PT</option><option value="/tools/id/ltv-calculator.html">ID</option><option value="/tools/zh-CN/ltv-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/ltv-calculator.html" selected>繁中</option><option value="/tools/en/ltv-calculator.html">EN</option><option value="/tools/ja/ltv-calculator.html">日本語</option><option value="/tools/ko/ltv-calculator.html">한국어</option><option value="/tools/de/ltv-calculator.html">DE</option><option value="/tools/fr/ltv-calculator.html">FR</option><option value="/tools/es/ltv-calculator.html">ES</option><option value="/tools/pt/ltv-calculator.html">PT</option><option value="/tools/id/ltv-calculator.html">ID</option><option value="/tools/zh-CN/ltv-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 客戶終身價值計算機</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/ltv-calculator.html" selected>繁中</option><option value="/tools/en/ltv-calculator.html">EN</option><option value="/tools/ja/ltv-calculator.html">日本語</option><option value="/tools/ko/ltv-calculator.html">한국어</option><option value="/tools/de/ltv-calculator.html">DE</option><option value="/tools/fr/ltv-calculator.html">FR</option><option value="/tools/es/ltv-calculator.html">ES</option><option value="/tools/pt/ltv-calculator.html">PT</option><option value="/tools/id/ltv-calculator.html">ID</option><option value="/tools/zh-CN/ltv-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -138,6 +152,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

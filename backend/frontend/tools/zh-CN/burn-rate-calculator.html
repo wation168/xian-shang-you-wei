@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "烧钱率计算器", "url": "https://softglow-ai.com/tools/zh-CN/burn-rate-calculator.html", "description": "免费烧钱率计算器，帮助初创公司计算月度现金消耗速度、资金跑道和资金耗尽时间。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "烧钱率和现金流有什么区别？", "acceptedAnswer": {"@type": "Answer", "text": "烧钱率特指初创公司的净现金支出（支出-收入），而现金流是更广泛的概念，包括所有进出的现金。烧钱率是现金流的一个重要组成部分，专门用于衡量公司消耗现金的速度。"}}, {"@type": "Question", "name": "如何延长资金跑道？", "acceptedAnswer": {"@type": "Answer", "text": "延长资金跑道有两个主要方向：(1)增加收入，通过销售、市场开拓或新产品推出来提高月度收入；(2)降低支出，通过成本优化、精简团队或谈判更优供应商价格来减少月度开支。两者结合效果最佳。"}}, {"@type": "Question", "name": "资金跑道为负数说明什么？", "acceptedAnswer": {"@type": "Answer", "text": "负数资金跑道表示公司月度收入已超过月度支出，即处于现金流为正的状态。这是初创公司的理想状态，意味着公司不再消耗现金，反而在积累现金储备，表明业务已实现盈利或接近盈利。"}}, {"@type": "Question", "name": "融资时应该瞄准多少个月的资金跑道？", "acceptedAnswer": {"@type": "Answer", "text": "通常建议融资目标应使资金跑道达到18-24个月。这样既能给公司足够的时间专注业务增长和优化，又能为下一轮融资或实现盈利留出充足的缓冲期。具体目标应根据行业、增长阶段和市场情况灵活调整。"}}, {"@type": "Question", "name": "烧钱率在不同创业阶段如何变化？", "acceptedAnswer": {"@type": "Answer", "text": "早期种子阶段烧钱率通常较高，因为支出多但收入少。随着业务增长，收入增加会降低烧钱率。成熟阶段公司应逐步实现正向现金流。跑道越长，公司成长时间越充足，但过长也意味着可能增长过缓。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="burn-rate-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/burn-rate-calculator.html">繁中</option><option value="/tools/en/burn-rate-calculator.html">EN</option><option value="/tools/ja/burn-rate-calculator.html">日本語</option><option value="/tools/ko/burn-rate-calculator.html">한국어</option><option value="/tools/de/burn-rate-calculator.html">DE</option><option value="/tools/fr/burn-rate-calculator.html">FR</option><option value="/tools/es/burn-rate-calculator.html">ES</option><option value="/tools/pt/burn-rate-calculator.html">PT</option><option value="/tools/id/burn-rate-calculator.html">ID</option><option value="/tools/zh-CN/burn-rate-calculator.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/burn-rate-calculator.html">繁中</option><option value="/tools/en/burn-rate-calculator.html">EN</option><option value="/tools/ja/burn-rate-calculator.html">日本語</option><option value="/tools/ko/burn-rate-calculator.html">한국어</option><option value="/tools/de/burn-rate-calculator.html">DE</option><option value="/tools/fr/burn-rate-calculator.html">FR</option><option value="/tools/es/burn-rate-calculator.html">ES</option><option value="/tools/pt/burn-rate-calculator.html">PT</option><option value="/tools/id/burn-rate-calculator.html">ID</option><option value="/tools/zh-CN/burn-rate-calculator.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 烧钱率计算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/burn-rate-calculator.html">繁中</option><option value="/tools/en/burn-rate-calculator.html">EN</option><option value="/tools/ja/burn-rate-calculator.html">日本語</option><option value="/tools/ko/burn-rate-calculator.html">한국어</option><option value="/tools/de/burn-rate-calculator.html">DE</option><option value="/tools/fr/burn-rate-calculator.html">FR</option><option value="/tools/es/burn-rate-calculator.html">ES</option><option value="/tools/pt/burn-rate-calculator.html">PT</option><option value="/tools/id/burn-rate-calculator.html">ID</option><option value="/tools/zh-CN/burn-rate-calculator.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -144,6 +158,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

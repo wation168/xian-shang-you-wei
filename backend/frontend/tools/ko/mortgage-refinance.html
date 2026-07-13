@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "모기지 재융자 계산기", "url": "https://softglow-ai.com/tools/ko/mortgage-refinance.html", "description": "현재 모기지와 재융자 옵션을 비교하여 월 납입금, 이자 절감액, 손익분기점을 계산합니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "재융자는 언제 고려해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "일반적으로 이자율이 현재보다 0.5% 이상 낮거나, 신용점수가 크게 개선되었을 때, 또는 대출 기간을 단축하고 싶을 때 재융자를 고려합니다. 손익분기점이 남은 대출 기간보다 짧아야 경제적으로 유리합니다."}}, {"@type": "Question", "name": "정산 비용(Closing Costs)에는 어떤 것들이 포함되나요?", "acceptedAnswer": {"@type": "Answer", "text": "정산 비용에는 신청료, 감정료, 신용조회료, 법적 비용, 저당권 설정 비용, 보험료 선납, 재산세 선납 등이 포함됩니다. 보통 대출금의 2~5% 정도이며, 금융기관별로 상이합니다."}}, {"@type": "Question", "name": "손익분기점이란 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "손익분기점은 월 납입금의 절감액으로 재융자 정산 비용을 완전히 상쇄하는 데 필요한 개월 수입니다. 이 기간이 지나야 실제 이득을 보게 됩니다. 예를 들어 손익분기점이 30개월이면 2년 6개월 후부터 이득입니다."}}, {"@type": "Question", "name": "재융자가 신용점수에 영향을 미치나요?", "acceptedAnswer": {"@type": "Answer", "text": "재융자 신청 시 신용조회로 인해 신용점수가 일시적으로 5~10점 내려갈 수 있습니다. 하지만 재융자 후 꾸준히 상환하면 신용점수가 다시 올라갑니다. 여러 기관에 신청할 때는 일정 기간 내에 신청하면 한 번의 영향만 받습니다."}}, {"@type": "Question", "name": "조기 상환 수수료가 있으면 어떻게 되나요?", "acceptedAnswer": {"@type": "Answer", "text": "기존 모기지에 조기 상환 수수료가 있다면, 이 금액도 재융자 비용에 포함하여 계산해야 합니다. 총 비용이 증가하면 손익분기점이 길어지므로, 수수료를 확인한 후 재융자 결정을 하세요."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="mortgage-refinance">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/mortgage-refinance.html">繁中</option><option value="/tools/en/mortgage-refinance.html">EN</option><option value="/tools/ja/mortgage-refinance.html">日本語</option><option value="/tools/ko/mortgage-refinance.html" selected>한국어</option><option value="/tools/de/mortgage-refinance.html">DE</option><option value="/tools/fr/mortgage-refinance.html">FR</option><option value="/tools/es/mortgage-refinance.html">ES</option><option value="/tools/pt/mortgage-refinance.html">PT</option><option value="/tools/id/mortgage-refinance.html">ID</option><option value="/tools/zh-CN/mortgage-refinance.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/mortgage-refinance.html">繁中</option><option value="/tools/en/mortgage-refinance.html">EN</option><option value="/tools/ja/mortgage-refinance.html">日本語</option><option value="/tools/ko/mortgage-refinance.html" selected>한국어</option><option value="/tools/de/mortgage-refinance.html">DE</option><option value="/tools/fr/mortgage-refinance.html">FR</option><option value="/tools/es/mortgage-refinance.html">ES</option><option value="/tools/pt/mortgage-refinance.html">PT</option><option value="/tools/id/mortgage-refinance.html">ID</option><option value="/tools/zh-CN/mortgage-refinance.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 모기지 재융자 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/mortgage-refinance.html">繁中</option><option value="/tools/en/mortgage-refinance.html">EN</option><option value="/tools/ja/mortgage-refinance.html">日本語</option><option value="/tools/ko/mortgage-refinance.html" selected>한국어</option><option value="/tools/de/mortgage-refinance.html">DE</option><option value="/tools/fr/mortgage-refinance.html">FR</option><option value="/tools/es/mortgage-refinance.html">ES</option><option value="/tools/pt/mortgage-refinance.html">PT</option><option value="/tools/id/mortgage-refinance.html">ID</option><option value="/tools/zh-CN/mortgage-refinance.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -178,6 +192,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

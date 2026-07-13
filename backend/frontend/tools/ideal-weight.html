@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "理想體重計算器", "url": "https://softglow-ai.com/tools/ideal-weight.html", "description": "使用Devine、Robinson、Miller和Hamwi公式計算您的理想體重。輸入身高和年齡，立即獲得個性化的健康體重範圍建議。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "為什麼不同公式給出的理想體重不同？", "acceptedAnswer": {"@type": "Answer", "text": "不同公式是基於不同的研究數據和時代開發的。Devine公式最早且最廣泛使用，而Robinson、Miller和Hamwi公式在其基礎上進行了改進或提出了替代方法。這些差異反映了不同的統計樣本和計算方法，因此使用平均值能更好地估計理想體重。"}}, {"@type": "Question", "name": "理想體重和BMI有什麼區別？", "acceptedAnswer": {"@type": "Answer", "text": "理想體重是基於身高計算的具體目標體重值，而BMI（體質指數）是體重除以身高平方的比值。BMI是衡量身體是否健康的指標，健康的BMI範圍是18.5至24.9。理想體重可以幫助確定達到健康BMI所需的體重範圍。"}}, {"@type": "Question", "name": "年齡對理想體重有影響嗎？", "acceptedAnswer": {"@type": "Answer", "text": "年齡確實會影響理想體重。隨著年齡增長，基礎代謝率會下降，肌肉質量可能會減少，因此體重管理變得更具挑戰性。本計算器中的年齡欄位可選，但輸入年齡能幫助提供更個性化的評估。"}}, {"@type": "Question", "name": "如果我的實際體重明顯高於計算的理想體重該怎麼辦？", "acceptedAnswer": {"@type": "Answer", "text": "如果您的體重明顯高於理想體重，建議諮詢醫生或營養師。他們可以幫助您制定安全有效的減重計畫，包括飲食改變、運動建議和必要的醫療監測。快速減重可能不健康，循序漸進的方法通常更可持續。"}}, {"@type": "Question", "name": "運動員或肌肉發達的人適用這個計算器嗎？", "acceptedAnswer": {"@type": "Answer", "text": "本計算器基於一般人群的平均數據開發，可能不完全適用於運動員或肌肉質量特別高的人。由於肌肉比脂肪更重，這些人的理想體重可能高於計算結果。在這種情況下，應該諮詢專業的健身教練或醫生以獲得更準確的評估。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="ideal-weight">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/ideal-weight.html" selected>繁中</option><option value="/tools/en/ideal-weight.html">EN</option><option value="/tools/ja/ideal-weight.html">日本語</option><option value="/tools/ko/ideal-weight.html">한국어</option><option value="/tools/de/ideal-weight.html">DE</option><option value="/tools/fr/ideal-weight.html">FR</option><option value="/tools/es/ideal-weight.html">ES</option><option value="/tools/pt/ideal-weight.html">PT</option><option value="/tools/id/ideal-weight.html">ID</option><option value="/tools/zh-CN/ideal-weight.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/ideal-weight.html" selected>繁中</option><option value="/tools/en/ideal-weight.html">EN</option><option value="/tools/ja/ideal-weight.html">日本語</option><option value="/tools/ko/ideal-weight.html">한국어</option><option value="/tools/de/ideal-weight.html">DE</option><option value="/tools/fr/ideal-weight.html">FR</option><option value="/tools/es/ideal-weight.html">ES</option><option value="/tools/pt/ideal-weight.html">PT</option><option value="/tools/id/ideal-weight.html">ID</option><option value="/tools/zh-CN/ideal-weight.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 理想體重計算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/ideal-weight.html" selected>繁中</option><option value="/tools/en/ideal-weight.html">EN</option><option value="/tools/ja/ideal-weight.html">日本語</option><option value="/tools/ko/ideal-weight.html">한국어</option><option value="/tools/de/ideal-weight.html">DE</option><option value="/tools/fr/ideal-weight.html">FR</option><option value="/tools/es/ideal-weight.html">ES</option><option value="/tools/pt/ideal-weight.html">PT</option><option value="/tools/id/ideal-weight.html">ID</option><option value="/tools/zh-CN/ideal-weight.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -163,6 +177,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

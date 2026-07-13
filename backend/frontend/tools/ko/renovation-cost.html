@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "리노베이션 예산 추정기", "url": "https://softglow-ai.com/tools/ko/renovation-cost.html", "description": "프로젝트 면적과 품질 등급으로 리노베이션 비용을 빠르게 추정하세요. 지역별 단가 적용으로 더욱 정확한 예산을 계산할 수 있습니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "리노베이션 예산 계산기는 어떻게 작동하나요?", "acceptedAnswer": {"@type": "Answer", "text": "이 계산기는 프로젝트 면적에 지역 평방피트당 단가를 곱하고, 선택한 품질 등급에 해당하는 계수를 적용하여 총 비용을 산출합니다. 품질 등급이 높을수록 비용 배수가 커집니다."}}, {"@type": "Question", "name": "품질 등급 1과 5의 비용 차이는 얼마나 되나요?", "acceptedAnswer": {"@type": "Answer", "text": "일반적으로 품질 등급이 1에서 5로 올라갈수록 비용은 약 2배에서 3배까지 증가합니다. 사용하는 자재, 마감재의 품질, 공사 기간과 난이도에 따라 달라질 수 있습니다."}}, {"@type": "Question", "name": "지역 시세 정보는 어디서 얻을 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "지역 건설업체, 시공사 협회, 온라인 건설 비용 데이터베이스, 또는 최근에 리노베이션을 완료한 이웃이나 친구의 경험을 참고할 수 있습니다. 여러 출처의 정보를 비교하여 평균값을 사용하세요."}}, {"@type": "Question", "name": "추정 비용에 포함되지 않는 항목이 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "이 계산기는 기본 공사비를 기반으로 합니다. 허가비, 검사비, 설계비, 특수 장비 설치 비용 등의 추가 비용은 별도로 계산하여 최종 예산에 포함시키는 것이 좋습니다."}}, {"@type": "Question", "name": "예산이 초과될 경우 어떻게 조정할 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "품질 등급을 낮추거나, 프로젝트 범위를 축소하거나, 단계적으로 공사를 진행하는 방법이 있습니다. 계산기에서 다양한 조합을 시뮬레이션하여 최적의 예산안을 찾을 수 있습니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="renovation-cost">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/renovation-cost.html">繁中</option><option value="/tools/en/renovation-cost.html">EN</option><option value="/tools/ja/renovation-cost.html">日本語</option><option value="/tools/ko/renovation-cost.html" selected>한국어</option><option value="/tools/de/renovation-cost.html">DE</option><option value="/tools/fr/renovation-cost.html">FR</option><option value="/tools/es/renovation-cost.html">ES</option><option value="/tools/pt/renovation-cost.html">PT</option><option value="/tools/id/renovation-cost.html">ID</option><option value="/tools/zh-CN/renovation-cost.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/renovation-cost.html">繁中</option><option value="/tools/en/renovation-cost.html">EN</option><option value="/tools/ja/renovation-cost.html">日本語</option><option value="/tools/ko/renovation-cost.html" selected>한국어</option><option value="/tools/de/renovation-cost.html">DE</option><option value="/tools/fr/renovation-cost.html">FR</option><option value="/tools/es/renovation-cost.html">ES</option><option value="/tools/pt/renovation-cost.html">PT</option><option value="/tools/id/renovation-cost.html">ID</option><option value="/tools/zh-CN/renovation-cost.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 리노베이션 예산 추정기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/renovation-cost.html">繁中</option><option value="/tools/en/renovation-cost.html">EN</option><option value="/tools/ja/renovation-cost.html">日本語</option><option value="/tools/ko/renovation-cost.html" selected>한국어</option><option value="/tools/de/renovation-cost.html">DE</option><option value="/tools/fr/renovation-cost.html">FR</option><option value="/tools/es/renovation-cost.html">ES</option><option value="/tools/pt/renovation-cost.html">PT</option><option value="/tools/id/renovation-cost.html">ID</option><option value="/tools/zh-CN/renovation-cost.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -137,6 +151,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

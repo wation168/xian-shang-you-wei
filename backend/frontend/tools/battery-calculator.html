@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "電池壽命計算器", "url": "https://softglow-ai.com/tools/battery-calculator.html", "description": "免費電池壽命計算器，輸入電池容量和耗電流，立即計算電池能使用多少小時或分鐘。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "mAh和mA分別代表什麼？", "acceptedAnswer": {"@type": "Answer", "text": "mAh（毫安時）是電池容量的單位，表示電池在1小時內能供應的毫安電流量。mA（毫安）是電流的單位，用於測量設備的耗電流。簡單來說，mAh代表『能量儲存量』，mA代表『能量消耗速率』。"}}, {"@type": "Question", "name": "計算器給出的結果是精確的嗎？", "acceptedAnswer": {"@type": "Answer", "text": "計算器基於理想條件進行計算，但實際電池壽命可能受多個因素影響，包括電池年齡、溫度、充放電效率和設備的實際功耗波動。因此，計算結果應作為參考估值，實際時間可能有10-20%的偏差。"}}, {"@type": "Question", "name": "如何降低設備的耗電流？", "acceptedAnswer": {"@type": "Answer", "text": "可以通過多種方式降低耗電流：降低屏幕亮度、關閉不必要的應用程序、禁用Wi-Fi和藍牙等無線功能、使用低功耗模式、減少處理器速度，以及避免在高溫環境下使用設備。"}}, {"@type": "Question", "name": "電池容量為什麼會隨時間減少？", "acceptedAnswer": {"@type": "Answer", "text": "電池老化是自然現象。每次充放電循環，電池內部的化學物質都會逐漸退化，導致容量逐漸減少。通常，鋰電池在經歷300-500次充放電循環後，容量會下降到原容量的80%左右。"}}, {"@type": "Question", "name": "我應該如何選擇合適容量的電池？", "acceptedAnswer": {"@type": "Answer", "text": "選擇電池容量應考慮設備的日常使用時間和耗電流。如果需要全天使用設備，應選擇能提供至少一整天續航時間的電池。同時要考慮設備的實體空間限制。對於關鍵應用，建議選擇容量稍大的電池以提供冗餘。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="battery-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/battery-calculator.html" selected>繁中</option><option value="/tools/en/battery-calculator.html">EN</option><option value="/tools/ja/battery-calculator.html">日本語</option><option value="/tools/ko/battery-calculator.html">한국어</option><option value="/tools/de/battery-calculator.html">DE</option><option value="/tools/fr/battery-calculator.html">FR</option><option value="/tools/es/battery-calculator.html">ES</option><option value="/tools/pt/battery-calculator.html">PT</option><option value="/tools/id/battery-calculator.html">ID</option><option value="/tools/zh-CN/battery-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/battery-calculator.html" selected>繁中</option><option value="/tools/en/battery-calculator.html">EN</option><option value="/tools/ja/battery-calculator.html">日本語</option><option value="/tools/ko/battery-calculator.html">한국어</option><option value="/tools/de/battery-calculator.html">DE</option><option value="/tools/fr/battery-calculator.html">FR</option><option value="/tools/es/battery-calculator.html">ES</option><option value="/tools/pt/battery-calculator.html">PT</option><option value="/tools/id/battery-calculator.html">ID</option><option value="/tools/zh-CN/battery-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 電池壽命計算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/battery-calculator.html" selected>繁中</option><option value="/tools/en/battery-calculator.html">EN</option><option value="/tools/ja/battery-calculator.html">日本語</option><option value="/tools/ko/battery-calculator.html">한국어</option><option value="/tools/de/battery-calculator.html">DE</option><option value="/tools/fr/battery-calculator.html">FR</option><option value="/tools/es/battery-calculator.html">ES</option><option value="/tools/pt/battery-calculator.html">PT</option><option value="/tools/id/battery-calculator.html">ID</option><option value="/tools/zh-CN/battery-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -129,6 +143,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

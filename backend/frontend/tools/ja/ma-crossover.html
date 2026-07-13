@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "MA クロスオーバー計算機", "url": "https://softglow-ai.com/tools/ja/ma-crossover.html", "description": "移動平均線のクロスオーバーを分析し、買いシグナルと売りシグナルを自動判定します。テクニカル分析ツール。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "ゴールデンクロスとデッドクロスの違いは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "ゴールデンクロスは短期移動平均線が長期移動平均線を下から上へ突破する現象で、買いシグナルと見なされます。デッドクロスは逆に短期MAが長期MAを上から下へ突破する現象で、売りシグナルです。"}}, {"@type": "Question", "name": "どの期間の移動平均線を使用すべきですか？", "acceptedAnswer": {"@type": "Answer", "text": "スキャルピングなら5日と10日、デイトレードなら12日と26日、スイングトレードなら20日と50日、中長期投資なら50日と200日がよく使用されます。市場や銘柄の特性に応じて調整してください。"}}, {"@type": "Question", "name": "MA間の距離が大きい場合と小さい場合で何が違いますか？", "acceptedAnswer": {"@type": "Answer", "text": "MA間の距離が大きい場合はトレンドが強く確立している状態です。一方、距離が小さい場合はトレンドが弱まっているか、次のクロスオーバーが近い可能性があります。"}}, {"@type": "Question", "name": "クロスオーバーシグナルだけで取引判断をしてもいいですか？", "acceptedAnswer": {"@type": "Answer", "text": "クロスオーバーは有用なシグナルですが、単独では不十分です。RSIやMACD、サポート・レジスタンスレベルなど、他の指標と組み合わせて判断することをお勧めします。"}}, {"@type": "Question", "name": "ダマシのクロスオーバーを避けるにはどうしたらいいですか？", "acceptedAnswer": {"@type": "Answer", "text": "ボリンジャーバンドやストキャスティクスなどのオシレーター系指標で過買い・過売り状態を確認したり、より長期の移動平均線を組み合わせたりすることで、ダマシの可能性を低減できます。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="ma-crossover">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ja">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ja/">ツール</a>
-    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/patterns/ja.html">ローソク足</a>
+    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/">ホーム</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/ma-crossover.html">繁中</option><option value="/tools/en/ma-crossover.html">EN</option><option value="/tools/ja/ma-crossover.html" selected>日本語</option><option value="/tools/ko/ma-crossover.html">한국어</option><option value="/tools/de/ma-crossover.html">DE</option><option value="/tools/fr/ma-crossover.html">FR</option><option value="/tools/es/ma-crossover.html">ES</option><option value="/tools/pt/ma-crossover.html">PT</option><option value="/tools/id/ma-crossover.html">ID</option><option value="/tools/zh-CN/ma-crossover.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/ma-crossover.html">繁中</option><option value="/tools/en/ma-crossover.html">EN</option><option value="/tools/ja/ma-crossover.html" selected>日本語</option><option value="/tools/ko/ma-crossover.html">한국어</option><option value="/tools/de/ma-crossover.html">DE</option><option value="/tools/fr/ma-crossover.html">FR</option><option value="/tools/es/ma-crossover.html">ES</option><option value="/tools/pt/ma-crossover.html">PT</option><option value="/tools/id/ma-crossover.html">ID</option><option value="/tools/zh-CN/ma-crossover.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > MA クロスオーバー計算機</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/ma-crossover.html">繁中</option><option value="/tools/en/ma-crossover.html">EN</option><option value="/tools/ja/ma-crossover.html" selected>日本語</option><option value="/tools/ko/ma-crossover.html">한국어</option><option value="/tools/de/ma-crossover.html">DE</option><option value="/tools/fr/ma-crossover.html">FR</option><option value="/tools/es/ma-crossover.html">ES</option><option value="/tools/pt/ma-crossover.html">PT</option><option value="/tools/id/ma-crossover.html">ID</option><option value="/tools/zh-CN/ma-crossover.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -172,6 +186,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="ツール、パターン、記事を検索…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>ブックマーク</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全て削除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "金屬重量計算器", "url": "https://softglow-ai.com/tools/metal-weight.html", "description": "免費金屬重量計算器。輸入體積和密度，自動計算金屬的重量。支持克、公斤、磅、盎司多種單位。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "如何測量金屬的體積？", "acceptedAnswer": {"@type": "Answer", "text": "對於規則形狀的金屬（如立方體或圓柱體），可以測量其尺寸後使用幾何公式計算體積。對於不規則形狀的金屬，可以使用排水法：將金屬放入充滿水的量筒中，測量水面上升的刻度差，該數值即為體積（以毫升或立方厘米計）。"}}, {"@type": "Question", "name": "密度值從哪裡獲取？", "acceptedAnswer": {"@type": "Answer", "text": "密度值通常可以從物理化學手冊、金屬供應商的技術規格表或在線資源中獲取。本計算器的金屬類型下拉菜單中包含了常見金屬的標準密度值，可直接選擇使用。若需要特殊金屬的密度，建議查閱專業技術文獻。"}}, {"@type": "Question", "name": "為什麼同一種金屬的密度可能不同？", "acceptedAnswer": {"@type": "Answer", "text": "金屬的密度可能因純度、晶體結構、溫度和壓力等因素而略有不同。例如，純銅和銅合金的密度會有差異。溫度升高通常會使密度略微下降。在精密計算時，應使用特定條件下的密度值。"}}, {"@type": "Question", "name": "計算器支持哪些重量單位？", "acceptedAnswer": {"@type": "Answer", "text": "計算器支持四種常見的重量單位：克（g）、公斤（kg）、磅（lb）和盎司（oz）。其中，克和公斤屬於公制單位，磅和盎司屬於英制單位。1公斤=1000克，1磅≈453.592克，1盎司≈28.35克。"}}, {"@type": "Question", "name": "計算結果的準確性如何保證？", "acceptedAnswer": {"@type": "Answer", "text": "計算器使用標準的物理公式（重量=體積×密度）進行計算。結果的準確性完全取決於您輸入的體積和密度數值的準確性。為確保結果可靠，請使用精確的測量工具測量體積，並從可信的來源獲取密度值。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="metal-weight">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/metal-weight.html" selected>繁中</option><option value="/tools/en/metal-weight.html">EN</option><option value="/tools/ja/metal-weight.html">日本語</option><option value="/tools/ko/metal-weight.html">한국어</option><option value="/tools/de/metal-weight.html">DE</option><option value="/tools/fr/metal-weight.html">FR</option><option value="/tools/es/metal-weight.html">ES</option><option value="/tools/pt/metal-weight.html">PT</option><option value="/tools/id/metal-weight.html">ID</option><option value="/tools/zh-CN/metal-weight.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/metal-weight.html" selected>繁中</option><option value="/tools/en/metal-weight.html">EN</option><option value="/tools/ja/metal-weight.html">日本語</option><option value="/tools/ko/metal-weight.html">한국어</option><option value="/tools/de/metal-weight.html">DE</option><option value="/tools/fr/metal-weight.html">FR</option><option value="/tools/es/metal-weight.html">ES</option><option value="/tools/pt/metal-weight.html">PT</option><option value="/tools/id/metal-weight.html">ID</option><option value="/tools/zh-CN/metal-weight.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 金屬重量計算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/metal-weight.html" selected>繁中</option><option value="/tools/en/metal-weight.html">EN</option><option value="/tools/ja/metal-weight.html">日本語</option><option value="/tools/ko/metal-weight.html">한국어</option><option value="/tools/de/metal-weight.html">DE</option><option value="/tools/fr/metal-weight.html">FR</option><option value="/tools/es/metal-weight.html">ES</option><option value="/tools/pt/metal-weight.html">PT</option><option value="/tools/id/metal-weight.html">ID</option><option value="/tools/zh-CN/metal-weight.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -160,6 +174,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

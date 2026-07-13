@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "市净率(P/B)计算器", "url": "https://softglow-ai.com/tools/zh-CN/pb-ratio.html", "description": "免费市净率计算器，输入股票现价和每股净资产，快速计算P/B比率，帮助投资者评估股票是否被低估或高估。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "市净率多少才算便宜？", "acceptedAnswer": {"@type": "Answer", "text": "一般来说，P/B比率小于1.0表示股票价格低于账面价值，可能被严重低估。比率在0.8-1.2之间通常被认为相对便宜。但具体判断还需考虑行业特性和公司质量，不同行业的合理P/B范围差异很大。"}}, {"@type": "Question", "name": "为什么有些公司的市净率远高于1.0？", "acceptedAnswer": {"@type": "Answer", "text": "高市净率通常反映市场对公司未来增长潜力的看好。许多高科技公司、轻资产公司或高增长公司的市净率较高，因为其价值更多来自无形资产和未来盈利能力，而非有形资产。"}}, {"@type": "Question", "name": "市净率低是否意味着股票是好投资？", "acceptedAnswer": {"@type": "Answer", "text": "不一定。低市净率可能表示股票被低估，但也可能说明公司存在问题，如盈利能力差、资产质量下降等。投资者需要进一步分析公司的盈利能力、行业地位和财务健康状况，避免陷入价值陷阱。"}}, {"@type": "Question", "name": "不同行业的市净率为什么差异这么大？", "acceptedAnswer": {"@type": "Answer", "text": "不同行业的资产构成差异很大。银行、保险等金融机构和房地产公司有大量有形资产，市净率通常较低；而科技、服务等轻资产行业的公司市净率通常较高。因此比较市净率时应与同行业公司比较。"}}, {"@type": "Question", "name": "市净率与市盈率有什么区别？", "acceptedAnswer": {"@type": "Answer", "text": "市净率基于账面价值(资产减负债)，反映股票相对资产的价格；市盈率基于盈利，反映股票相对利润的价格。市净率更适合评估资产密集型企业，市盈率更适合评估盈利能力强的企业。两者结合使用效果更好。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="pb-ratio">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/pb-ratio.html">繁中</option><option value="/tools/en/pb-ratio.html">EN</option><option value="/tools/ja/pb-ratio.html">日本語</option><option value="/tools/ko/pb-ratio.html">한국어</option><option value="/tools/de/pb-ratio.html">DE</option><option value="/tools/fr/pb-ratio.html">FR</option><option value="/tools/es/pb-ratio.html">ES</option><option value="/tools/pt/pb-ratio.html">PT</option><option value="/tools/id/pb-ratio.html">ID</option><option value="/tools/zh-CN/pb-ratio.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/pb-ratio.html">繁中</option><option value="/tools/en/pb-ratio.html">EN</option><option value="/tools/ja/pb-ratio.html">日本語</option><option value="/tools/ko/pb-ratio.html">한국어</option><option value="/tools/de/pb-ratio.html">DE</option><option value="/tools/fr/pb-ratio.html">FR</option><option value="/tools/es/pb-ratio.html">ES</option><option value="/tools/pt/pb-ratio.html">PT</option><option value="/tools/id/pb-ratio.html">ID</option><option value="/tools/zh-CN/pb-ratio.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 市净率(P/B)计算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/pb-ratio.html">繁中</option><option value="/tools/en/pb-ratio.html">EN</option><option value="/tools/ja/pb-ratio.html">日本語</option><option value="/tools/ko/pb-ratio.html">한국어</option><option value="/tools/de/pb-ratio.html">DE</option><option value="/tools/fr/pb-ratio.html">FR</option><option value="/tools/es/pb-ratio.html">ES</option><option value="/tools/pt/pb-ratio.html">PT</option><option value="/tools/id/pb-ratio.html">ID</option><option value="/tools/zh-CN/pb-ratio.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -123,6 +137,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

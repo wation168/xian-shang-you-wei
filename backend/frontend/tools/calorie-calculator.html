@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "卡路里計算機", "url": "https://softglow-ai.com/tools/calorie-calculator.html", "description": "免費卡路里計算機，根據年齡、性別、身高、體重和活動水平計算您的每日卡路里需求，幫助您達成體重管理目標。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "BMR和TDEE有什麼區別？", "acceptedAnswer": {"@type": "Answer", "text": "BMR（基礎代謝率）是您在靜止狀態下維持基本生命活動所需的卡路里，而TDEE（每日總能量消耗）包括BMR加上日常活動和運動所消耗的額外卡路里。TDEE是計劃您的飲食攝入時應參考的數字。"}}, {"@type": "Question", "name": "我應該每天消耗多少卡路里才能減重？", "acceptedAnswer": {"@type": "Answer", "text": "要安全地減重，建議每週減少3,500-7,000卡路里（即每天減少500-1,000卡路里），這樣可以每週減重約0.5-1公斤。過度減少卡路里可能導致營養不足和肌肉流失。"}}, {"@type": "Question", "name": "活動水平應該如何選擇？", "acceptedAnswer": {"@type": "Answer", "text": "久坐：幾乎沒有運動；輕度活動：每週運動1-3天；中度活動：每週運動3-5天；高度活動：每週運動6-7天；非常高度活動：體力工作或職業運動員。選擇最符合您實際生活方式的選項。"}}, {"@type": "Question", "name": "計算結果的準確性如何？", "acceptedAnswer": {"@type": "Answer", "text": "此計算機使用科學公式（Mifflin-St Jeor），但結果仍是估計值。實際卡路里需求可能因遺傳、肌肉量、代謝率和其他因素而異。建議結合實際體重變化來調整目標。"}}, {"@type": "Question", "name": "我的卡路里目標應該多久調整一次？", "acceptedAnswer": {"@type": "Answer", "text": "建議每2-4週根據體重變化和感覺調整一次。如果沒有達到預期目標，可能需要微調卡路里攝入或增加運動量。定期諮詢營養師或健身專家可以幫助優化您的計畫。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="calorie-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/calorie-calculator.html" selected>繁中</option><option value="/tools/en/calorie-calculator.html">EN</option><option value="/tools/ja/calorie-calculator.html">日本語</option><option value="/tools/ko/calorie-calculator.html">한국어</option><option value="/tools/de/calorie-calculator.html">DE</option><option value="/tools/fr/calorie-calculator.html">FR</option><option value="/tools/es/calorie-calculator.html">ES</option><option value="/tools/pt/calorie-calculator.html">PT</option><option value="/tools/id/calorie-calculator.html">ID</option><option value="/tools/zh-CN/calorie-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/calorie-calculator.html" selected>繁中</option><option value="/tools/en/calorie-calculator.html">EN</option><option value="/tools/ja/calorie-calculator.html">日本語</option><option value="/tools/ko/calorie-calculator.html">한국어</option><option value="/tools/de/calorie-calculator.html">DE</option><option value="/tools/fr/calorie-calculator.html">FR</option><option value="/tools/es/calorie-calculator.html">ES</option><option value="/tools/pt/calorie-calculator.html">PT</option><option value="/tools/id/calorie-calculator.html">ID</option><option value="/tools/zh-CN/calorie-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 卡路里計算機</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/calorie-calculator.html" selected>繁中</option><option value="/tools/en/calorie-calculator.html">EN</option><option value="/tools/ja/calorie-calculator.html">日本語</option><option value="/tools/ko/calorie-calculator.html">한국어</option><option value="/tools/de/calorie-calculator.html">DE</option><option value="/tools/fr/calorie-calculator.html">FR</option><option value="/tools/es/calorie-calculator.html">ES</option><option value="/tools/pt/calorie-calculator.html">PT</option><option value="/tools/id/calorie-calculator.html">ID</option><option value="/tools/zh-CN/calorie-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -155,6 +169,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "단열재 계산기", "url": "https://softglow-ai.com/tools/ko/insulation-calculator.html", "description": "단열재 계산기로 건물의 면적과 R-값 사양에 따라 필요한 단열재 두께, 총량 및 비용을 쉽게 계산하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "R-값은 무엇을 의미하나요?", "acceptedAnswer": {"@type": "Answer", "text": "R-값은 단열재의 열 저항성을 측정하는 지표입니다. 값이 높을수록 단열 성능이 우수하며, 인치 단위로 표시됩니다. 예를 들어 R-3.5는 1인치 두께의 단열재가 3.5의 R-값을 제공한다는 의미입니다."}}, {"@type": "Question", "name": "우리 집에 필요한 R-값은 어떻게 결정하나요?", "acceptedAnswer": {"@type": "Answer", "text": "필요한 R-값은 지역의 기후, 건축법, 건물의 위치(천장, 벽, 바닥)에 따라 다릅니다. 일반적으로 추운 지역은 더 높은 R-값이 필요합니다. 지역 건축 규정이나 전문가와 상담하여 적절한 목표 R-등급을 결정하세요."}}, {"@type": "Question", "name": "단열재 계산기의 결과를 어떻게 활용하나요?", "acceptedAnswer": {"@type": "Answer", "text": "계산 결과는 필요한 단열재의 두께, 총량, 예상 비용을 제공합니다. 이 정보를 바탕으로 구매할 단열재의 종류와 양을 결정하고, 시공 비용을 예상할 수 있습니다."}}, {"@type": "Question", "name": "단열재를 설치할 때 주의할 점은 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "단열재 설치 시 적절한 환기, 습기 제어, 안전 장비 착용이 중요합니다. 또한 전기 배선이나 배관을 손상하지 않도록 주의해야 하며, 필요시 전문 시공업체에 의뢰하는 것이 좋습니다."}}, {"@type": "Question", "name": "다양한 단열재 종류가 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "네, 글래스 울, 광물 울, 스프레이 폼, 셀룰로오스, 폴리스티렌 등 다양한 종류의 단열재가 있습니다. 각 종류는 R-값, 가격, 설치 난이도, 환경 영향 등이 다르므로 프로젝트에 맞는 것을 선택하세요."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="insulation-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/insulation-calculator.html">繁中</option><option value="/tools/en/insulation-calculator.html">EN</option><option value="/tools/ja/insulation-calculator.html">日本語</option><option value="/tools/ko/insulation-calculator.html" selected>한국어</option><option value="/tools/de/insulation-calculator.html">DE</option><option value="/tools/fr/insulation-calculator.html">FR</option><option value="/tools/es/insulation-calculator.html">ES</option><option value="/tools/pt/insulation-calculator.html">PT</option><option value="/tools/id/insulation-calculator.html">ID</option><option value="/tools/zh-CN/insulation-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/insulation-calculator.html">繁中</option><option value="/tools/en/insulation-calculator.html">EN</option><option value="/tools/ja/insulation-calculator.html">日本語</option><option value="/tools/ko/insulation-calculator.html" selected>한국어</option><option value="/tools/de/insulation-calculator.html">DE</option><option value="/tools/fr/insulation-calculator.html">FR</option><option value="/tools/es/insulation-calculator.html">ES</option><option value="/tools/pt/insulation-calculator.html">PT</option><option value="/tools/id/insulation-calculator.html">ID</option><option value="/tools/zh-CN/insulation-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 단열재 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/insulation-calculator.html">繁中</option><option value="/tools/en/insulation-calculator.html">EN</option><option value="/tools/ja/insulation-calculator.html">日本語</option><option value="/tools/ko/insulation-calculator.html" selected>한국어</option><option value="/tools/de/insulation-calculator.html">DE</option><option value="/tools/fr/insulation-calculator.html">FR</option><option value="/tools/es/insulation-calculator.html">ES</option><option value="/tools/pt/insulation-calculator.html">PT</option><option value="/tools/id/insulation-calculator.html">ID</option><option value="/tools/zh-CN/insulation-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -151,6 +165,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

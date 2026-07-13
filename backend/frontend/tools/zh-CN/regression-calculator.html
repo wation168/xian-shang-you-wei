@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "线性回归计算器", "url": "https://softglow-ai.com/tools/zh-CN/regression-calculator.html", "description": "免费线性回归计算器，快速计算斜率、截距、相关系数和R平方值。输入X和Y数据点，获得完整的回归分析结果。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "我需要多少个数据点才能进行线性回归分析？", "acceptedAnswer": {"@type": "Answer", "text": "理论上最少需要2个数据点就可以确定一条直线。但为了得到可靠的统计结果，建议至少使用10-20个数据点。数据点越多，回归模型通常越稳定，预测能力也越强。"}}, {"@type": "Question", "name": "R平方值等于0.5是好还是不好？", "acceptedAnswer": {"@type": "Answer", "text": "R²=0.5意味着50%的因变量变异可以被自变量解释。这个值的好坏取决于研究领域。在自然科学中可能认为不够理想，但在社会科学或商业应用中可能已经可以接受。应结合具体情境判断。"}}, {"@type": "Question", "name": "相关系数R为负数是什么意思？", "acceptedAnswer": {"@type": "Answer", "text": "负的相关系数表示两个变量呈负相关关系，即当一个变量增加时，另一个变量倾向于减少。例如，商品价格上升通常导致销售量下降，两者就存在负相关关系。负号只表示方向，绝对值大小仍然表示相关强度。"}}, {"@type": "Question", "name": "如果R平方值很低应该怎么办？", "acceptedAnswer": {"@type": "Answer", "text": "低的R²值表示线性模型不能很好地解释数据变异。可以尝试以下方法：(1)检查数据是否存在异常值或错误；(2)考虑是否需要数据转换；(3)检验是否存在非线性关系，可尝试多项式回归；(4)考虑是否有其他重要变量未被纳入模型。"}}, {"@type": "Question", "name": "我可以用这个工具进行预测吗？", "acceptedAnswer": {"@type": "Answer", "text": "是的，获得回归方程后，您可以输入任何X值来预测对应的Y值。但需要注意，预测只对数据范围内的值最为可靠。超出原数据范围的预测（外推）风险更高，准确性下降。同时，过去的关系不一定总能代表未来。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="regression-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/regression-calculator.html">繁中</option><option value="/tools/en/regression-calculator.html">EN</option><option value="/tools/ja/regression-calculator.html">日本語</option><option value="/tools/ko/regression-calculator.html">한국어</option><option value="/tools/de/regression-calculator.html">DE</option><option value="/tools/fr/regression-calculator.html">FR</option><option value="/tools/es/regression-calculator.html">ES</option><option value="/tools/pt/regression-calculator.html">PT</option><option value="/tools/id/regression-calculator.html">ID</option><option value="/tools/zh-CN/regression-calculator.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/regression-calculator.html">繁中</option><option value="/tools/en/regression-calculator.html">EN</option><option value="/tools/ja/regression-calculator.html">日本語</option><option value="/tools/ko/regression-calculator.html">한국어</option><option value="/tools/de/regression-calculator.html">DE</option><option value="/tools/fr/regression-calculator.html">FR</option><option value="/tools/es/regression-calculator.html">ES</option><option value="/tools/pt/regression-calculator.html">PT</option><option value="/tools/id/regression-calculator.html">ID</option><option value="/tools/zh-CN/regression-calculator.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 线性回归计算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/regression-calculator.html">繁中</option><option value="/tools/en/regression-calculator.html">EN</option><option value="/tools/ja/regression-calculator.html">日本語</option><option value="/tools/ko/regression-calculator.html">한국어</option><option value="/tools/de/regression-calculator.html">DE</option><option value="/tools/fr/regression-calculator.html">FR</option><option value="/tools/es/regression-calculator.html">ES</option><option value="/tools/pt/regression-calculator.html">PT</option><option value="/tools/id/regression-calculator.html">ID</option><option value="/tools/zh-CN/regression-calculator.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -172,6 +186,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

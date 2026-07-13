@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "移動平均線交叉計算器", "url": "https://softglow-ai.com/tools/ma-crossover.html", "description": "免費的移動平均線交叉計算器，幫助您識別交易信號。分析短期和長期移動平均線的交叉點，找出買賣機會。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "什麼是黃金交叉？", "acceptedAnswer": {"@type": "Answer", "text": "黃金交叉是指短期移動平均線從下方穿過長期移動平均線的現象。這被視為看漲信號，表明價格可能開始上升趨勢。黃金交叉通常伴隨著成交量的增加，這增強了信號的可靠性。"}}, {"@type": "Question", "name": "死亡交叉意味著什麼？", "acceptedAnswer": {"@type": "Answer", "text": "死亡交叉發生在短期移動平均線從上方穿過長期移動平均線時。這被視為看跌信號，表明價格可能進入下降趨勢。死亡交叉通常預示著賣出機會，但應與其他指標確認。"}}, {"@type": "Question", "name": "12日和26日線組合的優勢是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "12日和26日線是最常用的MA交叉組合。12日線反應快速，26日線提供中期趨勢確認。這個組合在識別明確的趨勢轉變方面平衡良好，適合中短期交易者。"}}, {"@type": "Question", "name": "為什麼有時MA交叉會產生虛假信號？", "acceptedAnswer": {"@type": "Answer", "text": "在橫向震盪的市場中，價格在短時間內上下波動，可能導致頻繁的MA交叉。這些虛假信號會造成多次小幅虧損。在明確的趨勢中，MA交叉的可靠性更高。"}}, {"@type": "Question", "name": "百分比差異如何幫助交易決策？", "acceptedAnswer": {"@type": "Answer", "text": "百分比差異顯示短期MA與長期MA之間相對距離的大小。較大的百分比差異表示兩條線相距較遠，可能表示趨勢強勁。較小的差異可能預示著即將發生交叉或趨勢減弱。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="ma-crossover">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/ma-crossover.html" selected>繁中</option><option value="/tools/en/ma-crossover.html">EN</option><option value="/tools/ja/ma-crossover.html">日本語</option><option value="/tools/ko/ma-crossover.html">한국어</option><option value="/tools/de/ma-crossover.html">DE</option><option value="/tools/fr/ma-crossover.html">FR</option><option value="/tools/es/ma-crossover.html">ES</option><option value="/tools/pt/ma-crossover.html">PT</option><option value="/tools/id/ma-crossover.html">ID</option><option value="/tools/zh-CN/ma-crossover.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/ma-crossover.html" selected>繁中</option><option value="/tools/en/ma-crossover.html">EN</option><option value="/tools/ja/ma-crossover.html">日本語</option><option value="/tools/ko/ma-crossover.html">한국어</option><option value="/tools/de/ma-crossover.html">DE</option><option value="/tools/fr/ma-crossover.html">FR</option><option value="/tools/es/ma-crossover.html">ES</option><option value="/tools/pt/ma-crossover.html">PT</option><option value="/tools/id/ma-crossover.html">ID</option><option value="/tools/zh-CN/ma-crossover.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 移動平均線交叉計算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/ma-crossover.html" selected>繁中</option><option value="/tools/en/ma-crossover.html">EN</option><option value="/tools/ja/ma-crossover.html">日本語</option><option value="/tools/ko/ma-crossover.html">한국어</option><option value="/tools/de/ma-crossover.html">DE</option><option value="/tools/fr/ma-crossover.html">FR</option><option value="/tools/es/ma-crossover.html">ES</option><option value="/tools/pt/ma-crossover.html">PT</option><option value="/tools/id/ma-crossover.html">ID</option><option value="/tools/zh-CN/ma-crossover.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -172,6 +186,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

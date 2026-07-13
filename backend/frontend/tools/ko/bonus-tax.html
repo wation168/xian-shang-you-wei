@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "보너스 세금 계산기", "url": "https://softglow-ai.com/tools/ko/bonus-tax.html", "description": "보너스에서 소득세, 국민보험, 학자금 대출금, 연금을 공제한 실제 수령액을 정확히 계산하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "보너스 세금 계산기는 정확한가요?", "acceptedAnswer": {"@type": "Answer", "text": "이 계산기는 일반적인 계산을 위해 설계되었으며, 입력한 세율을 기반으로 정확히 계산합니다. 다만 실제 세금은 개인의 상황, 기타 소득, 세금 공제 등에 따라 달라질 수 있으므로, 정확한 금액은 급여 명세서 또는 세무 전문가와 확인하시기 바랍니다."}}, {"@type": "Question", "name": "학자금 대출 상환률을 어디서 확인하나요?", "acceptedAnswer": {"@type": "Answer", "text": "학자금 대출 상환률은 대출 유형과 소득 수준에 따라 다릅니다. 일반적으로 급여 명세서에 표시되거나, Student Loans Company 또는 HR 부서에서 확인할 수 있습니다."}}, {"@type": "Question", "name": "연금 기여를 높이면 세금이 줄어드나요?", "acceptedAnswer": {"@type": "Answer", "text": "네, 일반적으로 그렇습니다. 연금 기여금은 과세 소득을 줄이기 때문에 소득세 기여금이 감소합니다. 다만 이는 현재 세금을 줄이는 대신 은퇴 후 자산이 증가하는 거래입니다."}}, {"@type": "Question", "name": "국민보험료와 소득세의 차이는 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "소득세는 정부 일반 예산에 사용되는 직접세이고, 국민보험료는 NHS(국민보건서비스), 실업 보험, 장애 보험 등 사회보장 혜택을 위해 사용됩니다. 세율과 계산 방식이 다릅니다."}}, {"@type": "Question", "name": "보너스에 대한 세금을 미리 알면 무엇이 좋나요?", "acceptedAnswer": {"@type": "Answer", "text": "실제 수령액을 미리 알면 재정 계획을 더 정확히 세울 수 있습니다. 저축, 투자, 부채 상환 등의 목표를 현실적으로 설정하고 관리할 수 있으며, 재정 관리의 효율성을 높일 수 있습니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="bonus-tax">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/bonus-tax.html">繁中</option><option value="/tools/en/bonus-tax.html">EN</option><option value="/tools/ja/bonus-tax.html">日本語</option><option value="/tools/ko/bonus-tax.html" selected>한국어</option><option value="/tools/de/bonus-tax.html">DE</option><option value="/tools/fr/bonus-tax.html">FR</option><option value="/tools/es/bonus-tax.html">ES</option><option value="/tools/pt/bonus-tax.html">PT</option><option value="/tools/id/bonus-tax.html">ID</option><option value="/tools/zh-CN/bonus-tax.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/bonus-tax.html">繁中</option><option value="/tools/en/bonus-tax.html">EN</option><option value="/tools/ja/bonus-tax.html">日本語</option><option value="/tools/ko/bonus-tax.html" selected>한국어</option><option value="/tools/de/bonus-tax.html">DE</option><option value="/tools/fr/bonus-tax.html">FR</option><option value="/tools/es/bonus-tax.html">ES</option><option value="/tools/pt/bonus-tax.html">PT</option><option value="/tools/id/bonus-tax.html">ID</option><option value="/tools/zh-CN/bonus-tax.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 보너스 세금 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/bonus-tax.html">繁中</option><option value="/tools/en/bonus-tax.html">EN</option><option value="/tools/ja/bonus-tax.html">日本語</option><option value="/tools/ko/bonus-tax.html" selected>한국어</option><option value="/tools/de/bonus-tax.html">DE</option><option value="/tools/fr/bonus-tax.html">FR</option><option value="/tools/es/bonus-tax.html">ES</option><option value="/tools/pt/bonus-tax.html">PT</option><option value="/tools/id/bonus-tax.html">ID</option><option value="/tools/zh-CN/bonus-tax.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -153,6 +167,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

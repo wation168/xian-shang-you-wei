@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "支撑和阻力计算器", "url": "https://softglow-ai.com/tools/zh-CN/support-resistance.html", "description": "免费在线支撑和阻力计算器，快速计算枢轴点、阻力位和支撑位，帮助交易者制定更好的交易策略。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "枢轴点（PP）如何计算？", "acceptedAnswer": {"@type": "Answer", "text": "枢轴点通过以下公式计算：PP = (最高价 + 最低价 + 收盘价) / 3。这给出了前一交易周期的平均价格，作为当前周期的参考点。"}}, {"@type": "Question", "name": "支撑位 1（S1）和支撑位 2（S2）有什么区别？", "acceptedAnswer": {"@type": "Answer", "text": "S1 是更靠近当前价格的支撑位，通常比 S2 更容易被触及。S2 是更远的支撑位，提供了更强的支撑水平。在价格下跌时，S1 是第一个支撑，S2 是第二道防线。"}}, {"@type": "Question", "name": "我应该在什么时候使用这个计算器？", "acceptedAnswer": {"@type": "Answer", "text": "在每个交易周期开始时使用这个计算器。对于日线交易者，在每天开市前计算；对于周线交易者，在每周开始时计算。使用前一周期的数据来预测当前周期的价格水平。"}}, {"@type": "Question", "name": "枢轴点在所有市场中都有效吗？", "acceptedAnswer": {"@type": "Answer", "text": "是的，枢轴点方法适用于所有流动性强的金融市场，包括外汇、股票、期货和加密货币。但是，效果可能因市场流动性和波动性而异。"}}, {"@type": "Question", "name": "如何将枢轴点与其他指标结合使用？", "acceptedAnswer": {"@type": "Answer", "text": "枢轴点可与移动平均线、相对强弱指数（RSI）和布林带等指标结合。当其他指标确认支撑或阻力位时，交易信号会更强。建议总是使用多个指标进行确认。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="support-resistance">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/support-resistance.html">繁中</option><option value="/tools/en/support-resistance.html">EN</option><option value="/tools/ja/support-resistance.html">日本語</option><option value="/tools/ko/support-resistance.html">한국어</option><option value="/tools/de/support-resistance.html">DE</option><option value="/tools/fr/support-resistance.html">FR</option><option value="/tools/es/support-resistance.html">ES</option><option value="/tools/pt/support-resistance.html">PT</option><option value="/tools/id/support-resistance.html">ID</option><option value="/tools/zh-CN/support-resistance.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/support-resistance.html">繁中</option><option value="/tools/en/support-resistance.html">EN</option><option value="/tools/ja/support-resistance.html">日本語</option><option value="/tools/ko/support-resistance.html">한국어</option><option value="/tools/de/support-resistance.html">DE</option><option value="/tools/fr/support-resistance.html">FR</option><option value="/tools/es/support-resistance.html">ES</option><option value="/tools/pt/support-resistance.html">PT</option><option value="/tools/id/support-resistance.html">ID</option><option value="/tools/zh-CN/support-resistance.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 支撑和阻力计算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/support-resistance.html">繁中</option><option value="/tools/en/support-resistance.html">EN</option><option value="/tools/ja/support-resistance.html">日本語</option><option value="/tools/ko/support-resistance.html">한국어</option><option value="/tools/de/support-resistance.html">DE</option><option value="/tools/fr/support-resistance.html">FR</option><option value="/tools/es/support-resistance.html">ES</option><option value="/tools/pt/support-resistance.html">PT</option><option value="/tools/id/support-resistance.html">ID</option><option value="/tools/zh-CN/support-resistance.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -111,6 +125,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

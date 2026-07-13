@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Kelly-Kriterium-Rechner", "url": "https://softglow-ai.com/tools/de/kelly-criterion.html", "description": "Berechnen Sie mit unserem Kelly-Kriterium-Rechner den optimalen Wetteinsatz. Ermitteln Sie die ideale Bankroll-Fraction für profitables Wetten.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "de"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Was ist der ideale Kelly-Wert?", "acceptedAnswer": {"@type": "Answer", "text": "Der ideale Kelly-Wert liegt typischerweise zwischen 0 und 0,25 (0-25% Ihres Bankrolls). Ein Wert von 0,10 (10%) ist ein vernünftiger langfristiger Betrag. Werte über 0,25 sind riskant und werden selten empfohlen, da sie zu großen Schwankungen führen."}}, {"@type": "Question", "name": "Sollte ich immer den vollen Kelly-Wert wetten?", "acceptedAnswer": {"@type": "Answer", "text": "Nein. Die meisten professionellen Wetter wetten nur einen Bruchteil des Kelly-Wertes (\"Fractional Kelly\"), wie 25% oder 50%, um das Risiko zu reduzieren. Dies schützt vor Fehlern bei der Wahrscheinlichkeitsschätzung und reduziert die Volatilität des Bankrolls."}}, {"@type": "Question", "name": "Was bedeutet ein negativer f-Wert?", "acceptedAnswer": {"@type": "Answer", "text": "Ein negativer f-Wert bedeutet, dass die Wette aus mathematischer Sicht ungünstig ist. Sie sollten diese Wette meiden oder nur sehr kleine Beträge einsetzen, wenn Sie triftige Gründe für eine Ausnahme haben."}}, {"@type": "Question", "name": "Wie genau muss meine Wahrscheinlichkeitsschätzung sein?", "acceptedAnswer": {"@type": "Answer", "text": "Sehr genau. Selbst kleine Fehler bei der Schätzung (z.B. 2-5% zu hoch) können zu langfristigen Verlusten führen. Überwachen Sie Ihre Ergebnisse kontinuierlich und passen Sie Ihre Schätzungen an tatsächliche Daten an."}}, {"@type": "Question", "name": "Kann ich das Kelly-Kriterium für verschiedene Arten von Wetten verwenden?", "acceptedAnswer": {"@type": "Answer", "text": "Ja, das Kelly-Kriterium funktioniert für Sportwetten, Casino-Spiele, Poker, Aktienhandel und andere wiederholbare Szenarien mit bekannten Quoten und Wahrscheinlichkeiten. Die Grundprinzipien bleiben gleich."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="kelly-criterion">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="de">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/de/">Tools</a>
-    <a href="/blog/de/index.html">Blog</a>
     <a href="/patterns/de.html">Muster</a>
+    <a href="/blog/de/index.html">Blog</a>
     <a href="/">Startseite</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/kelly-criterion.html">繁中</option><option value="/tools/en/kelly-criterion.html">EN</option><option value="/tools/ja/kelly-criterion.html">日本語</option><option value="/tools/ko/kelly-criterion.html">한국어</option><option value="/tools/de/kelly-criterion.html" selected>DE</option><option value="/tools/fr/kelly-criterion.html">FR</option><option value="/tools/es/kelly-criterion.html">ES</option><option value="/tools/pt/kelly-criterion.html">PT</option><option value="/tools/id/kelly-criterion.html">ID</option><option value="/tools/zh-CN/kelly-criterion.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/kelly-criterion.html">繁中</option><option value="/tools/en/kelly-criterion.html">EN</option><option value="/tools/ja/kelly-criterion.html">日本語</option><option value="/tools/ko/kelly-criterion.html">한국어</option><option value="/tools/de/kelly-criterion.html" selected>DE</option><option value="/tools/fr/kelly-criterion.html">FR</option><option value="/tools/es/kelly-criterion.html">ES</option><option value="/tools/pt/kelly-criterion.html">PT</option><option value="/tools/id/kelly-criterion.html">ID</option><option value="/tools/zh-CN/kelly-criterion.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/de/">Werkzeuge</a> > Kelly-Kriterium-Rechner</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/kelly-criterion.html">繁中</option><option value="/tools/en/kelly-criterion.html">EN</option><option value="/tools/ja/kelly-criterion.html">日本語</option><option value="/tools/ko/kelly-criterion.html">한국어</option><option value="/tools/de/kelly-criterion.html" selected>DE</option><option value="/tools/fr/kelly-criterion.html">FR</option><option value="/tools/es/kelly-criterion.html">ES</option><option value="/tools/pt/kelly-criterion.html">PT</option><option value="/tools/id/kelly-criterion.html">ID</option><option value="/tools/zh-CN/kelly-criterion.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -160,6 +174,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Tools, Muster, Artikel suchen…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Lesezeichen</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Alle löschen</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

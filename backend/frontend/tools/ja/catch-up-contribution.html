@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "キャッチアップ拠出計算機", "url": "https://softglow-ai.com/tools/ja/catch-up-contribution.html", "description": "50歳以上向けのキャッチアップ拠出限度額を計算。401(k)とIRAの追加拠出で退職資金を最大化します。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "キャッチアップ拠出は何歳から利用できますか?", "acceptedAnswer": {"@type": "Answer", "text": "キャッチアップ拠出は50歳以上の個人が利用できます。50歳の誕生日以降、その年の1月1日から拠出を開始できます。"}}, {"@type": "Question", "name": "401(k)とIRAの両方にキャッチアップ拠出できますか?", "acceptedAnswer": {"@type": "Answer", "text": "はい、401(k)プランに加入している場合でも、別途IRAを開設してIRAのキャッチアップ拠出を行うことができます。ただし、各プランの限度額は独立しています。"}}, {"@type": "Question", "name": "キャッチアップ拠出額は毎年変わりますか?", "acceptedAnswer": {"@type": "Answer", "text": "はい、IRS(米国歳入庁)はインフレに基づいて拠出限度額を毎年調整します。定期的に最新の限度額を確認することをお勧めします。"}}, {"@type": "Question", "name": "キャッチアップ拠出は所得制限がありますか?", "acceptedAnswer": {"@type": "Answer", "text": "401(k)のキャッチアップ拠出には所得制限がありません。ただし、IRAのキャッチアップ拠出については、Modified Adjusted Gross Income(修正調整総所得)に基づいて控除可能額が制限される場合があります。"}}, {"@type": "Question", "name": "この計算機はどのように使用すれば良いですか?", "acceptedAnswer": {"@type": "Answer", "text": "現在の年齢、目標退職年齢、拠出限度額、期待年間収益率を入力して、計算ボタンをクリックしてください。計算機は、退職までの期間での総拠出額と、予想される運用成果を表示します。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="catch-up-contribution">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ja">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ja/">ツール</a>
-    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/patterns/ja.html">ローソク足</a>
+    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/">ホーム</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/catch-up-contribution.html">繁中</option><option value="/tools/en/catch-up-contribution.html">EN</option><option value="/tools/ja/catch-up-contribution.html" selected>日本語</option><option value="/tools/ko/catch-up-contribution.html">한국어</option><option value="/tools/de/catch-up-contribution.html">DE</option><option value="/tools/fr/catch-up-contribution.html">FR</option><option value="/tools/es/catch-up-contribution.html">ES</option><option value="/tools/pt/catch-up-contribution.html">PT</option><option value="/tools/id/catch-up-contribution.html">ID</option><option value="/tools/zh-CN/catch-up-contribution.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/catch-up-contribution.html">繁中</option><option value="/tools/en/catch-up-contribution.html">EN</option><option value="/tools/ja/catch-up-contribution.html" selected>日本語</option><option value="/tools/ko/catch-up-contribution.html">한국어</option><option value="/tools/de/catch-up-contribution.html">DE</option><option value="/tools/fr/catch-up-contribution.html">FR</option><option value="/tools/es/catch-up-contribution.html">ES</option><option value="/tools/pt/catch-up-contribution.html">PT</option><option value="/tools/id/catch-up-contribution.html">ID</option><option value="/tools/zh-CN/catch-up-contribution.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > キャッチアップ拠出計算機</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/catch-up-contribution.html">繁中</option><option value="/tools/en/catch-up-contribution.html">EN</option><option value="/tools/ja/catch-up-contribution.html" selected>日本語</option><option value="/tools/ko/catch-up-contribution.html">한국어</option><option value="/tools/de/catch-up-contribution.html">DE</option><option value="/tools/fr/catch-up-contribution.html">FR</option><option value="/tools/es/catch-up-contribution.html">ES</option><option value="/tools/pt/catch-up-contribution.html">PT</option><option value="/tools/id/catch-up-contribution.html">ID</option><option value="/tools/zh-CN/catch-up-contribution.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -133,6 +147,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="ツール、パターン、記事を検索…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>ブックマーク</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全て削除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "벽지 계산기", "url": "https://softglow-ai.com/tools/ko/wallpaper-calculator.html", "description": "벽의 높이, 너비, 개수를 입력하여 필요한 벽지 롤의 정확한 수량을 계산하세요. 낭비 계수까지 고려한 정확한 계산.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "벽지 롤당 면적은 모두 같나요?", "acceptedAnswer": {"@type": "Answer", "text": "아니요, 벽지 롤당 면적은 제조사와 제품에 따라 다릅니다. 일반적으로 45~60제곱피트 범위이지만, 구매하려는 벽지의 패키지 정보를 확인하여 정확한 면적을 입력하세요."}}, {"@type": "Question", "name": "낭비 계수는 몇 퍼센트로 설정해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "일반적으로 10~15%의 낭비 계수를 권장합니다. 복잡한 패턴이나 형태가 불규칙한 방은 15~20%, 간단한 패턴의 직사각형 방은 10% 정도로 설정하세요."}}, {"@type": "Question", "name": "계산 결과보다 더 많이 구매해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "예, 계산된 수량보다 1~2개 롤을 추가로 구매하는 것을 권장합니다. 향후 수리나 교체 시 같은 로트의 벽지를 사용할 수 있고, 시공 중 예상치 못한 손상에 대비할 수 있습니다."}}, {"@type": "Question", "name": "문과 창문이 많은 경우는 어떻게 계산하나요?", "acceptedAnswer": {"@type": "Answer", "text": "이 계산기는 전체 벽 면적을 기준으로 계산합니다. 문과 창문 면적을 제외하려면 총 벽 면적에서 이들 면적을 빼거나 낭비 계수를 조정하여 사용할 수 있습니다."}}, {"@type": "Question", "name": "천장 높이가 표준보다 높으면 어떻게 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "천장 높이가 10피트를 초과하면 패턴 맞춤과 절단으로 인한 낭비가 증가합니다. 이 경우 낭비 계수를 15~25%로 높여서 계산하는 것을 권장합니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="wallpaper-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/wallpaper-calculator.html">繁中</option><option value="/tools/en/wallpaper-calculator.html">EN</option><option value="/tools/ja/wallpaper-calculator.html">日本語</option><option value="/tools/ko/wallpaper-calculator.html" selected>한국어</option><option value="/tools/de/wallpaper-calculator.html">DE</option><option value="/tools/fr/wallpaper-calculator.html">FR</option><option value="/tools/es/wallpaper-calculator.html">ES</option><option value="/tools/pt/wallpaper-calculator.html">PT</option><option value="/tools/id/wallpaper-calculator.html">ID</option><option value="/tools/zh-CN/wallpaper-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/wallpaper-calculator.html">繁中</option><option value="/tools/en/wallpaper-calculator.html">EN</option><option value="/tools/ja/wallpaper-calculator.html">日本語</option><option value="/tools/ko/wallpaper-calculator.html" selected>한국어</option><option value="/tools/de/wallpaper-calculator.html">DE</option><option value="/tools/fr/wallpaper-calculator.html">FR</option><option value="/tools/es/wallpaper-calculator.html">ES</option><option value="/tools/pt/wallpaper-calculator.html">PT</option><option value="/tools/id/wallpaper-calculator.html">ID</option><option value="/tools/zh-CN/wallpaper-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 벽지 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/wallpaper-calculator.html">繁中</option><option value="/tools/en/wallpaper-calculator.html">EN</option><option value="/tools/ja/wallpaper-calculator.html">日本語</option><option value="/tools/ko/wallpaper-calculator.html" selected>한국어</option><option value="/tools/de/wallpaper-calculator.html">DE</option><option value="/tools/fr/wallpaper-calculator.html">FR</option><option value="/tools/es/wallpaper-calculator.html">ES</option><option value="/tools/pt/wallpaper-calculator.html">PT</option><option value="/tools/id/wallpaper-calculator.html">ID</option><option value="/tools/zh-CN/wallpaper-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -119,6 +133,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

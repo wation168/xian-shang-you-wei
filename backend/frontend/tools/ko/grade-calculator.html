@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "성적 계산기", "url": "https://softglow-ai.com/tools/ko/grade-calculator.html", "description": "과제, 시험, 프로젝트의 가중치를 반영하여 최종 성적을 계산하는 무료 온라인 도구입니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "가중치의 합이 100%가 아니면 어떻게 되나요?", "acceptedAnswer": {"@type": "Answer", "text": "계산기는 입력한 가중치의 합을 확인합니다. 총 가중치가 100%가 아니면 결과가 정확하지 않을 수 있으므로, 학교의 성적 구성표를 다시 확인하고 가중치를 수정하세요."}}, {"@type": "Question", "name": "아직 보지 않은 시험의 가중치는 어떻게 계산하나요?", "acceptedAnswer": {"@type": "Answer", "text": "아직 보지 않은 시험은 선택사항인 과제 4에 입력하면 됩니다. 예상 점수를 입력하면 최종 성적을 미리 예측할 수 있습니다."}}, {"@type": "Question", "name": "가중치 평균과 산술 평균의 차이는 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "산술 평균은 모든 점수를 동등하게 취급하지만, 가중치 평균은 각 항목의 중요도를 반영합니다. 예를 들어 기말고사의 가중치가 높으면 최종 성적에 더 큰 영향을 미칩니다."}}, {"@type": "Question", "name": "점수는 0~100점 범위여야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "일반적으로 0~100점 범위를 사용하는 것이 표준이지만, 학교에 따라 다를 수 있습니다. 학교의 성적 체계에 맞춰 점수를 입력하세요."}}, {"@type": "Question", "name": "계산 결과가 맞는지 어떻게 확인하나요?", "acceptedAnswer": {"@type": "Answer", "text": "각 점수에 가중치(%)를 곱한 후 모두 더한 값이 가중치 평균 성적입니다. 직접 계산하여 결과와 비교해보면 정확성을 확인할 수 있습니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="grade-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/grade-calculator.html">繁中</option><option value="/tools/en/grade-calculator.html">EN</option><option value="/tools/ja/grade-calculator.html">日本語</option><option value="/tools/ko/grade-calculator.html" selected>한국어</option><option value="/tools/de/grade-calculator.html">DE</option><option value="/tools/fr/grade-calculator.html">FR</option><option value="/tools/es/grade-calculator.html">ES</option><option value="/tools/pt/grade-calculator.html">PT</option><option value="/tools/id/grade-calculator.html">ID</option><option value="/tools/zh-CN/grade-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/grade-calculator.html">繁中</option><option value="/tools/en/grade-calculator.html">EN</option><option value="/tools/ja/grade-calculator.html">日本語</option><option value="/tools/ko/grade-calculator.html" selected>한국어</option><option value="/tools/de/grade-calculator.html">DE</option><option value="/tools/fr/grade-calculator.html">FR</option><option value="/tools/es/grade-calculator.html">ES</option><option value="/tools/pt/grade-calculator.html">PT</option><option value="/tools/id/grade-calculator.html">ID</option><option value="/tools/zh-CN/grade-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 성적 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/grade-calculator.html">繁中</option><option value="/tools/en/grade-calculator.html">EN</option><option value="/tools/ja/grade-calculator.html">日本語</option><option value="/tools/ko/grade-calculator.html" selected>한국어</option><option value="/tools/de/grade-calculator.html">DE</option><option value="/tools/fr/grade-calculator.html">FR</option><option value="/tools/es/grade-calculator.html">ES</option><option value="/tools/pt/grade-calculator.html">PT</option><option value="/tools/id/grade-calculator.html">ID</option><option value="/tools/zh-CN/grade-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -210,6 +224,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

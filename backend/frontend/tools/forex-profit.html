@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "外匯獲利計算器", "url": "https://softglow-ai.com/tools/forex-profit.html", "description": "免費外匯獲利計算器，幫助您快速計算交易的價格差異、總利潤/損失和利潤率。輸入開倉價格、平倉價格、手數和點值即可。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "點（pip）是什麼意思？", "acceptedAnswer": {"@type": "Answer", "text": "點（pip）是外匯交易中最小的價格變動單位，通常是價格的第四位小數。例如，歐元/美元從1.2050變動到1.2051就是1個點的變動。不同的貨幣對可能有不同的點值定義。"}}, {"@type": "Question", "name": "手數（Lot Size）如何影響利潤計算？", "acceptedAnswer": {"@type": "Answer", "text": "手數直接影響您的利潤或損失金額。手數越大，相同的點數變動就會產生越大的利潤或損失。例如，同樣變動10個點，1.0手的交易獲利會是0.1手的10倍。"}}, {"@type": "Question", "name": "利潤率是如何計算的？", "acceptedAnswer": {"@type": "Answer", "text": "利潤率是總利潤/損失除以初始投資（保證金）乘以100%得出的百分比。較高的利潤率表示交易效率更高，但也通常意味著承擔的風險更大。"}}, {"@type": "Question", "name": "每點價值如何確定？", "acceptedAnswer": {"@type": "Answer", "text": "每點價值取決於您交易的貨幣對、手數和您的賬戶貨幣。大多數外匯經紀商會為標準手（1.0手）提供固定的點值，例如每點10美元。計算器中您需要輸入的是您實際交易的每點價值。"}}, {"@type": "Question", "name": "這個計算器可以用於所有貨幣對嗎？", "acceptedAnswer": {"@type": "Answer", "text": "是的，這個計算器可以用於所有貨幣對和商品交易。只要您正確輸入開倉價格、平倉價格、手數和正確的每點價值，計算器就能準確計算任何交易的利潤/損失。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="forex-profit">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/forex-profit.html" selected>繁中</option><option value="/tools/en/forex-profit.html">EN</option><option value="/tools/ja/forex-profit.html">日本語</option><option value="/tools/ko/forex-profit.html">한국어</option><option value="/tools/de/forex-profit.html">DE</option><option value="/tools/fr/forex-profit.html">FR</option><option value="/tools/es/forex-profit.html">ES</option><option value="/tools/pt/forex-profit.html">PT</option><option value="/tools/id/forex-profit.html">ID</option><option value="/tools/zh-CN/forex-profit.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/forex-profit.html" selected>繁中</option><option value="/tools/en/forex-profit.html">EN</option><option value="/tools/ja/forex-profit.html">日本語</option><option value="/tools/ko/forex-profit.html">한국어</option><option value="/tools/de/forex-profit.html">DE</option><option value="/tools/fr/forex-profit.html">FR</option><option value="/tools/es/forex-profit.html">ES</option><option value="/tools/pt/forex-profit.html">PT</option><option value="/tools/id/forex-profit.html">ID</option><option value="/tools/zh-CN/forex-profit.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 外匯獲利計算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/forex-profit.html" selected>繁中</option><option value="/tools/en/forex-profit.html">EN</option><option value="/tools/ja/forex-profit.html">日本語</option><option value="/tools/ko/forex-profit.html">한국어</option><option value="/tools/de/forex-profit.html">DE</option><option value="/tools/fr/forex-profit.html">FR</option><option value="/tools/es/forex-profit.html">ES</option><option value="/tools/pt/forex-profit.html">PT</option><option value="/tools/id/forex-profit.html">ID</option><option value="/tools/zh-CN/forex-profit.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -140,6 +154,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

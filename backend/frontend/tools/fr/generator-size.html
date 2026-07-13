@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculateur de Capacité de Générateur", "url": "https://softglow-ai.com/tools/fr/generator-size.html", "description": "Calculez la taille de générateur idéale en fonction de votre consommation électrique. Déterminez la puissance nécessaire pour vos appareils et équipements.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "fr"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Quelle est la différence entre la puissance de fonctionnement et la puissance de démarrage?", "acceptedAnswer": {"@type": "Answer", "text": "La puissance de fonctionnement est l'énergie continue que vos appareils consomment lors d'une utilisation normale. La puissance de démarrage est l'énergie supplémentaire requise pour mettre en marche les appareils, particulièrement ceux avec des moteurs. La puissance de démarrage est généralement 1,5 à 3 fois plus élevée que la puissance de fonctionnement."}}, {"@type": "Question", "name": "Pourquoi recommandez-vous une marge de sécurité de 20%?", "acceptedAnswer": {"@type": "Answer", "text": "La marge de 20% protège votre générateur du surmenage, prolonge sa durée de vie et assure un fonctionnement stable. Elle permet également d'accommoder les petits appareils supplémentaires que vous pourriez ajouter ultérieurement sans dépasser la capacité."}}, {"@type": "Question", "name": "Comment puis-je connaître la puissance de mes appareils?", "acceptedAnswer": {"@type": "Answer", "text": "La puissance est généralement indiquée sur l'étiquette de l'appareil (souvent à l'arrière ou en bas). Elle est exprimée en watts (W) ou en kilowatts (kW). Si seule l'intensité (ampères) est indiquée, multipliez-la par la tension (généralement 220V) pour obtenir les watts."}}, {"@type": "Question", "name": "Un générateur surdimensionné consomme-t-il plus de carburant?", "acceptedAnswer": {"@type": "Answer", "text": "Un générateur surdimensionné n'est pas plus inefficace, mais représente un investissement inutile et occupe plus d'espace. Cependant, fonctionner constamment à très faible charge (moins de 25% de capacité) peut être inefficace pour certains modèles. Une marge de 20% est donc un bon équilibre."}}, {"@type": "Question", "name": "Dois-je ajouter la puissance de tous mes appareils ou seulement ceux utilisés ensemble?", "acceptedAnswer": {"@type": "Answer", "text": "Vous devez additionner la puissance uniquement des appareils que vous utiliserez simultanément. Il est rare d'utiliser tous les appareils au même moment, donc identifiez les groupes d'appareils qui fonctionnent ensemble et calculez leur puissance combinée."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="generator-size">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="fr">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/fr/">Outils</a>
-    <a href="/blog/fr/index.html">Blog</a>
     <a href="/patterns/fr.html">Chandeliers</a>
+    <a href="/blog/fr/index.html">Blog</a>
     <a href="/">Accueil</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/generator-size.html">繁中</option><option value="/tools/en/generator-size.html">EN</option><option value="/tools/ja/generator-size.html">日本語</option><option value="/tools/ko/generator-size.html">한국어</option><option value="/tools/de/generator-size.html">DE</option><option value="/tools/fr/generator-size.html" selected>FR</option><option value="/tools/es/generator-size.html">ES</option><option value="/tools/pt/generator-size.html">PT</option><option value="/tools/id/generator-size.html">ID</option><option value="/tools/zh-CN/generator-size.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/generator-size.html">繁中</option><option value="/tools/en/generator-size.html">EN</option><option value="/tools/ja/generator-size.html">日本語</option><option value="/tools/ko/generator-size.html">한국어</option><option value="/tools/de/generator-size.html">DE</option><option value="/tools/fr/generator-size.html" selected>FR</option><option value="/tools/es/generator-size.html">ES</option><option value="/tools/pt/generator-size.html">PT</option><option value="/tools/id/generator-size.html">ID</option><option value="/tools/zh-CN/generator-size.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/fr/">Outils</a> > Calculateur de Capacité de Générateur</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/generator-size.html">繁中</option><option value="/tools/en/generator-size.html">EN</option><option value="/tools/ja/generator-size.html">日本語</option><option value="/tools/ko/generator-size.html">한국어</option><option value="/tools/de/generator-size.html">DE</option><option value="/tools/fr/generator-size.html" selected>FR</option><option value="/tools/es/generator-size.html">ES</option><option value="/tools/pt/generator-size.html">PT</option><option value="/tools/id/generator-size.html">ID</option><option value="/tools/zh-CN/generator-size.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -138,6 +152,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Rechercher outils, modèles, articles…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Favoris</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Tout effacer</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

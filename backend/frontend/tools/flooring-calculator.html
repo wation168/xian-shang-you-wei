@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "地板計算器", "url": "https://softglow-ai.com/tools/flooring-calculator.html", "description": "輕鬆計算地板所需材料數量，自動納入損耗係數。支援各種地板類型和房間尺寸的精確計算。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "什麼是損耗係數？", "acceptedAnswer": {"@type": "Answer", "text": "損耗係數是指地板安裝過程中的材料損耗百分比，包括切割邊角、破損、拼接等因素導致的材料浪費。合理設置損耗係數能確保材料採購充足。"}}, {"@type": "Question", "name": "不同地板類型的損耗係數應該怎麼設置？", "acceptedAnswer": {"@type": "Answer", "text": "木地板通常10-15%，瓷磚5-10%，石材15-20%。具體數值還要根據房間形狀、安裝方式和工人技術水平而定。複雜房間和對角鋪設損耗率更高。"}}, {"@type": "Question", "name": "如何準確測量房間面積？", "acceptedAnswer": {"@type": "Answer", "text": "使用卷尺測量房間的長度和寬度，計算面積時將長度乘以寬度。對於不規則房間，可分割成多個矩形分別計算後相加。測量時應避免房間內的柱子和固定家具。"}}, {"@type": "Question", "name": "計算出的材料數量是否包含損耗？", "acceptedAnswer": {"@type": "Answer", "text": "是的，計算器會自動將損耗係數納入最終結果。「所需材料總量」已包含損耗在內，「含損耗係數的總面積」則顯示實際需要覆蓋的總面積。"}}, {"@type": "Question", "name": "購買時應該額外預留多少材料？", "acceptedAnswer": {"@type": "Answer", "text": "除了計算器給出的數量外，建議再額外購買5-10%的材料作為後備。這樣可以應對未來維修、更換損壞地板或設計變更的需求。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="flooring-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/flooring-calculator.html" selected>繁中</option><option value="/tools/en/flooring-calculator.html">EN</option><option value="/tools/ja/flooring-calculator.html">日本語</option><option value="/tools/ko/flooring-calculator.html">한국어</option><option value="/tools/de/flooring-calculator.html">DE</option><option value="/tools/fr/flooring-calculator.html">FR</option><option value="/tools/es/flooring-calculator.html">ES</option><option value="/tools/pt/flooring-calculator.html">PT</option><option value="/tools/id/flooring-calculator.html">ID</option><option value="/tools/zh-CN/flooring-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/flooring-calculator.html" selected>繁中</option><option value="/tools/en/flooring-calculator.html">EN</option><option value="/tools/ja/flooring-calculator.html">日本語</option><option value="/tools/ko/flooring-calculator.html">한국어</option><option value="/tools/de/flooring-calculator.html">DE</option><option value="/tools/fr/flooring-calculator.html">FR</option><option value="/tools/es/flooring-calculator.html">ES</option><option value="/tools/pt/flooring-calculator.html">PT</option><option value="/tools/id/flooring-calculator.html">ID</option><option value="/tools/zh-CN/flooring-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 地板計算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/flooring-calculator.html" selected>繁中</option><option value="/tools/en/flooring-calculator.html">EN</option><option value="/tools/ja/flooring-calculator.html">日本語</option><option value="/tools/ko/flooring-calculator.html">한국어</option><option value="/tools/de/flooring-calculator.html">DE</option><option value="/tools/fr/flooring-calculator.html">FR</option><option value="/tools/es/flooring-calculator.html">ES</option><option value="/tools/pt/flooring-calculator.html">PT</option><option value="/tools/id/flooring-calculator.html">ID</option><option value="/tools/zh-CN/flooring-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -134,6 +148,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

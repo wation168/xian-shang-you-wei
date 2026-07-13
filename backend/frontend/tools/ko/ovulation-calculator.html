@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "배란 계산기", "url": "https://softglow-ai.com/tools/ko/ovulation-calculator.html", "description": "월경 주기 길이와 마지막 월경 첫날을 입력하여 배란 예정일과 가임기를 정확하게 계산하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "배란은 언제 발생하나요?", "acceptedAnswer": {"@type": "Answer", "text": "배란은 보통 월경 주기의 중간, 월경 첫날부터 약 14일 후에 발생합니다. 다만 개인차가 있으므로 정확한 시기는 다를 수 있습니다."}}, {"@type": "Question", "name": "가임기와 배란일은 같은가요?", "acceptedAnswer": {"@type": "Answer", "text": "아니습니다. 배란일은 난자가 방출되는 하루이고, 가임기는 배란 5일 전부터 배란일 다음날까지의 약 6일 기간입니다."}}, {"@type": "Question", "name": "이 계산기의 정확도는 어느 정도인가요?", "acceptedAnswer": {"@type": "Answer", "text": "이 계산기는 표준 배란 모델을 기반으로 하며, 일반적인 예측을 제공합니다. 개인의 호르몬 수준, 스트레스, 건강 상태 등에 따라 실제 배란 시기가 다를 수 있습니다."}}, {"@type": "Question", "name": "월경 주기가 불규칙하면 어떻게 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "지난 6-12개월간의 월경 주기를 기록하여 평균 주기를 계산한 후 입력하세요. 주기가 매우 불규칙하다면 의료 전문가와 상담하는 것을 권장합니다."}}, {"@type": "Question", "name": "배란 계산기로 피임할 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "이 계산기는 임신을 계획하는 사람을 위한 도구입니다. 피임 목적으로는 신뢰할 수 없으므로 확실한 피임 방법을 사용하세요."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="ovulation-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/ovulation-calculator.html">繁中</option><option value="/tools/en/ovulation-calculator.html">EN</option><option value="/tools/ja/ovulation-calculator.html">日本語</option><option value="/tools/ko/ovulation-calculator.html" selected>한국어</option><option value="/tools/de/ovulation-calculator.html">DE</option><option value="/tools/fr/ovulation-calculator.html">FR</option><option value="/tools/es/ovulation-calculator.html">ES</option><option value="/tools/pt/ovulation-calculator.html">PT</option><option value="/tools/id/ovulation-calculator.html">ID</option><option value="/tools/zh-CN/ovulation-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/ovulation-calculator.html">繁中</option><option value="/tools/en/ovulation-calculator.html">EN</option><option value="/tools/ja/ovulation-calculator.html">日本語</option><option value="/tools/ko/ovulation-calculator.html" selected>한국어</option><option value="/tools/de/ovulation-calculator.html">DE</option><option value="/tools/fr/ovulation-calculator.html">FR</option><option value="/tools/es/ovulation-calculator.html">ES</option><option value="/tools/pt/ovulation-calculator.html">PT</option><option value="/tools/id/ovulation-calculator.html">ID</option><option value="/tools/zh-CN/ovulation-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 배란 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/ovulation-calculator.html">繁中</option><option value="/tools/en/ovulation-calculator.html">EN</option><option value="/tools/ja/ovulation-calculator.html">日本語</option><option value="/tools/ko/ovulation-calculator.html" selected>한국어</option><option value="/tools/de/ovulation-calculator.html">DE</option><option value="/tools/fr/ovulation-calculator.html">FR</option><option value="/tools/es/ovulation-calculator.html">ES</option><option value="/tools/pt/ovulation-calculator.html">PT</option><option value="/tools/id/ovulation-calculator.html">ID</option><option value="/tools/zh-CN/ovulation-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -147,6 +161,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

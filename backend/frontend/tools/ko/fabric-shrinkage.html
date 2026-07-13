@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "천 수축률 계산기", "url": "https://softglow-ai.com/tools/ko/fabric-shrinkage.html", "description": "천의 수축률을 입력하여 필요한 절단 길이를 정확하게 계산합니다. 의류 제작 및 재단에 필수적인 도구입니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "천의 수축률은 어떻게 알 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "천 제조사가 제공하는 정보에서 확인할 수 있습니다. 또한 작은 샘플을 실제로 세탁해본 후 수축률을 직접 측정할 수도 있습니다. 같은 재료라도 제조 방식과 처리 방식에 따라 수축률이 다를 수 있습니다."}}, {"@type": "Question", "name": "수축률이 클수록 더 많이 절단해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "맞습니다. 수축률이 높을수록 더 많은 길이를 미리 절단해야 합니다. 예를 들어 수축률이 5%면 약 5% 더 길게, 10%면 약 11% 더 길게 절단해야 합니다."}}, {"@type": "Question", "name": "한 번의 세탁 후에만 수축하나요?", "acceptedAnswer": {"@type": "Answer", "text": "대부분의 수축은 처음 세탁에서 일어나지만, 재질에 따라 여러 번에 걸쳐 서서히 수축할 수도 있습니다. 고급 의류는 여러 번 세탁한 후의 최종 수축률을 고려하여 계산하는 것이 좋습니다."}}, {"@type": "Question", "name": "이 계산기를 사용할 때 주의할 점은?", "acceptedAnswer": {"@type": "Answer", "text": "정확한 수축률을 입력하는 것이 가장 중요합니다. 수축률은 천의 종류, 색상, 처리 방식에 따라 다르므로, 가능하면 실제 사용할 천을 테스트하여 정확한 수축률을 파악하세요."}}, {"@type": "Question", "name": "양방향 수축을 계산해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "이 계산기는 길이 방향의 수축만 계산합니다. 너비 방향의 수축도 중요하다면 같은 방식으로 별도로 계산하거나, 양쪽 수축률을 모두 고려하여 절단 계획을 세우세요."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="fabric-shrinkage">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/fabric-shrinkage.html">繁中</option><option value="/tools/en/fabric-shrinkage.html">EN</option><option value="/tools/ja/fabric-shrinkage.html">日本語</option><option value="/tools/ko/fabric-shrinkage.html" selected>한국어</option><option value="/tools/de/fabric-shrinkage.html">DE</option><option value="/tools/fr/fabric-shrinkage.html">FR</option><option value="/tools/es/fabric-shrinkage.html">ES</option><option value="/tools/pt/fabric-shrinkage.html">PT</option><option value="/tools/id/fabric-shrinkage.html">ID</option><option value="/tools/zh-CN/fabric-shrinkage.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/fabric-shrinkage.html">繁中</option><option value="/tools/en/fabric-shrinkage.html">EN</option><option value="/tools/ja/fabric-shrinkage.html">日本語</option><option value="/tools/ko/fabric-shrinkage.html" selected>한국어</option><option value="/tools/de/fabric-shrinkage.html">DE</option><option value="/tools/fr/fabric-shrinkage.html">FR</option><option value="/tools/es/fabric-shrinkage.html">ES</option><option value="/tools/pt/fabric-shrinkage.html">PT</option><option value="/tools/id/fabric-shrinkage.html">ID</option><option value="/tools/zh-CN/fabric-shrinkage.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 천 수축률 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/fabric-shrinkage.html">繁中</option><option value="/tools/en/fabric-shrinkage.html">EN</option><option value="/tools/ja/fabric-shrinkage.html">日本語</option><option value="/tools/ko/fabric-shrinkage.html" selected>한국어</option><option value="/tools/de/fabric-shrinkage.html">DE</option><option value="/tools/fr/fabric-shrinkage.html">FR</option><option value="/tools/es/fabric-shrinkage.html">ES</option><option value="/tools/pt/fabric-shrinkage.html">PT</option><option value="/tools/id/fabric-shrinkage.html">ID</option><option value="/tools/zh-CN/fabric-shrinkage.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -103,6 +117,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

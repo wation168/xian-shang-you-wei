@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "跑步配速計算機", "url": "https://softglow-ai.com/tools/pace-calculator.html", "description": "免費跑步配速計算機，輸入總時間和距離，快速計算每英里或每公里的配速和平均速度。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "配速和速度有什麼區別？", "acceptedAnswer": {"@type": "Answer", "text": "配速是完成一單位距離（英里或公里）所需的時間，通常以分鐘表示。速度是在一定時間內覆蓋的距離，通常以英里/小時或公里/小時表示。它們是相反的概念——配速越快，速度越高。"}}, {"@type": "Question", "name": "如何使用計算機改進我的跑步表現？", "acceptedAnswer": {"@type": "Answer", "text": "定期使用計算機記錄您的配速數據。如果配速逐周改善（時間縮短），說明您的表現在進步。設定現實的配速目標，根據不同訓練類型調整配速，並逐漸挑戰自己達到更快的速度。"}}, {"@type": "Question", "name": "初學跑者應該的目標配速是多少？", "acceptedAnswer": {"@type": "Answer", "text": "初學跑者的目標配速通常在每英里10-12分鐘（每公里6-7.5分鐘）。最重要的是找到舒適可持續的配速，而不是立即追求速度。隨著訓練進行，您可以逐漸提高配速。"}}, {"@type": "Question", "name": "為什麼同一天的不同跑步配速不同？", "acceptedAnswer": {"@type": "Answer", "text": "配速受多個因素影響，包括疲勞程度、天氣條件、地形、營養狀況和睡眠質量。這就是為什麼建議進行不同強度的訓練——某些日子進行輕鬆跑，其他日子進行高強度跑步。"}}, {"@type": "Question", "name": "計算機支持英里和公里嗎？", "acceptedAnswer": {"@type": "Answer", "text": "是的，計算機支持兩種距離單位。您可以選擇使用英里或公里，計算機會為您計算相應的配速。無論您使用哪種單位，計算機都會顯示英里和公里的配速結果，方便您進行對比。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="pace-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/pace-calculator.html" selected>繁中</option><option value="/tools/en/pace-calculator.html">EN</option><option value="/tools/ja/pace-calculator.html">日本語</option><option value="/tools/ko/pace-calculator.html">한국어</option><option value="/tools/de/pace-calculator.html">DE</option><option value="/tools/fr/pace-calculator.html">FR</option><option value="/tools/es/pace-calculator.html">ES</option><option value="/tools/pt/pace-calculator.html">PT</option><option value="/tools/id/pace-calculator.html">ID</option><option value="/tools/zh-CN/pace-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/pace-calculator.html" selected>繁中</option><option value="/tools/en/pace-calculator.html">EN</option><option value="/tools/ja/pace-calculator.html">日本語</option><option value="/tools/ko/pace-calculator.html">한국어</option><option value="/tools/de/pace-calculator.html">DE</option><option value="/tools/fr/pace-calculator.html">FR</option><option value="/tools/es/pace-calculator.html">ES</option><option value="/tools/pt/pace-calculator.html">PT</option><option value="/tools/id/pace-calculator.html">ID</option><option value="/tools/zh-CN/pace-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 跑步配速計算機</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/pace-calculator.html" selected>繁中</option><option value="/tools/en/pace-calculator.html">EN</option><option value="/tools/ja/pace-calculator.html">日本語</option><option value="/tools/ko/pace-calculator.html">한국어</option><option value="/tools/de/pace-calculator.html">DE</option><option value="/tools/fr/pace-calculator.html">FR</option><option value="/tools/es/pace-calculator.html">ES</option><option value="/tools/pt/pace-calculator.html">PT</option><option value="/tools/id/pace-calculator.html">ID</option><option value="/tools/zh-CN/pace-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -145,6 +159,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

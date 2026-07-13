@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "損益平衡點計算機", "url": "https://softglow-ai.com/tools/break-even.html", "description": "使用損益平衡點計算機，快速計算您需要銷售多少單位才能覆蓋所有成本。輸入固定成本、單位售價和單位變動成本即可。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "損益平衡點和利潤有什麼區別？", "acceptedAnswer": {"@type": "Answer", "text": "損益平衡點是收入等於成本的銷售量，此時利潤為零。超過損益平衡點的任何銷售都會產生利潤。因此，損益平衡點是達到實際盈利的最低銷售水平。"}}, {"@type": "Question", "name": "如何降低我的損益平衡點？", "acceptedAnswer": {"@type": "Answer", "text": "您可以通過三種方式降低損益平衡點：減少固定成本（如協商更低的租金）、提高產品價格（增加單位貢獻毛利），或降低變動成本（改進製造流程或與供應商談判）。"}}, {"@type": "Question", "name": "為什麼貢獻毛利率很重要？", "acceptedAnswer": {"@type": "Answer", "text": "貢獻毛利率顯示銷售收入中有多少用於支付固定成本。更高的比率意味著更高的效率，您需要較少的銷售額來覆蓋固定成本。這對於評估業務健康狀況和定價策略至關重要。"}}, {"@type": "Question", "name": "我應該多久計算一次損益平衡點？", "acceptedAnswer": {"@type": "Answer", "text": "當您的成本或定價發生重大變化時，應重新計算損益平衡點。建議至少每個季度審查一次，或在考慮提價、推出新產品或調整成本結構時進行計算。"}}, {"@type": "Question", "name": "損益平衡分析對小型企業有用嗎？", "acceptedAnswer": {"@type": "Answer", "text": "是的，損益平衡分析對所有規模的企業都非常有用，尤其是小型企業。它幫助創業者理解他們需要達成的銷售目標，評估業務的可行性，並做出明智的定價和成本控制決策。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="break-even">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/break-even.html" selected>繁中</option><option value="/tools/en/break-even.html">EN</option><option value="/tools/ja/break-even.html">日本語</option><option value="/tools/ko/break-even.html">한국어</option><option value="/tools/de/break-even.html">DE</option><option value="/tools/fr/break-even.html">FR</option><option value="/tools/es/break-even.html">ES</option><option value="/tools/pt/break-even.html">PT</option><option value="/tools/id/break-even.html">ID</option><option value="/tools/zh-CN/break-even.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/break-even.html" selected>繁中</option><option value="/tools/en/break-even.html">EN</option><option value="/tools/ja/break-even.html">日本語</option><option value="/tools/ko/break-even.html">한국어</option><option value="/tools/de/break-even.html">DE</option><option value="/tools/fr/break-even.html">FR</option><option value="/tools/es/break-even.html">ES</option><option value="/tools/pt/break-even.html">PT</option><option value="/tools/id/break-even.html">ID</option><option value="/tools/zh-CN/break-even.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 損益平衡點計算機</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/break-even.html" selected>繁中</option><option value="/tools/en/break-even.html">EN</option><option value="/tools/ja/break-even.html">日本語</option><option value="/tools/ko/break-even.html">한국어</option><option value="/tools/de/break-even.html">DE</option><option value="/tools/fr/break-even.html">FR</option><option value="/tools/es/break-even.html">ES</option><option value="/tools/pt/break-even.html">PT</option><option value="/tools/id/break-even.html">ID</option><option value="/tools/zh-CN/break-even.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -110,6 +124,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

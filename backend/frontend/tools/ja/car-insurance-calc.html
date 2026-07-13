@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "自動車保険料計算機", "url": "https://softglow-ai.com/tools/ja/car-insurance-calc.html", "description": "車両価値、運転者の年齢、免許保有年数などを入力して、推定年間自動車保険料を計算します。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "この計算機の結果はどの程度正確ですか？", "acceptedAnswer": {"@type": "Answer", "text": "この計算機は一般的な保険料計算モデルに基づいた推定値を提供します。実際の保険料は保険会社、地域、追加の条件によって異なる場合があります。正確な見積もりについては、保険会社に直接連絡してください。"}}, {"@type": "Question", "name": "無事故割引とは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "無事故割引は、設定期間中に事故や保険請求がなかった運転者に対する報酬です。通常、割引率は1年ごとに増加し、最大で60-70%に達する場合もあります。"}}, {"@type": "Question", "name": "運転者の年齢が保険料にどのように影響しますか？", "acceptedAnswer": {"@type": "Answer", "text": "若い運転者（18-25歳）と高齢運転者（65歳以上）は、統計的に事故リスクが高いとされているため、より高い保険料を支払う傾向があります。中年の運転者は通常、より低い料金が適用されます。"}}, {"@type": "Question", "name": "過去の交通違反は保険料にどのくらい影響しますか？", "acceptedAnswer": {"@type": "Answer", "text": "交通違反は保険料の大幅な増加につながります。違反の種類と重大性に応じて、保険料は25%から100%以上増加する可能性があります。違反記録は通常3-5年で保険料計算から除外されます。"}}, {"@type": "Question", "name": "駐車タイプを変更すると保険料はどう変わりますか？", "acceptedAnswer": {"@type": "Answer", "text": "安全な駐車環境（ガレージなど）は、盗難やいたずらのリスクを軽減し、保険料を低下させます。路上駐車の場合、リスクが高いと見なされ、より高い保険料が適用される傾向があります。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="car-insurance-calc">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ja">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ja/">ツール</a>
-    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/patterns/ja.html">ローソク足</a>
+    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/">ホーム</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/car-insurance-calc.html">繁中</option><option value="/tools/en/car-insurance-calc.html">EN</option><option value="/tools/ja/car-insurance-calc.html" selected>日本語</option><option value="/tools/ko/car-insurance-calc.html">한국어</option><option value="/tools/de/car-insurance-calc.html">DE</option><option value="/tools/fr/car-insurance-calc.html">FR</option><option value="/tools/es/car-insurance-calc.html">ES</option><option value="/tools/pt/car-insurance-calc.html">PT</option><option value="/tools/id/car-insurance-calc.html">ID</option><option value="/tools/zh-CN/car-insurance-calc.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/car-insurance-calc.html">繁中</option><option value="/tools/en/car-insurance-calc.html">EN</option><option value="/tools/ja/car-insurance-calc.html" selected>日本語</option><option value="/tools/ko/car-insurance-calc.html">한국어</option><option value="/tools/de/car-insurance-calc.html">DE</option><option value="/tools/fr/car-insurance-calc.html">FR</option><option value="/tools/es/car-insurance-calc.html">ES</option><option value="/tools/pt/car-insurance-calc.html">PT</option><option value="/tools/id/car-insurance-calc.html">ID</option><option value="/tools/zh-CN/car-insurance-calc.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 自動車保険料計算機</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/car-insurance-calc.html">繁中</option><option value="/tools/en/car-insurance-calc.html">EN</option><option value="/tools/ja/car-insurance-calc.html" selected>日本語</option><option value="/tools/ko/car-insurance-calc.html">한국어</option><option value="/tools/de/car-insurance-calc.html">DE</option><option value="/tools/fr/car-insurance-calc.html">FR</option><option value="/tools/es/car-insurance-calc.html">ES</option><option value="/tools/pt/car-insurance-calc.html">PT</option><option value="/tools/id/car-insurance-calc.html">ID</option><option value="/tools/zh-CN/car-insurance-calc.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -190,6 +204,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="ツール、パターン、記事を検索…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>ブックマーク</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全て削除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

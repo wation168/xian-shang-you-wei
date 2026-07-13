@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "ボルト締め付けトルク計算機", "url": "https://softglow-ai.com/tools/ja/bolt-torque.html", "description": "ボルト締め付けトルク計算機で、トルク係数、ボルト径、張力から正確な締め付けトルクを計算できます。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "トルク係数（K）はどのように決定しますか？", "acceptedAnswer": {"@type": "Answer", "text": "トルク係数はボルトの材質（鋼、ステンレス等）と表面処理（無処理、めっき、潤滑処理等）の組み合わせで決まります。一般的な値は0.12～0.20の範囲です。ボルトメーカーのカタログを参照するか、JIS規格の標準値を使用してください。"}}, {"@type": "Question", "name": "計算結果の単位は何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "最初の結果はN・m（ニュートンメートル）、2番目の結果はft・lbs（フィートポンド）です。メートル法とインペリアル法の両方を表示しているため、どちらの環境でも使用できます。"}}, {"@type": "Question", "name": "なぜトルク値の計算が必要なのですか？", "acceptedAnswer": {"@type": "Answer", "text": "ボルトを正確な力で締め付けることで、接合部の安全性と信頼性を確保できます。過度な締め付けはボルトの破損につながり、不足した締め付けは緩みの原因となるため、計算による適切な値の設定が不可欠です。"}}, {"@type": "Question", "name": "トルクレンチで測定するにはどうすればよいですか？", "acceptedAnswer": {"@type": "Answer", "text": "計算結果の値にトルクレンチを設定し、ボルトに徐々に力を加えてください。トルクレンチがカチッと音を立てたら、設定トルク値に到達したことを示しています。複数回の締め付けは避け、1回で目標値に達するようにしてください。"}}, {"@type": "Question", "name": "異なるボルト径で同じトルク係数を使用できますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、同じ材質と表面処理のボルトであれば、トルク係数は変わりません。ただしボルト径によってトルク値は変わるため、各径ごとに計算する必要があります。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="bolt-torque">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ja">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ja/">ツール</a>
-    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/patterns/ja.html">ローソク足</a>
+    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/">ホーム</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/bolt-torque.html">繁中</option><option value="/tools/en/bolt-torque.html">EN</option><option value="/tools/ja/bolt-torque.html" selected>日本語</option><option value="/tools/ko/bolt-torque.html">한국어</option><option value="/tools/de/bolt-torque.html">DE</option><option value="/tools/fr/bolt-torque.html">FR</option><option value="/tools/es/bolt-torque.html">ES</option><option value="/tools/pt/bolt-torque.html">PT</option><option value="/tools/id/bolt-torque.html">ID</option><option value="/tools/zh-CN/bolt-torque.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/bolt-torque.html">繁中</option><option value="/tools/en/bolt-torque.html">EN</option><option value="/tools/ja/bolt-torque.html" selected>日本語</option><option value="/tools/ko/bolt-torque.html">한국어</option><option value="/tools/de/bolt-torque.html">DE</option><option value="/tools/fr/bolt-torque.html">FR</option><option value="/tools/es/bolt-torque.html">ES</option><option value="/tools/pt/bolt-torque.html">PT</option><option value="/tools/id/bolt-torque.html">ID</option><option value="/tools/zh-CN/bolt-torque.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > ボルト締め付けトルク計算機</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/bolt-torque.html">繁中</option><option value="/tools/en/bolt-torque.html">EN</option><option value="/tools/ja/bolt-torque.html" selected>日本語</option><option value="/tools/ko/bolt-torque.html">한국어</option><option value="/tools/de/bolt-torque.html">DE</option><option value="/tools/fr/bolt-torque.html">FR</option><option value="/tools/es/bolt-torque.html">ES</option><option value="/tools/pt/bolt-torque.html">PT</option><option value="/tools/id/bolt-torque.html">ID</option><option value="/tools/zh-CN/bolt-torque.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -132,6 +146,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="ツール、パターン、記事を検索…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>ブックマーク</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全て削除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

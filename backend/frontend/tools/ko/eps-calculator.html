@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "EPS 계산기", "url": "https://softglow-ai.com/tools/ko/eps-calculator.html", "description": "순이익과 발행주식수를 입력하여 주당순이익(EPS)을 쉽게 계산할 수 있습니다. 회사의 수익성을 평가하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "EPS가 높을수록 항상 좋은 회사입니까?", "acceptedAnswer": {"@type": "Answer", "text": "꼭 그렇지는 않습니다. EPS는 수익성을 나타내는 지표이지만, 높은 EPS가 저평가된 주식을 의미할 수도 있고, 낮은 EPS가 성장 가능성 있는 회사를 의미할 수도 있습니다. PER, 성장률, 부채 비율 등 다른 지표들과 함께 분석해야 합니다."}}, {"@type": "Question", "name": "EPS가 음수라는 것은 무엇을 의미합니까?", "acceptedAnswer": {"@type": "Answer", "text": "음수 EPS는 회사가 순손실을 기록했다는 의미입니다. 즉, 비용이 수익보다 많아 손실을 본 상태입니다. 신생 회사나 경영난을 겪는 회사에서 종종 나타나는 현상입니다."}}, {"@type": "Question", "name": "주식 분할(Stock Split)은 EPS에 어떤 영향을 미칩니까?", "acceptedAnswer": {"@type": "Answer", "text": "주식 분할은 발행주식수를 증가시키므로 EPS를 낮춥니다. 예를 들어 2:1 분할 시 발행주식수는 2배가 되고 EPS는 절반이 됩니다. 하지만 회사의 실제 수익성은 변하지 않습니다."}}, {"@type": "Question", "name": "EPS와 DPS(주당배당금)의 차이는 무엇입니까?", "acceptedAnswer": {"@type": "Answer", "text": "EPS는 회사가 벌어들인 주당 순이익을 나타내고, DPS는 주주에게 실제로 배당하는 주당 금액입니다. 모든 순이익이 배당으로 지급되는 것은 아니며, 일부는 회사의 성장을 위해 유보됩니다."}}, {"@type": "Question", "name": "EPS 계산 시 선호주(Preferred Shares)는 어떻게 처리합니까?", "acceptedAnswer": {"@type": "Answer", "text": "EPS 계산에서는 일반적으로 보통주 발행수만 사용합니다. 순이익 계산 시에는 선호주에 대한 배당금을 먼저 차감한 후 보통주에 돌아갈 순이익으로 계산합니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="eps-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/eps-calculator.html">繁中</option><option value="/tools/en/eps-calculator.html">EN</option><option value="/tools/ja/eps-calculator.html">日本語</option><option value="/tools/ko/eps-calculator.html" selected>한국어</option><option value="/tools/de/eps-calculator.html">DE</option><option value="/tools/fr/eps-calculator.html">FR</option><option value="/tools/es/eps-calculator.html">ES</option><option value="/tools/pt/eps-calculator.html">PT</option><option value="/tools/id/eps-calculator.html">ID</option><option value="/tools/zh-CN/eps-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/eps-calculator.html">繁中</option><option value="/tools/en/eps-calculator.html">EN</option><option value="/tools/ja/eps-calculator.html">日本語</option><option value="/tools/ko/eps-calculator.html" selected>한국어</option><option value="/tools/de/eps-calculator.html">DE</option><option value="/tools/fr/eps-calculator.html">FR</option><option value="/tools/es/eps-calculator.html">ES</option><option value="/tools/pt/eps-calculator.html">PT</option><option value="/tools/id/eps-calculator.html">ID</option><option value="/tools/zh-CN/eps-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > EPS 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/eps-calculator.html">繁中</option><option value="/tools/en/eps-calculator.html">EN</option><option value="/tools/ja/eps-calculator.html">日本語</option><option value="/tools/ko/eps-calculator.html" selected>한국어</option><option value="/tools/de/eps-calculator.html">DE</option><option value="/tools/fr/eps-calculator.html">FR</option><option value="/tools/es/eps-calculator.html">ES</option><option value="/tools/pt/eps-calculator.html">PT</option><option value="/tools/id/eps-calculator.html">ID</option><option value="/tools/zh-CN/eps-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -136,6 +150,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

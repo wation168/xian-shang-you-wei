@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "피보나치 되돌림 계산기", "url": "https://softglow-ai.com/tools/ko/fibonacci-retracement.html", "description": "피보나치 비율을 이용한 기술적 분석 도구. 고가와 저가를 입력하면 5단계의 되돌림 수준을 자동으로 계산합니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "피보나치 되돌림에서 어떤 비율이 가장 중요한가요?", "acceptedAnswer": {"@type": "Answer", "text": "38.2%와 61.8% 비율이 가장 중요하게 간주됩니다. 61.8%는 황금비율(Golden Ratio)로 알려져 있으며, 강한 지지선과 저항선을 형성합니다."}}, {"@type": "Question", "name": "고가와 저가는 어떻게 선택해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "일반적으로 최근 강한 상승 추세의 최고점을 고가로, 그 이후의 최저점을 저가로 선택합니다. 시간 프레임(일봉, 주봉, 월봉)에 따라 적절한 고점과 저점을 선택하세요."}}, {"@type": "Question", "name": "피보나치 되돌림이 항상 정확한가요?", "acceptedAnswer": {"@type": "Answer", "text": "아니요, 피보나치 되돌림은 확률론적 도구일 뿐 100% 정확하지 않습니다. 시장 변수와 뉴스에 의해 예상과 다르게 움직일 수 있으므로, 다른 지표와 함께 사용하세요."}}, {"@type": "Question", "name": "단기 거래와 장기 투자 중 어디에 더 효과적인가요?", "acceptedAnswer": {"@type": "Answer", "text": "피보나치 되돌림은 모든 시간 프레임에서 사용할 수 있습니다. 다만 시간 프레임이 길수록 더 신뢰할 수 있는 지지선과 저항선을 형성합니다."}}, {"@type": "Question", "name": "손절매는 어디에 설정해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "일반적으로 선택한 고점이나 저점 위/아래에 손절매를 설정합니다. 또는 78.6% 되돌림 수준을 넘으면 추세 반전 신호로 보고 손절매를 실행하기도 합니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="fibonacci-retracement">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/fibonacci-retracement.html">繁中</option><option value="/tools/en/fibonacci-retracement.html">EN</option><option value="/tools/ja/fibonacci-retracement.html">日本語</option><option value="/tools/ko/fibonacci-retracement.html" selected>한국어</option><option value="/tools/de/fibonacci-retracement.html">DE</option><option value="/tools/fr/fibonacci-retracement.html">FR</option><option value="/tools/es/fibonacci-retracement.html">ES</option><option value="/tools/pt/fibonacci-retracement.html">PT</option><option value="/tools/id/fibonacci-retracement.html">ID</option><option value="/tools/zh-CN/fibonacci-retracement.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/fibonacci-retracement.html">繁中</option><option value="/tools/en/fibonacci-retracement.html">EN</option><option value="/tools/ja/fibonacci-retracement.html">日本語</option><option value="/tools/ko/fibonacci-retracement.html" selected>한국어</option><option value="/tools/de/fibonacci-retracement.html">DE</option><option value="/tools/fr/fibonacci-retracement.html">FR</option><option value="/tools/es/fibonacci-retracement.html">ES</option><option value="/tools/pt/fibonacci-retracement.html">PT</option><option value="/tools/id/fibonacci-retracement.html">ID</option><option value="/tools/zh-CN/fibonacci-retracement.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 피보나치 되돌림 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/fibonacci-retracement.html">繁中</option><option value="/tools/en/fibonacci-retracement.html">EN</option><option value="/tools/ja/fibonacci-retracement.html">日本語</option><option value="/tools/ko/fibonacci-retracement.html" selected>한국어</option><option value="/tools/de/fibonacci-retracement.html">DE</option><option value="/tools/fr/fibonacci-retracement.html">FR</option><option value="/tools/es/fibonacci-retracement.html">ES</option><option value="/tools/pt/fibonacci-retracement.html">PT</option><option value="/tools/id/fibonacci-retracement.html">ID</option><option value="/tools/zh-CN/fibonacci-retracement.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -143,6 +157,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "退休计算器", "url": "https://softglow-ai.com/tools/zh-CN/retirement.html", "description": "使用我们的退休计算器，输入月度缴款、年回报率和退休年限，快速计算您的退休储蓄总额和投资收益。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "应该投入多少月度缴款？", "acceptedAnswer": {"@type": "Answer", "text": "通常建议将您税后收入的10-15%用于退休储蓄。如果这个比例太高，可以从较低的金额开始，然后逐年增加，特别是在加薪时。我们的计算器可以帮助您模拟不同缴款金额的影响。"}}, {"@type": "Question", "name": "年回报率应该设为多少？", "acceptedAnswer": {"@type": "Answer", "text": "合理的年回报率取决于您的投资组合。保守投资组合（主要是债券）可能为3-5%，平衡组合为6-8%，激进组合（主要是股票）为8-10%或更高。根据您的风险承受能力和投资时间选择合适的率。"}}, {"@type": "Question", "name": "通货膨胀如何影响我的退休计划？", "acceptedAnswer": {"@type": "Answer", "text": "通货膨胀会降低您储蓄的购买力。理想情况下，您的投资回报率应该超过预期通货膨胀率。例如，如果通货膨胀为2%，投资回报率为7%，实际回报率约为5%。在规划时应考虑这一因素。"}}, {"@type": "Question", "name": "我可以更改计算中途的金额吗？", "acceptedAnswer": {"@type": "Answer", "text": "是的，可以。您可以随时调整任何输入值（月度缴款、回报率、年限或当前储蓄），计算器会立即重新计算结果。这允许您探索不同场景，找到最符合您目标的方案。"}}, {"@type": "Question", "name": "这个计算器对我的退休规划有多准确？", "acceptedAnswer": {"@type": "Answer", "text": "本计算器基于标准财务公式，提供合理的估计。但实际结果可能因市场波动、税收、提取模式和其他因素而有所不同。建议咨询财务顾问获得个性化建议，特别是对于大型退休计划。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="retirement">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/retirement.html">繁中</option><option value="/tools/en/retirement.html">EN</option><option value="/tools/ja/retirement.html">日本語</option><option value="/tools/ko/retirement.html">한국어</option><option value="/tools/de/retirement.html">DE</option><option value="/tools/fr/retirement.html">FR</option><option value="/tools/es/retirement.html">ES</option><option value="/tools/pt/retirement.html">PT</option><option value="/tools/id/retirement.html">ID</option><option value="/tools/zh-CN/retirement.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/retirement.html">繁中</option><option value="/tools/en/retirement.html">EN</option><option value="/tools/ja/retirement.html">日本語</option><option value="/tools/ko/retirement.html">한국어</option><option value="/tools/de/retirement.html">DE</option><option value="/tools/fr/retirement.html">FR</option><option value="/tools/es/retirement.html">ES</option><option value="/tools/pt/retirement.html">PT</option><option value="/tools/id/retirement.html">ID</option><option value="/tools/zh-CN/retirement.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 退休计算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/retirement.html">繁中</option><option value="/tools/en/retirement.html">EN</option><option value="/tools/ja/retirement.html">日本語</option><option value="/tools/ko/retirement.html">한국어</option><option value="/tools/de/retirement.html">DE</option><option value="/tools/fr/retirement.html">FR</option><option value="/tools/es/retirement.html">ES</option><option value="/tools/pt/retirement.html">PT</option><option value="/tools/id/retirement.html">ID</option><option value="/tools/zh-CN/retirement.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -111,6 +125,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

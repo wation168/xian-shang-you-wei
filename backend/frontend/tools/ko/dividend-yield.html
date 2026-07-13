@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "배당 수익률 계산기", "url": "https://softglow-ai.com/tools/ko/dividend-yield.html", "description": "배당 수익률 계산기로 주식 투자의 연간 배당 수익률을 쉽게 계산하세요. 배당금과 주가를 입력하여 투자 수익성을 분석하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "배당 수익률이 높으면 항상 좋은 투자인가요?", "acceptedAnswer": {"@type": "Answer", "text": "반드시 그렇지는 않습니다. 높은 배당 수익률은 매력적으로 보이지만, 회사의 재정 상황이 악화되어 주가가 급락한 결과일 수도 있습니다. 회사의 실적, 배당금 지속 가능성, 산업 전망 등을 함께 고려하여 판단해야 합니다."}}, {"@type": "Question", "name": "배당 수익률과 배당성장률의 차이는 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "배당 수익률은 현재 주가 대비 배당금의 비율입니다. 반면 배당성장률은 배당금이 해마다 얼마나 증가하는지를 나타냅니다. 장기 투자에서는 안정적인 배당금과 함께 성장성을 함께 고려하는 것이 중요합니다."}}, {"@type": "Question", "name": "월 배당금을 받는 경우 이 계산기를 어떻게 사용하나요?", "acceptedAnswer": {"@type": "Answer", "text": "월 배당금을 받는다면 먼저 월 배당금에 12를 곱하여 연간 배당금으로 변환한 후 입력하세요. 예를 들어 월 배당금이 $0.40이면 연간 배당금은 $4.80입니다."}}, {"@type": "Question", "name": "배당금이 없는 주식도 투자할 가치가 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "물론입니다. 배당금을 지급하지 않는 회사도 가치가 있습니다. 이런 회사들은 일반적으로 이윤을 재투자하여 기업 성장에 집중합니다. 이 경우 배당 수익률 대신 주가 상승에 따른 자본 이득을 노릴 수 있습니다."}}, {"@type": "Question", "name": "배당 수익률을 계산할 때 세금을 고려해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "이 계산기는 세금을 고려하지 않습니다. 실제 순 수익을 계산하려면 배당금에 적용되는 세율을 확인하고 세금을 공제해야 합니다. 국가와 개인의 세금 상황에 따라 실제 수익이 달라질 수 있습니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="dividend-yield">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/dividend-yield.html">繁中</option><option value="/tools/en/dividend-yield.html">EN</option><option value="/tools/ja/dividend-yield.html">日本語</option><option value="/tools/ko/dividend-yield.html" selected>한국어</option><option value="/tools/de/dividend-yield.html">DE</option><option value="/tools/fr/dividend-yield.html">FR</option><option value="/tools/es/dividend-yield.html">ES</option><option value="/tools/pt/dividend-yield.html">PT</option><option value="/tools/id/dividend-yield.html">ID</option><option value="/tools/zh-CN/dividend-yield.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/dividend-yield.html">繁中</option><option value="/tools/en/dividend-yield.html">EN</option><option value="/tools/ja/dividend-yield.html">日本語</option><option value="/tools/ko/dividend-yield.html" selected>한국어</option><option value="/tools/de/dividend-yield.html">DE</option><option value="/tools/fr/dividend-yield.html">FR</option><option value="/tools/es/dividend-yield.html">ES</option><option value="/tools/pt/dividend-yield.html">PT</option><option value="/tools/id/dividend-yield.html">ID</option><option value="/tools/zh-CN/dividend-yield.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 배당 수익률 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/dividend-yield.html">繁中</option><option value="/tools/en/dividend-yield.html">EN</option><option value="/tools/ja/dividend-yield.html">日本語</option><option value="/tools/ko/dividend-yield.html" selected>한국어</option><option value="/tools/de/dividend-yield.html">DE</option><option value="/tools/fr/dividend-yield.html">FR</option><option value="/tools/es/dividend-yield.html">ES</option><option value="/tools/pt/dividend-yield.html">PT</option><option value="/tools/id/dividend-yield.html">ID</option><option value="/tools/zh-CN/dividend-yield.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -126,6 +140,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

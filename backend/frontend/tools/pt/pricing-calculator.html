@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculadora de Precificação de Produtos", "url": "https://softglow-ai.com/tools/pt/pricing-calculator.html", "description": "Calcule o preço ideal de venda do seu produto considerando custos, taxas e margem de lucro desejada. Ferramenta gratuita online.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "pt"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Como devo preencher o campo de Taxas Adicionais?", "acceptedAnswer": {"@type": "Answer", "text": "Inclua todas as despesas diretas relacionadas ao produto: custo de envio, embalagem, rótulos, taxas de processamento de pagamento (como aquelas cobradas por cartão de crédito) e qualquer outra despesa específica da venda. Não inclua despesas gerais de administração neste campo."}}, {"@type": "Question", "name": "Qual margem de lucro devo estabelecer?", "acceptedAnswer": {"@type": "Answer", "text": "Isso depende do seu setor, custos operacionais e estratégia de mercado. Varejo físico geralmente tem margens de 30-50%, e-commerce de 25-40%, produtos digitais podem ter 70%+. Considere também seus custos fixos (aluguel, salários) que precisam ser cobertos pelo lucro total."}}, {"@type": "Question", "name": "Qual é a diferença entre margem e mark-up?", "acceptedAnswer": {"@type": "Answer", "text": "Margem de lucro é o percentual de lucro sobre o custo total (como mostramos aqui). Mark-up é o percentual adicionado ao custo. Para um produto de R$ 100 com margem de 40%, o preço é R$ 166,67. Com mark-up de 40%, seria R$ 140. São conceitos diferentes e a calculadora usa margem de lucro."}}, {"@type": "Question", "name": "Com que frequência devo recalcular meus preços?", "acceptedAnswer": {"@type": "Answer", "text": "Revise seus preços sempre que seus custos mudarem significativamente, pelo menos a cada trimestre. Se você tem múltiplos produtos, considere usar uma planilha que se integre com esta calculadora para gerenciar tudo de forma centralizada e eficiente."}}, {"@type": "Question", "name": "E se meu preço ficar acima do que o mercado aceita pagar?", "acceptedAnswer": {"@type": "Answer", "text": "Você tem algumas opções: reduzir sua margem de lucro, encontrar formas de reduzir custos (fornecedor mais barato, embalagem otimizada), melhorar o valor percebido do produto, ou focar em um nicho de mercado que aceita preços premium. Uma combinação dessas estratégias geralmente funciona melhor."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="pricing-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="pt">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/pt/">Ferramentas</a>
-    <a href="/blog/pt/index.html">Blog</a>
     <a href="/patterns/pt.html">Padrões</a>
+    <a href="/blog/pt/index.html">Blog</a>
     <a href="/">Início</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/pricing-calculator.html">繁中</option><option value="/tools/en/pricing-calculator.html">EN</option><option value="/tools/ja/pricing-calculator.html">日本語</option><option value="/tools/ko/pricing-calculator.html">한국어</option><option value="/tools/de/pricing-calculator.html">DE</option><option value="/tools/fr/pricing-calculator.html">FR</option><option value="/tools/es/pricing-calculator.html">ES</option><option value="/tools/pt/pricing-calculator.html" selected>PT</option><option value="/tools/id/pricing-calculator.html">ID</option><option value="/tools/zh-CN/pricing-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/pricing-calculator.html">繁中</option><option value="/tools/en/pricing-calculator.html">EN</option><option value="/tools/ja/pricing-calculator.html">日本語</option><option value="/tools/ko/pricing-calculator.html">한국어</option><option value="/tools/de/pricing-calculator.html">DE</option><option value="/tools/fr/pricing-calculator.html">FR</option><option value="/tools/es/pricing-calculator.html">ES</option><option value="/tools/pt/pricing-calculator.html" selected>PT</option><option value="/tools/id/pricing-calculator.html">ID</option><option value="/tools/zh-CN/pricing-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/pt/">Ferramentas</a> > Calculadora de Precificação de Produtos</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/pricing-calculator.html">繁中</option><option value="/tools/en/pricing-calculator.html">EN</option><option value="/tools/ja/pricing-calculator.html">日本語</option><option value="/tools/ko/pricing-calculator.html">한국어</option><option value="/tools/de/pricing-calculator.html">DE</option><option value="/tools/fr/pricing-calculator.html">FR</option><option value="/tools/es/pricing-calculator.html">ES</option><option value="/tools/pt/pricing-calculator.html" selected>PT</option><option value="/tools/id/pricing-calculator.html">ID</option><option value="/tools/zh-CN/pricing-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -140,6 +154,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Pesquisar ferramentas, padrões, artigos…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Favoritos</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Limpar tudo</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

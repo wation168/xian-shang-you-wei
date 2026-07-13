@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "资产配置计算器", "url": "https://softglow-ai.com/tools/zh-CN/asset-allocation.html", "description": "根据您的年龄、退休时间和风险承受能力，计算最优的股票、债券和现金配置比例。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "我应该多久检查一次我的资产配置？", "acceptedAnswer": {"@type": "Answer", "text": "建议每季度或至少每年检查一次您的资产配置。如果市场波动导致各资产类别的比例与目标偏差超过5%，应考虑进行重新平衡。生活重大变化（如工作变更、继承、大额支出）时也应及时调整。"}}, {"@type": "Question", "name": "为什么年轻人应该配置更多股票？", "acceptedAnswer": {"@type": "Answer", "text": "年轻投资者有20-30年或更长的投资时间。这意味着他们可以通过长期投资平复短期市场波动，获得股票的更高平均收益。历史数据表明，长期而言股票的平均收益率高于债券和现金。"}}, {"@type": "Question", "name": "风险承受能力和年龄哪个更重要？", "acceptedAnswer": {"@type": "Answer", "text": "两者都很重要，应综合考虑。年龄影响投资时间范围，心理风险承受能力影响您对波动的承受程度。理想的配置应该在这两个因素之间找到平衡点。如果您虽然年轻但心理承受能力低，不应被迫选择过激进的配置。"}}, {"@type": "Question", "name": "债券和现金哪个更安全？", "acceptedAnswer": {"@type": "Answer", "text": "两者各有特点。现金最安全但收益最低，通常保持3-6个月生活费的现金储备。债券的安全性取决于发行人（政府债券最安全），通常提供比现金更高的收益。建议两者都保留，现金应对短期需求，债券提供稳定收益。"}}, {"@type": "Question", "name": "我能完全根据计算器结果配置投资组合吗？", "acceptedAnswer": {"@type": "Answer", "text": "计算器结果是一个良好的指导框架，但应考虑您的具体情况。包括个人债务水平、退休后预期支出、家庭责任、现有投资和财务目标等因素。建议咨询专业财务顾问，根据您的完整财务状况制定个性化投资计划。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="asset-allocation">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/asset-allocation.html">繁中</option><option value="/tools/en/asset-allocation.html">EN</option><option value="/tools/ja/asset-allocation.html">日本語</option><option value="/tools/ko/asset-allocation.html">한국어</option><option value="/tools/de/asset-allocation.html">DE</option><option value="/tools/fr/asset-allocation.html">FR</option><option value="/tools/es/asset-allocation.html">ES</option><option value="/tools/pt/asset-allocation.html">PT</option><option value="/tools/id/asset-allocation.html">ID</option><option value="/tools/zh-CN/asset-allocation.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/asset-allocation.html">繁中</option><option value="/tools/en/asset-allocation.html">EN</option><option value="/tools/ja/asset-allocation.html">日本語</option><option value="/tools/ko/asset-allocation.html">한국어</option><option value="/tools/de/asset-allocation.html">DE</option><option value="/tools/fr/asset-allocation.html">FR</option><option value="/tools/es/asset-allocation.html">ES</option><option value="/tools/pt/asset-allocation.html">PT</option><option value="/tools/id/asset-allocation.html">ID</option><option value="/tools/zh-CN/asset-allocation.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 资产配置计算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/asset-allocation.html">繁中</option><option value="/tools/en/asset-allocation.html">EN</option><option value="/tools/ja/asset-allocation.html">日本語</option><option value="/tools/ko/asset-allocation.html">한국어</option><option value="/tools/de/asset-allocation.html">DE</option><option value="/tools/fr/asset-allocation.html">FR</option><option value="/tools/es/asset-allocation.html">ES</option><option value="/tools/pt/asset-allocation.html">PT</option><option value="/tools/id/asset-allocation.html">ID</option><option value="/tools/zh-CN/asset-allocation.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -159,6 +173,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

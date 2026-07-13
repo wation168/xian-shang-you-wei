@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "聚会食物计算器", "url": "https://softglow-ai.com/tools/zh-CN/serving-size.html", "description": "使用聚会食物计算器快速计算蛋白质、淀粉和蔬菜的总需求量。根据客人数量自动生成购物清单。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "计算器中的克数是指生食还是熟食？", "acceptedAnswer": {"@type": "Answer", "text": "计算器中的克数通常指生食或未烹饪状态。烹饪过程中，食物会流失水分，实际熟食重量会减少15-25%。为确保最终份量充足，建议按生食重量计算采购。"}}, {"@type": "Question", "name": "如何根据不同客人调整份量？", "acceptedAnswer": {"@type": "Answer", "text": "如果客人中有儿童或老人，可以适当减少份量。儿童建议按成人的60-70%计算，老人可按成人的80-90%计算。运动爱好者或体力劳动者可增加20-30%的蛋白质份量。"}}, {"@type": "Question", "name": "素食客人如何处理蛋白质计算？", "acceptedAnswer": {"@type": "Answer", "text": "素食客人可用豆制品、坚果、鸡蛋或乳制品代替肉类蛋白。100克豆腐≈15克蛋白质，100克豆类≈20克蛋白质。建议为素食客人单独备注并确保有足够的替代食材。"}}, {"@type": "Question", "name": "聚会中可能有食物剩余，应该预留多少余量？", "acceptedAnswer": {"@type": "Answer", "text": "通常建议预留10-15%的余量。如果聚会类型是自助餐，客人可能吃得更多，建议预留15-20%。如果是定量供应，预留5-10%即可。剩余食物可以冷冻保存或次日食用。"}}, {"@type": "Question", "name": "如何处理不同饮食习惯客人的需求？", "acceptedAnswer": {"@type": "Answer", "text": "提前了解客人的饮食限制很重要。准备多样化的食材选择：不同类型的蛋白质（肉类、鱼类、豆类），多种淀粉选择，丰富的蔬菜品种。这样可以满足素食者、过敏者和不同口味偏好的客人。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="serving-size">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/serving-size.html">繁中</option><option value="/tools/en/serving-size.html">EN</option><option value="/tools/ja/serving-size.html">日本語</option><option value="/tools/ko/serving-size.html">한국어</option><option value="/tools/de/serving-size.html">DE</option><option value="/tools/fr/serving-size.html">FR</option><option value="/tools/es/serving-size.html">ES</option><option value="/tools/pt/serving-size.html">PT</option><option value="/tools/id/serving-size.html">ID</option><option value="/tools/zh-CN/serving-size.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/serving-size.html">繁中</option><option value="/tools/en/serving-size.html">EN</option><option value="/tools/ja/serving-size.html">日本語</option><option value="/tools/ko/serving-size.html">한국어</option><option value="/tools/de/serving-size.html">DE</option><option value="/tools/fr/serving-size.html">FR</option><option value="/tools/es/serving-size.html">ES</option><option value="/tools/pt/serving-size.html">PT</option><option value="/tools/id/serving-size.html">ID</option><option value="/tools/zh-CN/serving-size.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 聚会食物计算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/serving-size.html">繁中</option><option value="/tools/en/serving-size.html">EN</option><option value="/tools/ja/serving-size.html">日本語</option><option value="/tools/ko/serving-size.html">한국어</option><option value="/tools/de/serving-size.html">DE</option><option value="/tools/fr/serving-size.html">FR</option><option value="/tools/es/serving-size.html">ES</option><option value="/tools/pt/serving-size.html">PT</option><option value="/tools/id/serving-size.html">ID</option><option value="/tools/zh-CN/serving-size.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -140,6 +154,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

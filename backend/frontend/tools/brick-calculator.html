@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "磚塊計算機", "url": "https://softglow-ai.com/tools/brick-calculator.html", "description": "使用磚塊計算機精確計算您的建築項目所需的磚塊數量。輸入牆壁尺寸和磚塊規格，立即獲得準確結果。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "灰漿接縫寬度應該是多少？", "acceptedAnswer": {"@type": "Answer", "text": "標準灰漿接縫寬度通常為10至12毫米（0.01至0.012公尺）。這取決於磚塊類型和建築標準。較寬的接縫可能用於某些裝飾風格，但會增加所需磚塊的數量。請諮詢您的建築設計或當地建築規範。"}}, {"@type": "Question", "name": "我應該購買比計算結果更多的磚塊嗎？", "acceptedAnswer": {"@type": "Answer", "text": "是的，建議購買額外的磚塊。通常建議增加5-10%的額外數量來應對破損、切割損耗和運輸損傷。對於複雜設計或顏色變化較大的項目，應考慮增加更多。"}}, {"@type": "Question", "name": "不同類型的磚塊尺寸相同嗎？", "acceptedAnswer": {"@type": "Answer", "text": "不同。標準紅磚、面磚、空心磚和特種磚的尺寸各不相同。不同國家和地區也有不同的標準。使用計算機前，請確認您計劃使用的磚塊的確切尺寸。"}}, {"@type": "Question", "name": "如何處理牆壁上的門窗開口？", "acceptedAnswer": {"@type": "Answer", "text": "計算實際需要鋪砌磚塊的面積。將牆壁總面積減去所有門窗開口的面積，得到實際的牆壁面積，然後使用此數值進行計算。這將給您更準確的磚塊需求估算。"}}, {"@type": "Question", "name": "計算結果是否包括浪費因素？", "acceptedAnswer": {"@type": "Answer", "text": "不包括。計算機提供的是理論所需的精確數量。您應根據項目複雜度自行增加5-10%或更多的浪費因素。建議與您的承包商或供應商討論合適的額外百分比。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="brick-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/brick-calculator.html" selected>繁中</option><option value="/tools/en/brick-calculator.html">EN</option><option value="/tools/ja/brick-calculator.html">日本語</option><option value="/tools/ko/brick-calculator.html">한국어</option><option value="/tools/de/brick-calculator.html">DE</option><option value="/tools/fr/brick-calculator.html">FR</option><option value="/tools/es/brick-calculator.html">ES</option><option value="/tools/pt/brick-calculator.html">PT</option><option value="/tools/id/brick-calculator.html">ID</option><option value="/tools/zh-CN/brick-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/brick-calculator.html" selected>繁中</option><option value="/tools/en/brick-calculator.html">EN</option><option value="/tools/ja/brick-calculator.html">日本語</option><option value="/tools/ko/brick-calculator.html">한국어</option><option value="/tools/de/brick-calculator.html">DE</option><option value="/tools/fr/brick-calculator.html">FR</option><option value="/tools/es/brick-calculator.html">ES</option><option value="/tools/pt/brick-calculator.html">PT</option><option value="/tools/id/brick-calculator.html">ID</option><option value="/tools/zh-CN/brick-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 磚塊計算機</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/brick-calculator.html" selected>繁中</option><option value="/tools/en/brick-calculator.html">EN</option><option value="/tools/ja/brick-calculator.html">日本語</option><option value="/tools/ko/brick-calculator.html">한국어</option><option value="/tools/de/brick-calculator.html">DE</option><option value="/tools/fr/brick-calculator.html">FR</option><option value="/tools/es/brick-calculator.html">ES</option><option value="/tools/pt/brick-calculator.html">PT</option><option value="/tools/id/brick-calculator.html">ID</option><option value="/tools/zh-CN/brick-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -142,6 +156,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

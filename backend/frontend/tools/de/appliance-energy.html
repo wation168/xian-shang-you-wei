@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Stromkosten-Rechner für Haushaltsgeräte", "url": "https://softglow-ai.com/tools/de/appliance-energy.html", "description": "Berechnen Sie einfach die monatlichen und jährlichen Stromkosten Ihrer Haushaltsgeräte mit unserem kostenlosen Rechner.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "de"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Wie finde ich die Wattzahl meines Geräts heraus?", "acceptedAnswer": {"@type": "Answer", "text": "Die Leistung in Watt finden Sie meist auf einem Etikett auf der Rückseite oder Unterseite des Geräts, in der Bedienungsanleitung oder auf der Verpackung. Alternativ können Sie auch ein Strommessgerät verwenden, um die tatsächliche Leistung zu messen."}}, {"@type": "Question", "name": "Welcher Stromtarif sollte ich verwenden?", "acceptedAnswer": {"@type": "Answer", "text": "Nutzen Sie den Stromtarif aus Ihrer letzten Stromrechnung. Dieser befindet sich normalerweise im oberen Bereich des Dokuments und wird in Euro pro Kilowattstunde (€/kWh) angegeben. Falls Sie unsicher sind, liegt der durchschnittliche deutsche Haushaltsstrompreis bei etwa 0,30 € pro kWh."}}, {"@type": "Question", "name": "Wie kann ich meine Stromkosten senken?", "acceptedAnswer": {"@type": "Answer", "text": "Kaufen Sie energieeffiziente Geräte mit besseren Energielabeln, nutzen Sie Geräte bewusster, schalten Sie sie vollständig aus statt Standby zu nutzen, und überprüfen Sie Ihren Stromtarif regelmäßig. Ein Wechsel zu einem günstigeren Stromanbieter kann ebenfalls erhebliche Ersparnisse bringen."}}, {"@type": "Question", "name": "Ist die Berechnung genau?", "acceptedAnswer": {"@type": "Answer", "text": "Die Berechnung ist eine gute Schätzung basierend auf den Eingabedaten. Die tatsächlichen Kosten können geringfügig abweichen, da viele Geräte ihre Leistung während des Betriebs variieren. Bei Geräten mit Thermostat oder Regelung sollten Sie mit durchschnittlichen Betriebszeiten rechnen."}}, {"@type": "Question", "name": "Kann ich mehrere Geräte gleichzeitig vergleichen?", "acceptedAnswer": {"@type": "Answer", "text": "Ja, Sie können den Rechner mehrmals verwenden, um verschiedene Geräte zu vergleichen. Notieren Sie sich die Ergebnisse und vergleichen Sie so die jährlichen Kosten. Dies hilft Ihnen bei der Entscheidung, welche Geräte am meisten Strom verbrauchen und wo Sparmaßnahmen sinnvoll sind."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="appliance-energy">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="de">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/de/">Tools</a>
-    <a href="/blog/de/index.html">Blog</a>
     <a href="/patterns/de.html">Muster</a>
+    <a href="/blog/de/index.html">Blog</a>
     <a href="/">Startseite</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/appliance-energy.html">繁中</option><option value="/tools/en/appliance-energy.html">EN</option><option value="/tools/ja/appliance-energy.html">日本語</option><option value="/tools/ko/appliance-energy.html">한국어</option><option value="/tools/de/appliance-energy.html" selected>DE</option><option value="/tools/fr/appliance-energy.html">FR</option><option value="/tools/es/appliance-energy.html">ES</option><option value="/tools/pt/appliance-energy.html">PT</option><option value="/tools/id/appliance-energy.html">ID</option><option value="/tools/zh-CN/appliance-energy.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/appliance-energy.html">繁中</option><option value="/tools/en/appliance-energy.html">EN</option><option value="/tools/ja/appliance-energy.html">日本語</option><option value="/tools/ko/appliance-energy.html">한국어</option><option value="/tools/de/appliance-energy.html" selected>DE</option><option value="/tools/fr/appliance-energy.html">FR</option><option value="/tools/es/appliance-energy.html">ES</option><option value="/tools/pt/appliance-energy.html">PT</option><option value="/tools/id/appliance-energy.html">ID</option><option value="/tools/zh-CN/appliance-energy.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/de/">Werkzeuge</a> > Stromkosten-Rechner für Haushaltsgeräte</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/appliance-energy.html">繁中</option><option value="/tools/en/appliance-energy.html">EN</option><option value="/tools/ja/appliance-energy.html">日本語</option><option value="/tools/ko/appliance-energy.html">한국어</option><option value="/tools/de/appliance-energy.html" selected>DE</option><option value="/tools/fr/appliance-energy.html">FR</option><option value="/tools/es/appliance-energy.html">ES</option><option value="/tools/pt/appliance-energy.html">PT</option><option value="/tools/id/appliance-energy.html">ID</option><option value="/tools/zh-CN/appliance-energy.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -132,6 +146,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Tools, Muster, Artikel suchen…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Lesezeichen</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Alle löschen</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

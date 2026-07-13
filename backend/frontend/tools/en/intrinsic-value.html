@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Intrinsic Value Calculator", "url": "https://softglow-ai.com/tools/en/intrinsic-value.html", "description": "Calculate intrinsic stock value using Benjamin Graham's formula. Input EPS and growth rate to determine fair value per share.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is the difference between intrinsic value and market price?", "acceptedAnswer": {"@type": "Answer", "text": "Intrinsic value is the calculated true worth of a stock based on fundamental analysis and earnings potential, while market price is what investors are actually willing to pay for the stock at any given moment. Market price is driven by supply, demand, sentiment, and news, and can diverge significantly from intrinsic value. Value investors use this difference to identify opportunities when market prices fall below calculated intrinsic values."}}, {"@type": "Question", "name": "How accurate is Graham's valuation formula?", "acceptedAnswer": {"@type": "Answer", "text": "Graham's formula provides a useful framework for valuation but is not perfectly accurate for all situations. Its accuracy depends heavily on the accuracy of your EPS and growth rate inputs. The formula works best for stable, mature companies with predictable earnings growth. It may be less reliable for high-growth technology companies, startups, or businesses in transition. Use it as one analytical tool combined with other fundamental analysis methods."}}, {"@type": "Question", "name": "What growth rate should I use in the calculator?", "acceptedAnswer": {"@type": "Answer", "text": "The growth rate should represent your realistic estimate of the company's earnings growth over the next 5-10 years. Consider the company's historical growth, industry trends, competitive position, and economic conditions. Conservative investors often use lower rates (5-8%), while more optimistic projections might reach 12-15%. Many professionals use growth rates that don't exceed long-term GDP growth rates (typically 3-5%) for mature economies to remain realistic."}}, {"@type": "Question", "name": "Is intrinsic value the same for all investors?", "acceptedAnswer": {"@type": "Answer", "text": "No, intrinsic value can vary between investors based on different assumptions about growth rates, risk tolerance, and expected returns. Two investors analyzing the same stock might arrive at different intrinsic values if they use different growth rate estimates or have different perspectives on the company's future. This is why it's important to document your assumptions and understand how sensitive your valuation is to changes in key inputs."}}, {"@type": "Question", "name": "What is a margin of safety and why is it important?", "acceptedAnswer": {"@type": "Answer", "text": "The margin of safety is the difference between a stock's intrinsic value and the price you pay for it. Graham advocated buying stocks only when they trade at a meaningful discount (often 20-30% or more) to intrinsic value. This safety margin protects you if your calculations are wrong, if the company underperforms expectations, or if market conditions deteriorate. It's a fundamental principle of value investing that helps reduce investment risk."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="intrinsic-value">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="en">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/en/">Tools</a>
-    <a href="/blog/en/index.html">Blog</a>
     <a href="/patterns/en.html">Patterns</a>
+    <a href="/blog/en/index.html">Blog</a>
     <a href="/">Home</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/intrinsic-value.html">繁中</option><option value="/tools/en/intrinsic-value.html" selected>EN</option><option value="/tools/ja/intrinsic-value.html">日本語</option><option value="/tools/ko/intrinsic-value.html">한국어</option><option value="/tools/de/intrinsic-value.html">DE</option><option value="/tools/fr/intrinsic-value.html">FR</option><option value="/tools/es/intrinsic-value.html">ES</option><option value="/tools/pt/intrinsic-value.html">PT</option><option value="/tools/id/intrinsic-value.html">ID</option><option value="/tools/zh-CN/intrinsic-value.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/intrinsic-value.html">繁中</option><option value="/tools/en/intrinsic-value.html" selected>EN</option><option value="/tools/ja/intrinsic-value.html">日本語</option><option value="/tools/ko/intrinsic-value.html">한국어</option><option value="/tools/de/intrinsic-value.html">DE</option><option value="/tools/fr/intrinsic-value.html">FR</option><option value="/tools/es/intrinsic-value.html">ES</option><option value="/tools/pt/intrinsic-value.html">PT</option><option value="/tools/id/intrinsic-value.html">ID</option><option value="/tools/zh-CN/intrinsic-value.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/en/">Tools</a> > Intrinsic Value Calculator</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/intrinsic-value.html">繁中</option><option value="/tools/en/intrinsic-value.html" selected>EN</option><option value="/tools/ja/intrinsic-value.html">日本語</option><option value="/tools/ko/intrinsic-value.html">한국어</option><option value="/tools/de/intrinsic-value.html">DE</option><option value="/tools/fr/intrinsic-value.html">FR</option><option value="/tools/es/intrinsic-value.html">ES</option><option value="/tools/pt/intrinsic-value.html">PT</option><option value="/tools/id/intrinsic-value.html">ID</option><option value="/tools/zh-CN/intrinsic-value.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -128,6 +142,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Search tools, patterns, articles…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Bookmarks</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Clear all</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

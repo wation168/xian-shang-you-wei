@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "LED 절감액 계산기", "url": "https://softglow-ai.com/tools/ko/led-savings.html", "description": "LED 조명으로 바꾸면 얼마나 절약할 수 있는지 계산하세요. 연간 절감액, 에너지 감소량, CO₂ 감소량을 확인하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "LED 전구로 교체하면 정말 전기료가 절약될까요?", "acceptedAnswer": {"@type": "Answer", "text": "네, LED 전구는 기존 백열전구 대비 75~80% 이상의 전기를 절약합니다. 연간 사용 시간이 많을수록 절감액도 커집니다."}}, {"@type": "Question", "name": "LED 전구의 초기 구매 비용이 높은데 가치가 있을까요?", "acceptedAnswer": {"@type": "Answer", "text": "LED 전구는 초기 비용이 높지만 오래 사용할 수 있고 전기료 절감액이 크므로 6개월~1년 내에 투자금을 회수할 수 있습니다."}}, {"@type": "Question", "name": "CO₂ 감소량은 어떻게 계산되나요?", "acceptedAnswer": {"@type": "Answer", "text": "절감된 에너지(kWh)에 평균 탄소배출계수(약 0.4~0.5kg CO₂/kWh)를 곱하여 계산합니다. 지역에 따라 수치는 달라질 수 있습니다."}}, {"@type": "Question", "name": "모든 조명기구에 LED 전구를 사용할 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "대부분의 조명기구에 사용 가능하지만 일부 조광 기능이 있는 기구는 호환되는 LED 제품을 확인해야 합니다."}}, {"@type": "Question", "name": "LED 전구의 실제 수명은 얼마나 되나요?", "acceptedAnswer": {"@type": "Answer", "text": "LED 전구는 일반적으로 25,000~50,000시간 사용 가능하며 매일 8시간 사용 기준으로 8~17년 사용할 수 있습니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="led-savings">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/led-savings.html">繁中</option><option value="/tools/en/led-savings.html">EN</option><option value="/tools/ja/led-savings.html">日本語</option><option value="/tools/ko/led-savings.html" selected>한국어</option><option value="/tools/de/led-savings.html">DE</option><option value="/tools/fr/led-savings.html">FR</option><option value="/tools/es/led-savings.html">ES</option><option value="/tools/pt/led-savings.html">PT</option><option value="/tools/id/led-savings.html">ID</option><option value="/tools/zh-CN/led-savings.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/led-savings.html">繁中</option><option value="/tools/en/led-savings.html">EN</option><option value="/tools/ja/led-savings.html">日本語</option><option value="/tools/ko/led-savings.html" selected>한국어</option><option value="/tools/de/led-savings.html">DE</option><option value="/tools/fr/led-savings.html">FR</option><option value="/tools/es/led-savings.html">ES</option><option value="/tools/pt/led-savings.html">PT</option><option value="/tools/id/led-savings.html">ID</option><option value="/tools/zh-CN/led-savings.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > LED 절감액 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/led-savings.html">繁中</option><option value="/tools/en/led-savings.html">EN</option><option value="/tools/ja/led-savings.html">日本語</option><option value="/tools/ko/led-savings.html" selected>한국어</option><option value="/tools/de/led-savings.html">DE</option><option value="/tools/fr/led-savings.html">FR</option><option value="/tools/es/led-savings.html">ES</option><option value="/tools/pt/led-savings.html">PT</option><option value="/tools/id/led-savings.html">ID</option><option value="/tools/zh-CN/led-savings.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -143,6 +157,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

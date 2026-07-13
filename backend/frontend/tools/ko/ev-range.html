@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "EV 주행거리 계산기", "url": "https://softglow-ai.com/tools/ko/ev-range.html", "description": "전기자동차의 배터리 용량과 에너지 소비량을 입력하여 한 번 충전으로 주행 가능한 거리를 정확히 계산하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "배터리 용량을 어디서 확인할 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "배터리 용량은 차량 구매 서류, 사용 설명서 또는 차량 정보 시스템에서 확인할 수 있습니다. 보통 '총 배터리 용량(Total Battery Capacity)'으로 표기되며, kWh 단위입니다. 제조사 공식 사양을 참고하는 것이 가장 정확합니다."}}, {"@type": "Question", "name": "에너지 소비량은 어떻게 알 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "에너지 소비량은 차량 정보 시스템의 에너지 소비 데이터, 충전 기록, 또는 실제 주행 데이터를 통해 계산할 수 있습니다. (총 주행거리 ÷ 사용한 에너지량) 공식 WLTP 기준값도 참고할 수 있으나, 개인의 운전 습관과 환경에 따라 실제값은 다를 수 있습니다."}}, {"@type": "Question", "name": "계산된 주행거리보다 실제로 더 짧게 가는 이유는 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "실제 주행거리는 기후, 도로 상태, 운전 습관 등 여러 요인에 영향을 받습니다. 특히 겨울철에는 배터리 성능 저하로 10~20% 주행거리가 감소할 수 있으며, 고속도로 주행, 급가속, 난방/냉방 사용도 에너지 소비를 증가시킵니다."}}, {"@type": "Question", "name": "계산기를 이용할 때 정확도를 높이려면?", "acceptedAnswer": {"@type": "Answer", "text": "제조사 사양의 정확한 배터리 용량을 사용하고, 최소 한 달 이상의 실제 운전 데이터를 바탕으로 평균 에너지 소비량을 입력하면 가장 정확합니다. 계절별, 운전 패턴별로 다른 값을 입력하여 비교해보는 것도 좋은 방법입니다."}}, {"@type": "Question", "name": "배터리 열화가 주행거리에 영향을 미치나요?", "acceptedAnswer": {"@type": "Answer", "text": "네, 배터리는 시간이 지나면서 점진적으로 용량이 감소합니다. 일반적으로 5년 후 약 5~10%, 10년 후 약 10~20%의 용량 감소가 발생할 수 있습니다. 계산기에 현재 실제 배터리 용량을 입력하면 정확한 예상 주행거리를 얻을 수 있습니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="ev-range">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/ev-range.html">繁中</option><option value="/tools/en/ev-range.html">EN</option><option value="/tools/ja/ev-range.html">日本語</option><option value="/tools/ko/ev-range.html" selected>한국어</option><option value="/tools/de/ev-range.html">DE</option><option value="/tools/fr/ev-range.html">FR</option><option value="/tools/es/ev-range.html">ES</option><option value="/tools/pt/ev-range.html">PT</option><option value="/tools/id/ev-range.html">ID</option><option value="/tools/zh-CN/ev-range.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/ev-range.html">繁中</option><option value="/tools/en/ev-range.html">EN</option><option value="/tools/ja/ev-range.html">日本語</option><option value="/tools/ko/ev-range.html" selected>한국어</option><option value="/tools/de/ev-range.html">DE</option><option value="/tools/fr/ev-range.html">FR</option><option value="/tools/es/ev-range.html">ES</option><option value="/tools/pt/ev-range.html">PT</option><option value="/tools/id/ev-range.html">ID</option><option value="/tools/zh-CN/ev-range.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > EV 주행거리 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/ev-range.html">繁中</option><option value="/tools/en/ev-range.html">EN</option><option value="/tools/ja/ev-range.html">日本語</option><option value="/tools/ko/ev-range.html" selected>한국어</option><option value="/tools/de/ev-range.html">DE</option><option value="/tools/fr/ev-range.html">FR</option><option value="/tools/es/ev-range.html">ES</option><option value="/tools/pt/ev-range.html">PT</option><option value="/tools/id/ev-range.html">ID</option><option value="/tools/zh-CN/ev-range.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -102,6 +116,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

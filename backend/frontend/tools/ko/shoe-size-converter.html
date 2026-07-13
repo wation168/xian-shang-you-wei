@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "신발 사이즈 변환기", "url": "https://softglow-ai.com/tools/ko/shoe-size-converter.html", "description": "신발 사이즈를 US, UK, EU, 일본, 한국, 센티미터 단위로 즉시 변환하세요. 정확한 사이즈 비교 도구입니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "미국 사이즈 10은 한국 사이즈로 몇 사이즈인가요?", "acceptedAnswer": {"@type": "Answer", "text": "미국 남성 사이즈 10은 약 280mm(28cm)의 발 길이에 해당하며, 한국 사이즈로는 280입니다. 다만 브랜드에 따라 다를 수 있으니 참고하세요."}}, {"@type": "Question", "name": "발 길이로 신발 사이즈를 정할 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "네, 발 길이는 가장 정확한 신발 사이즈 결정 방법입니다. 발 뒤꿈치부터 가장 긴 발가락까지 측정한 길이를 센티미터로 이 도구에 입력하면 모든 나라의 해당 사이즈를 알 수 있습니다."}}, {"@type": "Question", "name": "유럽 사이즈와 미국 사이즈의 차이는 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "유럽 사이즈(EU)는 발 길이를 기반으로 한 메트릭 시스템을 사용하며, 미국 사이즈(US)는 다른 계산 방식을 사용합니다. 일반적으로 EU 사이즈가 US 사이즈보다 약 31~32 크게 표시됩니다."}}, {"@type": "Question", "name": "영국 신발 사이즈는 미국과 얼마나 다른가요?", "acceptedAnswer": {"@type": "Answer", "text": "영국(UK) 사이즈는 미국(US) 사이즈보다 약 1~1.5 작습니다. 예를 들어 US 10은 대략 UK 9에 해당합니다."}}, {"@type": "Question", "name": "여성과 남성의 신발 사이즈 변환이 다른가요?", "acceptedAnswer": {"@type": "Answer", "text": "일반적으로 여성 신발이 남성 신발보다 작지만, 변환 계산식 자체는 같습니다. 다만 같은 사이즈 번호여도 실제 발 길이는 다를 수 있으므로, 발 길이 기준으로 변환하는 것이 가장 정확합니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="shoe-size-converter">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/shoe-size-converter.html">繁中</option><option value="/tools/en/shoe-size-converter.html">EN</option><option value="/tools/ja/shoe-size-converter.html">日本語</option><option value="/tools/ko/shoe-size-converter.html" selected>한국어</option><option value="/tools/de/shoe-size-converter.html">DE</option><option value="/tools/fr/shoe-size-converter.html">FR</option><option value="/tools/es/shoe-size-converter.html">ES</option><option value="/tools/pt/shoe-size-converter.html">PT</option><option value="/tools/id/shoe-size-converter.html">ID</option><option value="/tools/zh-CN/shoe-size-converter.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/shoe-size-converter.html">繁中</option><option value="/tools/en/shoe-size-converter.html">EN</option><option value="/tools/ja/shoe-size-converter.html">日本語</option><option value="/tools/ko/shoe-size-converter.html" selected>한국어</option><option value="/tools/de/shoe-size-converter.html">DE</option><option value="/tools/fr/shoe-size-converter.html">FR</option><option value="/tools/es/shoe-size-converter.html">ES</option><option value="/tools/pt/shoe-size-converter.html">PT</option><option value="/tools/id/shoe-size-converter.html">ID</option><option value="/tools/zh-CN/shoe-size-converter.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 신발 사이즈 변환기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/shoe-size-converter.html">繁中</option><option value="/tools/en/shoe-size-converter.html">EN</option><option value="/tools/ja/shoe-size-converter.html">日本語</option><option value="/tools/ko/shoe-size-converter.html" selected>한국어</option><option value="/tools/de/shoe-size-converter.html">DE</option><option value="/tools/fr/shoe-size-converter.html">FR</option><option value="/tools/es/shoe-size-converter.html">ES</option><option value="/tools/pt/shoe-size-converter.html">PT</option><option value="/tools/id/shoe-size-converter.html">ID</option><option value="/tools/zh-CN/shoe-size-converter.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -127,6 +141,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

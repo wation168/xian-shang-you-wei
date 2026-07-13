@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "이탈률 계산기", "url": "https://softglow-ai.com/tools/ko/churn-rate.html", "description": "이탈률 계산기로 특정 기간 동안 손실된 고객의 비율을 쉽게 계산하세요. 비즈니스 성과 분석에 필수적인 도구입니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "이탈률과 유지율의 차이는 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "이탈률은 떠난 고객의 비율이고, 유지율은 남아있는 고객의 비율입니다. 유지율 = 100% - 이탈률입니다. 예를 들어 이탈률이 5%라면 유지율은 95%입니다."}}, {"@type": "Question", "name": "이탈률을 계산할 때 새로운 고객은 포함되나요?", "acceptedAnswer": {"@type": "Answer", "text": "표준 이탈률 계산에서는 기간 시작 시점의 고객을 기준으로 합니다. 다만 신규 고객의 이탈률을 별도로 추적하는 것이 권장됩니다."}}, {"@type": "Question", "name": "어떤 주기로 이탈률을 측정해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "비즈니스 모델에 따라 다릅니다. SaaS 기업은 월간 이탈률을 주로 사용하고, 장기 구독 상품은 연간 이탈률을 측정합니다. 자신의 고객 주기에 맞게 설정하세요."}}, {"@type": "Question", "name": "높은 이탈률을 어떻게 해석해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "높은 이탈률은 고객 만족도가 낮음을 의미합니다. 고객 이탈 원인을 파악하기 위해 설문조사, 인터뷰, 고객 데이터 분석 등을 실시하고 개선책을 마련하세요."}}, {"@type": "Question", "name": "이탈률 계산에 휴면 고객을 포함해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "일반적으로 완전히 떠난 고객만 이탈로 간주합니다. 휴면 고객(비활성 하지만 여전히 고객 상태)의 처리 방식은 회사 정책에 따라 다를 수 있으므로 명확히 정의하는 것이 중요합니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="churn-rate">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/churn-rate.html">繁中</option><option value="/tools/en/churn-rate.html">EN</option><option value="/tools/ja/churn-rate.html">日本語</option><option value="/tools/ko/churn-rate.html" selected>한국어</option><option value="/tools/de/churn-rate.html">DE</option><option value="/tools/fr/churn-rate.html">FR</option><option value="/tools/es/churn-rate.html">ES</option><option value="/tools/pt/churn-rate.html">PT</option><option value="/tools/id/churn-rate.html">ID</option><option value="/tools/zh-CN/churn-rate.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/churn-rate.html">繁中</option><option value="/tools/en/churn-rate.html">EN</option><option value="/tools/ja/churn-rate.html">日本語</option><option value="/tools/ko/churn-rate.html" selected>한국어</option><option value="/tools/de/churn-rate.html">DE</option><option value="/tools/fr/churn-rate.html">FR</option><option value="/tools/es/churn-rate.html">ES</option><option value="/tools/pt/churn-rate.html">PT</option><option value="/tools/id/churn-rate.html">ID</option><option value="/tools/zh-CN/churn-rate.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 이탈률 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/churn-rate.html">繁中</option><option value="/tools/en/churn-rate.html">EN</option><option value="/tools/ja/churn-rate.html">日本語</option><option value="/tools/ko/churn-rate.html" selected>한국어</option><option value="/tools/de/churn-rate.html">DE</option><option value="/tools/fr/churn-rate.html">FR</option><option value="/tools/es/churn-rate.html">ES</option><option value="/tools/pt/churn-rate.html">PT</option><option value="/tools/id/churn-rate.html">ID</option><option value="/tools/zh-CN/churn-rate.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -138,6 +152,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

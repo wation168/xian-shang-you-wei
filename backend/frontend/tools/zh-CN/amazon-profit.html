@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "亚马逊利润计算器", "url": "https://softglow-ai.com/tools/zh-CN/amazon-profit.html", "description": "免费亚马逊利润计算器，帮助卖家快速计算销售净利润，包括推荐费、FBA费等成本", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "推荐费率应该设置为多少？", "acceptedAnswer": {"@type": "Answer", "text": "亚马逊推荐费因品类而异，通常在8%-45%之间。大多数常见品类（如电子产品、服装）为15%，但媒体产品可能是35%，珠宝可能是20%。请登录亚马逊卖家中心查看您具体品类的费率。"}}, {"@type": "Question", "name": "FBA费用包括哪些内容？", "acceptedAnswer": {"@type": "Answer", "text": "FBA费用包括仓储费用和配送处理费。仓储费按立方英尺和月份计算，配送费根据产品重量和尺寸而定。较重或体积大的产品FBA费用会相对较高，这会直接影响利润率。"}}, {"@type": "Question", "name": "如何降低亚马逊销售的总成本？", "acceptedAnswer": {"@type": "Answer", "text": "可以从以下几个方面入手：与供应商协商采购价格、优化产品包装减少FBA费用、在淡季进行促销提高销量、考虑自发货（FBM）模式以避免FBA费用。另外，监控库存避免长期仓储费也很重要。"}}, {"@type": "Question", "name": "什么样的利润率才是合理的？", "acceptedAnswer": {"@type": "Answer", "text": "这取决于产品类别和您的业务目标。一般来说，利润率在20%-50%被认为是健康的，但不同品类差异很大。高竞争品类可能只有10%-15%的利润率，而利基产品可能达到50%以上。建议对标竞争对手。"}}, {"@type": "Question", "name": "计算器中的单位利润有什么作用？", "acceptedAnswer": {"@type": "Answer", "text": "单位利润显示每件产品平均能赚取多少钱。这个指标帮助您判断是否值得投入时间和资源推广该产品。单位利润高的产品通常更值得重点运营，而单位利润低的产品需要考虑是否继续销售。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="amazon-profit">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/amazon-profit.html">繁中</option><option value="/tools/en/amazon-profit.html">EN</option><option value="/tools/ja/amazon-profit.html">日本語</option><option value="/tools/ko/amazon-profit.html">한국어</option><option value="/tools/de/amazon-profit.html">DE</option><option value="/tools/fr/amazon-profit.html">FR</option><option value="/tools/es/amazon-profit.html">ES</option><option value="/tools/pt/amazon-profit.html">PT</option><option value="/tools/id/amazon-profit.html">ID</option><option value="/tools/zh-CN/amazon-profit.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/amazon-profit.html">繁中</option><option value="/tools/en/amazon-profit.html">EN</option><option value="/tools/ja/amazon-profit.html">日本語</option><option value="/tools/ko/amazon-profit.html">한국어</option><option value="/tools/de/amazon-profit.html">DE</option><option value="/tools/fr/amazon-profit.html">FR</option><option value="/tools/es/amazon-profit.html">ES</option><option value="/tools/pt/amazon-profit.html">PT</option><option value="/tools/id/amazon-profit.html">ID</option><option value="/tools/zh-CN/amazon-profit.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 亚马逊利润计算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/amazon-profit.html">繁中</option><option value="/tools/en/amazon-profit.html">EN</option><option value="/tools/ja/amazon-profit.html">日本語</option><option value="/tools/ko/amazon-profit.html">한국어</option><option value="/tools/de/amazon-profit.html">DE</option><option value="/tools/fr/amazon-profit.html">FR</option><option value="/tools/es/amazon-profit.html">ES</option><option value="/tools/pt/amazon-profit.html">PT</option><option value="/tools/id/amazon-profit.html">ID</option><option value="/tools/zh-CN/amazon-profit.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -149,6 +163,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

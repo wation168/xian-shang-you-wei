@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "身體脂肪計算機", "url": "https://softglow-ai.com/tools/body-fat-calculator.html", "description": "免費身體脂肪計算機，採用美國海軍測量方法。輸入性別、年齡、身高、體重和圍度測量值，快速計算您的身體脂肪百分比。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "身體脂肪百分比和體重指數（BMI）有什麼區別？", "acceptedAnswer": {"@type": "Answer", "text": "BMI只考慮身高和體重的比例，而身體脂肪百分比測量的是實際脂肪組織所佔的比例。BMI無法區分肌肉和脂肪，因此運動員可能有高BMI但低身體脂肪。身體脂肪百分比提供了更準確的身體組成評估。"}}, {"@type": "Question", "name": "多久應該測量一次身體脂肪百分比？", "acceptedAnswer": {"@type": "Answer", "text": "建議每月測量一次身體脂肪百分比。太頻繁的測量（如每週）可能會因為日常波動而導致結果不一致。如果您正在進行健身計劃，每月測量足以追蹤進展。"}}, {"@type": "Question", "name": "這個計算器的準確度有多高？", "acceptedAnswer": {"@type": "Answer", "text": "美國海軍方法的準確度通常在±3-4%之內。然而，準確性取決於測量的精確性。確保使用合適的捲尺、正確的測量位置和一致的測量技巧，以獲得最準確的結果。"}}, {"@type": "Question", "name": "如果我的身體脂肪百分比超標應該怎麼辦？", "acceptedAnswer": {"@type": "Answer", "text": "如果您的身體脂肪百分比超過建議範圍，可以透過增加有氧運動、進行力量訓練和調整飲食來改善。諮詢健身專家或營養師可以幫助您制定個性化的計劃。重要的是逐步改變，而不是急功近利。"}}, {"@type": "Question", "name": "為什麼我的體重沒有變化，但身體脂肪百分比下降了？", "acceptedAnswer": {"@type": "Answer", "text": "這是健身進展的正常現象。當您進行力量訓練時，可能會增加肌肉質量，同時減少脂肪質量。由於肌肉比脂肪更重，總體重可能保持不變或甚至增加，但身體脂肪百分比會下降，這表示您的身體組成在改善。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="body-fat-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/body-fat-calculator.html" selected>繁中</option><option value="/tools/en/body-fat-calculator.html">EN</option><option value="/tools/ja/body-fat-calculator.html">日本語</option><option value="/tools/ko/body-fat-calculator.html">한국어</option><option value="/tools/de/body-fat-calculator.html">DE</option><option value="/tools/fr/body-fat-calculator.html">FR</option><option value="/tools/es/body-fat-calculator.html">ES</option><option value="/tools/pt/body-fat-calculator.html">PT</option><option value="/tools/id/body-fat-calculator.html">ID</option><option value="/tools/zh-CN/body-fat-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/body-fat-calculator.html" selected>繁中</option><option value="/tools/en/body-fat-calculator.html">EN</option><option value="/tools/ja/body-fat-calculator.html">日本語</option><option value="/tools/ko/body-fat-calculator.html">한국어</option><option value="/tools/de/body-fat-calculator.html">DE</option><option value="/tools/fr/body-fat-calculator.html">FR</option><option value="/tools/es/body-fat-calculator.html">ES</option><option value="/tools/pt/body-fat-calculator.html">PT</option><option value="/tools/id/body-fat-calculator.html">ID</option><option value="/tools/zh-CN/body-fat-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 身體脂肪計算機</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/body-fat-calculator.html" selected>繁中</option><option value="/tools/en/body-fat-calculator.html">EN</option><option value="/tools/ja/body-fat-calculator.html">日本語</option><option value="/tools/ko/body-fat-calculator.html">한국어</option><option value="/tools/de/body-fat-calculator.html">DE</option><option value="/tools/fr/body-fat-calculator.html">FR</option><option value="/tools/es/body-fat-calculator.html">ES</option><option value="/tools/pt/body-fat-calculator.html">PT</option><option value="/tools/id/body-fat-calculator.html">ID</option><option value="/tools/zh-CN/body-fat-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -185,6 +199,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

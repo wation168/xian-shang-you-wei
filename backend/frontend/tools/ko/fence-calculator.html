@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "울타리 계산기", "url": "https://softglow-ai.com/tools/ko/fence-calculator.html", "description": "울타리 둘레, 기둥 간격, 높이를 입력하여 필요한 기둥, 레일, 피켓의 정확한 수량을 계산하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "울타리 기둥 간격은 어떻게 결정하나요?", "acceptedAnswer": {"@type": "Answer", "text": "일반적으로 울타리 기둥 간격은 4~8피트입니다. 6피트는 가장 일반적인 간격으로, 강도와 경제성의 균형을 잘 맞춥니다. 기둥 간격이 좁을수록 더 안정적이지만 비용이 증가합니다."}}, {"@type": "Question", "name": "울타리 높이는 어떻게 결정하나요?", "acceptedAnswer": {"@type": "Answer", "text": "울타리 높이는 목적에 따라 다릅니다. 프라이버시 울타리는 보통 6~8피트, 장식용 울타리는 3~4피트, 동물 차단 울타리는 4~5피트가 적당합니다."}}, {"@type": "Question", "name": "섹션당 레일 수는 왜 중요한가요?", "acceptedAnswer": {"@type": "Answer", "text": "섹션당 레일 수가 많을수록 울타리의 강도가 높아집니다. 높은 울타리나 강풍이 많은 지역에서는 3개의 레일이 권장됩니다."}}, {"@type": "Question", "name": "피켓 간격은 얼마가 적당한가요?", "acceptedAnswer": {"@type": "Answer", "text": "피켓 간격은 보통 1~2인치입니다. 프라이버시가 중요한 경우 간격을 더 좁게 하고, 장식용의 경우 2~3인치로 넓게 설치할 수 있습니다."}}, {"@type": "Question", "name": "자재 여유분은 얼마나 준비해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "계산된 수량에 10~15%의 여유분을 추가하여 구매하는 것을 권장합니다. 이는 설치 과정에서의 손상, 자르기 손실, 향후 보수를 위한 예비분입니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="fence-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/fence-calculator.html">繁中</option><option value="/tools/en/fence-calculator.html">EN</option><option value="/tools/ja/fence-calculator.html">日本語</option><option value="/tools/ko/fence-calculator.html" selected>한국어</option><option value="/tools/de/fence-calculator.html">DE</option><option value="/tools/fr/fence-calculator.html">FR</option><option value="/tools/es/fence-calculator.html">ES</option><option value="/tools/pt/fence-calculator.html">PT</option><option value="/tools/id/fence-calculator.html">ID</option><option value="/tools/zh-CN/fence-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/fence-calculator.html">繁中</option><option value="/tools/en/fence-calculator.html">EN</option><option value="/tools/ja/fence-calculator.html">日本語</option><option value="/tools/ko/fence-calculator.html" selected>한국어</option><option value="/tools/de/fence-calculator.html">DE</option><option value="/tools/fr/fence-calculator.html">FR</option><option value="/tools/es/fence-calculator.html">ES</option><option value="/tools/pt/fence-calculator.html">PT</option><option value="/tools/id/fence-calculator.html">ID</option><option value="/tools/zh-CN/fence-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 울타리 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/fence-calculator.html">繁中</option><option value="/tools/en/fence-calculator.html">EN</option><option value="/tools/ja/fence-calculator.html">日本語</option><option value="/tools/ko/fence-calculator.html" selected>한국어</option><option value="/tools/de/fence-calculator.html">DE</option><option value="/tools/fr/fence-calculator.html">FR</option><option value="/tools/es/fence-calculator.html">ES</option><option value="/tools/pt/fence-calculator.html">PT</option><option value="/tools/id/fence-calculator.html">ID</option><option value="/tools/zh-CN/fence-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -145,6 +159,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

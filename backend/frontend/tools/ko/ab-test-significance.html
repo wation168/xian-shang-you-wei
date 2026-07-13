@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "A/B 테스트 유의성 계산기", "url": "https://softglow-ai.com/tools/ko/ab-test-significance.html", "description": "A/B 테스트 결과의 통계적 유의성을 계산하세요. Z-점수, P-값, 전환율 향상도를 분석합니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "P-값이 0.05는 무엇을 의미하나요?", "acceptedAnswer": {"@type": "Answer", "text": "P-값 0.05는 두 그룹이 실제로 같은데도 현재 차이가 나타날 확률이 5%라는 뜻입니다. 즉, 95% 확실성으로 두 그룹이 다르다고 판단할 수 있습니다."}}, {"@type": "Question", "name": "샘플 크기가 작으면 어떻게 되나요?", "acceptedAnswer": {"@type": "Answer", "text": "샘플 크기가 작으면 실제 효과가 있어도 통계적으로 감지하지 못할 수 있습니다. 신뢰할 수 있는 결과를 위해 충분한 샘플 크기가 필요합니다."}}, {"@type": "Question", "name": "전환율 향상도 10%는 좋은 결과인가요?", "acceptedAnswer": {"@type": "Answer", "text": "향상도가 크다고 해서 항상 좋은 것은 아닙니다. 향상도가 크더라도 통계적으로 유의미하지 않으면 우연일 수 있으므로, P-값과 함께 확인해야 합니다."}}, {"@type": "Question", "name": "언제 테스트를 종료해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "충분한 샘플 크기에 도달했을 때(일반적으로 각 그룹 1,000명 이상) 통계적 유의성이 나타나면 테스트를 종료할 수 있습니다. 단, 최소 1-2주 이상 운영하는 것이 좋습니다."}}, {"@type": "Question", "name": "99% 신뢰도와 95% 신뢰도의 차이는?", "acceptedAnswer": {"@type": "Answer", "text": "99% 신뢰도가 더 높은 확실성을 제공하지만, 더 많은 샘플과 시간이 필요합니다. 95%는 일반적인 온라인 테스트에서 표준으로 사용됩니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="ab-test-significance">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/ab-test-significance.html">繁中</option><option value="/tools/en/ab-test-significance.html">EN</option><option value="/tools/ja/ab-test-significance.html">日本語</option><option value="/tools/ko/ab-test-significance.html" selected>한국어</option><option value="/tools/de/ab-test-significance.html">DE</option><option value="/tools/fr/ab-test-significance.html">FR</option><option value="/tools/es/ab-test-significance.html">ES</option><option value="/tools/pt/ab-test-significance.html">PT</option><option value="/tools/id/ab-test-significance.html">ID</option><option value="/tools/zh-CN/ab-test-significance.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/ab-test-significance.html">繁中</option><option value="/tools/en/ab-test-significance.html">EN</option><option value="/tools/ja/ab-test-significance.html">日本語</option><option value="/tools/ko/ab-test-significance.html" selected>한국어</option><option value="/tools/de/ab-test-significance.html">DE</option><option value="/tools/fr/ab-test-significance.html">FR</option><option value="/tools/es/ab-test-significance.html">ES</option><option value="/tools/pt/ab-test-significance.html">PT</option><option value="/tools/id/ab-test-significance.html">ID</option><option value="/tools/zh-CN/ab-test-significance.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > A/B 테스트 유의성 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/ab-test-significance.html">繁中</option><option value="/tools/en/ab-test-significance.html">EN</option><option value="/tools/ja/ab-test-significance.html">日本語</option><option value="/tools/ko/ab-test-significance.html" selected>한국어</option><option value="/tools/de/ab-test-significance.html">DE</option><option value="/tools/fr/ab-test-significance.html">FR</option><option value="/tools/es/ab-test-significance.html">ES</option><option value="/tools/pt/ab-test-significance.html">PT</option><option value="/tools/id/ab-test-significance.html">ID</option><option value="/tools/zh-CN/ab-test-significance.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -202,6 +216,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

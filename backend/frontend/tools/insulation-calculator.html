@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "隔熱材料計算機", "url": "https://softglow-ai.com/tools/insulation-calculator.html", "description": "使用我們的隔熱計算機根據您的面積和R值要求計算所需的隔熱材料厚度、覆蓋範圍和總成本。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "什麼是R值，為什麼很重要？", "acceptedAnswer": {"@type": "Answer", "text": "R值是隔熱材料抵抗熱流的能力的測量值。更高的R值表示更好的隔熱性能。在寒冷地區，高R值可以顯著降低供暖成本，在炎熱地區可以降低冷卻成本。"}}, {"@type": "Question", "name": "我如何知道需要多少隔熱厚度？", "acceptedAnswer": {"@type": "Answer", "text": "隔熱厚度取決於您使用的隔熱材料的R值和目標R等級。我們的計算機通過將目標R等級除以每英寸R值來自動計算所需厚度。"}}, {"@type": "Question", "name": "不同地區的建議R值是多少？", "acceptedAnswer": {"@type": "Answer", "text": "推薦值因地區氣候而異。寒冷地區（美國北部）的閣樓通常需要R-38到R-60，而溫暖地區可能只需要R-19到R-30。請查閱當地建築法規以了解具體要求。"}}, {"@type": "Question", "name": "我可以在現有隔熱材料上添加更多隔熱材料嗎？", "acceptedAnswer": {"@type": "Answer", "text": "是的，您可以在現有隔熱材料上添加額外的隔熱材料以提高總R值。確保使用相容的材料類型並遵循製造商的安裝指南。"}}, {"@type": "Question", "name": "隔熱材料的成本是多少？", "acceptedAnswer": {"@type": "Answer", "text": "隔熱材料的成本因類型、質量和地點而異。玻璃棉通常是最便宜的選擇，而聚氨酯泡沫和纖維素等高性能材料成本更高。使用我們的計算機輸入當地價格以獲得準確的成本估算。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="insulation-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/insulation-calculator.html" selected>繁中</option><option value="/tools/en/insulation-calculator.html">EN</option><option value="/tools/ja/insulation-calculator.html">日本語</option><option value="/tools/ko/insulation-calculator.html">한국어</option><option value="/tools/de/insulation-calculator.html">DE</option><option value="/tools/fr/insulation-calculator.html">FR</option><option value="/tools/es/insulation-calculator.html">ES</option><option value="/tools/pt/insulation-calculator.html">PT</option><option value="/tools/id/insulation-calculator.html">ID</option><option value="/tools/zh-CN/insulation-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/insulation-calculator.html" selected>繁中</option><option value="/tools/en/insulation-calculator.html">EN</option><option value="/tools/ja/insulation-calculator.html">日本語</option><option value="/tools/ko/insulation-calculator.html">한국어</option><option value="/tools/de/insulation-calculator.html">DE</option><option value="/tools/fr/insulation-calculator.html">FR</option><option value="/tools/es/insulation-calculator.html">ES</option><option value="/tools/pt/insulation-calculator.html">PT</option><option value="/tools/id/insulation-calculator.html">ID</option><option value="/tools/zh-CN/insulation-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 隔熱材料計算機</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/insulation-calculator.html" selected>繁中</option><option value="/tools/en/insulation-calculator.html">EN</option><option value="/tools/ja/insulation-calculator.html">日本語</option><option value="/tools/ko/insulation-calculator.html">한국어</option><option value="/tools/de/insulation-calculator.html">DE</option><option value="/tools/fr/insulation-calculator.html">FR</option><option value="/tools/es/insulation-calculator.html">ES</option><option value="/tools/pt/insulation-calculator.html">PT</option><option value="/tools/id/insulation-calculator.html">ID</option><option value="/tools/zh-CN/insulation-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -151,6 +165,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "자동차 대출 계산기", "url": "https://softglow-ai.com/tools/ko/car-loan.html", "description": "자동차 대출의 월간 상환액, 총 이자, 총 상환액을 쉽게 계산할 수 있습니다. 무료 온라인 자동차 대출 계산기입니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "월간 상환액에 보험료와 유지비가 포함되나요?", "acceptedAnswer": {"@type": "Answer", "text": "아니요, 이 계산기는 대출금과 이자만 계산합니다. 자동차 보험료, 유지비, 연료비 등은 별도로 계산하여 전체 자동차 소유 비용을 파악하시기 바랍니다."}}, {"@type": "Question", "name": "대출 기간을 변경하면 월간 상환액이 어떻게 달라지나요?", "acceptedAnswer": {"@type": "Answer", "text": "대출 기간이 길어질수록 월간 상환액은 낮아지지만, 전체 상환 기간이 길어져 총 이자액은 증가합니다. 반대로 기간을 단축하면 월간 상환액은 높아지지만 총 이자액은 감소합니다."}}, {"@type": "Question", "name": "이자율이 변동하는 경우 어떻게 해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "고정금리 대출을 받으면 이자율이 변하지 않습니다. 변동금리 대출의 경우, 시장 상황에 따라 이자율이 변할 수 있으므로 대출 조건을 명확히 확인하세요."}}, {"@type": "Question", "name": "선금액을 더 많이 내면 어떤 이점이 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "선금액이 증가하면 대출 금액이 감소하여 월간 상환액과 총 이자액이 모두 줄어듭니다. 또한 대출 기관에 낮은 위험을 보여주어 더 낮은 이자율을 받을 수 있는 경우도 있습니다."}}, {"@type": "Question", "name": "대출 중도에 추가 상환을 할 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "대부분의 대출 기관에서 중도 상환을 허용하며, 추가 상환을 하면 대출 기간을 단축하고 총 이자액을 줄일 수 있습니다. 다만 중도 상환 수수료가 있는지 미리 확인하세요."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="car-loan">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/car-loan.html">繁中</option><option value="/tools/en/car-loan.html">EN</option><option value="/tools/ja/car-loan.html">日本語</option><option value="/tools/ko/car-loan.html" selected>한국어</option><option value="/tools/de/car-loan.html">DE</option><option value="/tools/fr/car-loan.html">FR</option><option value="/tools/es/car-loan.html">ES</option><option value="/tools/pt/car-loan.html">PT</option><option value="/tools/id/car-loan.html">ID</option><option value="/tools/zh-CN/car-loan.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/car-loan.html">繁中</option><option value="/tools/en/car-loan.html">EN</option><option value="/tools/ja/car-loan.html">日本語</option><option value="/tools/ko/car-loan.html" selected>한국어</option><option value="/tools/de/car-loan.html">DE</option><option value="/tools/fr/car-loan.html">FR</option><option value="/tools/es/car-loan.html">ES</option><option value="/tools/pt/car-loan.html">PT</option><option value="/tools/id/car-loan.html">ID</option><option value="/tools/zh-CN/car-loan.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 자동차 대출 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/car-loan.html">繁中</option><option value="/tools/en/car-loan.html">EN</option><option value="/tools/ja/car-loan.html">日本語</option><option value="/tools/ko/car-loan.html" selected>한국어</option><option value="/tools/de/car-loan.html">DE</option><option value="/tools/fr/car-loan.html">FR</option><option value="/tools/es/car-loan.html">ES</option><option value="/tools/pt/car-loan.html">PT</option><option value="/tools/id/car-loan.html">ID</option><option value="/tools/zh-CN/car-loan.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -158,6 +172,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

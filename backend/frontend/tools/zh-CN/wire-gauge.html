@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "电线规格转换器", "url": "https://softglow-ai.com/tools/zh-CN/wire-gauge.html", "description": "免费在线电线规格转换工具，快速转换美国线规(AWG)、毫米平方(mm²)和标准线规(SWG)，支持0-50范围内的精确换算。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "AWG 和 SWG 有什么区别？", "acceptedAnswer": {"@type": "Answer", "text": "AWG(美国线规)和SWG(标准线规)是两种不同的电线规格标准。虽然都用数字表示，但相同的数值对应的实际电线尺寸不同。AWG主要在北美使用，而SWG在英国和英联邦国家使用。此外，AWG的数值范围通常是0-40+，SWG的范围是0-50+。"}}, {"@type": "Question", "name": "如何根据截面积选择电线？", "acceptedAnswer": {"@type": "Answer", "text": "电线的截面积(mm²)直接决定其承载电流能力。一般来说，更大的截面积意味着更强的导电能力。选择时应考虑电路的最大电流需求，并选择足够大的截面积以确保安全。在中国，家庭配线通常使用1.5mm²(照明)、2.5mm²(插座)和4mm²(大功率电器)的电线。"}}, {"@type": "Question", "name": "为什么转换工具很重要？", "acceptedAnswer": {"@type": "Answer", "text": "由于不同国家和地区使用不同的电线规格标准，当需要国际采购或技术合作时，规格转换变得必不可少。精确的转换工具可以避免采购错误，确保电线符合应用要求，提高工程质量和安全性。手工计算容易出错，使用在线工具可以快速获得准确的结果。"}}, {"@type": "Question", "name": "电线直径和截面积有什么关系？", "acceptedAnswer": {"@type": "Answer", "text": "电线直径和截面积之间存在数学关系：截面积 = π × (直径/2)²。但需要注意的是，电线的外径(包括绝缘层)与其导体直径不同。在电气应用中，我们通常关注导体的截面积，因为它直接影响电线的导电性能。"}}, {"@type": "Question", "name": "如何确保选择的电线符合安全标准？", "acceptedAnswer": {"@type": "Answer", "text": "选择电线时应遵循当地的电气安装规范和相关标准。在中国，应符合GB 5023(PVC绝缘电缆)等国家标准。欧洲应符合 IEC 60228 标准，美国应符合 NEC 标准。购买时选择有认证标志的产品，并确保规格与设计图纸相符。大功率电器应使用更大截面积的电线以降低安全风险。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="wire-gauge">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/wire-gauge.html">繁中</option><option value="/tools/en/wire-gauge.html">EN</option><option value="/tools/ja/wire-gauge.html">日本語</option><option value="/tools/ko/wire-gauge.html">한국어</option><option value="/tools/de/wire-gauge.html">DE</option><option value="/tools/fr/wire-gauge.html">FR</option><option value="/tools/es/wire-gauge.html">ES</option><option value="/tools/pt/wire-gauge.html">PT</option><option value="/tools/id/wire-gauge.html">ID</option><option value="/tools/zh-CN/wire-gauge.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/wire-gauge.html">繁中</option><option value="/tools/en/wire-gauge.html">EN</option><option value="/tools/ja/wire-gauge.html">日本語</option><option value="/tools/ko/wire-gauge.html">한국어</option><option value="/tools/de/wire-gauge.html">DE</option><option value="/tools/fr/wire-gauge.html">FR</option><option value="/tools/es/wire-gauge.html">ES</option><option value="/tools/pt/wire-gauge.html">PT</option><option value="/tools/id/wire-gauge.html">ID</option><option value="/tools/zh-CN/wire-gauge.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 电线规格转换器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/wire-gauge.html">繁中</option><option value="/tools/en/wire-gauge.html">EN</option><option value="/tools/ja/wire-gauge.html">日本語</option><option value="/tools/ko/wire-gauge.html">한국어</option><option value="/tools/de/wire-gauge.html">DE</option><option value="/tools/fr/wire-gauge.html">FR</option><option value="/tools/es/wire-gauge.html">ES</option><option value="/tools/pt/wire-gauge.html">PT</option><option value="/tools/id/wire-gauge.html">ID</option><option value="/tools/zh-CN/wire-gauge.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -166,6 +180,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

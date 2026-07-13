@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "裝修預算估算器", "url": "https://softglow-ai.com/tools/renovation-cost.html", "description": "使用我們的裝修預算估算器，根據專案面積、品質等級和當地定價，準確估算裝修成本。立即計算您的裝修預算。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "品質等級1和5之間的成本差異有多大？", "acceptedAnswer": {"@type": "Answer", "text": "品質等級會顯著影響成本。通常，豪華裝修（等級5）的成本可能是基礎裝修（等級1）的2-3倍或更多，具體取決於您選擇的材料、設計複雜度和工藝水準。"}}, {"@type": "Question", "name": "我應該如何確定當地的每平方英尺定價？", "acceptedAnswer": {"@type": "Answer", "text": "您可以通過聯繫當地的裝修承包商獲得報價、查詢行業標準指南、或諮詢房地產專業人士來確定合適的定價。不同的装修类型（例如廚房對客廳）可能有不同的定價。"}}, {"@type": "Question", "name": "這個估算器是否包含所有裝修成本？", "acceptedAnswer": {"@type": "Answer", "text": "此估算器提供基於面積和品質等級的一般成本估算。實際成本可能因特定材料選擇、設計複雜度、現場條件、許可證和其他專業服務而異。建議獲得詳細的承包商報價以進行精確預算。"}}, {"@type": "Question", "name": "小面積裝修是否比大面積更貴？", "acceptedAnswer": {"@type": "Answer", "text": "小面積裝修的每平方英尺成本往往高於大面積，因為許多固定成本（如許可證、設計費、動員費）會攤分到較少的平方英尺上。因此，小房間可能看起來比例更昂貴。"}}, {"@type": "Question", "name": "我可以使用此工具進行多個空間的裝修嗎？", "acceptedAnswer": {"@type": "Answer", "text": "是的。您可以分別計算每個空間的成本，然後將結果相加，得出總體裝修預算。這對於多空間或分階段裝修特別有用，可以幫助您優先安排資源分配。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="renovation-cost">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/renovation-cost.html" selected>繁中</option><option value="/tools/en/renovation-cost.html">EN</option><option value="/tools/ja/renovation-cost.html">日本語</option><option value="/tools/ko/renovation-cost.html">한국어</option><option value="/tools/de/renovation-cost.html">DE</option><option value="/tools/fr/renovation-cost.html">FR</option><option value="/tools/es/renovation-cost.html">ES</option><option value="/tools/pt/renovation-cost.html">PT</option><option value="/tools/id/renovation-cost.html">ID</option><option value="/tools/zh-CN/renovation-cost.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/renovation-cost.html" selected>繁中</option><option value="/tools/en/renovation-cost.html">EN</option><option value="/tools/ja/renovation-cost.html">日本語</option><option value="/tools/ko/renovation-cost.html">한국어</option><option value="/tools/de/renovation-cost.html">DE</option><option value="/tools/fr/renovation-cost.html">FR</option><option value="/tools/es/renovation-cost.html">ES</option><option value="/tools/pt/renovation-cost.html">PT</option><option value="/tools/id/renovation-cost.html">ID</option><option value="/tools/zh-CN/renovation-cost.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 裝修預算估算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/renovation-cost.html" selected>繁中</option><option value="/tools/en/renovation-cost.html">EN</option><option value="/tools/ja/renovation-cost.html">日本語</option><option value="/tools/ko/renovation-cost.html">한국어</option><option value="/tools/de/renovation-cost.html">DE</option><option value="/tools/fr/renovation-cost.html">FR</option><option value="/tools/es/renovation-cost.html">ES</option><option value="/tools/pt/renovation-cost.html">PT</option><option value="/tools/id/renovation-cost.html">ID</option><option value="/tools/zh-CN/renovation-cost.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -137,6 +151,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

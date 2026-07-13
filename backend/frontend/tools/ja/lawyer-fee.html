@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "弁護士費用計算機", "url": "https://softglow-ai.com/tools/ja/lawyer-fee.html", "description": "時間給と予想作業時間から弁護士費用を簡単に計算できます。法務コストの正確な見積もりに役立つツールです。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "弁護士の時間給はどのように決まりますか？", "acceptedAnswer": {"@type": "Answer", "text": "時間給は弁護士の経験年数、専門分野、事務所の規模、地域によって異なります。一般的に大規模事務所や著名弁護士ほど高い傾向があります。初回相談は無料や割引料金の場合もあります。"}}, {"@type": "Question", "name": "この計算機の結果は最終的な費用ですか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ、この計算機は基本的な時間給ベースの費用計算です。実際の費用には裁判所費用、書類作成費、交通費などの実費が加わることがあります。正確な見積もりは弁護士に直接確認してください。"}}, {"@type": "Question", "name": "予想時間数をどのように決めれば良いですか？", "acceptedAnswer": {"@type": "Answer", "text": "弁護士に事前に相談内容を説明し、必要な作業時間の目安を聞くことが最適です。類似案件の経験がある場合は参考にできます。不明な場合は、保守的に多めに見積もることをお勧めします。"}}, {"@type": "Question", "name": "成功報酬制と時間給制の違いは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "時間給制は作業時間に応じて費用が決まります。成功報酬制は案件の結果に応じて費用が決まります。各制度にメリット・デメリットがあり、案件の性質によって適切な方式を選択します。"}}, {"@type": "Question", "name": "複数の弁護士から見積もりを取得すべきですか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、複数の弁護士から見積もりを取ることは重要です。時間給、サービス内容、対応の質などを比較できます。信頼できる弁護士を選択することが、最終的なコストパフォーマンスを左右します。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="lawyer-fee">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ja">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ja/">ツール</a>
-    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/patterns/ja.html">ローソク足</a>
+    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/">ホーム</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/lawyer-fee.html">繁中</option><option value="/tools/en/lawyer-fee.html">EN</option><option value="/tools/ja/lawyer-fee.html" selected>日本語</option><option value="/tools/ko/lawyer-fee.html">한국어</option><option value="/tools/de/lawyer-fee.html">DE</option><option value="/tools/fr/lawyer-fee.html">FR</option><option value="/tools/es/lawyer-fee.html">ES</option><option value="/tools/pt/lawyer-fee.html">PT</option><option value="/tools/id/lawyer-fee.html">ID</option><option value="/tools/zh-CN/lawyer-fee.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/lawyer-fee.html">繁中</option><option value="/tools/en/lawyer-fee.html">EN</option><option value="/tools/ja/lawyer-fee.html" selected>日本語</option><option value="/tools/ko/lawyer-fee.html">한국어</option><option value="/tools/de/lawyer-fee.html">DE</option><option value="/tools/fr/lawyer-fee.html">FR</option><option value="/tools/es/lawyer-fee.html">ES</option><option value="/tools/pt/lawyer-fee.html">PT</option><option value="/tools/id/lawyer-fee.html">ID</option><option value="/tools/zh-CN/lawyer-fee.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 弁護士費用計算機</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/lawyer-fee.html">繁中</option><option value="/tools/en/lawyer-fee.html">EN</option><option value="/tools/ja/lawyer-fee.html" selected>日本語</option><option value="/tools/ko/lawyer-fee.html">한국어</option><option value="/tools/de/lawyer-fee.html">DE</option><option value="/tools/fr/lawyer-fee.html">FR</option><option value="/tools/es/lawyer-fee.html">ES</option><option value="/tools/pt/lawyer-fee.html">PT</option><option value="/tools/id/lawyer-fee.html">ID</option><option value="/tools/zh-CN/lawyer-fee.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -103,6 +117,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="ツール、パターン、記事を検索…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>ブックマーク</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全て削除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

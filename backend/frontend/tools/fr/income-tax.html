@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculateur d'Impôt sur le Revenu", "url": "https://softglow-ai.com/tools/fr/income-tax.html", "description": "Calculez votre impôt fédéral et étatique rapidement. Déterminez votre revenu imposable, vos crédits d'impôt et votre taux effectif.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "fr"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Quelle est la différence entre une déduction et un crédit d'impôt?", "acceptedAnswer": {"@type": "Answer", "text": "Une déduction réduit votre revenu imposable (le montant sur lequel l'impôt est calculé), tandis qu'un crédit réduit directement votre impôt dû. Un crédit de 1 000 € économise toujours 1 000 € en impôts, mais une déduction de 1 000 € économise 1 000 € multiplié par votre taux d'imposition marginal, ce qui rend les crédits généralement plus précieux."}}, {"@type": "Question", "name": "Comment puis-je savoir quel est mon statut de déclaration correct?", "acceptedAnswer": {"@type": "Answer", "text": "Votre statut de déclaration dépend de votre situation matrimoniale au dernier jour de l'année fiscale. Les célibataires choisissent 'Célibataire', les couples mariés peuvent choisir 'Marié Déposant Conjointement' (généralement plus avantageux) ou 'Marié Déposant Séparément', et les personnes non mariées avec dépendants admissibles peuvent souvent utiliser 'Chef de Ménage'."}}, {"@type": "Question", "name": "Pourquoi mon taux d'imposition effectif est-il plus bas que mon taux marginal?", "acceptedAnswer": {"@type": "Answer", "text": "Votre taux marginal est le taux d'impôt appliqué à votre dernier euro de revenu, tandis que votre taux effectif est votre impôt total divisé par votre revenu total. Parce que le système d'imposition américain est progressif, vous payez des taux différents sur différentes portions de votre revenu, ce qui rend votre taux effectif inférieur à votre taux marginal."}}, {"@type": "Question", "name": "Dois-je retenir des impôts si je suis travailleur indépendant?", "acceptedAnswer": {"@type": "Answer", "text": "Oui, les travailleurs indépendants doivent estimer leurs impôts trimestriels et effectuer des paiements d'impôt estimés. Vous devez également payer l'impôt sur le travail indépendant (impôt de Sécurité Sociale et Medicare), qui représente environ 15,3 % de vos bénéfices nets du travail indépendant."}}, {"@type": "Question", "name": "Comment puis-je réduire mon impôt sur le revenu?", "acceptedAnswer": {"@type": "Answer", "text": "Plusieurs stratégies peuvent réduire votre impôt : contribuer à des comptes de retraite (401k, IRA traditionnel), utiliser les crédits d'impôt pour lesquels vous êtes admissible, énumérer les déductions si elles dépassent la déduction standard, faire des dons caritatifs, investir dans des obligations municipales exonérées d'impôt, ou consulter un professionnel fiscal pour des stratégies spécifiques à votre situation."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="income-tax">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="fr">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/fr/">Outils</a>
-    <a href="/blog/fr/index.html">Blog</a>
     <a href="/patterns/fr.html">Chandeliers</a>
+    <a href="/blog/fr/index.html">Blog</a>
     <a href="/">Accueil</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/income-tax.html">繁中</option><option value="/tools/en/income-tax.html">EN</option><option value="/tools/ja/income-tax.html">日本語</option><option value="/tools/ko/income-tax.html">한국어</option><option value="/tools/de/income-tax.html">DE</option><option value="/tools/fr/income-tax.html" selected>FR</option><option value="/tools/es/income-tax.html">ES</option><option value="/tools/pt/income-tax.html">PT</option><option value="/tools/id/income-tax.html">ID</option><option value="/tools/zh-CN/income-tax.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/income-tax.html">繁中</option><option value="/tools/en/income-tax.html">EN</option><option value="/tools/ja/income-tax.html">日本語</option><option value="/tools/ko/income-tax.html">한국어</option><option value="/tools/de/income-tax.html">DE</option><option value="/tools/fr/income-tax.html" selected>FR</option><option value="/tools/es/income-tax.html">ES</option><option value="/tools/pt/income-tax.html">PT</option><option value="/tools/id/income-tax.html">ID</option><option value="/tools/zh-CN/income-tax.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/fr/">Outils</a> > Calculateur d'Impôt sur le Revenu</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/income-tax.html">繁中</option><option value="/tools/en/income-tax.html">EN</option><option value="/tools/ja/income-tax.html">日本語</option><option value="/tools/ko/income-tax.html">한국어</option><option value="/tools/de/income-tax.html">DE</option><option value="/tools/fr/income-tax.html" selected>FR</option><option value="/tools/es/income-tax.html">ES</option><option value="/tools/pt/income-tax.html">PT</option><option value="/tools/id/income-tax.html">ID</option><option value="/tools/zh-CN/income-tax.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -220,6 +234,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Rechercher outils, modèles, articles…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Favoris</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Tout effacer</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

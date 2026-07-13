@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "컨테이너 적재 계산기", "url": "https://softglow-ai.com/tools/ko/container-load.html", "description": "해운 배송을 위한 20피트 및 40피트 컨테이너의 정확한 용적과 적재량을 즉시 계산하세요. 최대 적재량과 용적 활용률을 확인할 수 있습니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "20피트와 40피트 컨테이너의 차이점은 무엇입니까?", "acceptedAnswer": {"@type": "Answer", "text": "20피트 컨테이너(TEU)는 내부 용적이 약 33.2㎥이고 최대 적재 무게가 약 21,600kg입니다. 40피트 컨테이너(FEU)는 용적이 약 67.7㎥으로 약 2배이며, 최대 적재 무게는 약 26,680kg입니다. 40피트가 더 경제적이지만, 작은 물량의 경우 20피트를 선택하는 것이 효율적입니다."}}, {"@type": "Question", "name": "계산기에서 '최대 패키지 수'는 어떻게 결정되나요?", "acceptedAnswer": {"@type": "Answer", "text": "'최대 패키지 수'는 컨테이너의 용적과 무게 제한을 모두 고려하여 계산됩니다. 부피로 계산한 최대 패키지 수와 무게로 계산한 최대 패키지 수 중 더 작은 값이 실제 적재 가능한 최대 수량입니다."}}, {"@type": "Question", "name": "컨테이너 활용률이란 무엇입니까?", "acceptedAnswer": {"@type": "Answer", "text": "컨테이너 활용률은 실제 배송하는 패키지의 총 부피가 전체 컨테이너 용적에 대해 차지하는 비율입니다. 예를 들어 70%의 활용률은 컨테이너의 70%를 사용하고 30%가 빈 공간이라는 의미입니다."}}, {"@type": "Question", "name": "패키지 치수를 어떻게 정확하게 측정해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "패키지의 가장 긴 변을 길이(Length), 중간 길이를 너비(Width), 가장 짧은 변을 높이(Height)로 기록하세요. 모든 측정은 센티미터 단위로 통일하고, 패키지가 완전히 포장된 상태에서 측정하는 것이 정확합니다."}}, {"@type": "Question", "name": "실제 적재 시 계산값과 다른 이유는 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "실제 적재량은 패키지의 형태, 무게 분포, 적재 방식, 그리고 운송 규정에 따라 달라질 수 있습니다. 또한 안전한 운송을 위해 패키지들 사이에 최소한의 여유 공간이 필요하므로, 계산된 값에서 5-10%의 여유를 두는 것을 권장합니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="container-load">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/container-load.html">繁中</option><option value="/tools/en/container-load.html">EN</option><option value="/tools/ja/container-load.html">日本語</option><option value="/tools/ko/container-load.html" selected>한국어</option><option value="/tools/de/container-load.html">DE</option><option value="/tools/fr/container-load.html">FR</option><option value="/tools/es/container-load.html">ES</option><option value="/tools/pt/container-load.html">PT</option><option value="/tools/id/container-load.html">ID</option><option value="/tools/zh-CN/container-load.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/container-load.html">繁中</option><option value="/tools/en/container-load.html">EN</option><option value="/tools/ja/container-load.html">日本語</option><option value="/tools/ko/container-load.html" selected>한국어</option><option value="/tools/de/container-load.html">DE</option><option value="/tools/fr/container-load.html">FR</option><option value="/tools/es/container-load.html">ES</option><option value="/tools/pt/container-load.html">PT</option><option value="/tools/id/container-load.html">ID</option><option value="/tools/zh-CN/container-load.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 컨테이너 적재 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/container-load.html">繁中</option><option value="/tools/en/container-load.html">EN</option><option value="/tools/ja/container-load.html">日本語</option><option value="/tools/ko/container-load.html" selected>한국어</option><option value="/tools/de/container-load.html">DE</option><option value="/tools/fr/container-load.html">FR</option><option value="/tools/es/container-load.html">ES</option><option value="/tools/pt/container-load.html">PT</option><option value="/tools/id/container-load.html">ID</option><option value="/tools/zh-CN/container-load.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -173,6 +187,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

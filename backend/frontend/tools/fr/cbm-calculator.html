@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculateur CBM", "url": "https://softglow-ai.com/tools/fr/cbm-calculator.html", "description": "Calculez facilement les mètres cubes (CBM) pour vos expéditions et fret. Outil gratuit pour la logistique et le transport.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "fr"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Qu'est-ce que le CBM en logistique ?", "acceptedAnswer": {"@type": "Answer", "text": "CBM signifie « Cubic Meter » (mètre cube en français). C'est une unité de mesure de volume utilisée pour calculer l'espace occupé par une marchandise. Elle est calculée en multipliant la longueur, la largeur et la hauteur en mètres (ou en convertissant depuis les centimètres)."}}, {"@type": "Question", "name": "Comment convertir les centimètres en mètres pour le CBM ?", "acceptedAnswer": {"@type": "Answer", "text": "Pour convertir en mètres cubes depuis les centimètres, divisez chaque dimension par 100 avant de les multiplier ensemble. Par exemple : 100 cm × 80 cm × 60 cm = 1 m × 0,8 m × 0,6 m = 0,48 CBM. Notre calculateur effectue cette conversion automatiquement."}}, {"@type": "Question", "name": "Pourquoi le CBM est-il important pour l'expédition ?", "acceptedAnswer": {"@type": "Answer", "text": "Le CBM détermine les frais d'expédition dans la plupart des cas. Les compagnies de transport facturent généralement en fonction du volume (CBM) ou du poids, en retenant la valeur la plus élevée. Connaître votre CBM vous permet d'estimer précisément les coûts d'expédition et de comparer les offres de transporteurs."}}, {"@type": "Question", "name": "Quel est la différence entre le poids volumétrique et le CBM ?", "acceptedAnswer": {"@type": "Answer", "text": "Le CBM est simplement le volume en mètres cubes. Le poids volumétrique est une valeur calculée à partir du CBM pour les envois de faible densité. Pour l'aérien, il est calculé comme CBM × 167 kg/m³. Il représente le poids « fictif » d'un colis volumineux mais léger."}}, {"@type": "Question", "name": "Comment mesurer correctement les dimensions d'un colis irrégulier ?", "acceptedAnswer": {"@type": "Answer", "text": "Pour un colis de forme irrégulière, imaginez une boîte rectangulaire qui l'envelopperait complètement. Mesurez la longueur, la largeur et la hauteur de cette boîte imaginaire. Mesurez toujours à partir du point le plus large pour chaque dimension. Arrondissez toujours vers le haut pour éviter les problèmes d'ajustement dans les conteneurs."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="cbm-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="fr">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/fr/">Outils</a>
-    <a href="/blog/fr/index.html">Blog</a>
     <a href="/patterns/fr.html">Chandeliers</a>
+    <a href="/blog/fr/index.html">Blog</a>
     <a href="/">Accueil</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/cbm-calculator.html">繁中</option><option value="/tools/en/cbm-calculator.html">EN</option><option value="/tools/ja/cbm-calculator.html">日本語</option><option value="/tools/ko/cbm-calculator.html">한국어</option><option value="/tools/de/cbm-calculator.html">DE</option><option value="/tools/fr/cbm-calculator.html" selected>FR</option><option value="/tools/es/cbm-calculator.html">ES</option><option value="/tools/pt/cbm-calculator.html">PT</option><option value="/tools/id/cbm-calculator.html">ID</option><option value="/tools/zh-CN/cbm-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/cbm-calculator.html">繁中</option><option value="/tools/en/cbm-calculator.html">EN</option><option value="/tools/ja/cbm-calculator.html">日本語</option><option value="/tools/ko/cbm-calculator.html">한국어</option><option value="/tools/de/cbm-calculator.html">DE</option><option value="/tools/fr/cbm-calculator.html" selected>FR</option><option value="/tools/es/cbm-calculator.html">ES</option><option value="/tools/pt/cbm-calculator.html">PT</option><option value="/tools/id/cbm-calculator.html">ID</option><option value="/tools/zh-CN/cbm-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/fr/">Outils</a> > Calculateur CBM</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/cbm-calculator.html">繁中</option><option value="/tools/en/cbm-calculator.html">EN</option><option value="/tools/ja/cbm-calculator.html">日本語</option><option value="/tools/ko/cbm-calculator.html">한국어</option><option value="/tools/de/cbm-calculator.html">DE</option><option value="/tools/fr/cbm-calculator.html" selected>FR</option><option value="/tools/es/cbm-calculator.html">ES</option><option value="/tools/pt/cbm-calculator.html">PT</option><option value="/tools/id/cbm-calculator.html">ID</option><option value="/tools/zh-CN/cbm-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -107,6 +121,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Rechercher outils, modèles, articles…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Favoris</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Tout effacer</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

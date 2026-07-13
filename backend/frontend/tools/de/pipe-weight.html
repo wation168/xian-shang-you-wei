@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Rohrgewicht-Rechner", "url": "https://softglow-ai.com/tools/de/pipe-weight.html", "description": "Berechnen Sie das Gesamtgewicht von Rohren und das Gewicht pro Meter. Geben Sie Außendurchmesser, Wandstärke, Materialdichte und Rohrlänge ein.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "de"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Welche Materialien können mit diesem Rechner berechnet werden?", "acceptedAnswer": {"@type": "Answer", "text": "Der Rechner funktioniert mit jedem Material, solange Sie die genaue Dichte kennen. Häufig verwendete Materialien sind Stahl (7.850 kg/m³), Aluminium (2.700 kg/m³), Kupfer (8.960 kg/m³), Edelstahl (7.500-8.000 kg/m³) und verschiedene Kunststoffe."}}, {"@type": "Question", "name": "Wie misst man den Außendurchmesser und die Wandstärke korrekt?", "acceptedAnswer": {"@type": "Answer", "text": "Der Außendurchmesser sollte mit einer Schieblehre oder einem Messschieber von außen gemessen werden. Die Wandstärke kann durch Messung des Innendurchmessers und Subtrahieren vom Außendurchmesser ermittelt werden, oder mit einem Schichtdickenmessgerät direkt gemessen werden."}}, {"@type": "Question", "name": "Warum unterscheiden sich meine berechneten Gewichte von den Herstellerangaben?", "acceptedAnswer": {"@type": "Answer", "text": "Unterschiede können aufgrund von Ungenauigkeiten bei den Eingabeparametern, unterschiedlichen Materialdichten oder zusätzlichen Komponenten entstehen. Überprüfen Sie die genaue Dichte des Materials und stellen Sie sicher, dass die Messwerte präzise sind."}}, {"@type": "Question", "name": "Kann ich den Rechner für Rohre verschiedener Querschnitte verwenden?", "acceptedAnswer": {"@type": "Answer", "text": "Dieser Rechner ist für runde Rohre mit kreisförmigem Querschnitt ausgelegt. Für quadratische, rechteckige oder andere Profile müssen Sie möglicherweise eine spezialisiertere Berechnungsmethode verwenden."}}, {"@type": "Question", "name": "Wie beeinflussen Toleranzen die Gewichtsberechnung?", "acceptedAnswer": {"@type": "Answer", "text": "Fertigungstoleranzen können zu Variationen in Durchmesser und Wandstärke führen. Der Rechner bietet nur theoretische Werte basierend auf den eingegebenen Nennmaßen. Für präzise Anforderungen sollten tatsächliche Messungen durchgeführt werden."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="pipe-weight">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="de">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/de/">Tools</a>
-    <a href="/blog/de/index.html">Blog</a>
     <a href="/patterns/de.html">Muster</a>
+    <a href="/blog/de/index.html">Blog</a>
     <a href="/">Startseite</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/pipe-weight.html">繁中</option><option value="/tools/en/pipe-weight.html">EN</option><option value="/tools/ja/pipe-weight.html">日本語</option><option value="/tools/ko/pipe-weight.html">한국어</option><option value="/tools/de/pipe-weight.html" selected>DE</option><option value="/tools/fr/pipe-weight.html">FR</option><option value="/tools/es/pipe-weight.html">ES</option><option value="/tools/pt/pipe-weight.html">PT</option><option value="/tools/id/pipe-weight.html">ID</option><option value="/tools/zh-CN/pipe-weight.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/pipe-weight.html">繁中</option><option value="/tools/en/pipe-weight.html">EN</option><option value="/tools/ja/pipe-weight.html">日本語</option><option value="/tools/ko/pipe-weight.html">한국어</option><option value="/tools/de/pipe-weight.html" selected>DE</option><option value="/tools/fr/pipe-weight.html">FR</option><option value="/tools/es/pipe-weight.html">ES</option><option value="/tools/pt/pipe-weight.html">PT</option><option value="/tools/id/pipe-weight.html">ID</option><option value="/tools/zh-CN/pipe-weight.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/de/">Werkzeuge</a> > Rohrgewicht-Rechner</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/pipe-weight.html">繁中</option><option value="/tools/en/pipe-weight.html">EN</option><option value="/tools/ja/pipe-weight.html">日本語</option><option value="/tools/ko/pipe-weight.html">한국어</option><option value="/tools/de/pipe-weight.html" selected>DE</option><option value="/tools/fr/pipe-weight.html">FR</option><option value="/tools/es/pipe-weight.html">ES</option><option value="/tools/pt/pipe-weight.html">PT</option><option value="/tools/id/pipe-weight.html">ID</option><option value="/tools/zh-CN/pipe-weight.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -148,6 +162,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Tools, Muster, Artikel suchen…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Lesezeichen</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Alle löschen</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

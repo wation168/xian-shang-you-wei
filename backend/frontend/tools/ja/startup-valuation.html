@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "スタートアップ企業評価計算機", "url": "https://softglow-ai.com/tools/ja/startup-valuation.html", "description": "年間売上高と業界倍数からスタートアップの企業価値を簡単に計算できます。EV/Revenue倍数を使用した評価方法をご紹介します。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "EV/Revenue倍数はどのように決めるのですか？", "acceptedAnswer": {"@type": "Answer", "text": "同業界の上場企業やベンチマーク企業のEV/Revenue倍数を参照します。投資銀行のレポート、産業分析サイト、財務データベースで確認できます。複数企業の平均値を使用することで、より信頼性の高い倍数が得られます。"}}, {"@type": "Question", "name": "このツールの計算結果は信頼できますか？", "acceptedAnswer": {"@type": "Answer", "text": "このツールは概算値を提供するものです。実際の企業価値評価には、DCF分析、資産評価法など複数の方法を併用し、定性的要因も考慮する必要があります。重要な意思決定には、専門家の意見を求めることをお勧めします。"}}, {"@type": "Question", "name": "なぜ同じ売上高でも企業価値が異なるのですか？", "acceptedAnswer": {"@type": "Answer", "text": "業界により利益構造や成長性が異なるため、適用される倍数も異なります。高成長業界は高い倍数、成熟業界は低い倍数が適用されます。また、同業界内でも企業の競争力や市場シェアにより倍数が変動します。"}}, {"@type": "Question", "name": "赤字のスタートアップの価値はどう評価するのですか？", "acceptedAnswer": {"@type": "Answer", "text": "EV/Revenue倍数は売上高ベースなため、赤字企業でも使用できます。ただし、将来的な利益化の見通しが不確実な場合は、倍数を低めに設定する必要があります。他の評価方法との組み合わせをお勧めします。"}}, {"@type": "Question", "name": "どの業界倍数を参考にすべきですか？", "acceptedAnswer": {"@type": "Answer", "text": "自社と最も近い業界セグメントの倍数を使用してください。ビジネスモデルや成長ステージが異なる場合は、複数の倍数を試算して参考にすることで、評価の幅を把握できます。専門家への相談も有効です。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="startup-valuation">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ja">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ja/">ツール</a>
-    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/patterns/ja.html">ローソク足</a>
+    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/">ホーム</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/startup-valuation.html">繁中</option><option value="/tools/en/startup-valuation.html">EN</option><option value="/tools/ja/startup-valuation.html" selected>日本語</option><option value="/tools/ko/startup-valuation.html">한국어</option><option value="/tools/de/startup-valuation.html">DE</option><option value="/tools/fr/startup-valuation.html">FR</option><option value="/tools/es/startup-valuation.html">ES</option><option value="/tools/pt/startup-valuation.html">PT</option><option value="/tools/id/startup-valuation.html">ID</option><option value="/tools/zh-CN/startup-valuation.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/startup-valuation.html">繁中</option><option value="/tools/en/startup-valuation.html">EN</option><option value="/tools/ja/startup-valuation.html" selected>日本語</option><option value="/tools/ko/startup-valuation.html">한국어</option><option value="/tools/de/startup-valuation.html">DE</option><option value="/tools/fr/startup-valuation.html">FR</option><option value="/tools/es/startup-valuation.html">ES</option><option value="/tools/pt/startup-valuation.html">PT</option><option value="/tools/id/startup-valuation.html">ID</option><option value="/tools/zh-CN/startup-valuation.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > スタートアップ企業評価計算機</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/startup-valuation.html">繁中</option><option value="/tools/en/startup-valuation.html">EN</option><option value="/tools/ja/startup-valuation.html" selected>日本語</option><option value="/tools/ko/startup-valuation.html">한국어</option><option value="/tools/de/startup-valuation.html">DE</option><option value="/tools/fr/startup-valuation.html">FR</option><option value="/tools/es/startup-valuation.html">ES</option><option value="/tools/pt/startup-valuation.html">PT</option><option value="/tools/id/startup-valuation.html">ID</option><option value="/tools/zh-CN/startup-valuation.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -126,6 +140,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="ツール、パターン、記事を検索…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>ブックマーク</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全て削除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

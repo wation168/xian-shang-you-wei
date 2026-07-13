@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "안전 인출율 계산기", "url": "https://softglow-ai.com/tools/ko/withdrawal-rate.html", "description": "투자 포트폴리오의 안전한 연간 인출액을 계산하세요. 4% 규칙을 적용하여 지속 가능한 은퇴 소득을 파악할 수 있습니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "4% 규칙은 모든 상황에 적용 가능한가요?", "acceptedAnswer": {"@type": "Answer", "text": "4% 규칙은 일반적인 기준선이지만, 개인의 상황에 따라 달라질 수 있습니다. 은퇴 기간, 포트폴리오 구성, 생활비, 의료비 등을 고려하여 실제 인출율(3~5%)을 조정해야 합니다. 재무 전문가와 상담하는 것이 좋습니다."}}, {"@type": "Question", "name": "포트폴리오가 시장 하락으로 감소하면 어떻게 해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "시장이 급락할 때는 인출액을 일시적으로 줄이거나, 인플레이션 조정을 건너뛰는 방식으로 대응할 수 있습니다. 규칙적인 재평가(연 1~2회)를 통해 포트폴리오 상황에 맞춰 인출 전략을 유연하게 조정하세요."}}, {"@type": "Question", "name": "연간 인출액을 매년 동일하게 유지해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "4% 규칙의 기본 원칙은 연간 인출액을 인플레이션에 맞춰 증가시키는 것입니다. 예를 들어 연 3% 인플레이션이 발생하면 인출액도 3% 증가시켜야 합니다. 이는 구매력을 유지하기 위함입니다."}}, {"@type": "Question", "name": "이 계산기의 결과가 보장되나요?", "acceptedAnswer": {"@type": "Answer", "text": "이 계산기는 역사적 데이터와 통계를 기반으로 하지만, 미래의 시장 상황을 완벽하게 예측하지 못합니다. 약 90%의 성공 확률을 제시하므로, 정기적인 모니터링과 필요시 조정이 필수적입니다."}}, {"@type": "Question", "name": "포트폴리오가 작으면 어떻게 되나요?", "acceptedAnswer": {"@type": "Answer", "text": "포트폴리오가 작을수록 인출 가능 금액도 작아집니다. 은퇴에 필요한 충분한 자산을 확보하지 못한 경우, 추가 저축, 근무 기간 연장, 또는 인출액 감소를 고려해야 합니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="withdrawal-rate">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/withdrawal-rate.html">繁中</option><option value="/tools/en/withdrawal-rate.html">EN</option><option value="/tools/ja/withdrawal-rate.html">日本語</option><option value="/tools/ko/withdrawal-rate.html" selected>한국어</option><option value="/tools/de/withdrawal-rate.html">DE</option><option value="/tools/fr/withdrawal-rate.html">FR</option><option value="/tools/es/withdrawal-rate.html">ES</option><option value="/tools/pt/withdrawal-rate.html">PT</option><option value="/tools/id/withdrawal-rate.html">ID</option><option value="/tools/zh-CN/withdrawal-rate.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/withdrawal-rate.html">繁中</option><option value="/tools/en/withdrawal-rate.html">EN</option><option value="/tools/ja/withdrawal-rate.html">日本語</option><option value="/tools/ko/withdrawal-rate.html" selected>한국어</option><option value="/tools/de/withdrawal-rate.html">DE</option><option value="/tools/fr/withdrawal-rate.html">FR</option><option value="/tools/es/withdrawal-rate.html">ES</option><option value="/tools/pt/withdrawal-rate.html">PT</option><option value="/tools/id/withdrawal-rate.html">ID</option><option value="/tools/zh-CN/withdrawal-rate.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 안전 인출율 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/withdrawal-rate.html">繁中</option><option value="/tools/en/withdrawal-rate.html">EN</option><option value="/tools/ja/withdrawal-rate.html">日本語</option><option value="/tools/ko/withdrawal-rate.html" selected>한국어</option><option value="/tools/de/withdrawal-rate.html">DE</option><option value="/tools/fr/withdrawal-rate.html">FR</option><option value="/tools/es/withdrawal-rate.html">ES</option><option value="/tools/pt/withdrawal-rate.html">PT</option><option value="/tools/id/withdrawal-rate.html">ID</option><option value="/tools/zh-CN/withdrawal-rate.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -99,6 +113,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

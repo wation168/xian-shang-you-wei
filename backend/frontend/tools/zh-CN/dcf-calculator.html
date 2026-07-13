@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "DCF估值计算器", "url": "https://softglow-ai.com/tools/zh-CN/dcf-calculator.html", "description": "免费DCF折现现金流计算器，帮助投资者计算公司内在价值。输入5年现金流、折现率和终端增长率即可得出每股内在价值。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "WACC(加权平均资本成本)应该如何确定？", "acceptedAnswer": {"@type": "Answer", "text": "WACC = (E/V × Re) + (D/V × Rd × (1-Tc))，其中E是权益价值，D是债务价值，V是总价值，Re是权益成本，Rd是债务成本，Tc是企业税率。一般而言，低风险公司的WACC在6-8%，中等风险公司在8-10%，高风险公司在10-12%以上。"}}, {"@type": "Question", "name": "终端增长率设定为多少比较合理？", "acceptedAnswer": {"@type": "Answer", "text": "终端增长率应该接近或略低于长期经济增长率。对于发达国家公司，通常设定为2-2.5%；对于发展中国家可能为3-4%。不建议设定超过5%，因为这意味着公司增长永远快于经济增长，这在长期内是不现实的。"}}, {"@type": "Question", "name": "现金流应该如何预测？", "acceptedAnswer": {"@type": "Answer", "text": "可以基于历史增长率、行业增长预期和公司战略来预测。保守方法是使用过去3-5年的平均增长率；激进方法是参考分析师预测。建议采用分阶段预测：高增长期(2-3年)、缓和期(2-3年)、成熟期(之后)，这样更符合实际。"}}, {"@type": "Question", "name": "每股内在价值高于当前股价就一定应该买入吗？", "acceptedAnswer": {"@type": "Answer", "text": "不一定。首先要考虑DCF估值本身的不确定性——小的假设变化会导致结果差异很大。其次要检查计算中使用的假设是否合理。最后还需考虑其他因素：公司治理、竞争优势、财务健康状况和市场情绪等。建议留有安全边际，即只在内在价值明显高于股价时(如20-30%以上)才考虑投资。"}}, {"@type": "Question", "name": "为什么有时DCF估值结果与市场价格差异很大？", "acceptedAnswer": {"@type": "Answer", "text": "差异的原因可能有多种：1)现金流预测过于乐观或悲观；2)折现率设置不当；3)市场定价反映了DCF模型未考虑的因素(如行业变化、监管风险)；4)市场存在泡沫或极度悲观情绪。遇到大差异时应该反思假设是否合理，而不是盲目相信模型结果。DCF是分析工具，不是绝对真理。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="dcf-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/dcf-calculator.html">繁中</option><option value="/tools/en/dcf-calculator.html">EN</option><option value="/tools/ja/dcf-calculator.html">日本語</option><option value="/tools/ko/dcf-calculator.html">한국어</option><option value="/tools/de/dcf-calculator.html">DE</option><option value="/tools/fr/dcf-calculator.html">FR</option><option value="/tools/es/dcf-calculator.html">ES</option><option value="/tools/pt/dcf-calculator.html">PT</option><option value="/tools/id/dcf-calculator.html">ID</option><option value="/tools/zh-CN/dcf-calculator.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/dcf-calculator.html">繁中</option><option value="/tools/en/dcf-calculator.html">EN</option><option value="/tools/ja/dcf-calculator.html">日本語</option><option value="/tools/ko/dcf-calculator.html">한국어</option><option value="/tools/de/dcf-calculator.html">DE</option><option value="/tools/fr/dcf-calculator.html">FR</option><option value="/tools/es/dcf-calculator.html">ES</option><option value="/tools/pt/dcf-calculator.html">PT</option><option value="/tools/id/dcf-calculator.html">ID</option><option value="/tools/zh-CN/dcf-calculator.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > DCF估值计算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/dcf-calculator.html">繁中</option><option value="/tools/en/dcf-calculator.html">EN</option><option value="/tools/ja/dcf-calculator.html">日本語</option><option value="/tools/ko/dcf-calculator.html">한국어</option><option value="/tools/de/dcf-calculator.html">DE</option><option value="/tools/fr/dcf-calculator.html">FR</option><option value="/tools/es/dcf-calculator.html">ES</option><option value="/tools/pt/dcf-calculator.html">PT</option><option value="/tools/id/dcf-calculator.html">ID</option><option value="/tools/zh-CN/dcf-calculator.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -195,6 +209,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

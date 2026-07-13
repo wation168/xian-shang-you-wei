@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "P/E 비율 계산기", "url": "https://softglow-ai.com/tools/ko/pe-ratio.html", "description": "주가와 주당순이익(EPS)을 입력하여 P/E 비율을 계산하고 주식의 상대적 가치를 평가합니다. 투자 의사결정을 위한 필수 지표입니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "P/E 비율이 0이거나 음수인 경우는 무엇을 의미하나요?", "acceptedAnswer": {"@type": "Answer", "text": "P/E 비율이 0이 되려면 주당순이익이 0이어야 하며, 이는 회사가 손익분기점에 있다는 의미입니다. 음수 P/E 비율은 회사가 손실을 기록했다는 뜻으로, 이 경우 P/E 비율을 통한 평가는 의미가 없습니다."}}, {"@type": "Question", "name": "일반적으로 좋은 P/E 비율의 범위는 어느 정도인가요?", "acceptedAnswer": {"@type": "Answer", "text": "일반적으로 P/E 비율이 10~20 사이이면 적절한 평가 범위로 간주됩니다. 그러나 산업별로 큰 차이가 있으며, 기술 업종은 높고 유틸리티 업종은 낮은 경향이 있습니다. 반드시 같은 산업 내 평균과 비교해야 합니다."}}, {"@type": "Question", "name": "P/E 비율이 높은 주식이 항상 나쁜 투자인가요?", "acceptedAnswer": {"@type": "Answer", "text": "높은 P/E 비율이 반드시 나쁜 투자를 의미하지는 않습니다. 빠르게 성장하는 회사나 높은 수익성을 기대하는 기업의 경우 높은 P/E 비율을 보일 수 있습니다. 중요한 것은 P/E 비율과 회사의 성장성이 일치하는지 판단하는 것입니다."}}, {"@type": "Question", "name": "주당순이익(EPS)은 어디서 확인할 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "주당순이익(EPS)은 회사의 분기 또는 연간 재무 보고서에서 확인할 수 있습니다. 또한 금융 정보 웹사이트, 증권사 리포트, Yahoo Finance, Bloomberg 등 다양한 금융 데이터 제공 플랫폼에서 조회할 수 있습니다."}}, {"@type": "Question", "name": "P/E 비율을 이용한 투자 전략에는 어떤 것들이 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "저P/E 투자 전략은 저평가된 주식을 찾아 투자하는 방식이며, PEG 투자 전략은 P/E 비율과 성장률을 함께 고려하는 방식입니다. 또한 밸류 투자자들은 P/E 비율이 낮지만 우량한 회사를 찾기 위해 다른 지표들과 함께 분석합니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="pe-ratio">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/pe-ratio.html">繁中</option><option value="/tools/en/pe-ratio.html">EN</option><option value="/tools/ja/pe-ratio.html">日本語</option><option value="/tools/ko/pe-ratio.html" selected>한국어</option><option value="/tools/de/pe-ratio.html">DE</option><option value="/tools/fr/pe-ratio.html">FR</option><option value="/tools/es/pe-ratio.html">ES</option><option value="/tools/pt/pe-ratio.html">PT</option><option value="/tools/id/pe-ratio.html">ID</option><option value="/tools/zh-CN/pe-ratio.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/pe-ratio.html">繁中</option><option value="/tools/en/pe-ratio.html">EN</option><option value="/tools/ja/pe-ratio.html">日本語</option><option value="/tools/ko/pe-ratio.html" selected>한국어</option><option value="/tools/de/pe-ratio.html">DE</option><option value="/tools/fr/pe-ratio.html">FR</option><option value="/tools/es/pe-ratio.html">ES</option><option value="/tools/pt/pe-ratio.html">PT</option><option value="/tools/id/pe-ratio.html">ID</option><option value="/tools/zh-CN/pe-ratio.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > P/E 비율 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/pe-ratio.html">繁中</option><option value="/tools/en/pe-ratio.html">EN</option><option value="/tools/ja/pe-ratio.html">日本語</option><option value="/tools/ko/pe-ratio.html" selected>한국어</option><option value="/tools/de/pe-ratio.html">DE</option><option value="/tools/fr/pe-ratio.html">FR</option><option value="/tools/es/pe-ratio.html">ES</option><option value="/tools/pt/pe-ratio.html">PT</option><option value="/tools/id/pe-ratio.html">ID</option><option value="/tools/zh-CN/pe-ratio.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -139,6 +153,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

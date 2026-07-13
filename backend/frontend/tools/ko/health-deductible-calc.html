@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "건강보험 자기부담금 추적기", "url": "https://softglow-ai.com/tools/ko/health-deductible-calc.html", "description": "연간 건강보험 자기부담금에서 남은 금액을 빠르게 계산하세요. 이미 지출한 금액을 입력하고 남은 자기부담금을 확인하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "자기부담금이란 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "자기부담금은 보험 혜택을 받기 전에 본인이 직접 부담해야 하는 의료비입니다. 이 금액을 충족할 때까지는 보험사가 의료비를 지원하지 않습니다."}}, {"@type": "Question", "name": "자기부담금을 언제 리셋되나요?", "acceptedAnswer": {"@type": "Answer", "text": "자기부담금은 보험 연도가 변경될 때 리셋됩니다. 대부분의 보험은 1월 1일에 새로운 연도가 시작되므로, 매년 1월 1일에 자기부담금이 초기화되고 다시 0원부터 시작됩니다."}}, {"@type": "Question", "name": "자기부담금을 충족하면 어떻게 되나요?", "acceptedAnswer": {"@type": "Answer", "text": "자기부담금을 충족한 후의 의료비는 보험 약관에 따라 정해진 비율(예: 80%, 90%)로 보험사가 부담하고 나머지는 본인이 부담합니다. 최대 자기부담액(out-of-pocket maximum)에 도달하면 보험이 100% 부담합니다."}}, {"@type": "Question", "name": "자기부담금 계산기를 어떻게 사용하나요?", "acceptedAnswer": {"@type": "Answer", "text": "보험 증서에서 연간 자기부담금을 확인하고, 현재까지 지출한 의료비 금액을 입력하면 됩니다. 계산기가 자동으로 남은 자기부담금과 사용 비율을 계산해줍니다."}}, {"@type": "Question", "name": "여러 보험이 있을 경우 어떻게 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "각 보험마다 별도의 자기부담금이 적용됩니다. 주 보험(primary insurance)과 추가 보험(secondary insurance)이 있다면 각각 따로 계산해야 합니다. 필요시 각 보험사에 문의하여 정확한 자기부담금을 확인하세요."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="health-deductible-calc">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/health-deductible-calc.html">繁中</option><option value="/tools/en/health-deductible-calc.html">EN</option><option value="/tools/ja/health-deductible-calc.html">日本語</option><option value="/tools/ko/health-deductible-calc.html" selected>한국어</option><option value="/tools/de/health-deductible-calc.html">DE</option><option value="/tools/fr/health-deductible-calc.html">FR</option><option value="/tools/es/health-deductible-calc.html">ES</option><option value="/tools/pt/health-deductible-calc.html">PT</option><option value="/tools/id/health-deductible-calc.html">ID</option><option value="/tools/zh-CN/health-deductible-calc.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/health-deductible-calc.html">繁中</option><option value="/tools/en/health-deductible-calc.html">EN</option><option value="/tools/ja/health-deductible-calc.html">日本語</option><option value="/tools/ko/health-deductible-calc.html" selected>한국어</option><option value="/tools/de/health-deductible-calc.html">DE</option><option value="/tools/fr/health-deductible-calc.html">FR</option><option value="/tools/es/health-deductible-calc.html">ES</option><option value="/tools/pt/health-deductible-calc.html">PT</option><option value="/tools/id/health-deductible-calc.html">ID</option><option value="/tools/zh-CN/health-deductible-calc.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 건강보험 자기부담금 추적기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/health-deductible-calc.html">繁中</option><option value="/tools/en/health-deductible-calc.html">EN</option><option value="/tools/ja/health-deductible-calc.html">日本語</option><option value="/tools/ko/health-deductible-calc.html" selected>한국어</option><option value="/tools/de/health-deductible-calc.html">DE</option><option value="/tools/fr/health-deductible-calc.html">FR</option><option value="/tools/es/health-deductible-calc.html">ES</option><option value="/tools/pt/health-deductible-calc.html">PT</option><option value="/tools/id/health-deductible-calc.html">ID</option><option value="/tools/zh-CN/health-deductible-calc.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -144,6 +158,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

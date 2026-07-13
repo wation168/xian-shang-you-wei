@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "실수령액 계산기", "url": "https://softglow-ai.com/tools/ko/take-home-pay.html", "description": "연봉에서 소득세, 국민보험료, 기타 공제액을 뺀 실수령액을 자동으로 계산해보세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "실수령액과 총급여의 차이는 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "총급여는 기업이 지급하기로 한 전체 금액이고, 실수령액은 세금과 각종 공제액을 뺀 실제 통장에 입금되는 금액입니다."}}, {"@type": "Question", "name": "소득세율과 국민보험료율을 어디서 확인할 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "소득세율과 국민보험료율은 각 국가의 세무청 또는 사회보장 기관 웹사이트에서 확인할 수 있습니다. 거주 국가와 소득 수준에 따라 달라질 수 있습니다."}}, {"@type": "Question", "name": "기타 공제액에는 어떤 것들이 포함되나요?", "acceptedAnswer": {"@type": "Answer", "text": "연금 기여금, 건강보험료, 고용보험료, 장기요양보험료, 직장 저축, 자산관리 상품 납입금 등이 포함될 수 있습니다."}}, {"@type": "Question", "name": "계산 결과가 실제 급여와 다를 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "예, 회사의 추가 복리후생비, 상여금, 교육비 지원 등이 있으면 실제 수령액과 다를 수 있습니다. 이 계산기는 정규 월급을 기준으로 합니다."}}, {"@type": "Question", "name": "왜 실효세율을 계산해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "실효세율은 실제 세금 부담을 이해하고 다른 소득 수준과 비교하는 데 도움이 됩니다. 또한 세금 계획과 재정 관리 전략 수립에 유용합니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="take-home-pay">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/take-home-pay.html">繁中</option><option value="/tools/en/take-home-pay.html">EN</option><option value="/tools/ja/take-home-pay.html">日本語</option><option value="/tools/ko/take-home-pay.html" selected>한국어</option><option value="/tools/de/take-home-pay.html">DE</option><option value="/tools/fr/take-home-pay.html">FR</option><option value="/tools/es/take-home-pay.html">ES</option><option value="/tools/pt/take-home-pay.html">PT</option><option value="/tools/id/take-home-pay.html">ID</option><option value="/tools/zh-CN/take-home-pay.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/take-home-pay.html">繁中</option><option value="/tools/en/take-home-pay.html">EN</option><option value="/tools/ja/take-home-pay.html">日本語</option><option value="/tools/ko/take-home-pay.html" selected>한국어</option><option value="/tools/de/take-home-pay.html">DE</option><option value="/tools/fr/take-home-pay.html">FR</option><option value="/tools/es/take-home-pay.html">ES</option><option value="/tools/pt/take-home-pay.html">PT</option><option value="/tools/id/take-home-pay.html">ID</option><option value="/tools/zh-CN/take-home-pay.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 실수령액 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/take-home-pay.html">繁中</option><option value="/tools/en/take-home-pay.html">EN</option><option value="/tools/ja/take-home-pay.html">日本語</option><option value="/tools/ko/take-home-pay.html" selected>한국어</option><option value="/tools/de/take-home-pay.html">DE</option><option value="/tools/fr/take-home-pay.html">FR</option><option value="/tools/es/take-home-pay.html">ES</option><option value="/tools/pt/take-home-pay.html">PT</option><option value="/tools/id/take-home-pay.html">ID</option><option value="/tools/zh-CN/take-home-pay.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -152,6 +166,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

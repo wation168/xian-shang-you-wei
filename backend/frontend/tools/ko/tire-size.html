@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "타이어 사이즈 변환기", "url": "https://softglow-ai.com/tools/ko/tire-size.html", "description": "타이어 폭, 편평비, 림 직경을 입력하여 옆벽 높이, 전체 직경, 둘레, 속도계 오차를 계산하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "타이어 사이즈 표기 225/60R16은 무엇을 의미하나요?", "acceptedAnswer": {"@type": "Answer", "text": "225는 타이어 폭(밀리미터), 60은 편평비(백분율), R은 래디얼 구조, 16은 림 직경(인치)을 의미합니다."}}, {"@type": "Question", "name": "왜 타이어 사이즈를 변경하면 속도계에 오차가 생기나요?", "acceptedAnswer": {"@type": "Answer", "text": "속도계는 바퀴의 회전 수를 기반으로 속도를 계산합니다. 타이어 둘레가 변하면 같은 거리를 이동할 때 회전 수가 달라져 오차가 발생합니다."}}, {"@type": "Question", "name": "편평비가 낮을수록 어떤 장점이 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "편평비가 낮을수록 옆벽이 얇아져 횡단력이 증가하고 핸들링이 향상됩니다. 다만 승차감이 경직될 수 있습니다."}}, {"@type": "Question", "name": "속도계 오차가 5%를 초과하면 문제가 되나요?", "acceptedAnswer": {"@type": "Answer", "text": "±5% 이상의 오차는 연비 측정 부정확, 안전 장치 오작동, 법적 문제 등을 초래할 수 있으므로 권장되지 않습니다."}}, {"@type": "Question", "name": "순정 타이어 사이즈를 어디서 확인할 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "운전석 문틀, 연료 주입구 뚜껑 안쪽, 사용 설명서에서 확인할 수 있습니다. 차량마다 앞/뒤 타이어 사이즈가 다를 수 있습니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="tire-size">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/tire-size.html">繁中</option><option value="/tools/en/tire-size.html">EN</option><option value="/tools/ja/tire-size.html">日本語</option><option value="/tools/ko/tire-size.html" selected>한국어</option><option value="/tools/de/tire-size.html">DE</option><option value="/tools/fr/tire-size.html">FR</option><option value="/tools/es/tire-size.html">ES</option><option value="/tools/pt/tire-size.html">PT</option><option value="/tools/id/tire-size.html">ID</option><option value="/tools/zh-CN/tire-size.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/tire-size.html">繁中</option><option value="/tools/en/tire-size.html">EN</option><option value="/tools/ja/tire-size.html">日本語</option><option value="/tools/ko/tire-size.html" selected>한국어</option><option value="/tools/de/tire-size.html">DE</option><option value="/tools/fr/tire-size.html">FR</option><option value="/tools/es/tire-size.html">ES</option><option value="/tools/pt/tire-size.html">PT</option><option value="/tools/id/tire-size.html">ID</option><option value="/tools/zh-CN/tire-size.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 타이어 사이즈 변환기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/tire-size.html">繁中</option><option value="/tools/en/tire-size.html">EN</option><option value="/tools/ja/tire-size.html">日本語</option><option value="/tools/ko/tire-size.html" selected>한국어</option><option value="/tools/de/tire-size.html">DE</option><option value="/tools/fr/tire-size.html">FR</option><option value="/tools/es/tire-size.html">ES</option><option value="/tools/pt/tire-size.html">PT</option><option value="/tools/id/tire-size.html">ID</option><option value="/tools/zh-CN/tire-size.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -140,6 +154,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

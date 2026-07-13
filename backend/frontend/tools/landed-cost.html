@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "完稅成本計算器", "url": "https://softglow-ai.com/tools/landed-cost.html", "description": "免費完稅成本計算器。輸入產品價格、運費、關稅、保險和其他費用，快速計算進口產品的總完稅成本。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "完稅成本包括哪些費用？", "acceptedAnswer": {"@type": "Answer", "text": "完稅成本包括五個主要部分：產品價格、國際運費、進口關稅與稅費、運輸保險和其他相關費用（如清關費、倉儲費、處理費等）。這代表產品從生產地到您手中的全部成本。"}}, {"@type": "Question", "name": "進口關稅是如何計算的？", "acceptedAnswer": {"@type": "Answer", "text": "進口關稅通常根據產品的HS編碼（商品編碼）、原產國和目的地國家之間的貿易協議、產品的申報價值等因素計算。具體稅率由海關部門確定，不同國家的稅率可能有很大差異。"}}, {"@type": "Question", "name": "我需要為所有進口商品購買保險嗎？", "acceptedAnswer": {"@type": "Answer", "text": "雖然購買運輸保險不是法律要求，但強烈建議購買。保險可以保護您免受運輸過程中可能發生的損失或損害。保險費用通常為貨物價值的0.5%-2%。"}}, {"@type": "Question", "name": "如何降低完稅成本？", "acceptedAnswer": {"@type": "Answer", "text": "您可以通過以下方式降低成本：與供應商協商更優惠的產品價格、選擇更經濟的運輸方式、了解關稅優惠政策、優化清關流程以減少雜費、或考慮從不同國家採購以獲得更優惠的關稅率。"}}, {"@type": "Question", "name": "完稅成本計算器的計算結果準確嗎？", "acceptedAnswer": {"@type": "Answer", "text": "本計算器根據您輸入的數據提供預估結果。實際完稅成本可能因具體的海關評估、匯率波動、保險費率調整等因素而略有不同。建議將計算結果作為參考，並在進行重大採購決定前諮詢專業報關員或物流公司。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="landed-cost">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/landed-cost.html" selected>繁中</option><option value="/tools/en/landed-cost.html">EN</option><option value="/tools/ja/landed-cost.html">日本語</option><option value="/tools/ko/landed-cost.html">한국어</option><option value="/tools/de/landed-cost.html">DE</option><option value="/tools/fr/landed-cost.html">FR</option><option value="/tools/es/landed-cost.html">ES</option><option value="/tools/pt/landed-cost.html">PT</option><option value="/tools/id/landed-cost.html">ID</option><option value="/tools/zh-CN/landed-cost.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/landed-cost.html" selected>繁中</option><option value="/tools/en/landed-cost.html">EN</option><option value="/tools/ja/landed-cost.html">日本語</option><option value="/tools/ko/landed-cost.html">한국어</option><option value="/tools/de/landed-cost.html">DE</option><option value="/tools/fr/landed-cost.html">FR</option><option value="/tools/es/landed-cost.html">ES</option><option value="/tools/pt/landed-cost.html">PT</option><option value="/tools/id/landed-cost.html">ID</option><option value="/tools/zh-CN/landed-cost.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 完稅成本計算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/landed-cost.html" selected>繁中</option><option value="/tools/en/landed-cost.html">EN</option><option value="/tools/ja/landed-cost.html">日本語</option><option value="/tools/ko/landed-cost.html">한국어</option><option value="/tools/de/landed-cost.html">DE</option><option value="/tools/fr/landed-cost.html">FR</option><option value="/tools/es/landed-cost.html">ES</option><option value="/tools/pt/landed-cost.html">PT</option><option value="/tools/id/landed-cost.html">ID</option><option value="/tools/zh-CN/landed-cost.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -170,6 +184,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

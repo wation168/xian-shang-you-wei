@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculadora de Bandas de Bollinger", "url": "https://softglow-ai.com/tools/es/bollinger-bands.html", "description": "Calcula bandas de Bollinger para análisis técnico. Determina niveles de soporte, resistencia y volatilidad en tus operaciones.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "es"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "¿Cuál es el período recomendado para calcular la SMA en las Bandas de Bollinger?", "acceptedAnswer": {"@type": "Answer", "text": "El período más comúnmente utilizado es de 20 días, aunque esto puede variar según tu estrategia de trading. Los operadores intradiarios pueden usar períodos más cortos como 5 o 10, mientras que los operadores a largo plazo pueden usar 50 o 200 días. La clave es encontrar el período que se adapte mejor a tu análisis y horizonte de inversión."}}, {"@type": "Question", "name": "¿Qué significa cuando las Bandas de Bollinger se estrechan significativamente?", "acceptedAnswer": {"@type": "Answer", "text": "Cuando las bandas se estrechan (bajo Ancho de Banda), indica que la volatilidad del mercado está disminuyendo. Esto a menudo precede a un movimiento significativo del precio, ya que el mercado está acumulando energía. Los operadores frecuentemente ven esta contracción como una señal de que se aproxima una ruptura importante."}}, {"@type": "Question", "name": "¿Es una señal de venta automática cuando el precio toca la Banda Superior?", "acceptedAnswer": {"@type": "Answer", "text": "No necesariamente. Aunque tocar la Banda Superior puede indicar sobrecompra, el precio puede continuar subiendo en una fuerte tendencia alcista. Es importante confirmar cualquier señal con otros indicadores técnicos, volumen y análisis del contexto general del mercado antes de tomar decisiones de trading."}}, {"@type": "Question", "name": "¿Cómo puedo ajustar las Bandas de Bollinger para diferentes mercados?", "acceptedAnswer": {"@type": "Answer", "text": "Puedes ajustar tanto el período de la SMA como el número de desviaciones estándar. Para mercados más volátiles, considera aumentar el número de desviaciones estándar a 2.5 o 3. Para activos menos volátiles, puedes reducirlo a 1.5. También experimenta con diferentes períodos de SMA para encontrar lo que funciona mejor con tu estrategia."}}, {"@type": "Question", "name": "¿Qué es la Posición de Banda (%) y cómo la utilizo?", "acceptedAnswer": {"@type": "Answer", "text": "La Posición de Banda (%) muestra dónde se ubica el precio actual dentro del rango entre la banda inferior (0%) y superior (100%). Un valor del 75% significa que el precio está 75% del camino entre la banda inferior y superior. Esto ayuda a evaluar el momentum: valores cercanos al 100% indican fuerte momentum alcista, mientras que cercanos al 0% indican momentum bajista."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="bollinger-bands">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="es">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/es/">Herramientas</a>
-    <a href="/blog/es/index.html">Blog</a>
     <a href="/patterns/es.html">Patrones</a>
+    <a href="/blog/es/index.html">Blog</a>
     <a href="/">Inicio</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/bollinger-bands.html">繁中</option><option value="/tools/en/bollinger-bands.html">EN</option><option value="/tools/ja/bollinger-bands.html">日本語</option><option value="/tools/ko/bollinger-bands.html">한국어</option><option value="/tools/de/bollinger-bands.html">DE</option><option value="/tools/fr/bollinger-bands.html">FR</option><option value="/tools/es/bollinger-bands.html" selected>ES</option><option value="/tools/pt/bollinger-bands.html">PT</option><option value="/tools/id/bollinger-bands.html">ID</option><option value="/tools/zh-CN/bollinger-bands.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/bollinger-bands.html">繁中</option><option value="/tools/en/bollinger-bands.html">EN</option><option value="/tools/ja/bollinger-bands.html">日本語</option><option value="/tools/ko/bollinger-bands.html">한국어</option><option value="/tools/de/bollinger-bands.html">DE</option><option value="/tools/fr/bollinger-bands.html">FR</option><option value="/tools/es/bollinger-bands.html" selected>ES</option><option value="/tools/pt/bollinger-bands.html">PT</option><option value="/tools/id/bollinger-bands.html">ID</option><option value="/tools/zh-CN/bollinger-bands.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/es/">Herramientas</a> > Calculadora de Bandas de Bollinger</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/bollinger-bands.html">繁中</option><option value="/tools/en/bollinger-bands.html">EN</option><option value="/tools/ja/bollinger-bands.html">日本語</option><option value="/tools/ko/bollinger-bands.html">한국어</option><option value="/tools/de/bollinger-bands.html">DE</option><option value="/tools/fr/bollinger-bands.html">FR</option><option value="/tools/es/bollinger-bands.html" selected>ES</option><option value="/tools/pt/bollinger-bands.html">PT</option><option value="/tools/id/bollinger-bands.html">ID</option><option value="/tools/zh-CN/bollinger-bands.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -147,6 +161,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Buscar herramientas, patrones, artículos…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Favoritos</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Borrar todo</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "樣本大小計算器", "url": "https://softglow-ai.com/tools/sample-size.html", "description": "使用樣本大小計算器確定研究所需的最佳樣本量。輸入信心水平、人口比例和誤差邊際，即可獲得精確的統計結果。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "什麼是Z分數？", "acceptedAnswer": {"@type": "Answer", "text": "Z分數是標準正態分佈中的臨界值，用於確定信心水平。常見的Z分數包括：1.645（90%信心水平）、1.96（95%信心水平）和2.58（99%信心水平）。您可以根據研究所需的確信度選擇合適的Z分數。"}}, {"@type": "Question", "name": "為什麼樣本大小對研究很重要？", "acceptedAnswer": {"@type": "Answer", "text": "適當的樣本大小確保研究結果具有統計意義並能代表整個人口。樣本太小會導致結果不可靠，樣本太大則浪費資源。使用此計算器可幫助您找到最優的平衡點。"}}, {"@type": "Question", "name": "如果我不知道人口比例怎麼辦？", "acceptedAnswer": {"@type": "Answer", "text": "當您對人口比例沒有信息時，可以使用0.5作為保守估計。這個值會產生最大的樣本量要求，確保無論實際比例如何，您的樣本都足夠大。如果您有先前的研究或初步數據，應使用實際的比例值。"}}, {"@type": "Question", "name": "誤差邊際應該設置多少？", "acceptedAnswer": {"@type": "Answer", "text": "誤差邊際的選擇取決於您研究的精確度要求。典型的誤差邊際範圍為0.01至0.1。例如，0.05表示您的結果可能偏離真實值±5%。選擇較小的誤差邊際會增加所需的樣本大小。"}}, {"@type": "Question", "name": "計算出的樣本大小一定要達到嗎？", "acceptedAnswer": {"@type": "Answer", "text": "計算結果表示為了達到指定的統計標準所需的最小樣本量。理想情況下應達到或超過此數字。如果無法達到計算的樣本大小，可考慮調整信心水平或增加誤差邊際，但這會降低結果的統計可靠性。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="sample-size">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/sample-size.html" selected>繁中</option><option value="/tools/en/sample-size.html">EN</option><option value="/tools/ja/sample-size.html">日本語</option><option value="/tools/ko/sample-size.html">한국어</option><option value="/tools/de/sample-size.html">DE</option><option value="/tools/fr/sample-size.html">FR</option><option value="/tools/es/sample-size.html">ES</option><option value="/tools/pt/sample-size.html">PT</option><option value="/tools/id/sample-size.html">ID</option><option value="/tools/zh-CN/sample-size.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/sample-size.html" selected>繁中</option><option value="/tools/en/sample-size.html">EN</option><option value="/tools/ja/sample-size.html">日本語</option><option value="/tools/ko/sample-size.html">한국어</option><option value="/tools/de/sample-size.html">DE</option><option value="/tools/fr/sample-size.html">FR</option><option value="/tools/es/sample-size.html">ES</option><option value="/tools/pt/sample-size.html">PT</option><option value="/tools/id/sample-size.html">ID</option><option value="/tools/zh-CN/sample-size.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 樣本大小計算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/sample-size.html" selected>繁中</option><option value="/tools/en/sample-size.html">EN</option><option value="/tools/ja/sample-size.html">日本語</option><option value="/tools/ko/sample-size.html">한국어</option><option value="/tools/de/sample-size.html">DE</option><option value="/tools/fr/sample-size.html">FR</option><option value="/tools/es/sample-size.html">ES</option><option value="/tools/pt/sample-size.html">PT</option><option value="/tools/id/sample-size.html">ID</option><option value="/tools/zh-CN/sample-size.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -133,6 +147,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

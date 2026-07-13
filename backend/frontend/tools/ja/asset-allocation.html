@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "資産配分計算機", "url": "https://softglow-ai.com/tools/ja/asset-allocation.html", "description": "年齢、退職予定年齢、リスク許容度から、株式、債券、現金の最適な配分比率を計算できます。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "資産配分計算機の結果はどのように使用すればよいですか？", "acceptedAnswer": {"@type": "Answer", "text": "計算結果は、あなたの投資ポートフォリオの推奨される配分を示します。この配分に基づいて、現在のポートフォリオを調整し、推奨される比率に近づけることを目指してください。ただし、個人の状況により異なる可能性があるため、専門家に相談することをお勧めします。"}}, {"@type": "Question", "name": "リスク許容度レベルはどのように判断すればよいですか？", "acceptedAnswer": {"@type": "Answer", "text": "リスク許容度は、市場の変動に対するあなたの心理的快適性、経済的な余裕、投資経験に基づいています。短期的な損失に耐えられず、安定性を優先する場合は低いスコア（1-3）、変動性を受け入れ長期成長を目指す場合は高いスコア（8-10）を選択してください。"}}, {"@type": "Question", "name": "退職までの年数が短い場合、どのような戦略を採用すべきですか？", "acceptedAnswer": {"@type": "Answer", "text": "退職が近い場合、資本の保全がより重要になります。リスク許容度を下げ、債券と現金の割合を増やすことをお勧めします。これにより、退職年が近づくにつれてポートフォリオのボラティリティが低下します。"}}, {"@type": "Question", "name": "資産配分を変更する頻度はどのくらいですか？", "acceptedAnswer": {"@type": "Answer", "text": "一般的には、年1回から2回の定期的なリバランシングが推奨されます。市場の変動により、資産配分が目標から大きく乖離する場合は、より頻繁に調整が必要になる場合があります。ただし、過度な売買は取引コストと税務効率に悪影響を与えます。"}}, {"@type": "Question", "name": "この計算機は個人的な投資アドバイスを提供しますか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ、この計算機は一般的なガイドラインを提供するツールであり、個人的な投資アドバイスではありません。あなたの具体的な状況、目標、制約を考慮した専門的なアドバイスについては、ファイナンシャルアドバイザーに相談してください。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="asset-allocation">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ja">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ja/">ツール</a>
-    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/patterns/ja.html">ローソク足</a>
+    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/">ホーム</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/asset-allocation.html">繁中</option><option value="/tools/en/asset-allocation.html">EN</option><option value="/tools/ja/asset-allocation.html" selected>日本語</option><option value="/tools/ko/asset-allocation.html">한국어</option><option value="/tools/de/asset-allocation.html">DE</option><option value="/tools/fr/asset-allocation.html">FR</option><option value="/tools/es/asset-allocation.html">ES</option><option value="/tools/pt/asset-allocation.html">PT</option><option value="/tools/id/asset-allocation.html">ID</option><option value="/tools/zh-CN/asset-allocation.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/asset-allocation.html">繁中</option><option value="/tools/en/asset-allocation.html">EN</option><option value="/tools/ja/asset-allocation.html" selected>日本語</option><option value="/tools/ko/asset-allocation.html">한국어</option><option value="/tools/de/asset-allocation.html">DE</option><option value="/tools/fr/asset-allocation.html">FR</option><option value="/tools/es/asset-allocation.html">ES</option><option value="/tools/pt/asset-allocation.html">PT</option><option value="/tools/id/asset-allocation.html">ID</option><option value="/tools/zh-CN/asset-allocation.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 資産配分計算機</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/asset-allocation.html">繁中</option><option value="/tools/en/asset-allocation.html">EN</option><option value="/tools/ja/asset-allocation.html" selected>日本語</option><option value="/tools/ko/asset-allocation.html">한국어</option><option value="/tools/de/asset-allocation.html">DE</option><option value="/tools/fr/asset-allocation.html">FR</option><option value="/tools/es/asset-allocation.html">ES</option><option value="/tools/pt/asset-allocation.html">PT</option><option value="/tools/id/asset-allocation.html">ID</option><option value="/tools/zh-CN/asset-allocation.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -159,6 +173,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="ツール、パターン、記事を検索…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>ブックマーク</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全て削除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

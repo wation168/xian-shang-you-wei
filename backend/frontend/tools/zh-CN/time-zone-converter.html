@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "时区转换器", "url": "https://softglow-ai.com/tools/zh-CN/time-zone-converter.html", "description": "免费在线时区转换器，支持全球所有时区，快速计算UTC偏移差异，轻松转换不同时区时间。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "时区转换器支持哪些时区？", "acceptedAnswer": {"@type": "Answer", "text": "时区转换器支持全球所有主要时区，包括UTC-12到UTC+14的所有时区。每个时区都由其UTC偏移值标识，某些地区还会考虑夏令时调整。您可以在下拉菜单中选择特定的城市或时区代码。"}}, {"@type": "Question", "name": "夏令时会影响时区转换结果吗？", "acceptedAnswer": {"@type": "Answer", "text": "是的，夏令时会影响转换结果。在夏令时期间，某些国家会将时间向前拨1小时，导致UTC偏移发生变化。例如，美国从EST（UTC-5）变为EDT（UTC-4）。使用转换器时，请确保输入的日期在正确的时期，以获得准确的转换结果。"}}, {"@type": "Question", "name": "为什么我的转换结果显示日期改变了？", "acceptedAnswer": {"@type": "Answer", "text": "当转换跨越国际日期变更线或涉及较大的时区差异时，日期会发生改变。例如，从东京（UTC+9）转换到洛杉矶（UTC-8）时，可能会导致日期向前或向后移动。这是正常现象，反映了不同时区的实际当前时间。"}}, {"@type": "Question", "name": "如何快速计算两个时区之间的时差？", "acceptedAnswer": {"@type": "Answer", "text": "两个时区之间的时差等于它们UTC偏移值的差异。例如，北京（UTC+8）和纽约（UTC-5）之间的时差为8-(-5)=13小时。如果源时间是下午2:30，那么纽约的时间就是前一天的凌晨1:30。"}}, {"@type": "Question", "name": "时区转换器的准确度如何？", "acceptedAnswer": {"@type": "Answer", "text": "时区转换器基于标准的UTC偏移值进行计算，准确度很高。但需要注意的是，某些地区可能有特殊的时区规则或历史变更。对于涉及夏令时的转换，建议确认当前日期是否处于夏令时期间，以确保最高的准确性。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="time-zone-converter">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/time-zone-converter.html">繁中</option><option value="/tools/en/time-zone-converter.html">EN</option><option value="/tools/ja/time-zone-converter.html">日本語</option><option value="/tools/ko/time-zone-converter.html">한국어</option><option value="/tools/de/time-zone-converter.html">DE</option><option value="/tools/fr/time-zone-converter.html">FR</option><option value="/tools/es/time-zone-converter.html">ES</option><option value="/tools/pt/time-zone-converter.html">PT</option><option value="/tools/id/time-zone-converter.html">ID</option><option value="/tools/zh-CN/time-zone-converter.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/time-zone-converter.html">繁中</option><option value="/tools/en/time-zone-converter.html">EN</option><option value="/tools/ja/time-zone-converter.html">日本語</option><option value="/tools/ko/time-zone-converter.html">한국어</option><option value="/tools/de/time-zone-converter.html">DE</option><option value="/tools/fr/time-zone-converter.html">FR</option><option value="/tools/es/time-zone-converter.html">ES</option><option value="/tools/pt/time-zone-converter.html">PT</option><option value="/tools/id/time-zone-converter.html">ID</option><option value="/tools/zh-CN/time-zone-converter.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 时区转换器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/time-zone-converter.html">繁中</option><option value="/tools/en/time-zone-converter.html">EN</option><option value="/tools/ja/time-zone-converter.html">日本語</option><option value="/tools/ko/time-zone-converter.html">한국어</option><option value="/tools/de/time-zone-converter.html">DE</option><option value="/tools/fr/time-zone-converter.html">FR</option><option value="/tools/es/time-zone-converter.html">ES</option><option value="/tools/pt/time-zone-converter.html">PT</option><option value="/tools/id/time-zone-converter.html">ID</option><option value="/tools/zh-CN/time-zone-converter.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -114,6 +128,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

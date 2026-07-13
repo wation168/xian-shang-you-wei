@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "EV vs 가솔린 자동차 비용 계산기", "url": "https://softglow-ai.com/tools/ko/ev-vs-gas.html", "description": "전기차와 가솔린 자동차의 구매비, 연료비, 유지비를 비교하여 장기 소유비용을 계산하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "전기차의 손익분기점은 언제인가요?", "acceptedAnswer": {"@type": "Answer", "text": "손익분기점은 차량 모델, 지역의 전기료, 휘발유 가격, 연간 주행 거리에 따라 다릅니다. 일반적으로 3-7년 사이에 발생하며, 연간 주행 거리가 많을수록 빠릅니다. 이 계산기를 통해 당신의 구체적인 상황에 맞는 손익분기점을 확인할 수 있습니다."}}, {"@type": "Question", "name": "연방 세금 공제를 받을 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "미국 연방 정부에서는 최대 $7,500의 EV 세금 공제를 제공합니다(2024년 기준). 단, 차량 가격, 조립지, 구매자 소득에 따라 공제액이 달라질 수 있습니다. 정확한 공제액은 국세청 또는 제조사에 확인하세요."}}, {"@type": "Question", "name": "전기차의 배터리 교체 비용은 어느 정도인가요?", "acceptedAnswer": {"@type": "Answer", "text": "현대 전기차의 배터리는 8-10년 또는 100,000-150,000마일을 보장합니다. 배터리 교체 비용은 $5,000-$15,000이지만, 대부분의 차량이 이 기간 이전에 폐차되므로 일반적인 소유 기간 내에는 교체 비용을 고려할 필요가 없습니다."}}, {"@type": "Question", "name": "EV 효율성(miles/kWh)은 어떻게 확인하나요?", "acceptedAnswer": {"@type": "Answer", "text": "EPA 등급 또는 제조사 사양에서 확인할 수 있습니다. 일반적으로 대부분의 전기차는 2.5-4.0 miles/kWh의 효율성을 가지고 있습니다. 실제 효율성은 날씨, 주행 패턴, 지형에 따라 달라질 수 있습니다."}}, {"@type": "Question", "name": "이 계산기가 모든 비용을 포함하나요?", "acceptedAnswer": {"@type": "Answer", "text": "이 계산기는 구매 가격, 연료비, 유지비, 보험료, 등록비를 포함합니다. 다만 충전소 설치 비용, 타이어 교체, 수리 비용 등의 예기치 않은 비용은 포함되지 않으므로 참고하세요. 실제 총비용은 개인의 사용 패턴에 따라 달라질 수 있습니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="ev-vs-gas">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/ev-vs-gas.html">繁中</option><option value="/tools/en/ev-vs-gas.html">EN</option><option value="/tools/ja/ev-vs-gas.html">日本語</option><option value="/tools/ko/ev-vs-gas.html" selected>한국어</option><option value="/tools/de/ev-vs-gas.html">DE</option><option value="/tools/fr/ev-vs-gas.html">FR</option><option value="/tools/es/ev-vs-gas.html">ES</option><option value="/tools/pt/ev-vs-gas.html">PT</option><option value="/tools/id/ev-vs-gas.html">ID</option><option value="/tools/zh-CN/ev-vs-gas.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/ev-vs-gas.html">繁中</option><option value="/tools/en/ev-vs-gas.html">EN</option><option value="/tools/ja/ev-vs-gas.html">日本語</option><option value="/tools/ko/ev-vs-gas.html" selected>한국어</option><option value="/tools/de/ev-vs-gas.html">DE</option><option value="/tools/fr/ev-vs-gas.html">FR</option><option value="/tools/es/ev-vs-gas.html">ES</option><option value="/tools/pt/ev-vs-gas.html">PT</option><option value="/tools/id/ev-vs-gas.html">ID</option><option value="/tools/zh-CN/ev-vs-gas.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > EV vs 가솔린 자동차 비용 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/ev-vs-gas.html">繁中</option><option value="/tools/en/ev-vs-gas.html">EN</option><option value="/tools/ja/ev-vs-gas.html">日本語</option><option value="/tools/ko/ev-vs-gas.html" selected>한국어</option><option value="/tools/de/ev-vs-gas.html">DE</option><option value="/tools/fr/ev-vs-gas.html">FR</option><option value="/tools/es/ev-vs-gas.html">ES</option><option value="/tools/pt/ev-vs-gas.html">PT</option><option value="/tools/id/ev-vs-gas.html">ID</option><option value="/tools/zh-CN/ev-vs-gas.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -249,6 +263,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

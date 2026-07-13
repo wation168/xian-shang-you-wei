@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "最终成绩计算器", "url": "https://softglow-ai.com/tools/zh-CN/final-grade.html", "description": "使用最终成绩计算器确定你需要在期末考试中获得多少分数才能达到目标总成绩。快速准确的成绩预测工具。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "如何确定各部分成绩的占比比例？", "acceptedAnswer": {"@type": "Answer", "text": "占比比例通常由学校或教师制定。你可以查看课程大纲、教学计划或咨询教师来了解当前成绩和期末考试各自在总成绩中的占比。不同课程的占比可能不同。"}}, {"@type": "Question", "name": "如果计算结果超过100分怎么办？", "acceptedAnswer": {"@type": "Answer", "text": "如果所需成绩超过100分，说明仅通过期末考试无法达到你的目标总成绩。在这种情况下，你可能需要降低目标分数，或者寻求其他机会（如课程作业、参与讨论等）来提高总成绩。"}}, {"@type": "Question", "name": "当前成绩和目标成绩可以是小数吗？", "acceptedAnswer": {"@type": "Answer", "text": "可以的。计算器支持小数输入，以便更精确地反映实际情况。例如，你可以输入85.5分或89.25分作为当前成绩或目标成绩。"}}, {"@type": "Question", "name": "占比之和必须等于100%吗？", "acceptedAnswer": {"@type": "Answer", "text": "通常情况下，当前成绩占比和期末考试占比之和应该等于100%。如果你的课程有其他评分项目（如课堂参与、项目等），请将其占比也考虑进去，确保所有占比之和为100%。"}}, {"@type": "Question", "name": "这个工具可以用于其他评分系统吗？", "acceptedAnswer": {"@type": "Answer", "text": "这个工具主要基于百分制（0-100分）设计。如果你的学校使用其他评分系统（如字母等级或GPA），可能需要先将成绩转换为百分制后再使用。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="final-grade">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/final-grade.html">繁中</option><option value="/tools/en/final-grade.html">EN</option><option value="/tools/ja/final-grade.html">日本語</option><option value="/tools/ko/final-grade.html">한국어</option><option value="/tools/de/final-grade.html">DE</option><option value="/tools/fr/final-grade.html">FR</option><option value="/tools/es/final-grade.html">ES</option><option value="/tools/pt/final-grade.html">PT</option><option value="/tools/id/final-grade.html">ID</option><option value="/tools/zh-CN/final-grade.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/final-grade.html">繁中</option><option value="/tools/en/final-grade.html">EN</option><option value="/tools/ja/final-grade.html">日本語</option><option value="/tools/ko/final-grade.html">한국어</option><option value="/tools/de/final-grade.html">DE</option><option value="/tools/fr/final-grade.html">FR</option><option value="/tools/es/final-grade.html">ES</option><option value="/tools/pt/final-grade.html">PT</option><option value="/tools/id/final-grade.html">ID</option><option value="/tools/zh-CN/final-grade.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 最终成绩计算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/final-grade.html">繁中</option><option value="/tools/en/final-grade.html">EN</option><option value="/tools/ja/final-grade.html">日本語</option><option value="/tools/ko/final-grade.html">한국어</option><option value="/tools/de/final-grade.html">DE</option><option value="/tools/fr/final-grade.html">FR</option><option value="/tools/es/final-grade.html">ES</option><option value="/tools/pt/final-grade.html">PT</option><option value="/tools/id/final-grade.html">ID</option><option value="/tools/zh-CN/final-grade.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -169,6 +183,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

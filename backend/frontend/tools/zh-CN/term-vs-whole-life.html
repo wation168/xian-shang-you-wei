@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "定期寿险vs终身寿险对比计算器", "url": "https://softglow-ai.com/tools/zh-CN/term-vs-whole-life.html", "description": "使用净现值分析比较定期寿险和终身寿险的成本效益。输入保费、保额和折现率，快速评估最佳保险方案。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "定期寿险和终身寿险的主要区别是什么？", "acceptedAnswer": {"@type": "Answer", "text": "定期寿险在特定期限（如20或30年）内提供身故保障，期满后保障终止，保费低廉。终身寿险终身有效，保费更高，但积累现金价值。选择取决于您的保障需求期限和财务目标。"}}, {"@type": "Question", "name": "什么是净现值（NPV）？为什么用于寿险对比？", "acceptedAnswer": {"@type": "Answer", "text": "净现值是将未来现金流折现至当前价值的财务指标。在寿险对比中，NPV考虑保费支付的时间成本、投资回报率和通货膨胀，提供更准确的实际成本比较而非简单总和。"}}, {"@type": "Question", "name": "如果NPV差异为负数意味着什么？", "acceptedAnswer": {"@type": "Answer", "text": "NPV差异为负数（即终身寿险的NPV更低）意味着考虑时间价值后，终身寿险的实际成本更低。这通常发生在折现率较低或寿险现金价值较高的情况下，但还需结合实际保障需求考虑。"}}, {"@type": "Question", "name": "我应该如何选择折现率？", "acceptedAnswer": {"@type": "Answer", "text": "折现率代表您的预期投资回报率。保守投资者可使用3-4%，中等风险投资者使用5-7%，激进投资者使用8-10%。使用您认为合理的长期投资回报率，通常基于历史市场表现和个人风险承受度。"}}, {"@type": "Question", "name": "终身寿险的现金价值如何使用？", "acceptedAnswer": {"@type": "Answer", "text": "现金价值可用于贷款（借出现金价值的一部分），补充保费，或退保获取。这提供财务灵活性，但贷款需支付利息，退保会失去身故保障。仅在必要时使用现金价值。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="term-vs-whole-life">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/term-vs-whole-life.html">繁中</option><option value="/tools/en/term-vs-whole-life.html">EN</option><option value="/tools/ja/term-vs-whole-life.html">日本語</option><option value="/tools/ko/term-vs-whole-life.html">한국어</option><option value="/tools/de/term-vs-whole-life.html">DE</option><option value="/tools/fr/term-vs-whole-life.html">FR</option><option value="/tools/es/term-vs-whole-life.html">ES</option><option value="/tools/pt/term-vs-whole-life.html">PT</option><option value="/tools/id/term-vs-whole-life.html">ID</option><option value="/tools/zh-CN/term-vs-whole-life.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/term-vs-whole-life.html">繁中</option><option value="/tools/en/term-vs-whole-life.html">EN</option><option value="/tools/ja/term-vs-whole-life.html">日本語</option><option value="/tools/ko/term-vs-whole-life.html">한국어</option><option value="/tools/de/term-vs-whole-life.html">DE</option><option value="/tools/fr/term-vs-whole-life.html">FR</option><option value="/tools/es/term-vs-whole-life.html">ES</option><option value="/tools/pt/term-vs-whole-life.html">PT</option><option value="/tools/id/term-vs-whole-life.html">ID</option><option value="/tools/zh-CN/term-vs-whole-life.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 定期寿险vs终身寿险对比计算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/term-vs-whole-life.html">繁中</option><option value="/tools/en/term-vs-whole-life.html">EN</option><option value="/tools/ja/term-vs-whole-life.html">日本語</option><option value="/tools/ko/term-vs-whole-life.html">한국어</option><option value="/tools/de/term-vs-whole-life.html">DE</option><option value="/tools/fr/term-vs-whole-life.html">FR</option><option value="/tools/es/term-vs-whole-life.html">ES</option><option value="/tools/pt/term-vs-whole-life.html">PT</option><option value="/tools/id/term-vs-whole-life.html">ID</option><option value="/tools/zh-CN/term-vs-whole-life.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -188,6 +202,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

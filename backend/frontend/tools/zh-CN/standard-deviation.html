@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "标准差计算器", "url": "https://softglow-ai.com/tools/zh-CN/standard-deviation.html", "description": "免费标准差计算器，快速计算数据的平均值、方差和标准差。支持样本和总体数据分析。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "标准差和方差有什么区别？", "acceptedAnswer": {"@type": "Answer", "text": "方差是偏差平方的平均值，单位为原单位的平方；标准差是方差的平方根，与原数据单位相同。标准差更直观易懂，因为它用与数据相同的单位表示。"}}, {"@type": "Question", "name": "什么时候使用样本标准差，什么时候使用总体标准差？", "acceptedAnswer": {"@type": "Answer", "text": "当数据代表整个总体时使用总体标准差；当数据只是总体的一部分样本时使用样本标准差。在大多数实际情况下，我们处理的是样本数据，因此通常使用样本标准差。"}}, {"@type": "Question", "name": "标准差为0意味着什么？", "acceptedAnswer": {"@type": "Answer", "text": "标准差为0表示所有数据值都相同，即数据集中完全没有变异或离散。这种情况在实际应用中较为罕见。"}}, {"@type": "Question", "name": "如何使用这个计算器？", "acceptedAnswer": {"@type": "Answer", "text": "在第一个输入框中输入你的数据值，用逗号分隔（如：10, 20, 30, 40, 50）；在第二个下拉菜单中选择数据类型（样本或总体）；点击计算按钮即可获得结果。"}}, {"@type": "Question", "name": "标准差的单位是什么？", "acceptedAnswer": {"@type": "Answer", "text": "标准差的单位与原始数据的单位相同。例如，如果数据是以厘米为单位的身高，那么标准差也是以厘米为单位。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="standard-deviation">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/standard-deviation.html">繁中</option><option value="/tools/en/standard-deviation.html">EN</option><option value="/tools/ja/standard-deviation.html">日本語</option><option value="/tools/ko/standard-deviation.html">한국어</option><option value="/tools/de/standard-deviation.html">DE</option><option value="/tools/fr/standard-deviation.html">FR</option><option value="/tools/es/standard-deviation.html">ES</option><option value="/tools/pt/standard-deviation.html">PT</option><option value="/tools/id/standard-deviation.html">ID</option><option value="/tools/zh-CN/standard-deviation.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/standard-deviation.html">繁中</option><option value="/tools/en/standard-deviation.html">EN</option><option value="/tools/ja/standard-deviation.html">日本語</option><option value="/tools/ko/standard-deviation.html">한국어</option><option value="/tools/de/standard-deviation.html">DE</option><option value="/tools/fr/standard-deviation.html">FR</option><option value="/tools/es/standard-deviation.html">ES</option><option value="/tools/pt/standard-deviation.html">PT</option><option value="/tools/id/standard-deviation.html">ID</option><option value="/tools/zh-CN/standard-deviation.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 标准差计算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/standard-deviation.html">繁中</option><option value="/tools/en/standard-deviation.html">EN</option><option value="/tools/ja/standard-deviation.html">日本語</option><option value="/tools/ko/standard-deviation.html">한국어</option><option value="/tools/de/standard-deviation.html">DE</option><option value="/tools/fr/standard-deviation.html">FR</option><option value="/tools/es/standard-deviation.html">ES</option><option value="/tools/pt/standard-deviation.html">PT</option><option value="/tools/id/standard-deviation.html">ID</option><option value="/tools/zh-CN/standard-deviation.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -149,6 +163,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

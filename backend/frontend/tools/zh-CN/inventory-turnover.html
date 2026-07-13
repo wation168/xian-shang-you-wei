@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "库存周转率计算器", "url": "https://softglow-ai.com/tools/zh-CN/inventory-turnover.html", "description": "免费库存周转率计算器。输入销售成本和库存价值，快速计算平均库存、周转率和库存天数，优化库存管理。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "库存周转率多少才算合理？", "acceptedAnswer": {"@type": "Answer", "text": "库存周转率的合理水平取决于行业特性。快消品零售业通常要求8-12次/年；服装行业4-6次/年；制造业2-4次/年。同一行业内，周转率越高通常表示库存管理越高效，但需要避免过高导致缺货。最好的做法是与竞争对手和历史数据对比。"}}, {"@type": "Question", "name": "库存周转天数(DIO)代表什么意思？", "acceptedAnswer": {"@type": "Answer", "text": "库存周转天数表示企业平均需要多少天才能将库存全部销售出去。例如DIO为30天，说明企业平均每30天能销售完一轮库存。DIO越短越好，意味着资金周转速度快，库存管理效率高。该指标对于评估现金流非常重要。"}}, {"@type": "Question", "name": "销售成本(COGS)与销售收入有什么区别？", "acceptedAnswer": {"@type": "Answer", "text": "销售成本是指生产或购买已销售商品的直接成本，包括材料、人工等，不包括运营费用和税费。销售收入是商品的实际售价。库存周转率计算中必须使用销售成本而非销售收入，以确保与库存价值在同一计量基础上。"}}, {"@type": "Question", "name": "库存周转率低该如何改进？", "acceptedAnswer": {"@type": "Answer", "text": "库存周转率低可能原因包括：库存过多、销售不畅、产品陈旧或过时、销售预测不准确。改进方法有：清理滞销品、优化产品组合、增加营销推广、改进供应链效率、采用更好的需求预测方法、实施库存管理系统。需要从销售和采购两端协作。"}}, {"@type": "Question", "name": "季节性产品如何评估库存周转率？", "acceptedAnswer": {"@type": "Answer", "text": "季节性产品应该按季节分别计算周转率，而不是用全年数据。例如冬装品牌应该计算冬季的周转率。也可以计算全年周转率但要了解季节性波动，某些月份可能库存堆积，某些月份则快速消耗。在评估企业表现时，需要考虑这种季节性特征。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="inventory-turnover">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/inventory-turnover.html">繁中</option><option value="/tools/en/inventory-turnover.html">EN</option><option value="/tools/ja/inventory-turnover.html">日本語</option><option value="/tools/ko/inventory-turnover.html">한국어</option><option value="/tools/de/inventory-turnover.html">DE</option><option value="/tools/fr/inventory-turnover.html">FR</option><option value="/tools/es/inventory-turnover.html">ES</option><option value="/tools/pt/inventory-turnover.html">PT</option><option value="/tools/id/inventory-turnover.html">ID</option><option value="/tools/zh-CN/inventory-turnover.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/inventory-turnover.html">繁中</option><option value="/tools/en/inventory-turnover.html">EN</option><option value="/tools/ja/inventory-turnover.html">日本語</option><option value="/tools/ko/inventory-turnover.html">한국어</option><option value="/tools/de/inventory-turnover.html">DE</option><option value="/tools/fr/inventory-turnover.html">FR</option><option value="/tools/es/inventory-turnover.html">ES</option><option value="/tools/pt/inventory-turnover.html">PT</option><option value="/tools/id/inventory-turnover.html">ID</option><option value="/tools/zh-CN/inventory-turnover.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 库存周转率计算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/inventory-turnover.html">繁中</option><option value="/tools/en/inventory-turnover.html">EN</option><option value="/tools/ja/inventory-turnover.html">日本語</option><option value="/tools/ko/inventory-turnover.html">한국어</option><option value="/tools/de/inventory-turnover.html">DE</option><option value="/tools/fr/inventory-turnover.html">FR</option><option value="/tools/es/inventory-turnover.html">ES</option><option value="/tools/pt/inventory-turnover.html">PT</option><option value="/tools/id/inventory-turnover.html">ID</option><option value="/tools/zh-CN/inventory-turnover.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -109,6 +123,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

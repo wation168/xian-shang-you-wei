@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "인플루언서 요금 계산기", "url": "https://softglow-ai.com/tools/ko/influencer-rate.html", "description": "팔로워 수, 참여율, 니치 팩터를 입력하여 인플루언서 마케팅 요금을 정확하게 계산하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "인플루언서 요금은 어떻게 결정되나요?", "acceptedAnswer": {"@type": "Answer", "text": "인플루언서 요금은 주로 팔로워 수, 참여율, 콘텐츠의 질, 니치 전문성, 브랜드 친화도 등에 따라 결정됩니다. 이 계산기는 기본적인 시작점을 제공하며, 실제 협상에서는 추가 요소들을 고려해야 합니다."}}, {"@type": "Question", "name": "참여율은 어떻게 계산하나요?", "acceptedAnswer": {"@type": "Answer", "text": "참여율 = (총 참여도 / 팔로워 수) × 100입니다. 참여도는 좋아요, 댓글, 공유, 저장 등을 포함합니다. 일반적으로 지난 30일간의 평균을 기준으로 계산합니다."}}, {"@type": "Question", "name": "니치 팩터는 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "니치 팩터는 특정 산업이나 주제에 대한 전문성의 가치를 나타냅니다. 일반 라이프스타일은 1.0, 뷰티/패션은 1.2~1.5, 럭셔리/금융은 1.5~2.0입니다."}}, {"@type": "Question", "name": "마이크로 인플루언서는 낮은 요금을 받나요?", "acceptedAnswer": {"@type": "Answer", "text": "마이크로 인플루언서(1만~10만 팔로워)는 팔로워 수는 적지만, 높은 참여율과 강한 커뮤니티 신뢰도로 인해 매력적입니다. 참여율에 따라 매크로 인플루언서보다 더 효율적일 수 있습니다."}}, {"@type": "Question", "name": "추가 서비스(릴스, 스토리)에 대한 요금은 얼마인가요?", "acceptedAnswer": {"@type": "Answer", "text": "피드 게시물 요금의 기준으로, 스토리는 50~70%, 릴스는 100~150%, 라이브 스트림은 150~200%의 추가 요금을 책정하는 것이 일반적입니다. 계약 시 명확히 협의하세요."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="influencer-rate">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/influencer-rate.html">繁中</option><option value="/tools/en/influencer-rate.html">EN</option><option value="/tools/ja/influencer-rate.html">日本語</option><option value="/tools/ko/influencer-rate.html" selected>한국어</option><option value="/tools/de/influencer-rate.html">DE</option><option value="/tools/fr/influencer-rate.html">FR</option><option value="/tools/es/influencer-rate.html">ES</option><option value="/tools/pt/influencer-rate.html">PT</option><option value="/tools/id/influencer-rate.html">ID</option><option value="/tools/zh-CN/influencer-rate.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/influencer-rate.html">繁中</option><option value="/tools/en/influencer-rate.html">EN</option><option value="/tools/ja/influencer-rate.html">日本語</option><option value="/tools/ko/influencer-rate.html" selected>한국어</option><option value="/tools/de/influencer-rate.html">DE</option><option value="/tools/fr/influencer-rate.html">FR</option><option value="/tools/es/influencer-rate.html">ES</option><option value="/tools/pt/influencer-rate.html">PT</option><option value="/tools/id/influencer-rate.html">ID</option><option value="/tools/zh-CN/influencer-rate.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 인플루언서 요금 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/influencer-rate.html">繁中</option><option value="/tools/en/influencer-rate.html">EN</option><option value="/tools/ja/influencer-rate.html">日本語</option><option value="/tools/ko/influencer-rate.html" selected>한국어</option><option value="/tools/de/influencer-rate.html">DE</option><option value="/tools/fr/influencer-rate.html">FR</option><option value="/tools/es/influencer-rate.html">ES</option><option value="/tools/pt/influencer-rate.html">PT</option><option value="/tools/id/influencer-rate.html">ID</option><option value="/tools/zh-CN/influencer-rate.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -148,6 +162,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

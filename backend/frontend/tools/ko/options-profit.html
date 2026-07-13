@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "옵션 수익 계산기", "url": "https://softglow-ai.com/tools/ko/options-profit.html", "description": "옵션 거래 손익을 빠르게 계산하는 무료 도구입니다. 현물가격, 행사가, 프리미엄, 계약수를 입력하면 수익률과 손익을 즉시 확인할 수 있습니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "옵션 프리미엄이란 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "프리미엄은 옵션 계약을 구매할 때 지불하는 가격입니다. 이는 옵션의 내재가치와 시간가치로 구성되어 있으며, 콜옵션과 풋옵션 모두에 적용됩니다."}}, {"@type": "Question", "name": "손익분기점을 어떻게 활용하나요?", "acceptedAnswer": {"@type": "Answer", "text": "손익분기점은 거래로 손익이 발생하지 않는 기초자산 가격입니다. 현물가격이 이 가격을 넘어야 수익이 발생하므로, 거래 가능성을 판단하는 중요한 기준이 됩니다."}}, {"@type": "Question", "name": "한 옵션 계약은 몇 주를 대표하나요?", "acceptedAnswer": {"@type": "Answer", "text": "표준 옵션 계약은 기초자산 100주를 대표합니다. 따라서 5개 계약은 500주를 의미하며, 총 손익은 주당 손익에 100을 곱한 후 계약수를 곱해서 계산됩니다."}}, {"@type": "Question", "name": "음수 ROI는 무엇을 의미하나요?", "acceptedAnswer": {"@type": "Answer", "text": "음수 ROI는 초기 투자(프리미엄)보다 손실이 크거나 현재가격에서 손실 상태에 있음을 의미합니다. 이 경우 포지션을 청산하거나 추가 손실을 막기 위한 조치가 필요합니다."}}, {"@type": "Question", "name": "콜옵션과 풋옵션 계산의 차이는?", "acceptedAnswer": {"@type": "Answer", "text": "콜옵션은 기초자산 가격 상승으로 수익이 발생하며, 손익분기점은 행사가+프리미엄입니다. 풋옵션은 가격 하락으로 수익이 발생하며, 손익분기점은 행사가-프리미엄입니다. 이 계산기는 두 경우 모두 적용됩니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="options-profit">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/options-profit.html">繁中</option><option value="/tools/en/options-profit.html">EN</option><option value="/tools/ja/options-profit.html">日本語</option><option value="/tools/ko/options-profit.html" selected>한국어</option><option value="/tools/de/options-profit.html">DE</option><option value="/tools/fr/options-profit.html">FR</option><option value="/tools/es/options-profit.html">ES</option><option value="/tools/pt/options-profit.html">PT</option><option value="/tools/id/options-profit.html">ID</option><option value="/tools/zh-CN/options-profit.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/options-profit.html">繁中</option><option value="/tools/en/options-profit.html">EN</option><option value="/tools/ja/options-profit.html">日本語</option><option value="/tools/ko/options-profit.html" selected>한국어</option><option value="/tools/de/options-profit.html">DE</option><option value="/tools/fr/options-profit.html">FR</option><option value="/tools/es/options-profit.html">ES</option><option value="/tools/pt/options-profit.html">PT</option><option value="/tools/id/options-profit.html">ID</option><option value="/tools/zh-CN/options-profit.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 옵션 수익 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/options-profit.html">繁中</option><option value="/tools/en/options-profit.html">EN</option><option value="/tools/ja/options-profit.html">日本語</option><option value="/tools/ko/options-profit.html" selected>한국어</option><option value="/tools/de/options-profit.html">DE</option><option value="/tools/fr/options-profit.html">FR</option><option value="/tools/es/options-profit.html">ES</option><option value="/tools/pt/options-profit.html">PT</option><option value="/tools/id/options-profit.html">ID</option><option value="/tools/zh-CN/options-profit.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -143,6 +157,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

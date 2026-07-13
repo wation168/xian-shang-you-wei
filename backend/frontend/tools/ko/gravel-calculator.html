@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "자갈 및 모래 계산기", "url": "https://softglow-ai.com/tools/ko/gravel-calculator.html", "description": "건설 프로젝트에 필요한 자갈과 모래의 정확한 무게를 톤, 파운드 단위로 빠르게 계산하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "자갈과 모래의 밀도는 어떻게 다른가요?", "acceptedAnswer": {"@type": "Answer", "text": "자갈은 입자가 크고 밀도가 1,400~1,600 kg/m³이며, 모래는 입자가 작고 밀도가 1,500~1,700 kg/m³입니다. 정확한 값은 함유된 수분량과 입자 크기에 따라 달라집니다."}}, {"@type": "Question", "name": "입방야드를 입방미터로 변환하는 방법은?", "acceptedAnswer": {"@type": "Answer", "text": "1 입방야드는 약 0.765 입방미터입니다. 입방야드에 0.765를 곱하면 입방미터로 변환할 수 있습니다."}}, {"@type": "Question", "name": "톤과 파운드의 변환 비율은?", "acceptedAnswer": {"@type": "Answer", "text": "1 톤(미터톤)은 약 2,204.62 파운드입니다. 계산기는 자동으로 두 단위를 함께 제공합니다."}}, {"@type": "Question", "name": "건설 프로젝트에서 여유분을 고려해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "예, 일반적으로 계산된 양에 5~10%의 여유분을 추가하는 것이 좋습니다. 손실, 압축, 불균등한 포장 등을 고려하기 위함입니다."}}, {"@type": "Question", "name": "재료 공급업체에서 다른 밀도를 제시하면?", "acceptedAnswer": {"@type": "Answer", "text": "공급업체에서 제공한 밀도값을 계산기에 입력하세요. 재료의 함수율, 입자 크기, 채광지 등에 따라 밀도가 변할 수 있으므로 정확한 정보를 사용하는 것이 중요합니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="gravel-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/gravel-calculator.html">繁中</option><option value="/tools/en/gravel-calculator.html">EN</option><option value="/tools/ja/gravel-calculator.html">日本語</option><option value="/tools/ko/gravel-calculator.html" selected>한국어</option><option value="/tools/de/gravel-calculator.html">DE</option><option value="/tools/fr/gravel-calculator.html">FR</option><option value="/tools/es/gravel-calculator.html">ES</option><option value="/tools/pt/gravel-calculator.html">PT</option><option value="/tools/id/gravel-calculator.html">ID</option><option value="/tools/zh-CN/gravel-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/gravel-calculator.html">繁中</option><option value="/tools/en/gravel-calculator.html">EN</option><option value="/tools/ja/gravel-calculator.html">日本語</option><option value="/tools/ko/gravel-calculator.html" selected>한국어</option><option value="/tools/de/gravel-calculator.html">DE</option><option value="/tools/fr/gravel-calculator.html">FR</option><option value="/tools/es/gravel-calculator.html">ES</option><option value="/tools/pt/gravel-calculator.html">PT</option><option value="/tools/id/gravel-calculator.html">ID</option><option value="/tools/zh-CN/gravel-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 자갈 및 모래 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/gravel-calculator.html">繁中</option><option value="/tools/en/gravel-calculator.html">EN</option><option value="/tools/ja/gravel-calculator.html">日本語</option><option value="/tools/ko/gravel-calculator.html" selected>한국어</option><option value="/tools/de/gravel-calculator.html">DE</option><option value="/tools/fr/gravel-calculator.html">FR</option><option value="/tools/es/gravel-calculator.html">ES</option><option value="/tools/pt/gravel-calculator.html">PT</option><option value="/tools/id/gravel-calculator.html">ID</option><option value="/tools/zh-CN/gravel-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -131,6 +145,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

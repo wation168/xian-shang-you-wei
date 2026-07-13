@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "退職年齢計算機", "url": "https://softglow-ai.com/tools/ja/retirement-age.html", "description": "生年月日と定年退職年齢を入力するだけで、退職予定日と残り年数を自動計算します。早期退職の計画もできます。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "この計算機はどの国の定年制度に対応していますか？", "acceptedAnswer": {"@type": "Answer", "text": "この計算機は日本の定年退職制度に対応しており、日本の法定退職年齢に基づいて計算されます。ただし、企業ごとに異なる定年制度がある場合は、正確な企業の定年年齢を入力することで対応できます。"}}, {"@type": "Question", "name": "早期退職を選択した場合、年金はどうなりますか？", "acceptedAnswer": {"@type": "Answer", "text": "日本では60歳から64歳の間に年金を繰り上げ受給することができますが、繰り上げた期間に応じて月額が減少します。一般的に1ヶ月繰り上げるごとに約0.4%の減額となります。詳細は日本年金機構に相談することをお勧めします。"}}, {"@type": "Question", "name": "現在の年齢の計算方法は何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "計算機は生年月日と本日の日付に基づいて、現在の年齢を満年齢で計算しています。誕生日がまだ来ていない場合は、前年の年齢が表示されます。"}}, {"@type": "Question", "name": "退職日の計算に曜日の情報は含まれていますか？", "acceptedAnswer": {"@type": "Answer", "text": "計算機は月日ベースで退職日を計算しています。実際の退職日は企業の就業規則や給与支払日の関係で調整される可能性があります。詳細は人事部門に確認してください。"}}, {"@type": "Question", "name": "複数回の退職年齢を比較することはできますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、計算機の結果をメモに記録し、異なる定年年齢で複数回計算することで比較できます。早期退職と標準退職の両方を計算して、それぞれの退職日と残り年数を比較することをお勧めします。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="retirement-age">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ja">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ja/">ツール</a>
-    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/patterns/ja.html">ローソク足</a>
+    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/">ホーム</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/retirement-age.html">繁中</option><option value="/tools/en/retirement-age.html">EN</option><option value="/tools/ja/retirement-age.html" selected>日本語</option><option value="/tools/ko/retirement-age.html">한국어</option><option value="/tools/de/retirement-age.html">DE</option><option value="/tools/fr/retirement-age.html">FR</option><option value="/tools/es/retirement-age.html">ES</option><option value="/tools/pt/retirement-age.html">PT</option><option value="/tools/id/retirement-age.html">ID</option><option value="/tools/zh-CN/retirement-age.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/retirement-age.html">繁中</option><option value="/tools/en/retirement-age.html">EN</option><option value="/tools/ja/retirement-age.html" selected>日本語</option><option value="/tools/ko/retirement-age.html">한국어</option><option value="/tools/de/retirement-age.html">DE</option><option value="/tools/fr/retirement-age.html">FR</option><option value="/tools/es/retirement-age.html">ES</option><option value="/tools/pt/retirement-age.html">PT</option><option value="/tools/id/retirement-age.html">ID</option><option value="/tools/zh-CN/retirement-age.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 退職年齢計算機</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/retirement-age.html">繁中</option><option value="/tools/en/retirement-age.html">EN</option><option value="/tools/ja/retirement-age.html" selected>日本語</option><option value="/tools/ko/retirement-age.html">한국어</option><option value="/tools/de/retirement-age.html">DE</option><option value="/tools/fr/retirement-age.html">FR</option><option value="/tools/es/retirement-age.html">ES</option><option value="/tools/pt/retirement-age.html">PT</option><option value="/tools/id/retirement-age.html">ID</option><option value="/tools/zh-CN/retirement-age.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -181,6 +195,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="ツール、パターン、記事を検索…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>ブックマーク</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全て削除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

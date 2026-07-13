@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "蜡烛图形态识别器", "url": "https://softglow-ai.com/tools/zh-CN/candlestick-identifier.html", "description": "快速识别和分类蜡烛图形态,包括看涨看跌信号强度分析,适合股票、期货、外汇技术分析。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "开盘价和收盘价相同时会发生什么?", "acceptedAnswer": {"@type": "Answer", "text": "当开盘价等于收盘价时,蜡烛图会形成十字星或四价十字形态,表示市场在该时段内犹豫不决,买卖力量基本平衡。这通常预示可能即将发生突破,是重要的反转信号。"}}, {"@type": "Question", "name": "上影线和下影线长度代表什么?", "acceptedAnswer": {"@type": "Answer", "text": "上影线长度表示在交易期间最高价位被拉高后又回落的幅度,反映卖方的压力;下影线长度表示在交易期间最低价位被压低后又反弹的幅度,反映买方的支撑力。较长的影线表示市场波动剧烈。"}}, {"@type": "Question", "name": "看涨和看跌信号强度如何计算?", "acceptedAnswer": {"@type": "Answer", "text": "信号强度基于蜡烛图形态的历史统计数据和结构特征计算。看涨信号强度考虑实体方向、影线长度、与前一根K线的关系等因素;看跌信号强度采用相反逻辑。数值越高表示该信号越可靠。"}}, {"@type": "Question", "name": "前收盘价有什么用途?", "acceptedAnswer": {"@type": "Answer", "text": "前收盘价用于识别跳空(Gap)等形态,以及判断蜡烛图与前一个交易日的关系。例如,如果今日开盘价高于前一日收盘价,可能形成向上跳空,这往往预示上升趋势的延续。"}}, {"@type": "Question", "name": "蜡烛图形态识别在不同时间周期上准确率如何?", "acceptedAnswer": {"@type": "Answer", "text": "蜡烛图形态在各种时间周期(分钟线、小时线、日线等)上都适用,但准确率会因周期而异。通常日线级别的形态更加可靠,因为包含更多参与者的决策。建议在多个时间周期上确认形态,提高交易胜率。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="candlestick-identifier">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/candlestick-identifier.html">繁中</option><option value="/tools/en/candlestick-identifier.html">EN</option><option value="/tools/ja/candlestick-identifier.html">日本語</option><option value="/tools/ko/candlestick-identifier.html">한국어</option><option value="/tools/de/candlestick-identifier.html">DE</option><option value="/tools/fr/candlestick-identifier.html">FR</option><option value="/tools/es/candlestick-identifier.html">ES</option><option value="/tools/pt/candlestick-identifier.html">PT</option><option value="/tools/id/candlestick-identifier.html">ID</option><option value="/tools/zh-CN/candlestick-identifier.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/candlestick-identifier.html">繁中</option><option value="/tools/en/candlestick-identifier.html">EN</option><option value="/tools/ja/candlestick-identifier.html">日本語</option><option value="/tools/ko/candlestick-identifier.html">한국어</option><option value="/tools/de/candlestick-identifier.html">DE</option><option value="/tools/fr/candlestick-identifier.html">FR</option><option value="/tools/es/candlestick-identifier.html">ES</option><option value="/tools/pt/candlestick-identifier.html">PT</option><option value="/tools/id/candlestick-identifier.html">ID</option><option value="/tools/zh-CN/candlestick-identifier.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 蜡烛图形态识别器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/candlestick-identifier.html">繁中</option><option value="/tools/en/candlestick-identifier.html">EN</option><option value="/tools/ja/candlestick-identifier.html">日本語</option><option value="/tools/ko/candlestick-identifier.html">한국어</option><option value="/tools/de/candlestick-identifier.html">DE</option><option value="/tools/fr/candlestick-identifier.html">FR</option><option value="/tools/es/candlestick-identifier.html">ES</option><option value="/tools/pt/candlestick-identifier.html">PT</option><option value="/tools/id/candlestick-identifier.html">ID</option><option value="/tools/zh-CN/candlestick-identifier.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -210,6 +224,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

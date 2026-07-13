@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculatrice TVA et Taxe de Vente", "url": "https://softglow-ai.com/tools/fr/vat-calculator.html", "description": "Calculez facilement la TVA et les taxes de vente. Entrez le prix net et le taux de TVA pour obtenir le montant de taxe et le prix total incluant la taxe.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "fr"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Quelle est la différence entre le prix net et le prix TTC?", "acceptedAnswer": {"@type": "Answer", "text": "Le prix net (HT) est le prix avant l'application de la TVA, tandis que le prix TTC (Toutes Taxes Comprises) inclut la TVA. Par exemple, un article à 100€ HT avec une TVA de 20% aura un prix TTC de 120€."}}, {"@type": "Question", "name": "Pourquoi les taux de TVA varient-ils?", "acceptedAnswer": {"@type": "Answer", "text": "Les taux de TVA varient selon les pays, les régions et les types de produits ou services. Les gouvernements appliquent des taux réduits pour certains articles considérés comme essentiels, comme les aliments ou les médicaments, pour réduire le fardeau fiscal des consommateurs."}}, {"@type": "Question", "name": "Comment puis-je savoir quel taux de TVA appliquer?", "acceptedAnswer": {"@type": "Answer", "text": "Le taux de TVA dépend de votre localisation et du type de produit ou service. Vous pouvez consulter l'administration fiscale de votre pays ou région. En France, le site des impôts (impots.gouv.fr) fournit des informations complètes sur les taux applicables."}}, {"@type": "Question", "name": "Puis-je utiliser cette calculatrice pour calculer la TVA inverse?", "acceptedAnswer": {"@type": "Answer", "text": "Cet outil calcule la TVA directe (ajout du montant de taxe au prix net). Pour calculer la TVA inverse (extraire le montant de TVA d'un prix TTC), vous auriez besoin d'une calculatrice différente ou de la formule : TVA = Prix TTC - (Prix TTC / (1 + taux))."}}, {"@type": "Question", "name": "Est-ce que tous les produits et services sont soumis à la TVA?", "acceptedAnswer": {"@type": "Answer", "text": "Non, certains produits et services sont exonérés de TVA, comme les services financiers, les assurances, ou les services médicaux. D'autres bénéficient de taux réduits. Il est important de vérifier le statut fiscal spécifique de votre produit ou service auprès des autorités compétentes."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="vat-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="fr">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/fr/">Outils</a>
-    <a href="/blog/fr/index.html">Blog</a>
     <a href="/patterns/fr.html">Chandeliers</a>
+    <a href="/blog/fr/index.html">Blog</a>
     <a href="/">Accueil</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/vat-calculator.html">繁中</option><option value="/tools/en/vat-calculator.html">EN</option><option value="/tools/ja/vat-calculator.html">日本語</option><option value="/tools/ko/vat-calculator.html">한국어</option><option value="/tools/de/vat-calculator.html">DE</option><option value="/tools/fr/vat-calculator.html" selected>FR</option><option value="/tools/es/vat-calculator.html">ES</option><option value="/tools/pt/vat-calculator.html">PT</option><option value="/tools/id/vat-calculator.html">ID</option><option value="/tools/zh-CN/vat-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/vat-calculator.html">繁中</option><option value="/tools/en/vat-calculator.html">EN</option><option value="/tools/ja/vat-calculator.html">日本語</option><option value="/tools/ko/vat-calculator.html">한국어</option><option value="/tools/de/vat-calculator.html">DE</option><option value="/tools/fr/vat-calculator.html" selected>FR</option><option value="/tools/es/vat-calculator.html">ES</option><option value="/tools/pt/vat-calculator.html">PT</option><option value="/tools/id/vat-calculator.html">ID</option><option value="/tools/zh-CN/vat-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/fr/">Outils</a> > Calculatrice TVA et Taxe de Vente</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/vat-calculator.html">繁中</option><option value="/tools/en/vat-calculator.html">EN</option><option value="/tools/ja/vat-calculator.html">日本語</option><option value="/tools/ko/vat-calculator.html">한국어</option><option value="/tools/de/vat-calculator.html">DE</option><option value="/tools/fr/vat-calculator.html" selected>FR</option><option value="/tools/es/vat-calculator.html">ES</option><option value="/tools/pt/vat-calculator.html">PT</option><option value="/tools/id/vat-calculator.html">ID</option><option value="/tools/zh-CN/vat-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -124,6 +138,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Rechercher outils, modèles, articles…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Favoris</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Tout effacer</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

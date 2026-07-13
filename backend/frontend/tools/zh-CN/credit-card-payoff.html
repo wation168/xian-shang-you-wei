@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "信用卡还款计算器", "url": "https://softglow-ai.com/tools/zh-CN/credit-card-payoff.html", "description": "使用我们的信用卡还款计算器，输入当前余额、年利率和月付款金额，快速了解需要多久才能还清债务以及要支付多少利息。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "年利率（APR）是什么？", "acceptedAnswer": {"@type": "Answer", "text": "年利率（Annual Percentage Rate）是信用卡公司每年对您的未付余额收取的利息百分比。它通常在您的账单或信用卡协议中明确说明。不同的信用卡可能有不同的APR，有些卡甚至对不同的交易类型有不同的利率。"}}, {"@type": "Question", "name": "最低还款额是多少？", "acceptedAnswer": {"@type": "Answer", "text": "最低还款额通常是您当前余额的一小部分，通常在2%-5%之间。仅支付最低还款额意味着您将花费很长时间来偿还债务，并支付大量利息。此计算器帮助您看到支付超过最低额度的好处。"}}, {"@type": "Question", "name": "我如何更快地偿还信用卡债务？", "acceptedAnswer": {"@type": "Answer", "text": "增加您的月付款金额是加快偿还速度的最有效方式。即使增加50-100元也能产生显著差异。其他策略包括寻求更低的APR、避免新购买以及考虑余额转移到低利率卡。"}}, {"@type": "Question", "name": "总利息与总支付金额有什么区别？", "acceptedAnswer": {"@type": "Answer", "text": "总支付金额是您支付的所有金额，包括原始余额和所有利息。总利息是您支付的额外金额，超过您最初借用的金额。例如，如果您欠¥5000，最终支付¥7000，则总利息为¥2000。"}}, {"@type": "Question", "name": "我应该多久使用一次此计算器？", "acceptedAnswer": {"@type": "Answer", "text": "您可以每月使用此计算器来追踪进度。每次付款后，您的余额会减少，这会改变还清所需的时间。定期检查可以帮助您保持动力，并在需要调整付款计划时提醒您。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="credit-card-payoff">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/credit-card-payoff.html">繁中</option><option value="/tools/en/credit-card-payoff.html">EN</option><option value="/tools/ja/credit-card-payoff.html">日本語</option><option value="/tools/ko/credit-card-payoff.html">한국어</option><option value="/tools/de/credit-card-payoff.html">DE</option><option value="/tools/fr/credit-card-payoff.html">FR</option><option value="/tools/es/credit-card-payoff.html">ES</option><option value="/tools/pt/credit-card-payoff.html">PT</option><option value="/tools/id/credit-card-payoff.html">ID</option><option value="/tools/zh-CN/credit-card-payoff.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/credit-card-payoff.html">繁中</option><option value="/tools/en/credit-card-payoff.html">EN</option><option value="/tools/ja/credit-card-payoff.html">日本語</option><option value="/tools/ko/credit-card-payoff.html">한국어</option><option value="/tools/de/credit-card-payoff.html">DE</option><option value="/tools/fr/credit-card-payoff.html">FR</option><option value="/tools/es/credit-card-payoff.html">ES</option><option value="/tools/pt/credit-card-payoff.html">PT</option><option value="/tools/id/credit-card-payoff.html">ID</option><option value="/tools/zh-CN/credit-card-payoff.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 信用卡还款计算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/credit-card-payoff.html">繁中</option><option value="/tools/en/credit-card-payoff.html">EN</option><option value="/tools/ja/credit-card-payoff.html">日本語</option><option value="/tools/ko/credit-card-payoff.html">한국어</option><option value="/tools/de/credit-card-payoff.html">DE</option><option value="/tools/fr/credit-card-payoff.html">FR</option><option value="/tools/es/credit-card-payoff.html">ES</option><option value="/tools/pt/credit-card-payoff.html">PT</option><option value="/tools/id/credit-card-payoff.html">ID</option><option value="/tools/zh-CN/credit-card-payoff.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -110,6 +124,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

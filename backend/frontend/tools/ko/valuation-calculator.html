@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "사업 가치평가 계산기", "url": "https://softglow-ai.com/tools/ko/valuation-calculator.html", "description": "연간 수익과 현금흐름을 기반으로 사업 가치를 정확하게 계산하세요. 수익 배수법과 DCF 분석을 지원합니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "수익 배수법과 DCF 방법 중 어떤 것을 선택해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "수익 배수법은 빠르고 간단하며 비교 가능한 기업이 많을 때 유용합니다. DCF 방법은 미래 성장을 고려한 정교한 분석을 원할 때 선택하세요. 두 방법을 모두 시행하여 결과를 비교하면 더 정확한 가치 범위를 설정할 수 있습니다."}}, {"@type": "Question", "name": "적절한 수익 배수는 어떻게 결정하나요?", "acceptedAnswer": {"@type": "Answer", "text": "업계 평균 배수는 같은 산업의 상장사 또는 최근 인수합병 거래사례를 참고하여 결정합니다. 성장률이 높거나 수익성이 좋은 기업은 높은 배수를, 위험도가 높거나 성장성이 낮은 기업은 낮은 배수를 적용합니다."}}, {"@type": "Question", "name": "WACC를 어떻게 계산하나요?", "acceptedAnswer": {"@type": "Answer", "text": "WACC = (자기자본비용 × 자기자본비율) + (타인자본비용 × 타인자본비율 × (1-세율))로 계산됩니다. 자기자본비용은 무위험 수익률에 베타와 시장위험프리미엄을 고려하여 산정하며, 타인자본비용은 현재 차입금 이자율을 사용합니다."}}, {"@type": "Question", "name": "성장률과 할인율이 가치평가에 얼마나 영향을 미치나요?", "acceptedAnswer": {"@type": "Answer", "text": "성장률과 할인율은 DCF 가치평가에 매우 큰 영향을 미칩니다. 성장률이 1% 증가하면 가치가 크게 증가하고, 할인율이 1% 증가하면 가치가 크게 감소합니다. 따라서 보수적이고 현실적인 가정치를 사용하는 것이 중요합니다."}}, {"@type": "Question", "name": "터미널 가치(Terminal Value)란 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "터미널 가치는 예측 기간이 끝난 후 사업이 창출할 영구적 가치입니다. 일반적으로 예측 기간이 5년일 경우, 6년차 이후의 모든 현금흐름을 현재가치로 할인한 것입니다. DCF에서 터미널 가치는 전체 기업 가치의 60~80%를 차지하므로 신중하게 계산해야 합니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="valuation-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/valuation-calculator.html">繁中</option><option value="/tools/en/valuation-calculator.html">EN</option><option value="/tools/ja/valuation-calculator.html">日本語</option><option value="/tools/ko/valuation-calculator.html" selected>한국어</option><option value="/tools/de/valuation-calculator.html">DE</option><option value="/tools/fr/valuation-calculator.html">FR</option><option value="/tools/es/valuation-calculator.html">ES</option><option value="/tools/pt/valuation-calculator.html">PT</option><option value="/tools/id/valuation-calculator.html">ID</option><option value="/tools/zh-CN/valuation-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/valuation-calculator.html">繁中</option><option value="/tools/en/valuation-calculator.html">EN</option><option value="/tools/ja/valuation-calculator.html">日本語</option><option value="/tools/ko/valuation-calculator.html" selected>한국어</option><option value="/tools/de/valuation-calculator.html">DE</option><option value="/tools/fr/valuation-calculator.html">FR</option><option value="/tools/es/valuation-calculator.html">ES</option><option value="/tools/pt/valuation-calculator.html">PT</option><option value="/tools/id/valuation-calculator.html">ID</option><option value="/tools/zh-CN/valuation-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 사업 가치평가 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/valuation-calculator.html">繁中</option><option value="/tools/en/valuation-calculator.html">EN</option><option value="/tools/ja/valuation-calculator.html">日本語</option><option value="/tools/ko/valuation-calculator.html" selected>한국어</option><option value="/tools/de/valuation-calculator.html">DE</option><option value="/tools/fr/valuation-calculator.html">FR</option><option value="/tools/es/valuation-calculator.html">ES</option><option value="/tools/pt/valuation-calculator.html">PT</option><option value="/tools/id/valuation-calculator.html">ID</option><option value="/tools/zh-CN/valuation-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -190,6 +204,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "交易手續費計算器", "url": "https://softglow-ai.com/tools/trading-fee.html", "description": "快速計算交易手續費。輸入交易金額和費率，即時獲得手續費、淨額和總成本。適用於股票、期貨、加密貨幣等投資交易。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "手續費率應該如何填寫？", "acceptedAnswer": {"@type": "Answer", "text": "手續費率應以百分比形式輸入。例如，如果您的費率是0.1%，請輸入「0.1」；如果是1%，請輸入「1」。不需要輸入百分號符號，計算器會自動處理。"}}, {"@type": "Question", "name": "淨額和總成本有什麼區別？", "acceptedAnswer": {"@type": "Answer", "text": "淨額是您的交易金額減去手續費後的實際金額。總成本是您的原始交易金額加上手續費，代表您為完成交易而支付的全部成本。這兩個數值在財務規劃中都很重要。"}}, {"@type": "Question", "name": "這個計算器可以用於所有類型的交易嗎？", "acceptedAnswer": {"@type": "Answer", "text": "是的，只要您知道手續費的百分比率，這個計算器就適用於股票、期貨、加密貨幣、外匯和其他任何基於百分比手續費的交易。但如果您的經紀商採用固定費用制，則需要手動進行調整。"}}, {"@type": "Question", "name": "我如何知道我的交易手續費率？", "acceptedAnswer": {"@type": "Answer", "text": "您可以查看經紀商提供的費用說明書或帳戶合約。大多數在線經紀商在其網站上清楚地列出費率。如果不確定，建議直接聯繫您的經紀商客服確認。"}}, {"@type": "Question", "name": "計算器是否包括稅費和其他隱藏費用？", "acceptedAnswer": {"@type": "Answer", "text": "不，此計算器只計算基本的交易手續費。某些交易可能還涉及其他費用，如平台費、結算費、監管費或稅費。這些費用因交易類型和地區而異，建議您向經紀商確認全部成本。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="trading-fee">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/trading-fee.html" selected>繁中</option><option value="/tools/en/trading-fee.html">EN</option><option value="/tools/ja/trading-fee.html">日本語</option><option value="/tools/ko/trading-fee.html">한국어</option><option value="/tools/de/trading-fee.html">DE</option><option value="/tools/fr/trading-fee.html">FR</option><option value="/tools/es/trading-fee.html">ES</option><option value="/tools/pt/trading-fee.html">PT</option><option value="/tools/id/trading-fee.html">ID</option><option value="/tools/zh-CN/trading-fee.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/trading-fee.html" selected>繁中</option><option value="/tools/en/trading-fee.html">EN</option><option value="/tools/ja/trading-fee.html">日本語</option><option value="/tools/ko/trading-fee.html">한국어</option><option value="/tools/de/trading-fee.html">DE</option><option value="/tools/fr/trading-fee.html">FR</option><option value="/tools/es/trading-fee.html">ES</option><option value="/tools/pt/trading-fee.html">PT</option><option value="/tools/id/trading-fee.html">ID</option><option value="/tools/zh-CN/trading-fee.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 交易手續費計算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/trading-fee.html" selected>繁中</option><option value="/tools/en/trading-fee.html">EN</option><option value="/tools/ja/trading-fee.html">日本語</option><option value="/tools/ko/trading-fee.html">한국어</option><option value="/tools/de/trading-fee.html">DE</option><option value="/tools/fr/trading-fee.html">FR</option><option value="/tools/es/trading-fee.html">ES</option><option value="/tools/pt/trading-fee.html">PT</option><option value="/tools/id/trading-fee.html">ID</option><option value="/tools/zh-CN/trading-fee.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -134,6 +148,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

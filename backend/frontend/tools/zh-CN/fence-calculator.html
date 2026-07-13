@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "围栏计算器", "url": "https://softglow-ai.com/tools/zh-CN/fence-calculator.html", "description": "免费围栏计算器，快速计算围栏项目所需的立柱、横梁和栅板数量。输入围栏周长和间距即可获得准确的材料清单。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "立柱间距应该是多少？", "acceptedAnswer": {"@type": "Answer", "text": "标准立柱间距通常为4到8英尺。4英尺间距提供更多支撑和更好的外观，但需要更多立柱。6英尺是最常见的间距，在成本和强度之间提供良好的平衡。8英尺间距用于低围栏或风力较小的地区。"}}, {"@type": "Question", "name": "围栏高度应该是多少？", "acceptedAnswer": {"@type": "Answer", "text": "围栏高度取决于您的需求。隐私围栏通常为6到8英尺高。装饰围栏可以是3到4英尺。检查当地建筑代码和HOA规定，因为许多地区对围栏高度有限制。"}}, {"@type": "Question", "name": "每线性英尺需要多少栅板？", "acceptedAnswer": {"@type": "Answer", "text": "这取决于栅板的宽度和您想要的隐私程度。标准栅板为5到6英寸宽。对于完全隐私，使用5到6块栅板每线性英尺。对于部分隐私或装饰，使用3到4块每线性英尺。"}}, {"@type": "Question", "name": "一节围栏中应该有多少横梁？", "acceptedAnswer": {"@type": "Answer", "text": "横梁数量取决于围栏的高度和强度需求。大多数6英尺高的围栏使用2到3根横梁。较低的围栏可能只需1根横梁。较高的围栏或在风大的地区可能需要3根或更多横梁。"}}, {"@type": "Question", "name": "这个计算器是否包括门？", "acceptedAnswer": {"@type": "Answer", "text": "这个计算器提供基本围栏材料的估计。如果您计划添加门，从立柱总数中减少1到2根立柱，从栅板总数中减少相应数量的板。确保为门框留出适当的空间。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="fence-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/fence-calculator.html">繁中</option><option value="/tools/en/fence-calculator.html">EN</option><option value="/tools/ja/fence-calculator.html">日本語</option><option value="/tools/ko/fence-calculator.html">한국어</option><option value="/tools/de/fence-calculator.html">DE</option><option value="/tools/fr/fence-calculator.html">FR</option><option value="/tools/es/fence-calculator.html">ES</option><option value="/tools/pt/fence-calculator.html">PT</option><option value="/tools/id/fence-calculator.html">ID</option><option value="/tools/zh-CN/fence-calculator.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/fence-calculator.html">繁中</option><option value="/tools/en/fence-calculator.html">EN</option><option value="/tools/ja/fence-calculator.html">日本語</option><option value="/tools/ko/fence-calculator.html">한국어</option><option value="/tools/de/fence-calculator.html">DE</option><option value="/tools/fr/fence-calculator.html">FR</option><option value="/tools/es/fence-calculator.html">ES</option><option value="/tools/pt/fence-calculator.html">PT</option><option value="/tools/id/fence-calculator.html">ID</option><option value="/tools/zh-CN/fence-calculator.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 围栏计算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/fence-calculator.html">繁中</option><option value="/tools/en/fence-calculator.html">EN</option><option value="/tools/ja/fence-calculator.html">日本語</option><option value="/tools/ko/fence-calculator.html">한국어</option><option value="/tools/de/fence-calculator.html">DE</option><option value="/tools/fr/fence-calculator.html">FR</option><option value="/tools/es/fence-calculator.html">ES</option><option value="/tools/pt/fence-calculator.html">PT</option><option value="/tools/id/fence-calculator.html">ID</option><option value="/tools/zh-CN/fence-calculator.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -145,6 +159,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "배터리 수명 계산기", "url": "https://softglow-ai.com/tools/ko/battery-calculator.html", "description": "배터리 용량(mAh)과 전류 소비(mA)를 입력하여 배터리가 몇 시간 동안 지속되는지 계산하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "배터리 용량 2000mAh와 전류 소비 500mA일 때 배터리 수명은?", "acceptedAnswer": {"@type": "Answer", "text": "2000mAh를 500mA로 나누면 4시간입니다. 즉, 현재 조건에서 배터리는 약 4시간 동안 지속됩니다."}}, {"@type": "Question", "name": "계산된 배터리 수명이 정확한가요?", "acceptedAnswer": {"@type": "Answer", "text": "계산 결과는 이론적 추정값입니다. 실제 배터리 수명은 배터리 효율, 온도, 배터리 노화, 장치 최적화 등의 요인에 따라 10~20% 다를 수 있습니다."}}, {"@type": "Question", "name": "전류 소비량을 어떻게 알 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "장치의 사용 설명서를 확인하거나 배터리 모니터링 앱을 사용하여 실시간 전류 소비량을 측정할 수 있습니다. 일반적으로 스마트폰은 100~500mA, 태블릿은 500~2000mA를 소비합니다."}}, {"@type": "Question", "name": "배터리 용량이 5000mAh이고 전류 소비가 1000mA라면?", "acceptedAnswer": {"@type": "Answer", "text": "5000mAh를 1000mA로 나누면 5시간입니다. 이 경우 배터리는 약 5시간 동안 장치를 작동시킬 수 있습니다."}}, {"@type": "Question", "name": "배터리 수명을 늘리는 가장 좋은 방법은?", "acceptedAnswer": {"@type": "Answer", "text": "화면 밝기를 낮추고, GPS와 블루투스를 필요할 때만 켜며, 백그라운드 앱 새로고침을 비활성화하고, 배터리 절약 모드를 사용하는 것이 효과적입니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="battery-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/battery-calculator.html">繁中</option><option value="/tools/en/battery-calculator.html">EN</option><option value="/tools/ja/battery-calculator.html">日本語</option><option value="/tools/ko/battery-calculator.html" selected>한국어</option><option value="/tools/de/battery-calculator.html">DE</option><option value="/tools/fr/battery-calculator.html">FR</option><option value="/tools/es/battery-calculator.html">ES</option><option value="/tools/pt/battery-calculator.html">PT</option><option value="/tools/id/battery-calculator.html">ID</option><option value="/tools/zh-CN/battery-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/battery-calculator.html">繁中</option><option value="/tools/en/battery-calculator.html">EN</option><option value="/tools/ja/battery-calculator.html">日本語</option><option value="/tools/ko/battery-calculator.html" selected>한국어</option><option value="/tools/de/battery-calculator.html">DE</option><option value="/tools/fr/battery-calculator.html">FR</option><option value="/tools/es/battery-calculator.html">ES</option><option value="/tools/pt/battery-calculator.html">PT</option><option value="/tools/id/battery-calculator.html">ID</option><option value="/tools/zh-CN/battery-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 배터리 수명 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/battery-calculator.html">繁中</option><option value="/tools/en/battery-calculator.html">EN</option><option value="/tools/ja/battery-calculator.html">日本語</option><option value="/tools/ko/battery-calculator.html" selected>한국어</option><option value="/tools/de/battery-calculator.html">DE</option><option value="/tools/fr/battery-calculator.html">FR</option><option value="/tools/es/battery-calculator.html">ES</option><option value="/tools/pt/battery-calculator.html">PT</option><option value="/tools/id/battery-calculator.html">ID</option><option value="/tools/zh-CN/battery-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -129,6 +143,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

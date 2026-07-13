@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "칼로리 계산기", "url": "https://softglow-ai.com/tools/ko/calorie-calculator.html", "description": "나이, 성별, 신장, 체중, 활동량을 입력하여 기초대사량과 일일 칼로리 필요량을 계산하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "기초대사량(BMR)과 일일 에너지 소비량(TDEE)의 차이는?", "acceptedAnswer": {"@type": "Answer", "text": "기초대사량은 몸이 휴식 상태에서 기본 생명 활동을 유지하는데 필요한 칼로리이고, 일일 에너지 소비량은 여기에 활동으로 인한 칼로리 소모를 추가한 전체 소비량입니다."}}, {"@type": "Question", "name": "활동 수준은 어떻게 선택해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "활동 수준은 주당 운동 빈도로 판단합니다. 거의 운동하지 않으면 낮음, 주 3-4회 운동하면 보통, 주 5-6회 고강도 운동하면 높음을 선택하세요."}}, {"@type": "Question", "name": "체중을 감량하려면 칼로리를 얼마나 줄여야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "일반적으로 일일 칼로리 목표를 TDEE보다 500칼로리 낮추면 주당 약 0.5kg 감량할 수 있습니다. 급격한 제한은 건강에 해로우므로 점진적인 감량을 권장합니다."}}, {"@type": "Question", "name": "계산 결과가 정확한가요?", "acceptedAnswer": {"@type": "Answer", "text": "계산은 표준 공식을 사용하므로 일반적인 가이드라인입니다. 근육량, 신진대사, 호르몬 등 개인 차이가 있으므로 실제 필요량은 다를 수 있습니다."}}, {"@type": "Question", "name": "나이가 많으면 칼로리 필요량이 줄어드나요?", "acceptedAnswer": {"@type": "Answer", "text": "네, 나이가 들수록 기초대사량이 감소합니다. 일반적으로 10년마다 약 2-8% 감소하므로 나이가 많을수록 더 적은 칼로리가 필요합니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="calorie-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/calorie-calculator.html">繁中</option><option value="/tools/en/calorie-calculator.html">EN</option><option value="/tools/ja/calorie-calculator.html">日本語</option><option value="/tools/ko/calorie-calculator.html" selected>한국어</option><option value="/tools/de/calorie-calculator.html">DE</option><option value="/tools/fr/calorie-calculator.html">FR</option><option value="/tools/es/calorie-calculator.html">ES</option><option value="/tools/pt/calorie-calculator.html">PT</option><option value="/tools/id/calorie-calculator.html">ID</option><option value="/tools/zh-CN/calorie-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/calorie-calculator.html">繁中</option><option value="/tools/en/calorie-calculator.html">EN</option><option value="/tools/ja/calorie-calculator.html">日本語</option><option value="/tools/ko/calorie-calculator.html" selected>한국어</option><option value="/tools/de/calorie-calculator.html">DE</option><option value="/tools/fr/calorie-calculator.html">FR</option><option value="/tools/es/calorie-calculator.html">ES</option><option value="/tools/pt/calorie-calculator.html">PT</option><option value="/tools/id/calorie-calculator.html">ID</option><option value="/tools/zh-CN/calorie-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 칼로리 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/calorie-calculator.html">繁中</option><option value="/tools/en/calorie-calculator.html">EN</option><option value="/tools/ja/calorie-calculator.html">日本語</option><option value="/tools/ko/calorie-calculator.html" selected>한국어</option><option value="/tools/de/calorie-calculator.html">DE</option><option value="/tools/fr/calorie-calculator.html">FR</option><option value="/tools/es/calorie-calculator.html">ES</option><option value="/tools/pt/calorie-calculator.html">PT</option><option value="/tools/id/calorie-calculator.html">ID</option><option value="/tools/zh-CN/calorie-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -155,6 +169,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

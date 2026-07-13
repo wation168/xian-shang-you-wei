@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "销售佣金计算器", "url": "https://softglow-ai.com/tools/zh-CN/sales-commission.html", "description": "免费销售佣金计算器，支持多档位佣金结构。输入销售额和各档佣金率，立即获得分层佣金明细和有效佣金率。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "什么是分层佣金结构？", "acceptedAnswer": {"@type": "Answer", "text": "分层佣金结构是指根据销售额的不同区间设置不同的佣金率。销售额越高，适用的佣金率越高，以此激励销售人员提高业绩。例如，0-20,000美元按5%计算，20,000-50,000美元按7%计算，50,000美元以上按10%计算。"}}, {"@type": "Question", "name": "如何设置合理的佣金档位？", "acceptedAnswer": {"@type": "Answer", "text": "设置佣金档位应考虑多个因素：（1）产品或服务的利润率，佣金不应超过利润的30-40%；（2）行业平均水平和竞争对手的佣金制度；（3）销售目标和销售队伍的平均业绩；（4）公司的财务承受能力。建议咨询行业专家制定适合贵公司的方案。"}}, {"@type": "Question", "name": "有效佣金率如何计算？", "acceptedAnswer": {"@type": "Answer", "text": "有效佣金率 = 总佣金 ÷ 销售总额 × 100%。例如销售额50,000美元，总佣金为3,100美元，则有效佣金率为3,100÷50,000×100% = 6.2%。这个比率反映了平均激励水平，会随销售额增加而提高。"}}, {"@type": "Question", "name": "佣金计算中是否包含税款？", "acceptedAnswer": {"@type": "Answer", "text": "本计算器计算的是税前佣金总额，不包含所得税、社保等税费。实际支付给销售人员的佣金需要扣除相应的税款。具体税费标准请根据当地税法或与财务部门确认。"}}, {"@type": "Question", "name": "如何处理退款或退货情况？", "acceptedAnswer": {"@type": "Answer", "text": "对于退款或退货，通常需要从原销售额中扣除，重新计算佣金。例如，原销售额50,000美元，后期退货3,000美元，则应按47,000美元重新计算佣金并调整。建议在佣金政策中明确退货扣款规则，保护公司和销售人员的利益。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="sales-commission">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/sales-commission.html">繁中</option><option value="/tools/en/sales-commission.html">EN</option><option value="/tools/ja/sales-commission.html">日本語</option><option value="/tools/ko/sales-commission.html">한국어</option><option value="/tools/de/sales-commission.html">DE</option><option value="/tools/fr/sales-commission.html">FR</option><option value="/tools/es/sales-commission.html">ES</option><option value="/tools/pt/sales-commission.html">PT</option><option value="/tools/id/sales-commission.html">ID</option><option value="/tools/zh-CN/sales-commission.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/sales-commission.html">繁中</option><option value="/tools/en/sales-commission.html">EN</option><option value="/tools/ja/sales-commission.html">日本語</option><option value="/tools/ko/sales-commission.html">한국어</option><option value="/tools/de/sales-commission.html">DE</option><option value="/tools/fr/sales-commission.html">FR</option><option value="/tools/es/sales-commission.html">ES</option><option value="/tools/pt/sales-commission.html">PT</option><option value="/tools/id/sales-commission.html">ID</option><option value="/tools/zh-CN/sales-commission.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 销售佣金计算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/sales-commission.html">繁中</option><option value="/tools/en/sales-commission.html">EN</option><option value="/tools/ja/sales-commission.html">日本語</option><option value="/tools/ko/sales-commission.html">한국어</option><option value="/tools/de/sales-commission.html">DE</option><option value="/tools/fr/sales-commission.html">FR</option><option value="/tools/es/sales-commission.html">ES</option><option value="/tools/pt/sales-commission.html">PT</option><option value="/tools/id/sales-commission.html">ID</option><option value="/tools/zh-CN/sales-commission.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -168,6 +182,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

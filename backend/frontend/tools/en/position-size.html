@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Position Size Calculator", "url": "https://softglow-ai.com/tools/en/position-size.html", "description": "Calculate optimal trading position sizes based on account balance, risk percentage, and stop loss levels. Manage risk effectively.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is the ideal risk percentage per trade?", "acceptedAnswer": {"@type": "Answer", "text": "Professional traders typically risk 1-3% of their account per trade, with 2% being the most common standard. Conservative traders use 0.5-1%, while aggressive traders may use up to 5%. Your ideal percentage depends on your experience level, trading style, and account size. Beginners should start with 1-2% until they develop consistent profitability."}}, {"@type": "Question", "name": "Why is position sizing more important than entry points?", "acceptedAnswer": {"@type": "Answer", "text": "Position sizing directly controls your risk and protects your capital, while entry points only affect potential profits. A small position on a perfect entry still limits losses, but a large position on a poor entry can devastate your account. Professional traders prioritize position sizing because it's the only variable they can completely control before entering a trade."}}, {"@type": "Question", "name": "How does position size affect risk-reward ratio?", "acceptedAnswer": {"@type": "Answer", "text": "Smaller position sizes with wider stop losses provide better risk-reward ratios (e.g., risking $200 to make $400). Larger position sizes with tight stop losses offer worse risk-reward ratios. The calculator helps you balance position size with stop loss placement to achieve your desired risk-reward targets, typically 1:2 or better."}}, {"@type": "Question", "name": "Should I adjust position size based on market conditions?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, experienced traders adjust position sizes based on volatility and market conditions. During high volatility, use smaller positions or higher stop losses. During low volatility, you can increase position sizes or tighten stops. This dynamic approach helps maintain consistent dollar risk across different market environments."}}, {"@type": "Question", "name": "What happens if my account grows or shrinks?", "acceptedAnswer": {"@type": "Answer", "text": "Recalculate your position sizes whenever your account balance changes significantly. As your account grows, your position sizes can increase proportionally. If your account shrinks due to losses, immediately reduce position sizes to maintain your risk percentage. This ensures your position sizing remains appropriate for your current capital level at all times."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="position-size">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="en">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/en/">Tools</a>
-    <a href="/blog/en/index.html">Blog</a>
     <a href="/patterns/en.html">Patterns</a>
+    <a href="/blog/en/index.html">Blog</a>
     <a href="/">Home</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/position-size.html">繁中</option><option value="/tools/en/position-size.html" selected>EN</option><option value="/tools/ja/position-size.html">日本語</option><option value="/tools/ko/position-size.html">한국어</option><option value="/tools/de/position-size.html">DE</option><option value="/tools/fr/position-size.html">FR</option><option value="/tools/es/position-size.html">ES</option><option value="/tools/pt/position-size.html">PT</option><option value="/tools/id/position-size.html">ID</option><option value="/tools/zh-CN/position-size.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/position-size.html">繁中</option><option value="/tools/en/position-size.html" selected>EN</option><option value="/tools/ja/position-size.html">日本語</option><option value="/tools/ko/position-size.html">한국어</option><option value="/tools/de/position-size.html">DE</option><option value="/tools/fr/position-size.html">FR</option><option value="/tools/es/position-size.html">ES</option><option value="/tools/pt/position-size.html">PT</option><option value="/tools/id/position-size.html">ID</option><option value="/tools/zh-CN/position-size.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/en/">Tools</a> > Position Size Calculator</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/position-size.html">繁中</option><option value="/tools/en/position-size.html" selected>EN</option><option value="/tools/ja/position-size.html">日本語</option><option value="/tools/ko/position-size.html">한국어</option><option value="/tools/de/position-size.html">DE</option><option value="/tools/fr/position-size.html">FR</option><option value="/tools/es/position-size.html">ES</option><option value="/tools/pt/position-size.html">PT</option><option value="/tools/id/position-size.html">ID</option><option value="/tools/zh-CN/position-size.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -144,6 +158,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Search tools, patterns, articles…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Bookmarks</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Clear all</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

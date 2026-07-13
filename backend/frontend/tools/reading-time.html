@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "閱讀時間計算機", "url": "https://softglow-ai.com/tools/reading-time.html", "description": "輸入文章字數和閱讀速度，立即計算閱讀時間。幫助您規劃閱讀計畫，提高時間管理效率。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "閱讀速度應該如何計算？", "acceptedAnswer": {"@type": "Answer", "text": "您可以閱讀一篇 1,000 字的文章，記錄所用的時間（分鐘），然後用 1,000 除以時間，得到您的每分鐘閱讀字數。重複幾次以獲得平均值。"}}, {"@type": "Question", "name": "不同類型的文章閱讀速度會不同嗎？", "acceptedAnswer": {"@type": "Answer", "text": "是的。技術文檔和學術論文通常需要更慢的閱讀速度，而新聞文章或小說可能讀得較快。本工具使用平均閱讀速度估算，實際時間可能會有所不同。"}}, {"@type": "Question", "name": "如何快速計算中文文章的字數？", "acceptedAnswer": {"@type": "Answer", "text": "大多數文本編輯器和文字處理軟件都有字數統計功能。在 Word 或 Google Docs 中，您可以在工具菜單中找到字數統計選項。線上工具也可以幫助您快速計數。"}}, {"@type": "Question", "name": "這個計算結果準確嗎？", "acceptedAnswer": {"@type": "Answer", "text": "該計算基於平均閱讀速度。實際閱讀時間取決於內容難度、個人專注力、閱讀目的等因素。結果應視為估算值，而非絕對準確的時間。"}}, {"@type": "Question", "name": "我應該選擇多少字/分的閱讀速度？", "acceptedAnswer": {"@type": "Answer", "text": "一般成年人的閱讀速度為 200-250 字/分。快速閱讀者可達 300-400 字/分，而仔細閱讀時可能只有 100-150 字/分。根據您的實際能力和閱讀目的選擇合適的數值。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="reading-time">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/reading-time.html" selected>繁中</option><option value="/tools/en/reading-time.html">EN</option><option value="/tools/ja/reading-time.html">日本語</option><option value="/tools/ko/reading-time.html">한국어</option><option value="/tools/de/reading-time.html">DE</option><option value="/tools/fr/reading-time.html">FR</option><option value="/tools/es/reading-time.html">ES</option><option value="/tools/pt/reading-time.html">PT</option><option value="/tools/id/reading-time.html">ID</option><option value="/tools/zh-CN/reading-time.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/reading-time.html" selected>繁中</option><option value="/tools/en/reading-time.html">EN</option><option value="/tools/ja/reading-time.html">日本語</option><option value="/tools/ko/reading-time.html">한국어</option><option value="/tools/de/reading-time.html">DE</option><option value="/tools/fr/reading-time.html">FR</option><option value="/tools/es/reading-time.html">ES</option><option value="/tools/pt/reading-time.html">PT</option><option value="/tools/id/reading-time.html">ID</option><option value="/tools/zh-CN/reading-time.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 閱讀時間計算機</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/reading-time.html" selected>繁中</option><option value="/tools/en/reading-time.html">EN</option><option value="/tools/ja/reading-time.html">日本語</option><option value="/tools/ko/reading-time.html">한국어</option><option value="/tools/de/reading-time.html">DE</option><option value="/tools/fr/reading-time.html">FR</option><option value="/tools/es/reading-time.html">ES</option><option value="/tools/pt/reading-time.html">PT</option><option value="/tools/id/reading-time.html">ID</option><option value="/tools/zh-CN/reading-time.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -136,6 +150,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

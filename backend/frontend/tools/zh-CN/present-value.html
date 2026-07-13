@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "现值计算器", "url": "https://softglow-ai.com/tools/zh-CN/present-value.html", "description": "免费现值计算器，快速计算未来现金流的当前价值。输入未来价值、折现率和期数，立即得出结果。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "现值计算器如何工作？", "acceptedAnswer": {"@type": "Answer", "text": "计算器使用标准的现值公式 PV = FV / (1 + r)^n。您需要输入未来价值、折现率和期数三个参数，系统会自动计算出现值、总折现额和折现百分比。"}}, {"@type": "Question", "name": "折现率应该如何选择？", "acceptedAnswer": {"@type": "Answer", "text": "折现率的选择取决于具体情境。对于个人储蓄，可以使用银行定期存款利率；对于投资项目，通常使用公司的加权平均资本成本（WACC）；对于债券，使用市场收益率。选择合适的折现率至关重要。"}}, {"@type": "Question", "name": "现值和未来价值有什么区别？", "acceptedAnswer": {"@type": "Answer", "text": "未来价值是指当前投资在未来某个时点的价值，反映资金增长；现值是指未来某笔资金在当前时点的价值，反映资金的折现。两者是相反的概念，用于不同的财务分析目的。"}}, {"@type": "Question", "name": "为什么折现率越高，现值越低？", "acceptedAnswer": {"@type": "Answer", "text": "折现率代表资金的时间成本。折现率越高，说明资金价值衰减越快，未来的现金流在当前的价值就越低。这符合金融学中的时间价值理论。"}}, {"@type": "Question", "name": "现值计算在投资决策中如何应用？", "acceptedAnswer": {"@type": "Answer", "text": "投资决策中通常计算项目的净现值（NPV）。如果所有未来现金流的现值之和大于初始投资，则项目值得投资。通过比较不同项目的净现值，可以选择最优的投资方案。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="present-value">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/zh-CN/">工具</a>
-    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
     <a href="/">首页</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/present-value.html">繁中</option><option value="/tools/en/present-value.html">EN</option><option value="/tools/ja/present-value.html">日本語</option><option value="/tools/ko/present-value.html">한국어</option><option value="/tools/de/present-value.html">DE</option><option value="/tools/fr/present-value.html">FR</option><option value="/tools/es/present-value.html">ES</option><option value="/tools/pt/present-value.html">PT</option><option value="/tools/id/present-value.html">ID</option><option value="/tools/zh-CN/present-value.html" selected>简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/present-value.html">繁中</option><option value="/tools/en/present-value.html">EN</option><option value="/tools/ja/present-value.html">日本語</option><option value="/tools/ko/present-value.html">한국어</option><option value="/tools/de/present-value.html">DE</option><option value="/tools/fr/present-value.html">FR</option><option value="/tools/es/present-value.html">ES</option><option value="/tools/pt/present-value.html">PT</option><option value="/tools/id/present-value.html">ID</option><option value="/tools/zh-CN/present-value.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 现值计算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/present-value.html">繁中</option><option value="/tools/en/present-value.html">EN</option><option value="/tools/ja/present-value.html">日本語</option><option value="/tools/ko/present-value.html">한국어</option><option value="/tools/de/present-value.html">DE</option><option value="/tools/fr/present-value.html">FR</option><option value="/tools/es/present-value.html">ES</option><option value="/tools/pt/present-value.html">PT</option><option value="/tools/id/present-value.html">ID</option><option value="/tools/zh-CN/present-value.html" selected>简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -157,6 +171,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculadora de MRR", "url": "https://softglow-ai.com/tools/es/mrr-calculator.html", "description": "Calcula tu ingreso recurrente mensual (MRR), ingreso anual (ARR) y diario (DRR) basado en suscriptores y ARPU.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "es"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "¿Cuál es la diferencia entre MRR y ARR?", "acceptedAnswer": {"@type": "Answer", "text": "El MRR (Ingreso Recurrente Mensual) es tu ingreso predecible cada mes, mientras que el ARR (Ingreso Recurrente Anual) es el equivalente anualizado. El ARR se calcula multiplicando el MRR por 12. El ARR es más útil para presentaciones a inversores y planificación estratégica a largo plazo."}}, {"@type": "Question", "name": "¿Cómo afecta el churn a mi MRR?", "acceptedAnswer": {"@type": "Answer", "text": "El churn (tasa de cancelación) reduce directamente tu número de suscriptores, lo que disminuye tu MRR. Por ejemplo, si pierdes el 5% de tus suscriptores mensualmente, necesitarás adquirir nuevos clientes constantemente solo para mantener tu MRR actual. Reducir el churn es tan importante como adquirir nuevos suscriptores."}}, {"@type": "Question", "name": "¿Por qué es importante monitorear el DRR?", "acceptedAnswer": {"@type": "Answer", "text": "El DRR te ayuda a entender tu flujo de caja diario y a visualizar tu ingreso de manera más granular. Es útil para tomar decisiones rápidas sobre inversiones operacionales y para entender el impacto inmediato de cambios en tu número de suscriptores o ARPU."}}, {"@type": "Question", "name": "¿Cómo puedo aumentar mi ARPU?", "acceptedAnswer": {"@type": "Answer", "text": "Puedes aumentar tu ARPU de varias formas: implementar planes de precios escalonados, ofrecer características premium adicionales, realizar upsells a clientes existentes, mejorar tu propuesta de valor, o bundlear servicios complementarios. El aumento del ARPU puede tener un impacto significativo en tu MRR sin necesidad de adquirir nuevos clientes."}}, {"@type": "Question", "name": "¿Qué números debo considerar normales para MRR, ARR y DRR?", "acceptedAnswer": {"@type": "Answer", "text": "No hay números 'normales' universales, ya que dependen de tu industria, modelo de precios y etapa de crecimiento. Startup en etapas tempranas pueden tener un MRR bajo, mientras que empresas establecidas pueden tener cifras significativamente mayores. Lo importante es monitorear el crecimiento consistente de estas métricas mes a mes y trimestre a trimestre."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="mrr-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="es">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/es/">Herramientas</a>
-    <a href="/blog/es/index.html">Blog</a>
     <a href="/patterns/es.html">Patrones</a>
+    <a href="/blog/es/index.html">Blog</a>
     <a href="/">Inicio</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/mrr-calculator.html">繁中</option><option value="/tools/en/mrr-calculator.html">EN</option><option value="/tools/ja/mrr-calculator.html">日本語</option><option value="/tools/ko/mrr-calculator.html">한국어</option><option value="/tools/de/mrr-calculator.html">DE</option><option value="/tools/fr/mrr-calculator.html">FR</option><option value="/tools/es/mrr-calculator.html" selected>ES</option><option value="/tools/pt/mrr-calculator.html">PT</option><option value="/tools/id/mrr-calculator.html">ID</option><option value="/tools/zh-CN/mrr-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/mrr-calculator.html">繁中</option><option value="/tools/en/mrr-calculator.html">EN</option><option value="/tools/ja/mrr-calculator.html">日本語</option><option value="/tools/ko/mrr-calculator.html">한국어</option><option value="/tools/de/mrr-calculator.html">DE</option><option value="/tools/fr/mrr-calculator.html">FR</option><option value="/tools/es/mrr-calculator.html" selected>ES</option><option value="/tools/pt/mrr-calculator.html">PT</option><option value="/tools/id/mrr-calculator.html">ID</option><option value="/tools/zh-CN/mrr-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/es/">Herramientas</a> > Calculadora de MRR</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/mrr-calculator.html">繁中</option><option value="/tools/en/mrr-calculator.html">EN</option><option value="/tools/ja/mrr-calculator.html">日本語</option><option value="/tools/ko/mrr-calculator.html">한국어</option><option value="/tools/de/mrr-calculator.html">DE</option><option value="/tools/fr/mrr-calculator.html">FR</option><option value="/tools/es/mrr-calculator.html" selected>ES</option><option value="/tools/pt/mrr-calculator.html">PT</option><option value="/tools/id/mrr-calculator.html">ID</option><option value="/tools/zh-CN/mrr-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -134,6 +148,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Buscar herramientas, patrones, artículos…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Favoritos</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Borrar todo</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

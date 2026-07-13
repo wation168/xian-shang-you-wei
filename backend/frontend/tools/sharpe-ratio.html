@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "夏普比率計算器", "url": "https://softglow-ai.com/tools/sharpe-ratio.html", "description": "免費夏普比率計算器，幫助投資者精確衡量風險調整後的投資報酬。輸入投資組合報酬、無風險利率和標準差即可獲得結果。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "什麼是無風險利率？", "acceptedAnswer": {"@type": "Answer", "text": "無風險利率是指投資於完全安全的投資工具（如政府債券）所獲得的利率。由於政府債券由政府擔保，被認為具有最低風險。無風險利率通常以長期政府債券的收益率表示，例如台灣的10年期公債殖利率。"}}, {"@type": "Question", "name": "標準差代表什麼？", "acceptedAnswer": {"@type": "Answer", "text": "標準差衡量投資報酬的波動程度。標準差越大，表示投資報酬波動越劇烈，風險越高；標準差越小，表示報酬相對穩定，風險越低。標準差通常用歷史數據計算，也可以使用預測的波動率。"}}, {"@type": "Question", "name": "夏普比率可以用於比較不同類型的投資嗎？", "acceptedAnswer": {"@type": "Answer", "text": "可以。夏普比率的優點在於它能將不同風險水平的投資進行標準化比較。無論是股票、債券、基金還是其他投資工具，只要計算出夏普比率，就能在同一標準下進行比較，找出風險調整後報酬最高的投資組合。"}}, {"@type": "Question", "name": "夏普比率為負數代表什麼？", "acceptedAnswer": {"@type": "Answer", "text": "夏普比率為負數表示投資組合的報酬低於無風險利率。這意味著投資者承擔了風險，卻獲得的回報還不如投資於無風險資產。在這種情況下，投資者應該重新考慮投資策略或選擇其他投資機會。"}}, {"@type": "Question", "name": "夏普比率有什麼局限性？", "acceptedAnswer": {"@type": "Answer", "text": "夏普比率假設報酬遵循正態分佈，但實際市場可能出現異常波動。它只考慮標準差，不能反映極端風險。此外，夏普比率基於歷史數據計算，過去的表現不代表未來結果。投資者應結合其他指標進行綜合評估。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="sharpe-ratio">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/sharpe-ratio.html" selected>繁中</option><option value="/tools/en/sharpe-ratio.html">EN</option><option value="/tools/ja/sharpe-ratio.html">日本語</option><option value="/tools/ko/sharpe-ratio.html">한국어</option><option value="/tools/de/sharpe-ratio.html">DE</option><option value="/tools/fr/sharpe-ratio.html">FR</option><option value="/tools/es/sharpe-ratio.html">ES</option><option value="/tools/pt/sharpe-ratio.html">PT</option><option value="/tools/id/sharpe-ratio.html">ID</option><option value="/tools/zh-CN/sharpe-ratio.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/sharpe-ratio.html" selected>繁中</option><option value="/tools/en/sharpe-ratio.html">EN</option><option value="/tools/ja/sharpe-ratio.html">日本語</option><option value="/tools/ko/sharpe-ratio.html">한국어</option><option value="/tools/de/sharpe-ratio.html">DE</option><option value="/tools/fr/sharpe-ratio.html">FR</option><option value="/tools/es/sharpe-ratio.html">ES</option><option value="/tools/pt/sharpe-ratio.html">PT</option><option value="/tools/id/sharpe-ratio.html">ID</option><option value="/tools/zh-CN/sharpe-ratio.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 夏普比率計算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/sharpe-ratio.html" selected>繁中</option><option value="/tools/en/sharpe-ratio.html">EN</option><option value="/tools/ja/sharpe-ratio.html">日本語</option><option value="/tools/ko/sharpe-ratio.html">한국어</option><option value="/tools/de/sharpe-ratio.html">DE</option><option value="/tools/fr/sharpe-ratio.html">FR</option><option value="/tools/es/sharpe-ratio.html">ES</option><option value="/tools/pt/sharpe-ratio.html">PT</option><option value="/tools/id/sharpe-ratio.html">ID</option><option value="/tools/zh-CN/sharpe-ratio.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -141,6 +155,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

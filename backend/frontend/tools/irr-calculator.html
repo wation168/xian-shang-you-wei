@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "內部報酬率(IRR)計算器", "url": "https://softglow-ai.com/tools/irr-calculator.html", "description": "免費IRR計算器，快速計算投資的內部報酬率。支援多年現金流分析，幫助評估投資回報率。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "IRR和ROI有什麼區別?", "acceptedAnswer": {"@type": "Answer", "text": "IRR(內部報酬率)和ROI(投資回報率)都是衡量投資回報的指標，但計算方法不同。ROI是簡單的百分比計算，不考慮時間因素；而IRR考慮了時間價值和現金流的時序分佈，更適合分析多年投資專案。"}}, {"@type": "Question", "name": "為什麼NPV在IRR折現率下接近零?", "acceptedAnswer": {"@type": "Answer", "text": "根據IRR的定義，IRR就是使投資淨現值為零的折現率。因此，當使用IRR作為折現率計算NPV時，結果應該非常接近零(可能由於四捨五入而略有偏差)。"}}, {"@type": "Question", "name": "負的IRR意味著什麼?", "acceptedAnswer": {"@type": "Answer", "text": "負的IRR表示投資不僅沒有獲利，反而造成虧損。在這種情況下，投資專案會摧毀價值，不應該進行這項投資，除非有特殊的戰略考慮。"}}, {"@type": "Question", "name": "如何使用IRR進行投資決策?", "acceptedAnswer": {"@type": "Answer", "text": "通常將IRR與企業的成本資本進行比較。如果IRR高於成本資本，投資被認為是可接受的；如果IRR低於成本資本，投資應被拒絕。在比較多個專案時，選擇IRR最高的專案(在風險相當的前提下)。"}}, {"@type": "Question", "name": "計算器支援多少年的現金流?", "acceptedAnswer": {"@type": "Answer", "text": "目前計算器支援初始投資加上5年的現金流預測(總共6個時期)。如果您的投資專案時間更長，可以使用年均現金流或在第5年後進行終值計算作為替代方案。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="irr-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/irr-calculator.html" selected>繁中</option><option value="/tools/en/irr-calculator.html">EN</option><option value="/tools/ja/irr-calculator.html">日本語</option><option value="/tools/ko/irr-calculator.html">한국어</option><option value="/tools/de/irr-calculator.html">DE</option><option value="/tools/fr/irr-calculator.html">FR</option><option value="/tools/es/irr-calculator.html">ES</option><option value="/tools/pt/irr-calculator.html">PT</option><option value="/tools/id/irr-calculator.html">ID</option><option value="/tools/zh-CN/irr-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/irr-calculator.html" selected>繁中</option><option value="/tools/en/irr-calculator.html">EN</option><option value="/tools/ja/irr-calculator.html">日本語</option><option value="/tools/ko/irr-calculator.html">한국어</option><option value="/tools/de/irr-calculator.html">DE</option><option value="/tools/fr/irr-calculator.html">FR</option><option value="/tools/es/irr-calculator.html">ES</option><option value="/tools/pt/irr-calculator.html">PT</option><option value="/tools/id/irr-calculator.html">ID</option><option value="/tools/zh-CN/irr-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 內部報酬率(IRR)計算器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/irr-calculator.html" selected>繁中</option><option value="/tools/en/irr-calculator.html">EN</option><option value="/tools/ja/irr-calculator.html">日本語</option><option value="/tools/ko/irr-calculator.html">한국어</option><option value="/tools/de/irr-calculator.html">DE</option><option value="/tools/fr/irr-calculator.html">FR</option><option value="/tools/es/irr-calculator.html">ES</option><option value="/tools/pt/irr-calculator.html">PT</option><option value="/tools/id/irr-calculator.html">ID</option><option value="/tools/zh-CN/irr-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -171,6 +185,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

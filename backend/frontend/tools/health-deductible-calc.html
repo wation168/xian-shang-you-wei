@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "健康保險自付額追蹤器", "url": "https://softglow-ai.com/tools/health-deductible-calc.html", "description": "輕鬆計算您的健康保險自付額剩餘金額。輸入年度自付額和已支出金額，立即了解剩餘自付額和使用百分比。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "自付額和保險免賠額有什麼區別？", "acceptedAnswer": {"@type": "Answer", "text": "自付額是您每年需要自行支付的總醫療費用，而免賠額是保險開始理賠前的初期費用。達到自付額後，保險公司會開始理賠，但您可能還需支付共同保險或掛號費。"}}, {"@type": "Question", "name": "如果我在年中更換保險計畫，自付額會怎樣？", "acceptedAnswer": {"@type": "Answer", "text": "更換保險計畫後，新計畫會有新的自付額。舊計畫已支付的金額通常不會轉移到新計畫。因此，您可能需要為新計畫的自付額重新計算。"}}, {"@type": "Question", "name": "自付額達到上限後，我還需要支付任何費用嗎？", "acceptedAnswer": {"@type": "Answer", "text": "是的。達到自付額後，保險公司開始理賠，但您可能仍需支付共同保險費用（通常為20%）或專科掛號費。這些費用直到達到年度最高自費額才會停止。"}}, {"@type": "Question", "name": "哪些醫療服務計入自付額？", "acceptedAnswer": {"@type": "Answer", "text": "通常情況下，大多數醫療服務（包括醫生門診、實驗室檢查、影像檢查）都計入自付額。但預防性服務、掛號費和某些特定服務可能不計入。具體詳情應參考您的保險計畫文件。"}}, {"@type": "Question", "name": "選擇較高的自付額有什麼優勢？", "acceptedAnswer": {"@type": "Answer", "text": "較高的自付額通常對應較低的月度保費，適合健康狀況良好且醫療費用較少的人。這可以每年節省可觀的保費，只要您的醫療費用不會超過自付額差額。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="health-deductible-calc">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/health-deductible-calc.html" selected>繁中</option><option value="/tools/en/health-deductible-calc.html">EN</option><option value="/tools/ja/health-deductible-calc.html">日本語</option><option value="/tools/ko/health-deductible-calc.html">한국어</option><option value="/tools/de/health-deductible-calc.html">DE</option><option value="/tools/fr/health-deductible-calc.html">FR</option><option value="/tools/es/health-deductible-calc.html">ES</option><option value="/tools/pt/health-deductible-calc.html">PT</option><option value="/tools/id/health-deductible-calc.html">ID</option><option value="/tools/zh-CN/health-deductible-calc.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/health-deductible-calc.html" selected>繁中</option><option value="/tools/en/health-deductible-calc.html">EN</option><option value="/tools/ja/health-deductible-calc.html">日本語</option><option value="/tools/ko/health-deductible-calc.html">한국어</option><option value="/tools/de/health-deductible-calc.html">DE</option><option value="/tools/fr/health-deductible-calc.html">FR</option><option value="/tools/es/health-deductible-calc.html">ES</option><option value="/tools/pt/health-deductible-calc.html">PT</option><option value="/tools/id/health-deductible-calc.html">ID</option><option value="/tools/zh-CN/health-deductible-calc.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 健康保險自付額追蹤器</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/health-deductible-calc.html" selected>繁中</option><option value="/tools/en/health-deductible-calc.html">EN</option><option value="/tools/ja/health-deductible-calc.html">日本語</option><option value="/tools/ko/health-deductible-calc.html">한국어</option><option value="/tools/de/health-deductible-calc.html">DE</option><option value="/tools/fr/health-deductible-calc.html">FR</option><option value="/tools/es/health-deductible-calc.html">ES</option><option value="/tools/pt/health-deductible-calc.html">PT</option><option value="/tools/id/health-deductible-calc.html">ID</option><option value="/tools/zh-CN/health-deductible-calc.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -144,6 +158,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

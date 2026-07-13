@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "전세 vs 구매 계산기", "url": "https://softglow-ai.com/tools/ko/rent-vs-buy.html", "description": "주택 임차와 구매의 총 비용을 비교하고 어떤 선택이 더 경제적인지 분석하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "손익분기점이 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "손익분기점은 전세 총 비용과 구매 총 비용이 같아지는 해입니다. 이 시점 이후로는 부동산 자산 증가로 인해 구매가 더 유리해질 수 있습니다."}}, {"@type": "Question", "name": "순현가 차이(NPV Difference)는 어떻게 해석하나요?", "acceptedAnswer": {"@type": "Answer", "text": "NPV 차이가 음수면 구매가 더 경제적이고, 양수면 전세가 더 경제적입니다. 절대값이 클수록 두 선택지 간의 경제적 차이가 큽니다."}}, {"@type": "Question", "name": "대체 투자 수익률은 무엇을 의미하나요?", "acceptedAnswer": {"@type": "Answer", "text": "구매하지 않고 계약금을 다른 투자처(예: 펀드, 주식)에 투자했을 때 기대할 수 있는 연 수익률입니다. 기회비용을 반영한 계산을 위해 필요합니다."}}, {"@type": "Question", "name": "부동산 가치 상승률은 얼마로 설정하는 것이 현실적인가요?", "acceptedAnswer": {"@type": "Answer", "text": "지역과 시장 상황에 따라 다르지만, 일반적으로 연 2~4% 정도가 장기 평균 상승률입니다. 보수적 추정을 원하면 2%, 낙관적이면 4% 정도로 설정하세요."}}, {"@type": "Question", "name": "계산에 세금은 포함되어 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "양도세나 종합부동산세 같은 세금은 자동 계산에 포함되지 않습니다. 정확한 분석을 원하면 세무 전문가와 상담하여 추가로 고려하세요."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="rent-vs-buy">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/rent-vs-buy.html">繁中</option><option value="/tools/en/rent-vs-buy.html">EN</option><option value="/tools/ja/rent-vs-buy.html">日本語</option><option value="/tools/ko/rent-vs-buy.html" selected>한국어</option><option value="/tools/de/rent-vs-buy.html">DE</option><option value="/tools/fr/rent-vs-buy.html">FR</option><option value="/tools/es/rent-vs-buy.html">ES</option><option value="/tools/pt/rent-vs-buy.html">PT</option><option value="/tools/id/rent-vs-buy.html">ID</option><option value="/tools/zh-CN/rent-vs-buy.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/rent-vs-buy.html">繁中</option><option value="/tools/en/rent-vs-buy.html">EN</option><option value="/tools/ja/rent-vs-buy.html">日本語</option><option value="/tools/ko/rent-vs-buy.html" selected>한국어</option><option value="/tools/de/rent-vs-buy.html">DE</option><option value="/tools/fr/rent-vs-buy.html">FR</option><option value="/tools/es/rent-vs-buy.html">ES</option><option value="/tools/pt/rent-vs-buy.html">PT</option><option value="/tools/id/rent-vs-buy.html">ID</option><option value="/tools/zh-CN/rent-vs-buy.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 전세 vs 구매 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/rent-vs-buy.html">繁中</option><option value="/tools/en/rent-vs-buy.html">EN</option><option value="/tools/ja/rent-vs-buy.html">日本語</option><option value="/tools/ko/rent-vs-buy.html" selected>한국어</option><option value="/tools/de/rent-vs-buy.html">DE</option><option value="/tools/fr/rent-vs-buy.html">FR</option><option value="/tools/es/rent-vs-buy.html">ES</option><option value="/tools/pt/rent-vs-buy.html">PT</option><option value="/tools/id/rent-vs-buy.html">ID</option><option value="/tools/zh-CN/rent-vs-buy.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -255,6 +269,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

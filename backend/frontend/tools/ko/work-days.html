@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "업무일 계산기", "url": "https://softglow-ai.com/tools/ko/work-days.html", "description": "두 날짜 사이의 업무일을 빠르게 계산하세요. 주말과 공휴일을 자동으로 제외하여 정확한 업무일수를 구합니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "주말은 자동으로 제외되나요?", "acceptedAnswer": {"@type": "Answer", "text": "네, 토요일과 일요일은 자동으로 업무일에서 제외됩니다. 별도의 설정이 필요 없습니다."}}, {"@type": "Question", "name": "휴일을 여러 개 입력하려면 어떻게 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "휴일 입력란에 각 휴일을 새로운 줄에 입력하면 됩니다. 예를 들어, 2025-01-01, 2025-04-25, 2025-12-25를 각각 다른 줄에 입력하세요."}}, {"@type": "Question", "name": "시작 날짜와 종료 날짜에 같은 날을 입력하면 어떻게 되나요?", "acceptedAnswer": {"@type": "Answer", "text": "같은 날짜를 입력하면 그 날이 휴일이나 주말이 아닌 경우 1개의 업무일로 계산됩니다. 휴일이나 주말이면 0개의 업무일로 표시됩니다."}}, {"@type": "Question", "name": "계산 결과에 반차나 부분 근무는 포함되나요?", "acceptedAnswer": {"@type": "Answer", "text": "이 계산기는 전일 기준으로 계산합니다. 반차나 부분 근무를 반영하려면 결과값을 수동으로 조정해야 합니다."}}, {"@type": "Question", "name": "왜 계산 결과를 사용하나요?", "acceptedAnswer": {"@type": "Answer", "text": "정확한 업무일 계산은 프로젝트 일정 계획, 마감일 설정, 생산성 분석, 급여 계산 등 다양한 업무 관리 분야에서 필수적입니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="work-days">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/work-days.html">繁中</option><option value="/tools/en/work-days.html">EN</option><option value="/tools/ja/work-days.html">日本語</option><option value="/tools/ko/work-days.html" selected>한국어</option><option value="/tools/de/work-days.html">DE</option><option value="/tools/fr/work-days.html">FR</option><option value="/tools/es/work-days.html">ES</option><option value="/tools/pt/work-days.html">PT</option><option value="/tools/id/work-days.html">ID</option><option value="/tools/zh-CN/work-days.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/work-days.html">繁中</option><option value="/tools/en/work-days.html">EN</option><option value="/tools/ja/work-days.html">日本語</option><option value="/tools/ko/work-days.html" selected>한국어</option><option value="/tools/de/work-days.html">DE</option><option value="/tools/fr/work-days.html">FR</option><option value="/tools/es/work-days.html">ES</option><option value="/tools/pt/work-days.html">PT</option><option value="/tools/id/work-days.html">ID</option><option value="/tools/zh-CN/work-days.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 업무일 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/work-days.html">繁中</option><option value="/tools/en/work-days.html">EN</option><option value="/tools/ja/work-days.html">日本語</option><option value="/tools/ko/work-days.html" selected>한국어</option><option value="/tools/de/work-days.html">DE</option><option value="/tools/fr/work-days.html">FR</option><option value="/tools/es/work-days.html">ES</option><option value="/tools/pt/work-days.html">PT</option><option value="/tools/id/work-days.html">ID</option><option value="/tools/zh-CN/work-days.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -169,6 +183,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

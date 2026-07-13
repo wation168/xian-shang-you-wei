@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculadora de TIR", "url": "https://softglow-ai.com/tools/pt/irr-calculator.html", "description": "Calcule a Taxa Interna de Retorno (TIR) e VPL para análise profissional de investimentos e projetos financeiros.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "pt"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Qual é a diferença entre TIR e VPL?", "acceptedAnswer": {"@type": "Answer", "text": "O VPL (Valor Presente Líquido) calcula o valor absoluto do investimento em libras esterlinas utilizando uma taxa de desconto específica. A TIR é a taxa de desconto que torna o VPL igual a zero. Enquanto o VPL dá uma resposta em euros/libras, a TIR oferece uma resposta em percentagem de retorno."}}, {"@type": "Question", "name": "Uma TIR negativa significa que vou perder dinheiro?", "acceptedAnswer": {"@type": "Answer", "text": "Uma TIR negativa indica que o investimento não gera retorno positivo e você pode estar perdendo valor em relação ao investimento inicial. Neste caso, é recomendável reconsiderar o investimento, a menos que existam razões estratégicas específicas para prosseguir."}}, {"@type": "Question", "name": "Qual é uma boa taxa de TIR para um investimento?", "acceptedAnswer": {"@type": "Answer", "text": "O que constitui uma 'boa' TIR depende do contexto, incluindo a taxa de desconto mínima aceitável, o perfil de risco do investidor e as oportunidades alternativas disponíveis. Geralmente, a TIR deve ser significativamente superior à taxa de juros sem risco para compensar o risco adicional."}}, {"@type": "Question", "name": "Posso ter múltiplas TIRs para o mesmo projeto?", "acceptedAnswer": {"@type": "Answer", "text": "Sim, projetos com múltiplas mudanças de sinal nos fluxos de caixa (investimento inicial negativo, seguido por retornos, depois novamente investimento negativo) podem ter múltiplas TIRs. Nesses casos, análises adicionais são necessárias para tomar decisões apropriadas."}}, {"@type": "Question", "name": "Como as mudanças nos fluxos de caixa afetam a TIR?", "acceptedAnswer": {"@type": "Answer", "text": "Aumentos nos fluxos de caixa esperados resultarão em uma TIR maior, enquanto diminuições resultarão em uma TIR menor. Atrasos na recepção de fluxos de caixa também reduzem a TIR, pois o dinheiro recebido posteriormente vale menos em termos de valor presente."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="irr-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="pt">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/pt/">Ferramentas</a>
-    <a href="/blog/pt/index.html">Blog</a>
     <a href="/patterns/pt.html">Padrões</a>
+    <a href="/blog/pt/index.html">Blog</a>
     <a href="/">Início</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/irr-calculator.html">繁中</option><option value="/tools/en/irr-calculator.html">EN</option><option value="/tools/ja/irr-calculator.html">日本語</option><option value="/tools/ko/irr-calculator.html">한국어</option><option value="/tools/de/irr-calculator.html">DE</option><option value="/tools/fr/irr-calculator.html">FR</option><option value="/tools/es/irr-calculator.html">ES</option><option value="/tools/pt/irr-calculator.html" selected>PT</option><option value="/tools/id/irr-calculator.html">ID</option><option value="/tools/zh-CN/irr-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/irr-calculator.html">繁中</option><option value="/tools/en/irr-calculator.html">EN</option><option value="/tools/ja/irr-calculator.html">日本語</option><option value="/tools/ko/irr-calculator.html">한국어</option><option value="/tools/de/irr-calculator.html">DE</option><option value="/tools/fr/irr-calculator.html">FR</option><option value="/tools/es/irr-calculator.html">ES</option><option value="/tools/pt/irr-calculator.html" selected>PT</option><option value="/tools/id/irr-calculator.html">ID</option><option value="/tools/zh-CN/irr-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/pt/">Ferramentas</a> > Calculadora de TIR</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/irr-calculator.html">繁中</option><option value="/tools/en/irr-calculator.html">EN</option><option value="/tools/ja/irr-calculator.html">日本語</option><option value="/tools/ko/irr-calculator.html">한국어</option><option value="/tools/de/irr-calculator.html">DE</option><option value="/tools/fr/irr-calculator.html">FR</option><option value="/tools/es/irr-calculator.html">ES</option><option value="/tools/pt/irr-calculator.html" selected>PT</option><option value="/tools/id/irr-calculator.html">ID</option><option value="/tools/zh-CN/irr-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -171,6 +185,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Pesquisar ferramentas, padrões, artigos…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Favoritos</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Limpar tudo</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

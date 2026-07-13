@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculadora de División de Acciones", "url": "https://softglow-ai.com/tools/es/stock-split.html", "description": "Calcula fácilmente tu nueva cantidad de acciones después de una división corporativa. Ingresa tus acciones originales y el ratio de división.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "es"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "¿Una división de acciones cambia el valor de mi inversión?", "acceptedAnswer": {"@type": "Answer", "text": "No, una división de acciones no cambia el valor total de tu inversión. Si tus acciones valen 10.000 euros antes de la división, seguirán valiendo 10.000 euros después (ajustando por el precio de mercado). Lo que cambia es la cantidad de acciones que posees y el precio por acción."}}, {"@type": "Question", "name": "¿Cuál es la diferencia entre una división y una división inversa?", "acceptedAnswer": {"@type": "Answer", "text": "Una división normal aumenta el número de acciones que posees. Una división inversa hace lo opuesto: reduce el número de acciones. Por ejemplo, una división inversa 1:2 significa que cada dos acciones se combinan en una. Las divisiones inversas suelen realizarse cuando el precio de las acciones es demasiado bajo."}}, {"@type": "Question", "name": "¿Cómo afecta la división de acciones al precio de mis acciones?", "acceptedAnswer": {"@type": "Answer", "text": "El precio de cada acción se ajusta proporcionalmente a la división. En una división 2:1, si una acción costaba 100 euros, después de la división costará 50 euros. En una división 3:1, el precio se divide entre tres. El valor total de tu cartera permanece igual."}}, {"@type": "Question", "name": "¿Debo pagar impuestos por una división de acciones?", "acceptedAnswer": {"@type": "Answer", "text": "Por lo general, una división de acciones no es un evento gravable. No hay ganancia o pérdida realizada en el momento de la división. Sin embargo, debes actualizar tu base de costo por acción para futuras transacciones y reportes fiscales. Consulta con un asesor fiscal para tu situación específica."}}, {"@type": "Question", "name": "¿Cómo uso esta calculadora?", "acceptedAnswer": {"@type": "Answer", "text": "Ingresa el número original de acciones que posees en el primer campo y el ratio de división en el segundo campo. Por ejemplo, si tienes 500 acciones y hay una división 3:1, ingresa 500 y 3. La calculadora mostrará tu nueva cantidad de acciones (1.500), el aumento total (1.000) y el porcentaje de aumento (200%)."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="stock-split">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="es">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/es/">Herramientas</a>
-    <a href="/blog/es/index.html">Blog</a>
     <a href="/patterns/es.html">Patrones</a>
+    <a href="/blog/es/index.html">Blog</a>
     <a href="/">Inicio</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/stock-split.html">繁中</option><option value="/tools/en/stock-split.html">EN</option><option value="/tools/ja/stock-split.html">日本語</option><option value="/tools/ko/stock-split.html">한국어</option><option value="/tools/de/stock-split.html">DE</option><option value="/tools/fr/stock-split.html">FR</option><option value="/tools/es/stock-split.html" selected>ES</option><option value="/tools/pt/stock-split.html">PT</option><option value="/tools/id/stock-split.html">ID</option><option value="/tools/zh-CN/stock-split.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/stock-split.html">繁中</option><option value="/tools/en/stock-split.html">EN</option><option value="/tools/ja/stock-split.html">日本語</option><option value="/tools/ko/stock-split.html">한국어</option><option value="/tools/de/stock-split.html">DE</option><option value="/tools/fr/stock-split.html">FR</option><option value="/tools/es/stock-split.html" selected>ES</option><option value="/tools/pt/stock-split.html">PT</option><option value="/tools/id/stock-split.html">ID</option><option value="/tools/zh-CN/stock-split.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/es/">Herramientas</a> > Calculadora de División de Acciones</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/stock-split.html">繁中</option><option value="/tools/en/stock-split.html">EN</option><option value="/tools/ja/stock-split.html">日本語</option><option value="/tools/ko/stock-split.html">한국어</option><option value="/tools/de/stock-split.html">DE</option><option value="/tools/fr/stock-split.html">FR</option><option value="/tools/es/stock-split.html" selected>ES</option><option value="/tools/pt/stock-split.html">PT</option><option value="/tools/id/stock-split.html">ID</option><option value="/tools/zh-CN/stock-split.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -130,6 +144,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Buscar herramientas, patrones, artículos…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Favoritos</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Borrar todo</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

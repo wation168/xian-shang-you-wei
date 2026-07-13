@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "팁 계산기", "url": "https://softglow-ai.com/tools/ko/tip-calculator.html", "description": "식당 팁을 쉽게 계산하고 인원수에 따라 공정하게 분할하는 팁 계산기입니다. 빠르고 정확한 계산을 지원합니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "팁은 왜 내야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "팁은 서비스 업계에서 서비스 제공자에 대한 감사의 표시입니다. 특히 미국과 캐나다에서는 팁이 서비스 노동자의 주요 소득원이므로 매우 중요합니다."}}, {"@type": "Question", "name": "적절한 팁 비율은 얼마인가요?", "acceptedAnswer": {"@type": "Answer", "text": "일반적으로 식당에서는 청구액의 15-20%를 팁으로 줍니다. 우수한 서비스를 받았으면 20% 이상, 서비스가 부족했으면 10-15%를 고려할 수 있습니다."}}, {"@type": "Question", "name": "세금을 포함한 금액에서 팁을 계산해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "관례적으로 팁은 세금이 포함된 최종 청구액을 기준으로 계산합니다. 일부 사람들은 세금 전 금액을 기준으로 계산하기도 합니다."}}, {"@type": "Question", "name": "여러 명이 식사할 때 팁을 어떻게 분할하나요?", "acceptedAnswer": {"@type": "Answer", "text": "이 계산기를 사용하면 청구액을 인원 수로 나누고 각자의 팁을 자동으로 계산합니다. 모두가 동일하게 팁을 분담하는 가장 공정한 방법입니다."}}, {"@type": "Question", "name": "소수점 이하는 어떻게 처리하나요?", "acceptedAnswer": {"@type": "Answer", "text": "계산기에서 제시된 금액을 기준으로 반올림하여 처리하면 됩니다. 가장 가까운 정수 또는 소수점 첫째 자리로 반올림하는 것이 일반적입니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="tip-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/tip-calculator.html">繁中</option><option value="/tools/en/tip-calculator.html">EN</option><option value="/tools/ja/tip-calculator.html">日本語</option><option value="/tools/ko/tip-calculator.html" selected>한국어</option><option value="/tools/de/tip-calculator.html">DE</option><option value="/tools/fr/tip-calculator.html">FR</option><option value="/tools/es/tip-calculator.html">ES</option><option value="/tools/pt/tip-calculator.html">PT</option><option value="/tools/id/tip-calculator.html">ID</option><option value="/tools/zh-CN/tip-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/tip-calculator.html">繁中</option><option value="/tools/en/tip-calculator.html">EN</option><option value="/tools/ja/tip-calculator.html">日本語</option><option value="/tools/ko/tip-calculator.html" selected>한국어</option><option value="/tools/de/tip-calculator.html">DE</option><option value="/tools/fr/tip-calculator.html">FR</option><option value="/tools/es/tip-calculator.html">ES</option><option value="/tools/pt/tip-calculator.html">PT</option><option value="/tools/id/tip-calculator.html">ID</option><option value="/tools/zh-CN/tip-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 팁 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/tip-calculator.html">繁中</option><option value="/tools/en/tip-calculator.html">EN</option><option value="/tools/ja/tip-calculator.html">日本語</option><option value="/tools/ko/tip-calculator.html" selected>한국어</option><option value="/tools/de/tip-calculator.html">DE</option><option value="/tools/fr/tip-calculator.html">FR</option><option value="/tools/es/tip-calculator.html">ES</option><option value="/tools/pt/tip-calculator.html">PT</option><option value="/tools/id/tip-calculator.html">ID</option><option value="/tools/zh-CN/tip-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -131,6 +145,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

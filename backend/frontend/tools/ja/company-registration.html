@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "会社設立費用計算機", "url": "https://softglow-ai.com/tools/ja/company-registration.html", "description": "会社設立に必要な登録費用、資本金、代理人費用を計算します。設立総費用を素早く把握できます。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "会社設立費用に含まれるものは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "会社設立費用には、政府への登録手数料、資本金に対する税金、法人登記簿への登録料、定款作成費などが含まれます。専門家を利用する場合は、代理人やコンサルタントの報酬も加算されます。"}}, {"@type": "Question", "name": "資本金税とは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "資本金税は、会社が設立時に投入する資本金に対して課される税金です。国や地域によって税率が異なり、中には資本金税を廃止している地域もあります。設立前に現地の税務規定を確認することが重要です。"}}, {"@type": "Question", "name": "代理人を使わずに会社登録できますか？", "acceptedAnswer": {"@type": "Answer", "text": "多くの地域では代理人なしで会社登録できますが、手続きが複雑な場合や書類作成に不安がある場合は、専門家の利用をお勧めします。代理人費用を節約できる反面、手続きに時間と労力がかかる可能性があります。"}}, {"@type": "Question", "name": "設立費用を削減する方法はありますか？", "acceptedAnswer": {"@type": "Answer", "text": "複数の代理人から見積もりを取得し、最適な価格を選択しましょう。また、最小限の資本金での設立やオンラインサービスの活用も検討できます。ただし、過度な削減は後々のトラブルにつながる可能性があるため注意が必要です。"}}, {"@type": "Question", "name": "計算結果にはどのような情報が含まれていますか？", "acceptedAnswer": {"@type": "Answer", "text": "計算結果には、すべての費用を合計した設立総費用と、各費用項目が総額に占める割合（パーセンテージ）が表示されます。これにより、費用構成を視覚的に理解でき、予算計画に役立てられます。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="company-registration">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ja">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ja/">ツール</a>
-    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/patterns/ja.html">ローソク足</a>
+    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/">ホーム</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/company-registration.html">繁中</option><option value="/tools/en/company-registration.html">EN</option><option value="/tools/ja/company-registration.html" selected>日本語</option><option value="/tools/ko/company-registration.html">한국어</option><option value="/tools/de/company-registration.html">DE</option><option value="/tools/fr/company-registration.html">FR</option><option value="/tools/es/company-registration.html">ES</option><option value="/tools/pt/company-registration.html">PT</option><option value="/tools/id/company-registration.html">ID</option><option value="/tools/zh-CN/company-registration.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/company-registration.html">繁中</option><option value="/tools/en/company-registration.html">EN</option><option value="/tools/ja/company-registration.html" selected>日本語</option><option value="/tools/ko/company-registration.html">한국어</option><option value="/tools/de/company-registration.html">DE</option><option value="/tools/fr/company-registration.html">FR</option><option value="/tools/es/company-registration.html">ES</option><option value="/tools/pt/company-registration.html">PT</option><option value="/tools/id/company-registration.html">ID</option><option value="/tools/zh-CN/company-registration.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 会社設立費用計算機</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/company-registration.html">繁中</option><option value="/tools/en/company-registration.html">EN</option><option value="/tools/ja/company-registration.html" selected>日本語</option><option value="/tools/ko/company-registration.html">한국어</option><option value="/tools/de/company-registration.html">DE</option><option value="/tools/fr/company-registration.html">FR</option><option value="/tools/es/company-registration.html">ES</option><option value="/tools/pt/company-registration.html">PT</option><option value="/tools/id/company-registration.html">ID</option><option value="/tools/zh-CN/company-registration.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -107,6 +121,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="ツール、パターン、記事を検索…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>ブックマーク</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全て削除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

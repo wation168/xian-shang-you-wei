@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Bond Yield Calculator", "url": "https://softglow-ai.com/tools/en/bond-yield.html", "description": "Free bond yield calculator. Compute yield to maturity, current yield, and total returns. Perfect for bond investors and financial analysis.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is the difference between current yield and yield to maturity?", "acceptedAnswer": {"@type": "Answer", "text": "Current Yield is a simple calculation of annual coupon payment divided by the current market price, showing only the income component of your return. Yield to Maturity (YTM) is more comprehensive—it includes all coupon payments plus any capital gain or loss from buying at a discount or premium, giving you the total annual return if held to maturity. YTM is the preferred metric for comparing bonds."}}, {"@type": "Question", "name": "How often are bond coupons typically paid?", "acceptedAnswer": {"@type": "Answer", "text": "Bond coupon payment frequency varies by bond type and issuer. Most corporate and government bonds pay semi-annually (twice per year), but some pay quarterly (4 times yearly) or annually (once per year). Money market instruments might pay monthly. Always check the bond prospectus to confirm payment frequency before investing, as this affects your cash flow planning."}}, {"@type": "Question", "name": "Can YTM change after I purchase a bond?", "acceptedAnswer": {"@type": "Answer", "text": "No, the YTM you calculate at purchase is fixed—it's the return you'll earn if you hold the bond until maturity. However, the market yield on similar bonds will change as interest rates fluctuate. If you sell your bond before maturity, you'll realize a gain or loss depending on how bond prices have moved. The YTM at which others might buy your bond would differ from your original purchase YTM."}}, {"@type": "Question", "name": "What does it mean if a bond is trading at a premium?", "acceptedAnswer": {"@type": "Answer", "text": "A bond trades at a premium when its market price is above its face (par) value. This typically happens when the bond's coupon rate is higher than current market interest rates, making it more attractive than newly issued bonds. If you buy a premium bond, your YTM will be lower than the coupon rate because you're paying more upfront and will lose that premium amount at maturity."}}, {"@type": "Question", "name": "How do I use this calculator to compare different bonds?", "acceptedAnswer": {"@type": "Answer", "text": "Enter each bond's details into the calculator and compare their Yield to Maturity (YTM) figures—this is your primary comparison metric. Higher YTM means better return, but always verify the issuer's credit quality, as riskier issuers often pay higher yields. Also consider the bond's duration and maturity date to ensure it aligns with your investment timeline and risk tolerance."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="bond-yield">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="en">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/en/">Tools</a>
-    <a href="/blog/en/index.html">Blog</a>
     <a href="/patterns/en.html">Patterns</a>
+    <a href="/blog/en/index.html">Blog</a>
     <a href="/">Home</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/bond-yield.html">繁中</option><option value="/tools/en/bond-yield.html" selected>EN</option><option value="/tools/ja/bond-yield.html">日本語</option><option value="/tools/ko/bond-yield.html">한국어</option><option value="/tools/de/bond-yield.html">DE</option><option value="/tools/fr/bond-yield.html">FR</option><option value="/tools/es/bond-yield.html">ES</option><option value="/tools/pt/bond-yield.html">PT</option><option value="/tools/id/bond-yield.html">ID</option><option value="/tools/zh-CN/bond-yield.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/bond-yield.html">繁中</option><option value="/tools/en/bond-yield.html" selected>EN</option><option value="/tools/ja/bond-yield.html">日本語</option><option value="/tools/ko/bond-yield.html">한국어</option><option value="/tools/de/bond-yield.html">DE</option><option value="/tools/fr/bond-yield.html">FR</option><option value="/tools/es/bond-yield.html">ES</option><option value="/tools/pt/bond-yield.html">PT</option><option value="/tools/id/bond-yield.html">ID</option><option value="/tools/zh-CN/bond-yield.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/en/">Tools</a> > Bond Yield Calculator</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/bond-yield.html">繁中</option><option value="/tools/en/bond-yield.html" selected>EN</option><option value="/tools/ja/bond-yield.html">日本語</option><option value="/tools/ko/bond-yield.html">한국어</option><option value="/tools/de/bond-yield.html">DE</option><option value="/tools/fr/bond-yield.html">FR</option><option value="/tools/es/bond-yield.html">ES</option><option value="/tools/pt/bond-yield.html">PT</option><option value="/tools/id/bond-yield.html">ID</option><option value="/tools/zh-CN/bond-yield.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -232,6 +246,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Search tools, patterns, articles…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Bookmarks</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Clear all</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

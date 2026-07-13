@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "睡眠サイクル計算機", "url": "https://softglow-ai.com/tools/ja/sleep-calculator.html", "description": "90分の睡眠サイクルに基づいて、あなたに最適な就寝時間と睡眠時間を計算します。良質な睡眠のための完璧なスケジュールを見つけましょう。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "睡眠サイクルの90分は正確ですか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、ほとんどの成人は約90分のサイクルを持っていますが、個人差があります。60～110分の範囲で変動する場合があります。自分に最適なタイミングを見つけるために、複数日間試してみることをお勧めします。"}}, {"@type": "Question", "name": "入眠までの時間はどのように計算されていますか？", "acceptedAnswer": {"@type": "Answer", "text": "入眠までの時間は、平均的な睡眠潜時（寝てから眠りに落ちるまでの時間）である約15分として計算されています。これは科学的研究に基づく一般的な値です。"}}, {"@type": "Question", "name": "4サイクル未満の睡眠でも大丈夫ですか？", "acceptedAnswer": {"@type": "Answer", "text": "4未満のサイクルは長期的には推奨されません。ただし、緊急時には3サイクル（約4.5時間）でも機能します。定期的には、最低でも4～5サイクル確保することが健康のために重要です。"}}, {"@type": "Question", "name": "週末も同じスケジュールで寝るべきですか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、可能な限り毎日同じ時間に寝て起きることで、体内時計が安定し、睡眠の質が向上します。週末に大きく異なるスケジュールを取ると、社会的時差ぼけが発生する可能性があります。"}}, {"@type": "Question", "name": "このツールはすべての年齢に対応していますか？", "acceptedAnswer": {"@type": "Answer", "text": "このツールは主に成人向けです。子どもと高齢者は異なる睡眠パターンを持つため、医師や睡眠専門家に相談することをお勧めします。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="sleep-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ja">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ja/">ツール</a>
-    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/patterns/ja.html">ローソク足</a>
+    <a href="/blog/ja/index.html">ブログ</a>
     <a href="/">ホーム</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/sleep-calculator.html">繁中</option><option value="/tools/en/sleep-calculator.html">EN</option><option value="/tools/ja/sleep-calculator.html" selected>日本語</option><option value="/tools/ko/sleep-calculator.html">한국어</option><option value="/tools/de/sleep-calculator.html">DE</option><option value="/tools/fr/sleep-calculator.html">FR</option><option value="/tools/es/sleep-calculator.html">ES</option><option value="/tools/pt/sleep-calculator.html">PT</option><option value="/tools/id/sleep-calculator.html">ID</option><option value="/tools/zh-CN/sleep-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/sleep-calculator.html">繁中</option><option value="/tools/en/sleep-calculator.html">EN</option><option value="/tools/ja/sleep-calculator.html" selected>日本語</option><option value="/tools/ko/sleep-calculator.html">한국어</option><option value="/tools/de/sleep-calculator.html">DE</option><option value="/tools/fr/sleep-calculator.html">FR</option><option value="/tools/es/sleep-calculator.html">ES</option><option value="/tools/pt/sleep-calculator.html">PT</option><option value="/tools/id/sleep-calculator.html">ID</option><option value="/tools/zh-CN/sleep-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 睡眠サイクル計算機</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/sleep-calculator.html">繁中</option><option value="/tools/en/sleep-calculator.html">EN</option><option value="/tools/ja/sleep-calculator.html" selected>日本語</option><option value="/tools/ko/sleep-calculator.html">한국어</option><option value="/tools/de/sleep-calculator.html">DE</option><option value="/tools/fr/sleep-calculator.html">FR</option><option value="/tools/es/sleep-calculator.html">ES</option><option value="/tools/pt/sleep-calculator.html">PT</option><option value="/tools/id/sleep-calculator.html">ID</option><option value="/tools/zh-CN/sleep-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -141,6 +155,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="ツール、パターン、記事を検索…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>ブックマーク</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全て削除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

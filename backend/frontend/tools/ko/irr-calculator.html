@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "IRR 계산기", "url": "https://softglow-ai.com/tools/ko/irr-calculator.html", "description": "투자 프로젝트의 내부수익률(IRR)과 NPV를 계산하세요. 초기투자금과 연간 현금흐름을 입력하면 투자 수익성을 평가할 수 있습니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "IRR과 NPV의 차이점은 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "NPV는 특정 할인율에서 미래 현금흐름을 현재가치로 계산한 절대값이고, IRR은 NPV를 0으로 만드는 할인율 자체입니다. NPV는 금액으로 투자 가치를 측정하고, IRR은 수익률로 투자 효율성을 측정합니다."}}, {"@type": "Question", "name": "초기투자금을 음수로 입력해야 하는 이유는?", "acceptedAnswer": {"@type": "Answer", "text": "초기투자금은 현금 유출을 나타내므로 음수로 표기합니다. 이렇게 하면 계산기가 투자 수익을 정확하게 계산할 수 있습니다. 이는 회계학과 재무학의 표준 관례입니다."}}, {"@type": "Question", "name": "IRR이 음수가 나오면 어떤 의미인가요?", "acceptedAnswer": {"@type": "Answer", "text": "IRR이 음수는 투자가 손실을 의미합니다. 초기투자금을 회수하지 못하고 추가 손실이 발생할 수 있으므로, 그러한 투자는 진행하지 않는 것이 좋습니다."}}, {"@type": "Question", "name": "5년 이상의 장기 투자를 분석할 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "이 계산기는 5년까지의 현금흐름을 입력받도록 설계되었습니다. 더 긴 기간의 투자는 Excel 등 스프레드시트에서 IRR 함수를 사용하거나 전문 재무 소프트웨어를 활용하시기 바랍니다."}}, {"@type": "Question", "name": "여러 투자 안을 비교할 때 IRR이 높은 것만 선택해도 되나요?", "acceptedAnswer": {"@type": "Answer", "text": "IRR이 높을수록 좋지만, 초기투자액, 투자 위험도, 회사의 자금 상황, 프로젝트 기간 등 다른 요소들도 함께 고려해야 합니다. 최종 투자 의사결정은 이러한 종합적인 분석을 바탕으로 해야 합니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="irr-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/irr-calculator.html">繁中</option><option value="/tools/en/irr-calculator.html">EN</option><option value="/tools/ja/irr-calculator.html">日本語</option><option value="/tools/ko/irr-calculator.html" selected>한국어</option><option value="/tools/de/irr-calculator.html">DE</option><option value="/tools/fr/irr-calculator.html">FR</option><option value="/tools/es/irr-calculator.html">ES</option><option value="/tools/pt/irr-calculator.html">PT</option><option value="/tools/id/irr-calculator.html">ID</option><option value="/tools/zh-CN/irr-calculator.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/irr-calculator.html">繁中</option><option value="/tools/en/irr-calculator.html">EN</option><option value="/tools/ja/irr-calculator.html">日本語</option><option value="/tools/ko/irr-calculator.html" selected>한국어</option><option value="/tools/de/irr-calculator.html">DE</option><option value="/tools/fr/irr-calculator.html">FR</option><option value="/tools/es/irr-calculator.html">ES</option><option value="/tools/pt/irr-calculator.html">PT</option><option value="/tools/id/irr-calculator.html">ID</option><option value="/tools/zh-CN/irr-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > IRR 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/irr-calculator.html">繁中</option><option value="/tools/en/irr-calculator.html">EN</option><option value="/tools/ja/irr-calculator.html">日本語</option><option value="/tools/ko/irr-calculator.html" selected>한국어</option><option value="/tools/de/irr-calculator.html">DE</option><option value="/tools/fr/irr-calculator.html">FR</option><option value="/tools/es/irr-calculator.html">ES</option><option value="/tools/pt/irr-calculator.html">PT</option><option value="/tools/id/irr-calculator.html">ID</option><option value="/tools/zh-CN/irr-calculator.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -171,6 +185,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

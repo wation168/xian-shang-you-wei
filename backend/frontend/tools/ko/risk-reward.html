@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "위험-수익 계산기", "url": "https://softglow-ai.com/tools/ko/risk-reward.html", "description": "위험-수익 비율을 계산하여 거래의 수익성을 평가하세요. 진입가, 손절매, 목표가를 입력하면 즉시 분석 결과를 얻을 수 있습니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "위험-수익 비율이 1:1이라는 것은 무엇을 의미하나요?", "acceptedAnswer": {"@type": "Answer", "text": "1:1의 비율은 ₩1의 위험으로 ₩1의 수익을 얻을 수 있다는 뜻입니다. 이는 최소 50% 이상의 성공률이 필요한 지표입니다. 전문가들은 일반적으로 더 높은 비율을 권장합니다."}}, {"@type": "Question", "name": "왜 위험-수익 비율이 중요한가요?", "acceptedAnswer": {"@type": "Answer", "text": "이 비율은 거래의 기대값을 계산하는 데 도움이 됩니다. 높은 비율을 유지하면 낮은 성공률로도 장기적으로 수익을 창출할 수 있습니다."}}, {"@type": "Question", "name": "최적의 위험-수익 비율은 얼마인가요?", "acceptedAnswer": {"@type": "Answer", "text": "일반적으로 1.5:1 이상을 목표로 합니다. 그러나 개별 거래 전략과 시장 상황에 따라 달라질 수 있습니다. 자신의 거래 스타일에 맞는 비율을 설정하세요."}}, {"@type": "Question", "name": "이 계산기를 사용할 때 주의사항이 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "정확한 진입가, 손절매, 목표가를 입력해야 합니다. 또한 이 계산은 이론적인 것이며, 실제 거래에서는 슬리피지와 수수료 등이 발생할 수 있습니다."}}, {"@type": "Question", "name": "거래 성공률과 위험-수익 비율의 관계는?", "acceptedAnswer": {"@type": "Answer", "text": "높은 위험-수익 비율을 가지면 낮은 성공률로도 수익을 낼 수 있습니다. 예를 들어 1:2 비율에서 40% 성공률만으로도 장기적으로 수익을 창출할 수 있습니다."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="risk-reward">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/ko/">도구</a>
-    <a href="/blog/ko/index.html">블로그</a>
     <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
     <a href="/">홈</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/risk-reward.html">繁中</option><option value="/tools/en/risk-reward.html">EN</option><option value="/tools/ja/risk-reward.html">日本語</option><option value="/tools/ko/risk-reward.html" selected>한국어</option><option value="/tools/de/risk-reward.html">DE</option><option value="/tools/fr/risk-reward.html">FR</option><option value="/tools/es/risk-reward.html">ES</option><option value="/tools/pt/risk-reward.html">PT</option><option value="/tools/id/risk-reward.html">ID</option><option value="/tools/zh-CN/risk-reward.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/risk-reward.html">繁中</option><option value="/tools/en/risk-reward.html">EN</option><option value="/tools/ja/risk-reward.html">日本語</option><option value="/tools/ko/risk-reward.html" selected>한국어</option><option value="/tools/de/risk-reward.html">DE</option><option value="/tools/fr/risk-reward.html">FR</option><option value="/tools/es/risk-reward.html">ES</option><option value="/tools/pt/risk-reward.html">PT</option><option value="/tools/id/risk-reward.html">ID</option><option value="/tools/zh-CN/risk-reward.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 위험-수익 계산기</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/risk-reward.html">繁中</option><option value="/tools/en/risk-reward.html">EN</option><option value="/tools/ja/risk-reward.html">日本語</option><option value="/tools/ko/risk-reward.html" selected>한국어</option><option value="/tools/de/risk-reward.html">DE</option><option value="/tools/fr/risk-reward.html">FR</option><option value="/tools/es/risk-reward.html">ES</option><option value="/tools/pt/risk-reward.html">PT</option><option value="/tools/id/risk-reward.html">ID</option><option value="/tools/zh-CN/risk-reward.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -144,6 +158,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 

@@ -23,18 +23,32 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "加權平均計算機", "url": "https://softglow-ai.com/tools/weighted-average.html", "description": "免費加權平均計算機，幫助您計算成績、投資組合和統計數據的加權平均值。輸入數值和權重即可獲得結果。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "加權平均和簡單平均有什麼區別？", "acceptedAnswer": {"@type": "Answer", "text": "簡單平均將所有數值同等對待，而加權平均根據每個數值的重要性（權重）進行調整。例如，簡單平均：(85+90)÷2=87.5；加權平均（40%和60%）：(85×0.4+90×0.6)÷1=88。"}}, {"@type": "Question", "name": "權重應該如何設定？", "acceptedAnswer": {"@type": "Answer", "text": "權重取決於您的具體情況。在教育中，教師決定不同評估的權重。在投資中，權重通常是投資金額佔總投資的比例。權重應反映每個項目的實際重要性。"}}, {"@type": "Question", "name": "如果權重總和不是100會怎樣？", "acceptedAnswer": {"@type": "Answer", "text": "計算機仍會計算結果。加權平均公式會自動用權重總和進行除法。例如，如果權重總和為80而不是100，結果將相應調整。通常權重應總和為100%或1。"}}, {"@type": "Question", "name": "我可以有負數值或權重嗎？", "acceptedAnswer": {"@type": "Answer", "text": "可以。負數值在某些情況下是有效的，例如表示損失或虧損。權重通常為正數，但在某些統計應用中也可能為負。計算機將根據您輸入的值進行計算。"}}, {"@type": "Question", "name": "如何使用此計算機計算我的課程成績？", "acceptedAnswer": {"@type": "Answer", "text": "輸入每次考試或作業的成績作為數值，輸入該評估的權重百分比。例如，平時測驗85分（權重30%），期中考試90分（權重30%），期末考試88分（權重40%）。計算機將給出加權平均成績。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="weighted-average">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
 </head>
 <body>
-<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links">
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
     <a href="/tools/">工具</a>
-    <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
     <a href="/">首頁</a>
-    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/weighted-average.html" selected>繁中</option><option value="/tools/en/weighted-average.html">EN</option><option value="/tools/ja/weighted-average.html">日本語</option><option value="/tools/ko/weighted-average.html">한국어</option><option value="/tools/de/weighted-average.html">DE</option><option value="/tools/fr/weighted-average.html">FR</option><option value="/tools/es/weighted-average.html">ES</option><option value="/tools/pt/weighted-average.html">PT</option><option value="/tools/id/weighted-average.html">ID</option><option value="/tools/zh-CN/weighted-average.html">简中</option></select>
-  </div></div></nav>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/weighted-average.html" selected>繁中</option><option value="/tools/en/weighted-average.html">EN</option><option value="/tools/ja/weighted-average.html">日本語</option><option value="/tools/ko/weighted-average.html">한국어</option><option value="/tools/de/weighted-average.html">DE</option><option value="/tools/fr/weighted-average.html">FR</option><option value="/tools/es/weighted-average.html">ES</option><option value="/tools/pt/weighted-average.html">PT</option><option value="/tools/id/weighted-average.html">ID</option><option value="/tools/zh-CN/weighted-average.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
 <div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 加權平均計算機</div>
 <div class="container">
-<div class="lang-bar" style="display:flex;align-items:center;gap:8px;margin:24px 0"><span style="font-size:13px;color:#718096">🌐</span><select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/tools/weighted-average.html" selected>繁中</option><option value="/tools/en/weighted-average.html">EN</option><option value="/tools/ja/weighted-average.html">日本語</option><option value="/tools/ko/weighted-average.html">한국어</option><option value="/tools/de/weighted-average.html">DE</option><option value="/tools/fr/weighted-average.html">FR</option><option value="/tools/es/weighted-average.html">ES</option><option value="/tools/pt/weighted-average.html">PT</option><option value="/tools/id/weighted-average.html">ID</option><option value="/tools/zh-CN/weighted-average.html">简中</option></select></div>
 <div class="layout">
 <div class="main">
   <div class="calc-card">
@@ -134,6 +148,28 @@ document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('clic
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
 </script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
 </body>
 </html>
 
