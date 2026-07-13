@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestión de Riesgo de Posición: Soporte, Resistencia y Dimensionamiento</title>
+<meta name="description" content="Aprende a gestionar el riesgo de posición evaluando soporte/resistencia, asesando riesgos y dimensionando posiciones correctamente.">
+<meta name="robots" content="index, follow">
+<meta name="sg-slug" content="position-risk">
+<meta name="sg-type" content="blog">
+<meta name="sg-lang" content="es">
+<link rel="canonical" href="https://softglow-ai.com/blog/es/position-risk.html">
+<link rel="alternate" hreflang="zh-tw" href="https://softglow-ai.com/blog/position-risk.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/blog/en/position-risk.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/blog/ja/position-risk.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/blog/ko/position-risk.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/blog/de/position-risk.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/blog/fr/position-risk.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/blog/es/position-risk.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/blog/pt/position-risk.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/blog/id/position-risk.html">
+<link rel="alternate" hreflang="zh-cn" href="https://softglow-ai.com/blog/zh-CN/position-risk.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/blog/en/position-risk.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://softglow-ai.com/"}, {"@type": "ListItem", "position": 2, "name": "Artículos", "item": "https://softglow-ai.com/blog/es/index.html"}, {"@type": "ListItem", "position": 3, "name": "Gestión de Riesgo de Posición: Soporte, Resistencia y Dimensionamiento"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "Gestión de Riesgo de Posición: Soporte, Resistencia y Dimensionamiento", "description": "Aprende a gestionar el riesgo de posición evaluando soporte/resistencia, asesando riesgos y dimensionando posiciones correctamente.", "url": "https://softglow-ai.com/blog/es/position-risk.html", "publisher": {"@type": "Organization", "name": "SoftGlow"}, "datePublished": "2026-07-13", "dateModified": "2026-07-13"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "¿Cuál es el riesgo máximo recomendado por operación para un principiante?", "acceptedAnswer": {"@type": "Answer", "text": "Se recomienda arriesgar entre el 1% y 2% del capital total por operación. Por ejemplo, si tienes 10,000 dólares, riesgues máximo 100-200 dólares en una sola operación. Esto permite que incluso una serie de pérdidas no destroce tu cuenta."}}, {"@type": "Question", "name": "¿Qué es una relación riesgo-recompensa y por qué importa?", "acceptedAnswer": {"@type": "Answer", "text": "Es la razón entre lo que podrías ganar versus lo que podrías perder. Si arriesgas 5 dólares para ganar 10 dólares, tu RRR es 2:1. Busca mínimo 1.5:1 o 2:1. Con buenas relaciones riesgo-recompensa, ganarás dinero incluso si solo tienes razón el 40-50% de las veces."}}, {"@type": "Question", "name": "¿Cómo coloco mi stop-loss correctamente?", "acceptedAnswer": {"@type": "Answer", "text": "El stop-loss debe ir justo debajo (para compras) o arriba (para ventas) de niveles de soporte o resistencia técnicos. Nunca lo coloques basado en una cantidad arbitraria. Usa referencias técnicas: debajo de un nivel de soporte, debajo de un promedio móvil, o usando el ATR (volatilidad promedio)."}}, {"@type": "Question", "name": "¿Qué es el ATR y cómo lo uso para dimensionar?", "acceptedAnswer": {"@type": "Answer", "text": "ATR (Average True Range) es el promedio del rango de movimiento de precio. Si el ATR es 2 dólares, el precio típicamente se mueve 2 dólares por día. Puedes colocar tu stop a 1.5-2× el ATR desde tu entrada. Activos más volátiles (ATR mayor) requieren posiciones más pequeñas."}}, {"@type": "Question", "name": "¿Debo aumentar mi posición si la operación va a mi favor (adding)?", "acceptedAnswer": {"@type": "Answer", "text": "Esto es avanzado y debe hacerse solo en situaciones muy específicas, como cuando el precio rompe una resistencia con volumen fuerte. NUNCA aumentes una posición que está perdiendo. El \"averaging down\" es extremadamente peligroso para la gestión de riesgo y debe evitarse cuando estés aprendiendo."}}]}</script>
+<link rel="stylesheet" href="/common/softglow-common.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:#2D3748;background:#fff;line-height:1.8;-webkit-font-smoothing:antialiased}
+a{color:#2563EB;text-decoration:none}
+a:hover{text-decoration:underline}
+.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.97);backdrop-filter:blur(8px);border-bottom:1px solid #E2E8F0}
+.nav-inner{max-width:1080px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px}
+.nav-logo{font-size:17px;font-weight:700;color:#2D3748;letter-spacing:-0.5px}
+.nav-logo span{color:#2563EB}
+.nav-links{display:flex;gap:16px;align-items:center}
+.nav-links a{font-size:13px;color:#4A5568;font-weight:500}
+.nav-links a:hover{color:#2563EB;text-decoration:none}
+.nav-actions{display:flex;gap:8px;align-items:center}
+.nav-actions button{background:none;border:none;cursor:pointer;padding:6px;border-radius:6px;color:#718096}
+.nav-actions button:hover{background:#F7FAFC;color:#2563EB}
+.breadcrumb{max-width:1080px;margin:0 auto;padding:12px 20px;font-size:13px;color:#A0AEC0}
+.breadcrumb a{color:#718096}
+.container{max-width:1080px;margin:0 auto;padding:0 20px}
+.layout{display:grid;grid-template-columns:1fr 320px;gap:32px;align-items:start}
+.section{margin-bottom:32px}
+.article-content{line-height:1.9}
+.article-content h2{font-size:22px;font-weight:700;color:#1A202C;margin:32px 0 12px;padding-top:16px;border-top:1px solid #EDF2F7}
+.article-content h3{font-size:18px;font-weight:600;color:#2D3748;margin:24px 0 10px}
+.article-content p{margin-bottom:16px;color:#4A5568}
+.article-content ul,.article-content ol{margin:12px 0 16px 24px;color:#4A5568}
+.article-content li{margin-bottom:8px}
+.article-content table{width:100%;border-collapse:collapse;margin:16px 0}
+.article-content th{text-align:left;padding:10px 12px;background:#F7FAFC;border:1px solid #E2E8F0;font-size:13px;font-weight:600;color:#4A5568}
+.article-content td{padding:10px 12px;border:1px solid #E2E8F0;font-size:14px}
+.article-content strong{color:#1A202C}
+.faq-item{border-bottom:1px solid #E2E8F0;padding:16px 0}
+.faq-q{font-size:15px;font-weight:600;color:#2D3748;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.faq-q::after{content:"+";font-size:18px;color:#A0AEC0;transition:transform 0.2s}
+.faq-item.open .faq-q::after{content:"-"}
+.faq-a{font-size:14px;color:#718096;line-height:1.7;max-height:0;overflow:hidden;transition:max-height 0.3s,padding 0.3s}
+.faq-item.open .faq-a{max-height:500px;padding-top:10px}
+.ad-slot{background:#F7FAFC;border:1px dashed #CBD5E0;border-radius:8px;min-height:250px;display:flex;align-items:center;justify-content:center;color:#A0AEC0;font-size:12px;margin:24px 0}
+.sidebar{position:sticky;top:68px}
+.related-card{background:#F7FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:20px;margin-bottom:20px}
+.related-card h3{font-size:15px;font-weight:600;margin-bottom:12px;color:#1A202C}
+.related-link{display:block;padding:8px 0;border-bottom:1px solid #EDF2F7;font-size:13px;color:#2563EB}
+.related-link:last-child{border-bottom:none}
+.related-link:hover{text-decoration:none;color:#1D4ED8}
+.articles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin:24px 0}
+.article-card{display:block;padding:20px;background:#F7FAFC;border:1px solid #E2E8F0;border-radius:12px;transition:border-color 0.2s}
+.article-card:hover{border-color:#2563EB;text-decoration:none}
+.article-card h3{font-size:15px;font-weight:600;color:#1A202C;margin:0}
+.lang-bar{display:flex;gap:6px;flex-wrap:wrap;margin:24px 0}
+.lang-btn{font-size:12px;padding:4px 12px;border-radius:20px;background:#F7FAFC;border:1px solid #E2E8F0;color:#718096}
+.lang-btn:hover{background:#EBF5FF;border-color:#BEE3F8;text-decoration:none}
+.lang-btn.active{background:#2563EB;color:#fff;border-color:#2563EB}
+.disclaimer{font-size:12px;color:#A0AEC0;margin:24px 0;padding:16px;background:#FAFAFA;border-radius:8px}
+.footer{border-top:1px solid #E2E8F0;padding:24px 0;margin-top:40px}
+.footer-inner{max-width:1080px;margin:0 auto;padding:0 20px;display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:#A0AEC0}
+.footer-inner a{color:#718096}
+@media(max-width:768px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{position:static}
+  .nav-links{gap:10px}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/es/">Herramientas</a>
+    <a href="/blog/es/index.html">Artículos</a>
+    <a href="/patterns/es/">Velas</a>
+    <a href="/">Inicio</a>
+  </div>
+  <div class="nav-actions">
+    <button onclick="document.getElementById('sgSearchOverlay').classList.add('show')" title="Search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </button>
+    <button onclick="window._sgToggleBm&&window._sgToggleBm()" title="Bookmarks">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+    </button>
+  </div>
+</div>
+</nav>
+
+<div class="breadcrumb">
+  <a href="/">Inicio</a> &rsaquo; <a href="/blog/es/index.html">Artículos</a> &rsaquo; Gestión de Riesgo de Posición: Soporte, Resistencia y Dimensionamiento
+</div>
+
+<div class="container">
+<div class="layout">
+
+<div class="main">
+  <h1 style="font-size:28px;font-weight:700;color:#1A202C;margin-bottom:8px">Gestión de Riesgo de Posición: Soporte, Resistencia y Dimensionamiento</h1>
+  <p style="font-size:14px;color:#718096;margin-bottom:24px">Aprende a gestionar el riesgo de posición evaluando soporte/resistencia, asesando riesgos y dimensionando posiciones correctamente.</p>
+
+  <div class="ad-slot" id="ad-1" aria-hidden="true"></div>
+
+  
+  <article class="section article-content">
+    <h2>Gestión de Riesgo de Posición: Guía Completa para Inversores</h2>
+
+<p>La gestión de riesgo de posición es uno de los pilares fundamentales del trading e inversión exitosos. Muchos inversores principiantes se enfocan únicamente en encontrar oportunidades de ganancias, olvidando que el verdadero secreto del éxito financiero radica en <strong>preservar el capital</strong> y gestionar adecuadamente el riesgo. En este artículo, exploraremos cómo entender dónde se sitúa el precio en relación con niveles clave, cómo evaluar el riesgo antes de entrar en una posición, y cómo dimensionar correctamente tus operaciones.</p>
+
+<h2>¿Qué es la Gestión de Riesgo de Posición?</h2>
+
+<p>La gestión de riesgo de posición es el proceso de determinar <strong>cuánto capital arriesgar en cada operación</strong> y cómo gestionar ese riesgo una vez que la posición está abierta. No se trata solo de elegir buenos puntos de entrada, sino de establecer parámetros claros sobre dónde salir si el mercado se mueve en tu contra.</p>
+
+<p>Una posición bien gestionada respeta tres elementos clave:</p>
+
+<ul>
+<li><strong>Niveles de soporte y resistencia:</strong> puntos donde el precio tiende a reaccionar</li>
+<li><strong>Evaluación de riesgo:</strong> análisis del potencial de pérdida antes de entrar</li>
+<li><strong>Dimensionamiento de posición:</strong> determinar cuántos activos comprar o vender</li>
+</ul>
+
+<h2>Entendiendo el Precio Relativo a Soporte y Resistencia</h2>
+
+<h3>¿Qué son los Niveles de Soporte y Resistencia?</h3>
+
+<p><strong>Soporte</strong> es un nivel de precio donde el activo ha encontrado dificultades para caer por debajo históricamente. Los compradores tienden a intervenir en estos niveles, creando una "base" que sostiene el precio.</p>
+
+<p><strong>Resistencia</strong> es lo opuesto: un nivel donde el precio ha encontrado dificultades para subir por encima. Los vendedores tienden a intervenir, creando un "techo" que resiste el avance.</p>
+
+<p>La importancia de estos niveles en la gestión de riesgo es crítica porque:</p>
+
+<ul>
+<li>Ayudan a definir dónde colocar órdenes de stop-loss (límite de pérdida)</li>
+<li>Indican zonas donde el riesgo aumenta o disminuye</li>
+<li>Muestran puntos de entrada con mejor relación riesgo-recompensa</li>
+</ul>
+
+<h3>Cómo Identificar Niveles de Soporte y Resistencia</h3>
+
+<p>Existen varios métodos para identificar estos niveles:</p>
+
+<ol>
+<li><strong>Método de Pivotes:</strong> Basado en máximos, mínimos y cierre previos</li>
+<li><strong>Promedios Móviles:</strong> El precio tiende a reaccionar en torno a promedios de 20, 50 o 200 períodos</li>
+<li><strong>Análisis de Gráficos:</strong> Observar históricamente dónde el precio ha rebotado</li>
+<li><strong>Números Redondos:</strong> Precios como 100, 1000, etc., suelen actuar como resistencia psicológica</li>
+</ol>
+
+<p><strong>Ejemplo práctico:</strong> Si una acción ha tocado el nivel de 50 dólares en cinco ocasiones sin poder romper por encima, ese nivel de 50 dólares actúa como resistencia. Si el precio está en 48 dólares, estamos en una zona donde el riesgo de rechazo es alto. Si el precio está en 45 dólares, tenemos más espacio antes de la resistencia, lo que potencialmente ofrece mejor relación riesgo-recompensa.</p>
+
+<h3>Evaluando la Posición Relativa del Precio</h3>
+
+<p>Antes de entrar en una operación, pregúntate:</p>
+
+<ul>
+<li>¿Dónde está el precio ahora en relación con soporte y resistencia?</li>
+<li>¿Está cerca de una resistencia, donde es probable que encuentre dificultades?</li>
+<li>¿Está cerca de un soporte, donde puede rebotar?</li>
+<li>¿Acaba de romper un nivel? ¿Con qué volumen?</li>
+</ul>
+
+<p>Esta evaluación determinará directamente tu <strong>stop-loss</strong> y tu <strong>relación riesgo-recompensa</strong>.</p>
+
+<h2>Evaluación de Riesgo Antes de la Entrada</h2>
+
+<h3>¿Por Qué es Crítica la Evaluación Previa?</h3>
+
+<p>El error más común entre inversores principiantes es entrar en una operación sin un plan claro. Ven una oportunidad que "se ve bien" y actúan emocionalmente. Una evaluación de riesgo adecuada <strong>actúa como una lista de verificación</strong> que previene decisiones impulsivas.</p>
+
+<h3>Componentes Clave de la Evaluación de Riesgo</h3>
+
+<h4>1. Distancia al Stop-Loss</h4>
+
+<p>El stop-loss es tu línea de defensa. Es el precio al que saldrás si tienes razón equivocada sobre la dirección del movimiento.</p>
+
+<p><strong>Cálculo:</strong></p>
+
+<p>Distancia al Stop-Loss = |Precio de Entrada - Precio de Stop-Loss|</p>
+
+<p><strong>Ejemplo:</strong> Si entras en una acción a 100 dólares y planeas un stop-loss en 95 dólares, tu distancia al stop es de 5 dólares.</p>
+
+<h4>2. Relación Riesgo-Recompensa (RRR)</h4>
+
+<p>Esta es quizás la métrica más importante. Te muestra cuánto podrías ganar en relación con lo que podrías perder.</p>
+
+<p><strong>Fórmula:</strong></p>
+
+<p>RRR = Potencial de Ganancia / Potencial de Pérdida</p>
+
+<p><strong>Ejemplo práctico:</strong></p>
+
+<ul>
+<li>Precio de entrada: 100 dólares</li>
+<li>Stop-loss: 95 dólares (riesgo = 5 dólares)</li>
+<li>Objetivo de ganancia: 110 dólares (recompensa = 10 dólares)</li>
+<li>RRR = 10 / 5 = 2.0</li>
+</ul>
+
+<p>Un RRR de 2.0 significa que por cada dólar que arriesgas, podrías ganar 2. Esta es una relación muy atractiva.</p>
+
+<p>Como regla general, busca operaciones con RRR mínimo de 1.5:1 o 2:1. Si la relación es menor a 1:1, la operación probablemente no vale la pena.</p>
+
+<h4>3. Evaluación de Volatilidad</h4>
+
+<p>Los activos con mayor volatilidad requieren stops más amplios, lo que aumenta el riesgo absoluto por operación. La volatilidad se puede medir mediante:</p>
+
+<ul>
+<li><strong>Rango promedio verdadero (ATR):</strong> promedio de movimiento de precio en un período</li>
+<li><strong>Desviación estándar:</strong> estadísticas del movimiento histórico del precio</li>
+<li><strong>Beta:</strong> volatilidad relativa al mercado general</li>
+</ul>
+
+<p>Un activo con ATR de 3 dólares es menos volátil que uno con ATR de 8 dólares. Para activos más volátiles, necesitarás stops más amplios y, por lo tanto, posiciones más pequeñas.</p>
+
+<h4>4. Confirmación de la Dirección del Movimiento</h4>
+
+<p>Antes de entrar, verifica que múltiples indicadores confirmen tu hipótesis:</p>
+
+<ul>
+<li>¿El precio está en tendencia o es un rebote?</li>
+<li>¿El volumen respalda el movimiento?</li>
+<li>¿Hay confluencia entre niveles técnicos y fundamentales?</li>
+<li>¿Hay noticias o eventos próximos que podrían alterar el precio significativamente?</li>
+</ul>
+
+<h4>5. Evaluación del Entorno de Mercado</h4>
+
+<p>El contexto general afecta el riesgo. No es lo mismo operar durante un mercado alcista estable que durante una corrección o volatilidad extrema. Evalúa:</p>
+
+<ul>
+<li>Tendencia general del mercado</li>
+<li>Niveles de volatilidad del mercado (VIX en acciones)</li>
+<li>Liquidez del activo específico</li>
+<li>Indicadores económicos próximos</li>
+</ul>
+
+<h2>Dimensionamiento de Posición: La Fórmula del Éxito</h2>
+
+<h3>¿Por Qué es Crucial el Dimensionamiento?</h3>
+
+<p>El dimensionamiento correcto es lo que separa a los traders profesionales de los aficionados. Incluso si tu estrategia es correcta el 50% de las veces, si dimensionas adecuadamente, ganarás dinero a largo plazo.</p>
+
+<p>El objetivo del dimensionamiento es asegurar que <strong>ninguna operación única pueda destruir tu capital</strong>.</p>
+
+<h3>Método 1: Porcentaje del Capital en Riesgo</h3>
+
+<p>Este es el método más común y recomendado para principiantes.</p>
+
+<p><strong>Fórmula:</strong></p>
+
+<p>Cantidad a Arriesgar ($) = Capital Total × % en Riesgo por Operación</p>
+
+<p>Luego:</p>
+
+<p>Tamaño de Posición = Cantidad a Arriesgar / Distancia al Stop-Loss</p>
+
+<p><strong>Ejemplo práctico completo:</strong></p>
+
+<ul>
+<li>Capital total: 10,000 dólares</li>
+<li>Riesgo máximo por operación: 2% (estándar recomendado)</li>
+<li>Cantidad a arriesgar: 10,000 × 0.02 = 200 dólares</li>
+<li>Precio de entrada: 100 dólares</li>
+<li>Stop-loss: 95 dólares</li>
+<li>Riesgo por acción: 5 dólares</li>
+<li><strong>Tamaño de posición: 200 / 5 = 40 acciones</strong></li>
+</ul>
+
+<p>Si tu stop-loss se activa, perderás 200 dólares, que es exactamente el 2% de tu capital. Si la operación gana tu objetivo de 110 dólares, ganarás 400 dólares (10 acciones × 10 dólares de ganancia).</p>
+
+<h3>Recomendaciones de Riesgo Máximo por Operación</h3>
+
+<table>
+<tr>
+<th>Perfil de Inversor</th>
+<th>Riesgo Recomendado por Operación</th>
+<th>Justificación</th>
+</tr>
+<tr>
+<td>Principiante</td>
+<td>1% - 2%</td>
+<td>Reduce el impacto de errores iniciales</td>
+</tr>
+<tr>
+<td>Intermedio</td>
+<td>2% - 3%</td>
+<td>Aumenta retorno con experiencia</td>
+</tr>
+<tr>
+<td>Profesional</td>
+<td>3% - 5%</td>
+<td>Optimiza retorno con estrategia probada</td>
+</tr>
+<tr>
+<td>Institucional</td>
+<td>Varía</td>
+<td>Utiliza modelos complejos de VAR</td>
+</tr>
+</table>
+
+<h3>Método 2: Dimensionamiento por Volatilidad (Ajustado)</h3>
+
+<p>Para activos con volatilidades diferentes, puedes ajustar el tamaño basado en el ATR.</p>
+
+<p><strong>Fórmula:</strong></p>
+
+<p>Tamaño de Posición = (Riesgo Permitido) / (ATR × Multiplicador)</p>
+
+<p><strong>Ejemplo:</strong></p>
+
+<ul>
+<li>Riesgo permitido: 200 dólares</li>
+<li>ATR (14 períodos): 2 dólares</li>
+<li>Multiplicador: 2 (para colocar stop 2×ATR arriba del precio de entrada)</li>
+<li>Tamaño = 200 / (2 × 2) = 50 acciones</li>
+</ul>
+
+<p>Este método es útil cuando operas múltiples activos con diferentes volatilidades.</p>
+
+<h3>Errores Comunes en Dimensionamiento</h3>
+
+<p><strong>Error 1: Ignorar el Dimensionamiento Completamente</strong></p>
+
+<p>Algunos traders simplemente compran una cantidad fija (ej: "siempre 100 acciones") sin considerar el riesgo. Esto es extremadamente peligroso porque el riesgo varía según el precio y la volatilidad.</p>
+
+<p><strong>Error 2: Aumentar Posiciones Después de Pérdidas ("Averaging Down")</strong></p>
+
+<p>Cuando pierdes dinero, la tentación de comprar más al precio más bajo es fuerte. Esto multiplica tu riesgo precisamente cuando tu confianza es baja. Nunca aumentes una posición perdedora sin razones técnicas específicas.</p>
+
+<p><strong>Error 3: Riesgo Excesivo por Avaricia</strong></p>
+
+<p>"Con un riesgo del 10%, podría ganar más rápido." Sí, pero también podrías perder tu capital más rápido. Los profesionales entienden que el crecimiento exponencial requiere supervivencia primero.</p>
+
+<p><strong>Error 4: Ignorar la Correlación Entre Posiciones</strong></p>
+
+<p>Si tienes 5 posiciones abiertas en acciones de tecnología, no es lo mismo que tener 5 posiciones en sectores diferentes. La correlación aumenta el riesgo sistémico. Considera tu riesgo total, no solo el de cada operación.</p>
+
+<h2>Aplicación Práctica: Ejemplo Completo Paso a Paso</h2>
+
+<p>Supongamos que identificas una oportunidad de compra en una acción:</p>
+
+<h3>Paso 1: Análisis de Soporte y Resistencia</h3>
+
+<ul>
+<li>Precio actual: 50 dólares</li>
+<li>Resistencia fuerte: 55 dólares (ha rechazado 3 veces en los últimos 2 meses)</li>
+<li>Soporte fuerte: 45 dólares (ha rebotado 4 veces)</li>
+<li>El precio está en 50 dólares, a mitad de camino entre soporte y resistencia</li>
+</ul>
+
+<h3>Paso 2: Evaluación de Riesgo</h3>
+
+<ul>
+<li>Stop-loss: 48 dólares (justo debajo del soporte de corto plazo, 2 dólares de riesgo)</li>
+<li>Objetivo: 54 dólares (debajo de la resistencia, 4 dólares de ganancia)</li>
+<li>RRR: 4/2 = 2.0 ✓ Excelente relación</li>
+<li>ATR (14): 1.5 dólares (volatilidad moderada) ✓</li>
+<li>Volumen: El 20% arriba del promedio en el movimiento alcista ✓</li>
+<li>Entorno: Mercado en tendencia alcista general ✓</li>
+</ul>
+
+<h3>Paso 3: Dimensionamiento de Posición</h3>
+
+<ul>
+<li>Capital: 5,000 dólares</li>
+<li>Riesgo máximo: 2%</li>
+<li>Cantidad a arriesgar: 5,000 × 0.02 = 100 dólares</li>
+<li>Riesgo por acción: 2 dólares</li>
+<li><strong>Tamaño de posición: 100 / 2 = 50 acciones</strong></li>
+<li>Inversión total: 50 × 50 = 2,500 dólares</li>
+</ul>
+
+<h3>Paso 4: Configuración de Órdenes</h3>
+
+<ul>
+<li>Orden de compra: 50 acciones a 50 dólares</li>
+<li>Stop-loss: 50 acciones a 48 dólares (pérdida máxima: 100 dólares)</li>
+<li>Objetivo de ganancia: 50 acciones a 54 dólares (ganancia: 200 dólares)</li>
+</ul>
+
+<p>Con esta configuración, has establecido claramente tu riesgo y recompensa ANTES de entrar. No hay espacio para emociones.</p>
+
+<h2>Niveles de Confiabilidad en tu Estrategia de Gestión</h2>
+
+<p>Conforme develops tu experiencia, la confiabilidad de tu proceso mejorará:</p>
+
+<p><strong>Confiabilidad Alta:</strong> Cuando tu proceso de soporte/resistencia y dimensionamiento es consistente, documentado y ha sido probado en múltiples condiciones de mercado. Tus órdenes se ejecutan exactamente como planeadas.</p>
+
+<p><strong>Confiabilidad Media:</strong> Cuando entiendes los conceptos pero aún tienes cierta variabilidad en la ejecución o ocasionalmente ignoras tu plan por emociones.</p>
+
+<p><strong>Confiabilidad Baja:</strong> Cuando operas sin un plan claro, cambias tus stops después de entrar, o riegas cantidades inconsistentes.</p>
+
+<h2>Resumen de Puntos Clave</h2>
+
+<ul>
+<li><strong>Soporte y Resistencia:</strong> Identifica estos niveles ANTES de operar. Son la base de tu stop-loss.</li>
+<li><strong>Relación Riesgo-Recompensa:</strong> Busca mínimo 1.5:1 o 2:1. Si no existe, espera una mejor oportunidad.</li>
+<li><strong>Evaluación Completa:</strong> Considera volatilidad, confirmación técnica, volumen y entorno de mercado.</li>
+<li><strong>Dimensionamiento:</strong> Arriesga máximo 2% por operación como principiante. Calcula la posición ANTES de entrar.</li>
+<li><strong>Disciplina:</strong> Tu plan escrito es ley. No lo modifiques basado en emociones.</li>
+<li><strong>Riesgo Total:</strong> Considera todas tus posiciones abiertas, no solo la nueva.</li>
+</ul>
+
+<h2>Conclusión</h2>
+
+<p>La gestión de riesgo de posición no es glamorosa ni emocionante. No genera historias de éxito de "ganancias exponenciales". Pero es lo que convierte a traders ocasionales en inversores consistentemente rentables.</p>
+
+<p>Cada decisión que tomes debe responder a tres preguntas simples:</p>
+
+<ol>
+<li>¿Dónde está el precio y dónde debería estar mi stop?</li>
+<li>¿Cuál es mi riesgo versus mi potencial de ganancia?</li>
+<li>¿Cuántas unidades debo comprar para mantener mi riesgo bajo control?</li>
+</ol>
+
+<p>Responde estas preguntas ANTES de operar. Cada vez. Sin excepciones. Esto es lo que separa a los ganadores de los perdedores en los mercados financieros.</p>
+  </article>
+
+  <div class="ad-slot" id="ad-3" aria-hidden="true"></div>
+
+  <section class="section">
+    <h2>Preguntas frecuentes</h2>
+    <div class="faq-item">
+  <div class="faq-q">¿Cuál es el riesgo máximo recomendado por operación para un principiante?</div>
+  <div class="faq-a">Se recomienda arriesgar entre el 1% y 2% del capital total por operación. Por ejemplo, si tienes 10,000 dólares, riesgues máximo 100-200 dólares en una sola operación. Esto permite que incluso una serie de pérdidas no destroce tu cuenta.</div>
+</div>
+<div class="faq-item">
+  <div class="faq-q">¿Qué es una relación riesgo-recompensa y por qué importa?</div>
+  <div class="faq-a">Es la razón entre lo que podrías ganar versus lo que podrías perder. Si arriesgas 5 dólares para ganar 10 dólares, tu RRR es 2:1. Busca mínimo 1.5:1 o 2:1. Con buenas relaciones riesgo-recompensa, ganarás dinero incluso si solo tienes razón el 40-50% de las veces.</div>
+</div>
+<div class="faq-item">
+  <div class="faq-q">¿Cómo coloco mi stop-loss correctamente?</div>
+  <div class="faq-a">El stop-loss debe ir justo debajo (para compras) o arriba (para ventas) de niveles de soporte o resistencia técnicos. Nunca lo coloques basado en una cantidad arbitraria. Usa referencias técnicas: debajo de un nivel de soporte, debajo de un promedio móvil, o usando el ATR (volatilidad promedio).</div>
+</div>
+<div class="faq-item">
+  <div class="faq-q">¿Qué es el ATR y cómo lo uso para dimensionar?</div>
+  <div class="faq-a">ATR (Average True Range) es el promedio del rango de movimiento de precio. Si el ATR es 2 dólares, el precio típicamente se mueve 2 dólares por día. Puedes colocar tu stop a 1.5-2× el ATR desde tu entrada. Activos más volátiles (ATR mayor) requieren posiciones más pequeñas.</div>
+</div>
+<div class="faq-item">
+  <div class="faq-q">¿Debo aumentar mi posición si la operación va a mi favor (adding)?</div>
+  <div class="faq-a">Esto es avanzado y debe hacerse solo en situaciones muy específicas, como cuando el precio rompe una resistencia con volumen fuerte. NUNCA aumentes una posición que está perdiendo. El "averaging down" es extremadamente peligroso para la gestión de riesgo y debe evitarse cuando estés aprendiendo.</div>
+</div>
+  </section>
+
+  <div class="ad-slot" id="ad-4" aria-hidden="true"></div>
+
+  <div class="disclaimer">
+    Aprende a gestionar el riesgo de posición evaluando soporte/resistencia, asesando riesgos y dimensionando posiciones correctamente. &mdash; Last updated: 2026-07-13
+  </div>
+
+  <div class="lang-bar">
+    <a href="/blog/position-risk.html" class="lang-btn">繁體中文</a>
+    <a href="/blog/en/position-risk.html" class="lang-btn">English</a>
+    <a href="/blog/ja/position-risk.html" class="lang-btn">日本語</a>
+    <a href="/blog/ko/position-risk.html" class="lang-btn">한국어</a>
+    <a href="/blog/de/position-risk.html" class="lang-btn">Deutsch</a>
+    <a href="/blog/fr/position-risk.html" class="lang-btn">Français</a>
+    <a href="/blog/es/position-risk.html" class="lang-btn active">Español</a>
+    <a href="/blog/pt/position-risk.html" class="lang-btn">Português</a>
+    <a href="/blog/id/position-risk.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/blog/zh-CN/position-risk.html" class="lang-btn">简体中文</a>
+  </div>
+</div>
+
+<aside class="sidebar">
+  <div class="ad-slot" id="ad-side" aria-hidden="true"></div>
+  <div class="related-card"><h3>Artículos</h3><a href="/blog/es/kd-indicator.html" class="related-link">Indicador Estocástico KD: Guía Completa y Estrategias</a>
+    <a href="/blog/es/macd-indicator.html" class="related-link">MACD Indicator: Guía Completa de Análisis y Estrategias</a>
+    <a href="/blog/es/rsi-indicator.html" class="related-link">RSI Índice de Fuerza Relativa: Guía Completa para Traders</a>
+    <a href="/blog/es/moving-average-guide.html" class="related-link">Medias Móviles: Guía Completa SMA vs EMA y Estrategias</a>
+    <a href="/blog/es/candlestick-patterns.html" class="related-link">Patrones de Velas: Guía Completa de Reversión y Continuación</a></div>
+  <div class="related-card">
+    <h3>Herramientas</h3>
+    <a href="/tools/es/compound-interest.html" class="related-link">Compound Interest</a>
+    <a href="/tools/es/rsi-calculator.html" class="related-link">Rsi Calculator</a>
+    <a href="/tools/es/macd-calculator.html" class="related-link">Macd Calculator</a>
+    <a href="/tools/es/position-size.html" class="related-link">Position Size</a>
+    <a href="/tools/es/risk-reward.html" class="related-link">Risk Reward</a>
+  </div>
+</aside>
+
+</div>
+</div>
+
+<footer class="footer">
+<div class="footer-inner">
+  <a href="/about.html">About</a>
+  <a href="/contact.html">Contact</a>
+  <a href="/privacy.html">Privacy</a>
+  <a href="/terms.html">Terms</a>
+  <span style="margin-left:auto">&copy; 2026 SoftGlow</span>
+</div>
+</footer>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Search..." autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Bookmarks</h3>
+    <button class="bm-clear" onclick="window._sgClearBm&&window._sgClearBm()">Clear</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script>
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});
+});
+</script>
+
+<!-- AdSense delayed load -->
+<script>
+setTimeout(function(){
+  var s=document.createElement('script');
+  s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';
+  s.async=true;s.crossOrigin='anonymous';
+  document.head.appendChild(s);
+},2000);
+</script>
+
+<!-- Generator: blog-gen v1.0 | position-risk | es | 2026-07-13 -->
+</body>
+</html>

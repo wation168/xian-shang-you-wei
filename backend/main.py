@@ -7468,6 +7468,14 @@ td{{padding:12px 12px;vertical-align:middle}}
     </div>
   </div>
   <p class="disclaimer">⚠️ 本頁面資料僅供參考，不構成任何買賣建議。投資有風險，請自行評估。資料來源：FinMind / TWSE</p>
+  <!-- AdSense 底部廣告 -->
+  <ins class="adsbygoogle"
+       style="display:block;margin:24px 0"
+       data-ad-client="ca-pub-1768270548115739"
+       data-ad-slot="4182262477"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>try{{(adsbygoogle=window.adsbygoogle||[]).push({{}})}}catch(e){{}}</script>
 </div>
 </body>
 </html>"""
@@ -7790,7 +7798,15 @@ td{{padding:11px 12px;vertical-align:middle}}
        data-ad-slot="2793159185"
        data-ad-format="auto"
        data-full-width-responsive="true"></ins>
-  <script>(adsbygoogle = window.adsbygoogle || []).push({{}});</script>
+  <script>try{{(adsbygoogle=window.adsbygoogle||[]).push({{}})}}catch(e){{}}</script>
+  <!-- AdSense 底部廣告 -->
+  <ins class="adsbygoogle"
+       style="display:block;margin:24px 0"
+       data-ad-client="ca-pub-1768270548115739"
+       data-ad-slot="4182262477"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>try{{(adsbygoogle=window.adsbygoogle||[]).push({{}})}}catch(e){{}}</script>
 </div>
 <script>
 function showTab(name,btn){{
