@@ -45,7 +45,7 @@
     <p class="calc-subtitle">Déterminez votre couverture de responsabilité civile optimale en fonction de vos actifs personnels et de votre exposition au risque</p>
     <div id="calcInputs"><div class="input-group">
   <label for="netWorth">Valeur Nette (Actifs Totaux)</label>
-  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="netWorth" placeholder="500000"  value="500000" step="10000"></div>
+  <div class="input-row"><span class="input-prefix">€</span><input type="number" id="netWorth" placeholder="500000"  value="500000" step="10000"></div>
 </div>
   <small class="input-help">Entrez la valeur totale de vos actifs personnels (immobilier, investissements, épargne, etc.)</small>
 <div class="input-group">
@@ -55,12 +55,12 @@
   <small class="input-help">Entrez un multiplicateur de risque entre 1,0 et 3,0 selon votre profil de risque (1,0=faible, 3,0=élevé)</small>
 <div class="input-group">
   <label for="existingCoverage">Limites d'Assurance Habitation/Auto Existantes</label>
-  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="existingCoverage" placeholder="300000"  value="300000" step="10000"></div>
+  <div class="input-row"><span class="input-prefix">€</span><input type="number" id="existingCoverage" placeholder="300000"  value="300000" step="10000"></div>
 </div>
   <small class="input-help">Entrez le montant total de vos couvertures de responsabilité existantes</small>
 <div class="input-group">
   <label for="annualIncome">Revenu Annuel</label>
-  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="annualIncome" placeholder="75000"  value="75000" step="5000"></div>
+  <div class="input-row"><span class="input-prefix">€</span><input type="number" id="annualIncome" placeholder="75000"  value="75000" step="5000"></div>
 </div>
   <small class="input-help">Entrez votre revenu annuel brut pour évaluer votre capacité de couverture</small></div>
     <button class="btn-calc" onclick="calculate()">Calculer</button>
@@ -111,7 +111,7 @@
 </div></div>
 <footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
 <script>
-function calculate() { const netWorthInput = document.getElementById('netWorth'); const liabilityExposureInput = document.getElementById('liabilityExposure'); const existingCoverageInput = document.getElementById('existingCoverage'); const annualIncomeInput = document.getElementById('annualIncome'); if (!netWorthInput.value || !liabilityExposureInput.value || !existingCoverageInput.value) { alert('Please fill in all required fields'); return; } const netWorth = parseFloat(netWorthInput.value); const liabilityExposure = parseFloat(liabilityExposureInput.value); const existingCoverage = parseFloat(existingCoverageInput.value); const annualIncome = parseFloat(annualIncomeInput.value); if (netWorth <= 0 || liabilityExposure <= 0 || existingCoverage < 0 || annualIncome < 0) { alert('Please enter valid positive numbers'); return; } const recommended = Math.round(netWorth * liabilityExposure); const coverageGap = Math.max(0, netWorth - existingCoverage); const riskMultiplier = liabilityExposure; const protectionRatio = Math.round((existingCoverage + recommended) / (netWorth || 1) * 100); document.getElementById('recommendedCoverage').textContent = recommended.toLocaleString('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0, maximumFractionDigits: 0 }); document.getElementById('coverageGap').textContent = coverageGap.toLocaleString('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0, maximumFractionDigits: 0 }); document.getElementById('riskMultiplier').textContent = riskMultiplier.toFixed(2); document.getElementById('protectionRatio').textContent = protectionRatio + '%'; document.getElementById('resultsSection').classList.add('show'); }
+function calculate() { const netWorthInput = document.getElementById('netWorth'); const liabilityExposureInput = document.getElementById('liabilityExposure'); const existingCoverageInput = document.getElementById('existingCoverage'); const annualIncomeInput = document.getElementById('annualIncome'); if (!netWorthInput.value || !liabilityExposureInput.value || !existingCoverageInput.value) { alert('Please fill in all required fields'); return; } const netWorth = parseFloat(netWorthInput.value); const liabilityExposure = parseFloat(liabilityExposureInput.value); const existingCoverage = parseFloat(existingCoverageInput.value); const annualIncome = parseFloat(annualIncomeInput.value); if (netWorth <= 0 || liabilityExposure <= 0 || existingCoverage < 0 || annualIncome < 0) { alert('Please enter valid positive numbers'); return; } const recommended = Math.round(netWorth * liabilityExposure); const coverageGap = Math.max(0, netWorth - existingCoverage); const riskMultiplier = liabilityExposure; const protectionRatio = Math.round((existingCoverage + recommended) / (netWorth || 1) * 100); document.getElementById('recommendedCoverage').textContent = recommended.toLocaleString('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0, maximumFractionDigits: 0 }); document.getElementById('coverageGap').textContent = coverageGap.toLocaleString('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0, maximumFractionDigits: 0 }); document.getElementById('riskMultiplier').textContent = riskMultiplier.toFixed(2); document.getElementById('protectionRatio').textContent = protectionRatio + '%'; document.getElementById('results').classList.add('show'); }
 function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copié !';setTimeout(function(){b.textContent='Partager'},1500);}}
 document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
 </script>

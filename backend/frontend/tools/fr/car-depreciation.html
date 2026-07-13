@@ -45,7 +45,7 @@
     <p class="calc-subtitle">Calculez la perte de valeur du véhicule en utilisant la méthode d'amortissement dégressif</p>
     <div id="calcInputs"><div class="input-group">
   <label for="purchasePrice">Prix d'Achat Original</label>
-  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="purchasePrice" placeholder="35000"  step="1"></div>
+  <div class="input-row"><span class="input-prefix">€</span><input type="number" id="purchasePrice" placeholder="35000"  step="1"></div>
 </div>
   <small class="input-help">Entrez le prix d'achat initial du véhicule</small>
 <div class="input-group">
@@ -60,7 +60,7 @@
   <small class="input-help">Entrez le nombre d'années pour calculer la dépréciation</small>
 <div class="input-group">
   <label for="residualValue">Valeur Résiduelle Minimale (Facultatif)</label>
-  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="residualValue" placeholder="5000"  step="1"></div>
+  <div class="input-row"><span class="input-prefix">€</span><input type="number" id="residualValue" placeholder="5000"  step="1"></div>
 </div>
   <small class="input-help">Entrez la valeur minimale en dessous de laquelle le véhicule ne peut pas descendre</small></div>
     <button class="btn-calc" onclick="calculate()">Calculer</button>
@@ -132,14 +132,14 @@ function calculate() {
   const rateDecimal = depreciationRate / 100;
   let breakdownHTML = '<table style="width:100%; border-collapse:collapse; margin-top:10px;"><tr style="background:#f0f0f0;"><th style="border:1px solid #ccc; padding:8px; text-align:left;">Year</th><th style="border:1px solid #ccc; padding:8px; text-align:right;">Value</th></tr>';
 
-  breakdownHTML += '<tr><td style="border:1px solid #ccc; padding:8px;">0</td><td style="border:1px solid #ccc; padding:8px; text-align:right;">£' + purchasePrice.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td></tr>';
+  breakdownHTML += '<tr><td style="border:1px solid #ccc; padding:8px;">0</td><td style="border:1px solid #ccc; padding:8px; text-align:right;">€' + purchasePrice.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td></tr>';
 
   for (let year = 1; year <= yearsOwned; year++) {
     currentValue = currentValue * (1 - rateDecimal);
     if (residualValue > 0 && currentValue < residualValue) {
       currentValue = residualValue;
     }
-    breakdownHTML += '<tr><td style="border:1px solid #ccc; padding:8px;">' + year + '</td><td style="border:1px solid #ccc; padding:8px; text-align:right;">£' + currentValue.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td></tr>';
+    breakdownHTML += '<tr><td style="border:1px solid #ccc; padding:8px;">' + year + '</td><td style="border:1px solid #ccc; padding:8px; text-align:right;">€' + currentValue.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td></tr>';
   }
 
   breakdownHTML += '</table>';
@@ -147,8 +147,8 @@ function calculate() {
   const totalDepreciation = purchasePrice - currentValue;
   const depreciationPercent = (totalDepreciation / purchasePrice) * 100;
 
-  document.getElementById('currentValue').textContent = '£' + currentValue.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  document.getElementById('totalDepreciation').textContent = '£' + totalDepreciation.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('currentValue').textContent = '€' + currentValue.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('totalDepreciation').textContent = '€' + totalDepreciation.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   document.getElementById('depreciationPercent').textContent = depreciationPercent.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '%';
   document.getElementById('yearlyBreakdown').innerHTML = breakdownHTML;
 

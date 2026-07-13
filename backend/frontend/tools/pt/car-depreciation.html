@@ -132,14 +132,14 @@ function calculate() {
   const rateDecimal = depreciationRate / 100;
   let breakdownHTML = '<table style="width:100%; border-collapse:collapse; margin-top:10px;"><tr style="background:#f0f0f0;"><th style="border:1px solid #ccc; padding:8px; text-align:left;">Year</th><th style="border:1px solid #ccc; padding:8px; text-align:right;">Value</th></tr>';
 
-  breakdownHTML += '<tr><td style="border:1px solid #ccc; padding:8px;">0</td><td style="border:1px solid #ccc; padding:8px; text-align:right;">£' + purchasePrice.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td></tr>';
+  breakdownHTML += '<tr><td style="border:1px solid #ccc; padding:8px;">0</td><td style="border:1px solid #ccc; padding:8px; text-align:right;">R$' + purchasePrice.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td></tr>';
 
   for (let year = 1; year <= yearsOwned; year++) {
     currentValue = currentValue * (1 - rateDecimal);
     if (residualValue > 0 && currentValue < residualValue) {
       currentValue = residualValue;
     }
-    breakdownHTML += '<tr><td style="border:1px solid #ccc; padding:8px;">' + year + '</td><td style="border:1px solid #ccc; padding:8px; text-align:right;">£' + currentValue.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td></tr>';
+    breakdownHTML += '<tr><td style="border:1px solid #ccc; padding:8px;">' + year + '</td><td style="border:1px solid #ccc; padding:8px; text-align:right;">R$' + currentValue.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td></tr>';
   }
 
   breakdownHTML += '</table>';
@@ -147,8 +147,8 @@ function calculate() {
   const totalDepreciation = purchasePrice - currentValue;
   const depreciationPercent = (totalDepreciation / purchasePrice) * 100;
 
-  document.getElementById('currentValue').textContent = '£' + currentValue.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  document.getElementById('totalDepreciation').textContent = '£' + totalDepreciation.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('currentValue').textContent = 'R$' + currentValue.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('totalDepreciation').textContent = 'R$' + totalDepreciation.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   document.getElementById('depreciationPercent').textContent = depreciationPercent.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '%';
   document.getElementById('yearlyBreakdown').innerHTML = breakdownHTML;
 

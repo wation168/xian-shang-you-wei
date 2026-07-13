@@ -45,7 +45,7 @@
     <p class="calc-subtitle">根據個人資產和風險敞口確定最優責任保險覆蓋範圍</p>
     <div id="calcInputs"><div class="input-group">
   <label for="netWorth">淨資產（總資產）</label>
-  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="netWorth" placeholder="500000"  value="500000" step="10000"></div>
+  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="netWorth" placeholder="500000"  value="500000" step="10000"></div>
 </div>
   <small class="input-help">輸入您的所有資產總值，包括房產、投資和儲蓄</small>
 <div class="input-group">
@@ -55,12 +55,12 @@
   <small class="input-help">輸入風險係數（1.0-3.0），根據職業和生活方式判斷</small>
 <div class="input-group">
   <label for="existingCoverage">現有住宅/汽車保險限額</label>
-  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="existingCoverage" placeholder="300000"  value="300000" step="10000"></div>
+  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="existingCoverage" placeholder="300000"  value="300000" step="10000"></div>
 </div>
   <small class="input-help">輸入您現有住宅和汽車保險的總責任限額</small>
 <div class="input-group">
   <label for="annualIncome">年收入</label>
-  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="annualIncome" placeholder="75000"  value="75000" step="5000"></div>
+  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="annualIncome" placeholder="75000"  value="75000" step="5000"></div>
 </div>
   <small class="input-help">輸入您的年度稅前收入金額</small></div>
     <button class="btn-calc" onclick="calculate()">計算</button>
@@ -111,7 +111,7 @@
 </div></div>
 <footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
 <script>
-function calculate() { const netWorthInput = document.getElementById('netWorth'); const liabilityExposureInput = document.getElementById('liabilityExposure'); const existingCoverageInput = document.getElementById('existingCoverage'); const annualIncomeInput = document.getElementById('annualIncome'); if (!netWorthInput.value || !liabilityExposureInput.value || !existingCoverageInput.value) { alert('Please fill in all required fields'); return; } const netWorth = parseFloat(netWorthInput.value); const liabilityExposure = parseFloat(liabilityExposureInput.value); const existingCoverage = parseFloat(existingCoverageInput.value); const annualIncome = parseFloat(annualIncomeInput.value); if (netWorth <= 0 || liabilityExposure <= 0 || existingCoverage < 0 || annualIncome < 0) { alert('Please enter valid positive numbers'); return; } const recommended = Math.round(netWorth * liabilityExposure); const coverageGap = Math.max(0, netWorth - existingCoverage); const riskMultiplier = liabilityExposure; const protectionRatio = Math.round((existingCoverage + recommended) / (netWorth || 1) * 100); document.getElementById('recommendedCoverage').textContent = recommended.toLocaleString('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0, maximumFractionDigits: 0 }); document.getElementById('coverageGap').textContent = coverageGap.toLocaleString('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0, maximumFractionDigits: 0 }); document.getElementById('riskMultiplier').textContent = riskMultiplier.toFixed(2); document.getElementById('protectionRatio').textContent = protectionRatio + '%'; document.getElementById('resultsSection').classList.add('show'); }
+function calculate() { const netWorthInput = document.getElementById('netWorth'); const liabilityExposureInput = document.getElementById('liabilityExposure'); const existingCoverageInput = document.getElementById('existingCoverage'); const annualIncomeInput = document.getElementById('annualIncome'); if (!netWorthInput.value || !liabilityExposureInput.value || !existingCoverageInput.value) { alert('Please fill in all required fields'); return; } const netWorth = parseFloat(netWorthInput.value); const liabilityExposure = parseFloat(liabilityExposureInput.value); const existingCoverage = parseFloat(existingCoverageInput.value); const annualIncome = parseFloat(annualIncomeInput.value); if (netWorth <= 0 || liabilityExposure <= 0 || existingCoverage < 0 || annualIncome < 0) { alert('Please enter valid positive numbers'); return; } const recommended = Math.round(netWorth * liabilityExposure); const coverageGap = Math.max(0, netWorth - existingCoverage); const riskMultiplier = liabilityExposure; const protectionRatio = Math.round((existingCoverage + recommended) / (netWorth || 1) * 100); document.getElementById('recommendedCoverage').textContent = recommended.toLocaleString('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0, maximumFractionDigits: 0 }); document.getElementById('coverageGap').textContent = coverageGap.toLocaleString('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0, maximumFractionDigits: 0 }); document.getElementById('riskMultiplier').textContent = riskMultiplier.toFixed(2); document.getElementById('protectionRatio').textContent = protectionRatio + '%'; document.getElementById('results').classList.add('show'); }
 function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
 document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
 </script>

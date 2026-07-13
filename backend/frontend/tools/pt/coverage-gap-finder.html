@@ -45,12 +45,12 @@
     <p class="calc-subtitle">Identifique lacunas de seguros e determine quanto de cobertura adicional você precisa</p>
     <div id="calcInputs"><div class="input-group">
   <label for="neededCoverage">Cobertura Total Necessária</label>
-  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="neededCoverage" placeholder="500000"  value="500000" step="1000"></div>
+  <div class="input-row"><span class="input-prefix">R$</span><input type="number" id="neededCoverage" placeholder="500000"  value="500000" step="1000"></div>
 </div>
   <small class="input-help">Insira o valor total de cobertura que você estima ser necessário para proteger seu patrimônio e responsabilidades</small>
 <div class="input-group">
   <label for="existingCoverage">Valor de Cobertura Atual</label>
-  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="existingCoverage" placeholder="250000"  value="250000" step="1000"></div>
+  <div class="input-row"><span class="input-prefix">R$</span><input type="number" id="existingCoverage" placeholder="250000"  value="250000" step="1000"></div>
 </div>
   <small class="input-help">Insira o valor total de cobertura que você já possui atualmente em suas apólices de seguros</small></div>
     <button class="btn-calc" onclick="calculate()">Calcular</button>
@@ -97,7 +97,7 @@
 </div></div>
 <footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
 <script>
-function calculate() { const neededInput = document.getElementById('neededCoverage'); const existingInput = document.getElementById('existingCoverage'); const gapResult = document.getElementById('coverageGap'); const percentResult = document.getElementById('gapPercentage'); const adequacyResult = document.getElementById('adequacy'); if (!neededInput.value || !existingInput.value) { alert('Please fill in all fields'); return; } const needed = parseFloat(neededInput.value); const existing = parseFloat(existingInput.value); if (needed <= 0 || existing < 0) { alert('Please enter valid positive numbers'); return; } const gap = needed - existing; const gapPercent = (gap / needed) * 100; let adequacyStatus = 'Fully Covered'; if (gap > 0) { adequacyStatus = 'Underinsured'; } else if (gap < 0) { adequacyStatus = 'Overinsured'; } gapResult.textContent = gap >= 0 ? '£' + Math.max(0, gap).toLocaleString('en-GB', {minimumFractionDigits: 0, maximumFractionDigits: 0}) : '-£' + Math.abs(gap).toLocaleString('en-GB', {minimumFractionDigits: 0, maximumFractionDigits: 0}); percentResult.textContent = Math.abs(gapPercent).toLocaleString('en-GB', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + '%'; adequacyResult.textContent = adequacyStatus; document.getElementById('resultsDiv').classList.add('show'); }
+function calculate() { const neededInput = document.getElementById('neededCoverage'); const existingInput = document.getElementById('existingCoverage'); const gapResult = document.getElementById('coverageGap'); const percentResult = document.getElementById('gapPercentage'); const adequacyResult = document.getElementById('adequacy'); if (!neededInput.value || !existingInput.value) { alert('Please fill in all fields'); return; } const needed = parseFloat(neededInput.value); const existing = parseFloat(existingInput.value); if (needed <= 0 || existing < 0) { alert('Please enter valid positive numbers'); return; } const gap = needed - existing; const gapPercent = (gap / needed) * 100; let adequacyStatus = 'Fully Covered'; if (gap > 0) { adequacyStatus = 'Underinsured'; } else if (gap < 0) { adequacyStatus = 'Overinsured'; } gapResult.textContent = gap >= 0 ? 'R$' + Math.max(0, gap).toLocaleString('en-GB', {minimumFractionDigits: 0, maximumFractionDigits: 0}) : '-R$' + Math.abs(gap).toLocaleString('en-GB', {minimumFractionDigits: 0, maximumFractionDigits: 0}); percentResult.textContent = Math.abs(gapPercent).toLocaleString('en-GB', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + '%'; adequacyResult.textContent = adequacyStatus; document.getElementById('results').classList.add('show'); }
 function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copiado!';setTimeout(function(){b.textContent='Compartilhar'},1500);}}
 document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
 </script>
