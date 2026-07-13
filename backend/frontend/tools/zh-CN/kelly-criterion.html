@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>凱利公式計算器 - 最佳投注比例</title>
+<meta name="description" content="使用凱利公式計算最優投注比例。輸入勝率、賠率和本金，快速獲得最佳下注金額和風險評估。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/zh-CN/kelly-criterion.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/kelly-criterion.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/kelly-criterion.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/kelly-criterion.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/kelly-criterion.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/kelly-criterion.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/kelly-criterion.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/kelly-criterion.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/kelly-criterion.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/kelly-criterion.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/kelly-criterion.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/kelly-criterion.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "凱利公式計算器", "url": "https://softglow-ai.com/tools/kelly-criterion.html", "description": "使用凱利公式計算最優投注比例。輸入勝率、賠率和本金，快速獲得最佳下注金額和風險評估。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "什麼是凱利公式？", "acceptedAnswer": {"@type": "Answer", "text": "凱利公式是一個數學方程式，用於計算在重複投注或投資中最大化長期增長的最佳投注規模。公式考慮您的勝率、賠率和資金量。"}}, {"@type": "Question", "name": "凱利值0.25是什麼意思？", "acceptedAnswer": {"@type": "Answer", "text": "凱利值0.25表示您應將總資金的25%用於單次下注。例如，如果您有1000元資金，應投注250元。"}}, {"@type": "Question", "name": "為什麼不能投注更多資金？", "acceptedAnswer": {"@type": "Answer", "text": "過度投注會增加破產風險。凱利公式已被證明能在長期內最大化資金增長，超過該值會增加風險而不增加預期利潤。"}}, {"@type": "Question", "name": "什麼是分數凱利策略？", "acceptedAnswer": {"@type": "Answer", "text": "分數凱利是指只投注凱利公式建議金額的一部分（通常25-50%），以降低風險。職業交易員經常使用此方法提高安全性。"}}, {"@type": "Question", "name": "凱利公式適用於所有投注嗎？", "acceptedAnswer": {"@type": "Answer", "text": "凱利公式在勝率估計準確時效果最佳。對於複雜或不確定性高的投注，應謹慎使用，並考慮使用更保守的投注策略。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<nav class="nav"><div class="nav-inner"><a href="/" class="nav-logo">Soft<span>Glow</span></a><div class="nav-links"><a href="/tools/">工具</a><a href="/blog/">Blog</a><a href="/">Home</a></div></div></nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 凱利公式計算器</div>
+<div class="container">
+<div class="lang-bar"><a href="/tools/en/kelly-criterion.html" class="lang-btn">English</a>
+    <a href="/tools/kelly-criterion.html" class="lang-btn">繁體中文</a>
+    <a href="/tools/ja/kelly-criterion.html" class="lang-btn">日本語</a>
+    <a href="/tools/de/kelly-criterion.html" class="lang-btn">Deutsch</a>
+    <a href="/tools/fr/kelly-criterion.html" class="lang-btn">Français</a>
+    <a href="/tools/es/kelly-criterion.html" class="lang-btn">Español</a>
+    <a href="/tools/pt/kelly-criterion.html" class="lang-btn">Português</a>
+    <a href="/tools/ko/kelly-criterion.html" class="lang-btn">한국어</a>
+    <a href="/tools/id/kelly-criterion.html" class="lang-btn">Bahasa Indonesia</a>
+    <a href="/tools/zh-CN/kelly-criterion.html" class="lang-btn active">简体中文</a></div>
+<div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>凱利公式計算器</h1>
+    <p class="calc-subtitle">計算每次下注的最佳資金比例</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="winProbability">勝率（小數格式）</label>
+  <div class="input-row"><input type="number" id="winProbability" placeholder="0.55"  step="0.01"></div>
+</div>
+  <small class="input-help">輸入勝率作為0到1之間的小數（例如0.55表示55%）</small>
+<div class="input-group">
+  <label for="oddsDecimal">賠率（小數格式）</label>
+  <div class="input-row"><input type="number" id="oddsDecimal" placeholder="2.5"  step="0.01"></div>
+</div>
+  <small class="input-help">輸入小數格式的賠率（例如2.5表示贏得時獲得2.5倍賭注）</small>
+<div class="input-group">
+  <label for="bankroll">初始資金</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="bankroll" placeholder="1000"  step="1"></div>
+</div>
+  <small class="input-help">輸入您的總可用投注資金</small></div>
+    <button class="btn-calc" onclick="calculate()">計算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">凱利公式值（f值）</span><span class="result-value" id="kellyCriterion">—</span></div>
+<div class="result-highlight"><span class="result-label">最佳下注金額</span><span class="result-value" id="optimalBetAmount">—</span></div>
+<div class="result-item"><span class="result-label">風險評估</span><span class="result-value" id="riskLevel">—</span></div>
+<div class="result-item"><span class="result-label">每次下注的期望值</span><span class="result-value" id="expectedValue">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> 凱利公式值（f值）表示您應投入資金的最佳百分比，最佳下注金額為根據您的資金計算出的具體金額。風險評估顯示該策略的風險等級，期望值表示每次下注的平均預期利潤。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 列印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <article class="article"><h2>凱利公式簡介</h2><p>凱利公式是由美國數學家約翰·凱利在1956年提出的資金管理策略。它用於計算在一系列投注中最大化長期增長的最佳賭注規模。公式為：f* = (bp - q) / b，其中b是賠率減1，p是勝率，q是敗率。</p><h2>如何使用本計算器</h2><p>輸入三個關鍵參數：您認為會贏的概率（0到1之間），您的投注賠率（小數格式），以及您的起始資金。計算器會立即顯示應投注的最佳資金百分比和具體金額。</p><h2>理解凱利值</h2><p>凱利值（f值）表示您應將總資金的百分之幾用於單次下注。例如，如果凱利值為0.25，表示應投注資金的25%。較高的凱利值意味著更激進的策略，但風險也更高。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>風險與報酬</h2><p>凱利公式在長期內能最大化資金增長，但前提是您的概率估計準確。過度估計勝率可能導致破產，因此許多職業投資者使用「分數凱利」，投注凱利值的25-50%以降低風險。</p><h2>實際應用</h2><p>該公式廣泛應用於體育博彩、股票投資和撲克等領域。無論是職業交易員還是業餘愛好者，了解最優投注規模都能顯著改善長期財務結果。</p><h2>重要提示</h2><p>請記住，凱利公式的有效性取決於您對勝率的準確預測。如果估計有誤，結果可能不理想。始終謹慎進行，考慮使用保守的凱利值作為初始策略。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">什麼是凱利公式？</div><div class="faq-a">凱利公式是一個數學方程式，用於計算在重複投注或投資中最大化長期增長的最佳投注規模。公式考慮您的勝率、賠率和資金量。</div></div>
+  <div class="faq-item"><div class="faq-q">凱利值0.25是什麼意思？</div><div class="faq-a">凱利值0.25表示您應將總資金的25%用於單次下注。例如，如果您有1000元資金，應投注250元。</div></div>
+  <div class="faq-item"><div class="faq-q">為什麼不能投注更多資金？</div><div class="faq-a">過度投注會增加破產風險。凱利公式已被證明能在長期內最大化資金增長，超過該值會增加風險而不增加預期利潤。</div></div>
+  <div class="faq-item"><div class="faq-q">什麼是分數凱利策略？</div><div class="faq-a">分數凱利是指只投注凱利公式建議金額的一部分（通常25-50%），以降低風險。職業交易員經常使用此方法提高安全性。</div></div>
+  <div class="faq-item"><div class="faq-q">凱利公式適用於所有投注嗎？</div><div class="faq-a">凱利公式在勝率估計準確時效果最佳。對於複雜或不確定性高的投注，應謹慎使用，並考慮使用更保守的投注策略。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/roi-calculator.html">ROI 計算機</a>
+      <a class="tool-pill" href="/tools/risk-reward.html">風險報酬計算機</a>
+      <a class="tool-pill" href="/tools/position-size.html">部位規模計算器</a>
+      <a class="tool-pill" href="/tools/stop-loss.html">停損計算機</a>
+      <a class="tool-pill" href="/tools/dividend-yield.html">股息收益率計算機</a>
+      <a class="tool-pill" href="/tools/pe-ratio.html">本益比計算機</a>
+      <a class="tool-pill" href="/tools/dca-calculator.html">定期定額投資計算機</a>
+      <a class="tool-pill" href="/tools/cagr.html">年複合成長率計算器</a>
+      <a class="tool-pill" href="/tools/margin-calculator.html">保證金計算器</a>
+      <a class="tool-pill" href="/tools/stock-gain-loss.html">股票損益計算機</a>
+      <a class="tool-pill" href="/tools/break-even.html">損益平衡點計算機</a></div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const winProb = parseFloat(document.getElementById('winProbability').value);
+  const odds = parseFloat(document.getElementById('oddsDecimal').value);
+  const bankroll = parseFloat(document.getElementById('bankroll').value);
+
+  if (!winProb || !odds || !bankroll) {
+    alert('Please fill in all fields with valid numbers');
+    return;
+  }
+
+  if (winProb <= 0 || winProb > 1) {
+    alert('Probability must be between 0 and 1 (0.01 to 0.99)');
+    return;
+  }
+
+  if (odds < 1) {
+    alert('Odds must be greater than or equal to 1');
+    return;
+  }
+
+  if (bankroll <= 0) {
+    alert('Bankroll must be a positive number');
+    return;
+  }
+
+  const lossProb = 1 - winProb;
+  const b = odds - 1;
+  const kellyCriterion = (b * winProb - lossProb) / b;
+
+  let riskAssessment = 'Moderate';
+  let displayKelly = kellyCriterion;
+
+  if (kellyCriterion < 0) {
+    riskAssessment = 'Avoid bet (negative edge)';
+    displayKelly = 0;
+  } else if (kellyCriterion > 0.25) {
+    riskAssessment = 'High volatility risk';
+  } else if (kellyCriterion < 0.01) {
+    riskAssessment = 'Very conservative';
+  }
+
+  const optimalBet = bankroll * displayKelly;
+  const expectedValue = optimalBet * (winProb * (odds - 1) - lossProb);
+
+  document.getElementById('kellyCriterion').textContent = (displayKelly * 100).toLocaleString('en-US', {maximumFractionDigits: 2});
+  document.getElementById('optimalBetAmount').textContent = optimalBet.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('riskLevel').textContent = riskAssessment;
+  document.getElementById('expectedValue').textContent = expectedValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}};},2000);
+</script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-TW|kelly-criterion|2026-07-09 -->
