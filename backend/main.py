@@ -6591,8 +6591,8 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{stock_id} {stock_name} 個股分析報告 {report_date} — 線上有位</title>
-<meta name="description" content="{stock_id} {stock_name} {report_date} 技術分析報告：{trend}，支撐 {support}，壓力 {resistance}，損益比 {rr_ratio:.2f}">
+<title>{stock_name}({stock_id}) 能買嗎？多空雷達 × 支撐壓力完整分析 {report_date}｜線上有位</title>
+<meta name="description" content="輸入股票代號，AI 自動分析多空雷達、K棒型態、支撐壓力位、葛蘭碧買點，一鍵產出完整報告。免費使用。還有 500+ 計算工具和全球彩票選號。">
 <meta property="og:title" content="{stock_id} {stock_name} 分析報告">
 <meta property="og:description" content="{trend}｜支撐 {support}｜壓力 {resistance}｜損益比 {rr_ratio:.2f}">
 <meta property="og:type" content="article">
@@ -7395,11 +7395,11 @@ def picks_page():
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>每日精選台股 {date_str} — 線上有位</title>
-<meta name="description" content="線上有位每日精選台股，依均線金叉、KD指標、量能、MACD篩選強勢候選股。{date_str} 共 {count} 支入選。">
+<title>今日精選股｜AI 篩出的強勢股＋進場理由與停損位 {date_str}｜線上有位</title>
+<meta name="description" content="AI 每日從台股篩出均線金叉、KD黃金交叉、量能爆發的強勢股，附進場理由與建議停損位。{date_str} 共 {count} 支入選。還有 500+ 免費計算工具。">
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="{BACKEND_URL}/picks">
-<meta property="og:title" content="每日精選台股 {date_str} — 線上有位">
+<meta property="og:title" content="今日精選股｜AI 篩出的強勢股＋進場理由 {date_str}｜線上有位">
 <meta property="og:description" content="依均線金叉、KD指標、量能、MACD篩選強勢候選股，{date_str} 共 {count} 支入選">
 <meta property="og:url" content="{BACKEND_URL}/picks">
 <meta property="og:type" content="website">
@@ -7710,8 +7710,8 @@ def rankings():
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>台股排行榜 漲幅/跌幅/成交量 Top 20 — 線上有位</title>
-<meta name="description" content="台股今日漲幅榜、跌幅榜、成交量榜 Top 20，資料來源 FinMind，每15分鐘更新">
+<title>台股今日漲跌排行｜漲幅、跌幅、成交量 Top 20 即時更新｜線上有位</title>
+<meta name="description" content="台股今日漲幅榜、跌幅榜、成交量榜 Top 20，即時更新。搭配 AI 個股分析報告（多空雷達＋K棒型態＋支撐壓力），一鍵查看任一股。">
 <script type="application/ld+json">{json_ld}</script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739" crossorigin="anonymous"></script>
 <style>
