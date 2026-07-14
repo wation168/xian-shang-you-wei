@@ -108,7 +108,7 @@
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/fuse.js/7.0.0/fuse.min.js';
     script.onload = function() {
       // Load search index
-      fetch('/search-index.json')
+      fetch('/common/search-index.json')
         .then(function(r){ return r.json(); })
         .then(function(data){
           _searchIndex = data;
@@ -143,7 +143,7 @@
     var typeLabels = _typeLabels();
     results.slice(0, 10).forEach(function(r) {
       var item = r.item;
-      var title = (item.titles && item.titles[META.lang]) || (item.titles && item.titles['en']) || item.slug;
+      var title = (item.names && item.names[META.lang]) || (item.names && item.names['en']) || item.slug;
       var url = _buildUrl(item);
       var typeLabel = typeLabels[item.type] || item.type;
       html += '<div class="search-item" onclick="window.location.href=\'' + url + '\'">' +
