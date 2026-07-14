@@ -2,457 +2,152 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>캔들스틱 패턴 완전 가이드 | 線上有位</title>
-<meta name="description" content="50가지 이상의 캔들스틱 및 차트 패턴을 SVG 그림, 시장 심리, 승률 통계와 함께 완전 해설.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>*{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0d1117;--surface:#161b22;--border:#21262d;--text:#e6edf3;--muted:#8b949e;--accent:#f59e0b;--bull:#22c55e;--bear:#ef4444;--radius:8px;--font:'Inter',system-ui,sans-serif;}
-body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6;font-size:15px}
-a{color:var(--accent);text-decoration:none}
-nav{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
-.nav-logo{font-weight:700;font-size:18px;color:var(--accent)}
-.nav-links{display:flex;gap:16px;margin-left:auto;font-size:14px}
-.hero{background:linear-gradient(135deg,#0d1117 0%,#1a1f2e 100%);padding:60px 24px 40px;text-align:center;border-bottom:1px solid var(--border)}
-.hero h1{font-size:clamp(28px,5vw,48px);font-weight:800;letter-spacing:-1px;line-height:1.2}
-.hero h1 span{background:linear-gradient(90deg,var(--bull),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero-sub{color:var(--muted);margin-top:12px;font-size:16px;max-width:640px;margin-inline:auto}
-.lang-switcher{display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap}
-.lang-btn{padding:5px 14px;border:1px solid var(--border);border-radius:16px;font-size:13px;color:var(--muted);transition:.2s}
-.lang-btn:hover,.lang-btn.active{border-color:var(--accent);color:var(--accent)}
-.container{max-width:1100px;margin:0 auto;padding:0 24px}
-.section-header{margin:40px 0 20px;padding-bottom:10px;border-bottom:1px solid var(--border)}
-.section-header h2{font-size:20px;font-weight:700;color:var(--accent)}
-.pattern-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:16px}
-.pattern-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;transition:border-color .2s,transform .2s;cursor:pointer;display:block}
-.pattern-card:hover{border-color:var(--accent);transform:translateY(-2px)}
-.card-name{font-weight:700;font-size:15px;margin-bottom:8px;color:var(--text)}
-.card-meta{display:flex;gap:6px;flex-wrap:wrap}
-.tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600}
-.tag-bull{background:#14532d;color:var(--bull)}.tag-bear{background:#450a0a;color:var(--bear)}.tag-neutral{background:#1e293b;color:var(--muted)}
-.tag-high{background:#1c2e1c;color:#86efac}.tag-medium{background:#2a2007;color:#fcd34d}.tag-low{background:#1e1e2e;color:#94a3b8}
-footer{background:var(--surface);border-top:1px solid var(--border);padding:32px 24px;margin-top:60px;text-align:center;color:var(--muted);font-size:14px}
-.footer-logo{color:var(--accent);font-weight:700;font-size:18px;margin-bottom:8px}</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>캔들스틱 패턴 - SoftGlow</title>
+<meta name="description" content="Learn 50+ candlestick patterns">
+<meta name="robots" content="index, follow">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="patterns-index">
+<meta name="sg-type" content="page">
+<meta name="sg-lang" content="ko">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:#2D3748;background:#fff;line-height:1.6}
+a{color:#2563EB;text-decoration:none}
+.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);border-bottom:1px solid #E2E8F0}
+.nav-inner{max-width:1080px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px}
+.nav-logo{font-size:17px;font-weight:700;color:#2D3748}.nav-logo span{color:#2563EB}
+.nav-links{display:flex;gap:12px;align-items:center}.nav-links a{font-size:13px;color:#4A5568;font-weight:500}
+.nav-actions{display:flex;gap:6px;align-items:center}
+.container{max-width:1080px;margin:0 auto;padding:20px}
+.header{text-align:center;padding:40px 0 20px}
+.header h1{font-size:28px;font-weight:700;color:#1A202C}
+.header p{color:#718096;margin-top:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin:24px 0}
+.card{display:block;padding:14px 16px;background:#F7FAFC;border:1px solid #E2E8F0;border-radius:10px;font-size:14px;color:#2D3748;transition:all 0.15s}
+.card:hover{background:#EBF5FF;border-color:#BEE3F8;text-decoration:none;transform:translateY(-1px)}
+.footer{border-top:1px solid #E2E8F0;padding:24px 0;margin-top:40px}
+.footer-inner{max-width:1080px;margin:0 auto;padding:0 20px;display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:#A0AEC0}
+.footer-inner a{color:#718096}
+@media(max-width:768px){.grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}.card{padding:12px;font-size:13px}}
+</style>
 </head>
 <body>
-<nav>
-  <a class="nav-logo" href="/">線上有位</a>
-  <div class="nav-links"><a href="/">홈</a><a href="/patterns/ko.html">패턴</a></div>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/ko/">Tools</a>
+    <a href="/patterns/ko.html">Patterns</a>
+    <a href="/blog/ko/index.html">Blog</a>
+    <a href="/">Home</a>
+  </div>
+  <div class="nav-actions">
+    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/patterns/index.html">繁中</option><option value="/patterns/en.html">EN</option><option value="/patterns/ja.html">日本語</option><option value="/patterns/ko.html" selected>한국어</option><option value="/patterns/de.html">DE</option><option value="/patterns/fr.html">FR</option><option value="/patterns/es.html">ES</option><option value="/patterns/pt.html">PT</option><option value="/patterns/id.html">ID</option><option value="/patterns/zh-CN.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+  </div>
+</div>
 </nav>
-<div class="hero">
-  <div style="display:inline-block;background:#1e3a5f;color:#60a5fa;border:1px solid #1d4ed8;border-radius:20px;padding:4px 14px;font-size:13px;margin-bottom:16px">기술적 분석</div>
-  <h1><span>캔들스틱 패턴 완전 가이드</span></h1>
-  <p class="hero-sub">50가지 이상의 캔들스틱 및 차트 패턴을 SVG 그림, 시장 심리, 승률 통계와 함께 완전 해설.</p>
-  <div class="lang-switcher">
-    <a href="/patterns/index.html" class="lang-btn">繁中</a>
-    <a href="/patterns/en.html" class="lang-btn">EN</a>
-    <a href="/patterns/ja.html" class="lang-btn">日本語</a>
-    <a href="/patterns/ko.html" class="lang-btn active">한국어</a>
+
+<div class="container">
+  <div class="header">
+    <h1>캔들스틱 패턴</h1>
+    <p>66  patterns</p>
   </div>
-</div>
-<div class="container" style="padding-bottom:60px">
-<div class="section-header"><h2>단일 캔들스틱 패턴</h2></div>
-<div class="pattern-grid">
-<a class="pattern-card" href="/patterns/ko/big-bullish.html">
-  <div class="card-name">대양봉</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-medium">신뢰도 보통</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 68%</span>
+  <div class="grid">
+      <a href="/patterns/ko/abandoned-baby-bearish.html" class="card">포기된 아기 약세 캔들스틱 패턴 분석</a>
+      <a href="/patterns/ko/abandoned-baby-bull.html" class="card">강세 버림아이</a>
+      <a href="/patterns/ko/abandoned-baby-bullish.html" class="card">어댑티드 베이비 불리시 캔들스틱 패턴</a>
+      <a href="/patterns/ko/ascending-triangle.html" class="card">상승삼각형 패턴 - 강세 지속 신호 분석</a>
+      <a href="/patterns/ko/bear-flag.html" class="card">약세 깃발형</a>
+      <a href="/patterns/ko/bearish-belt-hold.html" class="card">베어리시 벨트홀드 캔들 패턴</a>
+      <a href="/patterns/ko/bearish-engulfing.html" class="card">베어리시 엔걸핑 패턴 - 강세장 반전 신호</a>
+      <a href="/patterns/ko/bearish-harami.html" class="card">약세 하라미 패턴 - 상승세 반전 신호</a>
+      <a href="/patterns/ko/bearish-marubozu.html" class="card">약세 마루보주 캔들 패턴 - 강세 반전 신호</a>
+      <a href="/patterns/ko/big-bearish.html" class="card">빅 베어리시 캔들 패턴 - 약세 신호 분석</a>
+      <a href="/patterns/ko/big-bullish.html" class="card">빅 불리시(Big Bullish) 캔들 패턴 분석 및 매매 전략</a>
+      <a href="/patterns/ko/bullish-belt-hold.html" class="card">강세 벨트 홀드 캔들스틱 패턴 - 매매 신호 분석</a>
+      <a href="/patterns/ko/bullish-engulfing.html" class="card">강세 엔벨로핑 패턴: 하락세에서의 반전 신호</a>
+      <a href="/patterns/ko/bullish-harami.html" class="card">강세 하라미 패턴: 하락 추세 반전 신호</a>
+      <a href="/patterns/ko/bullish-marubozu.html" class="card">강세 마루보즈 캔들 패턴</a>
+      <a href="/patterns/ko/cup-handle.html" class="card">컵 핸들 패턴: 강세 지속 차트 패턴 분석</a>
+      <a href="/patterns/ko/dark-cloud.html" class="card">다크 클라우드 패턴 - 약세 반전 캔들 분석</a>
+      <a href="/patterns/ko/descending-triangle.html" class="card">하락 삼각형</a>
+      <a href="/patterns/ko/doji.html" class="card">도지 캔들 패턴 분석 및 거래 전략 가이드</a>
+      <a href="/patterns/ko/double-bottom.html" class="card">더블 바닥(Double Bottom) 캔들 패턴 - 강세 반전 신호</a>
+      <a href="/patterns/ko/double-top.html" class="card">더블탑 캔들스틱 패턴: 베어리시 반전 신호</a>
+      <a href="/patterns/ko/dragonfly-doji.html" class="card">드래곤플라이 도지 패턴</a>
+      <a href="/patterns/ko/evening-doji-star.html" class="card">이브닝 도지 스타 패턴: 베어리시 반전 신호</a>
+      <a href="/patterns/ko/evening-star.html" class="card">이브닝 스타(Evening Star) 캔들 패턴 분석</a>
+      <a href="/patterns/ko/falling-three-methods.html" class="card">폴링 쓰리 메서드 캔들 패턴</a>
+      <a href="/patterns/ko/falling-window.html" class="card">폴링 윈도우(Falling Window) 캔들 패턴 분석</a>
+      <a href="/patterns/ko/flag-bull.html" class="card">강세 깃발형</a>
+      <a href="/patterns/ko/gap-down.html" class="card">하향 갭</a>
+      <a href="/patterns/ko/gap-up.html" class="card">상향 갭</a>
+      <a href="/patterns/ko/gravestone-doji.html" class="card">묘지 도지(Gravestone Doji) 캔들 패턴 분석</a>
+      <a href="/patterns/ko/hammer.html" class="card">해머 캔들 패턴</a>
+      <a href="/patterns/ko/hanging-man.html" class="card">행잉맨 캔들 패턴: 약세 반전 신호 해석</a>
+      <a href="/patterns/ko/head-shoulders-top.html" class="card">머리어깨 천장</a>
+      <a href="/patterns/ko/head-shoulders.html" class="card">헤드 앤 숄더 패턴: 강세 반전 신호 분석</a>
+      <a href="/patterns/ko/inverse-head-shoulders.html" class="card">역 머리어깨</a>
+      <a href="/patterns/ko/inverted-hammer.html" class="card">역망치 캔들 패턴</a>
+      <a href="/patterns/ko/kicker-bearish.html" class="card">킥커 베어리시 캔들 패턴: 하락세 반전 신호</a>
+      <a href="/patterns/ko/kicker-bullish.html" class="card">킥커 불리시 캔들 패턴: 강세 반전 거래 가이드</a>
+      <a href="/patterns/ko/long-legged-doji.html" class="card">롱 레그드 도지(Long Legged Doji) 캔들 패턴</a>
+      <a href="/patterns/ko/mat-hold.html" class="card">매트 홀드 캔들스틱 패턴 - 강세 지속 패턴</a>
+      <a href="/patterns/ko/morning-doji-star.html" class="card">Morning Doji Star 캔들 패턴 - 강세 반전 신호</a>
+      <a href="/patterns/ko/morning-star.html" class="card">모닝스타 캔들패턴</a>
+      <a href="/patterns/ko/on-neck.html" class="card">목에 걸치기</a>
+      <a href="/patterns/ko/pennant.html" class="card">페넌트</a>
+      <a href="/patterns/ko/piercing-line.html" class="card">피어싱 라인(Piercing Line) 캔들 패턴 분석</a>
+      <a href="/patterns/ko/rectangle-bull.html" class="card">강세 직사각형</a>
+      <a href="/patterns/ko/rising-three-methods.html" class="card">상승 3법 패턴</a>
+      <a href="/patterns/ko/rising-window.html" class="card">라이징 윈도우(Rising Window) 캔들 패턴 분석</a>
+      <a href="/patterns/ko/separating-lines-bearish.html" class="card">분리선 약세 패턴: 하락세 지속 신호</a>
+      <a href="/patterns/ko/separating-lines-bullish.html" class="card">분리선 불릿 캔들스틱 패턴 - 강세 지속 신호</a>
+      <a href="/patterns/ko/shooting-star.html" class="card">샤이닝스타 캔들 패턴: 하락 전환 신호</a>
+      <a href="/patterns/ko/spinning-top.html" class="card">스핀닝탑 캔들 패턴 분석 및 거래 전략</a>
+      <a href="/patterns/ko/three-black-crows.html" class="card">스리 블랙 크로우 캔들 패턴 - 약세 반전 분석</a>
+      <a href="/patterns/ko/three-inside-down.html" class="card">쓰리 인사이드 다운 캔들 패턴: 하락 반전 신호</a>
+      <a href="/patterns/ko/three-inside-up.html" class="card">스리 인사이드 업(Three Inside Up) 캔들스틱 패턴 분석</a>
+      <a href="/patterns/ko/three-outside-down.html" class="card">쓰리 아웃사이드 다운 캔들 패턴 분석</a>
+      <a href="/patterns/ko/three-outside-up.html" class="card">쓰리 아웃사이드 업(Three Outside Up) 캔들 패턴 분석</a>
+      <a href="/patterns/ko/three-white-soldiers.html" class="card">쓰리 화이트 솔저스 캔들 패턴 - 강세 반전 신호</a>
+      <a href="/patterns/ko/tri-star.html" class="card">트리스타 캔들패턴: 중립 신호와 우유부단 분석</a>
+      <a href="/patterns/ko/triangle-symmetrical.html" class="card">대칭 삼각형</a>
+      <a href="/patterns/ko/triple-bottom.html" class="card">삼중 바닥</a>
+      <a href="/patterns/ko/triple-top.html" class="card">삼중 천장</a>
+      <a href="/patterns/ko/tweezer-bottom.html" class="card">트위저 바닥 캔들 패턴: 강세 반전 신호</a>
+      <a href="/patterns/ko/tweezer-top.html" class="card">트위저 탑 캔들 패턴</a>
+      <a href="/patterns/ko/wedge-falling.html" class="card">하락 쐐기형</a>
+      <a href="/patterns/ko/wedge-rising.html" class="card">상승 쐐기형</a>
   </div>
-</a><a class="pattern-card" href="/patterns/ko/big-bearish.html">
-  <div class="card-name">대음봉</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">약세</span>
-    <span class="tag tag-medium">신뢰도 보통</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 71%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/doji.html">
-  <div class="card-name">도지</div>
-  <div class="card-meta">
-    <span class="tag tag-neutral">중립</span>
-    <span class="tag tag-low">신뢰도 낮음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 54%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/hammer.html">
-  <div class="card-name">해머</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-medium">신뢰도 보통</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 60%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/shooting-star.html">
-  <div class="card-name">유성형</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">약세</span>
-    <span class="tag tag-medium">신뢰도 보통</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 66%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/hanging-man.html">
-  <div class="card-name">교수형</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">약세</span>
-    <span class="tag tag-medium">신뢰도 보통</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 59%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/inverted-hammer.html">
-  <div class="card-name">역 해머</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-medium">신뢰도 보통</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 57%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/dragonfly-doji.html">
-  <div class="card-name">잠자리 도지</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-medium">신뢰도 보통</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 64%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/gravestone-doji.html">
-  <div class="card-name">비석 도지</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">약세</span>
-    <span class="tag tag-medium">신뢰도 보통</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 62%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/spinning-top.html">
-  <div class="card-name">팽이형</div>
-  <div class="card-meta">
-    <span class="tag tag-neutral">중립</span>
-    <span class="tag tag-low">신뢰도 낮음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 54%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/long-legged-doji.html">
-  <div class="card-name">장다리 도지</div>
-  <div class="card-meta">
-    <span class="tag tag-neutral">중립</span>
-    <span class="tag tag-low">신뢰도 낮음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 52%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/bullish-marubozu.html">
-  <div class="card-name">강세 마루보주</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 74%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/bearish-marubozu.html">
-  <div class="card-name">약세 마루보주</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">약세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 73%</span>
-  </div>
-</a>
-</div>
-<div class="section-header"><h2>이중 캔들스틱 패턴</h2></div>
-<div class="pattern-grid">
-<a class="pattern-card" href="/patterns/ko/bullish-engulfing.html">
-  <div class="card-name">강세 포함형</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-medium">신뢰도 보통</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 63%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/bearish-engulfing.html">
-  <div class="card-name">약세 포함형</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">약세</span>
-    <span class="tag tag-medium">신뢰도 보통</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 61%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/piercing-line.html">
-  <div class="card-name">관통선</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-medium">신뢰도 보통</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 64%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/dark-cloud.html">
-  <div class="card-name">먹구름 덮개</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">약세</span>
-    <span class="tag tag-medium">신뢰도 보통</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 62%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/bullish-harami.html">
-  <div class="card-name">강세 잉태형</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-low">신뢰도 낮음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 53%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/bearish-harami.html">
-  <div class="card-name">약세 잉태형</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">약세</span>
-    <span class="tag tag-low">신뢰도 낮음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 55%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/tweezer-bottom.html">
-  <div class="card-name">집게 바닥</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-medium">신뢰도 보통</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 61%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/tweezer-top.html">
-  <div class="card-name">집게 천장</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">약세</span>
-    <span class="tag tag-medium">신뢰도 보통</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 60%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/kicker-bullish.html">
-  <div class="card-name">강세 킥</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 76%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/on-neck.html">
-  <div class="card-name">목에 걸치기</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">약세</span>
-    <span class="tag tag-low">신뢰도 낮음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 58%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/gap-up.html">
-  <div class="card-name">상향 갭</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-medium">신뢰도 보통</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 65%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/gap-down.html">
-  <div class="card-name">하향 갭</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">약세</span>
-    <span class="tag tag-medium">신뢰도 보통</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 63%</span>
-  </div>
-</a>
-</div>
-<div class="section-header">
-<div style="margin:24px 0;text-align:center;">
-<ins class="adsbygoogle"
-     style="display:block; text-align:center; min-height:250px;"
-     data-ad-layout="in-article"
-     data-ad-format="fluid"
-     data-ad-client="ca-pub-1768270548115739"
-     data-ad-slot="2793159185"></ins>
-<script>try{(adsbygoogle=window.adsbygoogle||[]).push({});}catch(e){}</script>
-</div>
-<h2>삼중 캔들스틱 패턴</h2></div>
-<div class="pattern-grid">
-<a class="pattern-card" href="/patterns/ko/morning-star.html">
-  <div class="card-name">아침별</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 72%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/evening-star.html">
-  <div class="card-name">저녁별</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">약세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 69%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/morning-doji-star.html">
-  <div class="card-name">아침 도지 별</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 71%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/evening-doji-star.html">
-  <div class="card-name">저녁 도지 별</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">약세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 70%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/three-white-soldiers.html">
-  <div class="card-name">세 백기병</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 78%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/three-black-crows.html">
-  <div class="card-name">세 까마귀</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">약세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 76%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/three-inside-up.html">
-  <div class="card-name">세 내부 상승</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-medium">신뢰도 보통</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 65%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/three-inside-down.html">
-  <div class="card-name">세 내부 하락</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">약세</span>
-    <span class="tag tag-medium">신뢰도 보통</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 63%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/abandoned-baby-bull.html">
-  <div class="card-name">강세 버림아이</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 75%</span>
-  </div>
-</a>
-</div>
-<div class="section-header"><h2>차트 패턴</h2></div>
-<div class="pattern-grid">
-<a class="pattern-card" href="/patterns/ko/double-bottom.html">
-  <div class="card-name">이중 바닥</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 73%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/double-top.html">
-  <div class="card-name">이중 천장</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">약세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 72%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/triple-bottom.html">
-  <div class="card-name">삼중 바닥</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 71%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/triple-top.html">
-  <div class="card-name">삼중 천장</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">약세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 70%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/head-shoulders-top.html">
-  <div class="card-name">머리어깨 천장</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">약세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 74%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/inverse-head-shoulders.html">
-  <div class="card-name">역 머리어깨</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 73%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/ascending-triangle.html">
-  <div class="card-name">상승 삼각형</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 68%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/descending-triangle.html">
-  <div class="card-name">하락 삼각형</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">약세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 66%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/triangle-symmetrical.html">
-  <div class="card-name">대칭 삼각형</div>
-  <div class="card-meta">
-    <span class="tag tag-neutral">중립</span>
-    <span class="tag tag-medium">신뢰도 보통</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 63%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/rectangle-bull.html">
-  <div class="card-name">강세 직사각형</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-medium">신뢰도 보통</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 64%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/flag-bull.html">
-  <div class="card-name">강세 깃발형</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 67%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/bear-flag.html">
-  <div class="card-name">약세 깃발형</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">약세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 65%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/pennant.html">
-  <div class="card-name">페넌트</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-medium">신뢰도 보통</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 66%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/cup-handle.html">
-  <div class="card-name">컵과 손잡이</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 65%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/wedge-falling.html">
-  <div class="card-name">하락 쐐기형</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">강세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 69%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ko/wedge-rising.html">
-  <div class="card-name">상승 쐐기형</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">약세</span>
-    <span class="tag tag-high">신뢰도 높음</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">승률 68%</span>
-  </div>
-</a>
 </div>
 
-</div>
-<footer>
-  <div class="footer-logo">線上有位</div>
-  <p>Professional Taiwan stock technical analysis platform.</p>
-  <p style="margin-top:8px;font-size:12px">© 2025 線上有位. All rights reserved.</p>
-
-<div style="margin:32px 0 16px;text-align:center;">
-<ins class="adsbygoogle"
-     style="display:block; min-height:250px;"
-     data-ad-client="ca-pub-1768270548115739"
-     data-ad-slot="4182262477"
-     data-ad-format="auto"
-     data-full-width-responsive="true"></ins>
-<script>try{(adsbygoogle=window.adsbygoogle||[]).push({});}catch(e){}</script>
+<footer class="footer">
+<div class="footer-inner">
+  <a href="/about.html">About</a>
+  <a href="/contact.html">Contact</a>
+  <a href="/privacy.html">Privacy</a>
+  <a href="/terms.html">Terms</a>
+  <span style="margin-left:auto">© 2026 SoftGlow</span>
 </div>
 </footer>
 
-<script>
-setTimeout(function(){
-  var s=document.createElement('script');
-  s.async=true;
-  s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';
-  s.crossOrigin='anonymous';
-  document.head.appendChild(s);
-},2000);
-</script>
-</body></html>
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Search..." autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header"><h3>Bookmarks</h3><button class="bm-clear" onclick="window._sgClearBm()">Clear</button></div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+<script src="/common/softglow-common.js"></script>
+</body>
+</html>

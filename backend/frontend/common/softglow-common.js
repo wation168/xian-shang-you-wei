@@ -113,7 +113,7 @@
         .then(function(data){
           _searchIndex = data;
           _fuse = new Fuse(data, {
-            keys: ['titles.' + META.lang, 'titles.en', 'slug'],
+            keys: ['names.' + META.lang, 'names.en', 'slug'],
             threshold: 0.3,
             limit: 10
           });

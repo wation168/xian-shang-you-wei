@@ -2,457 +2,152 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ローソク足パターン完全解析 | 線上有位</title>
-<meta name="description" content="50種類以上のローソク足・チャートパターンをSVG図解・市場心理・勝率統計付きで完全解説。">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>*{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#0d1117;--surface:#161b22;--border:#21262d;--text:#e6edf3;--muted:#8b949e;--accent:#f59e0b;--bull:#22c55e;--bear:#ef4444;--radius:8px;--font:'Inter',system-ui,sans-serif;}
-body{background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.6;font-size:15px}
-a{color:var(--accent);text-decoration:none}
-nav{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
-.nav-logo{font-weight:700;font-size:18px;color:var(--accent)}
-.nav-links{display:flex;gap:16px;margin-left:auto;font-size:14px}
-.hero{background:linear-gradient(135deg,#0d1117 0%,#1a1f2e 100%);padding:60px 24px 40px;text-align:center;border-bottom:1px solid var(--border)}
-.hero h1{font-size:clamp(28px,5vw,48px);font-weight:800;letter-spacing:-1px;line-height:1.2}
-.hero h1 span{background:linear-gradient(90deg,var(--bull),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero-sub{color:var(--muted);margin-top:12px;font-size:16px;max-width:640px;margin-inline:auto}
-.lang-switcher{display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap}
-.lang-btn{padding:5px 14px;border:1px solid var(--border);border-radius:16px;font-size:13px;color:var(--muted);transition:.2s}
-.lang-btn:hover,.lang-btn.active{border-color:var(--accent);color:var(--accent)}
-.container{max-width:1100px;margin:0 auto;padding:0 24px}
-.section-header{margin:40px 0 20px;padding-bottom:10px;border-bottom:1px solid var(--border)}
-.section-header h2{font-size:20px;font-weight:700;color:var(--accent)}
-.pattern-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:16px}
-.pattern-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;transition:border-color .2s,transform .2s;cursor:pointer;display:block}
-.pattern-card:hover{border-color:var(--accent);transform:translateY(-2px)}
-.card-name{font-weight:700;font-size:15px;margin-bottom:8px;color:var(--text)}
-.card-meta{display:flex;gap:6px;flex-wrap:wrap}
-.tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600}
-.tag-bull{background:#14532d;color:var(--bull)}.tag-bear{background:#450a0a;color:var(--bear)}.tag-neutral{background:#1e293b;color:var(--muted)}
-.tag-high{background:#1c2e1c;color:#86efac}.tag-medium{background:#2a2007;color:#fcd34d}.tag-low{background:#1e1e2e;color:#94a3b8}
-footer{background:var(--surface);border-top:1px solid var(--border);padding:32px 24px;margin-top:60px;text-align:center;color:var(--muted);font-size:14px}
-.footer-logo{color:var(--accent);font-weight:700;font-size:18px;margin-bottom:8px}</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ローソク足パターン - SoftGlow</title>
+<meta name="description" content="Learn 50+ candlestick patterns">
+<meta name="robots" content="index, follow">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="patterns-index">
+<meta name="sg-type" content="page">
+<meta name="sg-lang" content="ja">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:#2D3748;background:#fff;line-height:1.6}
+a{color:#2563EB;text-decoration:none}
+.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);border-bottom:1px solid #E2E8F0}
+.nav-inner{max-width:1080px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px}
+.nav-logo{font-size:17px;font-weight:700;color:#2D3748}.nav-logo span{color:#2563EB}
+.nav-links{display:flex;gap:12px;align-items:center}.nav-links a{font-size:13px;color:#4A5568;font-weight:500}
+.nav-actions{display:flex;gap:6px;align-items:center}
+.container{max-width:1080px;margin:0 auto;padding:20px}
+.header{text-align:center;padding:40px 0 20px}
+.header h1{font-size:28px;font-weight:700;color:#1A202C}
+.header p{color:#718096;margin-top:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin:24px 0}
+.card{display:block;padding:14px 16px;background:#F7FAFC;border:1px solid #E2E8F0;border-radius:10px;font-size:14px;color:#2D3748;transition:all 0.15s}
+.card:hover{background:#EBF5FF;border-color:#BEE3F8;text-decoration:none;transform:translateY(-1px)}
+.footer{border-top:1px solid #E2E8F0;padding:24px 0;margin-top:40px}
+.footer-inner{max-width:1080px;margin:0 auto;padding:0 20px;display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:#A0AEC0}
+.footer-inner a{color:#718096}
+@media(max-width:768px){.grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}.card{padding:12px;font-size:13px}}
+</style>
 </head>
 <body>
-<nav>
-  <a class="nav-logo" href="/">線上有位</a>
-  <div class="nav-links"><a href="/">ホーム</a><a href="/patterns/ja.html">パターン</a></div>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/ja/">Tools</a>
+    <a href="/patterns/ja.html">Patterns</a>
+    <a href="/blog/ja/index.html">Blog</a>
+    <a href="/">Home</a>
+  </div>
+  <div class="nav-actions">
+    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/patterns/index.html">繁中</option><option value="/patterns/en.html">EN</option><option value="/patterns/ja.html" selected>日本語</option><option value="/patterns/ko.html">한국어</option><option value="/patterns/de.html">DE</option><option value="/patterns/fr.html">FR</option><option value="/patterns/es.html">ES</option><option value="/patterns/pt.html">PT</option><option value="/patterns/id.html">ID</option><option value="/patterns/zh-CN.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+  </div>
+</div>
 </nav>
-<div class="hero">
-  <div style="display:inline-block;background:#1e3a5f;color:#60a5fa;border:1px solid #1d4ed8;border-radius:20px;padding:4px 14px;font-size:13px;margin-bottom:16px">テクニカル分析</div>
-  <h1><span>ローソク足パターン完全解析</span></h1>
-  <p class="hero-sub">50種類以上のローソク足・チャートパターンをSVG図解・市場心理・勝率統計付きで完全解説。</p>
-  <div class="lang-switcher">
-    <a href="/patterns/index.html" class="lang-btn">繁中</a>
-    <a href="/patterns/en.html" class="lang-btn">EN</a>
-    <a href="/patterns/ja.html" class="lang-btn active">日本語</a>
-    <a href="/patterns/ko.html" class="lang-btn">한국어</a>
+
+<div class="container">
+  <div class="header">
+    <h1>ローソク足パターン</h1>
+    <p>66  patterns</p>
   </div>
-</div>
-<div class="container" style="padding-bottom:60px">
-<div class="section-header"><h2>単体ローソク足パターン</h2></div>
-<div class="pattern-grid">
-<a class="pattern-card" href="/patterns/ja/big-bullish.html">
-  <div class="card-name">大陽線</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-medium">信頼度中</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 68%</span>
+  <div class="grid">
+      <a href="/patterns/ja/abandoned-baby-bearish.html" class="card">アバンドンド・ベビー・ベアリッシュ</a>
+      <a href="/patterns/ja/abandoned-baby-bull.html" class="card">棄嬰（強気）</a>
+      <a href="/patterns/ja/abandoned-baby-bullish.html" class="card">アバンドンド・ベイビー強気型</a>
+      <a href="/patterns/ja/ascending-triangle.html" class="card">アセンディングトライアングル｜強気相場の継続パターン</a>
+      <a href="/patterns/ja/bear-flag.html" class="card">ベアフラッグ</a>
+      <a href="/patterns/ja/bearish-belt-hold.html" class="card">ベアリッシュ・ベルトホールド｜弱気の継続パターン</a>
+      <a href="/patterns/ja/bearish-engulfing.html" class="card">ベアリッシュ・エンガルフィング</a>
+      <a href="/patterns/ja/bearish-harami.html" class="card">ベアリッシュハラミパターン</a>
+      <a href="/patterns/ja/bearish-marubozu.html" class="card">弱気マルボズパターン：トレンド転換の強力なシグナル</a>
+      <a href="/patterns/ja/big-bearish.html" class="card">ビッグベアリッシュ型：上昇トレンド反転シグナル</a>
+      <a href="/patterns/ja/big-bullish.html" class="card">ビッグ・ブリッシュ（Big Bullish）パターンの見分け方と取引方法</a>
+      <a href="/patterns/ja/bullish-belt-hold.html" class="card">強気ベルトホールドパターン｜単一ローソク足の買いシグナル</a>
+      <a href="/patterns/ja/bullish-engulfing.html" class="card">強気の包み足パターン｜買いシグナルの見つけ方</a>
+      <a href="/patterns/ja/bullish-harami.html" class="card">強気はらみパターン：下降トレンドの反転シグナル</a>
+      <a href="/patterns/ja/bullish-marubozu.html" class="card">強気マルボズパターン｜単一ローソク足の強力な買いシグナル</a>
+      <a href="/patterns/ja/cup-handle.html" class="card">カップ・ハンドルパターン：強気の継続シグナル</a>
+      <a href="/patterns/ja/dark-cloud.html" class="card">ダーククラウド｜弱気の反転パターン解説</a>
+      <a href="/patterns/ja/descending-triangle.html" class="card">下降三角形</a>
+      <a href="/patterns/ja/doji.html" class="card">ドージ（Doji）パターン：相場の迷いを読む</a>
+      <a href="/patterns/ja/double-bottom.html" class="card">ダブルボトムパターン：強気反転シグナルの見つけ方</a>
+      <a href="/patterns/ja/double-top.html" class="card">ダブルトップパターン｜下落反転の強気な売りシグナル</a>
+      <a href="/patterns/ja/dragonfly-doji.html" class="card">トンボ足（ドラゴンフライドジ）パターンの取引ガイド</a>
+      <a href="/patterns/ja/evening-doji-star.html" class="card">イブニングドジスター</a>
+      <a href="/patterns/ja/evening-star.html" class="card">イブニングスター（夜明けの明星）パターン解説</a>
+      <a href="/patterns/ja/falling-three-methods.html" class="card">フォーリングスリーメソッド：弱気継続パターン</a>
+      <a href="/patterns/ja/falling-window.html" class="card">フォーリングウィンドウパターン｜弱気の継続シグナル</a>
+      <a href="/patterns/ja/flag-bull.html" class="card">ブルフラッグ</a>
+      <a href="/patterns/ja/gap-down.html" class="card">窓空け下落</a>
+      <a href="/patterns/ja/gap-up.html" class="card">窓空け上昇</a>
+      <a href="/patterns/ja/gravestone-doji.html" class="card">グレイブストーン・ドウジ：弱気反転パターンの見分け方</a>
+      <a href="/patterns/ja/hammer.html" class="card">ハンマーパターン：強気転換シグナルの見分け方</a>
+      <a href="/patterns/ja/hanging-man.html" class="card">ハンギングマン（首吊り線）パターン：相場反転の見分け方</a>
+      <a href="/patterns/ja/head-shoulders-top.html" class="card">三尊天井</a>
+      <a href="/patterns/ja/head-shoulders.html" class="card">ヘッドアンドショルダーズパターン</a>
+      <a href="/patterns/ja/inverse-head-shoulders.html" class="card">逆三尊</a>
+      <a href="/patterns/ja/inverted-hammer.html" class="card">逆ハンマー（インバーテッドハンマー）とは｜強気反転パターン</a>
+      <a href="/patterns/ja/kicker-bearish.html" class="card">キッカーベアリッシュパターン｜強気相場の反転シグナル</a>
+      <a href="/patterns/ja/kicker-bullish.html" class="card">キッカー強気パターン｜逆転シグナルの見分け方</a>
+      <a href="/patterns/ja/long-legged-doji.html" class="card">ロングレッグドジ：市場の優柔不断を示す中立パターン</a>
+      <a href="/patterns/ja/mat-hold.html" class="card">マットホールドパターン｜強気の継続パターン</a>
+      <a href="/patterns/ja/morning-doji-star.html" class="card">モーニングドジスター：強気反転パターンの見分け方</a>
+      <a href="/patterns/ja/morning-star.html" class="card">モーニングスター(Morning Star)パターン｜強気反転シグナル</a>
+      <a href="/patterns/ja/on-neck.html" class="card">首に触れる</a>
+      <a href="/patterns/ja/pennant.html" class="card">ペナント</a>
+      <a href="/patterns/ja/piercing-line.html" class="card">ピアッシングライン：強気反転パターンの読み方</a>
+      <a href="/patterns/ja/rectangle-bull.html" class="card">レクタングル整理</a>
+      <a href="/patterns/ja/rising-three-methods.html" class="card">上昇3メソッドパターン：強気継続シグナル</a>
+      <a href="/patterns/ja/rising-window.html" class="card">ライジングウィンドウパターン｜強気継続シグナル</a>
+      <a href="/patterns/ja/separating-lines-bearish.html" class="card">セパレーティングラインズ・ベアリッシュ｜下落継続パターン</a>
+      <a href="/patterns/ja/separating-lines-bullish.html" class="card">セパレーティング・ラインズ・ブリッシュ</a>
+      <a href="/patterns/ja/shooting-star.html" class="card">シューティングスター：熊相場の反転パターン解説</a>
+      <a href="/patterns/ja/spinning-top.html" class="card">スピニングトップ（Spinning Top）パターン解説</a>
+      <a href="/patterns/ja/three-black-crows.html" class="card">三羽烏パターン</a>
+      <a href="/patterns/ja/three-inside-down.html" class="card">スリーインサイドダウン：弱気反転パターンの見極め方</a>
+      <a href="/patterns/ja/three-inside-up.html" class="card">スリー・インサイド・アップ：強気転換パターン</a>
+      <a href="/patterns/ja/three-outside-down.html" class="card">スリーアウトサイドダウン：強気相場の反転シグナル</a>
+      <a href="/patterns/ja/three-outside-up.html" class="card">スリーアウトサイドアップパターン：強気転換の完全ガイド</a>
+      <a href="/patterns/ja/three-white-soldiers.html" class="card">スリーホワイトソルジャーズ｜強気の反転パターン</a>
+      <a href="/patterns/ja/tri-star.html" class="card">トリスター(Tri Star)パターン：中立シグナルの読み方</a>
+      <a href="/patterns/ja/triangle-symmetrical.html" class="card">対称三角形</a>
+      <a href="/patterns/ja/triple-bottom.html" class="card">三重底</a>
+      <a href="/patterns/ja/triple-top.html" class="card">三重天井</a>
+      <a href="/patterns/ja/tweezer-bottom.html" class="card">トゥイーザーボトム：下降トレンドの反転シグナル</a>
+      <a href="/patterns/ja/tweezer-top.html" class="card">トゥイーザートップとは｜ベアリッシュ反転パターン</a>
+      <a href="/patterns/ja/wedge-falling.html" class="card">下降ウェッジ</a>
+      <a href="/patterns/ja/wedge-rising.html" class="card">上昇ウェッジ</a>
   </div>
-</a><a class="pattern-card" href="/patterns/ja/big-bearish.html">
-  <div class="card-name">大陰線</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">弱気</span>
-    <span class="tag tag-medium">信頼度中</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 71%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/doji.html">
-  <div class="card-name">十字線</div>
-  <div class="card-meta">
-    <span class="tag tag-neutral">中立</span>
-    <span class="tag tag-low">信頼度低</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 54%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/hammer.html">
-  <div class="card-name">ハンマー</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-medium">信頼度中</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 60%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/shooting-star.html">
-  <div class="card-name">流れ星</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">弱気</span>
-    <span class="tag tag-medium">信頼度中</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 66%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/hanging-man.html">
-  <div class="card-name">首吊り線</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">弱気</span>
-    <span class="tag tag-medium">信頼度中</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 59%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/inverted-hammer.html">
-  <div class="card-name">逆ハンマー</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-medium">信頼度中</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 57%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/dragonfly-doji.html">
-  <div class="card-name">トンボ十字線</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-medium">信頼度中</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 64%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/gravestone-doji.html">
-  <div class="card-name">墓石十字線</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">弱気</span>
-    <span class="tag tag-medium">信頼度中</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 62%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/spinning-top.html">
-  <div class="card-name">コマ</div>
-  <div class="card-meta">
-    <span class="tag tag-neutral">中立</span>
-    <span class="tag tag-low">信頼度低</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 54%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/long-legged-doji.html">
-  <div class="card-name">長い足の十字線</div>
-  <div class="card-meta">
-    <span class="tag tag-neutral">中立</span>
-    <span class="tag tag-low">信頼度低</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 52%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/bullish-marubozu.html">
-  <div class="card-name">陽の丸坊主</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 74%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/bearish-marubozu.html">
-  <div class="card-name">陰の丸坊主</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">弱気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 73%</span>
-  </div>
-</a>
-</div>
-<div class="section-header"><h2>2本ローソク足パターン</h2></div>
-<div class="pattern-grid">
-<a class="pattern-card" href="/patterns/ja/bullish-engulfing.html">
-  <div class="card-name">陽線包み</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-medium">信頼度中</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 63%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/bearish-engulfing.html">
-  <div class="card-name">陰線包み</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">弱気</span>
-    <span class="tag tag-medium">信頼度中</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 61%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/piercing-line.html">
-  <div class="card-name">切り込み線</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-medium">信頼度中</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 64%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/dark-cloud.html">
-  <div class="card-name">かぶせ線</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">弱気</span>
-    <span class="tag tag-medium">信頼度中</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 62%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/bullish-harami.html">
-  <div class="card-name">陽線はらみ</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-low">信頼度低</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 53%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/bearish-harami.html">
-  <div class="card-name">陰線はらみ</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">弱気</span>
-    <span class="tag tag-low">信頼度低</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 55%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/tweezer-bottom.html">
-  <div class="card-name">毛抜き底</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-medium">信頼度中</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 61%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/tweezer-top.html">
-  <div class="card-name">毛抜き天井</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">弱気</span>
-    <span class="tag tag-medium">信頼度中</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 60%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/kicker-bullish.html">
-  <div class="card-name">強気のキッカー</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 76%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/on-neck.html">
-  <div class="card-name">首に触れる</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">弱気</span>
-    <span class="tag tag-low">信頼度低</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 58%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/gap-up.html">
-  <div class="card-name">窓空け上昇</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-medium">信頼度中</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 65%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/gap-down.html">
-  <div class="card-name">窓空け下落</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">弱気</span>
-    <span class="tag tag-medium">信頼度中</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 63%</span>
-  </div>
-</a>
-</div>
-<div class="section-header">
-<div style="margin:24px 0;text-align:center;">
-<ins class="adsbygoogle"
-     style="display:block; text-align:center; min-height:250px;"
-     data-ad-layout="in-article"
-     data-ad-format="fluid"
-     data-ad-client="ca-pub-1768270548115739"
-     data-ad-slot="2793159185"></ins>
-<script>try{(adsbygoogle=window.adsbygoogle||[]).push({});}catch(e){}</script>
-</div>
-<h2>3本ローソク足パターン</h2></div>
-<div class="pattern-grid">
-<a class="pattern-card" href="/patterns/ja/morning-star.html">
-  <div class="card-name">明けの明星</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 72%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/evening-star.html">
-  <div class="card-name">宵の明星</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">弱気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 69%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/morning-doji-star.html">
-  <div class="card-name">十字明けの明星</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 71%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/evening-doji-star.html">
-  <div class="card-name">十字宵の明星</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">弱気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 70%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/three-white-soldiers.html">
-  <div class="card-name">三兵</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 78%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/three-black-crows.html">
-  <div class="card-name">三羽烏</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">弱気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 76%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/three-inside-up.html">
-  <div class="card-name">三内部上昇</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-medium">信頼度中</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 65%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/three-inside-down.html">
-  <div class="card-name">三内部下落</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">弱気</span>
-    <span class="tag tag-medium">信頼度中</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 63%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/abandoned-baby-bull.html">
-  <div class="card-name">棄嬰（強気）</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 75%</span>
-  </div>
-</a>
-</div>
-<div class="section-header"><h2>チャートパターン</h2></div>
-<div class="pattern-grid">
-<a class="pattern-card" href="/patterns/ja/double-bottom.html">
-  <div class="card-name">ダブルボトム</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 73%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/double-top.html">
-  <div class="card-name">ダブルトップ</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">弱気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 72%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/triple-bottom.html">
-  <div class="card-name">三重底</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 71%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/triple-top.html">
-  <div class="card-name">三重天井</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">弱気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 70%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/head-shoulders-top.html">
-  <div class="card-name">三尊天井</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">弱気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 74%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/inverse-head-shoulders.html">
-  <div class="card-name">逆三尊</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 73%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/ascending-triangle.html">
-  <div class="card-name">上昇三角形</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 68%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/descending-triangle.html">
-  <div class="card-name">下降三角形</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">弱気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 66%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/triangle-symmetrical.html">
-  <div class="card-name">対称三角形</div>
-  <div class="card-meta">
-    <span class="tag tag-neutral">中立</span>
-    <span class="tag tag-medium">信頼度中</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 63%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/rectangle-bull.html">
-  <div class="card-name">レクタングル整理</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-medium">信頼度中</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 64%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/flag-bull.html">
-  <div class="card-name">ブルフラッグ</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 67%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/bear-flag.html">
-  <div class="card-name">ベアフラッグ</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">弱気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 65%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/pennant.html">
-  <div class="card-name">ペナント</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-medium">信頼度中</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 66%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/cup-handle.html">
-  <div class="card-name">カップ・ウィズ・ハンドル</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 65%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/wedge-falling.html">
-  <div class="card-name">下降ウェッジ</div>
-  <div class="card-meta">
-    <span class="tag tag-bull">強気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 69%</span>
-  </div>
-</a><a class="pattern-card" href="/patterns/ja/wedge-rising.html">
-  <div class="card-name">上昇ウェッジ</div>
-  <div class="card-meta">
-    <span class="tag tag-bear">弱気</span>
-    <span class="tag tag-high">信頼度高</span>
-    <span class="tag" style="background:#1e293b;color:#94a3b8">勝率 68%</span>
-  </div>
-</a>
 </div>
 
-</div>
-<footer>
-  <div class="footer-logo">線上有位</div>
-  <p>Professional Taiwan stock technical analysis platform.</p>
-  <p style="margin-top:8px;font-size:12px">© 2025 線上有位. All rights reserved.</p>
-
-<div style="margin:32px 0 16px;text-align:center;">
-<ins class="adsbygoogle"
-     style="display:block; min-height:250px;"
-     data-ad-client="ca-pub-1768270548115739"
-     data-ad-slot="4182262477"
-     data-ad-format="auto"
-     data-full-width-responsive="true"></ins>
-<script>try{(adsbygoogle=window.adsbygoogle||[]).push({});}catch(e){}</script>
+<footer class="footer">
+<div class="footer-inner">
+  <a href="/about.html">About</a>
+  <a href="/contact.html">Contact</a>
+  <a href="/privacy.html">Privacy</a>
+  <a href="/terms.html">Terms</a>
+  <span style="margin-left:auto">© 2026 SoftGlow</span>
 </div>
 </footer>
 
-<script>
-setTimeout(function(){
-  var s=document.createElement('script');
-  s.async=true;
-  s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';
-  s.crossOrigin='anonymous';
-  document.head.appendChild(s);
-},2000);
-</script>
-</body></html>
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Search..." autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header"><h3>Bookmarks</h3><button class="bm-clear" onclick="window._sgClearBm()">Clear</button></div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+<script src="/common/softglow-common.js"></script>
+</body>
+</html>

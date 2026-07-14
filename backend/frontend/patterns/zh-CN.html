@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K线形态解析 - SoftGlow</title>
+<meta name="description" content="Learn 50+ candlestick patterns">
+<meta name="robots" content="index, follow">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="patterns-index">
+<meta name="sg-type" content="page">
+<meta name="sg-lang" content="zh-CN">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:#2D3748;background:#fff;line-height:1.6}
+a{color:#2563EB;text-decoration:none}
+.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.95);backdrop-filter:blur(8px);border-bottom:1px solid #E2E8F0}
+.nav-inner{max-width:1080px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px}
+.nav-logo{font-size:17px;font-weight:700;color:#2D3748}.nav-logo span{color:#2563EB}
+.nav-links{display:flex;gap:12px;align-items:center}.nav-links a{font-size:13px;color:#4A5568;font-weight:500}
+.nav-actions{display:flex;gap:6px;align-items:center}
+.container{max-width:1080px;margin:0 auto;padding:20px}
+.header{text-align:center;padding:40px 0 20px}
+.header h1{font-size:28px;font-weight:700;color:#1A202C}
+.header p{color:#718096;margin-top:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin:24px 0}
+.card{display:block;padding:14px 16px;background:#F7FAFC;border:1px solid #E2E8F0;border-radius:10px;font-size:14px;color:#2D3748;transition:all 0.15s}
+.card:hover{background:#EBF5FF;border-color:#BEE3F8;text-decoration:none;transform:translateY(-1px)}
+.footer{border-top:1px solid #E2E8F0;padding:24px 0;margin-top:40px}
+.footer-inner{max-width:1080px;margin:0 auto;padding:0 20px;display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:#A0AEC0}
+.footer-inner a{color:#718096}
+@media(max-width:768px){.grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}.card{padding:12px;font-size:13px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/zh-CN/">工具</a>
+    <a href="/patterns/zh-CN.html">Patterns</a>
+    <a href="/blog/zh-CN/index.html">教學</a>
+    <a href="/">首頁</a>
+  </div>
+  <div class="nav-actions">
+    <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/patterns/index.html">繁中</option><option value="/patterns/en.html">EN</option><option value="/patterns/ja.html">日本語</option><option value="/patterns/ko.html">한국어</option><option value="/patterns/de.html">DE</option><option value="/patterns/fr.html">FR</option><option value="/patterns/es.html">ES</option><option value="/patterns/pt.html">PT</option><option value="/patterns/id.html">ID</option><option value="/patterns/zh-CN.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+  </div>
+</div>
+</nav>
+
+<div class="container">
+  <div class="header">
+    <h1>K线形态解析</h1>
+    <p>66 種型態</p>
+  </div>
+  <div class="grid">
+      <a href="/patterns/zh-CN/abandoned-baby-bearish.html" class="card">弃婴看跌形态：高可靠性反转信号详解</a>
+      <a href="/patterns/zh-CN/abandoned-baby-bull.html" class="card">棄嬰（多頭）</a>
+      <a href="/patterns/zh-CN/abandoned-baby-bullish.html" class="card">弃婴看涨形态：高可靠性反转信号详解</a>
+      <a href="/patterns/zh-CN/ascending-triangle.html" class="card">上升三角形形态：看涨延续信号分析</a>
+      <a href="/patterns/zh-CN/bear-flag.html" class="card">空頭旗形</a>
+      <a href="/patterns/zh-CN/bearish-belt-hold.html" class="card">看跌腰带缠绕K线形态详解及交易策略</a>
+      <a href="/patterns/zh-CN/bearish-engulfing.html" class="card">看跌吞没形态：高胜率的反转信号</a>
+      <a href="/patterns/zh-CN/bearish-harami.html" class="card">看跌孕线形态详解｜K线反转信号</a>
+      <a href="/patterns/zh-CN/bearish-marubozu.html" class="card">看跌秃顶线形态 - 单根K线反转信号解析</a>
+      <a href="/patterns/zh-CN/big-bearish.html" class="card">大熊烛台形态 - 看跌信号识别与交易指南</a>
+      <a href="/patterns/zh-CN/big-bullish.html" class="card">大牛烛线形态：下跌后的强势反转信号</a>
+      <a href="/patterns/zh-CN/bullish-belt-hold.html" class="card">看涨腰带线形态 - 单根K线反转信号</a>
+      <a href="/patterns/zh-CN/bullish-engulfing.html" class="card">看涨吞没形态 - 强势反转信号解析</a>
+      <a href="/patterns/zh-CN/bullish-harami.html" class="card">看涨孕线形态 - 外汇和股票交易中的底部反转信号</a>
+      <a href="/patterns/zh-CN/bullish-marubozu.html" class="card">看涨光头阴线(Bullish Marubozu)K线形态分析</a>
+      <a href="/patterns/zh-CN/cup-handle.html" class="card">杯柄形态｜看涨延续形态完整交易指南</a>
+      <a href="/patterns/zh-CN/dark-cloud.html" class="card">乌云盖顶形态 - 熊市反转信号详解</a>
+      <a href="/patterns/zh-CN/descending-triangle.html" class="card">下降三角形</a>
+      <a href="/patterns/zh-CN/doji.html" class="card">十字星(Doji)蜡烛图形态 - 中立信号详解</a>
+      <a href="/patterns/zh-CN/double-bottom.html" class="card">双底形态</a>
+      <a href="/patterns/zh-CN/double-top.html" class="card">双顶形态：熊市反转信号详解与交易指南</a>
+      <a href="/patterns/zh-CN/dragonfly-doji.html" class="card">蜻蜓十字星K线形态 - 看涨反转信号</a>
+      <a href="/patterns/zh-CN/evening-doji-star.html" class="card">晚间十字星形态 - 熊市反转信号</a>
+      <a href="/patterns/zh-CN/evening-star.html" class="card">晚星形态 - 熊市反转信号详解与交易规则</a>
+      <a href="/patterns/zh-CN/falling-three-methods.html" class="card">下跌三法形态：熊市延续信号详解</a>
+      <a href="/patterns/zh-CN/falling-window.html" class="card">下跌窗口形态：熊市延续信号详解</a>
+      <a href="/patterns/zh-CN/flag-bull.html" class="card">多頭旗形</a>
+      <a href="/patterns/zh-CN/gap-down.html" class="card">跳空缺口（向下）</a>
+      <a href="/patterns/zh-CN/gap-up.html" class="card">跳空缺口（向上）</a>
+      <a href="/patterns/zh-CN/gravestone-doji.html" class="card">墓碑十字星形态：熊市反转信号详解</a>
+      <a href="/patterns/zh-CN/hammer.html" class="card">锤子形态：看跌反转的强势买点信号</a>
+      <a href="/patterns/zh-CN/hanging-man.html" class="card">吊人线形态：熊市反转信号详解</a>
+      <a href="/patterns/zh-CN/head-shoulders-top.html" class="card">頭肩頂</a>
+      <a href="/patterns/zh-CN/head-shoulders.html" class="card">头肩顶形态 - 熊市反转信号详解</a>
+      <a href="/patterns/zh-CN/inverse-head-shoulders.html" class="card">頭肩底</a>
+      <a href="/patterns/zh-CN/inverted-hammer.html" class="card">倒锤头形态：看涨反转信号的完整指南</a>
+      <a href="/patterns/zh-CN/kicker-bearish.html" class="card">踢线看跌形态：识别和交易指南</a>
+      <a href="/patterns/zh-CN/kicker-bullish.html" class="card">踢线看涨形态</a>
+      <a href="/patterns/zh-CN/long-legged-doji.html" class="card">长腿十字星（Long Legged Doji）- 中立形态详解</a>
+      <a href="/patterns/zh-CN/mat-hold.html" class="card">Mat Hold形态 - 看涨延续信号解读</a>
+      <a href="/patterns/zh-CN/morning-doji-star.html" class="card">晨星十字星形态：看涨反转信号详解</a>
+      <a href="/patterns/zh-CN/morning-star.html" class="card">晨星形态</a>
+      <a href="/patterns/zh-CN/on-neck.html" class="card">貫穿頸部</a>
+      <a href="/patterns/zh-CN/pennant.html" class="card">三角旗形</a>
+      <a href="/patterns/zh-CN/piercing-line.html" class="card">刺透线形态 - 看涨反转信号详解</a>
+      <a href="/patterns/zh-CN/rectangle-bull.html" class="card">矩形整理（多頭）</a>
+      <a href="/patterns/zh-CN/rising-three-methods.html" class="card">上升三法形态：看涨延续信号详解</a>
+      <a href="/patterns/zh-CN/rising-window.html" class="card">上升窗口形态：看涨延续信号分析</a>
+      <a href="/patterns/zh-CN/separating-lines-bearish.html" class="card">分离线看跌形态 - K线形态分析指南</a>
+      <a href="/patterns/zh-CN/separating-lines-bullish.html" class="card">分离线看涨形态：上升趋势中的延续信号</a>
+      <a href="/patterns/zh-CN/shooting-star.html" class="card">射击之星K线形态 - 熊市反转信号详解</a>
+      <a href="/patterns/zh-CN/spinning-top.html" class="card">纺锤形态K线图解：中立信号与盘整判断</a>
+      <a href="/patterns/zh-CN/three-black-crows.html" class="card">三黑鸦图形：熊市反转信号详解</a>
+      <a href="/patterns/zh-CN/three-inside-down.html" class="card">三重内部下跌K线形态 - 熊市反转信号</a>
+      <a href="/patterns/zh-CN/three-inside-up.html" class="card">三内部上升形态：看涨反转信号详解</a>
+      <a href="/patterns/zh-CN/three-outside-down.html" class="card">三外部下行形态</a>
+      <a href="/patterns/zh-CN/three-outside-up.html" class="card">三外部上涨形态 - 看涨反转信号详解</a>
+      <a href="/patterns/zh-CN/three-white-soldiers.html" class="card">三白兵K线形态 - 看涨反转信号详解</a>
+      <a href="/patterns/zh-CN/tri-star.html" class="card">三星孤立形态：中立信号与不确定性的完整交易指南</a>
+      <a href="/patterns/zh-CN/triangle-symmetrical.html" class="card">對稱三角形</a>
+      <a href="/patterns/zh-CN/triple-bottom.html" class="card">三重底</a>
+      <a href="/patterns/zh-CN/triple-top.html" class="card">三重頂</a>
+      <a href="/patterns/zh-CN/tweezer-bottom.html" class="card">镊子底部形态 - 看涨反转信号详解</a>
+      <a href="/patterns/zh-CN/tweezer-top.html" class="card">镊子顶部形态：熊市反转信号详解</a>
+      <a href="/patterns/zh-CN/wedge-falling.html" class="card">下降楔形</a>
+      <a href="/patterns/zh-CN/wedge-rising.html" class="card">上升楔形</a>
+  </div>
+</div>
+
+<footer class="footer">
+<div class="footer-inner">
+  <a href="/about.html">About</a>
+  <a href="/contact.html">Contact</a>
+  <a href="/privacy.html">Privacy</a>
+  <a href="/terms.html">Terms</a>
+  <span style="margin-left:auto">© 2026 SoftGlow</span>
+</div>
+</footer>
+
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Search..." autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header"><h3>Bookmarks</h3><button class="bm-clear" onclick="window._sgClearBm()">Clear</button></div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+<script src="/common/softglow-common.js"></script>
+</body>
+</html>
