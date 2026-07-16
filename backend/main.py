@@ -714,6 +714,20 @@ async def serve_comparisons_locale_index(locale: str):
         return FileResponse(path)
     return JSONResponse({"detail": "Not Found"}, status_code=404)
 
+# ---- JS 靜態檔路由 (cookie-consent.css, softglow-cookies.js 等) ----
+@app.get("/js/{js_filename:path}", include_in_schema=False)
+async def serve_js_files(js_filename: str):
+    from fastapi.responses import FileResponse
+    import os as _os
+    if not js_filename.endswith((".css", ".js", ".json")):
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    path = _os.path.join(_FRONTEND_DIR, "js", js_filename)
+    if _os.path.isfile(path):
+        _media = {"css": "text/css", "js": "application/javascript", "json": "application/json"}
+        ext = js_filename.rsplit(".", 1)[-1]
+        return FileResponse(path, media_type=_media.get(ext, "application/octet-stream"))
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
 # ---- Common 靜態檔路由 (CSS/JS/JSON) ----
 @app.get("/common/{filename}", include_in_schema=False)
 async def serve_common_file(filename: str):

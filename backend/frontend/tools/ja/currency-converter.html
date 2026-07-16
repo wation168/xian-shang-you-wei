@@ -62,12 +62,12 @@
   <small class="input-help">換算したい金額を入力してください</small>
 <div class="input-group">
   <label for="fromCurrency">元の通貨</label>
-  <div class="input-row"><input type="text" id="fromCurrency" value="USD"></div>
+  <div class="input-row"><select id="fromCurrency" onchange="if(typeof calculate==='function')calculate()"><option value="JPY">日本円 (JPY)</option><option value="USD" selected>米ドル (USD)</option><option value="EUR">ユーロ (EUR)</option><option value="GBP">英ポンド (GBP)</option><option value="CNY">中国元 (CNY)</option><option value="KRW">韓国ウォン (KRW)</option><option value="AUD">豪ドル (AUD)</option><option value="CAD">カナダドル (CAD)</option><option value="CHF">スイスフラン (CHF)</option><option value="HKD">香港ドル (HKD)</option><option value="SGD">シンガポールドル (SGD)</option><option value="TWD">台湾ドル (TWD)</option><option value="NZD">NZドル (NZD)</option><option value="SEK">スウェーデンクローナ (SEK)</option><option value="NOK">ノルウェークローネ (NOK)</option><option value="INR">インドルピー (INR)</option><option value="BRL">ブラジルレアル (BRL)</option><option value="MXN">メキシコペソ (MXN)</option><option value="ZAR">南アランド (ZAR)</option><option value="TRY">トルコリラ (TRY)</option><option value="IDR">インドネシアルピア (IDR)</option></select></div>
 </div>
   <small class="input-help">元となる通貨を選択してください</small>
 <div class="input-group">
   <label for="toCurrency">換算先通貨</label>
-  <div class="input-row"><input type="text" id="toCurrency" value="GBP"></div>
+  <div class="input-row"><select id="toCurrency" onchange="if(typeof calculate==='function')calculate()"><option value="JPY">日本円 (JPY)</option><option value="USD">米ドル (USD)</option><option value="EUR">ユーロ (EUR)</option><option value="GBP">英ポンド (GBP)</option><option value="CNY">中国元 (CNY)</option><option value="KRW">韓国ウォン (KRW)</option><option value="AUD">豪ドル (AUD)</option><option value="CAD">カナダドル (CAD)</option><option value="CHF">スイスフラン (CHF)</option><option value="HKD">香港ドル (HKD)</option><option value="SGD">シンガポールドル (SGD)</option><option value="TWD" selected>台湾ドル (TWD)</option><option value="NZD">NZドル (NZD)</option><option value="SEK">スウェーデンクローナ (SEK)</option><option value="NOK">ノルウェークローネ (NOK)</option><option value="INR">インドルピー (INR)</option><option value="BRL">ブラジルレアル (BRL)</option><option value="MXN">メキシコペソ (MXN)</option><option value="ZAR">南アランド (ZAR)</option><option value="TRY">トルコリラ (TRY)</option><option value="IDR">インドネシアルピア (IDR)</option></select></div>
 </div>
   <small class="input-help">換算先の通貨を選択してください</small></div>
     <button class="btn-calc" onclick="calculate()">計算する</button>
@@ -190,19 +190,7 @@ document.getElementById('amountInput').addEventListener('keypress', function(e) 
   if (e.key === 'Enter') calculate();
 });
 
-window.addEventListener('DOMContentLoaded', function() {
-  const currencies = ['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'CNY', 'SEK', 'NZD', 'INR', 'SGD', 'HKD', 'NOK', 'KRW', 'TRY', 'RUB', 'BRL', 'ZAR', 'MXN'];
-  const fromSelect = document.getElementById('fromCurrency');
-  const toSelect = document.getElementById('toCurrency');
-  
-  currencies.forEach(curr => {
-    fromSelect.innerHTML += '<option value="' + curr + '">' + curr + '</option>';
-    toSelect.innerHTML += '<option value="' + curr + '">' + curr + '</option>';
-  });
-  
-  fromSelect.value = 'USD';
-  toSelect.value = 'GBP';
-});
+/* dropdown options now in HTML */
 function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
 document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
 </script>

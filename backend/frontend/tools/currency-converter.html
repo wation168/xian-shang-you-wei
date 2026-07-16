@@ -62,12 +62,12 @@
   <small class="input-help">輸入要轉換的金額數字</small>
 <div class="input-group">
   <label for="fromCurrency">來源幣別</label>
-  <div class="input-row"><input type="text" id="fromCurrency" value="USD"></div>
+  <div class="input-row"><select id="fromCurrency" onchange="if(typeof calculate==='function')calculate()"><option value="USD" selected>美元 (USD)</option><option value="EUR">歐元 (EUR)</option><option value="GBP">英鎊 (GBP)</option><option value="JPY">日圓 (JPY)</option><option value="TWD">新台幣 (TWD)</option><option value="CNY">人民幣 (CNY)</option><option value="KRW">韓元 (KRW)</option><option value="AUD">澳幣 (AUD)</option><option value="CAD">加幣 (CAD)</option><option value="CHF">瑞郎 (CHF)</option><option value="HKD">港幣 (HKD)</option><option value="SGD">新加坡幣 (SGD)</option><option value="NZD">紐幣 (NZD)</option><option value="SEK">瑞典克朗 (SEK)</option><option value="NOK">挪威克朗 (NOK)</option><option value="INR">印度盧比 (INR)</option><option value="BRL">巴西雷亞爾 (BRL)</option><option value="MXN">墨西哥披索 (MXN)</option><option value="ZAR">南非蘭特 (ZAR)</option><option value="TRY">土耳其里拉 (TRY)</option><option value="IDR">印尼盾 (IDR)</option></select></div>
 </div>
   <small class="input-help">選擇要轉換的來源貨幣</small>
 <div class="input-group">
   <label for="toCurrency">目標幣別</label>
-  <div class="input-row"><input type="text" id="toCurrency" value="GBP"></div>
+  <div class="input-row"><select id="toCurrency" onchange="if(typeof calculate==='function')calculate()"><option value="USD">美元 (USD)</option><option value="EUR">歐元 (EUR)</option><option value="GBP">英鎊 (GBP)</option><option value="JPY">日圓 (JPY)</option><option value="TWD" selected>新台幣 (TWD)</option><option value="CNY">人民幣 (CNY)</option><option value="KRW">韓元 (KRW)</option><option value="AUD">澳幣 (AUD)</option><option value="CAD">加幣 (CAD)</option><option value="CHF">瑞郎 (CHF)</option><option value="HKD">港幣 (HKD)</option><option value="SGD">新加坡幣 (SGD)</option><option value="NZD">紐幣 (NZD)</option><option value="SEK">瑞典克朗 (SEK)</option><option value="NOK">挪威克朗 (NOK)</option><option value="INR">印度盧比 (INR)</option><option value="BRL">巴西雷亞爾 (BRL)</option><option value="MXN">墨西哥披索 (MXN)</option><option value="ZAR">南非蘭特 (ZAR)</option><option value="TRY">土耳其里拉 (TRY)</option><option value="IDR">印尼盾 (IDR)</option></select></div>
 </div>
   <small class="input-help">選擇要轉換成的目標貨幣</small></div>
     <button class="btn-calc" onclick="calculate()">計算</button>
@@ -190,19 +190,7 @@ document.getElementById('amountInput').addEventListener('keypress', function(e) 
   if (e.key === 'Enter') calculate();
 });
 
-window.addEventListener('DOMContentLoaded', function() {
-  const currencies = ['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'CNY', 'SEK', 'NZD', 'INR', 'SGD', 'HKD', 'NOK', 'KRW', 'TRY', 'RUB', 'BRL', 'ZAR', 'MXN'];
-  const fromSelect = document.getElementById('fromCurrency');
-  const toSelect = document.getElementById('toCurrency');
-  
-  currencies.forEach(curr => {
-    fromSelect.innerHTML += '<option value="' + curr + '">' + curr + '</option>';
-    toSelect.innerHTML += '<option value="' + curr + '">' + curr + '</option>';
-  });
-  
-  fromSelect.value = 'USD';
-  toSelect.value = 'GBP';
-});
+/* dropdown options now in HTML */
 function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
 document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
 </script>
