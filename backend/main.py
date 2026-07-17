@@ -562,6 +562,16 @@ async def serve_patterns_html(filename: str):
         return FileResponse(path)
     return JSONResponse({"detail": "Not Found"}, status_code=404)
 
+@app.get("/patterns", include_in_schema=False)
+@app.get("/patterns/", include_in_schema=False)
+async def serve_patterns_index():
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "patterns", "index.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
 @app.get("/patterns/{locale}/{filename}.html", include_in_schema=False)
 async def serve_patterns_locale_html(locale: str, filename: str):
     from fastapi.responses import FileResponse
