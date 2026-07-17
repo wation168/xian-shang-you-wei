@@ -669,6 +669,51 @@ async def serve_tools_locale_index(locale: str):
     # 沒有則 fallback 到主索引
     return RedirectResponse(url="/tools/", status_code=302)
 
+# ---- Glossary 術語百科路由 ----
+_GLOSSARY_LOCALES = ("en","ja","ko","es","pt","id","de","fr","zh-CN")
+
+@app.get("/glossary/{filename}.html", include_in_schema=False)
+async def serve_glossary_html(filename: str):
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "glossary", f"{filename}.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/glossary", include_in_schema=False)
+@app.get("/glossary/", include_in_schema=False)
+async def serve_glossary_index():
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "glossary", "index.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/glossary/{locale}/{filename}.html", include_in_schema=False)
+async def serve_glossary_locale_html(locale: str, filename: str):
+    from fastapi.responses import FileResponse
+    import os as _os
+    if locale not in _GLOSSARY_LOCALES:
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    path = _os.path.join(_FRONTEND_DIR, "glossary", locale, f"{filename}.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/glossary/{locale}", include_in_schema=False)
+@app.get("/glossary/{locale}/", include_in_schema=False)
+async def serve_glossary_locale_index(locale: str):
+    from fastapi.responses import FileResponse, RedirectResponse
+    import os as _os
+    if locale not in _GLOSSARY_LOCALES:
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    path = _os.path.join(_FRONTEND_DIR, "glossary", locale, "index.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return RedirectResponse(url="/glossary/", status_code=302)
+
 # ---- Comparisons 路由 ----
 _COMP_LOCALES = ("en","ja","ko","es","pt","id","de","fr","zh-CN","zh-TW")
 
@@ -7580,6 +7625,20 @@ def sitemap():
                 for _pf in sorted(os.listdir(_lang_path)):
                     if _pf.endswith(".html"):
                         locs.append(f"  <url><loc>{FRONTEND_URL}/patterns/{_lang_dir}/{_pf}</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>")
+
+    # ── Glossary 術語百科（動態掃描磁碟，10 語言）──
+    _glossary_base = os.path.join(os.path.dirname(__file__), "frontend", "glossary")
+    if os.path.isdir(_glossary_base):
+        locs.append(f"  <url><loc>{FRONTEND_URL}/glossary/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>")
+        for _gf in sorted(os.listdir(_glossary_base)):
+            if _gf.endswith(".html") and _gf != "index.html":
+                locs.append(f"  <url><loc>{FRONTEND_URL}/glossary/{_gf}</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>")
+        for _lang_dir in sorted(os.listdir(_glossary_base)):
+            _lang_path = os.path.join(_glossary_base, _lang_dir)
+            if os.path.isdir(_lang_path) and _lang_dir not in (".", ".."):
+                for _gf in sorted(os.listdir(_lang_path)):
+                    if _gf.endswith(".html"):
+                        locs.append(f"  <url><loc>{FRONTEND_URL}/glossary/{_lang_dir}/{_gf}</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>")
 
     # ── Comparison 比較頁（V3 動態掃描磁碟，10 語言）──
     _comp_base = os.path.join(os.path.dirname(__file__), "frontend", "comparisons")
