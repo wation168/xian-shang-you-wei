@@ -120,70 +120,82 @@
 </div></div>
 <footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
 <script>
-function calculate() {
-  const amountInput = document.getElementById('amountInput');
-  const fromCurrencyInput = document.getElementById('fromCurrency');
-  const toCurrencyInput = document.getElementById('toCurrency');
-  const convertedAmountResult = document.getElementById('convertedAmount');
-  const exchangeRateResult = document.getElementById('exchangeRate');
-  const resultsDiv = document.querySelector('.results');
+var _liveRates = null;
+var _ratesLoaded = false;
 
-  const amount = parseFloat(amountInput.value);
-  const fromCurrency = fromCurrencyInput.value;
-  const toCurrency = toCurrencyInput.value;
+(function() {
+  var statusEl = document.createElement('div');
+  statusEl.id = 'rateStatus';
+  statusEl.style.cssText = 'text-align:center;padding:8px 16px;margin:-12px 0 16px;font-size:13px;color:#718096;';
+  statusEl.textContent = '正在加载实时汇率...';
+  var calcCard = document.querySelector('.calc-card');
+  if (calcCard) {
+    var btn = calcCard.querySelector('.btn-calc');
+    if (btn) calcCard.insertBefore(statusEl, btn);
+  }
+
+  fetch('https://open.er-api.com/v6/latest/USD')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data && data.result === 'success' && data.rates) {
+        _liveRates = data.rates;
+        _ratesLoaded = true;
+        var d = new Date(data.time_last_update_utc || Date.now());
+        var timeStr = d.toLocaleString();
+        statusEl.innerHTML = '<span style="color:#38A169">●</span> 汇率更新时间: ' + timeStr + '<br><span style="font-size:11px;color:#A0AEC0">数据来源：Open Exchange Rates</span>';
+        if (typeof calculate === 'function') calculate();
+      } else {
+        statusEl.innerHTML = '<span style="color:#E53E3E">●</span> 无法获取实时汇率，请稍后再试';
+      }
+    })
+    .catch(function() {
+      statusEl.innerHTML = '<span style="color:#E53E3E">●</span> 无法获取实时汇率，请稍后再试';
+    });
+})();
+
+function calculate() {
+  var amountInput = document.getElementById('amountInput');
+  var fromCurrencyInput = document.getElementById('fromCurrency');
+  var toCurrencyInput = document.getElementById('toCurrency');
+  var convertedAmountResult = document.getElementById('convertedAmount');
+  var exchangeRateResult = document.getElementById('exchangeRate');
+  var resultsDiv = document.querySelector('.results');
+
+  var amount = parseFloat(amountInput.value);
+  var fromCurrency = fromCurrencyInput.value;
+  var toCurrency = toCurrencyInput.value;
 
   if (!amount || amount <= 0) {
     alert('Please enter a valid amount greater than zero');
     return;
   }
-
   if (!fromCurrency || !toCurrency) {
     alert('Please select both currencies');
     return;
   }
-
-  const exchangeRates = {
-    'USD': 1.0,
-    'EUR': 0.92,
-    'GBP': 0.79,
-    'JPY': 149.50,
-    'AUD': 1.52,
-    'CAD': 1.36,
-    'CHF': 0.88,
-    'CNY': 7.24,
-    'SEK': 10.50,
-    'NZD': 1.67,
-    'INR': 83.12,
-    'SGD': 1.35,
-    'HKD': 7.81,
-    'NOK': 10.72,
-    'KRW': 1319.50,
-    'TRY': 32.50,
-    'RUB': 98.50,
-    'BRL': 4.97,
-    'ZAR': 18.65,
-    'MXN': 17.05,
-    'TWD': 32.20,
-    'IDR': 15800.00
-  };
-
-  const fromRate = exchangeRates[fromCurrency];
-  const toRate = exchangeRates[toCurrency];
-
-  if (fromRate === undefined || toRate === undefined) {
-    alert('Currency not found in our database');
+  if (!_ratesLoaded || !_liveRates) {
+    var statusEl = document.getElementById('rateStatus');
+    if (statusEl) statusEl.innerHTML = '<span style="color:#E53E3E">●</span> 无法获取实时汇率，请稍后再试';
     return;
   }
 
-  const rateValue = toRate / fromRate;
-  const convertedValue = amount * rateValue;
+  var fromRate = _liveRates[fromCurrency];
+  var toRate = _liveRates[toCurrency];
+
+  if (fromRate === undefined || toRate === undefined) {
+    alert('Currency not supported');
+    return;
+  }
+
+  var rateValue = toRate / fromRate;
+  var convertedValue = amount * rateValue;
 
   convertedAmountResult.textContent = convertedValue.toLocaleString('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }) + ' ' + toCurrency;
 
-  exchangeRateResult.textContent = (1 / rateValue).toFixed(6) + ' ' + fromCurrency + ' = 1 ' + toCurrency;
+  exchangeRateResult.textContent = '1 ' + fromCurrency + ' = ' + rateValue.toFixed(6) + ' ' + toCurrency;
 
   resultsDiv.classList.add('show');
 }
@@ -191,10 +203,6 @@ function calculate() {
 document.getElementById('amountInput').addEventListener('keypress', function(e) {
   if (e.key === 'Enter') calculate();
 });
-
-/* dropdown options now in HTML */
-function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已复制！';setTimeout(function(){b.textContent='分享'},1500);}}
-document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
 </script>
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},2000);
