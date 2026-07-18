@@ -50,7 +50,7 @@
     _searchOverlay = document.getElementById('sgSearchOverlay');
     _searchInput = document.getElementById('sgSearchInput');
     _searchResults = document.getElementById('sgSearchResults');
-    if (!_searchOverlay) return;
+    if (!_searchOverlay || !_searchInput || !_searchResults) return;
 
     // Close on overlay click
     _searchOverlay.addEventListener('click', function(e) {

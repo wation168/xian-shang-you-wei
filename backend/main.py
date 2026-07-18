@@ -553,6 +553,16 @@ async def redirect_old_landing():
     from fastapi.responses import RedirectResponse
     return RedirectResponse("/stock/landing", status_code=301)
 
+@app.get("/patterns", include_in_schema=False)
+@app.get("/patterns/", include_in_schema=False)
+async def serve_patterns_index():
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "patterns", "index.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
 @app.get("/patterns/{filename}.html", include_in_schema=False)
 async def serve_patterns_html(filename: str):
     from fastapi.responses import FileResponse
@@ -562,12 +572,12 @@ async def serve_patterns_html(filename: str):
         return FileResponse(path)
     return JSONResponse({"detail": "Not Found"}, status_code=404)
 
-@app.get("/patterns", include_in_schema=False)
-@app.get("/patterns/", include_in_schema=False)
-async def serve_patterns_index():
+@app.get("/patterns/{locale}", include_in_schema=False)
+@app.get("/patterns/{locale}/", include_in_schema=False)
+async def serve_patterns_locale_index(locale: str):
     from fastapi.responses import FileResponse
     import os as _os
-    path = _os.path.join(_FRONTEND_DIR, "patterns", "index.html")
+    path = _os.path.join(_FRONTEND_DIR, "patterns", locale, "index.html")
     if _os.path.isfile(path):
         return FileResponse(path)
     return JSONResponse({"detail": "Not Found"}, status_code=404)
