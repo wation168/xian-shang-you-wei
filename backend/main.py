@@ -523,7 +523,7 @@ async def serve_homepage(request: Request):
     import os as _os
     # 如果帶有台股 SPA 的參數，自動跳到 /stock/
     qs = str(request.query_params)
-    if qs and ("stock=" in qs or "report=" in qs or "tab=" in qs):
+    if qs and ("stock=" in qs or "report=" in qs or "tab=" in qs or "q=" in qs):
         return RedirectResponse(f"/stock/?{qs}", status_code=302)
     # 優先回傳 homepage.html，不存在則 fallback 到 index.html
     hp = _os.path.join(_FRONTEND_DIR, "homepage.html")
@@ -563,14 +563,33 @@ async def serve_patterns_index():
         return FileResponse(path)
     return JSONResponse({"detail": "Not Found"}, status_code=404)
 
+# ── Patterns slug redirect map (old sitemap slug → actual filename) ──
+_PATTERN_REDIRECTS = {
+    "abandoned-baby-bear": "abandoned-baby-bearish",
+    "dark-cloud-cover": "dark-cloud",
+    "falling-three": "falling-three-methods",
+    "kicking-bearish": "kicker-bearish",
+    "kicking-bullish": "kicker-bullish",
+    "marubozu-bearish": "bearish-marubozu",
+    "marubozu-bullish": "bullish-marubozu",
+    "rising-three": "rising-three-methods",
+    "tri-star-bearish": "tri-star",
+    "tri-star-bullish": "tri-star",
+}
+
 @app.get("/patterns/{filename}.html", include_in_schema=False)
 async def serve_patterns_html(filename: str):
-    from fastapi.responses import FileResponse
+    from fastapi.responses import FileResponse, RedirectResponse
     import os as _os
     path = _os.path.join(_FRONTEND_DIR, "patterns", f"{filename}.html")
     if _os.path.isfile(path):
         return FileResponse(path)
-    return JSONResponse({"detail": "Not Found"}, status_code=404)
+    # Check redirect map
+    new_slug = _PATTERN_REDIRECTS.get(filename)
+    if new_slug:
+        return RedirectResponse(f"/patterns/{new_slug}.html", status_code=301)
+    # Unknown pattern → redirect to index
+    return RedirectResponse("/patterns/", status_code=301)
 
 @app.get("/patterns/{locale}", include_in_schema=False)
 @app.get("/patterns/{locale}/", include_in_schema=False)
@@ -584,12 +603,15 @@ async def serve_patterns_locale_index(locale: str):
 
 @app.get("/patterns/{locale}/{filename}.html", include_in_schema=False)
 async def serve_patterns_locale_html(locale: str, filename: str):
-    from fastapi.responses import FileResponse
+    from fastapi.responses import FileResponse, RedirectResponse
     import os as _os
     path = _os.path.join(_FRONTEND_DIR, "patterns", locale, f"{filename}.html")
     if _os.path.isfile(path):
         return FileResponse(path)
-    return JSONResponse({"detail": "Not Found"}, status_code=404)
+    new_slug = _PATTERN_REDIRECTS.get(filename)
+    if new_slug:
+        return RedirectResponse(f"/patterns/{locale}/{new_slug}.html", status_code=301)
+    return RedirectResponse(f"/patterns/{locale}/", status_code=301)
 
 @app.get("/blog/{filename}.html", include_in_schema=False)
 async def serve_blog_html(filename: str):
@@ -680,8 +702,11 @@ async def serve_tools_locale_html(locale: str, filename: str):
     if locale not in _TOOLS_LOCALES:
         return JSONResponse({"detail": "Not Found"}, status_code=404)
     path = _os.path.join(_FRONTEND_DIR, "tools", locale, f"{filename}.html")
-    if _os.path.isfile(path):
-        return FileResponse(path)
+    try:
+        if _os.path.isfile(path):
+            return FileResponse(path)
+    except Exception:
+        pass
     return JSONResponse({"detail": "Not Found"}, status_code=404)
 
 @app.get("/tools/{locale}", include_in_schema=False)
@@ -7321,17 +7346,24 @@ def get_report(slug: str):
         stock_id = slug.upper()
         report_date = _taipei_today()
 
-    conn = _db_conn()
-    row = conn.execute(
-        "SELECT report_html FROM stock_reports WHERE stock_id=? AND report_date=? ORDER BY created_at DESC LIMIT 1",
-        (stock_id, report_date)
-    ).fetchone()
-    if not row:
+    # Validate stock code format (1-6 alphanumeric chars)
+    if not _re.match(r"^[A-Z0-9]{1,6}$", stock_id):
+        return HTMLResponse("<html><body><h1>404</h1><p>Invalid stock code.</p><a href='/'>← Home</a></body></html>", status_code=404)
+
+    try:
+        conn = _db_conn()
         row = conn.execute(
-            "SELECT report_html, report_date FROM stock_reports WHERE stock_id=? ORDER BY created_at DESC LIMIT 1",
-            (stock_id,)
+            "SELECT report_html FROM stock_reports WHERE stock_id=? AND report_date=? ORDER BY created_at DESC LIMIT 1",
+            (stock_id, report_date)
         ).fetchone()
-    conn.close()
+        if not row:
+            row = conn.execute(
+                "SELECT report_html, report_date FROM stock_reports WHERE stock_id=? ORDER BY created_at DESC LIMIT 1",
+                (stock_id,)
+            ).fetchone()
+        conn.close()
+    except Exception:
+        return HTMLResponse("<html><body><h1>503</h1><p>Service temporarily unavailable.</p><a href='/'>← Home</a></body></html>", status_code=503)
 
     if row and str(row["report_date"] if "report_date" in row.keys() else '')[:10] != report_date:
         row = None  # 報告日期不符，強制重算
