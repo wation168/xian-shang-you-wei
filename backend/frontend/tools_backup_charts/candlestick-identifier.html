@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K線型態識別器 - 技術分析工具</title>
+<meta name="description" content="免費K線型態識別工具，幫助識別看漲和看跌訊號。分析開盤價、收盤價、最高價和最低價，快速判斷型態。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/candlestick-identifier.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/candlestick-identifier.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/candlestick-identifier.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/candlestick-identifier.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/candlestick-identifier.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/candlestick-identifier.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/candlestick-identifier.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/candlestick-identifier.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/candlestick-identifier.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/candlestick-identifier.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/candlestick-identifier.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/candlestick-identifier.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "K線型態識別器", "url": "https://softglow-ai.com/tools/candlestick-identifier.html", "description": "免費K線型態識別工具，幫助識別看漲和看跌訊號。分析開盤價、收盤價、最高價和最低價，快速判斷型態。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "什麼是K線的實體和影線？", "acceptedAnswer": {"@type": "Answer", "text": "K線實體是開盤價和收盤價之間的矩形部分，反映該時段內的價格範圍。影線是實體上下延伸的細線，上影線從實體頂端到該時段最高價，下影線從實體底端到最低價。實體顏色通常為紅（上漲）或綠（下跌）。"}}, {"@type": "Question", "name": "如何判斷K線型態的可信度？", "acceptedAnswer": {"@type": "Answer", "text": "K線型態的可信度取決於其訊號強度和成交量的配合。訊號強度越高表示型態越典型，同時伴隨放大的成交量會增強型態的可信度。此外，結合整體市場趨勢和支撐阻力位來判斷，能進一步提高預測準確性。"}}, {"@type": "Question", "name": "看漲訊號和看跌訊號如何區分？", "acceptedAnswer": {"@type": "Answer", "text": "看漲訊號通常表現為下影線較長、實體較小的K線（如錘頭線），或收盤價高於開盤價的情況。看跌訊號則表現為上影線較長、實體較小的K線（如倒錘頭線），或收盤價低於開盤價的情況。訊號強度數值越高，其預示能力越強。"}}, {"@type": "Question", "name": "單根K線能準確預測行情嗎？", "acceptedAnswer": {"@type": "Answer", "text": "單根K線型態提供的訊息有限，準確性相對較低。建議與其他技術指標和多根K線的組合型態相結合，例如觀察錘頭線是否在支撐位出現、是否伴隨成交量增加等。綜合分析多個因素能大幅提高預測的可靠性。"}}, {"@type": "Question", "name": "如何選擇合適的時間週期分析K線？", "acceptedAnswer": {"@type": "Answer", "text": "不同時間週期的K線適用於不同的交易策略。日線適合中線交易，4小時線適合短線交易，分鐘線適合超短線交易。較長的時間週期內的K線型態通常更加可靠，短期波動的幹擾較少。建議根據自己的交易風格選擇合適的時間週期。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="candlestick-identifier">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/">工具</a>
+    <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
+    <a href="/">首頁</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/candlestick-identifier.html" selected>繁中</option><option value="/tools/en/candlestick-identifier.html">EN</option><option value="/tools/ja/candlestick-identifier.html">日本語</option><option value="/tools/ko/candlestick-identifier.html">한국어</option><option value="/tools/de/candlestick-identifier.html">DE</option><option value="/tools/fr/candlestick-identifier.html">FR</option><option value="/tools/es/candlestick-identifier.html">ES</option><option value="/tools/pt/candlestick-identifier.html">PT</option><option value="/tools/id/candlestick-identifier.html">ID</option><option value="/tools/zh-CN/candlestick-identifier.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > K線型態識別器</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>K線型態識別器</h1>
+    <p class="calc-subtitle">識別和分類K線型態以進行技術分析</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="openPrice">開盤價</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="openPrice" placeholder="例如：100"  step="0.01"></div>
+</div>
+  <small class="input-help">輸入該根K線的開盤價格</small>
+<div class="input-group">
+  <label for="closePrice">收盤價</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="closePrice" placeholder="例如：105"  step="0.01"></div>
+</div>
+  <small class="input-help">輸入該根K線的收盤價格</small>
+<div class="input-group">
+  <label for="highPrice">最高價</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="highPrice" placeholder="例如：108"  step="0.01"></div>
+</div>
+  <small class="input-help">輸入該根K線的最高價格</small>
+<div class="input-group">
+  <label for="lowPrice">最低價</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="lowPrice" placeholder="例如：98"  step="0.01"></div>
+</div>
+  <small class="input-help">輸入該根K線的最低價格</small>
+<div class="input-group">
+  <label for="previousClosePrice">前一根K線收盤價</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="previousClosePrice" placeholder="例如：102"  step="0.01"></div>
+</div>
+  <small class="input-help">輸入前一根K線的收盤價格以進行比較</small></div>
+    <button class="btn-calc" onclick="calculate()">計算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">識別出的型態</span><span class="result-value" id="patternType">—</span></div>
+<div class="result-item"><span class="result-label">型態分類</span><span class="result-value" id="patternCategory">—</span></div>
+<div class="result-item"><span class="result-label">K線實體大小（價格範圍）</span><span class="result-value" id="bodySize">—</span></div>
+<div class="result-item"><span class="result-label">上影線長度</span><span class="result-value" id="upperWick">—</span></div>
+<div class="result-item"><span class="result-label">下影線長度</span><span class="result-value" id="lowerWick">—</span></div>
+<div class="result-item"><span class="result-label">看漲訊號強度</span><span class="result-value" id="bullishSignal">—</span></div>
+<div class="result-item"><span class="result-label">看跌訊號強度</span><span class="result-value" id="bearishSignal">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> 識別結果顯示該根K線形成的型態名稱及其分類，同時提供K線實體、上下影線的具體長度。根據看漲和看跌訊號強度，可判斷該型態對後續價格走勢的預示作用，數值越高表示訊號越強。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 列印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+<div style="margin:20px 0;padding:16px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;text-align:center"><a href="https://lottery.softglow-ai.com/zh-TW/" target="_blank" rel="noopener" style="text-decoration:none;color:#fff"><div style="font-size:16px;font-weight:700;margin-bottom:4px">🎰 15國彩票開獎＋12種智慧選號工具</div><div style="font-size:12px;opacity:0.9">威力彩・大樂透・Powerball・Mega Millions — 星座、生日、夢境、AI 等選號方式</div></a></div>
+
+  <article class="article"><h2>K線型態識別器使用指南</h2><p>K線型態是技術分析中最重要的工具之一，通過識別和分析K線的不同形狀，交易者可以預測市場的走勢。我們的K線型態識別器能幫助您快速識別常見的K線型態，並評估其看漲或看跌的強度。</p><h2>如何使用本工具</h2><p>首先，輸入該根K線的四個關鍵價格數據：開盤價、收盤價、最高價和最低價。開盤價是交易時段開始時的價格，收盤價是結束時的價格，最高價和最低價分別代表該時段內的最高和最低交易價格。同時提供前一根K線的收盤價，以便工具進行更準確的型態判斷。</p><h2>常見K線型態說明</h2><p>K線型態主要包括單根型態和多根組合型態。單根型態如十字星、錘頭線、倒錘頭線、紡錘線等，這些型態的看漲或看跌訊號取決於K線實體的大小和影線的長度。十字星表示買賣力量均衡，錘頭線在底部出現通常預示反轉上升，倒錘頭線則相反。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>理解訊號強度</h2><p>看漲訊號強度和看跌訊號強度以百分比表示，反映該型態預示行情上漲或下跌的可能性。一般來說，訊號強度越高（接近100%），該型態的預測價值越大。當看漲訊號強度明顯高於看跌強度時，表示市場傾向上升；反之則傾向下降。</p><h2>K線實體與影線的意義</h2><p>K線實體代表開盤價和收盤價之間的價格範圍，影線代表該時段內超出開盤收盤區間的極端價格。上影線長度反映賣方的力量，下影線長度反映買方的力量。短實體配長影線通常預示反轉訊號強烈，而長實體配短影線則表示趨勢明確。</p><h2>技術分析應用</h2><p>單純依靠一根K線進行交易決策風險較大，建議結合多根K線的組合型態以及其他技術指標（如移動平均線、相對強弱指數等）進行綜合分析。K線型態識別只是技術分析的基礎工具，應與市場整體趨勢、支撐阻力位和成交量等因素相結合，以提高預測準確性。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/candlestick-patterns.html">Candlestick Patterns<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/support-resistance.html">Support & Resistance<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/moving-average-guide.html">Moving Average Guide<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">什麼是K線的實體和影線？</div><div class="faq-a">K線實體是開盤價和收盤價之間的矩形部分，反映該時段內的價格範圍。影線是實體上下延伸的細線，上影線從實體頂端到該時段最高價，下影線從實體底端到最低價。實體顏色通常為紅（上漲）或綠（下跌）。</div></div>
+  <div class="faq-item"><div class="faq-q">如何判斷K線型態的可信度？</div><div class="faq-a">K線型態的可信度取決於其訊號強度和成交量的配合。訊號強度越高表示型態越典型，同時伴隨放大的成交量會增強型態的可信度。此外，結合整體市場趨勢和支撐阻力位來判斷，能進一步提高預測準確性。</div></div>
+  <div class="faq-item"><div class="faq-q">看漲訊號和看跌訊號如何區分？</div><div class="faq-a">看漲訊號通常表現為下影線較長、實體較小的K線（如錘頭線），或收盤價高於開盤價的情況。看跌訊號則表現為上影線較長、實體較小的K線（如倒錘頭線），或收盤價低於開盤價的情況。訊號強度數值越高，其預示能力越強。</div></div>
+  <div class="faq-item"><div class="faq-q">單根K線能準確預測行情嗎？</div><div class="faq-a">單根K線型態提供的訊息有限，準確性相對較低。建議與其他技術指標和多根K線的組合型態相結合，例如觀察錘頭線是否在支撐位出現、是否伴隨成交量增加等。綜合分析多個因素能大幅提高預測的可靠性。</div></div>
+  <div class="faq-item"><div class="faq-q">如何選擇合適的時間週期分析K線？</div><div class="faq-a">不同時間週期的K線適用於不同的交易策略。日線適合中線交易，4小時線適合短線交易，分鐘線適合超短線交易。較長的時間週期內的K線型態通常更加可靠，短期波動的幹擾較少。建議根據自己的交易風格選擇合適的時間週期。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/fibonacci-retracement.html">斐波那契回調計算器</a>
+      <a class="tool-pill" href="/tools/pivot-point.html">樞紐點計算器</a>
+      <a class="tool-pill" href="/tools/rsi-calculator.html">RSI 計算器</a>
+      <a class="tool-pill" href="/tools/macd-calculator.html">MACD 計算器</a>
+      <a class="tool-pill" href="/tools/bollinger-bands.html">布林帶計算器</a>
+      <a class="tool-pill" href="/tools/atr-calculator.html">ATR計算器</a>
+      <a class="tool-pill" href="/tools/ma-crossover.html">移動平均線交叉計算器</a>
+      <a class="tool-pill" href="/tools/support-resistance.html">支撐與阻力計算器</a>
+      <a class="tool-pill" href="/tools/pip-value.html">點值計算機</a>
+      <a class="tool-pill" href="/tools/options-profit.html">期權損益計算器</a>
+      <a class="tool-pill" href="/tools/stock-split.html">股票分割計算器</a>
+      <a class="tool-pill" href="/tools/trading-fee.html">交易手續費計算器</a></div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
+    
+  </div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const openPrice = parseFloat(document.getElementById('openPrice').value);
+  const closePrice = parseFloat(document.getElementById('closePrice').value);
+  const highPrice = parseFloat(document.getElementById('highPrice').value);
+  const lowPrice = parseFloat(document.getElementById('lowPrice').value);
+  const previousClosePrice = parseFloat(document.getElementById('previousClosePrice').value);
+
+  if (isNaN(openPrice) || isNaN(closePrice) || isNaN(highPrice) || isNaN(lowPrice) || isNaN(previousClosePrice)) {
+    alert('Please enter all price values');
+    return;
+  }
+
+  if (lowPrice > openPrice || lowPrice > closePrice || highPrice < openPrice || highPrice < closePrice) {
+    alert('Invalid price configuration. High must be highest and Low must be lowest.');
+    return;
+  }
+
+  const bodySize = Math.abs(closePrice - openPrice);
+  const totalRange = highPrice - lowPrice;
+  const upperWick = highPrice - Math.max(closePrice, openPrice);
+  const lowerWick = Math.min(closePrice, openPrice) - lowPrice;
+  const bodyPercent = (bodySize / totalRange) * 100;
+  const isBullish = closePrice > openPrice;
+  const isBearish = closePrice < openPrice;
+  const isDoji = bodySize < (totalRange * 0.05);
+  const isHammer = (lowerWick > (bodySize * 2)) && (upperWick < (bodySize * 0.5)) && !isBullish;
+  const isInvertedHammer = (upperWick > (bodySize * 2)) && (lowerWick < (bodySize * 0.5)) && !isBearish;
+  const isMorningstar = closePrice > previousClosePrice && isBullish && bodySize > (totalRange * 0.3);
+  const isEveningStar = closePrice < previousClosePrice && isBearish && bodySize > (totalRange * 0.3);
+  const isSpinningTop = (bodyPercent < 30) && (upperWick > (bodySize * 1.5)) && (lowerWick > (bodySize * 1.5));
+  const isMarubozu = (upperWick < totalRange * 0.02) && (lowerWick < totalRange * 0.02);
+  const isGravestoneDoji = (isDoji && upperWick > (totalRange * 0.4)) && (lowerWick < totalRange * 0.1);
+  const isDragonflydoji = (isDoji && lowerWick > (totalRange * 0.4)) && (upperWick < totalRange * 0.1);
+
+  let patternType = 'Unidentified Pattern';
+  let patternCategory = 'Neutral';
+
+  if (isDoji) {
+    patternType = 'Doji';
+    patternCategory = 'Reversal / Indecision';
+  } else if (isGravestoneDoji) {
+    patternType = 'Gravestone Doji';
+    patternCategory = 'Bearish Reversal';
+  } else if (isDragonflydoji) {
+    patternType = 'Dragonfly Doji';
+    patternCategory = 'Bullish Reversal';
+  } else if (isHammer) {
+    patternType = 'Hammer';
+    patternCategory = 'Bullish Reversal';
+  } else if (isInvertedHammer) {
+    patternType = 'Inverted Hammer';
+    patternCategory = 'Bullish Reversal';
+  } else if (isSpinningTop) {
+    patternType = 'Spinning Top';
+    patternCategory = 'Indecision / Potential Reversal';
+  } else if (isMarubozu && isBullish) {
+    patternType = 'Bullish Marubozu';
+    patternCategory = 'Strong Bullish Continuation';
+  } else if (isMarubozu && isBearish) {
+    patternType = 'Bearish Marubozu';
+    patternCategory = 'Strong Bearish Continuation';
+  } else if (isBullish && bodySize > (totalRange * 0.6)) {
+    patternType = 'Strong Bullish Candle';
+    patternCategory = 'Bullish Continuation';
+  } else if (isBearish && bodySize > (totalRange * 0.6)) {
+    patternType = 'Strong Bearish Candle';
+    patternCategory = 'Bearish Continuation';
+  } else if (isBullish) {
+    patternType = 'Bullish Candle';
+    patternCategory = 'Bullish';
+  } else if (isBearish) {
+    patternType = 'Bearish Candle';
+    patternCategory = 'Bearish';
+  }
+
+  const bullishSignal = isBullish ? Math.min(100, (bodyPercent / 2)) : Math.max(0, 50 - (bodyPercent / 2));
+  const bearishSignal = isBearish ? Math.min(100, (bodyPercent / 2)) : Math.max(0, 50 - (bodyPercent / 2));
+
+  document.getElementById('patternType').textContent = patternType;
+  document.getElementById('patternCategory').textContent = patternCategory;
+  document.getElementById('bodySize').textContent = bodySize.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('upperWick').textContent = upperWick.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('lowerWick').textContent = lowerWick.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('bullishSignal').textContent = bullishSignal.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+  document.getElementById('bearishSignal').textContent = bearishSignal.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},2000);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-TW|candlestick-identifier|2026-07-09 -->

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DCF 計算器 - 計算股票內在價值</title>
+<meta name="description" content="免費 DCF 折現現金流計算器，快速評估公司內在價值。輸入現金流、折現率和終端增長率，立即得出每股內在價值。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/dcf-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/dcf-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/dcf-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/dcf-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/dcf-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/dcf-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/dcf-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/dcf-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/dcf-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/dcf-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/dcf-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/dcf-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "DCF 計算器", "url": "https://softglow-ai.com/tools/dcf-calculator.html", "description": "免費 DCF 折現現金流計算器，快速評估公司內在價值。輸入現金流、折現率和終端增長率，立即得出每股內在價值。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "什麼是自由現金流（FCF）？", "acceptedAnswer": {"@type": "Answer", "text": "自由現金流是公司產生的現金減去資本支出後的金額。它代表公司在滿足所有運營和資本投資需求後，可供債權人和股東使用的現金。自由現金流是 DCF 分析中最重要的指標。"}}, {"@type": "Question", "name": "如何選擇合適的折現率（WACC）？", "acceptedAnswer": {"@type": "Answer", "text": "WACC 應根據公司的風險狀況、所處行業和資本結構計算。一般來說，高風險公司應使用更高的 WACC，而低風險公司則使用較低的 WACC。您可以參考行業平均 WACC 或使用資本資產定價模型（CAPM）進行計算。"}}, {"@type": "Question", "name": "終端增長率應該設定為多少？", "acceptedAnswer": {"@type": "Answer", "text": "終端增長率通常設定為 2% 至 3% 之間，與全球長期 GDP 增長率相近。對於高增長行業的公司，可以使用稍高的增長率，但應避免過度樂觀的假設。敏感性分析可以幫助您理解終端增長率變化的影響。"}}, {"@type": "Question", "name": "DCF 估值與市場價格不符怎麼辦？", "acceptedAnswer": {"@type": "Answer", "text": "如果 DCF 估值與市場價格存在大幅差異，建議檢查您的假設是否合理。可能的原因包括對現金流的高估或低估、折現率選擇不當，或市場對公司前景的不同看法。進行敏感性分析有助於理解哪些因素對估值影響最大。"}}, {"@type": "Question", "name": "DCF 分析有什麼局限性？", "acceptedAnswer": {"@type": "Answer", "text": "DCF 分析高度依賴於對未來現金流的預測，這涉及許多不確定因素。宏觀經濟變化、行業競爭、管理層變更等都可能影響實際現金流。因此，DCF 應與其他估值方法（如相對估值）結合使用，以獲得更全面的評估。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="dcf-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/">工具</a>
+    <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
+    <a href="/">首頁</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/dcf-calculator.html" selected>繁中</option><option value="/tools/en/dcf-calculator.html">EN</option><option value="/tools/ja/dcf-calculator.html">日本語</option><option value="/tools/ko/dcf-calculator.html">한국어</option><option value="/tools/de/dcf-calculator.html">DE</option><option value="/tools/fr/dcf-calculator.html">FR</option><option value="/tools/es/dcf-calculator.html">ES</option><option value="/tools/pt/dcf-calculator.html">PT</option><option value="/tools/id/dcf-calculator.html">ID</option><option value="/tools/zh-CN/dcf-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > DCF 計算器</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>DCF 計算器</h1>
+    <p class="calc-subtitle">使用折現現金流分析計算公司內在價值</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="yearOne">第1年現金流</label>
+  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="yearOne" placeholder="50000"  value="50000" step="1"></div>
+</div>
+  <small class="input-help">輸入第1年預期的自由現金流金額</small>
+<div class="input-group">
+  <label for="yearTwo">第2年現金流</label>
+  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="yearTwo" placeholder="55000"  value="55000" step="1"></div>
+</div>
+  <small class="input-help">輸入第2年預期的自由現金流金額</small>
+<div class="input-group">
+  <label for="yearThree">第3年現金流</label>
+  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="yearThree" placeholder="60500"  value="60500" step="1"></div>
+</div>
+  <small class="input-help">輸入第3年預期的自由現金流金額</small>
+<div class="input-group">
+  <label for="yearFour">第4年現金流</label>
+  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="yearFour" placeholder="66550"  value="66550" step="1"></div>
+</div>
+  <small class="input-help">輸入第4年預期的自由現金流金額</small>
+<div class="input-group">
+  <label for="yearFive">第5年現金流</label>
+  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="yearFive" placeholder="73205"  value="73205" step="1"></div>
+</div>
+  <small class="input-help">輸入第5年預期的自由現金流金額</small>
+<div class="input-group">
+  <label for="discountRate">折現率（WACC）</label>
+  <div class="input-row"><input type="number" id="discountRate" placeholder="10"  value="10" step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">輸入加權平均資本成本（WACC），通常為5%-15%</small>
+<div class="input-group">
+  <label for="terminalGrowth">終端增長率</label>
+  <div class="input-row"><input type="number" id="terminalGrowth" placeholder="2.5"  value="2.5" step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">輸入長期終端增長率，通常為2%-3%</small>
+<div class="input-group">
+  <label for="terminalValue">終端價值（選填）</label>
+  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="terminalValue" placeholder="0"  value="0" step="1"></div>
+</div>
+  <small class="input-help">若有特定終端價值，可直接輸入，否則由公式自動計算</small>
+<div class="input-group">
+  <label for="netDebt">淨債務（債務-現金）</label>
+  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="netDebt" placeholder="0"  value="0" step="1"></div>
+</div>
+  <small class="input-help">輸入公司總債務減去現金的淨額（單位：百萬）</small>
+<div class="input-group">
+  <label for="sharesOutstanding">流通股數</label>
+  <div class="input-row"><input type="number" id="sharesOutstanding" placeholder="100"  value="100" step="0.1"><span class="input-suffix">百萬</span></div>
+</div>
+  <small class="input-help">輸入公司流通在外的總股數（單位：百萬）</small></div>
+    <button class="btn-calc" onclick="calculate()">計算</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">現金流現值（第1-5年）</span><span class="result-value" id="pvCashFlows">—</span></div>
+<div class="result-item"><span class="result-label">終端價值現值</span><span class="result-value" id="pvTerminal">—</span></div>
+<div class="result-item"><span class="result-label">企業價值</span><span class="result-value" id="enterpriseValue">—</span></div>
+<div class="result-item"><span class="result-label">股權價值</span><span class="result-value" id="equityValue">—</span></div>
+<div class="result-highlight"><span class="result-label">每股內在價值</span><span class="result-value" id="valuePerShare">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> 每股內在價值是透過將未來現金流折現到現在價值，然後扣除淨債務後除以流通股數計算所得。將計算結果與目前股價比較，若內在價值高於股價，代表股票可能被低估；反之則可能被高估。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 列印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+<div style="margin:20px 0;padding:16px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;text-align:center"><a href="https://lottery.softglow-ai.com/zh-TW/" target="_blank" rel="noopener" style="text-decoration:none;color:#fff"><div style="font-size:16px;font-weight:700;margin-bottom:4px">🎰 15國彩票開獎＋12種智慧選號工具</div><div style="font-size:12px;opacity:0.9">威力彩・大樂透・Powerball・Mega Millions — 星座、生日、夢境、AI 等選號方式</div></a></div>
+
+  <article class="article"><h2>DCF 折現現金流分析入門</h2><p>折現現金流（Discounted Cash Flow, DCF）是一種經典的股票估值方法，通過預測公司未來的現金流並將其折現到現在價值，以確定公司的內在價值。這種方法基於一個簡單的原則：公司的價值等於其未來現金流的現值。</p><h2>DCF 計算的關鍵步驟</h2><p>首先，您需要預測公司未來5年的自由現金流（Free Cash Flow）。這通常基於公司的歷史表現、行業增長前景和管理層指引。其次，確定適當的折現率（WACC），這代表投資者的預期回報率。最後，計算終端價值，代表預測期後公司的價值。</p><h2>折現率（WACC）的重要性</h2><p>加權平均資本成本（WACC）是影響 DCF 估值的關鍵因素。較高的折現率會導致較低的現值，反之亦然。WACC 考慮了公司的債務成本、股權成本和資本結構。典型的 WACC 範圍為 5% 至 15%，具體取決於公司的風險狀況和所處行業。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>終端增長率的選擇</h2><p>終端增長率用於計算公司在5年預測期後的價值。通常建議使用 2% 至 3% 的終端增長率，與全球長期經濟增長率相一致。過高的終端增長率會導致過度樂觀的估值，而過低的增長率可能低估公司的潛力。</p><h2>淨債務的調整</h2><p>企業價值減去淨債務得出股權價值。淨債務是公司總債務減去現金及等價物。這一調整至關重要，因為它反映了股東真正擁有的價值。如果公司有大量現金，這將增加股權價值；反之亦然。</p><h2>解讀 DCF 結果</h2><p>計算出的每股內在價值應與當前市場價格進行比較。如果內在價值明顯高於市場價格，可能表示該股票被低估；如果內在價值低於市場價格，則可能被高估。然而，DCF 分析涉及許多假設，結果的準確性取決於預測的準確性。建議投資者進行敏感性分析，測試不同的折現率和增長率對估值的影響。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">什麼是自由現金流（FCF）？</div><div class="faq-a">自由現金流是公司產生的現金減去資本支出後的金額。它代表公司在滿足所有運營和資本投資需求後，可供債權人和股東使用的現金。自由現金流是 DCF 分析中最重要的指標。</div></div>
+  <div class="faq-item"><div class="faq-q">如何選擇合適的折現率（WACC）？</div><div class="faq-a">WACC 應根據公司的風險狀況、所處行業和資本結構計算。一般來說，高風險公司應使用更高的 WACC，而低風險公司則使用較低的 WACC。您可以參考行業平均 WACC 或使用資本資產定價模型（CAPM）進行計算。</div></div>
+  <div class="faq-item"><div class="faq-q">終端增長率應該設定為多少？</div><div class="faq-a">終端增長率通常設定為 2% 至 3% 之間，與全球長期 GDP 增長率相近。對於高增長行業的公司，可以使用稍高的增長率，但應避免過度樂觀的假設。敏感性分析可以幫助您理解終端增長率變化的影響。</div></div>
+  <div class="faq-item"><div class="faq-q">DCF 估值與市場價格不符怎麼辦？</div><div class="faq-a">如果 DCF 估值與市場價格存在大幅差異，建議檢查您的假設是否合理。可能的原因包括對現金流的高估或低估、折現率選擇不當，或市場對公司前景的不同看法。進行敏感性分析有助於理解哪些因素對估值影響最大。</div></div>
+  <div class="faq-item"><div class="faq-q">DCF 分析有什麼局限性？</div><div class="faq-a">DCF 分析高度依賴於對未來現金流的預測，這涉及許多不確定因素。宏觀經濟變化、行業競爭、管理層變更等都可能影響實際現金流。因此，DCF 應與其他估值方法（如相對估值）結合使用，以獲得更全面的評估。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/roi-calculator.html">ROI 計算機</a>
+      <a class="tool-pill" href="/tools/risk-reward.html">風險報酬計算機</a>
+      <a class="tool-pill" href="/tools/position-size.html">部位規模計算器</a>
+      <a class="tool-pill" href="/tools/stop-loss.html">停損計算機</a>
+      <a class="tool-pill" href="/tools/dividend-yield.html">股息收益率計算機</a>
+      <a class="tool-pill" href="/tools/pe-ratio.html">本益比計算機</a>
+      <a class="tool-pill" href="/tools/dca-calculator.html">定期定額投資計算機</a>
+      <a class="tool-pill" href="/tools/cagr.html">年複合成長率計算器</a>
+      <a class="tool-pill" href="/tools/margin-calculator.html">保證金計算器</a>
+      <a class="tool-pill" href="/tools/stock-gain-loss.html">股票損益計算機</a>
+      <a class="tool-pill" href="/tools/break-even.html">損益平衡點計算機</a></div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
+    
+  </div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const y1 = parseFloat(document.getElementById('yearOne').value);
+  const y2 = parseFloat(document.getElementById('yearTwo').value);
+  const y3 = parseFloat(document.getElementById('yearThree').value);
+  const y4 = parseFloat(document.getElementById('yearFour').value);
+  const y5 = parseFloat(document.getElementById('yearFive').value);
+  const discountRate = parseFloat(document.getElementById('discountRate').value) / 100;
+  const terminalGrowth = parseFloat(document.getElementById('terminalGrowth').value) / 100;
+  const terminalValueInput = parseFloat(document.getElementById('terminalValue').value);
+  const netDebt = parseFloat(document.getElementById('netDebt').value);
+  const shares = parseFloat(document.getElementById('sharesOutstanding').value) * 1000000;
+
+  if (isNaN(y1) || isNaN(y2) || isNaN(y3) || isNaN(y4) || isNaN(y5) || isNaN(discountRate) || isNaN(shares)) {
+    alert('Please fill in all required fields with valid numbers');
+    return;
+  }
+
+  if (discountRate <= 0 || discountRate > 1) {
+    alert('Discount rate must be between 0 and 100%');
+    return;
+  }
+
+  const pv1 = y1 / Math.pow(1 + discountRate, 1);
+  const pv2 = y2 / Math.pow(1 + discountRate, 2);
+  const pv3 = y3 / Math.pow(1 + discountRate, 3);
+  const pv4 = y4 / Math.pow(1 + discountRate, 4);
+  const pv5 = y5 / Math.pow(1 + discountRate, 5);
+
+  const pvCashFlows = pv1 + pv2 + pv3 + pv4 + pv5;
+
+  let pvTerminal = 0;
+  if (terminalValueInput > 0) {
+    pvTerminal = terminalValueInput / Math.pow(1 + discountRate, 5);
+  } else {
+    const terminalValue = (y5 * (1 + terminalGrowth)) / (discountRate - terminalGrowth);
+    pvTerminal = terminalValue / Math.pow(1 + discountRate, 5);
+  }
+
+  const enterpriseValue = pvCashFlows + pvTerminal;
+  const equityValue = enterpriseValue - netDebt;
+  const valuePerShare = equityValue / shares;
+
+  document.getElementById('pvCashFlows').textContent = 'NT$' + pvCashFlows.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('pvTerminal').textContent = 'NT$' + pvTerminal.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('enterpriseValue').textContent = 'NT$' + enterpriseValue.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('equityValue').textContent = 'NT$' + equityValue.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('valuePerShare').textContent = 'NT$' + valuePerShare.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},2000);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-TW|dcf-calculator|2026-07-09 -->

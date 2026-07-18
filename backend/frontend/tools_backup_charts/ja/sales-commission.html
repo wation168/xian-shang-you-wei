@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>売上手数料計算機 - 段階別手数料を素早く計算</title>
+<meta name="description" content="複数の段階的手数料構造に対応した売上手数料計算機。段階1～3の手数料を自動計算し、実効手数料率を表示します。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/sales-commission.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/sales-commission.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/sales-commission.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/sales-commission.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/sales-commission.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/sales-commission.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/sales-commission.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/sales-commission.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/sales-commission.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/sales-commission.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/sales-commission.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/sales-commission.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "売上手数料計算機", "url": "https://softglow-ai.com/tools/ja/sales-commission.html", "description": "複数の段階的手数料構造に対応した売上手数料計算機。段階1～3の手数料を自動計算し、実効手数料率を表示します。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "段階別手数料とは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "段階別手数料は、売上金額の範囲に応じて異なる手数料率を適用する制度です。売上が増えるにつれて高い手数料率が適用されることで、営業スタッフのモチベーション向上につながります。"}}, {"@type": "Question", "name": "実効手数料率はどのように計算されていますか？", "acceptedAnswer": {"@type": "Answer", "text": "実効手数料率は、総手数料を総売上金額で割り、100を掛けた値です。複数の段階が組み合わさった場合の実際の手数料率を示す指標となります。"}}, {"@type": "Question", "name": "段階1の上限を超えた場合、どのように計算されますか？", "acceptedAnswer": {"@type": "Answer", "text": "段階1の上限を超えた売上部分には段階2の手数料率が適用されます。段階2の上限を超えた部分には段階3の手数料率が適用されるという方式で、段階的に計算されます。"}}, {"@type": "Question", "name": "3段階以上の手数料構造に対応していますか？", "acceptedAnswer": {"@type": "Answer", "text": "本計算機は段階1から段階3までの3段階に対応しています。より複雑な構造が必要な場合は、カスタマイズのご相談をお願いします。"}}, {"@type": "Question", "name": "手数料率の設定に推奨される値はありますか？", "acceptedAnswer": {"@type": "Answer", "text": "業界や企業の営業目標によって異なりますが、一般的には段階1が3～5%、段階2が5～8%、段階3が8～15%程度の設定が多く見られます。組織の目標と市場環境に合わせて調整してください。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="sales-commission">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ja">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/ja/">ツール</a>
+    <a href="/patterns/ja.html">ローソク足</a>
+    <a href="/blog/ja/index.html">ブログ</a>
+    <a href="/">ホーム</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/sales-commission.html">繁中</option><option value="/tools/en/sales-commission.html">EN</option><option value="/tools/ja/sales-commission.html" selected>日本語</option><option value="/tools/ko/sales-commission.html">한국어</option><option value="/tools/de/sales-commission.html">DE</option><option value="/tools/fr/sales-commission.html">FR</option><option value="/tools/es/sales-commission.html">ES</option><option value="/tools/pt/sales-commission.html">PT</option><option value="/tools/id/sales-commission.html">ID</option><option value="/tools/zh-CN/sales-commission.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 売上手数料計算機</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>売上手数料計算機</h1>
+    <p class="calc-subtitle">複数の段階的手数料構造で即座に段階別手数料を計算</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="salesAmount">総売上金額</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="salesAmount" placeholder="50000"  step="0.01"></div>
+</div>
+  <small class="input-help">合計の売上金額を入力してください</small>
+<div class="input-group">
+  <label for="tier1Rate">段階1手数料率（％）</label>
+  <div class="input-row"><input type="number" id="tier1Rate" placeholder="5"  value="5" step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">段階1に適用される手数料率をパーセンテージで入力</small>
+<div class="input-group">
+  <label for="tier1Limit">段階1上限金額（$）</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="tier1Limit" placeholder="20000"  value="20000" step="0.01"></div>
+</div>
+  <small class="input-help">段階1が適用される売上の上限金額を入力</small>
+<div class="input-group">
+  <label for="tier2Rate">段階2手数料率（％）</label>
+  <div class="input-row"><input type="number" id="tier2Rate" placeholder="7"  value="7" step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">段階2に適用される手数料率をパーセンテージで入力</small>
+<div class="input-group">
+  <label for="tier2Limit">段階2上限金額（$）</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="tier2Limit" placeholder="50000"  value="50000" step="0.01"></div>
+</div>
+  <small class="input-help">段階2が適用される売上の上限金額を入力</small>
+<div class="input-group">
+  <label for="tier3Rate">段階3手数料率（％）</label>
+  <div class="input-row"><input type="number" id="tier3Rate" placeholder="10"  value="10" step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">段階3に適用される手数料率をパーセンテージで入力</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">段階1手数料</span><span class="result-value" id="tier1Commission">—</span></div>
+<div class="result-item"><span class="result-label">段階2手数料</span><span class="result-value" id="tier2Commission">—</span></div>
+<div class="result-item"><span class="result-label">段階3手数料</span><span class="result-value" id="tier3Commission">—</span></div>
+<div class="result-highlight"><span class="result-label">総手数料</span><span class="result-value" id="totalCommission">—</span></div>
+<div class="result-item"><span class="result-label">実効手数料率</span><span class="result-value" id="effectiveRate">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 各段階の手数料は、設定した上限までの売上に対して段階別の手数料率を適用して計算されます。総手数料は全段階の手数料合計であり、実効手数料率は総売上に対する総手数料の割合を示しています。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+<div style="margin:20px 0;padding:16px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;text-align:center"><a href="https://lottery.softglow-ai.com/ja/" target="_blank" rel="noopener" style="text-decoration:none;color:#fff"><div style="font-size:16px;font-weight:700;margin-bottom:4px">🎰 世界15の宝くじ＋12種類の番号選択ツール</div><div style="font-size:12px;opacity:0.9">パワーボール・メガミリオンズ — 星座・誕生日・夢・AI選番</div></a></div>
+
+  <article class="article"><h2>段階別売上手数料計算機について</h2><p>売上手数料の計算は営業組織において重要な業務です。本計算機は、複数の段階的手数料構造に対応し、売上金額に応じて異なる手数料率を自動的に適用します。例えば、最初の$20,000までは5%、次の$30,000までは7%、それ以上は10%といった複雑な段階構造も簡単に処理できます。</p><h2>段階別手数料の仕組み</h2><p>段階別手数料制度は、売上が増加するにつれてより高い手数料率が適用される仕組みです。段階1上限までの売上には段階1の手数料率が、その上の部分には段階2の手数料率が適用されます。この方式により、営業スタッフのモチベーション向上と公正な報酬配分が実現します。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>計算機の使い方</h2><p>総売上金額と各段階の手数料率及び上限金額を入力するだけで、自動的に各段階の手数料と総手数料が計算されます。実効手数料率は、総売上に対する実際の手数料の割合を示す指標として役立ちます。この値を参考に、手数料構造の妥当性を検討することができます。</p><h2>実効手数料率の重要性</h2><p>実効手数料率は、手数料構造の評価に不可欠な指標です。表面上の手数料率と異なり、実効手数料率は複数の段階が組み合わさった実際の負担を反映しています。営業目標の設定や予算計画の際には、この実効手数料率を基準に検討することが重要です。</p><h2>段階別手数料の最適化</h2><p>多くの企業では、売上が増えるほど高い手数料率を適用することで、営業スタッフのモチベーションを維持しています。本計算機を使用することで、異なる手数料構造のシミュレーションが容易になり、組織の売上目標に最適な手数料体系を設計できます。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">段階別手数料とは何ですか？</div><div class="faq-a">段階別手数料は、売上金額の範囲に応じて異なる手数料率を適用する制度です。売上が増えるにつれて高い手数料率が適用されることで、営業スタッフのモチベーション向上につながります。</div></div>
+  <div class="faq-item"><div class="faq-q">実効手数料率はどのように計算されていますか？</div><div class="faq-a">実効手数料率は、総手数料を総売上金額で割り、100を掛けた値です。複数の段階が組み合わさった場合の実際の手数料率を示す指標となります。</div></div>
+  <div class="faq-item"><div class="faq-q">段階1の上限を超えた場合、どのように計算されますか？</div><div class="faq-a">段階1の上限を超えた売上部分には段階2の手数料率が適用されます。段階2の上限を超えた部分には段階3の手数料率が適用されるという方式で、段階的に計算されます。</div></div>
+  <div class="faq-item"><div class="faq-q">3段階以上の手数料構造に対応していますか？</div><div class="faq-a">本計算機は段階1から段階3までの3段階に対応しています。より複雑な構造が必要な場合は、カスタマイズのご相談をお願いします。</div></div>
+  <div class="faq-item"><div class="faq-q">手数料率の設定に推奨される値はありますか？</div><div class="faq-a">業界や企業の営業目標によって異なりますが、一般的には段階1が3～5%、段階2が5～8%、段階3が8～15%程度の設定が多く見られます。組織の目標と市場環境に合わせて調整してください。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">ROI計算機</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">リスク・リワード計算機</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">ポジションサイズ計算機</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">P/Eレシオ計算機</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">証拠金計算機</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
+    
+  </div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const salesAmount = parseFloat(document.getElementById('salesAmount').value);
+  const tier1Rate = parseFloat(document.getElementById('tier1Rate').value);
+  const tier1Limit = parseFloat(document.getElementById('tier1Limit').value);
+  const tier2Rate = parseFloat(document.getElementById('tier2Rate').value);
+  const tier2Limit = parseFloat(document.getElementById('tier2Limit').value);
+  const tier3Rate = parseFloat(document.getElementById('tier3Rate').value);
+  
+  if (!salesAmount || salesAmount < 0 || !tier1Rate || !tier1Limit || !tier2Rate || !tier2Limit || !tier3Rate) {
+    alert('Please enter all required values');
+    return;
+  }
+  
+  let tier1Commission = 0;
+  let tier2Commission = 0;
+  let tier3Commission = 0;
+  
+  if (salesAmount > 0) {
+    const tier1Amount = Math.min(salesAmount, tier1Limit);
+    tier1Commission = (tier1Amount * tier1Rate) / 100;
+  }
+  
+  if (salesAmount > tier1Limit) {
+    const tier2Amount = Math.min(salesAmount - tier1Limit, tier2Limit - tier1Limit);
+    tier2Commission = (tier2Amount * tier2Rate) / 100;
+  }
+  
+  if (salesAmount > tier2Limit) {
+    const tier3Amount = salesAmount - tier2Limit;
+    tier3Commission = (tier3Amount * tier3Rate) / 100;
+  }
+  
+  const totalCommission = tier1Commission + tier2Commission + tier3Commission;
+  const effectiveRate = (totalCommission / salesAmount) * 100;
+  
+  document.getElementById('tier1Commission').textContent = '$' + tier1Commission.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('tier2Commission').textContent = '$' + tier2Commission.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('tier3Commission').textContent = '$' + tier3Commission.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('totalCommission').textContent = '$' + totalCommission.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('effectiveRate').textContent = effectiveRate.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '%';
+  
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},2000);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="ツール、パターン、記事を検索…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>ブックマーク</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全て削除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|sales-commission|2026-07-09 -->

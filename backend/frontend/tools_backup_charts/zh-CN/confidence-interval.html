@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>置信区间计算器 - 在线统计分析工具</title>
+<meta name="description" content="免费置信区间计算器，快速计算样本均值的置信区间、标准误差和误差幅度，支持90%、95%、99%置信水平。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/zh-CN/confidence-interval.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/confidence-interval.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/confidence-interval.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/confidence-interval.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/confidence-interval.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/confidence-interval.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/confidence-interval.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/confidence-interval.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/confidence-interval.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/confidence-interval.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/confidence-interval.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/confidence-interval.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "置信区间计算器", "url": "https://softglow-ai.com/tools/zh-CN/confidence-interval.html", "description": "免费置信区间计算器，快速计算样本均值的置信区间、标准误差和误差幅度，支持90%、95%、99%置信水平。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "置信水平越高是否越好？", "acceptedAnswer": {"@type": "Answer", "text": "不一定。置信水平越高（如99%），置信区间越宽，这意味着估计的精确性降低。通常在精确性和可信度之间需要平衡，95%的置信水平是最常用的选择。"}}, {"@type": "Question", "name": "如何减小误差幅度？", "acceptedAnswer": {"@type": "Answer", "text": "减小误差幅度的主要方法是增加样本量。因为标准误差与样本量的平方根成反比，增加样本量会直接降低误差幅度，使置信区间更窄。"}}, {"@type": "Question", "name": "标准差和标准误差有什么区别？", "acceptedAnswer": {"@type": "Answer", "text": "标准差(σ)衡量的是原始数据相对于均值的离散程度；标准误差(SE)衡量的是样本均值相对于总体均值的离散程度。标准误差更小，因为它除以了样本量的平方根。"}}, {"@type": "Question", "name": "Z值是什么？它如何计算？", "acceptedAnswer": {"@type": "Answer", "text": "Z值是根据置信水平从标准正态分布查得的临界值。90%置信水平对应Z=1.645，95%对应Z=1.96，99%对应Z=2.576。误差幅度=Z值×标准误差。"}}, {"@type": "Question", "name": "样本量多大才算合适？", "acceptedAnswer": {"@type": "Answer", "text": "样本量的确定取决于研究目的、置信水平和所需的误差幅度。一般来说，样本量越大越好，但也要考虑成本。通常样本量≥30可以应用中心极限定理。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="confidence-interval">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/zh-CN/">工具</a>
+    <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
+    <a href="/">首页</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/confidence-interval.html">繁中</option><option value="/tools/en/confidence-interval.html">EN</option><option value="/tools/ja/confidence-interval.html">日本語</option><option value="/tools/ko/confidence-interval.html">한국어</option><option value="/tools/de/confidence-interval.html">DE</option><option value="/tools/fr/confidence-interval.html">FR</option><option value="/tools/es/confidence-interval.html">ES</option><option value="/tools/pt/confidence-interval.html">PT</option><option value="/tools/id/confidence-interval.html">ID</option><option value="/tools/zh-CN/confidence-interval.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > 置信区间计算器</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>置信区间计算器</h1>
+    <p class="calc-subtitle">计算统计数据的置信区间和误差幅度</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="sampleMean">样本均值 (x̄)</label>
+  <div class="input-row"><input type="number" id="sampleMean" placeholder="输入样本均值"  value="100" step="0.01"></div>
+</div>
+  <small class="input-help">输入样本数据的平均值</small>
+<div class="input-group">
+  <label for="stdDeviation">标准差 (σ)</label>
+  <div class="input-row"><input type="number" id="stdDeviation" placeholder="输入标准差"  value="15" step="0.01"></div>
+</div>
+  <small class="input-help">输入数据的标准差，表示数据的离散程度</small>
+<div class="input-group">
+  <label for="sampleSize">样本量 (n)</label>
+  <div class="input-row"><input type="number" id="sampleSize" placeholder="输入样本量"  value="100" step="1"></div>
+</div>
+  <small class="input-help">输入样本中的数据个数</small>
+<div class="input-group">
+  <label for="confidenceLevel">置信水平</label>
+  <div class="input-row"><input type="number" id="confidenceLevel" placeholder="输入 90、95 或 99"  value="95" step="1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">输入置信水平：90、95或99</small></div>
+    <button class="btn-calc" onclick="calculate()">计算</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">Z值</span><span class="result-value" id="zScore">—</span></div>
+<div class="result-item"><span class="result-label">标准误差 (σ/√n)</span><span class="result-value" id="standardError">—</span></div>
+<div class="result-highlight"><span class="result-label">误差幅度</span><span class="result-value" id="marginOfError">—</span></div>
+<div class="result-highlight"><span class="result-label">置信区间下界</span><span class="result-value" id="lowerBound">—</span></div>
+<div class="result-highlight"><span class="result-label">置信区间上界</span><span class="result-value" id="upperBound">—</span></div>
+<div class="result-highlight"><span class="result-label">置信区间</span><span class="result-value" id="confidenceInterval">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>这代表什么？</strong> 置信区间表示样本均值的真实值落在该范围内的概率。误差幅度越小，估计越精确。下界和上界共同构成了置信区间的边界。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 打印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+<div style="margin:20px 0;padding:16px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;text-align:center"><a href="https://lottery.softglow-ai.com/zh-TW/" target="_blank" rel="noopener" style="text-decoration:none;color:#fff"><div style="font-size:16px;font-weight:700;margin-bottom:4px">🎰 15国彩票开奖＋12种智慧选号工具</div><div style="font-size:12px;opacity:0.9">威力彩・大乐透・Powerball・Mega Millions — 星座、生日、梦境、AI</div></a></div>
+
+  <article class="article"><h2>什么是置信区间？</h2><p>置信区间是统计学中用来估计未知参数范围的方法。它基于样本数据计算，表示总体参数（如平均值）落在某个范围内的概率。置信区间越窄，表示我们的估计越精确。</p><h2>置信水平的含义</h2><p>置信水平（如90%、95%、99%）表示如果重复多次抽样，有相应百分比的置信区间会包含真实的总体参数。95%是最常用的置信水平，表示我们有95%的把握真实值在计算出的区间内。</p><h2>标准误差和误差幅度</h2><p>标准误差（SE）反映样本均值的变异程度，计算公式为σ/√n。误差幅度是Z值与标准误差的乘积，用来确定置信区间的上下界距离样本均值的距离。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>如何解读计算结果</h2><p>置信区间由下界和上界组成。例如，如果置信区间为[95, 105]，则表示我们有相应置信水平的把握认为真实的总体均值在95到105之间。误差幅度越大，区间越宽，估计的精确性越低。</p><h2>提高置信区间精确性的方法</h2><p>增加样本量是最有效的方法——样本越大，标准误差越小，置信区间越窄。另外，降低置信水平也会产生更窄的区间，但这会降低可信度。在实际应用中需要在精确性和可信度之间进行权衡。</p><h2>应用场景</h2><p>置信区间广泛应用于市场调查、医学研究、质量控制、经济预测等领域。它帮助决策者在不确定性中做出更科学的判断，评估样本数据对总体的代表性程度。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸阅读</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常见问题</h2><div class="faq-item"><div class="faq-q">置信水平越高是否越好？</div><div class="faq-a">不一定。置信水平越高（如99%），置信区间越宽，这意味着估计的精确性降低。通常在精确性和可信度之间需要平衡，95%的置信水平是最常用的选择。</div></div>
+  <div class="faq-item"><div class="faq-q">如何减小误差幅度？</div><div class="faq-a">减小误差幅度的主要方法是增加样本量。因为标准误差与样本量的平方根成反比，增加样本量会直接降低误差幅度，使置信区间更窄。</div></div>
+  <div class="faq-item"><div class="faq-q">标准差和标准误差有什么区别？</div><div class="faq-a">标准差(σ)衡量的是原始数据相对于均值的离散程度；标准误差(SE)衡量的是样本均值相对于总体均值的离散程度。标准误差更小，因为它除以了样本量的平方根。</div></div>
+  <div class="faq-item"><div class="faq-q">Z值是什么？它如何计算？</div><div class="faq-a">Z值是根据置信水平从标准正态分布查得的临界值。90%置信水平对应Z=1.645，95%对应Z=1.96，99%对应Z=2.576。误差幅度=Z值×标准误差。</div></div>
+  <div class="faq-item"><div class="faq-q">样本量多大才算合适？</div><div class="faq-a">样本量的确定取决于研究目的、置信水平和所需的误差幅度。一般来说，样本量越大越好，但也要考虑成本。通常样本量≥30可以应用中心极限定理。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/zh-CN/compound-interest.html">复利计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/roi-calculator.html">投资回报率 (ROI) 计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/risk-reward.html">风险收益比计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/position-size.html">头寸规模计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stop-loss.html">止损计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dividend-yield.html">股息收益率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/pe-ratio.html">市盈率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dca-calculator.html">定期定额投资计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/cagr.html">复合年增长率(CAGR)计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/margin-calculator.html">保证金计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stock-gain-loss.html">股票盈亏计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/break-even.html">损益平衡点计算器</a></div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相关工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
+    
+  </div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() { const sampleMean = parseFloat(document.getElementById('sampleMean').value); const stdDeviation = parseFloat(document.getElementById('stdDeviation').value); const sampleSize = parseFloat(document.getElementById('sampleSize').value); const confidenceLevel = parseFloat(document.getElementById('confidenceLevel').value); if (isNaN(sampleMean) || isNaN(stdDeviation) || isNaN(sampleSize) || isNaN(confidenceLevel)) { alert('Please fill in all fields with valid numbers'); return; } if (stdDeviation < 0 || sampleSize < 1) { alert('Standard deviation must be non-negative and sample size must be at least 1'); return; } if (confidenceLevel <= 0 || confidenceLevel >= 100) { alert('Confidence level must be between 0 and 100'); return; } let zScore = 0; if (confidenceLevel === 90) { zScore = 1.645; } else if (confidenceLevel === 95) { zScore = 1.96; } else if (confidenceLevel === 99) { zScore = 2.576; } else { const alpha = (100 - confidenceLevel) / 200; zScore = Math.abs((((-2.5258 * alpha * alpha) + (8.0564 * alpha) + 0.4501) / (1 - (0.0236 * alpha))).toFixed(3)); } const sqrtN = Math.sqrt(sampleSize); const standardError = stdDeviation / sqrtN; const marginOfError = zScore * standardError; const lowerBound = sampleMean - marginOfError; const upperBound = sampleMean + marginOfError; document.getElementById('zScore').textContent = zScore.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }); document.getElementById('standardError').textContent = standardError.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }); document.getElementById('marginOfError').textContent = marginOfError.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }); document.getElementById('lowerBound').textContent = lowerBound.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }); document.getElementById('upperBound').textContent = upperBound.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }); document.getElementById('confidenceInterval').textContent = lowerBound.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ', ' + upperBound.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); document.getElementById('results').classList.add('show'); }
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已复制！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},2000);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-CN|confidence-interval|2026-07-09 -->

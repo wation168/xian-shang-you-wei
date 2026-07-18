@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>事業評価計算機 - 企業価値を無料で計算</title>
+<meta name="description" content="売上高倍数法とDCF法で事業価値を簡単に推定。年間収益と成長率から企業評価額を算出します。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/valuation-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/valuation-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/valuation-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/valuation-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/valuation-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/valuation-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/valuation-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/valuation-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/valuation-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/valuation-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/valuation-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/valuation-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "事業評価計算機", "url": "https://softglow-ai.com/tools/ja/valuation-calculator.html", "description": "売上高倍数法とDCF法で事業価値を簡単に推定。年間収益と成長率から企業評価額を算出します。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "売上倍数法とDCF法はどちらを使うべきですか？", "acceptedAnswer": {"@type": "Answer", "text": "安定した利益を持つ成熟企業には倍数法、高い成長が期待できるスタートアップや急成長企業にはDCF法が適しています。可能であれば両方を計算して比較することがベストです。"}}, {"@type": "Question", "name": "WACC（割引率）はどのように決めますか？", "acceptedAnswer": {"@type": "Answer", "text": "WACCは企業の資本構成とリスクに基づいて計算します。一般的には銀行利率＋リスクプレミアムで、5～12%の範囲が目安です。業界や企業規模によって異なります。"}}, {"@type": "Question", "name": "ターミナル成長率は何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "予測期間終了後の永続的な成長率です。通常は長期GDP成長率（2～3%）を参考に設定します。高すぎる設定は評価を過大評価する原因になります。"}}, {"@type": "Question", "name": "この計算は税務上有効ですか？", "acceptedAnswer": {"@type": "Answer", "text": "この計算は一般的なガイドラインを提供しますが、税務申告や法的用途には正式な専門家の評価が必要です。公式な評価には、認定評価士や税理士に相談してください。"}}, {"@type": "Question", "name": "売上倍数は業界によって違いますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい、業界によって大きく異なります。テクノロジー企業は3～5倍、小売業は0.5～1.5倍が目安です。同業他社の最近のM&A事例を参考に適切な倍数を設定してください。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="valuation-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ja">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/ja/">ツール</a>
+    <a href="/patterns/ja.html">ローソク足</a>
+    <a href="/blog/ja/index.html">ブログ</a>
+    <a href="/">ホーム</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/valuation-calculator.html">繁中</option><option value="/tools/en/valuation-calculator.html">EN</option><option value="/tools/ja/valuation-calculator.html" selected>日本語</option><option value="/tools/ko/valuation-calculator.html">한국어</option><option value="/tools/de/valuation-calculator.html">DE</option><option value="/tools/fr/valuation-calculator.html">FR</option><option value="/tools/es/valuation-calculator.html">ES</option><option value="/tools/pt/valuation-calculator.html">PT</option><option value="/tools/id/valuation-calculator.html">ID</option><option value="/tools/zh-CN/valuation-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 事業評価計算機</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>事業評価計算機</h1>
+    <p class="calc-subtitle">売上高倍数法またはDCF分析を使用して事業価値を推定します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="annualRevenue">年間売上高</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="annualRevenue" placeholder="5000000"  step="1"></div>
+</div>
+  <small class="input-help">事業の年間総売上を入力してください</small>
+<div class="input-group">
+  <label for="valuationMethod">評価方法</label>
+  <div class="input-row"><input type="text" id="valuationMethod" value="multiple"></div>
+</div>
+  <small class="input-help">倍数法またはDCF法を選択してください</small>
+<div class="input-group">
+  <label for="revenueMultiple">売上倍数（倍数法用）</label>
+  <div class="input-row"><input type="number" id="revenueMultiple" placeholder="3.5"  step="0.1"><span class="input-suffix">倍</span></div>
+</div>
+  <small class="input-help">業界平均の売上倍数を入力してください</small>
+<div class="input-group">
+  <label for="netIncome">年間純利益（DCF法用）</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="netIncome" placeholder="1000000"  step="1"></div>
+</div>
+  <small class="input-help">税後利益の年間額を入力してください</small>
+<div class="input-group">
+  <label for="growthRate">予想年間成長率</label>
+  <div class="input-row"><input type="number" id="growthRate" placeholder="10"  step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">予想される年間成長率をパーセンテージで入力してください</small>
+<div class="input-group">
+  <label for="discountRate">割引率（WACC）</label>
+  <div class="input-row"><input type="number" id="discountRate" placeholder="10"  step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">加重平均資本コスト（WACC）をパーセンテージで入力してください</small>
+<div class="input-group">
+  <label for="projectionYears">予測期間（年）</label>
+  <div class="input-row"><input type="number" id="projectionYears" placeholder="5"  value="5" step="1"><span class="input-suffix">年</span></div>
+</div>
+  <small class="input-help">キャッシュフロー予測の期間を年数で入力してください</small>
+<div class="input-group">
+  <label for="terminalGrowth">ターミナル成長率</label>
+  <div class="input-row"><input type="number" id="terminalGrowth" placeholder="2"  value="2" step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">予測期間後の永続成長率をパーセンテージで入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">推定事業価値</span><span class="result-value" id="businessValuation">—</span></div>
+<div class="result-item"><span class="result-label">使用した評価方法</span><span class="result-value" id="valuationMethod">—</span></div>
+<div class="result-item"><span class="result-label">DCF構成要素</span><span class="result-value" id="dcfBreakdown">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 推定事業価値は選択した評価方法に基づいて計算されます。倍数法は業界比較に基づき、DCF法は将来キャッシュフローの現在価値を示します。結果は事業の売却価格や投資判断の参考資料として活用できます。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+<div style="margin:20px 0;padding:16px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;text-align:center"><a href="https://lottery.softglow-ai.com/ja/" target="_blank" rel="noopener" style="text-decoration:none;color:#fff"><div style="font-size:16px;font-weight:700;margin-bottom:4px">🎰 世界15の宝くじ＋12種類の番号選択ツール</div><div style="font-size:12px;opacity:0.9">パワーボール・メガミリオンズ — 星座・誕生日・夢・AI選番</div></a></div>
+
+  <article class="article"><h2>事業評価とは</h2><p>事業評価は、企業の経済的価値を判定するプロセスです。M&A、投資判断、後継者への承継計画など、様々なビジネスシーンで必要とされます。正確な評価により、適切な売却価格の設定や投資意思決定が可能になります。</p><h2>売上倍数法について</h2><p>売上倍数法は、年間売上高に業界標準の倍数を掛けて企業価値を算出する方法です。計算が簡単で、同業他社との比較が容易です。一般的にSaaS企業は3～5倍、小売業は0.5～1.5倍など、業界によって倍数が異なります。</p><h2>DCF法（ディスカウントキャッシュフロー法）</h2><p>DCF法は、将来のキャッシュフローを予測し、現在価値に割引いて企業価値を算出します。より詳細な分析が可能で、成長性の高い企業の評価に適しています。WACC（加重平均資本コスト）を割引率として使用し、リスクを反映させます。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>評価方法の選択</h2><p>倍数法は簡単で比較的に信頼性が高く、安定した事業向けです。一方、DCF法は複雑ですが、成長予測を詳細に反映でき、高成長企業の評価に適しています。両方の方法を組み合わせることで、より信頼性の高い評価が実現します。</p><h2>重要な入力パラメータ</h2><p>割引率（WACC）は企業のリスクと資本コストを反映します。通常5～12%の範囲です。成長率は保守的に見積もることが重要です。予測期間は5～10年が一般的で、ターミナル成長率は長期GDP成長率（2～3%）を参考にしましょう。</p><h2>評価結果の活用</h2><p>計算結果は事業譲渡価格の参考、融資申請時の担保評価、相続税申告時の評価額、投資判断などに活用できます。ただし、税務や法的助言が必要な場合は、専門家に相談することをお勧めします。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">売上倍数法とDCF法はどちらを使うべきですか？</div><div class="faq-a">安定した利益を持つ成熟企業には倍数法、高い成長が期待できるスタートアップや急成長企業にはDCF法が適しています。可能であれば両方を計算して比較することがベストです。</div></div>
+  <div class="faq-item"><div class="faq-q">WACC（割引率）はどのように決めますか？</div><div class="faq-a">WACCは企業の資本構成とリスクに基づいて計算します。一般的には銀行利率＋リスクプレミアムで、5～12%の範囲が目安です。業界や企業規模によって異なります。</div></div>
+  <div class="faq-item"><div class="faq-q">ターミナル成長率は何ですか？</div><div class="faq-a">予測期間終了後の永続的な成長率です。通常は長期GDP成長率（2～3%）を参考に設定します。高すぎる設定は評価を過大評価する原因になります。</div></div>
+  <div class="faq-item"><div class="faq-q">この計算は税務上有効ですか？</div><div class="faq-a">この計算は一般的なガイドラインを提供しますが、税務申告や法的用途には正式な専門家の評価が必要です。公式な評価には、認定評価士や税理士に相談してください。</div></div>
+  <div class="faq-item"><div class="faq-q">売上倍数は業界によって違いますか？</div><div class="faq-a">はい、業界によって大きく異なります。テクノロジー企業は3～5倍、小売業は0.5～1.5倍が目安です。同業他社の最近のM&A事例を参考に適切な倍数を設定してください。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">ROI計算機</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">リスク・リワード計算機</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">ポジションサイズ計算機</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">ストップロス計算機</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">P/Eレシオ計算機</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">証拠金計算機</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">株式利益損失計算機</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
+    
+  </div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const annualRevenue = parseFloat(document.getElementById('annualRevenue').value);
+  const method = document.getElementById('valuationMethod').value;
+  const revenueMultiple = parseFloat(document.getElementById('revenueMultiple').value);
+  const netIncome = parseFloat(document.getElementById('netIncome').value);
+  const growthRate = parseFloat(document.getElementById('growthRate').value) / 100;
+  const discountRate = parseFloat(document.getElementById('discountRate').value) / 100;
+  const projectionYears = parseInt(document.getElementById('projectionYears').value);
+  const terminalGrowth = parseFloat(document.getElementById('terminalGrowth').value) / 100;
+
+  if (!annualRevenue || annualRevenue <= 0) {
+    alert('Please enter a valid annual revenue');
+    return;
+  }
+
+  let valuation = 0;
+  let methodLabel = '';
+  let breakdown = '';
+
+  if (method === 'multiple') {
+    if (!revenueMultiple || revenueMultiple <= 0) {
+      alert('Please enter a valid revenue multiple for this method');
+      return;
+    }
+    valuation = annualRevenue * revenueMultiple;
+    methodLabel = 'Revenue Multiple Method';
+    breakdown = 'Revenue: ' + annualRevenue.toLocaleString('en-US', {style: 'currency', currency: 'USD'}) + ' × Multiple: ' + revenueMultiple.toFixed(1) + 'x';
+  } else if (method === 'dcf') {
+    if (!netIncome || netIncome <= 0) {
+      alert('Please enter valid net income for DCF calculation');
+      return;
+    }
+
+    let presentValue = 0;
+    let yearDetails = [];
+
+    for (let year = 1; year <= projectionYears; year++) {
+      const projectedCashFlow = netIncome * Math.pow(1 + growthRate, year);
+      const discountedCashFlow = projectedCashFlow / Math.pow(1 + discountRate, year);
+      presentValue += discountedCashFlow;
+      yearDetails.push('Year ' + year + ': ' + discountedCashFlow.toLocaleString('en-US', {style: 'currency', currency: 'USD', maximumFractionDigits: 0}));
+    }
+
+    const terminalValue = (netIncome * Math.pow(1 + growthRate, projectionYears) * (1 + terminalGrowth)) / (discountRate - terminalGrowth);
+    const discountedTerminalValue = terminalValue / Math.pow(1 + discountRate, projectionYears);
+
+    valuation = presentValue + discountedTerminalValue;
+    methodLabel = 'Discounted Cash Flow (DCF) Method';
+    breakdown = yearDetails.slice(0, 3).join(' | ') + (projectionYears > 3 ? '...' : '') + ' | Terminal Value: ' + discountedTerminalValue.toLocaleString('en-US', {style: 'currency', currency: 'USD', maximumFractionDigits: 0});
+  }
+
+  document.getElementById('businessValuation').textContent = valuation.toLocaleString('en-US', {style: 'currency', currency: 'USD', maximumFractionDigits: 0});
+  document.getElementById('valuationMethod').textContent = methodLabel;
+  document.getElementById('dcfBreakdown').textContent = breakdown;
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},2000);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="ツール、パターン、記事を検索…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>ブックマーク</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全て削除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|valuation-calculator|2026-07-09 -->

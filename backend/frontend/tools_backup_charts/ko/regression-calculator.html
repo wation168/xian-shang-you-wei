@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>선형 회귀 계산기 - 최적 적합선 계산</title>
+<meta name="description" content="선형 회귀 계산기로 X와 Y 값을 입력하여 기울기, Y절편, 회귀 방정식, 상관계수를 빠르게 계산하세요.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ko/regression-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/regression-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/regression-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/regression-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/regression-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/regression-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/regression-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/regression-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/regression-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/regression-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/regression-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/regression-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "선형 회귀 계산기", "url": "https://softglow-ai.com/tools/ko/regression-calculator.html", "description": "선형 회귀 계산기로 X와 Y 값을 입력하여 기울기, Y절편, 회귀 방정식, 상관계수를 빠르게 계산하세요.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "선형 회귀 계산기는 어떻게 작동하나요?", "acceptedAnswer": {"@type": "Answer", "text": "X와 Y 값들을 입력하면 계산기는 최소제곱법(Least Squares Method)을 사용하여 데이터에 가장 잘 맞는 직선을 찾습니다. 기울기, Y절편, 회귀 방정식, 상관계수, 결정계수를 계산하여 반환합니다."}}, {"@type": "Question", "name": "상관계수 R과 결정계수 R²의 차이는 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "상관계수(R)는 -1에서 1 사이의 값으로 두 변수 간의 선형 관계의 강도와 방향을 나타냅니다. 결정계수(R²)는 R을 제곱한 값으로, 0에서 1 사이의 값을 가지며 모델이 종속 변수의 변동성을 얼마나 설명하는지를 나타냅니다."}}, {"@type": "Question", "name": "음수 기울기는 무엇을 의미하나요?", "acceptedAnswer": {"@type": "Answer", "text": "음수 기울기는 두 변수 간에 음의 상관관계가 있음을 의미합니다. 즉, X가 증가할수록 Y는 감소하는 경향을 보입니다. 예를 들어, 공부 시간(X)과 불안도(Y)의 관계에서 음수 기울기가 나타날 수 있습니다."}}, {"@type": "Question", "name": "R² = 0.5는 좋은 결과인가요?", "acceptedAnswer": {"@type": "Answer", "text": "R² = 0.5는 분야와 상황에 따라 다릅니다. 사회과학이나 경제학에서는 합리적인 값으로 간주될 수 있지만, 물리학이나 공학에서는 더 높은 R² 값이 기대됩니다. 일반적으로 R² > 0.7은 좋은 적합도로 봅니다."}}, {"@type": "Question", "name": "이상치(outlier)가 있으면 어떻게 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "이상치는 회귀선에 큰 영향을 미칠 수 있습니다. 이상치의 원인을 조사하여 데이터 입력 오류인지 확인하세요. 정당한 이상치는 포함하되, 명백한 오류는 제거 후 다시 계산하는 것이 좋습니다."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="regression-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/ko/">도구</a>
+    <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
+    <a href="/">홈</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/regression-calculator.html">繁中</option><option value="/tools/en/regression-calculator.html">EN</option><option value="/tools/ja/regression-calculator.html">日本語</option><option value="/tools/ko/regression-calculator.html" selected>한국어</option><option value="/tools/de/regression-calculator.html">DE</option><option value="/tools/fr/regression-calculator.html">FR</option><option value="/tools/es/regression-calculator.html">ES</option><option value="/tools/pt/regression-calculator.html">PT</option><option value="/tools/id/regression-calculator.html">ID</option><option value="/tools/zh-CN/regression-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 선형 회귀 계산기</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>선형 회귀 계산기</h1>
+    <p class="calc-subtitle">y = mx + b 공식을 사용하여 최적 적합선 계산</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="xValues">X 값 (쉼표로 구분)</label>
+  <div class="input-row"><input type="text" id="xValues" placeholder="1, 2, 3, 4, 5"  step="1"></div>
+</div>
+  <small class="input-help">분석할 독립 변수(X) 값들을 쉼표로 구분하여 입력하세요</small>
+<div class="input-group">
+  <label for="yValues">Y 값 (쉼표로 구분)</label>
+  <div class="input-row"><input type="text" id="yValues" placeholder="2, 4, 5, 4, 6"  step="1"></div>
+</div>
+  <small class="input-help">분석할 종속 변수(Y) 값들을 쉼표로 구분하여 입력하세요</small></div>
+    <button class="btn-calc" onclick="calculate()">계산하기</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">기울기 (m)</span><span class="result-value" id="slopeResult">—</span></div>
+<div class="result-highlight"><span class="result-label">Y절편 (b)</span><span class="result-value" id="interceptResult">—</span></div>
+<div class="result-highlight"><span class="result-label">회귀 방정식</span><span class="result-value" id="equationResult">—</span></div>
+<div class="result-item"><span class="result-label">상관계수 (R)</span><span class="result-value" id="correlationResult">—</span></div>
+<div class="result-item"><span class="result-label">결정계수 (R²)</span><span class="result-value" id="rSquaredResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>이것은 무엇을 의미합니까?</strong> 기울기(m)는 X가 1 단위 증가할 때 Y의 변화량을 나타냅니다. Y절편(b)은 X가 0일 때의 Y 값입니다. 상관계수(R)는 -1에서 1 사이의 값으로 두 변수 간의 선형 관계의 강도를 나타내며, R²은 Y의 변동성 중 모델로 설명되는 비율입니다.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 인쇄</button>
+        <button onclick="shareResult()">&#x1f4e4; 공유</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+<div style="margin:20px 0;padding:16px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;text-align:center"><a href="https://lottery.softglow-ai.com/ko/" target="_blank" rel="noopener" style="text-decoration:none;color:#fff"><div style="font-size:16px;font-weight:700;margin-bottom:4px">🎰 세계 15개 복권 + 12가지 번호 선택 도구</div><div style="font-size:12px;opacity:0.9">Powerball · Mega Millions · EuroMillions — 별자리, 생일, 꿈, AI</div></a></div>
+
+  <article class="article"><h2>선형 회귀란 무엇인가요?</h2><p>선형 회귀는 두 변수 간의 선형 관계를 분석하는 통계 기법입니다. 독립 변수(X)와 종속 변수(Y) 사이의 관계를 나타내는 직선(y = mx + b)을 찾아 미래의 값을 예측하거나 변수들 간의 관계를 이해하는 데 사용됩니다.</p><h2>기울기와 Y절편의 의미</h2><p>기울기(m)는 직선의 가파른 정도를 나타내며, X가 1 단위 증가할 때 Y가 얼마나 변하는지를 보여줍니다. 양수이면 X가 증가할 때 Y도 증가하고, 음수이면 Y가 감소합니다. Y절편(b)은 X가 0일 때 직선이 Y축과 만나는 지점의 값입니다.</p><h2>상관계수(R)의 해석</h2><p>상관계수는 -1에서 1 사이의 값으로, 두 변수 간의 선형 관계의 강도와 방향을 나타냅니다. R = 1은 완벽한 양의 상관관계, R = -1은 완벽한 음의 상관관계, R = 0은 상관관계가 없음을 의미합니다. 일반적으로 |R| > 0.7이면 강한 상관관계로 간주됩니다.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>결정계수(R²)의 중요성</h2><p>R²은 종속 변수의 변동성 중 몇 퍼센트가 독립 변수에 의해 설명되는지를 나타냅니다. 예를 들어 R² = 0.85는 Y의 변동성 중 85%가 모델로 설명된다는 의미입니다. R²이 높을수록 모델의 적합도가 좋다고 볼 수 있습니다.</p><h2>실제 응용 분야</h2><p>선형 회귀는 판매 예측, 주식 가격 분석, 온도와 에너지 사용량의 관계 분석 등 다양한 분야에서 사용됩니다. 기업에서는 과거 데이터를 바탕으로 미래의 추세를 예측하고 의사결정에 활용합니다.</p><h2>계산기 사용 팁</h2><p>정확한 결과를 얻기 위해 X와 Y 값의 개수가 같아야 합니다. 최소 2개 이상의 데이터 포인트가 필요하며, 더 많은 데이터를 사용할수록 회귀선이 더 신뢰할 수 있게 됩니다. 이상치(아주 큰 또는 작은 값)가 결과에 큰 영향을 미칠 수 있으므로 주의하세요.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 관련 기사</h3><div class="blog-grid"><a class="blog-card" href="/blog/ko/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ko/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ko/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>자주 묻는 질문</h2><div class="faq-item"><div class="faq-q">선형 회귀 계산기는 어떻게 작동하나요?</div><div class="faq-a">X와 Y 값들을 입력하면 계산기는 최소제곱법(Least Squares Method)을 사용하여 데이터에 가장 잘 맞는 직선을 찾습니다. 기울기, Y절편, 회귀 방정식, 상관계수, 결정계수를 계산하여 반환합니다.</div></div>
+  <div class="faq-item"><div class="faq-q">상관계수 R과 결정계수 R²의 차이는 무엇인가요?</div><div class="faq-a">상관계수(R)는 -1에서 1 사이의 값으로 두 변수 간의 선형 관계의 강도와 방향을 나타냅니다. 결정계수(R²)는 R을 제곱한 값으로, 0에서 1 사이의 값을 가지며 모델이 종속 변수의 변동성을 얼마나 설명하는지를 나타냅니다.</div></div>
+  <div class="faq-item"><div class="faq-q">음수 기울기는 무엇을 의미하나요?</div><div class="faq-a">음수 기울기는 두 변수 간에 음의 상관관계가 있음을 의미합니다. 즉, X가 증가할수록 Y는 감소하는 경향을 보입니다. 예를 들어, 공부 시간(X)과 불안도(Y)의 관계에서 음수 기울기가 나타날 수 있습니다.</div></div>
+  <div class="faq-item"><div class="faq-q">R² = 0.5는 좋은 결과인가요?</div><div class="faq-a">R² = 0.5는 분야와 상황에 따라 다릅니다. 사회과학이나 경제학에서는 합리적인 값으로 간주될 수 있지만, 물리학이나 공학에서는 더 높은 R² 값이 기대됩니다. 일반적으로 R² > 0.7은 좋은 적합도로 봅니다.</div></div>
+  <div class="faq-item"><div class="faq-q">이상치(outlier)가 있으면 어떻게 하나요?</div><div class="faq-a">이상치는 회귀선에 큰 영향을 미칠 수 있습니다. 이상치의 원인을 조사하여 데이터 입력 오류인지 확인하세요. 정당한 이상치는 포함하되, 명백한 오류는 제거 후 다시 계산하는 것이 좋습니다.</div></div></section>
+  <div class="more-tools"><h3>더 많은 도구</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ko/compound-interest.html">복리 이자 계산기</a>
+      <a class="tool-pill" href="/tools/ko/roi-calculator.html">ROI 계산기</a>
+      <a class="tool-pill" href="/tools/ko/risk-reward.html">위험-수익 계산기</a>
+      <a class="tool-pill" href="/tools/ko/position-size.html">포지션 크기 계산기</a>
+      <a class="tool-pill" href="/tools/ko/stop-loss.html">손절매 계산기</a>
+      <a class="tool-pill" href="/tools/ko/dividend-yield.html">배당 수익률 계산기</a>
+      <a class="tool-pill" href="/tools/ko/pe-ratio.html">P/E 비율 계산기</a>
+      <a class="tool-pill" href="/tools/ko/dca-calculator.html">DCA 계산기</a>
+      <a class="tool-pill" href="/tools/ko/cagr.html">CAGR 계산기</a>
+      <a class="tool-pill" href="/tools/ko/margin-calculator.html">마진 계산기</a>
+      <a class="tool-pill" href="/tools/ko/stock-gain-loss.html">주식 수익/손실 계산기</a>
+      <a class="tool-pill" href="/tools/ko/break-even.html">손익분기점 계산기</a></div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>관련 계산기</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
+    
+  </div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const xInput = document.getElementById('xValues').value.trim();
+  const yInput = document.getElementById('yValues').value.trim();
+  
+  if (!xInput || !yInput) {
+    alert('Please enter both X and Y values');
+    return;
+  }
+  
+  const xValues = xInput.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+  const yValues = yInput.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+  
+  if (xValues.length === 0 || yValues.length === 0) {
+    alert('Please enter valid numeric values');
+    return;
+  }
+  
+  if (xValues.length !== yValues.length) {
+    alert('X and Y must have the same number of values');
+    return;
+  }
+  
+  if (xValues.length < 2) {
+    alert('Please enter at least 2 data points');
+    return;
+  }
+  
+  const n = xValues.length;
+  const sumX = xValues.reduce((a, b) => a + b, 0);
+  const sumY = yValues.reduce((a, b) => a + b, 0);
+  const sumXY = xValues.reduce((sum, x, i) => sum + x * yValues[i], 0);
+  const sumX2 = xValues.reduce((sum, x) => sum + x * x, 0);
+  const sumY2 = yValues.reduce((sum, y) => sum + y * y, 0);
+  
+  const meanX = sumX / n;
+  const meanY = sumY / n;
+  
+  const numerator = n * sumXY - sumX * sumY;
+  const denominator = n * sumX2 - sumX * sumX;
+  
+  if (denominator === 0) {
+    alert('Cannot calculate regression with these values');
+    return;
+  }
+  
+  const slope = numerator / denominator;
+  const intercept = meanY - slope * meanX;
+  
+  const rNumerator = numerator;
+  const rDenominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+  const correlation = rDenominator === 0 ? 0 : rNumerator / rDenominator;
+  const rSquared = correlation * correlation;
+  
+  const slopeFormatted = slope.toFixed(4);
+  const interceptFormatted = intercept.toFixed(4);
+  const equationText = `y = ${slopeFormatted}x + ${interceptFormatted}`;
+  const correlationFormatted = correlation.toFixed(4);
+  const rSquaredFormatted = rSquared.toFixed(4);
+  
+  document.getElementById('slopeResult').textContent = slopeFormatted;
+  document.getElementById('interceptResult').textContent = interceptFormatted;
+  document.getElementById('equationResult').textContent = equationText;
+  document.getElementById('correlationResult').textContent = correlationFormatted;
+  document.getElementById('rSquaredResult').textContent = rSquaredFormatted;
+  
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='복사됨!';setTimeout(function(){b.textContent='공유'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},2000);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>
+
+<!-- gen:v2.1|ko|regression-calculator|2026-07-09 -->

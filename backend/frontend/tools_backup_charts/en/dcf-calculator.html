@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DCF Calculator - Intrinsic Value Analysis</title>
+<meta name="description" content="Free DCF calculator to determine company intrinsic value. Analyze discounted cash flows, terminal value, and equity value per share.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/en/dcf-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/dcf-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/dcf-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/dcf-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/dcf-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/dcf-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/dcf-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/dcf-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/dcf-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/dcf-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/dcf-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/dcf-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "DCF Calculator", "url": "https://softglow-ai.com/tools/en/dcf-calculator.html", "description": "Free DCF calculator to determine company intrinsic value. Analyze discounted cash flows, terminal value, and equity value per share.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is the Weighted Average Cost of Capital (WACC)?", "acceptedAnswer": {"@type": "Answer", "text": "WACC represents the average rate of return required by all of a company's investors, both equity holders and debt holders, weighted by their respective contributions to the company's capital structure. It reflects the risk profile of the company and the cost of financing. A higher WACC indicates greater risk and results in lower present values for future cash flows."}}, {"@type": "Question", "name": "Why is terminal value important in DCF analysis?", "acceptedAnswer": {"@type": "Answer", "text": "Terminal value typically represents 60-80% of the total enterprise value in a DCF model because it captures the value of all cash flows beyond the explicit forecast period. This perpetual value assumption is necessary because companies continue to operate indefinitely. The terminal growth rate should reflect long-term economic growth expectations rather than optimistic projections."}}, {"@type": "Question", "name": "How should I estimate free cash flows for future years?", "acceptedAnswer": {"@type": "Answer", "text": "Free cash flow forecasts should be based on historical performance, industry trends, and company-specific factors. Analyse historical growth rates, consider management guidance, evaluate competitive positioning, and account for capital intensity. Conservative estimates are generally preferable to avoid overvaluation, and stress-testing with pessimistic scenarios helps assess downside risks."}}, {"@type": "Question", "name": "What margin of safety should I use when comparing intrinsic value to market price?", "acceptedAnswer": {"@type": "Answer", "text": "Most value investors apply a margin of safety of 20-50%, meaning they purchase stocks trading at a significant discount to calculated intrinsic value to protect against forecast errors and unforeseen risks. The appropriate margin depends on your risk tolerance, the uncertainty of your assumptions, and the quality of the company. Higher-risk businesses warrant larger safety margins."}}, {"@type": "Question", "name": "When is DCF analysis most and least reliable?", "acceptedAnswer": {"@type": "Answer", "text": "DCF works best for stable, mature companies with predictable cash flows, clear capital structures, and modest growth rates. It is less reliable for early-stage companies with inconsistent earnings, high-growth technology firms, cyclical businesses, or companies undergoing significant restructuring. In these cases, supplement DCF with relative valuation methods and qualitative analysis."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="dcf-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="en">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/en/">Tools</a>
+    <a href="/patterns/en.html">Patterns</a>
+    <a href="/blog/en/index.html">Blog</a>
+    <a href="/">Home</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/dcf-calculator.html">繁中</option><option value="/tools/en/dcf-calculator.html" selected>EN</option><option value="/tools/ja/dcf-calculator.html">日本語</option><option value="/tools/ko/dcf-calculator.html">한국어</option><option value="/tools/de/dcf-calculator.html">DE</option><option value="/tools/fr/dcf-calculator.html">FR</option><option value="/tools/es/dcf-calculator.html">ES</option><option value="/tools/pt/dcf-calculator.html">PT</option><option value="/tools/id/dcf-calculator.html">ID</option><option value="/tools/zh-CN/dcf-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/en/">Tools</a> > DCF Calculator</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>DCF Calculator</h1>
+    <p class="calc-subtitle">Calculate company intrinsic value using discounted cash flow analysis</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="yearOne">Year 1 Cash Flow</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="yearOne" placeholder="50000"  value="50000" step="1"></div>
+</div>
+  <small class="input-help">Expected free cash flow for year 1 in currency units</small>
+<div class="input-group">
+  <label for="yearTwo">Year 2 Cash Flow</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="yearTwo" placeholder="55000"  value="55000" step="1"></div>
+</div>
+  <small class="input-help">Expected free cash flow for year 2 in currency units</small>
+<div class="input-group">
+  <label for="yearThree">Year 3 Cash Flow</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="yearThree" placeholder="60500"  value="60500" step="1"></div>
+</div>
+  <small class="input-help">Expected free cash flow for year 3 in currency units</small>
+<div class="input-group">
+  <label for="yearFour">Year 4 Cash Flow</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="yearFour" placeholder="66550"  value="66550" step="1"></div>
+</div>
+  <small class="input-help">Expected free cash flow for year 4 in currency units</small>
+<div class="input-group">
+  <label for="yearFive">Year 5 Cash Flow</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="yearFive" placeholder="73205"  value="73205" step="1"></div>
+</div>
+  <small class="input-help">Expected free cash flow for year 5 in currency units</small>
+<div class="input-group">
+  <label for="discountRate">Discount Rate (WACC)</label>
+  <div class="input-row"><input type="number" id="discountRate" placeholder="10"  value="10" step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">Weighted average cost of capital used to discount future cash flows</small>
+<div class="input-group">
+  <label for="terminalGrowth">Terminal Growth Rate</label>
+  <div class="input-row"><input type="number" id="terminalGrowth" placeholder="2.5"  value="2.5" step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">Perpetual growth rate applied to terminal value calculation</small>
+<div class="input-group">
+  <label for="terminalValue">Terminal Value (Optional)</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="terminalValue" placeholder="0"  value="0" step="1"></div>
+</div>
+  <small class="input-help">Optional: manually enter terminal value instead of calculating from growth rate</small>
+<div class="input-group">
+  <label for="netDebt">Net Debt (Debt - Cash)</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="netDebt" placeholder="0"  value="0" step="1"></div>
+</div>
+  <small class="input-help">Total net debt: company debt minus cash and equivalents</small>
+<div class="input-group">
+  <label for="sharesOutstanding">Shares Outstanding</label>
+  <div class="input-row"><input type="number" id="sharesOutstanding" placeholder="100"  value="100" step="0.1"><span class="input-suffix">millions</span></div>
+</div>
+  <small class="input-help">Total number of outstanding shares in millions</small></div>
+    <button class="btn-calc" onclick="calculate()">Calculate</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">Present Value of Cash Flows (Years 1-5)</span><span class="result-value" id="pvCashFlows">—</span></div>
+<div class="result-item"><span class="result-label">Present Value of Terminal Value</span><span class="result-value" id="pvTerminal">—</span></div>
+<div class="result-item"><span class="result-label">Enterprise Value</span><span class="result-value" id="enterpriseValue">—</span></div>
+<div class="result-item"><span class="result-label">Equity Value</span><span class="result-value" id="equityValue">—</span></div>
+<div class="result-highlight"><span class="result-label">Intrinsic Value Per Share</span><span class="result-value" id="valuePerShare">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>What does this mean?</strong> The intrinsic value per share represents the theoretical fair value of the company based on discounted future cash flows. Compare this value to the current market price to determine if the stock is undervalued or overvalued. Higher discount rates and lower growth rates will reduce the intrinsic value estimate.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Print</button>
+        <button onclick="shareResult()">&#x1f4e4; Share</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+<div style="margin:20px 0;padding:16px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;text-align:center"><a href="https://lottery.softglow-ai.com/en/" target="_blank" rel="noopener" style="text-decoration:none;color:#fff"><div style="font-size:16px;font-weight:700;margin-bottom:4px">🎰 15 Global Lotteries + 12 Smart Number Pickers</div><div style="font-size:12px;opacity:0.9">Powerball · Mega Millions · EuroMillions — Zodiac, Birthday, Dream, AI & more</div></a></div>
+
+  <article class="article"><h2>Understanding DCF Valuation</h2><p>The Discounted Cash Flow (DCF) method is a fundamental valuation approach used by investors and analysts to determine the intrinsic value of a company. This technique assumes that a company's worth equals the present value of all its future cash flows. By discounting future cash flows back to today's pounds using an appropriate discount rate, investors can make informed decisions about whether a stock is trading at a fair price.</p><h2>Key Components of DCF Analysis</h2><p>The DCF model requires several critical inputs. Free cash flows represent the actual cash generated by the business after accounting for capital expenditures and working capital changes. The discount rate, commonly represented by the Weighted Average Cost of Capital (WACC), reflects the risk of the investment and the cost of financing. Terminal growth rate estimates the company's perpetual growth rate beyond the five-year projection period, typically ranging from 2-3% to match long-term GDP growth expectations.</p><h2>Calculating Present Values</h2><p>Each year's cash flow is discounted using the formula: PV = Cash Flow / (1 + Discount Rate)^Year. This process accounts for the time value of money, recognising that $1 today is worth more than $1 tomorrow. The present value of terminal value is calculated by first projecting the Year 5 cash flow into perpetuity using the Gordon Growth Model, then discounting that terminal value back to today. The enterprise value combines the present value of all explicit forecast cash flows with the present value of the terminal value.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>From Enterprise Value to Per Share Value</h2><p>Enterprise value represents the total value of the company's operations. To arrive at equity value, subtract net debt (total debt minus cash and equivalents) from enterprise value. This adjustment accounts for the fact that shareholders own the company after deducting obligations to creditors. Finally, divide the equity value by the number of shares outstanding (in millions) to calculate the intrinsic value per share. This per-share figure provides a clear benchmark for comparing to current market prices.</p><h2>Sensitivity and Risk Considerations</h2><p>DCF valuations are highly sensitive to assumptions about future cash flows, discount rates, and terminal growth rates. Small changes in these inputs can significantly impact the calculated intrinsic value. A sensitivity analysis, testing various combinations of key assumptions, helps investors understand the range of possible valuations and assess downside risks. Remember that DCF models work best for mature, stable companies with predictable cash flows, and may be less reliable for high-growth or cyclical businesses.</p><h2>Practical Application and Limitations</h2><p>Use the DCF calculator to compare your estimated intrinsic value against the current market price. If the intrinsic value exceeds the market price by a meaningful margin (your margin of safety), the stock may represent a buying opportunity. Conversely, if the market price significantly exceeds intrinsic value, the stock may be overvalued. However, remember that DCF analysis is just one valuation method and should be combined with other approaches, including comparable company analysis and precedent transactions, to form a comprehensive investment decision.</article>
+  <div class="blog-section"><h3>&#x1f4da; Related Articles</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>FAQ</h2><div class="faq-item"><div class="faq-q">What is the Weighted Average Cost of Capital (WACC)?</div><div class="faq-a">WACC represents the average rate of return required by all of a company's investors, both equity holders and debt holders, weighted by their respective contributions to the company's capital structure. It reflects the risk profile of the company and the cost of financing. A higher WACC indicates greater risk and results in lower present values for future cash flows.</div></div>
+  <div class="faq-item"><div class="faq-q">Why is terminal value important in DCF analysis?</div><div class="faq-a">Terminal value typically represents 60-80% of the total enterprise value in a DCF model because it captures the value of all cash flows beyond the explicit forecast period. This perpetual value assumption is necessary because companies continue to operate indefinitely. The terminal growth rate should reflect long-term economic growth expectations rather than optimistic projections.</div></div>
+  <div class="faq-item"><div class="faq-q">How should I estimate free cash flows for future years?</div><div class="faq-a">Free cash flow forecasts should be based on historical performance, industry trends, and company-specific factors. Analyse historical growth rates, consider management guidance, evaluate competitive positioning, and account for capital intensity. Conservative estimates are generally preferable to avoid overvaluation, and stress-testing with pessimistic scenarios helps assess downside risks.</div></div>
+  <div class="faq-item"><div class="faq-q">What margin of safety should I use when comparing intrinsic value to market price?</div><div class="faq-a">Most value investors apply a margin of safety of 20-50%, meaning they purchase stocks trading at a significant discount to calculated intrinsic value to protect against forecast errors and unforeseen risks. The appropriate margin depends on your risk tolerance, the uncertainty of your assumptions, and the quality of the company. Higher-risk businesses warrant larger safety margins.</div></div>
+  <div class="faq-item"><div class="faq-q">When is DCF analysis most and least reliable?</div><div class="faq-a">DCF works best for stable, mature companies with predictable cash flows, clear capital structures, and modest growth rates. It is less reliable for early-stage companies with inconsistent earnings, high-growth technology firms, cyclical businesses, or companies undergoing significant restructuring. In these cases, supplement DCF with relative valuation methods and qualitative analysis.</div></div></section>
+  <div class="more-tools"><h3>More Tools</h3><div class="tools-grid"><a class="tool-pill" href="/tools/en/compound-interest.html">Compound Interest Calculator</a>
+      <a class="tool-pill" href="/tools/en/roi-calculator.html">ROI Calculator</a>
+      <a class="tool-pill" href="/tools/en/risk-reward.html">Risk Reward Calculator</a>
+      <a class="tool-pill" href="/tools/en/position-size.html">Position Size Calculator</a>
+      <a class="tool-pill" href="/tools/en/stop-loss.html">Stop Loss Calculator</a>
+      <a class="tool-pill" href="/tools/en/dividend-yield.html">Dividend Yield Calculator</a>
+      <a class="tool-pill" href="/tools/en/pe-ratio.html">P/E Ratio Calculator</a>
+      <a class="tool-pill" href="/tools/en/dca-calculator.html">DCA Calculator</a>
+      <a class="tool-pill" href="/tools/en/cagr.html">CAGR Calculator</a>
+      <a class="tool-pill" href="/tools/en/margin-calculator.html">Margin Calculator</a>
+      <a class="tool-pill" href="/tools/en/stock-gain-loss.html">Stock Gain/Loss Calculator</a>
+      <a class="tool-pill" href="/tools/en/break-even.html">Break Even Calculator</a></div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Related Tools</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
+    
+  </div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const y1 = parseFloat(document.getElementById('yearOne').value);
+  const y2 = parseFloat(document.getElementById('yearTwo').value);
+  const y3 = parseFloat(document.getElementById('yearThree').value);
+  const y4 = parseFloat(document.getElementById('yearFour').value);
+  const y5 = parseFloat(document.getElementById('yearFive').value);
+  const discountRate = parseFloat(document.getElementById('discountRate').value) / 100;
+  const terminalGrowth = parseFloat(document.getElementById('terminalGrowth').value) / 100;
+  const terminalValueInput = parseFloat(document.getElementById('terminalValue').value);
+  const netDebt = parseFloat(document.getElementById('netDebt').value);
+  const shares = parseFloat(document.getElementById('sharesOutstanding').value) * 1000000;
+
+  if (isNaN(y1) || isNaN(y2) || isNaN(y3) || isNaN(y4) || isNaN(y5) || isNaN(discountRate) || isNaN(shares)) {
+    alert('Please fill in all required fields with valid numbers');
+    return;
+  }
+
+  if (discountRate <= 0 || discountRate > 1) {
+    alert('Discount rate must be between 0 and 100%');
+    return;
+  }
+
+  const pv1 = y1 / Math.pow(1 + discountRate, 1);
+  const pv2 = y2 / Math.pow(1 + discountRate, 2);
+  const pv3 = y3 / Math.pow(1 + discountRate, 3);
+  const pv4 = y4 / Math.pow(1 + discountRate, 4);
+  const pv5 = y5 / Math.pow(1 + discountRate, 5);
+
+  const pvCashFlows = pv1 + pv2 + pv3 + pv4 + pv5;
+
+  let pvTerminal = 0;
+  if (terminalValueInput > 0) {
+    pvTerminal = terminalValueInput / Math.pow(1 + discountRate, 5);
+  } else {
+    const terminalValue = (y5 * (1 + terminalGrowth)) / (discountRate - terminalGrowth);
+    pvTerminal = terminalValue / Math.pow(1 + discountRate, 5);
+  }
+
+  const enterpriseValue = pvCashFlows + pvTerminal;
+  const equityValue = enterpriseValue - netDebt;
+  const valuePerShare = equityValue / shares;
+
+  document.getElementById('pvCashFlows').textContent = '$' + pvCashFlows.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('pvTerminal').textContent = '$' + pvTerminal.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('enterpriseValue').textContent = '$' + enterpriseValue.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('equityValue').textContent = '$' + equityValue.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('valuePerShare').textContent = '$' + valuePerShare.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copied!';setTimeout(function(){b.textContent='Share'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},2000);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Search tools, patterns, articles…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Bookmarks</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Clear all</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>
+
+<!-- gen:v2.1|en|dcf-calculator|2026-07-09 -->

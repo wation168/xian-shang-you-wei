@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이동평균 교차 계산기 - 거래 신호 분석</title>
+<meta name="description" content="단기 및 장기 이동평균의 교차점을 분석하여 거래 신호를 식별하는 금융 계산기입니다.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ko/ma-crossover.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/ma-crossover.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/ma-crossover.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/ma-crossover.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/ma-crossover.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/ma-crossover.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/ma-crossover.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/ma-crossover.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/ma-crossover.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/ma-crossover.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/ma-crossover.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/ma-crossover.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "이동평균 교차 계산기", "url": "https://softglow-ai.com/tools/ko/ma-crossover.html", "description": "단기 및 장기 이동평균의 교차점을 분석하여 거래 신호를 식별하는 금융 계산기입니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "이동평균 교차 계산기는 어떻게 작동하나요?", "acceptedAnswer": {"@type": "Answer", "text": "이 계산기는 현재와 이전 기간의 단기 및 장기 이동평균값을 입력받아, 교차 여부와 신호 유형을 판단합니다. 현재 단기 MA가 장기 MA보다 크고 이전에는 작았다면 골든 크로스(매수 신호)이고, 반대면 데드 크로스(매도 신호)입니다."}}, {"@type": "Question", "name": "백분율 차이는 어떻게 해석하나요?", "acceptedAnswer": {"@type": "Answer", "text": "백분율 차이는 두 이동평균 간의 상대적 차이를 나타냅니다. 양수 값은 단기 MA가 장기 MA보다 크다는 의미이며, 절댓값이 클수록 추세가 강합니다. 예를 들어 2%의 차이는 0.5%의 차이보다 더 강한 신호입니다."}}, {"@type": "Question", "name": "이동평균 기간은 어떻게 선택하나요?", "acceptedAnswer": {"@type": "Answer", "text": "기간 선택은 거래 목표에 따라 달라집니다. 단기 거래자는 5일/12일을, 중기 거래자는 12일/26일을, 장기 투자자는 50일/200일을 사용합니다. 기간이 짧을수록 신호가 빠르지만 허위 신호가 많고, 길수록 신뢰도가 높지만 반응이 늦습니다."}}, {"@type": "Question", "name": "골든 크로스가 발생하면 항상 매수해야 하나요?", "acceptedAnswer": {"@type": "Answer", "text": "골든 크로스는 강력한 신호이지만, 단독으로는 부족합니다. 거래량, 지지선/저항선, RSI, MACD 등 다른 지표를 함께 확인하고, 전체 시장 상황을 고려하여 종합적으로 판단해야 합니다."}}, {"@type": "Question", "name": "이동평균 거리가 작으면 어떤 의미인가요?", "acceptedAnswer": {"@type": "Answer", "text": "거리가 작다는 것은 두 이동평균이 수렴하고 있다는 의미로, 곧 교차가 일어날 가능성이 있습니다. 이는 추세 변화의 신호이므로, 추세 전환에 대비하여 포지션을 조정할 필요가 있습니다."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="ma-crossover">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/ko/">도구</a>
+    <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
+    <a href="/">홈</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/ma-crossover.html">繁中</option><option value="/tools/en/ma-crossover.html">EN</option><option value="/tools/ja/ma-crossover.html">日本語</option><option value="/tools/ko/ma-crossover.html" selected>한국어</option><option value="/tools/de/ma-crossover.html">DE</option><option value="/tools/fr/ma-crossover.html">FR</option><option value="/tools/es/ma-crossover.html">ES</option><option value="/tools/pt/ma-crossover.html">PT</option><option value="/tools/id/ma-crossover.html">ID</option><option value="/tools/zh-CN/ma-crossover.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > 이동평균 교차 계산기</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>이동평균 교차 계산기</h1>
+    <p class="calc-subtitle">이동평균이 교차할 때 거래 신호를 식별합니다</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="shortMAPeriod">단기 이동평균 기간 (일)</label>
+  <div class="input-row"><input type="number" id="shortMAPeriod" placeholder="12"  value="12" step="1"></div>
+</div>
+  <small class="input-help">단기 이동평균을 계산할 일 수를 입력하세요 (예: 12일)</small>
+<div class="input-group">
+  <label for="longMAPeriod">장기 이동평균 기간 (일)</label>
+  <div class="input-row"><input type="number" id="longMAPeriod" placeholder="26"  value="26" step="1"></div>
+</div>
+  <small class="input-help">장기 이동평균을 계산할 일 수를 입력하세요 (예: 26일)</small>
+<div class="input-group">
+  <label for="shortMAValue">현재 단기 이동평균값</label>
+  <div class="input-row"><input type="number" id="shortMAValue" placeholder="2450.50"  step="0.01"></div>
+</div>
+  <small class="input-help">현재 기간의 단기 이동평균 값을 입력하세요</small>
+<div class="input-group">
+  <label for="longMAValue">현재 장기 이동평균값</label>
+  <div class="input-row"><input type="number" id="longMAValue" placeholder="2400.75"  step="0.01"></div>
+</div>
+  <small class="input-help">현재 기간의 장기 이동평균 값을 입력하세요</small>
+<div class="input-group">
+  <label for="previousShortMA">이전 단기 이동평균값</label>
+  <div class="input-row"><input type="number" id="previousShortMA" placeholder="2448.20"  step="0.01"></div>
+</div>
+  <small class="input-help">이전 기간의 단기 이동평균 값을 입력하세요</small>
+<div class="input-group">
+  <label for="previousLongMA">이전 장기 이동평균값</label>
+  <div class="input-row"><input type="number" id="previousLongMA" placeholder="2401.30"  step="0.01"></div>
+</div>
+  <small class="input-help">이전 기간의 장기 이동평균 값을 입력하세요</small></div>
+    <button class="btn-calc" onclick="calculate()">계산하기</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">교차 신호</span><span class="result-value" id="crossoverSignal">—</span></div>
+<div class="result-highlight"><span class="result-label">신호 유형</span><span class="result-value" id="signalType">—</span></div>
+<div class="result-item"><span class="result-label">이동평균 간 거리</span><span class="result-value" id="maDistance">—</span></div>
+<div class="result-item"><span class="result-label">백분율 차이</span><span class="result-value" id="percentageDiff">—</span></div>
+<div class="result-item"><span class="result-label">이전 이동평균 간 거리</span><span class="result-value" id="previousDistance">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>이것은 무엇을 의미합니까?</strong> 교차 신호는 단기 이동평균이 장기 이동평균을 상향 또는 하향 돌파했는지 나타냅니다. 골든 크로스(단기 > 장기)는 매수 신호이고, 데드 크로스(단기 < 장기)는 매도 신호입니다. 백분율 차이와 거리 값은 신호의 강도를 평가하는 데 도움이 됩니다.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 인쇄</button>
+        <button onclick="shareResult()">&#x1f4e4; 공유</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+<div style="margin:20px 0;padding:16px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;text-align:center"><a href="https://lottery.softglow-ai.com/ko/" target="_blank" rel="noopener" style="text-decoration:none;color:#fff"><div style="font-size:16px;font-weight:700;margin-bottom:4px">🎰 세계 15개 복권 + 12가지 번호 선택 도구</div><div style="font-size:12px;opacity:0.9">Powerball · Mega Millions · EuroMillions — 별자리, 생일, 꿈, AI</div></a></div>
+
+  <article class="article"><h2>이동평균 교차란 무엇인가요?</h2><p>이동평균 교차는 기술적 분석에서 가장 널리 사용되는 거래 신호 중 하나입니다. 단기 이동평균(예: 12일)이 장기 이동평균(예: 26일)을 넘어가는 지점을 의미합니다. 이러한 교차는 시장의 추세 변화를 나타내며, 투자자들이 진입 또는 퇴출 시점을 결정하는 데 활용됩니다.</p><h2>골든 크로스 vs 데드 크로스</h2><p>골든 크로스는 단기 이동평균이 장기 이동평균 위로 올라갈 때 발생하며, 이는 상승 추세의 시작을 신호합니다. 반대로 데드 크로스는 단기 이동평균이 장기 이동평균 아래로 내려갈 때 발생하며, 하락 추세의 시작을 나타냅니다. 이 두 신호는 매매 전략의 핵심 요소입니다.</p><h2>신호 강도 평가</h2><p>이동평균 간의 거리와 백분율 차이는 신호의 강도를 나타냅니다. 거리가 클수록 추세가 강하며, 작을수록 약한 신호입니다. 백분율 차이는 두 이동평균 사이의 상대적 차이를 보여주므로, 이를 통해 신호의 신뢰도를 평가할 수 있습니다.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>시간 프레임의 중요성</h2><p>단기 이동평균으로는 12일, 장기 이동평균으로는 26일을 사용하는 것이 일반적입니다. 그러나 거래 스타일과 목표에 따라 다른 기간을 선택할 수 있습니다. 일일 거래자는 더 짧은 기간을, 장기 투자자는 더 긴 기간을 사용합니다.</p><h2>거래 신호 활용 시 주의사항</h2><p>이동평균 교차는 강력한 도구이지만, 단독으로는 부족합니다. 다른 기술적 지표(RSI, MACD 등)와 함께 사용하고, 시장의 변동성과 거래량을 고려하여 종합적으로 판단해야 합니다. 또한 허위 신호를 피하기 위해 추가 확인 신호를 기다리는 것이 좋습니다.</p><h2>실제 적용 예시</h2><p>현재 가격이 2,450.50원이고 장기 평균이 2,400.75원일 때, 단기 이동평균이 이전의 2,448.20원에서 상승했다면 강한 매수 신호입니다. 이 경우 약 49.75원(약 2.07%)의 양의 차이를 보이므로, 상승 추세가 확실하다고 판단할 수 있습니다.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 관련 기사</h3><div class="blog-grid"><a class="blog-card" href="/blog/ko/candlestick-patterns.html">Candlestick Patterns<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ko/support-resistance.html">Support & Resistance<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ko/moving-average-guide.html">Moving Average Guide<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>자주 묻는 질문</h2><div class="faq-item"><div class="faq-q">이동평균 교차 계산기는 어떻게 작동하나요?</div><div class="faq-a">이 계산기는 현재와 이전 기간의 단기 및 장기 이동평균값을 입력받아, 교차 여부와 신호 유형을 판단합니다. 현재 단기 MA가 장기 MA보다 크고 이전에는 작았다면 골든 크로스(매수 신호)이고, 반대면 데드 크로스(매도 신호)입니다.</div></div>
+  <div class="faq-item"><div class="faq-q">백분율 차이는 어떻게 해석하나요?</div><div class="faq-a">백분율 차이는 두 이동평균 간의 상대적 차이를 나타냅니다. 양수 값은 단기 MA가 장기 MA보다 크다는 의미이며, 절댓값이 클수록 추세가 강합니다. 예를 들어 2%의 차이는 0.5%의 차이보다 더 강한 신호입니다.</div></div>
+  <div class="faq-item"><div class="faq-q">이동평균 기간은 어떻게 선택하나요?</div><div class="faq-a">기간 선택은 거래 목표에 따라 달라집니다. 단기 거래자는 5일/12일을, 중기 거래자는 12일/26일을, 장기 투자자는 50일/200일을 사용합니다. 기간이 짧을수록 신호가 빠르지만 허위 신호가 많고, 길수록 신뢰도가 높지만 반응이 늦습니다.</div></div>
+  <div class="faq-item"><div class="faq-q">골든 크로스가 발생하면 항상 매수해야 하나요?</div><div class="faq-a">골든 크로스는 강력한 신호이지만, 단독으로는 부족합니다. 거래량, 지지선/저항선, RSI, MACD 등 다른 지표를 함께 확인하고, 전체 시장 상황을 고려하여 종합적으로 판단해야 합니다.</div></div>
+  <div class="faq-item"><div class="faq-q">이동평균 거리가 작으면 어떤 의미인가요?</div><div class="faq-a">거리가 작다는 것은 두 이동평균이 수렴하고 있다는 의미로, 곧 교차가 일어날 가능성이 있습니다. 이는 추세 변화의 신호이므로, 추세 전환에 대비하여 포지션을 조정할 필요가 있습니다.</div></div></section>
+  <div class="more-tools"><h3>더 많은 도구</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ko/fibonacci-retracement.html">피보나치 되돌림 계산기</a>
+      <a class="tool-pill" href="/tools/ko/pivot-point.html">피벗 포인트 계산기</a>
+      <a class="tool-pill" href="/tools/ko/rsi-calculator.html">RSI 계산기</a>
+      <a class="tool-pill" href="/tools/ko/macd-calculator.html">MACD 계산기</a>
+      <a class="tool-pill" href="/tools/ko/bollinger-bands.html">볼린저 밴드 계산기</a>
+      <a class="tool-pill" href="/tools/ko/atr-calculator.html">ATR 계산기</a>
+      <a class="tool-pill" href="/tools/ko/candlestick-identifier.html">캔들스틱 패턴 식별자</a>
+      <a class="tool-pill" href="/tools/ko/support-resistance.html">지지선과 저항선 계산기</a>
+      <a class="tool-pill" href="/tools/ko/pip-value.html">핍 값 계산기</a>
+      <a class="tool-pill" href="/tools/ko/options-profit.html">옵션 수익 계산기</a>
+      <a class="tool-pill" href="/tools/ko/stock-split.html">주식 분할 계산기</a>
+      <a class="tool-pill" href="/tools/ko/trading-fee.html">거래 수수료 계산기</a></div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>관련 계산기</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
+    
+  </div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const shortMAPeriod = parseFloat(document.getElementById('shortMAPeriod').value);
+  const longMAPeriod = parseFloat(document.getElementById('longMAPeriod').value);
+  const shortMAValue = parseFloat(document.getElementById('shortMAValue').value);
+  const longMAValue = parseFloat(document.getElementById('longMAValue').value);
+  const previousShortMA = parseFloat(document.getElementById('previousShortMA').value);
+  const previousLongMA = parseFloat(document.getElementById('previousLongMA').value);
+
+  if (isNaN(shortMAPeriod) || isNaN(longMAPeriod) || isNaN(shortMAValue) || isNaN(longMAValue) || isNaN(previousShortMA) || isNaN(previousLongMA)) {
+    alert('Please fill in all fields with valid numbers');
+    return;
+  }
+
+  if (shortMAPeriod >= longMAPeriod) {
+    alert('Short MA period must be less than Long MA period');
+    return;
+  }
+
+  const currentDistance = shortMAValue - longMAValue;
+  const previousDistance = previousShortMA - previousLongMA;
+  const percentageDiff = ((currentDistance / longMAValue) * 100).toFixed(2);
+
+  let crossoverSignal = 'No Crossover';
+  let signalType = 'None';
+
+  if (previousDistance < 0 && currentDistance > 0) {
+    crossoverSignal = 'Yes - Bullish Crossover Detected';
+    signalType = 'BUY SIGNAL (Golden Cross)';
+  } else if (previousDistance > 0 && currentDistance < 0) {
+    crossoverSignal = 'Yes - Bearish Crossover Detected';
+    signalType = 'SELL SIGNAL (Death Cross)';
+  } else if (previousDistance === 0 || currentDistance === 0) {
+    crossoverSignal = 'Potential Crossover Point';
+    signalType = 'Watch Closely';
+  } else {
+    crossoverSignal = 'No';
+    signalType = 'MAs moving in same direction';
+  }
+
+  document.getElementById('crossoverSignal').textContent = crossoverSignal;
+  document.getElementById('signalType').textContent = signalType;
+  document.getElementById('maDistance').textContent = currentDistance.toFixed(2);
+  document.getElementById('percentageDiff').textContent = Math.abs(percentageDiff);
+  document.getElementById('previousDistance').textContent = previousDistance.toFixed(2);
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='복사됨!';setTimeout(function(){b.textContent='공유'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},2000);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>
+
+<!-- gen:v2.1|ko|ma-crossover|2026-07-09 -->

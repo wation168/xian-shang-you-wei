@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>サンプルサイズ計算機 - 統計的精度を確保</title>
+<meta name="description" content="信頼度レベル、母集団比率、誤差範囲を入力して、研究に必要なサンプルサイズを計算します。統計的に有意な結果を得るための最適なサンプル数を即座に算出。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/sample-size.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/sample-size.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/sample-size.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/sample-size.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/sample-size.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/sample-size.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/sample-size.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/sample-size.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/sample-size.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/sample-size.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/sample-size.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/sample-size.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "サンプルサイズ計算機", "url": "https://softglow-ai.com/tools/ja/sample-size.html", "description": "信頼度レベル、母集団比率、誤差範囲を入力して、研究に必要なサンプルサイズを計算します。統計的に有意な結果を得るための最適なサンプル数を即座に算出。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "信頼度レベルと信頼区間の違いは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "信頼度レベルは、調査結果が正確である確率を表します（例：95%）。信頼区間は、推定値の周囲の範囲を示し、誤差範囲によって定義されます。例えば、95%信頼度で誤差範囲が5%の場合、実際の値は推定値の±5%以内にあると95%の確率で言えます。"}}, {"@type": "Question", "name": "母集団比率（p）がわからない場合、どの値を使用すべきですか？", "acceptedAnswer": {"@type": "Answer", "text": "母集団比率が不明な場合は、0.5を使用することをお勧めします。この値は最も保守的で、最大の変動性を考慮したサンプルサイズを算出します。これにより、どのような実際の比率であっても、統計的信頼性が確保されます。"}}, {"@type": "Question", "name": "サンプルサイズが大きすぎる場合、どうすればよいですか？", "acceptedAnswer": {"@type": "Answer", "text": "サンプルサイズが大きすぎる場合、信頼度を90%に低下させるか、誤差範囲を10%に拡大することを検討してください。ただし、これにより結果の精度が低下することを認識してください。予算と時間の制約内で、実現可能な値を選択することが重要です。"}}, {"@type": "Question", "name": "異なる自信度レベルでのZ値は何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "一般的なZ値は以下の通りです：90%信頼度でZ=1.645、95%信頼度でZ=1.96、99%信頼度でZ=2.576です。信頼度が高いほどZ値が大きくなり、必要なサンプルサイズも増加します。"}}, {"@type": "Question", "name": "計算されたサンプルサイズより少ないサンプルで調査を実施できますか？", "acceptedAnswer": {"@type": "Answer", "text": "計算されたサンプルサイズより少ないサンプルで調査を実施することは技術的には可能ですが、統計的信頼性が低下します。指定された信頼度と誤差範囲を達成できなくなるため、結果の精度が損なわれます。可能な限り計算値以上のサンプルを収集することをお勧めします。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="sample-size">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ja">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/ja/">ツール</a>
+    <a href="/patterns/ja.html">ローソク足</a>
+    <a href="/blog/ja/index.html">ブログ</a>
+    <a href="/">ホーム</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/sample-size.html">繁中</option><option value="/tools/en/sample-size.html">EN</option><option value="/tools/ja/sample-size.html" selected>日本語</option><option value="/tools/ko/sample-size.html">한국어</option><option value="/tools/de/sample-size.html">DE</option><option value="/tools/fr/sample-size.html">FR</option><option value="/tools/es/sample-size.html">ES</option><option value="/tools/pt/sample-size.html">PT</option><option value="/tools/id/sample-size.html">ID</option><option value="/tools/zh-CN/sample-size.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > サンプルサイズ計算機</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>サンプルサイズ計算機</h1>
+    <p class="calc-subtitle">統計的に正確な研究結果のための理想的なサンプルサイズを決定します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="confidenceLevel">信頼度レベル（Z値）</label>
+  <div class="input-row"><input type="number" id="confidenceLevel" placeholder="1.96"  value="1.96" step="0.01"></div>
+</div>
+  <small class="input-help">信頼度に対応するZ値を入力してください（95%信頼度の場合は1.96）</small>
+<div class="input-group">
+  <label for="proportion">母集団比率（p）</label>
+  <div class="input-row"><input type="number" id="proportion" placeholder="0.5"  value="0.5" step="0.01"></div>
+</div>
+  <small class="input-help">予想される母集団の比率を0から1の間で入力してください（不明な場合は0.5）</small>
+<div class="input-group">
+  <label for="marginError">誤差範囲（e）</label>
+  <div class="input-row"><input type="number" id="marginError" placeholder="0.05"  value="0.05" step="0.01"></div>
+</div>
+  <small class="input-help">許容できる誤差範囲を小数で入力してください（例：0.05は5%）</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">必要なサンプルサイズ</span><span class="result-value" id="sampleSizeResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 計算されたサンプルサイズは、指定された信頼度と誤差範囲で統計的に有意な結果を得るために必要な最小限のサンプル数です。この数値以上のサンプルを収集することで、研究の信頼性と精度が保証されます。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+<div style="margin:20px 0;padding:16px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;text-align:center"><a href="https://lottery.softglow-ai.com/ja/" target="_blank" rel="noopener" style="text-decoration:none;color:#fff"><div style="font-size:16px;font-weight:700;margin-bottom:4px">🎰 世界15の宝くじ＋12種類の番号選択ツール</div><div style="font-size:12px;opacity:0.9">パワーボール・メガミリオンズ — 星座・誕生日・夢・AI選番</div></a></div>
+
+  <article class="article"><h2>サンプルサイズ計算機とは</h2><p>サンプルサイズ計算機は、統計調査やアンケート研究において、必要な標本数を科学的に決定するための重要なツールです。適切なサンプルサイズを決定することで、研究結果の信頼性と精度を確保できます。</p><h2>サンプルサイズ決定の重要性</h2><p>サンプルサイズが小さすぎると、結果が母集団を正確に代表できず、統計的な信頼性が低くなります。一方、サンプルサイズが大きすぎると、時間とコストが無駄になります。最適なサンプルサイズを計算することで、効率的かつ正確な研究を実現できます。</p><h2>信頼度レベル（Z値）について</h2><p>信頼度レベルは、調査結果がどの程度の確実性を持つかを示します。一般的に95%の信頼度（Z値=1.96）が使用されますが、より高い精度が必要な場合は99%（Z値=2.576）を選択します。信頼度が高いほど、より大きなサンプルサイズが必要になります。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>母集団比率（p）の設定方法</h2><p>母集団比率は、調査対象となる特定の特性を持つ母集団の割合です。事前の調査データがある場合はその値を使用し、不明な場合は0.5を設定することで、最も保守的なサンプルサイズを得られます。0.5を使用すると、最大限の変動性を考慮した計算になります。</p><h2>誤差範囲（マージンオブエラー）の解釈</h2><p>誤差範囲は、標本統計量と母集団パラメータの間の許容できる差のことです。例えば、誤差範囲が5%（0.05）の場合、調査結果は実際の値から±5%の範囲内にあると考えられます。より小さい誤差範囲を望むほど、より大きなサンプルサイズが必要になります。</p><h2>計算式と応用例</h2><p>サンプルサイズは次の式で計算されます：n = (Z² × p × (1-p)) / e²。例えば、95%信頼度、50%母集団比率、5%誤差範囲の場合、必要なサンプルサイズは約384になります。このサイズ以上のサンプルを収集することで、統計的に有意な結果が得られます。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">信頼度レベルと信頼区間の違いは何ですか？</div><div class="faq-a">信頼度レベルは、調査結果が正確である確率を表します（例：95%）。信頼区間は、推定値の周囲の範囲を示し、誤差範囲によって定義されます。例えば、95%信頼度で誤差範囲が5%の場合、実際の値は推定値の±5%以内にあると95%の確率で言えます。</div></div>
+  <div class="faq-item"><div class="faq-q">母集団比率（p）がわからない場合、どの値を使用すべきですか？</div><div class="faq-a">母集団比率が不明な場合は、0.5を使用することをお勧めします。この値は最も保守的で、最大の変動性を考慮したサンプルサイズを算出します。これにより、どのような実際の比率であっても、統計的信頼性が確保されます。</div></div>
+  <div class="faq-item"><div class="faq-q">サンプルサイズが大きすぎる場合、どうすればよいですか？</div><div class="faq-a">サンプルサイズが大きすぎる場合、信頼度を90%に低下させるか、誤差範囲を10%に拡大することを検討してください。ただし、これにより結果の精度が低下することを認識してください。予算と時間の制約内で、実現可能な値を選択することが重要です。</div></div>
+  <div class="faq-item"><div class="faq-q">異なる自信度レベルでのZ値は何ですか？</div><div class="faq-a">一般的なZ値は以下の通りです：90%信頼度でZ=1.645、95%信頼度でZ=1.96、99%信頼度でZ=2.576です。信頼度が高いほどZ値が大きくなり、必要なサンプルサイズも増加します。</div></div>
+  <div class="faq-item"><div class="faq-q">計算されたサンプルサイズより少ないサンプルで調査を実施できますか？</div><div class="faq-a">計算されたサンプルサイズより少ないサンプルで調査を実施することは技術的には可能ですが、統計的信頼性が低下します。指定された信頼度と誤差範囲を達成できなくなるため、結果の精度が損なわれます。可能な限り計算値以上のサンプルを収集することをお勧めします。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/ja/roi-calculator.html">ROI計算機</a>
+      <a class="tool-pill" href="/tools/ja/risk-reward.html">リスク・リワード計算機</a>
+      <a class="tool-pill" href="/tools/ja/position-size.html">ポジションサイズ計算機</a>
+      <a class="tool-pill" href="/tools/ja/stop-loss.html">Stop Loss</a>
+      <a class="tool-pill" href="/tools/ja/dividend-yield.html">配当利回り計算機</a>
+      <a class="tool-pill" href="/tools/ja/pe-ratio.html">P/Eレシオ計算機</a>
+      <a class="tool-pill" href="/tools/ja/dca-calculator.html">ドルコスト平均法計算機</a>
+      <a class="tool-pill" href="/tools/ja/cagr.html">CAGR計算機</a>
+      <a class="tool-pill" href="/tools/ja/margin-calculator.html">証拠金計算機</a>
+      <a class="tool-pill" href="/tools/ja/stock-gain-loss.html">Stock Gain Loss</a>
+      <a class="tool-pill" href="/tools/ja/break-even.html">損益分岐点計算機</a></div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
+    
+  </div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const confidenceLevel = parseFloat(document.getElementById('confidenceLevel').value);
+  const proportion = parseFloat(document.getElementById('proportion').value);
+  const marginError = parseFloat(document.getElementById('marginError').value);
+
+  if (!confidenceLevel || !proportion || !marginError) {
+    alert('Please fill in all fields with valid numbers');
+    return;
+  }
+
+  if (proportion < 0 || proportion > 1) {
+    alert('Population proportion must be between 0 and 1');
+    return;
+  }
+
+  if (marginError <= 0) {
+    alert('Margin of error must be greater than 0');
+    return;
+  }
+
+  const numerator = (confidenceLevel * confidenceLevel) * proportion * (1 - proportion);
+  const denominator = marginError * marginError;
+  const sampleSize = Math.ceil(numerator / denominator);
+
+  document.getElementById('sampleSizeResult').textContent = sampleSize.toLocaleString('en-US');
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},2000);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="ツール、パターン、記事を検索…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>ブックマーク</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全て削除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|sample-size|2026-07-09 -->

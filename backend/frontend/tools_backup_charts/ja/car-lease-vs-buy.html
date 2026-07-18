@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>カーリース vs 購入計算機 - NPV分析</title>
+<meta name="description" content="カーリースと購入の総費用をNPV分析で比較。毎月の支払い、燃料代、メンテナンス費用を含めた詳細な財務分析。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/car-lease-vs-buy.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/car-lease-vs-buy.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/car-lease-vs-buy.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/car-lease-vs-buy.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/car-lease-vs-buy.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/car-lease-vs-buy.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/car-lease-vs-buy.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/car-lease-vs-buy.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/car-lease-vs-buy.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/car-lease-vs-buy.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/car-lease-vs-buy.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/car-lease-vs-buy.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "カーリース vs 購入計算機", "url": "https://softglow-ai.com/tools/ja/car-lease-vs-buy.html", "description": "カーリースと購入の総費用をNPV分析で比較。毎月の支払い、燃料代、メンテナンス費用を含めた詳細な財務分析。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "NPV分析とは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "NPV（正味現在価値）は、異なる時期に発生する現金流出を現在の価値に換算して比較する手法です。割引率を使用して、現在のお金と将来のお金の価値を調整します。これにより、複数年にわたる費用をより正確に比較できます。"}}, {"@type": "Question", "name": "割引率をどのように設定すべきですか？", "acceptedAnswer": {"@type": "Answer", "text": "割引率は、お金の時間的価値を反映する利率です。一般的には3～7％が使用されます。銀行のセービング金利や期待される投資リターンを基準に設定することができます。より高い割引率は、将来の費用を軽く評価し、より低い割引率は重く評価します。"}}, {"@type": "Question", "name": "残価率をどのように決定しますか？", "acceptedAnswer": {"@type": "Answer", "text": "残価率は、ローン完済時に車がいくらで売却できるかを購入価格の％で表したものです。一般的には、5年後の残価率は40～60％です。ただし、車の人気度、年式、走行距離、メンテナンス状況によって異なります。信頼できる自動車評価サイトで確認することをお勧めします。"}}, {"@type": "Question", "name": "リースの走行距離制限を超えた場合の費用は含まれていますか？", "acceptedAnswer": {"@type": "Answer", "text": "いいえ、基本的な計算には含まれていません。リース契約の走行距離制限を超える可能性がある場合は、超過費用（通常1マイルあたり$0.15～$0.30）を手動で追加して検討してください。年間の予想走行距離がリース制限を超えることが予想される場合は、購入の方が経済的である可能性があります。"}}, {"@type": "Question", "name": "購入時のメンテナンス費用はどのように見積もりますか？", "acceptedAnswer": {"@type": "Answer", "text": "新車の場合、最初の数年は年間$500～$1,000程度です。車が古くなるにつれて費用は増加します。5年目以降は年間$1,000～$2,000以上になる可能性があります。メーカーの推奨メンテナンススケジュールと過去のモデルの実績に基づいて見積もることをお勧めします。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="car-lease-vs-buy">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ja">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/ja/">ツール</a>
+    <a href="/patterns/ja.html">ローソク足</a>
+    <a href="/blog/ja/index.html">ブログ</a>
+    <a href="/">ホーム</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/car-lease-vs-buy.html">繁中</option><option value="/tools/en/car-lease-vs-buy.html">EN</option><option value="/tools/ja/car-lease-vs-buy.html" selected>日本語</option><option value="/tools/ko/car-lease-vs-buy.html">한국어</option><option value="/tools/de/car-lease-vs-buy.html">DE</option><option value="/tools/fr/car-lease-vs-buy.html">FR</option><option value="/tools/es/car-lease-vs-buy.html">ES</option><option value="/tools/pt/car-lease-vs-buy.html">PT</option><option value="/tools/id/car-lease-vs-buy.html">ID</option><option value="/tools/zh-CN/car-lease-vs-buy.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > カーリース vs 購入計算機</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>カーリース vs 購入計算機</h1>
+    <p class="calc-subtitle">NPV分析を使用してカーリースと購入の総費用を比較</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="carPrice">車の購入価格</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="carPrice" placeholder="35000"  value="35000" step="1000"></div>
+</div>
+  <small class="input-help">購入予定の車の総額を入力してください</small>
+<div class="input-group">
+  <label for="downPayment">頭金（購入オプション）</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="downPayment" placeholder="7000"  value="7000" step="500"></div>
+</div>
+  <small class="input-help">購入時に支払う頭金の額を入力してください</small>
+<div class="input-group">
+  <label for="loanRate">ローン金利（年率）</label>
+  <div class="input-row"><input type="number" id="loanRate" placeholder="5.5"  value="5.5" step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">自動車ローンの年間利率を入力してください</small>
+<div class="input-group">
+  <label for="loanTerm">ローン期間</label>
+  <div class="input-row"><input type="number" id="loanTerm" placeholder="5"  value="5" step="1"><span class="input-suffix">years</span></div>
+</div>
+  <small class="input-help">自動車ローンの返済期間を年数で入力してください</small>
+<div class="input-group">
+  <label for="residualValue">残価率（購入価格に対する％）</label>
+  <div class="input-row"><input type="number" id="residualValue" placeholder="50"  value="50" step="5"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">ローン完済時の車の予想残価を購入価格の何％かで入力してください</small>
+<div class="input-group">
+  <label for="leaseMonthly">月額リース料金</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="leaseMonthly" placeholder="450"  value="450" step="10"></div>
+</div>
+  <small class="input-help">月額リース料金を入力してください</small>
+<div class="input-group">
+  <label for="leaseTerm">リース期間</label>
+  <div class="input-row"><input type="number" id="leaseTerm" placeholder="3"  value="3" step="1"><span class="input-suffix">years</span></div>
+</div>
+  <small class="input-help">リースの契約期間を年数で入力してください</small>
+<div class="input-group">
+  <label for="annualMaintenance">年間メンテナンス費用（購入）</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="annualMaintenance" placeholder="800"  value="800" step="50"></div>
+</div>
+  <small class="input-help">購入した場合の年間メンテナンス費用を入力してください</small>
+<div class="input-group">
+  <label for="annualInsurance">年間保険費用</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="annualInsurance" placeholder="1200"  value="1200" step="50"></div>
+</div>
+  <small class="input-help">年間の自動車保険料を入力してください</small>
+<div class="input-group">
+  <label for="annualRegistration">年間登録・税金（購入）</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="annualRegistration" placeholder="200"  value="200" step="25"></div>
+</div>
+  <small class="input-help">年間の登録・税金費用を入力してください</small>
+<div class="input-group">
+  <label for="annualMileage">年間走行距離</label>
+  <div class="input-row"><input type="number" id="annualMileage" placeholder="12000"  value="12000" step="1000"><span class="input-suffix">miles</span></div>
+</div>
+  <small class="input-help">毎年の予想走行距離をマイルで入力してください</small>
+<div class="input-group">
+  <label for="discountRate">割引率（NPV計算）</label>
+  <div class="input-row"><input type="number" id="discountRate" placeholder="5"  value="5" step="0.5"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">NPV計算に使用する割引率を％で入力してください</small>
+<div class="input-group">
+  <label for="gasPrice">ガソリン1ガロンあたりの平均価格</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="gasPrice" placeholder="3.50"  value="3.50" step="0.10"></div>
+</div>
+  <small class="input-help">ガソリンの平均価格をドル/ガロンで入力してください</small>
+<div class="input-group">
+  <label for="fuelEconomy">車の燃費（MPG）</label>
+  <div class="input-row"><input type="number" id="fuelEconomy" placeholder="28"  value="28" step="1"><span class="input-suffix">MPG</span></div>
+</div>
+  <small class="input-help">車の燃料効率をMPG（マイル/ガロン）で入力してください</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">購入の総費用（NPV）</span><span class="result-value" id="totalBuyCost">—</span></div>
+<div class="result-highlight"><span class="result-label">リースの総費用（NPV）</span><span class="result-value" id="totalLeaseCost">—</span></div>
+<div class="result-highlight"><span class="result-label">費用差額</span><span class="result-value" id="costDifference">—</span></div>
+<div class="result-item"><span class="result-label">推奨事項</span><span class="result-value" id="recommendation">—</span></div>
+<div class="result-item"><span class="result-label">平均月額費用（購入）</span><span class="result-value" id="monthlyCostBuy">—</span></div>
+<div class="result-item"><span class="result-label">平均月額費用（リース）</span><span class="result-value" id="monthlyCostLease">—</span></div>
+<div class="result-item"><span class="result-label">必要な頭金</span><span class="result-value" id="buydownPayment">—</span></div>
+<div class="result-item"><span class="result-label">月額ローン支払額</span><span class="result-value" id="monthlyLoan">—</span></div>
+<div class="result-item"><span class="result-label">総燃料費用（購入）</span><span class="result-value" id="totalFuelCost">—</span></div>
+<div class="result-item"><span class="result-label">総メンテナンス費用（購入）</span><span class="result-value" id="totalMaintenanceCost">—</span></div>
+<div class="result-item"><span class="result-label">期間終了時の残価</span><span class="result-value" id="residualValueAmount">—</span></div>
+<div class="result-item"><span class="result-label">総リース支払額</span><span class="result-value" id="totalLeaseCostBreakdown">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 計算結果は、カーリースと購入の現在価値（NPV）で比較した総費用を示します。推奨事項は、どちらの選択肢がより経済的であるかを示します。平均月額費用を比較することで、毎月の予算計画に役立てることができます。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+<div style="margin:20px 0;padding:16px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;text-align:center"><a href="https://lottery.softglow-ai.com/ja/" target="_blank" rel="noopener" style="text-decoration:none;color:#fff"><div style="font-size:16px;font-weight:700;margin-bottom:4px">🎰 世界15の宝くじ＋12種類の番号選択ツール</div><div style="font-size:12px;opacity:0.9">パワーボール・メガミリオンズ — 星座・誕生日・夢・AI選番</div></a></div>
+
+  <article class="article"><h2>カーリース vs 購入：どちらを選ぶべきか</h2><p>車を利用する際、リースと購入のどちらを選ぶかは重要な経済的決断です。このカーリース vs 購入計算機は、NPV（正味現在価値）分析を使用して、両方の選択肢の総費用を比較します。購入には頭金、ローン支払い、メンテナンス、保険、税金、そしてガソリン代が含まれます。一方、リースは月額料金と保険料が主な費用です。</p><h2>NPV分析の重要性</h2><p>正味現在価値（NPV）は、異なる時期の現金流出を同じ基準で比較するために使用されます。割引率を設定することで、現在のお金と将来のお金の価値を調整できます。一般的な割引率は3～7％です。これにより、全体的な経済的負担をより正確に評価できます。</p><h2>購入時の隠れた費用</h2><p>車を購入する場合、月額ローン支払いだけでなく、多くの追加費用があります。毎年の保険料、登録・税金、そして走行距離に基づく燃料費とメンテナンス費用が含まれます。走行距離が多い場合、これらの費用は大きくなります。また、ローン完済後も、車の劣化に伴いメンテナンス費用は増加する傾向があります。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>リースのメリットとデメリット</h2><p>リースの最大のメリットは、月額支払いが固定されていることと、保証期間中のメンテナンスが不要または最小限であることです。ただし、走行距離制限があり、超過した場合は追加費用が発生します。また、リース終了後は何も残りません。一方、購入した場合は、ローン完済後、残価がある限り資産として保有できます。</p><h2>燃費と走行距離の影響</h2><p>年間走行距離とガソリン価格は、購入のトータルコストに大きな影響を与えます。走行距離が多い場合、購入は割高になる可能性があります。逆に、走行距離が少ない場合や、リースの走行距離制限を超える可能性が低い場合は、リースがより経済的です。燃費の良い車を選ぶことも、長期的なコスト削減に重要です。</p><h2>計算結果の解釈</h2><p>このツールは、購入とリースの両方の総費用をNPVで計算します。推奨事項は、費用差額に基づいて自動的に表示されます。平均月額費用を比較することで、月々の予算への影響を理解できます。残価率の設定により、ローン完済時の車の価値を反映させることができますが、実際の市場価値は変動する可能性があります。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">NPV分析とは何ですか？</div><div class="faq-a">NPV（正味現在価値）は、異なる時期に発生する現金流出を現在の価値に換算して比較する手法です。割引率を使用して、現在のお金と将来のお金の価値を調整します。これにより、複数年にわたる費用をより正確に比較できます。</div></div>
+  <div class="faq-item"><div class="faq-q">割引率をどのように設定すべきですか？</div><div class="faq-a">割引率は、お金の時間的価値を反映する利率です。一般的には3～7％が使用されます。銀行のセービング金利や期待される投資リターンを基準に設定することができます。より高い割引率は、将来の費用を軽く評価し、より低い割引率は重く評価します。</div></div>
+  <div class="faq-item"><div class="faq-q">残価率をどのように決定しますか？</div><div class="faq-a">残価率は、ローン完済時に車がいくらで売却できるかを購入価格の％で表したものです。一般的には、5年後の残価率は40～60％です。ただし、車の人気度、年式、走行距離、メンテナンス状況によって異なります。信頼できる自動車評価サイトで確認することをお勧めします。</div></div>
+  <div class="faq-item"><div class="faq-q">リースの走行距離制限を超えた場合の費用は含まれていますか？</div><div class="faq-a">いいえ、基本的な計算には含まれていません。リース契約の走行距離制限を超える可能性がある場合は、超過費用（通常1マイルあたり$0.15～$0.30）を手動で追加して検討してください。年間の予想走行距離がリース制限を超えることが予想される場合は、購入の方が経済的である可能性があります。</div></div>
+  <div class="faq-item"><div class="faq-q">購入時のメンテナンス費用はどのように見積もりますか？</div><div class="faq-a">新車の場合、最初の数年は年間$500～$1,000程度です。車が古くなるにつれて費用は増加します。5年目以降は年間$1,000～$2,000以上になる可能性があります。メーカーの推奨メンテナンススケジュールと過去のモデルの実績に基づいて見積もることをお勧めします。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/car-loan.html">Car Loan</a>
+      <a class="tool-pill" href="/tools/ja/car-depreciation.html">車の減価償却計算機</a>
+      <a class="tool-pill" href="/tools/ja/car-insurance-calc.html">自動車保険料計算機</a>
+      <a class="tool-pill" href="/tools/ja/car-insurance-estimate.html">自動車保険料計算ツール</a>
+      <a class="tool-pill" href="/tools/ja/commute-cost.html">Commute Cost</a>
+      <a class="tool-pill" href="/tools/ja/fuel-cost.html">Fuel Cost</a>
+      <a class="tool-pill" href="/tools/ja/ev-savings.html">Ev Savings</a>
+      <a class="tool-pill" href="/tools/ja/gas-mileage.html">Gas Mileage</a></div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
+    
+  </div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const carPrice = parseFloat(document.getElementById('carPrice').value);
+  const downPayment = parseFloat(document.getElementById('downPayment').value);
+  const loanRate = parseFloat(document.getElementById('loanRate').value) / 100;
+  const loanTerm = parseInt(document.getElementById('loanTerm').value);
+  const residualValue = parseFloat(document.getElementById('residualValue').value) / 100;
+  const leaseMonthly = parseFloat(document.getElementById('leaseMonthly').value);
+  const leaseTerm = parseInt(document.getElementById('leaseTerm').value);
+  const annualMaintenance = parseFloat(document.getElementById('annualMaintenance').value);
+  const annualInsurance = parseFloat(document.getElementById('annualInsurance').value);
+  const annualRegistration = parseFloat(document.getElementById('annualRegistration').value);
+  const annualMileage = parseFloat(document.getElementById('annualMileage').value);
+  const discountRate = parseFloat(document.getElementById('discountRate').value) / 100;
+  const gasPrice = parseFloat(document.getElementById('gasPrice').value);
+  const fuelEconomy = parseFloat(document.getElementById('fuelEconomy').value);
+
+  if (!carPrice || !downPayment || !leaseMonthly || !annualMaintenance || !annualInsurance || !gasPrice || !fuelEconomy) {
+    alert('Please fill in all required fields');
+    return;
+  }
+
+  const loanAmount = carPrice - downPayment;
+  const monthlyRate = loanRate / 12;
+  const numPayments = loanTerm * 12;
+  const monthlyPayment = (loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numPayments))) / (Math.pow(1 + monthlyRate, numPayments) - 1);
+  
+  let totalBuyCost = downPayment;
+  let buyNPV = downPayment;
+  
+  for (let month = 1; month <= numPayments; month++) {
+    const year = Math.floor((month - 1) / 12);
+    const discountFactor = Math.pow(1 + discountRate, year);
+    buyNPV += monthlyPayment / discountFactor;
+  }
+  
+  for (let year = 0; year < loanTerm; year++) {
+    const discountFactor = Math.pow(1 + discountRate, year);
+    const yearlyMaint = annualMaintenance * (year + 1) * 0.05;
+    buyNPV += (annualInsurance + annualRegistration + yearlyMaint) / discountFactor;
+  }
+  
+  const annualFuel = (annualMileage / fuelEconomy) * gasPrice;
+  for (let year = 0; year < loanTerm; year++) {
+    const discountFactor = Math.pow(1 + discountRate, year);
+    buyNPV += annualFuel / discountFactor;
+  }
+  
+  const residualAmount = carPrice * residualValue;
+  const discountFactorResidual = Math.pow(1 + discountRate, loanTerm);
+  buyNPV -= residualAmount / discountFactorResidual;
+  
+  let leaseNPV = 0;
+  for (let month = 1; month <= leaseTerm * 12; month++) {
+    const year = Math.floor((month - 1) / 12);
+    const discountFactor = Math.pow(1 + discountRate, year);
+    leaseNPV += leaseMonthly / discountFactor;
+  }
+  
+  let leaseInsuranceCost = 0;
+  for (let year = 0; year < leaseTerm; year++) {
+    const discountFactor = Math.pow(1 + discountRate, year);
+    leaseInsuranceCost += annualInsurance / discountFactor;
+  }
+  leaseNPV += leaseInsuranceCost;
+  
+  const totalLeasePayments = leaseMonthly * leaseTerm * 12;
+  const costDiff = buyNPV - leaseNPV;
+  const avgMonthlyBuy = buyNPV / (loanTerm * 12);
+  const avgMonthlyLease = leaseNPV / (leaseTerm * 12);
+  
+  const totalFuelCost = annualFuel * loanTerm;
+  const totalMaintenanceCost = annualMaintenance * loanTerm;
+  
+  const recommendation = costDiff > 0 ? 'LEASE is more economical' : 'BUY is more economical';
+  
+  document.getElementById('totalBuyCost').textContent = '$' + buyNPV.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('totalLeaseCost').textContent = '$' + leaseNPV.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('costDifference').textContent = '$' + Math.abs(costDiff).toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('recommendation').textContent = recommendation;
+  document.getElementById('monthlyCostBuy').textContent = '$' + avgMonthlyBuy.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('monthlyCostLease').textContent = '$' + avgMonthlyLease.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('buydownPayment').textContent = '$' + downPayment.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('monthlyLoan').textContent = '$' + monthlyPayment.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('totalFuelCost').textContent = '$' + totalFuelCost.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('totalMaintenanceCost').textContent = '$' + totalMaintenanceCost.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('residualValueAmount').textContent = '$' + residualAmount.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('totalLeaseCostBreakdown').textContent = '$' + totalLeasePayments.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},2000);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="ツール、パターン、記事を検索…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>ブックマーク</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全て削除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|car-lease-vs-buy|2026-07-09 -->

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Ratio de Sharpe - Análisis de Inversiones</title>
+<meta name="description" content="Calcula el ratio de Sharpe para evaluar el rendimiento ajustado al riesgo de tu cartera. Herramienta financiera gratuita para inversores.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/es/sharpe-ratio.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/sharpe-ratio.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/sharpe-ratio.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/sharpe-ratio.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/sharpe-ratio.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/sharpe-ratio.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/sharpe-ratio.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/sharpe-ratio.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/sharpe-ratio.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/sharpe-ratio.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/sharpe-ratio.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/sharpe-ratio.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Calculadora de Ratio de Sharpe", "url": "https://softglow-ai.com/tools/es/sharpe-ratio.html", "description": "Calcula el ratio de Sharpe para evaluar el rendimiento ajustado al riesgo de tu cartera. Herramienta financiera gratuita para inversores.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "es"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "¿Qué rendimiento de cartera debo usar?", "acceptedAnswer": {"@type": "Answer", "text": "Puedes usar el rendimiento histórico promedio anual de tu cartera de los últimos 3-5 años, o el rendimiento esperado proyectado basado en tu análisis. Para backtesting, usa datos históricos reales. Para planificación futura, usa estimaciones conservadoras de rendimiento basadas en las características de tus activos."}}, {"@type": "Question", "name": "¿Cuál es una buena tasa libre de riesgo?", "acceptedAnswer": {"@type": "Answer", "text": "La tasa libre de riesgo debe corresponder a la rentabilidad de bonos del gobierno de tu país con vencimiento similar a tu horizonte de inversión. En España, puedes usar el rendimiento de los Bonos del Tesoro a 10 años. Actualmente oscila entre 2,5% y 4,5% dependiendo del contexto económico."}}, {"@type": "Question", "name": "¿Cómo calculo la desviación estándar de mi cartera?", "acceptedAnswer": {"@type": "Answer", "text": "La desviación estándar se calcula usando datos históricos de rendimientos mensuales o anuales de tu cartera. Necesitas al menos 12-24 datos puntuales para una estimación confiable. Muchas plataformas de inversión la proporcionan automáticamente, o puedes calcularla con Excel usando la función DESVEST."}}, {"@type": "Question", "name": "¿Puedo comparar carteras de diferentes países con este ratio?", "acceptedAnswer": {"@type": "Answer", "text": "Sí, pero debe ajustarse la tasa libre de riesgo para cada país o zona monetaria. Un inversor español debería usar bonos españoles, mientras que uno en otro país usaría bonos de su nación. Esto asegura comparaciones equitativas considerando el riesgo de crédito de cada economía."}}, {"@type": "Question", "name": "¿Con qué frecuencia debo recalcular mi Ratio de Sharpe?", "acceptedAnswer": {"@type": "Answer", "text": "Idealmente, recalcula el ratio trimestralmente o semestralmente para monitorear si tu cartera mantiene una buena relación riesgo-rendimiento. Los datos de volatilidad y rendimiento cambian continuamente, por lo que un ratio alto hoy puede cambiar significativamente en el futuro debido a nuevas condiciones de mercado."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="sharpe-ratio">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="es">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/es/">Herramientas</a>
+    <a href="/patterns/es.html">Patrones</a>
+    <a href="/blog/es/index.html">Blog</a>
+    <a href="/">Inicio</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/sharpe-ratio.html">繁中</option><option value="/tools/en/sharpe-ratio.html">EN</option><option value="/tools/ja/sharpe-ratio.html">日本語</option><option value="/tools/ko/sharpe-ratio.html">한국어</option><option value="/tools/de/sharpe-ratio.html">DE</option><option value="/tools/fr/sharpe-ratio.html">FR</option><option value="/tools/es/sharpe-ratio.html" selected>ES</option><option value="/tools/pt/sharpe-ratio.html">PT</option><option value="/tools/id/sharpe-ratio.html">ID</option><option value="/tools/zh-CN/sharpe-ratio.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/es/">Herramientas</a> > Calculadora de Ratio de Sharpe</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Calculadora de Ratio de Sharpe</h1>
+    <p class="calc-subtitle">Mide los rendimientos ajustados al riesgo con precisión</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="portfolioReturn">Rendimiento de la Cartera (Rp)</label>
+  <div class="input-row"><input type="number" id="portfolioReturn" placeholder="ej., 12,5"  step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">Ingresa el rendimiento esperado de tu cartera de inversión en porcentaje</small>
+<div class="input-group">
+  <label for="riskFreeRate">Tasa Libre de Riesgo (Rf)</label>
+  <div class="input-row"><input type="number" id="riskFreeRate" placeholder="ej., 4,5"  step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">Ingresa la tasa de rendimiento sin riesgo (bonos del gobierno) en porcentaje</small>
+<div class="input-group">
+  <label for="standardDeviation">Desviación Estándar (σp)</label>
+  <div class="input-row"><input type="number" id="standardDeviation" placeholder="ej., 8,3"  step="0.01"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">Ingresa la volatilidad o desviación estándar de la cartera en porcentaje</small></div>
+    <button class="btn-calc" onclick="calculate()">Calcular</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">Ratio de Sharpe</span><span class="result-value" id="sharpeRatioResult">—</span></div>
+<div class="result-item"><span class="result-label">Rendimiento Excedente</span><span class="result-value" id="excessReturnResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>¿Qué significa esto?</strong> El Ratio de Sharpe mide cuánto rendimiento excedente obtienes por cada unidad de riesgo asumido. Un ratio más alto indica una mejor compensación riesgo-rendimiento. El Rendimiento Excedente muestra cuánto retorno adicional genera tu cartera por encima de la tasa libre de riesgo.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; Imprimir</button>
+        <button onclick="shareResult()">&#x1f4e4; Compartir</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+<div style="margin:20px 0;padding:16px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;text-align:center"><a href="https://lottery.softglow-ai.com/en/" target="_blank" rel="noopener" style="text-decoration:none;color:#fff"><div style="font-size:16px;font-weight:700;margin-bottom:4px">🎰 15 Loterias Globales + 12 Herramientas</div><div style="font-size:12px;opacity:0.9">Powerball · EuroMillions · El Gordo — Zodiaco, Cumpleanos & IA</div></a></div>
+
+  <article class="article"><h2>¿Qué es el Ratio de Sharpe?</h2><p>El Ratio de Sharpe es una métrica fundamental en la teoría moderna de carteras que permite a los inversores evaluar el rendimiento ajustado al riesgo de sus inversiones. Desarrollado por William F. Sharpe en 1966, este indicador se ha convertido en una herramienta indispensable para analistas financieros y gestores de cartera en todo el mundo. El ratio proporciona una forma estandarizada de comparar diferentes inversiones o carteras, considerando tanto los rendimientos como la volatilidad asociada.</p><h2>Fórmula del Ratio de Sharpe</h2><p>La fórmula matemática es simple pero poderosa: Ratio de Sharpe = (Rendimiento de la Cartera - Tasa Libre de Riesgo) / Desviación Estándar. El numerador representa el rendimiento excedente que obtienes por invertir en activos riesgosos en lugar de activos seguros. El denominador mide la volatilidad histórica de la cartera. Al dividir el rendimiento excedente entre el riesgo, obtienes una relación que indica cuánta recompensa recibes por cada unidad de riesgo que asumes. Por ejemplo, un Ratio de Sharpe de 1,5 significa que por cada porcentaje de volatilidad, ganas 1,5 puntos porcentuales de rendimiento excedente.</p><h2>Interpretación de los Resultados</h2><p>Un Ratio de Sharpe superior a 1,0 se considera bueno, indicando que el rendimiento excedente compensa adecuadamente el riesgo asumido. Ratios entre 1,0 y 2,0 son excelentes, mostrando una gestión eficiente del riesgo. Ratios superiores a 2,0 son excepcionales y difíciles de lograr de manera consistente. Un Ratio de Sharpe negativo indica que la cartera está rendimiento por debajo de la tasa libre de riesgo, lo que significa que estarías mejor invirtiendo en bonos del gobierno. Al comparar dos carteras, siempre elige la que tenga un Ratio de Sharpe más alto, ya que ofrece mejor rendimiento ajustado al riesgo.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Componentes Clave de la Calculadora</h2><p>El Rendimiento de la Cartera debe ser el retorno total esperado o histórico de tu inversión, expresado en porcentaje anual. La Tasa Libre de Riesgo típicamente corresponde al rendimiento de bonos del gobierno a largo plazo, como los bonos españoles del Tesoro o deuda pública de tu país. En la zona euro, este valor oscila entre 2% y 4% dependiendo del contexto macroeconómico actual. La Desviación Estándar mide la volatilidad histórica de la cartera, calculada generalmente sobre datos de 1 a 5 años. Estos tres componentes son esenciales para obtener un análisis confiable de tu inversión.</p><h2>Aplicaciones Prácticas del Ratio de Sharpe</h2><p>Los fondos de inversión y gestores patrimoniales utilizan el Ratio de Sharpe para justificar sus estrategias y demostrar el valor agregado de sus servicios. Los inversores individuales pueden usarlo para comparar fondos mutualistas, ETFs o sus carteras personales. Instituciones financieras lo emplean en la asignación de capital entre diferentes unidades de negocio. El ratio también es útil para evaluar el desempeño histórico de un gestor: un Ratio de Sharpe consistentemente alto durante varios años sugiere habilidad en la gestión del riesgo. Además, permite identificar si los buenos rendimientos se deben a estrategia inteligente o simplemente a asumir riesgos excesivos.</p><h2>Limitaciones y Consideraciones Importantes</h2><p>Aunque el Ratio de Sharpe es invaluable, tiene limitaciones importantes a considerar. Asume que los rendimientos siguen una distribución normal, lo cual no siempre es cierto en mercados reales con eventos extremos. No captura el riesgo de colas (tail risk) o la posibilidad de pérdidas catastróficas. El ratio también es sensible al período histórico seleccionado para calcular la volatilidad; usar datos de mercados alcistas puede subestimar el riesgo real. Además, no considera el riesgo de liquidez, el impacto de impuestos o comisiones, ni los cambios en correlaciones durante crisis. Para un análisis completo, combina el Ratio de Sharpe con otras métricas como el Sortino Ratio, el Calmar Ratio o el Maximum Drawdown.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; Artículos relacionados</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>Preguntas frecuentes</h2><div class="faq-item"><div class="faq-q">¿Qué rendimiento de cartera debo usar?</div><div class="faq-a">Puedes usar el rendimiento histórico promedio anual de tu cartera de los últimos 3-5 años, o el rendimiento esperado proyectado basado en tu análisis. Para backtesting, usa datos históricos reales. Para planificación futura, usa estimaciones conservadoras de rendimiento basadas en las características de tus activos.</div></div>
+  <div class="faq-item"><div class="faq-q">¿Cuál es una buena tasa libre de riesgo?</div><div class="faq-a">La tasa libre de riesgo debe corresponder a la rentabilidad de bonos del gobierno de tu país con vencimiento similar a tu horizonte de inversión. En España, puedes usar el rendimiento de los Bonos del Tesoro a 10 años. Actualmente oscila entre 2,5% y 4,5% dependiendo del contexto económico.</div></div>
+  <div class="faq-item"><div class="faq-q">¿Cómo calculo la desviación estándar de mi cartera?</div><div class="faq-a">La desviación estándar se calcula usando datos históricos de rendimientos mensuales o anuales de tu cartera. Necesitas al menos 12-24 datos puntuales para una estimación confiable. Muchas plataformas de inversión la proporcionan automáticamente, o puedes calcularla con Excel usando la función DESVEST.</div></div>
+  <div class="faq-item"><div class="faq-q">¿Puedo comparar carteras de diferentes países con este ratio?</div><div class="faq-a">Sí, pero debe ajustarse la tasa libre de riesgo para cada país o zona monetaria. Un inversor español debería usar bonos españoles, mientras que uno en otro país usaría bonos de su nación. Esto asegura comparaciones equitativas considerando el riesgo de crédito de cada economía.</div></div>
+  <div class="faq-item"><div class="faq-q">¿Con qué frecuencia debo recalcular mi Ratio de Sharpe?</div><div class="faq-a">Idealmente, recalcula el ratio trimestralmente o semestralmente para monitorear si tu cartera mantiene una buena relación riesgo-rendimiento. Los datos de volatilidad y rendimiento cambian continuamente, por lo que un ratio alto hoy puede cambiar significativamente en el futuro debido a nuevas condiciones de mercado.</div></div></section>
+  <div class="more-tools"><h3>Más herramientas</h3><div class="tools-grid"><a class="tool-pill" href="/tools/es/compound-interest.html">Calculadora de Interés Compuesto</a>
+      <a class="tool-pill" href="/tools/es/roi-calculator.html">Calculadora de ROI</a>
+      <a class="tool-pill" href="/tools/es/risk-reward.html">Calculadora de Riesgo-Recompensa</a>
+      <a class="tool-pill" href="/tools/es/position-size.html">Calculadora de Tamaño de Posición</a>
+      <a class="tool-pill" href="/tools/es/stop-loss.html">Calculadora de Stop Loss</a>
+      <a class="tool-pill" href="/tools/es/dividend-yield.html">Calculadora de Rendimiento por Dividendo</a>
+      <a class="tool-pill" href="/tools/es/pe-ratio.html">Calculadora de Ratio P/E</a>
+      <a class="tool-pill" href="/tools/es/dca-calculator.html">Calculadora DCA</a>
+      <a class="tool-pill" href="/tools/es/cagr.html">Calculadora CAGR</a>
+      <a class="tool-pill" href="/tools/es/margin-calculator.html">Calculadora de Margen</a>
+      <a class="tool-pill" href="/tools/es/stock-gain-loss.html">Calculadora de Ganancias/Pérdidas en Acciones</a>
+      <a class="tool-pill" href="/tools/es/break-even.html">Calculadora de Punto de Equilibrio</a></div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Herramientas relacionadas</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
+    
+  </div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const portfolioReturnEl = document.getElementById('portfolioReturn');
+  const riskFreeRateEl = document.getElementById('riskFreeRate');
+  const standardDeviationEl = document.getElementById('standardDeviation');
+  
+  const portfolioReturn = parseFloat(portfolioReturnEl.value);
+  const riskFreeRate = parseFloat(riskFreeRateEl.value);
+  const standardDeviation = parseFloat(standardDeviationEl.value);
+  
+  if (isNaN(portfolioReturn) || portfolioReturnEl.value.trim() === '') {
+    alert('Please enter a valid Portfolio Return');
+    return;
+  }
+  if (isNaN(riskFreeRate) || riskFreeRateEl.value.trim() === '') {
+    alert('Please enter a valid Risk-Free Rate');
+    return;
+  }
+  if (isNaN(standardDeviation) || standardDeviationEl.value.trim() === '') {
+    alert('Please enter a valid Standard Deviation');
+    return;
+  }
+  if (standardDeviation === 0) {
+    alert('Standard Deviation cannot be zero');
+    return;
+  }
+  
+  const excessReturn = portfolioReturn - riskFreeRate;
+  const sharpeRatio = excessReturn / standardDeviation;
+  
+  document.getElementById('sharpeRatioResult').textContent = sharpeRatio.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+  document.getElementById('excessReturnResult').textContent = excessReturn.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='¡Copiado!';setTimeout(function(){b.textContent='Compartir'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},2000);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Buscar herramientas, patrones, artículos…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Favoritos</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Borrar todo</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>
+
+<!-- gen:v2.1|es|sharpe-ratio|2026-07-09 -->

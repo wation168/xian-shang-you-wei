@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IRR 계산기 - 내부수익률 투자 분석</title>
+<meta name="description" content="투자 프로젝트의 내부수익률(IRR)과 NPV를 계산하세요. 초기투자금과 연간 현금흐름을 입력하면 투자 수익성을 평가할 수 있습니다.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ko/irr-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/irr-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/irr-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/irr-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/irr-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/irr-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/irr-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/irr-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/irr-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/irr-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/irr-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/irr-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "IRR 계산기", "url": "https://softglow-ai.com/tools/ko/irr-calculator.html", "description": "투자 프로젝트의 내부수익률(IRR)과 NPV를 계산하세요. 초기투자금과 연간 현금흐름을 입력하면 투자 수익성을 평가할 수 있습니다.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ko"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "IRR과 NPV의 차이점은 무엇인가요?", "acceptedAnswer": {"@type": "Answer", "text": "NPV는 특정 할인율에서 미래 현금흐름을 현재가치로 계산한 절대값이고, IRR은 NPV를 0으로 만드는 할인율 자체입니다. NPV는 금액으로 투자 가치를 측정하고, IRR은 수익률로 투자 효율성을 측정합니다."}}, {"@type": "Question", "name": "초기투자금을 음수로 입력해야 하는 이유는?", "acceptedAnswer": {"@type": "Answer", "text": "초기투자금은 현금 유출을 나타내므로 음수로 표기합니다. 이렇게 하면 계산기가 투자 수익을 정확하게 계산할 수 있습니다. 이는 회계학과 재무학의 표준 관례입니다."}}, {"@type": "Question", "name": "IRR이 음수가 나오면 어떤 의미인가요?", "acceptedAnswer": {"@type": "Answer", "text": "IRR이 음수는 투자가 손실을 의미합니다. 초기투자금을 회수하지 못하고 추가 손실이 발생할 수 있으므로, 그러한 투자는 진행하지 않는 것이 좋습니다."}}, {"@type": "Question", "name": "5년 이상의 장기 투자를 분석할 수 있나요?", "acceptedAnswer": {"@type": "Answer", "text": "이 계산기는 5년까지의 현금흐름을 입력받도록 설계되었습니다. 더 긴 기간의 투자는 Excel 등 스프레드시트에서 IRR 함수를 사용하거나 전문 재무 소프트웨어를 활용하시기 바랍니다."}}, {"@type": "Question", "name": "여러 투자 안을 비교할 때 IRR이 높은 것만 선택해도 되나요?", "acceptedAnswer": {"@type": "Answer", "text": "IRR이 높을수록 좋지만, 초기투자액, 투자 위험도, 회사의 자금 상황, 프로젝트 기간 등 다른 요소들도 함께 고려해야 합니다. 최종 투자 의사결정은 이러한 종합적인 분석을 바탕으로 해야 합니다."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="irr-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ko">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/ko/">도구</a>
+    <a href="/patterns/ko.html">캔들 패턴</a>
+    <a href="/blog/ko/index.html">블로그</a>
+    <a href="/">홈</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/irr-calculator.html">繁中</option><option value="/tools/en/irr-calculator.html">EN</option><option value="/tools/ja/irr-calculator.html">日本語</option><option value="/tools/ko/irr-calculator.html" selected>한국어</option><option value="/tools/de/irr-calculator.html">DE</option><option value="/tools/fr/irr-calculator.html">FR</option><option value="/tools/es/irr-calculator.html">ES</option><option value="/tools/pt/irr-calculator.html">PT</option><option value="/tools/id/irr-calculator.html">ID</option><option value="/tools/zh-CN/irr-calculator.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ko/">도구</a> > IRR 계산기</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>IRR 계산기</h1>
+    <p class="calc-subtitle">투자 분석을 위한 내부수익률(IRR) 계산</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="initialInvestment">초기투자금 (0년)</label>
+  <div class="input-row"><span class="input-prefix">₩</span><input type="number" id="initialInvestment" placeholder="예: -50000"  value="-50000" step="1"></div>
+</div>
+  <small class="input-help">프로젝트 시작 시점의 초기 투자액(음수로 입력)</small>
+<div class="input-group">
+  <label for="year1CashFlow">1년차 현금흐름</label>
+  <div class="input-row"><span class="input-prefix">₩</span><input type="number" id="year1CashFlow" placeholder="예: 10000"  value="10000" step="1"></div>
+</div>
+  <small class="input-help">1년 후 예상되는 순 현금흐름</small>
+<div class="input-group">
+  <label for="year2CashFlow">2년차 현금흐름</label>
+  <div class="input-row"><span class="input-prefix">₩</span><input type="number" id="year2CashFlow" placeholder="예: 15000"  value="15000" step="1"></div>
+</div>
+  <small class="input-help">2년 후 예상되는 순 현금흐름</small>
+<div class="input-group">
+  <label for="year3CashFlow">3년차 현금흐름</label>
+  <div class="input-row"><span class="input-prefix">₩</span><input type="number" id="year3CashFlow" placeholder="예: 12000"  value="12000" step="1"></div>
+</div>
+  <small class="input-help">3년 후 예상되는 순 현금흐름</small>
+<div class="input-group">
+  <label for="year4CashFlow">4년차 현금흐름</label>
+  <div class="input-row"><span class="input-prefix">₩</span><input type="number" id="year4CashFlow" placeholder="예: 18000"  value="18000" step="1"></div>
+</div>
+  <small class="input-help">4년 후 예상되는 순 현금흐름</small>
+<div class="input-group">
+  <label for="year5CashFlow">5년차 현금흐름</label>
+  <div class="input-row"><span class="input-prefix">₩</span><input type="number" id="year5CashFlow" placeholder="예: 20000"  value="20000" step="1"></div>
+</div>
+  <small class="input-help">5년 후 예상되는 순 현금흐름</small></div>
+    <button class="btn-calc" onclick="calculate()">계산하기</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">내부수익률(IRR)</span><span class="result-value" id="irrResult">—</span></div>
+<div class="result-item"><span class="result-label">IRR 할인율에서의 NPV</span><span class="result-value" id="npvAtZero">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>이것은 무엇을 의미합니까?</strong> IRR은 투자 수익률을 백분율로 나타낸 것으로, 높을수록 투자 수익성이 우수합니다. NPV at IRR Rate는 IRR 할인율에서의 순현재가치로 0에 가까울수록 정확한 계산입니다. IRR이 기대수익률보다 높으면 투자 가치가 있습니다.</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 인쇄</button>
+        <button onclick="shareResult()">&#x1f4e4; 공유</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+<div style="margin:20px 0;padding:16px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;text-align:center"><a href="https://lottery.softglow-ai.com/ko/" target="_blank" rel="noopener" style="text-decoration:none;color:#fff"><div style="font-size:16px;font-weight:700;margin-bottom:4px">🎰 세계 15개 복권 + 12가지 번호 선택 도구</div><div style="font-size:12px;opacity:0.9">Powerball · Mega Millions · EuroMillions — 별자리, 생일, 꿈, AI</div></a></div>
+
+  <article class="article"><h2>IRR 계산기란?</h2><p>내부수익률(IRR, Internal Rate of Return) 계산기는 투자 프로젝트의 수익성을 평가하는 재무 분석 도구입니다. 초기투자금과 연간 현금흐름을 입력하면, 이 투자가 얼마나 좋은 수익을 가져올 수 있는지 백분율로 계산해줍니다.</p><h2>IRR의 의미</h2><p>내부수익률은 투자로부터 얻을 수 있는 예상 수익률을 나타냅니다. 예를 들어 IRR이 15%라면, 이 투자는 연평균 15% 수익을 제공한다는 의미입니다. 일반적으로 IRR이 높을수록 투자 가치가 높으며, 기업의 기대수익률(할인율)보다 높으면 투자를 진행할 가치가 있다고 판단합니다.</p><h2>현금흐름 입력 방법</h2><p>초기투자금은 음수로 입력해야 합니다. 예를 들어 ₩50,000을 투자한다면 -50000으로 입력합니다. 각 연도의 현금흐름은 해당 연도에 얻을 것으로 예상되는 순 현금이익(수입-지출)을 입력합니다. 적자가 예상되는 연도는 음수로 입력할 수 있습니다.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>NPV와 IRR의 관계</h2><p>NPV(순현재가치)는 미래 현금흐름을 현재가치로 할인한 총합입니다. IRR 할인율에서의 NPV는 0에 가까워야 정확한 IRR 계산입니다. NPV가 양수면 투자 수익성이 있고, 음수면 손실이 예상됩니다. 투자 의사결정 시 IRR과 NPV를 함께 고려하여 판단하는 것이 중요합니다.</p><h2>투자 의사결정 기준</h2><p>IRR을 기반으로 투자 의사결정을 할 때는 다음 기준을 고려합니다: (1) IRR이 높을수록 우수한 투자, (2) 회사의 요구수익률(자본비용)보다 높은 IRR을 가진 프로젝트는 가치 창출, (3) 여러 프로젝트 중에서는 IRR이 높은 순서로 우선순위 결정. 다만 초기투자액, 투자기간, 위험도 등 다른 요소들도 함께 검토하여 최종 결정해야 합니다.</p><h2>IRR 계산기 활용</h2><p>이 계산기는 사업 계획, 자본 투자 평가, 부동산 투자, 주식 포트폴리오 분석 등 다양한 투자 시나리오를 평가하는 데 유용합니다. 여러 투자 안을 비교하여 어느 것이 더 높은 수익성을 제공하는지 빠르게 파악할 수 있습니다.</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 관련 기사</h3><div class="blog-grid"><a class="blog-card" href="/blog/ko/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ko/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ko/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>자주 묻는 질문</h2><div class="faq-item"><div class="faq-q">IRR과 NPV의 차이점은 무엇인가요?</div><div class="faq-a">NPV는 특정 할인율에서 미래 현금흐름을 현재가치로 계산한 절대값이고, IRR은 NPV를 0으로 만드는 할인율 자체입니다. NPV는 금액으로 투자 가치를 측정하고, IRR은 수익률로 투자 효율성을 측정합니다.</div></div>
+  <div class="faq-item"><div class="faq-q">초기투자금을 음수로 입력해야 하는 이유는?</div><div class="faq-a">초기투자금은 현금 유출을 나타내므로 음수로 표기합니다. 이렇게 하면 계산기가 투자 수익을 정확하게 계산할 수 있습니다. 이는 회계학과 재무학의 표준 관례입니다.</div></div>
+  <div class="faq-item"><div class="faq-q">IRR이 음수가 나오면 어떤 의미인가요?</div><div class="faq-a">IRR이 음수는 투자가 손실을 의미합니다. 초기투자금을 회수하지 못하고 추가 손실이 발생할 수 있으므로, 그러한 투자는 진행하지 않는 것이 좋습니다.</div></div>
+  <div class="faq-item"><div class="faq-q">5년 이상의 장기 투자를 분석할 수 있나요?</div><div class="faq-a">이 계산기는 5년까지의 현금흐름을 입력받도록 설계되었습니다. 더 긴 기간의 투자는 Excel 등 스프레드시트에서 IRR 함수를 사용하거나 전문 재무 소프트웨어를 활용하시기 바랍니다.</div></div>
+  <div class="faq-item"><div class="faq-q">여러 투자 안을 비교할 때 IRR이 높은 것만 선택해도 되나요?</div><div class="faq-a">IRR이 높을수록 좋지만, 초기투자액, 투자 위험도, 회사의 자금 상황, 프로젝트 기간 등 다른 요소들도 함께 고려해야 합니다. 최종 투자 의사결정은 이러한 종합적인 분석을 바탕으로 해야 합니다.</div></div></section>
+  <div class="more-tools"><h3>더 많은 도구</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ko/compound-interest.html">복리 이자 계산기</a>
+      <a class="tool-pill" href="/tools/ko/roi-calculator.html">ROI 계산기</a>
+      <a class="tool-pill" href="/tools/ko/risk-reward.html">위험-수익 계산기</a>
+      <a class="tool-pill" href="/tools/ko/position-size.html">포지션 크기 계산기</a>
+      <a class="tool-pill" href="/tools/ko/stop-loss.html">손절매 계산기</a>
+      <a class="tool-pill" href="/tools/ko/dividend-yield.html">배당 수익률 계산기</a>
+      <a class="tool-pill" href="/tools/ko/pe-ratio.html">P/E 비율 계산기</a>
+      <a class="tool-pill" href="/tools/ko/dca-calculator.html">DCA 계산기</a>
+      <a class="tool-pill" href="/tools/ko/cagr.html">CAGR 계산기</a>
+      <a class="tool-pill" href="/tools/ko/margin-calculator.html">마진 계산기</a>
+      <a class="tool-pill" href="/tools/ko/stock-gain-loss.html">주식 수익/손실 계산기</a>
+      <a class="tool-pill" href="/tools/ko/break-even.html">손익분기점 계산기</a></div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>관련 계산기</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
+    
+  </div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const cf0 = parseFloat(document.getElementById('initialInvestment').value);
+  const cf1 = parseFloat(document.getElementById('year1CashFlow').value);
+  const cf2 = parseFloat(document.getElementById('year2CashFlow').value);
+  const cf3 = parseFloat(document.getElementById('year3CashFlow').value);
+  const cf4 = parseFloat(document.getElementById('year4CashFlow').value);
+  const cf5 = parseFloat(document.getElementById('year5CashFlow').value);
+
+  if (isNaN(cf0) || isNaN(cf1) || isNaN(cf2) || isNaN(cf3) || isNaN(cf4) || isNaN(cf5)) {
+    alert('Please enter all cash flow values');
+    return;
+  }
+
+  const cashFlows = [cf0, cf1, cf2, cf3, cf4, cf5];
+
+  function npv(rate, flows) {
+    let sum = 0;
+    for (let i = 0; i < flows.length; i++) {
+      sum += flows[i] / Math.pow(1 + rate, i);
+    }
+    return sum;
+  }
+
+  let irr = 0.1;
+  let low = -0.99;
+  let high = 10;
+  let tolerance = 0.0001;
+
+  for (let i = 0; i < 1000; i++) {
+    const npvValue = npv(irr, cashFlows);
+    if (Math.abs(npvValue) < tolerance) {
+      break;
+    }
+    if (npvValue > 0) {
+      low = irr;
+    } else {
+      high = irr;
+    }
+    irr = (low + high) / 2;
+  }
+
+  const irrPercent = (irr * 100).toFixed(2);
+  const npvValue = npv(irr, cashFlows).toFixed(2);
+
+  document.getElementById('irrResult').textContent = parseFloat(irrPercent).toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('npvAtZero').textContent = parseFloat(npvValue).toLocaleString('en-GB', {style: 'currency', currency: 'GBP', minimumFractionDigits: 2});
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='복사됨!';setTimeout(function(){b.textContent='공유'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},2000);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="도구, 패턴, 기사 검색…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>북마크</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">모두 삭제</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>
+
+<!-- gen:v2.1|ko|irr-calculator|2026-07-09 -->

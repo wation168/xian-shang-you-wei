@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>停損計算機 - 最大虧損與停損水位計算</title>
+<meta name="description" content="免費停損計算機幫助您快速計算交易的最大虧損金額、單股虧損和虧損百分比，制定更好的風險管理策略。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/stop-loss.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/stop-loss.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/stop-loss.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/stop-loss.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/stop-loss.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/stop-loss.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/stop-loss.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/stop-loss.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/stop-loss.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/stop-loss.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/stop-loss.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/stop-loss.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "停損計算機", "url": "https://softglow-ai.com/tools/stop-loss.html", "description": "免費停損計算機幫助您快速計算交易的最大虧損金額、單股虧損和虧損百分比，制定更好的風險管理策略。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "什麼是停損？", "acceptedAnswer": {"@type": "Answer", "text": "停損是一個預先設定的價格點位，當股票價格下跌到該點時，自動售出您的持倉以限制損失。它是風險管理的重要工具，可以保護您免受重大虧損。"}}, {"@type": "Question", "name": "我應該如何選擇停損點位？", "acceptedAnswer": {"@type": "Answer", "text": "選擇停損點位時應考慮：技術支撐位、股票的歷史波動性、您的風險承受能力，以及單筆交易虧損不應超過帳戶資金的1-2%的規則。您可以用本計算機測試不同點位。"}}, {"@type": "Question", "name": "停損點位越緊越好嗎？", "acceptedAnswer": {"@type": "Answer", "text": "不一定。雖然緊的停損限制了虧損，但可能導致您被短期波動止損。太寬的停損則會承擔過大風險。需要找到適合您交易風格和市場環境的平衡點。"}}, {"@type": "Question", "name": "虧損百分比是如何計算的？", "acceptedAnswer": {"@type": "Answer", "text": "虧損百分比 = (進場價格 - 停損價格) ÷ 進場價格 × 100%。例如進場價格$50、停損價格$45，虧損百分比 = (50-45)÷50×100% = 10%。"}}, {"@type": "Question", "name": "我可以在交易中改變停損點位嗎？", "acceptedAnswer": {"@type": "Answer", "text": "可以，但應謹慎。許多專業交易者只會向上移動停損（追蹤停損）以鎖定利潤，但很少向下移動停損。修改停損應基於新的技術分析信號，而不是情感決定。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="stop-loss">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-TW">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/">工具</a>
+    <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
+    <a href="/">首頁</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/stop-loss.html" selected>繁中</option><option value="/tools/en/stop-loss.html">EN</option><option value="/tools/ja/stop-loss.html">日本語</option><option value="/tools/ko/stop-loss.html">한국어</option><option value="/tools/de/stop-loss.html">DE</option><option value="/tools/fr/stop-loss.html">FR</option><option value="/tools/es/stop-loss.html">ES</option><option value="/tools/pt/stop-loss.html">PT</option><option value="/tools/id/stop-loss.html">ID</option><option value="/tools/zh-CN/stop-loss.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/">工具</a> > 停損計算機</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>停損計算機</h1>
+    <p class="calc-subtitle">計算您的最大虧損金額並確定任何交易的最優停損水位</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="numberOfShares">股數</label>
+  <div class="input-row"><input type="number" id="numberOfShares" placeholder="100"  step="1"><span class="input-suffix">股</span></div>
+</div>
+  <small class="input-help">輸入您購買的股票總數</small>
+<div class="input-group">
+  <label for="entryPrice">進場價格</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="entryPrice" placeholder="50.00"  step="0.01"></div>
+</div>
+  <small class="input-help">輸入您進場時的每股價格</small>
+<div class="input-group">
+  <label for="stopLossPrice">停損價格</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="stopLossPrice" placeholder="45.00"  step="0.01"></div>
+</div>
+  <small class="input-help">輸入您設定的停損點位價格</small></div>
+    <button class="btn-calc" onclick="calculate()">計算</button>
+    <div class="results" id="results">
+      <div class="result-highlight"><span class="result-label">最大虧損</span><span class="result-value" id="maxLossResult">—</span></div>
+<div class="result-item"><span class="result-label">單股虧損</span><span class="result-value" id="lossPerShareResult">—</span></div>
+<div class="result-item"><span class="result-label">虧損百分比</span><span class="result-value" id="percentageLossResult">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> 最大虧損顯示您在該交易中可能損失的總金額。單股虧損表示每股的損失金額，虧損百分比則反映相對於進場價格的虧損比例。這些數據幫助您評估交易風險是否符合您的風險承受能力。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 列印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+<div style="margin:20px 0;padding:16px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;text-align:center"><a href="https://lottery.softglow-ai.com/zh-TW/" target="_blank" rel="noopener" style="text-decoration:none;color:#fff"><div style="font-size:16px;font-weight:700;margin-bottom:4px">🎰 15國彩票開獎＋12種智慧選號工具</div><div style="font-size:12px;opacity:0.9">威力彩・大樂透・Powerball・Mega Millions — 星座、生日、夢境、AI 等選號方式</div></a></div>
+
+  <article class="article"><h2>停損計算機使用指南</h2><p>停損是交易中最重要的風險管理工具之一。設定合理的停損點位可以幫助您在市場不利時限制損失，保護您的投資資本。本計算機幫助您快速計算不同停損價格下的潛在虧損。</p><h2>如何使用停損計算機</h2><p>首先輸入您購買的股數，然後輸入您進場時的價格和設定的停損價格。計算機會立即顯示您在該停損點位可能損失的總金額、單股虧損金額和虧損百分比。您可以調整停損價格來比較不同風險水平的交易結果。</p><h2>停損計算的重要性</h2><p>瞭解您在特定停損點可能的最大虧損對制定交易計劃至關重要。這讓您能夠評估該交易是否值得承擔這個風險，並確保損失不會超過您的風險承受能力。專業交易者通常在進場前就計算好停損點位。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>風險管理最佳實踐</h2><p>一個常見的風險管理規則是單筆交易的虧損不應超過您帳戶資金的1-2%。使用本計算機確定停損點位後，您可以計算該虧損佔您總資本的百分比，以確保符合您的風險管理規則。</p><h2>選擇合適的停損點位</h2><p>停損價格應基於技術分析支撐位、波動性和您的交易策略。太緊的停損可能導致頻繁止損，而太寬的停損則會承擔過大風險。使用本計算機測試不同的停損水位，找到最適合您的交易風格的平衡點。</p><h2>監控和調整</h2><p>設定停損後應嚴格執行，但在某些情況下您可能需要調整策略。定期使用本計算機重新評估您的風險水平，尤其是在市場環境改變或您的資金量增減時。持續改進風險管理能力是成為成功交易者的關鍵。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">什麼是停損？</div><div class="faq-a">停損是一個預先設定的價格點位，當股票價格下跌到該點時，自動售出您的持倉以限制損失。它是風險管理的重要工具，可以保護您免受重大虧損。</div></div>
+  <div class="faq-item"><div class="faq-q">我應該如何選擇停損點位？</div><div class="faq-a">選擇停損點位時應考慮：技術支撐位、股票的歷史波動性、您的風險承受能力，以及單筆交易虧損不應超過帳戶資金的1-2%的規則。您可以用本計算機測試不同點位。</div></div>
+  <div class="faq-item"><div class="faq-q">停損點位越緊越好嗎？</div><div class="faq-a">不一定。雖然緊的停損限制了虧損，但可能導致您被短期波動止損。太寬的停損則會承擔過大風險。需要找到適合您交易風格和市場環境的平衡點。</div></div>
+  <div class="faq-item"><div class="faq-q">虧損百分比是如何計算的？</div><div class="faq-a">虧損百分比 = (進場價格 - 停損價格) ÷ 進場價格 × 100%。例如進場價格$50、停損價格$45，虧損百分比 = (50-45)÷50×100% = 10%。</div></div>
+  <div class="faq-item"><div class="faq-q">我可以在交易中改變停損點位嗎？</div><div class="faq-a">可以，但應謹慎。許多專業交易者只會向上移動停損（追蹤停損）以鎖定利潤，但很少向下移動停損。修改停損應基於新的技術分析信號，而不是情感決定。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/compound-interest.html">複利計算機</a>
+      <a class="tool-pill" href="/tools/roi-calculator.html">ROI 計算機</a>
+      <a class="tool-pill" href="/tools/risk-reward.html">風險報酬計算機</a>
+      <a class="tool-pill" href="/tools/position-size.html">部位規模計算器</a>
+      <a class="tool-pill" href="/tools/dividend-yield.html">股息收益率計算機</a>
+      <a class="tool-pill" href="/tools/pe-ratio.html">本益比計算機</a>
+      <a class="tool-pill" href="/tools/dca-calculator.html">定期定額投資計算機</a>
+      <a class="tool-pill" href="/tools/cagr.html">年複合成長率計算器</a>
+      <a class="tool-pill" href="/tools/margin-calculator.html">保證金計算器</a>
+      <a class="tool-pill" href="/tools/stock-gain-loss.html">股票損益計算機</a>
+      <a class="tool-pill" href="/tools/break-even.html">損益平衡點計算機</a>
+      <a class="tool-pill" href="/tools/rule-of-72.html">72法則計算機</a></div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
+    
+  </div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const shares = parseFloat(document.getElementById('numberOfShares').value);
+  const entry = parseFloat(document.getElementById('entryPrice').value);
+  const stopLoss = parseFloat(document.getElementById('stopLossPrice').value);
+  
+  if (!shares || !entry || !stopLoss || shares <= 0 || entry <= 0 || stopLoss < 0) {
+    alert('Please enter valid positive numbers for all fields');
+    return;
+  }
+  
+  if (stopLoss >= entry) {
+    alert('Stop Loss price must be lower than Entry price');
+    return;
+  }
+  
+  const lossPerShare = entry - stopLoss;
+  const maxLoss = shares * lossPerShare;
+  const percentageLoss = (lossPerShare / entry) * 100;
+  
+  document.getElementById('maxLossResult').textContent = maxLoss.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('lossPerShareResult').textContent = lossPerShare.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('percentageLossResult').textContent = percentageLoss.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},2000);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-TW|stop-loss|2026-07-09 -->

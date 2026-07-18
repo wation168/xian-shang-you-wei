@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>所得税計算機 - 連邦税・州税を自動計算</title>
+<meta name="description" content="年間総収入から連邦税と州税を計算。扶養家族や税額控除を考慮した正確な税負債の試算ができます。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/ja/income-tax.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/income-tax.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/income-tax.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/income-tax.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/income-tax.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/income-tax.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/income-tax.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/income-tax.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/income-tax.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/income-tax.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/income-tax.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/income-tax.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "所得税計算機", "url": "https://softglow-ai.com/tools/ja/income-tax.html", "description": "年間総収入から連邦税と州税を計算。扶養家族や税額控除を考慮した正確な税負債の試算ができます。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "標準控除と項目別控除の違いは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "標準控除は誰もが利用できる一定額の控除で、申告ステータスで決まります。項目別控除は、住宅ローン利息や医療費など個別の支出を合計したもので、標準控除より大きい場合に利用します。"}}, {"@type": "Question", "name": "実効税率と限界税率の違いは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "実効税率は総収入に対する総税負債の割合です。限界税率は追加の1ドルを稼いだ時に適用される税率です。米国は累進税制のため、所得が増えると限界税率は上がりますが、実効税率はより緩やかに上昇します。"}}, {"@type": "Question", "name": "扶養家族として申告できるのは誰ですか？", "acceptedAnswer": {"@type": "Answer", "text": "一般的には、21歳未満の子供または24歳未満の学生、および65歳以上の親族が扶養家族として認められます。ただし、所得制限や同居要件など複数の条件を満たす必要があります。詳細はIRSのガイドラインを参照してください。"}}, {"@type": "Question", "name": "この計算機の結果はどの程度正確ですか？", "acceptedAnswer": {"@type": "Answer", "text": "このツールは一般的な計算に基づいており、個人の状況により実際の税負債は異なる場合があります。複雑な税務状況がある場合は、税理士や認定会計士に相談することをお勧めします。"}}, {"@type": "Question", "name": "還付金を受け取る場合はどうなりますか？", "acceptedAnswer": {"@type": "Answer", "text": "このツールは年間の税負債を計算していますが、給与から源泉徴収された税金が多い場合、確定申告時に還付金を受け取ります。逆に源泉徴収が少なければ追加納税が必要です。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="income-tax">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="ja">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/ja/">ツール</a>
+    <a href="/patterns/ja.html">ローソク足</a>
+    <a href="/blog/ja/index.html">ブログ</a>
+    <a href="/">ホーム</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/income-tax.html">繁中</option><option value="/tools/en/income-tax.html">EN</option><option value="/tools/ja/income-tax.html" selected>日本語</option><option value="/tools/ko/income-tax.html">한국어</option><option value="/tools/de/income-tax.html">DE</option><option value="/tools/fr/income-tax.html">FR</option><option value="/tools/es/income-tax.html">ES</option><option value="/tools/pt/income-tax.html">PT</option><option value="/tools/id/income-tax.html">ID</option><option value="/tools/zh-CN/income-tax.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/ja/">ツール</a> > 所得税計算機</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>所得税計算機</h1>
+    <p class="calc-subtitle">連邦税と州税の所得税負債を即座に計算します</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="grossIncome">年間総収入</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="grossIncome" placeholder="50000"  value="50000" step="1"></div>
+</div>
+  <small class="input-help">1年間の総収入額（給与、事業所得など）を入力</small>
+<div class="input-group">
+  <label for="filingStatus">申告ステータス</label>
+  <div class="input-row"><input type="text" id="filingStatus" value="single"></div>
+</div>
+  <small class="input-help">独身、既婚共同申告など申告ステータスを選択</small>
+<div class="input-group">
+  <label for="standardDeduction">標準控除額</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="standardDeduction" placeholder="13850"  value="13850" step="1"></div>
+</div>
+  <small class="input-help">該当する標準控除額を入力</small>
+<div class="input-group">
+  <label for="dependents">扶養家族数</label>
+  <div class="input-row"><input type="number" id="dependents" placeholder="0"  value="0" step="1"></div>
+</div>
+  <small class="input-help">配偶者および21歳未満の扶養家族の数</small>
+<div class="input-group">
+  <label for="childTaxCredit">児童税額控除（1人あたり）</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="childTaxCredit" placeholder="2000"  value="2000" step="1"></div>
+</div>
+  <small class="input-help">適用される児童税額控除額（通常1人2000ドル）</small>
+<div class="input-group">
+  <label for="state">州</label>
+  <div class="input-row"><input type="text" id="state" value="CA"></div>
+</div>
+  <small class="input-help">居住または事業所在地の州を選択</small></div>
+    <button class="btn-calc" onclick="calculate()">計算する</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">課税所得</span><span class="result-value" id="taxableIncome">—</span></div>
+<div class="result-item"><span class="result-label">連邦所得税</span><span class="result-value" id="federalIncomeTax">—</span></div>
+<div class="result-item"><span class="result-label">州所得税</span><span class="result-value" id="stateIncomeTax">—</span></div>
+<div class="result-highlight"><span class="result-label">総税負債</span><span class="result-value" id="totalTaxLiability">—</span></div>
+<div class="result-item"><span class="result-label">実効税率</span><span class="result-value" id="effectiveTaxRate">—</span></div>
+<div class="result-highlight"><span class="result-label">手取り収入</span><span class="result-value" id="afterTaxIncome">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>これは何を意味しますか？</strong> 課税所得は標準控除と扶養控除を差し引いた所得です。連邦所得税と州所得税の合計が総税負債となり、実効税率は総収入に対する税負債の割合を示します。手取り収入は総収入から総税負債を差し引いた実際に受け取る金額です。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 印刷</button>
+        <button onclick="shareResult()">&#x1f4e4; 共有</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+<div style="margin:20px 0;padding:16px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;text-align:center"><a href="https://lottery.softglow-ai.com/ja/" target="_blank" rel="noopener" style="text-decoration:none;color:#fff"><div style="font-size:16px;font-weight:700;margin-bottom:4px">🎰 世界15の宝くじ＋12種類の番号選択ツール</div><div style="font-size:12px;opacity:0.9">パワーボール・メガミリオンズ — 星座・誕生日・夢・AI選番</div></a></div>
+
+  <article class="article"><h2>所得税計算機について</h2><p>所得税計算機は、年間総収入から連邦税と州税の税負債を簡単に計算できるツールです。標準控除額、扶養家族数、児童税額控除などを入力することで、正確な税負債の試算が可能です。</p><h2>計算の仕組み</h2><p>このツールは、年間総収入から標準控除額を差し引いて課税所得を算出します。その後、課税所得に適用される税率を乗じて連邦所得税を計算し、児童税額控除などの控除額を差し引きます。州所得税も同様に計算され、両者の合計が総税負債となります。</p><h2>標準控除とは</h2><p>標準控除は、所得から差し引くことができる一定額の控除です。申告ステータスや年齢によって異なります。2024年の単身者の標準控除額は14,600ドル、既婚共同申告は29,200ドルです。標準控除を利用することで、課税所得を減らし、税負債を軽減できます。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>児童税額控除の活用</h2><p>17歳未満の扶養家族がいる場合、1人あたり2,000ドルの児童税額控除を受けられます。この控除は税額から直接差し引かれるため、税率の控除よりも節税効果が大きいです。扶養家族がいる場合は、必ずこの控除を活用しましょう。</p><h2>実効税率の意味</h2><p>実効税率は、年間総収入に対する総税負債の割合です。例えば、総収入が50,000ドルで総税負債が5,000ドルの場合、実効税率は10%となります。この指標により、実際の税負担の程度を把握できます。</p><h2>州による税負債の違い</h2><p>米国では、州によって所得税率が大きく異なります。テキサス州やフロリダ州など州所得税がない州もあれば、カリフォルニア州など高い税率の州もあります。転居を検討している場合、州の税制も重要な判断要素となります。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 関連記事</h3><div class="blog-grid"><a class="blog-card" href="/blog/ja/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/ja/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>よくある質問</h2><div class="faq-item"><div class="faq-q">標準控除と項目別控除の違いは何ですか？</div><div class="faq-a">標準控除は誰もが利用できる一定額の控除で、申告ステータスで決まります。項目別控除は、住宅ローン利息や医療費など個別の支出を合計したもので、標準控除より大きい場合に利用します。</div></div>
+  <div class="faq-item"><div class="faq-q">実効税率と限界税率の違いは何ですか？</div><div class="faq-a">実効税率は総収入に対する総税負債の割合です。限界税率は追加の1ドルを稼いだ時に適用される税率です。米国は累進税制のため、所得が増えると限界税率は上がりますが、実効税率はより緩やかに上昇します。</div></div>
+  <div class="faq-item"><div class="faq-q">扶養家族として申告できるのは誰ですか？</div><div class="faq-a">一般的には、21歳未満の子供または24歳未満の学生、および65歳以上の親族が扶養家族として認められます。ただし、所得制限や同居要件など複数の条件を満たす必要があります。詳細はIRSのガイドラインを参照してください。</div></div>
+  <div class="faq-item"><div class="faq-q">この計算機の結果はどの程度正確ですか？</div><div class="faq-a">このツールは一般的な計算に基づいており、個人の状況により実際の税負債は異なる場合があります。複雑な税務状況がある場合は、税理士や認定会計士に相談することをお勧めします。</div></div>
+  <div class="faq-item"><div class="faq-q">還付金を受け取る場合はどうなりますか？</div><div class="faq-a">このツールは年間の税負債を計算していますが、給与から源泉徴収された税金が多い場合、確定申告時に還付金を受け取ります。逆に源泉徴収が少なければ追加納税が必要です。</div></div></section>
+  <div class="more-tools"><h3>その他のツール</h3><div class="tools-grid"><a class="tool-pill" href="/tools/ja/capital-gains-tax.html">譲渡所得税計算機</a>
+      <a class="tool-pill" href="/tools/ja/effective-tax-rate.html">実効税率計算機</a>
+      <a class="tool-pill" href="/tools/ja/bonus-tax.html">ボーナス税計算機</a>
+      <a class="tool-pill" href="/tools/ja/self-employment-tax.html">Self Employment Tax</a>
+      <a class="tool-pill" href="/tools/ja/tax-bracket.html">Tax Bracket</a>
+      <a class="tool-pill" href="/tools/ja/payroll-tax.html">Payroll Tax</a>
+      <a class="tool-pill" href="/tools/ja/vat-calculator.html">Vat Calculator</a>
+      <a class="tool-pill" href="/tools/ja/sales-tax.html">Sales Tax</a></div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>関連ツール</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
+    
+  </div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const grossIncome = parseFloat(document.getElementById('grossIncome').value);
+  const filingStatus = document.getElementById('filingStatus').value;
+  const standardDeduction = parseFloat(document.getElementById('standardDeduction').value);
+  const dependents = parseInt(document.getElementById('dependents').value) || 0;
+  const childTaxCredit = parseFloat(document.getElementById('childTaxCredit').value);
+  const state = document.getElementById('state').value;
+
+  if (!grossIncome || grossIncome < 0) {
+    alert('Please enter a valid gross income');
+    return;
+  }
+
+  const taxableIncome = Math.max(0, grossIncome - standardDeduction);
+
+  let federalTax = 0;
+  const brackets2024 = {
+    single: [
+      {min: 0, max: 11600, rate: 0.10},
+      {min: 11600, max: 47150, rate: 0.12},
+      {min: 47150, max: 100525, rate: 0.22},
+      {min: 100525, max: 191950, rate: 0.24},
+      {min: 191950, max: 243725, rate: 0.32},
+      {min: 243725, max: 609350, rate: 0.35},
+      {min: 609350, max: Infinity, rate: 0.37}
+    ],
+    married: [
+      {min: 0, max: 23200, rate: 0.10},
+      {min: 23200, max: 94300, rate: 0.12},
+      {min: 94300, max: 201050, rate: 0.22},
+      {min: 201050, max: 383900, rate: 0.24},
+      {min: 383900, max: 487450, rate: 0.32},
+      {min: 487450, max: 731200, rate: 0.35},
+      {min: 731200, max: Infinity, rate: 0.37}
+    ],
+    married_sep: [
+      {min: 0, max: 11600, rate: 0.10},
+      {min: 11600, max: 47150, rate: 0.12},
+      {min: 47150, max: 100525, rate: 0.22},
+      {min: 100525, max: 191950, rate: 0.24},
+      {min: 191950, max: 243725, rate: 0.32},
+      {min: 243725, max: 365600, rate: 0.35},
+      {min: 365600, max: Infinity, rate: 0.37}
+    ],
+    head: [
+      {min: 0, max: 17450, rate: 0.10},
+      {min: 17450, max: 66550, rate: 0.12},
+      {min: 66550, max: 113400, rate: 0.22},
+      {min: 113400, max: 203150, rate: 0.24},
+      {min: 203150, max: 264800, rate: 0.32},
+      {min: 264800, max: 631200, rate: 0.35},
+      {min: 631200, max: Infinity, rate: 0.37}
+    ]
+  };
+
+  const brackets = brackets2024[filingStatus] || brackets2024.single;
+  let remainingIncome = taxableIncome;
+  let previousMax = 0;
+
+  for (let bracket of brackets) {
+    if (remainingIncome <= 0) break;
+    const taxableInThisBracket = Math.min(remainingIncome, bracket.max - bracket.min);
+    federalTax += taxableInThisBracket * bracket.rate;
+    remainingIncome -= taxableInThisBracket;
+  }
+
+  const dependentCredit = dependents * childTaxCredit;
+  federalTax = Math.max(0, federalTax - dependentCredit);
+
+  const stateTaxRates = {
+    'AL': 0.05, 'AK': 0.00, 'AZ': 0.0545, 'AR': 0.0599, 'CA': 0.093,
+    'CO': 0.044, 'CT': 0.0650, 'DE': 0.066, 'FL': 0.00, 'GA': 0.0575,
+    'HI': 0.0860, 'ID': 0.0585, 'IL': 0.0495, 'IN': 0.0315, 'IA': 0.0633,
+    'KS': 0.057, 'KY': 0.0625, 'LA': 0.0425, 'ME': 0.0715, 'MD': 0.0897,
+    'MA': 0.05, 'MI': 0.0425, 'MN': 0.0985, 'MS': 0.05, 'MO': 0.053,
+    'MT': 0.0650, 'NE': 0.0684, 'NV': 0.00, 'NH': 0.00, 'NJ': 0.1075,
+    'NM': 0.0590, 'NY': 0.0685, 'NC': 0.0475, 'ND': 0.0290, 'OH': 0.0399,
+    'OK': 0.0475, 'OR': 0.0895, 'PA': 0.0307, 'RI': 0.0699, 'SC': 0.07,
+    'SD': 0.00, 'TN': 0.00, 'TX': 0.00, 'UT': 0.0495, 'VT': 0.0875,
+    'VA': 0.0575, 'WA': 0.00, 'WV': 0.065, 'WI': 0.0685, 'WY': 0.00
+  };
+
+  const stateRate = stateTaxRates[state] || 0.05;
+  const stateTax = Math.max(0, taxableIncome * stateRate);
+
+  const totalTax = federalTax + stateTax;
+  const effectiveRate = grossIncome > 0 ? (totalTax / grossIncome) * 100 : 0;
+  const afterTax = grossIncome - totalTax;
+
+  document.getElementById('taxableIncome').textContent = '$' + taxableIncome.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('federalIncomeTax').textContent = '$' + federalTax.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('stateIncomeTax').textContent = '$' + stateTax.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('totalTaxLiability').textContent = '$' + totalTax.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('effectiveTaxRate').textContent = effectiveRate.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2}) + '%';
+  document.getElementById('afterTaxIncome').textContent = '$' + afterTax.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='コピー済';setTimeout(function(){b.textContent='共有'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},2000);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="ツール、パターン、記事を検索…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>ブックマーク</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全て削除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>
+
+<!-- gen:v2.1|ja|income-tax|2026-07-09 -->

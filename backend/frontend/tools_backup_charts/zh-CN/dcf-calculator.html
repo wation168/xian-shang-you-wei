@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DCF估值计算器 - 计算公司内在价值</title>
+<meta name="description" content="免费DCF折现现金流计算器，帮助投资者计算公司内在价值。输入5年现金流、折现率和终端增长率即可得出每股内在价值。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/zh-CN/dcf-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/dcf-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/dcf-calculator.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/tools/ja/dcf-calculator.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/tools/de/dcf-calculator.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/tools/fr/dcf-calculator.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/tools/es/dcf-calculator.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/tools/pt/dcf-calculator.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/tools/ko/dcf-calculator.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/tools/id/dcf-calculator.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/dcf-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/dcf-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "DCF估值计算器", "url": "https://softglow-ai.com/tools/zh-CN/dcf-calculator.html", "description": "免费DCF折现现金流计算器，帮助投资者计算公司内在价值。输入5年现金流、折现率和终端增长率即可得出每股内在价值。", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "WACC(加权平均资本成本)应该如何确定？", "acceptedAnswer": {"@type": "Answer", "text": "WACC = (E/V × Re) + (D/V × Rd × (1-Tc))，其中E是权益价值，D是债务价值，V是总价值，Re是权益成本，Rd是债务成本，Tc是企业税率。一般而言，低风险公司的WACC在6-8%，中等风险公司在8-10%，高风险公司在10-12%以上。"}}, {"@type": "Question", "name": "终端增长率设定为多少比较合理？", "acceptedAnswer": {"@type": "Answer", "text": "终端增长率应该接近或略低于长期经济增长率。对于发达国家公司，通常设定为2-2.5%；对于发展中国家可能为3-4%。不建议设定超过5%，因为这意味着公司增长永远快于经济增长，这在长期内是不现实的。"}}, {"@type": "Question", "name": "现金流应该如何预测？", "acceptedAnswer": {"@type": "Answer", "text": "可以基于历史增长率、行业增长预期和公司战略来预测。保守方法是使用过去3-5年的平均增长率；激进方法是参考分析师预测。建议采用分阶段预测：高增长期(2-3年)、缓和期(2-3年)、成熟期(之后)，这样更符合实际。"}}, {"@type": "Question", "name": "每股内在价值高于当前股价就一定应该买入吗？", "acceptedAnswer": {"@type": "Answer", "text": "不一定。首先要考虑DCF估值本身的不确定性——小的假设变化会导致结果差异很大。其次要检查计算中使用的假设是否合理。最后还需考虑其他因素：公司治理、竞争优势、财务健康状况和市场情绪等。建议留有安全边际，即只在内在价值明显高于股价时(如20-30%以上)才考虑投资。"}}, {"@type": "Question", "name": "为什么有时DCF估值结果与市场价格差异很大？", "acceptedAnswer": {"@type": "Answer", "text": "差异的原因可能有多种：1)现金流预测过于乐观或悲观；2)折现率设置不当；3)市场定价反映了DCF模型未考虑的因素(如行业变化、监管风险)；4)市场存在泡沫或极度悲观情绪。遇到大差异时应该反思假设是否合理，而不是盲目相信模型结果。DCF是分析工具，不是绝对真理。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="dcf-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="zh-CN">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/zh-CN/">工具</a>
+    <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">博客</a>
+    <a href="/">首页</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/dcf-calculator.html">繁中</option><option value="/tools/en/dcf-calculator.html">EN</option><option value="/tools/ja/dcf-calculator.html">日本語</option><option value="/tools/ko/dcf-calculator.html">한국어</option><option value="/tools/de/dcf-calculator.html">DE</option><option value="/tools/fr/dcf-calculator.html">FR</option><option value="/tools/es/dcf-calculator.html">ES</option><option value="/tools/pt/dcf-calculator.html">PT</option><option value="/tools/id/dcf-calculator.html">ID</option><option value="/tools/zh-CN/dcf-calculator.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/zh-CN/">工具</a> > DCF估值计算器</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>DCF估值计算器</h1>
+    <p class="calc-subtitle">使用折现现金流分析计算公司内在价值</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="yearOne">第1年现金流</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="yearOne" placeholder="50000"  value="50000" step="1"></div>
+</div>
+  <small class="input-help">输入公司第1年预计或历史现金流(百万元)</small>
+<div class="input-group">
+  <label for="yearTwo">第2年现金流</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="yearTwo" placeholder="55000"  value="55000" step="1"></div>
+</div>
+  <small class="input-help">输入公司第2年预计或历史现金流(百万元)</small>
+<div class="input-group">
+  <label for="yearThree">第3年现金流</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="yearThree" placeholder="60500"  value="60500" step="1"></div>
+</div>
+  <small class="input-help">输入公司第3年预计或历史现金流(百万元)</small>
+<div class="input-group">
+  <label for="yearFour">第4年现金流</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="yearFour" placeholder="66550"  value="66550" step="1"></div>
+</div>
+  <small class="input-help">输入公司第4年预计或历史现金流(百万元)</small>
+<div class="input-group">
+  <label for="yearFive">第5年现金流</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="yearFive" placeholder="73205"  value="73205" step="1"></div>
+</div>
+  <small class="input-help">输入公司第5年预计或历史现金流(百万元)</small>
+<div class="input-group">
+  <label for="discountRate">折现率(WACC)</label>
+  <div class="input-row"><input type="number" id="discountRate" placeholder="10"  value="10" step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">输入加权平均资本成本(WACC)百分比，通常6-12%</small>
+<div class="input-group">
+  <label for="terminalGrowth">终端增长率</label>
+  <div class="input-row"><input type="number" id="terminalGrowth" placeholder="2.5"  value="2.5" step="0.1"><span class="input-suffix">%</span></div>
+</div>
+  <small class="input-help">输入长期终端增长率百分比，通常1-3%</small>
+<div class="input-group">
+  <label for="terminalValue">终端价值(可选)</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="terminalValue" placeholder="0"  value="0" step="1"></div>
+</div>
+  <small class="input-help">可选：直接输入终端价值，留空则自动计算</small>
+<div class="input-group">
+  <label for="netDebt">净债务(债务-现金)</label>
+  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="netDebt" placeholder="0"  value="0" step="1"></div>
+</div>
+  <small class="input-help">输入公司总债务减去现金的净额(百万元)</small>
+<div class="input-group">
+  <label for="sharesOutstanding">流通股数</label>
+  <div class="input-row"><input type="number" id="sharesOutstanding" placeholder="100"  value="100" step="0.1"><span class="input-suffix">百万元</span></div>
+</div>
+  <small class="input-help">输入公司当前流通在外的股份总数(百万股)</small></div>
+    <button class="btn-calc" onclick="calculate()">计算</button>
+    <div class="results" id="results">
+      <div class="result-item"><span class="result-label">现金流现值(第1-5年)</span><span class="result-value" id="pvCashFlows">—</span></div>
+<div class="result-item"><span class="result-label">终端价值现值</span><span class="result-value" id="pvTerminal">—</span></div>
+<div class="result-item"><span class="result-label">企业价值</span><span class="result-value" id="enterpriseValue">—</span></div>
+<div class="result-item"><span class="result-label">股权价值</span><span class="result-value" id="equityValue">—</span></div>
+<div class="result-highlight"><span class="result-label">每股内在价值</span><span class="result-value" id="valuePerShare">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>这代表什么？</strong> 每股内在价值是DCF模型的核心结果，代表基于公司未来现金流的理论价值。将其与当前股价对比，股价低于内在价值表示可能被低估，高于内在价值表示可能被高估。企业价值和股权价值帮助理解公司整体估值构成。</div>
+      <div class="action-bar">
+        <button onclick="window.print()">&#x1f5a8; 打印</button>
+        <button onclick="shareResult()">&#x1f4e4; 分享</button>
+      </div>
+    </div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+<div style="margin:20px 0;padding:16px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;text-align:center"><a href="https://lottery.softglow-ai.com/zh-TW/" target="_blank" rel="noopener" style="text-decoration:none;color:#fff"><div style="font-size:16px;font-weight:700;margin-bottom:4px">🎰 15国彩票开奖＋12种智慧选号工具</div><div style="font-size:12px;opacity:0.9">威力彩・大乐透・Powerball・Mega Millions — 星座、生日、梦境、AI</div></a></div>
+
+  <article class="article"><h2>什么是DCF折现现金流估值法？</h2><p>折现现金流(DCF)是一种基本的公司估值方法，通过预测公司未来的自由现金流，并以适当的折现率(通常为加权平均资本成本WACC)将其折现到现在，计算出公司的内在价值。这个方法的核心理念是：公司的价值等于它未来能产生的所有现金流的现值总和。</p><h2>DCF计算的关键参数</h2><p><strong>现金流预测：</strong>前5年的自由现金流是DCF模型的基础。这些数据可以基于历史增长率、行业前景和公司战略来预测。<strong>折现率(WACC)：</strong>用于将未来现金流折现到现值的利率。WACC考虑了公司的债务成本和权益成本的加权平均。通常在6-12%之间，取决于行业和公司风险。<strong>终端增长率：</strong>用于计算第5年后的永续价值，通常设定为1-3%，不应超过长期经济增长率。</p><h2>如何解读DCF计算结果</h2><p>计算结果分为几个关键部分：<strong>现金流现值</strong>是前5年现金流折现后的总和；<strong>终端价值现值</strong>是公司第5年后永续价值的现值；<strong>企业价值</strong>是两者之和，代表公司经营业务的总价值；<strong>股权价值</strong>等于企业价值减去净债务；<strong>每股内在价值</strong>等于股权价值除以流通股数，这是投资决策的核心参考指标。</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>DCF估值的优势与局限</h2><p>DCF方法的优势在于它基于财务基本面，能够充分反映公司的盈利能力和增长潜力。但它也存在局限性：过度依赖对未来现金流的准确预测，小的假设变化可能导致估值结果大幅波动。因此，应该结合其他估值方法(如P/E倍数法、可比公司法)进行综合分析，而不是单独依赖DCF模型。</p><h2>实际应用建议</h2><p>使用DCF计算器时，建议采用保守的假设，特别是在预测增长率时。可以进行敏感性分析，测试不同的折现率和增长率对估值的影响。同时要注意行业周期、竞争格局和管理层质量等定性因素，这些因素会显著影响现金流的可持续性和准确性。</p><h2>何时应该使用DCF估值</h2><p>DCF特别适合用于估值那些现金流稳定、可预测的成熟公司，如公用事业、房地产投资信托和消费品公司。对于初创公司或现金流不稳定的高增长公司，DCF可能不是最佳工具，因为预测的不确定性太高。在任何情况下，都应该将DCF作为投资分析框架的一部分，而不是唯一的决策依据。</p></article>
+  <div class="blog-section"><h3>&#x1f4da; 延伸阅读</h3><div class="blog-grid"><a class="blog-card" href="/blog/en/kd-indicator.html">KD Indicator Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/macd-indicator.html">MACD Guide<span>→ Blog</span></a>
+      <a class="blog-card" href="/blog/en/stop-loss-guide.html">Stop Loss Strategy<span>→ Blog</span></a></div></div>
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>常见问题</h2><div class="faq-item"><div class="faq-q">WACC(加权平均资本成本)应该如何确定？</div><div class="faq-a">WACC = (E/V × Re) + (D/V × Rd × (1-Tc))，其中E是权益价值，D是债务价值，V是总价值，Re是权益成本，Rd是债务成本，Tc是企业税率。一般而言，低风险公司的WACC在6-8%，中等风险公司在8-10%，高风险公司在10-12%以上。</div></div>
+  <div class="faq-item"><div class="faq-q">终端增长率设定为多少比较合理？</div><div class="faq-a">终端增长率应该接近或略低于长期经济增长率。对于发达国家公司，通常设定为2-2.5%；对于发展中国家可能为3-4%。不建议设定超过5%，因为这意味着公司增长永远快于经济增长，这在长期内是不现实的。</div></div>
+  <div class="faq-item"><div class="faq-q">现金流应该如何预测？</div><div class="faq-a">可以基于历史增长率、行业增长预期和公司战略来预测。保守方法是使用过去3-5年的平均增长率；激进方法是参考分析师预测。建议采用分阶段预测：高增长期(2-3年)、缓和期(2-3年)、成熟期(之后)，这样更符合实际。</div></div>
+  <div class="faq-item"><div class="faq-q">每股内在价值高于当前股价就一定应该买入吗？</div><div class="faq-a">不一定。首先要考虑DCF估值本身的不确定性——小的假设变化会导致结果差异很大。其次要检查计算中使用的假设是否合理。最后还需考虑其他因素：公司治理、竞争优势、财务健康状况和市场情绪等。建议留有安全边际，即只在内在价值明显高于股价时(如20-30%以上)才考虑投资。</div></div>
+  <div class="faq-item"><div class="faq-q">为什么有时DCF估值结果与市场价格差异很大？</div><div class="faq-a">差异的原因可能有多种：1)现金流预测过于乐观或悲观；2)折现率设置不当；3)市场定价反映了DCF模型未考虑的因素(如行业变化、监管风险)；4)市场存在泡沫或极度悲观情绪。遇到大差异时应该反思假设是否合理，而不是盲目相信模型结果。DCF是分析工具，不是绝对真理。</div></div></section>
+  <div class="more-tools"><h3>更多工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/zh-CN/compound-interest.html">复利计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/roi-calculator.html">投资回报率 (ROI) 计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/risk-reward.html">风险收益比计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/position-size.html">头寸规模计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stop-loss.html">止损计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dividend-yield.html">股息收益率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/pe-ratio.html">市盈率计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/dca-calculator.html">定期定额投资计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/cagr.html">复合年增长率(CAGR)计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/margin-calculator.html">保证金计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/stock-gain-loss.html">股票盈亏计算器</a>
+      <a class="tool-pill" href="/tools/zh-CN/break-even.html">损益平衡点计算器</a></div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相关工具</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
+    
+  </div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+function calculate() {
+  const y1 = parseFloat(document.getElementById('yearOne').value);
+  const y2 = parseFloat(document.getElementById('yearTwo').value);
+  const y3 = parseFloat(document.getElementById('yearThree').value);
+  const y4 = parseFloat(document.getElementById('yearFour').value);
+  const y5 = parseFloat(document.getElementById('yearFive').value);
+  const discountRate = parseFloat(document.getElementById('discountRate').value) / 100;
+  const terminalGrowth = parseFloat(document.getElementById('terminalGrowth').value) / 100;
+  const terminalValueInput = parseFloat(document.getElementById('terminalValue').value);
+  const netDebt = parseFloat(document.getElementById('netDebt').value);
+  const shares = parseFloat(document.getElementById('sharesOutstanding').value) * 1000000;
+
+  if (isNaN(y1) || isNaN(y2) || isNaN(y3) || isNaN(y4) || isNaN(y5) || isNaN(discountRate) || isNaN(shares)) {
+    alert('Please fill in all required fields with valid numbers');
+    return;
+  }
+
+  if (discountRate <= 0 || discountRate > 1) {
+    alert('Discount rate must be between 0 and 100%');
+    return;
+  }
+
+  const pv1 = y1 / Math.pow(1 + discountRate, 1);
+  const pv2 = y2 / Math.pow(1 + discountRate, 2);
+  const pv3 = y3 / Math.pow(1 + discountRate, 3);
+  const pv4 = y4 / Math.pow(1 + discountRate, 4);
+  const pv5 = y5 / Math.pow(1 + discountRate, 5);
+
+  const pvCashFlows = pv1 + pv2 + pv3 + pv4 + pv5;
+
+  let pvTerminal = 0;
+  if (terminalValueInput > 0) {
+    pvTerminal = terminalValueInput / Math.pow(1 + discountRate, 5);
+  } else {
+    const terminalValue = (y5 * (1 + terminalGrowth)) / (discountRate - terminalGrowth);
+    pvTerminal = terminalValue / Math.pow(1 + discountRate, 5);
+  }
+
+  const enterpriseValue = pvCashFlows + pvTerminal;
+  const equityValue = enterpriseValue - netDebt;
+  const valuePerShare = equityValue / shares;
+
+  document.getElementById('pvCashFlows').textContent = '¥' + pvCashFlows.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('pvTerminal').textContent = '¥' + pvTerminal.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('enterpriseValue').textContent = '¥' + enterpriseValue.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('equityValue').textContent = '¥' + equityValue.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('valuePerShare').textContent = '¥' + valuePerShare.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+
+  document.getElementById('results').classList.add('show');
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已复制！';setTimeout(function(){b.textContent='分享'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},2000);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>
+
+<!-- gen:v2.1|zh-CN|dcf-calculator|2026-07-09 -->

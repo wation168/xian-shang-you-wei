@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manajemen Risiko Posisi: Panduan Support Resistance dan Sizing</title>
+<meta name="description" content="Pelajari manajemen risiko posisi, analisis support/resistance, dan teknik position sizing untuk trading yang lebih aman dan menguntungkan.">
+<meta name="robots" content="index, follow">
+<meta name="sg-slug" content="position-risk">
+<meta name="sg-type" content="blog">
+<meta name="sg-lang" content="id">
+<link rel="canonical" href="https://softglow-ai.com/blog/id/position-risk.html">
+<link rel="alternate" hreflang="zh-tw" href="https://softglow-ai.com/blog/position-risk.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/blog/en/position-risk.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/blog/ja/position-risk.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/blog/ko/position-risk.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/blog/de/position-risk.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/blog/fr/position-risk.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/blog/es/position-risk.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/blog/pt/position-risk.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/blog/id/position-risk.html">
+<link rel="alternate" hreflang="zh-cn" href="https://softglow-ai.com/blog/zh-CN/position-risk.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/blog/en/position-risk.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://softglow-ai.com/"}, {"@type": "ListItem", "position": 2, "name": "Artikel", "item": "https://softglow-ai.com/blog/id/index.html"}, {"@type": "ListItem", "position": 3, "name": "Manajemen Risiko Posisi: Panduan Support Resistance dan Sizing"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "Manajemen Risiko Posisi: Panduan Support Resistance dan Sizing", "description": "Pelajari manajemen risiko posisi, analisis support/resistance, dan teknik position sizing untuk trading yang lebih aman dan menguntungkan.", "url": "https://softglow-ai.com/blog/id/position-risk.html", "publisher": {"@type": "Organization", "name": "SoftGlow"}, "datePublished": "2026-07-13", "dateModified": "2026-07-13"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Berapa persen risiko per trade yang aman untuk pemula?", "acceptedAnswer": {"@type": "Answer", "text": "Standar industri untuk pemula adalah 0.5-1% dari total akun per trade. Ini memastikan bahwa 100 kerugian berturut-turut masih meninggalkan 36-60% akun Anda intact. Semakin konservatif, semakin aman untuk belajar."}}, {"@type": "Question", "name": "Bagaimana cara menentukan stop loss yang baik?", "acceptedAnswer": {"@type": "Answer", "text": "Stop loss terbaik ditempatkan di bawah support (untuk long) atau di atas resistance (untuk short). Jarak minimal 2-3% dari entry, dan harus didasarkan pada level teknikal yang valid, bukan angka sembarangan. Jangan terlalu dekat karena bisa terpicu oleh noise pasar."}}, {"@type": "Question", "name": "Apa itu Risk-Reward Ratio dan berapa target minimalnya?", "acceptedAnswer": {"@type": "Answer", "text": "RRR adalah perbandingan potensi profit terhadap potensi loss. Rumusnya: (Take Profit - Entry) ÷ (Entry - Stop Loss). Target minimal adalah 1:1, artinya potensi untung sama dengan potensi rugi. Trader berpengalaman mencari RRR 1:2 atau lebih."}}, {"@type": "Question", "name": "Mengapa position sizing lebih penting daripada winning rate?", "acceptedAnswer": {"@type": "Answer", "text": "Seorang trader dengan 40% win rate tapi sizing konsisten dan RRR baik bisa menguntungkan lebih dari trader 60% win rate tapi sizing asal-asalan. Ini karena yang menentukan profit jangka panjang adalah ekspektasi matematis: (Win% × Avg Win) - (Loss% × Avg Loss)."}}, {"@type": "Question", "name": "Apa yang harus dilakukan jika harga immediately keluar dari support/resistance setelah entry?", "acceptedAnswer": {"@type": "Answer", "text": "Jika harga memecah support/resistance yang Anda andalkan, ini adalah sinyal bahwa analisis Anda salah. Keluarlah pada stop loss yang sudah ditetapkan. Jangan menunggu atau menambah posisi. Kerugian kecil adalah bagian dari trading yang profesional."}}]}</script>
+<link rel="stylesheet" href="/common/softglow-common.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:#2D3748;background:#fff;line-height:1.8;-webkit-font-smoothing:antialiased}
+a{color:#2563EB;text-decoration:none}
+a:hover{text-decoration:underline}
+.nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.97);backdrop-filter:blur(8px);border-bottom:1px solid #E2E8F0}
+.nav-inner{max-width:1080px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px}
+.nav-logo{font-size:17px;font-weight:700;color:#2D3748;letter-spacing:-0.5px}
+.nav-logo span{color:#2563EB}
+.nav-links{display:flex;gap:16px;align-items:center}
+.nav-links a{font-size:13px;color:#4A5568;font-weight:500}
+.nav-links a:hover{color:#2563EB;text-decoration:none}
+.nav-actions{display:flex;gap:8px;align-items:center}
+.nav-actions button{background:none;border:none;cursor:pointer;padding:6px;border-radius:6px;color:#718096}
+.nav-actions button:hover{background:#F7FAFC;color:#2563EB}
+.breadcrumb{max-width:1080px;margin:0 auto;padding:12px 20px;font-size:13px;color:#A0AEC0}
+.breadcrumb a{color:#718096}
+.container{max-width:1080px;margin:0 auto;padding:0 20px}
+.layout{display:grid;grid-template-columns:1fr 320px;gap:32px;align-items:start}
+.section{margin-bottom:32px}
+.article-content{line-height:1.9}
+.article-content h2{font-size:22px;font-weight:700;color:#1A202C;margin:32px 0 12px;padding-top:16px;border-top:1px solid #EDF2F7}
+.article-content h3{font-size:18px;font-weight:600;color:#2D3748;margin:24px 0 10px}
+.article-content p{margin-bottom:16px;color:#4A5568}
+.article-content ul,.article-content ol{margin:12px 0 16px 24px;color:#4A5568}
+.article-content li{margin-bottom:8px}
+.article-content table{width:100%;border-collapse:collapse;margin:16px 0}
+.article-content th{text-align:left;padding:10px 12px;background:#F7FAFC;border:1px solid #E2E8F0;font-size:13px;font-weight:600;color:#4A5568}
+.article-content td{padding:10px 12px;border:1px solid #E2E8F0;font-size:14px}
+.article-content strong{color:#1A202C}
+.faq-item{border-bottom:1px solid #E2E8F0;padding:16px 0}
+.faq-q{font-size:15px;font-weight:600;color:#2D3748;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.faq-q::after{content:"+";font-size:18px;color:#A0AEC0;transition:transform 0.2s}
+.faq-item.open .faq-q::after{content:"-"}
+.faq-a{font-size:14px;color:#718096;line-height:1.7;max-height:0;overflow:hidden;transition:max-height 0.3s,padding 0.3s}
+.faq-item.open .faq-a{max-height:500px;padding-top:10px}
+.ad-slot{background:#F7FAFC;border:1px dashed #CBD5E0;border-radius:8px;min-height:250px;display:flex;align-items:center;justify-content:center;color:#A0AEC0;font-size:12px;margin:24px 0}
+.sidebar{position:sticky;top:68px}
+.related-card{background:#F7FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:20px;margin-bottom:20px}
+.related-card h3{font-size:15px;font-weight:600;margin-bottom:12px;color:#1A202C}
+.related-link{display:block;padding:8px 0;border-bottom:1px solid #EDF2F7;font-size:13px;color:#2563EB}
+.related-link:last-child{border-bottom:none}
+.related-link:hover{text-decoration:none;color:#1D4ED8}
+.articles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin:24px 0}
+.article-card{display:block;padding:20px;background:#F7FAFC;border:1px solid #E2E8F0;border-radius:12px;transition:border-color 0.2s}
+.article-card:hover{border-color:#2563EB;text-decoration:none}
+.article-card h3{font-size:15px;font-weight:600;color:#1A202C;margin:0}
+.lang-bar{display:flex;gap:6px;flex-wrap:wrap;margin:24px 0}
+.lang-btn{font-size:12px;padding:4px 12px;border-radius:20px;background:#F7FAFC;border:1px solid #E2E8F0;color:#718096}
+.lang-btn:hover{background:#EBF5FF;border-color:#BEE3F8;text-decoration:none}
+.lang-btn.active{background:#2563EB;color:#fff;border-color:#2563EB}
+.disclaimer{font-size:12px;color:#A0AEC0;margin:24px 0;padding:16px;background:#FAFAFA;border-radius:8px}
+.footer{border-top:1px solid #E2E8F0;padding:24px 0;margin-top:40px}
+.footer-inner{max-width:1080px;margin:0 auto;padding:0 20px;display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:#A0AEC0}
+.footer-inner a{color:#718096}
+@media(max-width:768px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{position:static}
+  .nav-links{gap:10px}
+}
+</style>
+<link rel="stylesheet" href="/js/cookie-consent.css">
+</head>
+<body>
+
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/id/">Alat</a>
+    <a href="/blog/id/index.html">Artikel</a>
+    <a href="/patterns/id/">Pola Candlestick</a>
+    <a href="/">Beranda</a>
+  </div>
+  <div class="nav-actions">
+    <button onclick="document.getElementById('sgSearchOverlay').classList.add('show')" title="Search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </button>
+    <button onclick="window._sgToggleBm&&window._sgToggleBm()" title="Bookmarks">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+    </button>
+  <select onchange="location.href=this.value" style="padding:4px 8px;border-radius:6px;border:1px solid #CBD5E0;font-size:13px;background:#fff;color:#4A5568;cursor:pointer"><option value="/blog/position-risk.html">繁中</option><option value="/blog/en/position-risk.html">EN</option><option value="/blog/ja/position-risk.html">日本語</option><option value="/blog/ko/position-risk.html">한국어</option><option value="/blog/de/position-risk.html">DE</option><option value="/blog/fr/position-risk.html">FR</option><option value="/blog/es/position-risk.html">ES</option><option value="/blog/pt/position-risk.html">PT</option><option value="/blog/id/position-risk.html" selected>ID</option><option value="/blog/zh-CN/position-risk.html">简中</option></select>
+</div>
+</div>
+</nav>
+
+<div class="breadcrumb">
+  <a href="/">Beranda</a> &rsaquo; <a href="/blog/id/index.html">Artikel</a> &rsaquo; Manajemen Risiko Posisi: Panduan Support Resistance dan Sizing
+</div>
+
+<div class="container">
+<div class="layout">
+
+<div class="main">
+  <h1 style="font-size:28px;font-weight:700;color:#1A202C;margin-bottom:8px">Manajemen Risiko Posisi: Panduan Support Resistance dan Sizing</h1>
+  <p style="font-size:14px;color:#718096;margin-bottom:24px">Pelajari manajemen risiko posisi, analisis support/resistance, dan teknik position sizing untuk trading yang lebih aman dan menguntungkan.</p>
+
+  <div class="ad-slot" id="ad-1" aria-hidden="true"></div>
+
+  
+  <article class="section article-content">
+    <h2>Pengantar Manajemen Risiko Posisi</h2>
+<p>Manajemen risiko posisi adalah fondasi dari trading yang berkelanjutan. Banyak trader pemula fokus hanya pada peluang keuntungan tanpa mempertimbangkan seberapa besar risiko yang mereka ambil. Padahal, kesuksesan jangka panjang ditentukan bukan oleh seberapa sering Anda menang, tetapi oleh bagaimana Anda mengelola risiko setiap kali kalah.</p>
+<p>Artikel ini akan memandu Anda melalui tiga pilar utama manajemen risiko posisi: memahami posisi harga relative terhadap support dan resistance, melakukan penilaian risiko sebelum entry, dan menerapkan teknik position sizing yang tepat.</p>
+
+<h2>Bagian 1: Memahami Support dan Resistance sebagai Acuan Risiko</h2>
+
+<h3>Definisi Support dan Resistance</h3>
+<p><strong>Support</strong> adalah level harga dimana pembeli cenderung muncul untuk menghentikan penurunan harga. <strong>Resistance</strong> adalah level dimana penjual muncul untuk menghentikan kenaikan harga. Dalam konteks manajemen risiko, level-level ini penting karena mereka menunjukkan di mana harga "seharusnya" berhenti atau memantul.</p>
+
+<h3>Mengidentifikasi Support dan Resistance yang Kuat</h3>
+<p>Tidak semua level support dan resistance memiliki kekuatan yang sama. Support dan resistance yang <strong>kuat</strong> memiliki karakteristik berikut:</p>
+<ul>
+<li>Telah diuji berkali-kali tanpa tertembus</li>
+<li>Terletak pada area dengan volume transaksi tinggi</li>
+<li>Bertepatan dengan pivot point atau moving average penting</li>
+<li>Berada di level round number (contoh: 10,000 atau 100,000)</li>
+<li>Terbentuk dalam timeframe yang lebih besar (harian atau mingguan)</li>
+</ul>
+
+<h3>Posisi Harga Relatif Terhadap Support dan Resistance</h3>
+<p>Memahami di mana harga Anda saat ini berada sangat penting untuk risk management:</p>
+<table>
+<tr>
+<th>Posisi Harga</th>
+<th>Karakteristik Risiko</th>
+<th>Implikasi Trading</th>
+</tr>
+<tr>
+<td>Dekat Support (naik)</td>
+<td>Risiko terbatas ke bawah</td>
+<td>Stop loss bisa ditempatkan di bawah support dengan jarak kecil</td>
+</tr>
+<tr>
+<td>Dekat Resistance (turun)</td>
+<td>Risiko terbatas ke atas</td>
+<td>Stop loss bisa ditempatkan di atas resistance dengan jarak kecil</td>
+</tr>
+<tr>
+<td>Jauh dari Support (turun)</td>
+<td>Risiko besar jika support tembus</td>
+<td>Perlu hati-hati, pertimbangkan menunggu rebound ke resistance</td>
+</tr>
+<tr>
+<td>Jauh dari Resistance (naik)</td>
+<td>Risiko besar jika resistance tembus</td>
+<td>Entry agresif, tetapi stop loss harus lebih jauh</td>
+</tr>
+</table>
+
+<h3>Contoh Praktis Support dan Resistance</h3>
+<p>Misalkan Anda menganalisis saham XYZ dengan data berikut:</p>
+<ul>
+<li>Harga saat ini: Rp 10,500</li>
+<li>Support terdekat: Rp 10,000 (kuat, telah ditest 3x)</li>
+<li>Resistance terdekat: Rp 11,000 (kuat, merupakan high bulan lalu)</li>
+</ul>
+<p>Dalam skenario ini, harga berada di tengah-tengah, sekitar 5% dari support dan 4.8% dari resistance. Ini adalah posisi yang cukup seimbang untuk entry long jika ada sinyal positif.</p>
+
+<h2>Bagian 2: Penilaian Risiko Sebelum Entry</h2>
+
+<h3>Komponen Penilaian Risiko</h3>
+<p>Sebelum membuka posisi, Anda harus menentukan:</p>
+<ol>
+<li><strong>Entry Price:</strong> Di mana Anda akan membeli atau menjual</li>
+<li><strong>Stop Loss Level:</strong> Di mana Anda akan keluar jika trade salah</li>
+<li><strong>Take Profit Level:</strong> Di mana Anda akan mengambil keuntungan</li>
+<li><strong>Risk-Reward Ratio:</strong> Perbandingan antara risiko dan potensi keuntungan</li>
+<li><strong>Position Size:</strong> Berapa banyak lot atau saham yang akan dibeli</li>
+</ol>
+
+<h3>Menghitung Risk per Trade</h3>
+<p>Risk per trade adalah jumlah uang yang Anda siap kehilangan dalam satu transaksi. Rumus umum:</p>
+<p style="background-color: #f0f0f0; padding: 15px; border-left: 4px solid #007bff;">
+<strong>Risk (Rp) = Entry Price - Stop Loss Price × Jumlah Lot</strong>
+</p>
+<p><strong>Contoh:</strong></p>
+<ul>
+<li>Anda ingin membeli saham di Rp 10,500</li>
+<li>Stop loss ditetapkan di Rp 10,000</li>
+<li>Risk per lot = (10,500 - 10,000) × 100 saham = Rp 50,000</li>
+<li>Jika Anda ingin membeli 5 lot, total risk = Rp 250,000</li>
+</ul>
+
+<h3>Risk-Reward Ratio (RRR)</h3>
+<p>RRR adalah perbandingan antara besarnya risiko dengan besarnya potensi reward. Ini dianggap <strong>high reliability</strong> karena terbukti meningkatkan profitabilitas jangka panjang.</p>
+<p style="background-color: #f0f0f0; padding: 15px; border-left: 4px solid #28a745;">
+<strong>RRR = (Take Profit - Entry) ÷ (Entry - Stop Loss)</strong>
+</p>
+<p><strong>Contoh:</strong></p>
+<ul>
+<li>Entry: Rp 10,500</li>
+<li>Stop Loss: Rp 10,000</li>
+<li>Take Profit: Rp 11,000</li>
+<li>RRR = (11,000 - 10,500) ÷ (10,500 - 10,000) = 500 ÷ 500 = 1:1</li>
+</ul>
+<p>RRR 1:1 berarti potensi keuntungan sama dengan potensi kerugian. Sebagai pemula, target minimal adalah RRR 1:1. Untuk strategi yang lebih agresif, target RRR 1:2 atau lebih besar.</p>
+
+<h3>Analisis Teknikal untuk Penilaian Risiko</h3>
+<p>Selain support dan resistance, gunakan indikator tambahan:</p>
+<ul>
+<li><strong>Moving Averages:</strong> Jika harga di atas MA200 (long-term), risiko menurun untuk long trades</li>
+<li><strong>Momentum:</strong> RSI di atas 50 menunjukkan momentum naik, lebih aman untuk long</li>
+<li><strong>Volume:</strong> Entry pada hari dengan volume tinggi lebih reliable</li>
+<li><strong>Tren:</strong> Trading melawan tren utama memiliki risiko lebih tinggi</li>
+</ul>
+
+<h3>Kesalahan Umum dalam Penilaian Risiko</h3>
+<p><strong>1. Tidak Menetapkan Stop Loss</strong></p>
+<p>Banyak trader pemula tidak menetapkan stop loss "untuk menghemat biaya" atau berharap harga akan kembali. Ini adalah kesalahan fatal yang dapat mengakibatkan kerugian besar.</p>
+
+<p><strong>2. Stop Loss Terlalu Dekat</strong></p>
+<p>Stop loss di 1-2% dari entry sering terpicu oleh fluktuasi normal. Gunakan support terdekat sebagai acuan, minimal 2-3%.</p>
+
+<p><strong>3. Take Profit Terlalu Jauh</strong></p>
+<p>Target yang tidak realistis membuat Anda menunggu terlalu lama dan risiko kehilangan keuntungan.</p>
+
+<p><strong>4. Mengabaikan Kondisi Pasar</strong></p>
+<p>Risk assessment harus mempertimbangkan volatilitas pasar. Saat volatilitas tinggi, jarak stop loss perlu lebih besar.</p>
+
+<h2>Bagian 3: Position Sizing - Teknik Menentukan Ukuran Posisi</h2>
+
+<h3>Mengapa Position Sizing Penting</h3>
+<p>Position sizing yang tepat memastikan bahwa setiap kerugian tidak akan memusnahkan akun trading Anda. Ini adalah perbedaan antara trader yang bertahan lama dan yang bangkrut. <strong>High reliability</strong> menunjukkan bahwa trader dengan position sizing disiplin memiliki career span yang jauh lebih panjang.</p>
+
+<h3>Metode 1: Fixed Percentage Risk (Metode yang Paling Direkomendasikan)</h3>
+<p>Metode ini menetapkan persentase tetap dari akun Anda sebagai risiko maksimal per trade.</p>
+<p style="background-color: #f0f0f0; padding: 15px; border-left: 4px solid #007bff;">
+<strong>Position Size = (Account Size × Risk % per Trade) ÷ Risk per Lot</strong>
+</p>
+<p><strong>Contoh Lengkap:</strong></p>
+<ul>
+<li>Akun trading Anda: Rp 10,000,000</li>
+<li>Risk per trade yang ditetapkan: 1% (standar industri untuk pemula)</li>
+<li>Total risk yang boleh diambil: Rp 10,000,000 × 1% = Rp 100,000</li>
+<li>Entry: Rp 10,500, Stop Loss: Rp 10,000, Risk per lot: Rp 50,000</li>
+<li>Position Size = Rp 100,000 ÷ Rp 50,000 = 2 lot (200 saham)</li>
+</ul>
+<p>Dengan sistem ini, terlepas dari seberapa besar akun Anda berfluktuasi, risiko per trade selalu konsisten pada 1% dari akun terkini.</p>
+
+<h3>Metode 2: Fixed Lot Size</h3>
+<p>Trader memutuskan untuk selalu trading dengan ukuran lot yang sama (contoh: selalu 1 lot atau 5 lot).</p>
+<p><strong>Kelebihan:</strong> Sederhana dan mudah diingat</p>
+<p><strong>Kekurangan:</strong> Tidak berkembang saat akun tumbuh, tetap sama saat akun shrink</p>
+<p>Metode ini memiliki <strong>medium reliability</strong> karena tidak fleksibel terhadap kondisi pasar dan pertumbuhan akun.</p>
+
+<h3>Metode 3: Volatility-Based Sizing</h3>
+<p>Ukuran posisi disesuaikan dengan volatilitas instrumen. Instrumen lebih volatil = posisi lebih kecil.</p>
+<p><strong>Contoh:</strong></p>
+<ul>
+<li>Saham dengan volatilitas tinggi (daily ATR 300 poin): Posisi 1 lot</li>
+<li>Saham dengan volatilitas rendah (daily ATR 50 poin): Posisi 5 lot</li>
+</ul>
+<p>Metode ini memiliki <strong>high reliability</strong> karena menyesuaikan dengan kondisi pasar aktual.</p>
+
+<h3>Menentukan Persentase Risk yang Tepat</h3>
+<p>Besarnya risk per trade tergantung pada pengalaman dan risk tolerance Anda:</p>
+<table>
+<tr>
+<th>Level Trader</th>
+<th>Risk per Trade</th>
+<th>Catatan</th>
+</tr>
+<tr>
+<td>Pemula</td>
+<td>0.5% - 1%</td>
+<td>Fokus belajar, tidak fokus profit</td>
+</tr>
+<tr>
+<td>Intermediate</td>
+<td>1% - 2%</td>
+<td>Sudah konsisten untung</td>
+</tr>
+<tr>
+<td>Advanced</td>
+<td>2% - 3%</td>
+<td>Win rate tinggi, strategi proven</td>
+</tr>
+<tr>
+<td>Professional</td>
+<td>0.5% - 1%</td>
+<td>Akun besar, prioritas preservation</td>
+</tr>
+</table>
+
+<h3>Contoh Skenario Position Sizing</h3>
+<p><strong>Skenario A: Saham Bervolume Besar</strong></p>
+<ul>
+<li>Akun: Rp 50,000,000</li>
+<li>Risk per trade: 1% = Rp 500,000</li>
+<li>Entry: Rp 15,000, Stop Loss: Rp 14,500, Risk per lot (100 saham): Rp 50,000</li>
+<li>Lot yang dibeli: Rp 500,000 ÷ Rp 50,000 = 10 lot (1,000 saham)</li>
+<li>Total modal yang dibutuhkan: 1,000 × Rp 15,000 = Rp 15,000,000</li>
+</ul>
+
+<p><strong>Skenario B: Forex Trading EUR/USD</strong></p>
+<ul>
+<li>Akun: USD 10,000 (Rp 150,000,000)</li>
+<li>Risk per trade: 1% = USD 100 (Rp 1,500,000)</li>
+<li>Entry: 1.0850, Stop Loss: 1.0800, Risk per pip: USD 10 (standard lot)</li>
+<li>Pips risk: 50 pips × USD 10 = USD 500</li>
+<li>Lot yang digunakan: USD 100 ÷ USD 500 = 0.2 lot (atau 2 micro lot)</li>
+</ul>
+
+<h3>Kesalahan Umum dalam Position Sizing</h3>
+<p><strong>1. Over-Leveraging</strong></p>
+<p>Menggunakan leverage terlalu besar membuat posisi sizing Anda tidak efektif. Trader pemula disarankan menghindari leverage, atau maksimal 1:2 jika diperlukan.</p>
+
+<p><strong>2. Menambah Posisi Saat Rugi (Averaging Down)</strong></p>
+<p>Menambah posisi saat harga turun adalah kesalahan besar. Kecuali Anda memiliki rencana khusus, hindari ini.</p>
+
+<p><strong>3. Tidak Konsisten</strong></p>
+<p>Saat menang, sizing kecil. Saat percaya diri, sizing besar. Inkonsistensi ini mencegah Anda belajar dari data statistik trading Anda.</p>
+
+<p><strong>4. Position Size Terlalu Besar</strong></p>
+<p>Jika setiap loss membuat Anda emosional, berarti position sizing Anda terlalu besar. Kurangi hingga Anda bisa fokus pada trading dengan rasional.</p>
+
+<h2>Bagian 4: Integrasi Ketiga Elemen dalam Trading Plan</h2>
+
+<h3>Checklist Pre-Entry</h3>
+<p>Sebelum Anda memasuki trade, lakukan pengecekan berikut:</p>
+<ol>
+<li>✓ Apakah harga berada pada level support/resistance yang valid?</li>
+<li>✓ Apakah ada 2-3 konfirmasi teknikal positif (moving average, volume, momentum)?</li>
+<li>✓ Apakah RRR minimal 1:1?</li>
+<li>✓ Apakah risk per trade tidak melebihi 1-2% dari akun?</li>
+<li>✓ Apakah stop loss dan take profit sudah ditetapkan sebelum entry?</li>
+<li>✓ Apakah posisi size sudah dihitung dengan rumus yang benar?</li>
+<li>✓ Apakah berada dalam jam trading yang sesuai dengan strategi saya?</li>
+</ol>
+
+<h3>Contoh Trading Plan Lengkap</h3>
+<p><strong>Instrumen:</strong> Saham ABC</p>
+<p><strong>Akun:</strong> Rp 20,000,000</p>
+<p><strong>Risk per Trade:</strong> 1% = Rp 200,000</p>
+
+<table>
+<tr>
+<th>Parameter</th>
+<th>Nilai</th>
+<th>Alasan</th>
+</tr>
+<tr>
+<td>Entry Price</td>
+<td>Rp 10,500</td>
+<td>Bounce dari support Rp 10,000, confirmed dengan volume</td>
+</tr>
+<tr>
+<td>Stop Loss</td>
+<td>Rp 10,000</td>
+<td>Support kuat yang sudah ditest 4x</td>
+</tr>
+<tr>
+<td>Take Profit</td>
+<td>Rp 11,000</td>
+<td>Resistance level, RRR 1:1</td>
+</tr>
+<tr>
+<td>Risk per Lot</td>
+<td>Rp 50,000</td>
+<td>(10,500 - 10,000) × 100 saham</td>
+</tr>
+<tr>
+<td>Position Size</td>
+<td>4 lot</td>
+<td>Rp 200,000 ÷ Rp 50,000 = 4 lot</td>
+</tr>
+<tr>
+<td>Modal Digunakan</td>
+<td>Rp 4,200,000</td>
+<td>10,500 × 400 saham</td>
+</tr>
+<tr>
+<td>Potential Profit</td>
+<td>Rp 200,000</td>
+<td>(11,000 - 10,500) × 400 saham</td>
+</tr>
+</table>
+
+<h3>Manajemen Setelah Entry</h3>
+<p>Manajemen risiko tidak berhenti setelah Anda membuka posisi. Lakukan hal berikut:</p>
+<ul>
+<li><strong>Update Stop Loss ke Break Even:</strong> Setelah profit mencapai 50% dari target, pindahkan stop loss ke entry price</li>
+<li><strong>Trail Stop Loss:</strong> Gunakan trailing stop untuk lock in profit saat trend berlanjut</li>
+<li><strong>Jangan Merubah Plan:</strong> Kecuali ada perubahan significant pada chart, jangan ubah stop loss atau take profit</li>
+<li><strong>Monitor Sentimen:</strong> Jika fundamental atau sentimen pasar berubah drastis, pertimbangkan exit lebih awal</li>
+</ul>
+
+<h2>Kesimpulan</h2>
+<p>Manajemen risiko posisi adalah keterampilan yang harus dikuasai sebelum Anda fokus pada strategi entry. Dengan memahami support dan resistance, melakukan penilaian risiko yang menyeluruh, dan menerapkan position sizing yang konsisten, Anda sudah memiliki fondasi yang kuat untuk trading berkelanjutan.</p>
+<p>Ingat: tujuan utama adalah <strong>survival</strong>, bukan kaya cepat. Trader yang bertahan adalah trader yang disiplin dalam manajemen risiko.</p>
+  </article>
+
+  <div class="ad-slot" id="ad-3" aria-hidden="true"></div>
+
+  <section class="section">
+    <h2>Pertanyaan Umum</h2>
+    <div class="faq-item">
+  <div class="faq-q">Berapa persen risiko per trade yang aman untuk pemula?</div>
+  <div class="faq-a">Standar industri untuk pemula adalah 0.5-1% dari total akun per trade. Ini memastikan bahwa 100 kerugian berturut-turut masih meninggalkan 36-60% akun Anda intact. Semakin konservatif, semakin aman untuk belajar.</div>
+</div>
+<div class="faq-item">
+  <div class="faq-q">Bagaimana cara menentukan stop loss yang baik?</div>
+  <div class="faq-a">Stop loss terbaik ditempatkan di bawah support (untuk long) atau di atas resistance (untuk short). Jarak minimal 2-3% dari entry, dan harus didasarkan pada level teknikal yang valid, bukan angka sembarangan. Jangan terlalu dekat karena bisa terpicu oleh noise pasar.</div>
+</div>
+<div class="faq-item">
+  <div class="faq-q">Apa itu Risk-Reward Ratio dan berapa target minimalnya?</div>
+  <div class="faq-a">RRR adalah perbandingan potensi profit terhadap potensi loss. Rumusnya: (Take Profit - Entry) ÷ (Entry - Stop Loss). Target minimal adalah 1:1, artinya potensi untung sama dengan potensi rugi. Trader berpengalaman mencari RRR 1:2 atau lebih.</div>
+</div>
+<div class="faq-item">
+  <div class="faq-q">Mengapa position sizing lebih penting daripada winning rate?</div>
+  <div class="faq-a">Seorang trader dengan 40% win rate tapi sizing konsisten dan RRR baik bisa menguntungkan lebih dari trader 60% win rate tapi sizing asal-asalan. Ini karena yang menentukan profit jangka panjang adalah ekspektasi matematis: (Win% × Avg Win) - (Loss% × Avg Loss).</div>
+</div>
+<div class="faq-item">
+  <div class="faq-q">Apa yang harus dilakukan jika harga immediately keluar dari support/resistance setelah entry?</div>
+  <div class="faq-a">Jika harga memecah support/resistance yang Anda andalkan, ini adalah sinyal bahwa analisis Anda salah. Keluarlah pada stop loss yang sudah ditetapkan. Jangan menunggu atau menambah posisi. Kerugian kecil adalah bagian dari trading yang profesional.</div>
+</div>
+  </section>
+
+  <div class="ad-slot" id="ad-4" aria-hidden="true"></div>
+
+  <div class="disclaimer">
+    Pelajari manajemen risiko posisi, analisis support/resistance, dan teknik position sizing untuk trading yang lebih aman dan menguntungkan. &mdash; Last updated: 2026-07-13
+  </div>
+
+  <div class="lang-bar">
+    <a href="/blog/position-risk.html" class="lang-btn">繁體中文</a>
+    <a href="/blog/en/position-risk.html" class="lang-btn">English</a>
+    <a href="/blog/ja/position-risk.html" class="lang-btn">日本語</a>
+    <a href="/blog/ko/position-risk.html" class="lang-btn">한국어</a>
+    <a href="/blog/de/position-risk.html" class="lang-btn">Deutsch</a>
+    <a href="/blog/fr/position-risk.html" class="lang-btn">Français</a>
+    <a href="/blog/es/position-risk.html" class="lang-btn">Español</a>
+    <a href="/blog/pt/position-risk.html" class="lang-btn">Português</a>
+    <a href="/blog/id/position-risk.html" class="lang-btn active">Bahasa Indonesia</a>
+    <a href="/blog/zh-CN/position-risk.html" class="lang-btn">简体中文</a>
+  </div>
+</div>
+
+<aside class="sidebar">
+  <div class="ad-slot" id="ad-side" aria-hidden="true"></div>
+  <div class="related-card"><h3>Artikel</h3><a href="/blog/id/kd-indicator.html" class="related-link">KD Stochastic Indicator: Panduan Lengkap Trading</a>
+    <a href="/blog/id/macd-indicator.html" class="related-link">MACD Indicator: Panduan Lengkap Analisis Histogram dan Signal Line</a>
+    <a href="/blog/id/rsi-indicator.html" class="related-link">RSI Relative Strength Index: Panduan Lengkap untuk Investor</a>
+    <a href="/blog/id/moving-average-guide.html" class="related-link">Panduan Lengkap Moving Averages: SMA vs EMA & Strategi Granville</a>
+    <a href="/blog/id/candlestick-patterns.html" class="related-link">Candlestick Patterns: Panduan Lengkap Reversal dan Continuation</a></div>
+  <div class="related-card">
+    <h3>Alat</h3>
+    <a href="/tools/id/compound-interest.html" class="related-link">Compound Interest</a>
+    <a href="/tools/id/rsi-calculator.html" class="related-link">Rsi Calculator</a>
+    <a href="/tools/id/macd-calculator.html" class="related-link">Macd Calculator</a>
+    <a href="/tools/id/position-size.html" class="related-link">Position Size</a>
+    <a href="/tools/id/risk-reward.html" class="related-link">Risk Reward</a>
+  </div>
+</aside>
+
+</div>
+</div>
+
+<footer class="footer">
+<div class="footer-inner">
+  <a href="/about.html">About</a>
+  <a href="/contact.html">Contact</a>
+  <a href="/privacy.html">Privacy</a>
+  <a href="/terms.html">Terms</a>
+  <span style="margin-left:auto">&copy; 2026 SoftGlow</span>
+</div>
+</footer>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Search..." autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Bookmarks</h3>
+    <button class="bm-clear" onclick="window._sgClearBm&&window._sgClearBm()">Clear</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script>
+document.querySelectorAll('.faq-q').forEach(function(q){
+  q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});
+});
+</script>
+
+<!-- AdSense delayed load -->
+<script>
+setTimeout(function(){
+  var s=document.createElement('script');
+  s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';
+  s.async=true;s.crossOrigin='anonymous';
+  document.head.appendChild(s);
+},2000);
+</script>
+
+<!-- Generator: blog-gen v1.0 | position-risk | id | 2026-07-13 -->
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>
