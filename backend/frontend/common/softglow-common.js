@@ -175,6 +175,7 @@
     if (item.type === 'tool') prefix = '/tools/';
     else if (item.type === 'pattern') prefix = '/patterns/';
     else if (item.type === 'blog') prefix = '/blog/';
+    else if (item.type === 'comparison') prefix = '/comparisons/';
 
     if (lang === 'zh-TW') return prefix + item.slug + '.html';
     return prefix + lang + '/' + item.slug + '.html';
