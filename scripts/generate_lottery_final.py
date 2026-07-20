@@ -486,7 +486,8 @@ def gen_intro(lang, slug, cfg, draws, stats):
     prize_html = ""
     prizes = PRIZES.get(slug, [])
     if prizes:
-        rows = "".join(f'<tr{"class=\"jr\"" if i==0 else ""}><td>{p[0]}</td><td>{p[1]}</td><td>{p[2]}</td><td>{p[3]}</td></tr>' for i,p in enumerate(prizes))
+        _jr = 'class="jr"'
+        rows = "".join(f'<tr {_jr if i==0 else ""}><td>{p[0]}</td><td>{p[1]}</td><td>{p[2]}</td><td>{p[3]}</td></tr>' for i,p in enumerate(prizes))
         prize_html = f'<h2>💰 {t(lang,"prize")}</h2><table class="prize-table"><thead><tr><th>{"獎項" if lang.startswith("zh") else "Prize"}</th><th>{"中獎條件" if lang.startswith("zh") else "Match"}</th><th>{t(lang,"odds")}</th><th>{"獎金" if lang.startswith("zh") else "Prize"}</th></tr></thead><tbody>{rows}</tbody></table>'
     
     lang_btns = "".join(f'<a href="{page_url(la,slug)}" class="lang-btn{" active" if la==lang else ""}">{la}</a>' for la in cfg["langs"])
@@ -531,7 +532,8 @@ def gen_results(lang, slug, cfg, draws, stats):
     prize_html = ""
     prizes = PRIZES.get(slug, [])
     if prizes:
-        rows = "".join(f'<tr{"class=\"jr\"" if i==0 else ""}><td>{p[0]}</td><td>{p[1]}</td><td>{p[2]}</td><td>{p[3]}</td></tr>' for i,p in enumerate(prizes))
+        _jr = 'class="jr"'
+        rows = "".join(f'<tr {_jr if i==0 else ""}><td>{p[0]}</td><td>{p[1]}</td><td>{p[2]}</td><td>{p[3]}</td></tr>' for i,p in enumerate(prizes))
         prize_html = f'<div class="card"><h2>💰 {t(lang,"prize")}</h2><table class="prize-table"><thead><tr><th>{"獎項" if lang.startswith("zh") else "Prize"}</th><th>{"中獎條件" if lang.startswith("zh") else "Match"}</th><th>{t(lang,"odds")}</th><th>{"獎金" if lang.startswith("zh") else "Prize"}</th></tr></thead><tbody>{rows}</tbody></table></div>'
     
     # Hot/cold strip
