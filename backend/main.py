@@ -503,6 +503,44 @@ app = FastAPI(
     redoc_url=None if IS_PROD else "/redoc",
     openapi_url=None if IS_PROD else "/openapi.json",
 )
+
+
+# ---- Lottery subdomain 301 redirect middleware ----
+from starlette.middleware.base import BaseHTTPMiddleware
+
+class LotteryRedirectMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        host = request.headers.get("host", "")
+        if "lottery.softglow-ai.com" in host:
+            from starlette.responses import RedirectResponse
+            path = request.url.path
+            parts = path.strip("/").split("/")
+            if len(parts) >= 2:
+                locale = parts[0]
+                lottery_slug = parts[1] if len(parts) > 1 else ""
+                page_type = parts[2] if len(parts) > 2 else ""
+                if locale in ("en","ja","ko","fr","de","es","pt","id","zh-CN"):
+                    if page_type:
+                        new_path = f"/lottery/{locale}/{lottery_slug}-{page_type}.html"
+                    elif lottery_slug:
+                        new_path = f"/lottery/{locale}/{lottery_slug}.html"
+                    else:
+                        new_path = f"/lottery/{locale}/"
+                elif locale == "zh-TW":
+                    if page_type:
+                        new_path = f"/lottery/{lottery_slug}-{page_type}.html"
+                    elif lottery_slug:
+                        new_path = f"/lottery/{lottery_slug}.html"
+                    else:
+                        new_path = "/lottery/"
+                else:
+                    new_path = "/lottery/"
+            else:
+                new_path = "/lottery/"
+            return RedirectResponse(url=f"https://softglow-ai.com{new_path}", status_code=301)
+        return await call_next(request)
+
+app.add_middleware(LotteryRedirectMiddleware)
 # CORS：明確列出允許來源，支援帶 Authorization header 的請求
 _cors_origins = ALLOWED_ORIGINS if ALLOWED_ORIGINS else ["*"]
 app.add_middleware(
@@ -722,6 +760,63 @@ async def serve_tools_locale_index(locale: str):
         return FileResponse(path)
     # 沒有則 fallback 到主索引
     return RedirectResponse(url="/tools/", status_code=302)
+
+
+# ---- Lottery 彩票路由 ----
+_LOTTERY_LOCALES = ("en","ja","ko","fr","de","es","pt","id","zh-CN")
+
+@app.get("/lottery/data/{filename}", include_in_schema=False)
+async def serve_lottery_data(filename: str):
+    from fastapi.responses import FileResponse
+    import os as _os
+    if not filename.endswith(".json"):
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    path = _os.path.join(_FRONTEND_DIR, "lottery", "data", filename)
+    if _os.path.isfile(path):
+        return FileResponse(path, media_type="application/json")
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/lottery/{filename}.html", include_in_schema=False)
+async def serve_lottery_html(filename: str):
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "lottery", f"{filename}.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/lottery", include_in_schema=False)
+@app.get("/lottery/", include_in_schema=False)
+async def serve_lottery_index():
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "lottery", "index.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/lottery/{locale}/{filename}.html", include_in_schema=False)
+async def serve_lottery_locale_html(locale: str, filename: str):
+    from fastapi.responses import FileResponse
+    import os as _os
+    if locale not in _LOTTERY_LOCALES:
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    path = _os.path.join(_FRONTEND_DIR, "lottery", locale, f"{filename}.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/lottery/{locale}", include_in_schema=False)
+@app.get("/lottery/{locale}/", include_in_schema=False)
+async def serve_lottery_locale_index(locale: str):
+    from fastapi.responses import FileResponse, RedirectResponse
+    import os as _os
+    if locale not in _LOTTERY_LOCALES:
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    path = _os.path.join(_FRONTEND_DIR, "lottery", locale, "index.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return RedirectResponse(url="/lottery/", status_code=302)
 
 # ---- Glossary 術語百科路由 ----
 _GLOSSARY_LOCALES = ("en","ja","ko","es","pt","id","de","fr","zh-CN")
@@ -7715,6 +7810,21 @@ def sitemap():
                 for _cf in sorted(os.listdir(_lang_path)):
                     if _cf.endswith(".html"):
                         locs.append(f"  <url><loc>{FRONTEND_URL}/comparisons/{_lang_dir}/{_cf}</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>")
+
+    # ── Lottery 彩票頁（動態掃描磁碟，多語言）──
+    _lottery_base = os.path.join(os.path.dirname(__file__), "frontend", "lottery")
+    if os.path.isdir(_lottery_base):
+        locs.append(f"  <url><loc>{FRONTEND_URL}/lottery/</loc><changefreq>daily</changefreq><priority>0.8</priority></url>")
+        for _lf in sorted(os.listdir(_lottery_base)):
+            if _lf.endswith(".html") and _lf != "index.html":
+                locs.append(f'  <url><loc>{FRONTEND_URL}/lottery/{_lf}</loc><changefreq>daily</changefreq><priority>0.7</priority></url>')
+        for _lang_dir in sorted(os.listdir(_lottery_base)):
+            _lang_path = os.path.join(_lottery_base, _lang_dir)
+            if os.path.isdir(_lang_path) and _lang_dir not in (".", "..", "data"):
+                for _lf in sorted(os.listdir(_lang_path)):
+                    if _lf.endswith(".html"):
+                        locs.append(f'  <url><loc>{FRONTEND_URL}/lottery/{_lang_dir}/{_lf}</loc><changefreq>daily</changefreq><priority>0.6</priority></url>')
+
     # 熱門股優先 priority 0.8，其餘 0.6
     hardcoded_set = set(_SEO_HARDCODED_STOCKS)
     for sid in all_stock_ids:
