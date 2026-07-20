@@ -292,7 +292,8 @@ def base_html(lang, title, desc, body, slug=None, ptype="intro", hreflang_langs=
     subnav = ""
     if slug:
         pages = [("intro", lname(slug,lang)), ("results", t(lang,"results")), ("history", t(lang,"history")), ("statistics", t(lang,"statistics"))]
-        links = "".join(f'<a href="{page_url(lang,slug,pt)}"{" class=\"active\"" if pt==ptype else ""}>{lb}</a>' for pt,lb in pages)
+        _active = ' class="active"'
+        links = "".join(f'<a href="{page_url(lang,slug,pt)}"{_active if pt==ptype else ""}>{lb}</a>' for pt,lb in pages)
         # Add number generator link to subnav
         links += f'<a href="{page_url(lang,slug,"number-generator") if slug else "#"}">{t(lang,"number_generator")}</a>'
         subnav = f'<div class="subnav"><div class="subnav-inner">{links}</div></div>'
