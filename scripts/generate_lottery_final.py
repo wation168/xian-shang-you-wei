@@ -509,7 +509,7 @@ def gen_intro(lang, slug, cfg, draws, stats):
   <div class="card"><h3>🎲 {t(lang,"number_generator")}</h3>
     <a href="{page_url(lang,None,'number-generator')}" class="btn" style="width:100%;display:block;text-align:center">{t(lang,"generate")} →</a></div>
   <div class="card"><h3>🌏 {t(lang,"all_lotteries")}</h3>
-    {"".join(f"<a href=\"{page_url(lang,l['slug'])}\">{l['flag']} {lname(l['slug'],lang)}</a>" for l in LOTTERIES if l["slug"]!=slug)[:5]}
+    {"".join('<a href="' + page_url(lang,l['slug']) + '">' + l['flag'] + ' ' + lname(l['slug'],lang) + '</a>' for l in LOTTERIES if l["slug"]!=slug)[:5]}
   </div>
 </aside></div>'''
     return base_html(lang, title, desc, body, slug, "intro", cfg["langs"])
@@ -565,7 +565,7 @@ def gen_results(lang, slug, cfg, draws, stats):
   <div class="card"><h3>🎲 {t(lang,"number_generator")}</h3>
     <a href="{page_url(lang,None,'number-generator')}" class="btn" style="width:100%;display:block;text-align:center">{t(lang,"generate")} →</a></div>
   <div class="card"><h3>🌏 {t(lang,"all_lotteries")}</h3>
-    {"".join(f"<a href=\"{page_url(lang,l['slug'],'results')}\">{l['flag']} {lname(l['slug'],lang)}</a>" for l in LOTTERIES if l['slug']!=slug)[:5]}
+    {"".join('<a href="' + page_url(lang,l['slug'],'results') + '">' + l['flag'] + ' ' + lname(l['slug'],lang) + '</a>' for l in LOTTERIES if l['slug']!=slug)[:5]}
   </div>
 </aside></div>'''
     return base_html(lang, title, desc, body, slug, "results", cfg["langs"])
