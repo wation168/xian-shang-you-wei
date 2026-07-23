@@ -26,19 +26,21 @@ jobs:
       - name: Fetch latest lottery results
         run: python scripts/fetch_lottery_results.py
 
-      - name: Regenerate lottery HTML pages
-        run: python scripts/generate_lottery_final.py --data-dir scripts/lottery_data --output-dir backend/frontend/lottery
+      - name: Copy updated JSON to frontend
+        run: |
+          mkdir -p backend/frontend/lottery/data
+          cp scripts/lottery_data/results/*.json backend/frontend/lottery/data/
 
       - name: Check for changes
         id: check
         run: |
-          git diff --quiet backend/frontend/lottery/ && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
+          git diff --quiet backend/frontend/lottery/data/ scripts/lottery_data/ && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
 
       - name: Commit and push
         if: steps.check.outputs.changed == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add backend/frontend/lottery/
-          git commit -m "daily: update lottery results $(date +%Y-%m-%d)"
+          git add backend/frontend/lottery/data/ scripts/lottery_data/
+          git commit -m "daily: update lottery data $(date +%Y-%m-%d)"
           git push
