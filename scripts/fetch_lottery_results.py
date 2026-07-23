@@ -247,6 +247,62 @@ def fetch_mega_sena():
 
 
 # ============================================================
+# FETCH FUNCTIONS — lottolyzer.com 通用爬蟲
+# ============================================================
+
+def fetch_lottolyzer(slug, lottolyzer_path, pick_range, bonus_range, expected_nums=None):
+    """Generic lottolyzer.com scraper — works for all lotteries on that site.
+    All lottolyzer history pages use the same HTML table structure:
+      <td class="sum-p1">YYYY-MM-DD</td>     ← Date
+      <td class="sum-p1">N,N,N,...</td>       ← Winning numbers
+      <td class="sum-p1">N[,N]</td>           ← Bonus/Supp (if column exists)
+    """
+    existing = load_existing(slug)
+    try:
+        url = f"https://en.lottolyzer.com/history/{lottolyzer_path}"
+        r = requests.get(url, timeout=15, headers=HEADERS)
+        r.raise_for_status()
+        html = r.text
+
+        new_draws = []
+
+        # Try 3-column match first (date + numbers + bonus)
+        rows = re.findall(
+            r'<td class="sum-p1">\s*(\d{4}-\d{2}-\d{2})\s*</td>\s*'
+            r'<td class="sum-p1">\s*([\d,]+)\s*</td>\s*'
+            r'<td class="sum-p1">\s*([\d,]+)\s*</td>',
+            html
+        )
+        if rows:
+            for dt, nums_str, bonus_str in rows:
+                nums = sorted([int(n) for n in nums_str.split(",")])
+                bonus = sorted([int(n) for n in bonus_str.split(",")])
+                if expected_nums is None or len(nums) == expected_nums:
+                    new_draws.append({"date": dt, "numbers": nums, "bonus": bonus})
+
+        # Fallback: 2-column match (date + numbers, no bonus column)
+        if not new_draws:
+            rows2 = re.findall(
+                r'<td class="sum-p1">\s*(\d{4}-\d{2}-\d{2})\s*</td>\s*'
+                r'<td class="sum-p1">\s*([\d,]+)\s*</td>',
+                html
+            )
+            for dt, nums_str in rows2:
+                nums = sorted([int(n) for n in nums_str.split(",")])
+                if expected_nums is None or len(nums) == expected_nums:
+                    new_draws.append({"date": dt, "numbers": nums, "bonus": []})
+
+        if new_draws:
+            _save_and_report(slug, new_draws, existing, pick_range, bonus_range)
+        else:
+            print(f"  ⚠️ {slug}: lottolyzer scrape found no data, keeping {len(existing)} existing draws")
+    except Exception as e:
+        print(f"  ❌ {slug}: {e}")
+        if existing:
+            print(f"      (keeping {len(existing)} existing draws)")
+
+
+# ============================================================
 # FETCH FUNCTIONS — magayo（加 DNS fallback）
 # ============================================================
 
@@ -316,40 +372,37 @@ def fetch_magayo(slug, game_id, pick_range, bonus_range):
 # ============================================================
 
 def fetch_euromillions():
-    """EuroMillions — pedromealha 免費 API (替代壞掉的 daowa89 GitHub CSV)"""
+    """EuroMillions — lottolyzer.com 爬蟲（pedromealha API 被限流 429）
+    HTML 結構（已驗證 2026/07/23）：
+      <td class="sum-p1">2026-07-21</td>               ← Date
+      <td class="sum-p1">2,3,8,28,39</td>              ← 5 main numbers
+      <td class="sum-p1">2,11</td>                     ← 2 Lucky Stars (comma-separated)
+    """
     slug = "euromillions"
     existing = load_existing(slug)
     try:
-        # Primary: pedromealha free API
-        url = "https://euromillions.api.pedromealha.dev/v1/draws?limit=10"
+        url = "https://en.lottolyzer.com/history/multi-country/euromillions"
         r = requests.get(url, timeout=15, headers=HEADERS)
         r.raise_for_status()
-        data = r.json()
+        html = r.text
 
         new_draws = []
-        items = data if isinstance(data, list) else data.get("draws", data.get("data", []))
-        for item in items:
-            # API returns: date, numbers (list), stars (list)
-            dt = item.get("date", "")
-            if not dt:
-                continue
-            # Date format might be "YYYY-MM-DD" or "DD/MM/YYYY"
-            if "/" in dt:
-                p = dt.split("/")
-                dt = f"{p[2]}-{p[1]}-{p[0]}"
-            dt = dt[:10]
-            numbers = item.get("numbers", [])
-            stars = item.get("stars", item.get("lucky_stars", item.get("bonus", [])))
-            if numbers:
-                new_draws.append({
-                    "date": dt,
-                    "numbers": sorted([int(n) for n in numbers]),
-                    "bonus": sorted([int(s) for s in stars])
-                })
+        rows = re.findall(
+            r'<td class="sum-p1">\s*(\d{4}-\d{2}-\d{2})\s*</td>\s*'
+            r'<td class="sum-p1">\s*([\d,]+)\s*</td>\s*'
+            r'<td class="sum-p1">\s*([\d,]+)\s*</td>',
+            html
+        )
+        for dt, nums_str, bonus_str in rows:
+            nums = sorted([int(n) for n in nums_str.split(",")])
+            bonus = sorted([int(n) for n in bonus_str.split(",")])
+            if len(nums) == 5:
+                new_draws.append({"date": dt, "numbers": nums, "bonus": bonus})
+
         if new_draws:
             _save_and_report(slug, new_draws, existing, 50, 12)
         else:
-            print(f"  ⚠️ {slug}: API returned no draws, keeping existing {len(existing)}")
+            print(f"  ⚠️ {slug}: lottolyzer scrape found no data, keeping {len(existing)} existing draws")
     except Exception as e:
         print(f"  ❌ {slug}: {e}")
         if existing:
@@ -600,23 +653,23 @@ def main():
     print("\n[Europe]")
     fetch_euromillions()
     fetch_lotto_6aus49()
-    fetch_magayo("uk-lotto", "uk_lotto", 59, 0)
+    fetch_lottolyzer("uk-lotto", "united-kingdom/lotto", 59, 0, expected_nums=6)
     fetch_el_gordo()
     fetch_superenalotto()
 
     # Americas (working + fixed)
     print("\n[Americas]")
     fetch_mega_sena()
-    fetch_magayo("lotto-max", "ca_lotto_max", 50, 0)
+    fetch_lottolyzer("lotto-max", "canada/lotto-max", 50, 0, expected_nums=7)
 
     # Asia (fixed)
     print("\n[Asia]")
-    fetch_korea_lotto()
+    fetch_lottolyzer("korea-lotto", "south-korea/6_slash_45-lotto", 45, 45, expected_nums=6)
     fetch_japan_loto6()
 
     # Oceania
     print("\n[Oceania]")
-    fetch_magayo("oz-lotto", "au_oz_lotto", 47, 47)
+    fetch_lottolyzer("oz-lotto", "australia/oz-lotto", 47, 47, expected_nums=7)
 
     print(f"\n{'='*50}")
     # Summary
