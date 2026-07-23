@@ -88,12 +88,18 @@ def fetch_powerball():
             if not nums_str:
                 continue
             parts = nums_str.strip().split()
-            if len(parts) < 6:
-                continue
             numbers = [int(x) for x in parts[:5]]
-            bonus = [int(parts[5])]
+            # Powerball may be separate field or 6th number
+            pb = d.get("powerball")
+            if pb is not None:
+                bonus = [int(pb)]
+            elif len(parts) >= 6:
+                bonus = [int(parts[5])]
+            else:
+                bonus = []
             multiplier = d.get("multiplier")
-            new_draws.append({"date": date, "numbers": numbers, "bonus": bonus, "multiplier": multiplier})
+            if numbers:
+                new_draws.append({"date": date, "numbers": numbers, "bonus": bonus, "multiplier": multiplier})
         
         all_draws = new_draws + existing
         count = save_results(slug, all_draws)
@@ -117,12 +123,17 @@ def fetch_mega_millions():
             if not nums_str:
                 continue
             parts = nums_str.strip().split()
-            if len(parts) < 6:
-                continue
             numbers = [int(x) for x in parts[:5]]
-            bonus = [int(parts[5])]
-            multiplier = d.get("mega_ball", None)
-            new_draws.append({"date": date, "numbers": numbers, "bonus": bonus})
+            # mega_ball may be separate field (new format) or 6th number (old format)
+            mega_ball = d.get("mega_ball")
+            if mega_ball is not None:
+                bonus = [int(mega_ball)]
+            elif len(parts) >= 6:
+                bonus = [int(parts[5])]
+            else:
+                bonus = []
+            if numbers:
+                new_draws.append({"date": date, "numbers": numbers, "bonus": bonus})
         
         all_draws = new_draws + existing
         count = save_results(slug, all_draws)
@@ -132,45 +143,67 @@ def fetch_mega_millions():
         print(f"  ❌ {slug}: {e}")
 
 def fetch_taiwan(slug, game_code, pick_range, bonus_range):
-    """Taiwan lotteries — api.taiwanlottery.com"""
+    """Taiwan lotteries — api.taiwanlottery.com (2026/07 new API format)"""
     existing = load_existing(slug)
     try:
         url = f"https://api.taiwanlottery.com/TLCAPIWeB/Lottery/LastNumber?gameCode={game_code}&count=10"
-        r = requests.get(url, timeout=15)
+        r = requests.get(url, timeout=15, verify=False)
         r.raise_for_status()
         data = r.json()
         
         new_draws = []
-        items = data.get("content", {}).get("lotteryNumbers", [])
+        # New format: content.lastNumberList (array of all games)
+        items = data.get("content", {}).get("lastNumberList", [])
+        # Fallback to old format
+        if not items:
+            items = data.get("content", {}).get("lotteryNumbers", [])
+        
         for item in items:
-            date = item.get("period", "")
-            # Parse date from period format
-            draw_date = item.get("date", "")
-            if not draw_date and "period" in item:
-                draw_date = item.get("drawDate", "")
+            # Filter by gameCode (new API returns all games)
+            item_code = item.get("gameCode")
+            if item_code is not None and str(item_code) != str(game_code):
+                continue
+            
+            # Get draw date
+            draw_date = item.get("drawDate", "") or item.get("date", "")
+            if not draw_date:
+                continue
+            draw_date = draw_date[:10]  # "2026-07-22 00:00:00" -> "2026-07-22"
             
             nums = []
             bonus_nums = []
             
-            # Try different field names
-            for key in ["normalNumbers", "numbers"]:
-                if key in item and item[key]:
-                    if isinstance(item[key], list):
-                        nums = [int(n) for n in item[key]]
-                    elif isinstance(item[key], str):
-                        nums = [int(n) for n in item[key].split(",")]
-                    break
+            # New format: lotNumber (plain array)
+            if "lotNumber" in item and item["lotNumber"]:
+                lot = item["lotNumber"]
+                if isinstance(lot, list):
+                    all_nums = [int(n) for n in lot]
+                    if bonus_range > 0 and len(all_nums) > pick_range:
+                        # Last number(s) might be bonus
+                        nums = all_nums[:pick_range]
+                        bonus_nums = all_nums[pick_range:]
+                    else:
+                        nums = all_nums
             
-            for key in ["specialNumbers", "special"]:
-                if key in item and item[key]:
-                    if isinstance(item[key], list):
-                        bonus_nums = [int(n) for n in item[key]]
-                    elif isinstance(item[key], str):
-                        bonus_nums = [int(n) for n in item[key].split(",")]
-                    break
+            # Fallback: old format fields
+            if not nums:
+                for key in ["normalNumbers", "numbers"]:
+                    if key in item and item[key]:
+                        if isinstance(item[key], list):
+                            nums = [int(n) for n in item[key]]
+                        elif isinstance(item[key], str):
+                            nums = [int(n) for n in item[key].split(",")]
+                        break
+                for key in ["specialNumbers", "special"]:
+                    if key in item and item[key]:
+                        if isinstance(item[key], list):
+                            bonus_nums = [int(n) for n in item[key]]
+                        elif isinstance(item[key], str):
+                            bonus_nums = [int(n) for n in item[key].split(",")]
+                        break
             
             if nums and draw_date:
-                new_draws.append({"date": draw_date[:10], "numbers": sorted(nums), "bonus": sorted(bonus_nums)})
+                new_draws.append({"date": draw_date, "numbers": sorted(nums), "bonus": sorted(bonus_nums)})
         
         all_draws = new_draws + existing
         count = save_results(slug, all_draws)
