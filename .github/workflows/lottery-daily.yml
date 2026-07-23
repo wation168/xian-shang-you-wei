@@ -2,6 +2,7 @@ name: Daily Lottery Update
 
 on:
   schedule:
+    # UTC 01:00 = 台北 09:00（各彩種都已開完獎）
     - cron: '0 1 * * *'
   workflow_dispatch:
 
@@ -11,6 +12,7 @@ permissions:
 jobs:
   update-lottery:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -26,21 +28,26 @@ jobs:
       - name: Fetch latest lottery results
         run: python scripts/fetch_lottery_results.py
 
-      - name: Copy updated JSON to frontend
+      - name: Copy updated data to frontend
         run: |
           mkdir -p backend/frontend/lottery/data
           cp scripts/lottery_data/results/*.json backend/frontend/lottery/data/
+          # Also copy stats if needed by frontend
+          if [ -d "scripts/lottery_data/stats" ]; then
+            mkdir -p backend/frontend/lottery/stats
+            cp scripts/lottery_data/stats/*.json backend/frontend/lottery/stats/
+          fi
 
       - name: Check for changes
         id: check
         run: |
-          git diff --quiet backend/frontend/lottery/data/ scripts/lottery_data/ && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
+          git diff --quiet backend/frontend/lottery/ scripts/lottery_data/ && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
 
       - name: Commit and push
         if: steps.check.outputs.changed == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add backend/frontend/lottery/data/ scripts/lottery_data/
+          git add backend/frontend/lottery/data/ backend/frontend/lottery/stats/ scripts/lottery_data/
           git commit -m "daily: update lottery data $(date +%Y-%m-%d)"
           git push

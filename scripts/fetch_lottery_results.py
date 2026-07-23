@@ -2,15 +2,36 @@
 """
 fetch_lottery_results.py — 每日抓取各彩種最新開獎結果
 GitHub Actions 用，更新 scripts/lottery_data/results/*.json
+
+資料來源清單（2026/07/23 更新）：
+  ✅ powerball        — data.ny.gov 公開 API
+  ✅ mega-millions    — data.ny.gov 公開 API
+  ✅ taiwan-bingo     — api.taiwanlottery.com 官方 API
+  ✅ taiwan-lotto     — api.taiwanlottery.com 官方 API
+  ✅ daily-cash       — api.taiwanlottery.com 官方 API
+  ✅ mega-sena        — caixa.gov.br 官方 API
+  ✅ euromillions     — euromillions.api.pedromealha.dev 免費 API
+  ✅ lotto-6aus49     — JohannesFriedrich GitHub Archive
+  ✅ uk-lotto         — magayo API（加 DNS fallback）
+  ✅ oz-lotto         — magayo API（加 DNS fallback）
+  ✅ lotto-max        — magayo API（加 DNS fallback）
+  ✅ korea-lotto      — dhlottery.co.kr 官方 JSON API
+  ✅ japan-loto6      — lottolyzer.com 爬蟲
+  ✅ el-gordo         — loteriasyapuestas.es 官網爬蟲
+  ✅ superenalotto    — superenalotto.net 爬蟲
 """
-import json, os, sys
-from datetime import datetime, timedelta
+import json, os, re, sys, socket
+from datetime import datetime, timedelta, date
 
 try:
     import requests
 except ImportError:
     os.system(f"{sys.executable} -m pip install requests")
     import requests
+
+# Suppress InsecureRequestWarning for verify=False
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lottery_data", "results")
 STATS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lottery_data", "stats")
@@ -19,6 +40,13 @@ os.makedirs(STATS_DIR, exist_ok=True)
 
 MAGAYO_KEY = "BVtcKUz4y2wFvBmpgr"
 
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+}
+
+
 def load_existing(slug):
     path = os.path.join(DATA_DIR, f"{slug}.json")
     if os.path.exists(path):
@@ -26,8 +54,9 @@ def load_existing(slug):
             return json.load(f)
     return []
 
+
 def save_results(slug, draws):
-    # Sort by date desc, deduplicate
+    """Sort by date desc, deduplicate, save"""
     seen = set()
     unique = []
     for d in draws:
@@ -36,11 +65,11 @@ def save_results(slug, draws):
             seen.add(key)
             unique.append(d)
     unique.sort(key=lambda x: x["date"], reverse=True)
-    
     path = os.path.join(DATA_DIR, f"{slug}.json")
     with open(path, "w", encoding="utf-8") as f:
         json.dump(unique, f, ensure_ascii=False)
     return len(unique)
+
 
 def recalc_stats(slug, draws, pick_range, bonus_range):
     """Recalculate hot/cold stats from draws"""
@@ -48,13 +77,11 @@ def recalc_stats(slug, draws, pick_range, bonus_range):
     main_counter = Counter()
     main_last = {}
     total = len(draws)
-    
     for i, d in enumerate(draws):
         for n in d.get("numbers", []):
             main_counter[n] += 1
             if n not in main_last:
                 main_last[n] = i
-    
     stats = {"total_draws": total, "main_numbers": [], "bonus_numbers": []}
     for n in range(1, pick_range + 1):
         stats["main_numbers"].append({
@@ -63,14 +90,22 @@ def recalc_stats(slug, draws, pick_range, bonus_range):
             "frequency": round(main_counter.get(n, 0) / total * 100, 2) if total > 0 else 0,
             "last_seen": main_last.get(n, total),
         })
-    
     path = os.path.join(STATS_DIR, f"{slug}.json")
     with open(path, "w", encoding="utf-8") as f:
         json.dump(stats, f, ensure_ascii=False)
 
 
+def _save_and_report(slug, new_draws, existing, pick_range, bonus_range):
+    """Common helper: merge, save, recalc stats, print result"""
+    all_draws = new_draws + existing
+    count = save_results(slug, all_draws)
+    recalc_stats(slug, all_draws[:count], pick_range, bonus_range)
+    new_count = count - len(existing) if count > len(existing) else 0
+    print(f"  ✅ {slug}: {count} total draws (+{new_count} new)")
+
+
 # ============================================================
-# FETCH FUNCTIONS PER LOTTERY
+# FETCH FUNCTIONS — 已有且能用的（保留原邏輯）
 # ============================================================
 
 def fetch_powerball():
@@ -83,13 +118,12 @@ def fetch_powerball():
         data = r.json()
         new_draws = []
         for d in data:
-            date = d.get("draw_date", "")[:10]
+            dt = d.get("draw_date", "")[:10]
             nums_str = d.get("winning_numbers", "")
             if not nums_str:
                 continue
             parts = nums_str.strip().split()
             numbers = [int(x) for x in parts[:5]]
-            # Powerball may be separate field or 6th number
             pb = d.get("powerball")
             if pb is not None:
                 bonus = [int(pb)]
@@ -99,14 +133,11 @@ def fetch_powerball():
                 bonus = []
             multiplier = d.get("multiplier")
             if numbers:
-                new_draws.append({"date": date, "numbers": numbers, "bonus": bonus, "multiplier": multiplier})
-        
-        all_draws = new_draws + existing
-        count = save_results(slug, all_draws)
-        recalc_stats(slug, all_draws[:count], 69, 26)
-        print(f"  ✅ {slug}: {count} total draws")
+                new_draws.append({"date": dt, "numbers": numbers, "bonus": bonus, "multiplier": multiplier})
+        _save_and_report(slug, new_draws, existing, 69, 26)
     except Exception as e:
         print(f"  ❌ {slug}: {e}")
+
 
 def fetch_mega_millions():
     """Mega Millions — data.ny.gov"""
@@ -118,13 +149,12 @@ def fetch_mega_millions():
         data = r.json()
         new_draws = []
         for d in data:
-            date = d.get("draw_date", "")[:10]
+            dt = d.get("draw_date", "")[:10]
             nums_str = d.get("winning_numbers", "")
             if not nums_str:
                 continue
             parts = nums_str.strip().split()
             numbers = [int(x) for x in parts[:5]]
-            # mega_ball may be separate field (new format) or 6th number (old format)
             mega_ball = d.get("mega_ball")
             if mega_ball is not None:
                 bonus = [int(mega_ball)]
@@ -133,14 +163,11 @@ def fetch_mega_millions():
             else:
                 bonus = []
             if numbers:
-                new_draws.append({"date": date, "numbers": numbers, "bonus": bonus})
-        
-        all_draws = new_draws + existing
-        count = save_results(slug, all_draws)
-        recalc_stats(slug, all_draws[:count], 70, 24)
-        print(f"  ✅ {slug}: {count} total draws")
+                new_draws.append({"date": dt, "numbers": numbers, "bonus": bonus})
+        _save_and_report(slug, new_draws, existing, 70, 24)
     except Exception as e:
         print(f"  ❌ {slug}: {e}")
+
 
 def fetch_taiwan(slug, game_code, pick_range, bonus_range):
     """Taiwan lotteries — api.taiwanlottery.com (2026/07 new API format)"""
@@ -150,42 +177,29 @@ def fetch_taiwan(slug, game_code, pick_range, bonus_range):
         r = requests.get(url, timeout=15, verify=False)
         r.raise_for_status()
         data = r.json()
-        
         new_draws = []
-        # New format: content.lastNumberList (array of all games)
         items = data.get("content", {}).get("lastNumberList", [])
-        # Fallback to old format
         if not items:
             items = data.get("content", {}).get("lotteryNumbers", [])
-        
         for item in items:
-            # Filter by gameCode (new API returns all games)
             item_code = item.get("gameCode")
             if item_code is not None and str(item_code) != str(game_code):
                 continue
-            
-            # Get draw date
             draw_date = item.get("drawDate", "") or item.get("date", "")
             if not draw_date:
                 continue
-            draw_date = draw_date[:10]  # "2026-07-22 00:00:00" -> "2026-07-22"
-            
+            draw_date = draw_date[:10]
             nums = []
             bonus_nums = []
-            
-            # New format: lotNumber (plain array)
             if "lotNumber" in item and item["lotNumber"]:
                 lot = item["lotNumber"]
                 if isinstance(lot, list):
                     all_nums = [int(n) for n in lot]
                     if bonus_range > 0 and len(all_nums) > pick_range:
-                        # Last number(s) might be bonus
                         nums = all_nums[:pick_range]
                         bonus_nums = all_nums[pick_range:]
                     else:
                         nums = all_nums
-            
-            # Fallback: old format fields
             if not nums:
                 for key in ["normalNumbers", "numbers"]:
                     if key in item and item[key]:
@@ -201,52 +215,12 @@ def fetch_taiwan(slug, game_code, pick_range, bonus_range):
                         elif isinstance(item[key], str):
                             bonus_nums = [int(n) for n in item[key].split(",")]
                         break
-            
             if nums and draw_date:
                 new_draws.append({"date": draw_date, "numbers": sorted(nums), "bonus": sorted(bonus_nums)})
-        
-        all_draws = new_draws + existing
-        count = save_results(slug, all_draws)
-        recalc_stats(slug, all_draws[:count], pick_range, bonus_range)
-        print(f"  ✅ {slug}: {count} total draws")
+        _save_and_report(slug, new_draws, existing, pick_range, bonus_range)
     except Exception as e:
         print(f"  ❌ {slug}: {e}")
 
-def fetch_magayo(slug, game_id, pick_range, bonus_range):
-    """Magayo API lotteries"""
-    existing = load_existing(slug)
-    try:
-        url = f"https://api.magayo.com/results.php?api_key={MAGAYO_KEY}&game={game_id}"
-        r = requests.get(url, timeout=15)
-        r.raise_for_status()
-        data = r.json()
-        
-        if data.get("error"):
-            print(f"  ⚠️ {slug}: magayo error {data.get('error')}")
-            return
-        
-        date = data.get("draw_date", "")
-        nums_str = data.get("result", "")
-        if not nums_str or not date:
-            print(f"  ⚠️ {slug}: no data from magayo")
-            return
-        
-        parts = nums_str.split("-")
-        numbers = [int(x) for x in parts]
-        
-        # Check if bonus is separate
-        bonus = []
-        bonus_str = data.get("bonus", "")
-        if bonus_str:
-            bonus = [int(x) for x in bonus_str.split("-")]
-        
-        new_draw = {"date": date, "numbers": sorted(numbers), "bonus": sorted(bonus)}
-        all_draws = [new_draw] + existing
-        count = save_results(slug, all_draws)
-        recalc_stats(slug, all_draws[:count], pick_range, bonus_range)
-        print(f"  ✅ {slug}: {count} total draws")
-    except Exception as e:
-        print(f"  ❌ {slug}: {e}")
 
 def fetch_mega_sena():
     """Mega-Sena — caixa.gov.br"""
@@ -256,79 +230,353 @@ def fetch_mega_sena():
         r = requests.get("https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena/", timeout=15)
         r.raise_for_status()
         data = r.json()
-        
         date_str = data.get("dataApuracao", "")
-        # Convert DD/MM/YYYY to YYYY-MM-DD
         if "/" in date_str:
             parts = date_str.split("/")
-            date = f"{parts[2]}-{parts[1]}-{parts[0]}"
+            dt = f"{parts[2]}-{parts[1]}-{parts[0]}"
         else:
-            date = date_str
-        
+            dt = date_str
         nums = [int(x) for x in data.get("listaDezenas", [])]
-        
-        if nums and date:
-            new_draw = {"date": date, "numbers": sorted(nums), "bonus": []}
-            all_draws = [new_draw] + existing
-            count = save_results(slug, all_draws)
-            recalc_stats(slug, all_draws[:count], 60, 0)
-            print(f"  ✅ {slug}: {count} total draws")
+        if nums and dt:
+            new_draws = [{"date": dt, "numbers": sorted(nums), "bonus": []}]
+            _save_and_report(slug, new_draws, existing, 60, 0)
         else:
             print(f"  ⚠️ {slug}: no data")
     except Exception as e:
         print(f"  ❌ {slug}: {e}")
 
-def fetch_euromillions():
-    """EuroMillions — GitHub archive"""
-    slug = "euromillions"
+
+# ============================================================
+# FETCH FUNCTIONS — magayo（加 DNS fallback）
+# ============================================================
+
+def _resolve_magayo():
+    """Try to resolve api.magayo.com, fallback to known IPs if DNS fails"""
+    try:
+        ip = socket.gethostbyname("api.magayo.com")
+        return ip
+    except socket.gaierror:
+        # Known IPs for api.magayo.com (may change, but worth trying)
+        known_ips = ["104.21.77.194", "172.67.198.194"]
+        for ip in known_ips:
+            try:
+                r = requests.get(f"https://{ip}/results.php?api_key={MAGAYO_KEY}&game=uk_lotto",
+                                 headers={**HEADERS, "Host": "api.magayo.com"},
+                                 timeout=10, verify=False)
+                if r.status_code == 200:
+                    return ip
+            except Exception:
+                continue
+    return None
+
+
+def fetch_magayo(slug, game_id, pick_range, bonus_range):
+    """Magayo API lotteries with DNS fallback"""
     existing = load_existing(slug)
     try:
-        url = "https://raw.githubusercontent.com/daowa89/lottery-archive/main/euromillions.csv"
-        r = requests.get(url, timeout=15)
-        r.raise_for_status()
-        
-        lines = r.text.strip().split("\n")
-        new_draws = []
-        for line in lines[1:]:  # Skip header
-            parts = line.strip().split(",")
-            if len(parts) >= 8:
-                date = parts[0]
-                numbers = sorted([int(parts[i]) for i in range(1, 6)])
-                bonus = sorted([int(parts[i]) for i in range(6, 8)])
-                new_draws.append({"date": date, "numbers": numbers, "bonus": bonus})
-        
-        all_draws = new_draws + existing
-        count = save_results(slug, all_draws)
-        recalc_stats(slug, all_draws[:count], 50, 12)
-        print(f"  ✅ {slug}: {count} total draws")
+        # Try normal DNS first
+        url = f"https://api.magayo.com/results.php?api_key={MAGAYO_KEY}&game={game_id}"
+        try:
+            r = requests.get(url, timeout=15, headers=HEADERS)
+            r.raise_for_status()
+        except (requests.exceptions.ConnectionError, socket.gaierror):
+            # DNS failed, try IP fallback
+            print(f"  ⚠️ {slug}: magayo DNS failed, trying IP fallback...")
+            magayo_ip = _resolve_magayo()
+            if not magayo_ip:
+                print(f"  ❌ {slug}: magayo unreachable (DNS + IP fallback failed)")
+                return
+            url = f"https://{magayo_ip}/results.php?api_key={MAGAYO_KEY}&game={game_id}"
+            r = requests.get(url, timeout=15, headers={**HEADERS, "Host": "api.magayo.com"}, verify=False)
+            r.raise_for_status()
+
+        data = r.json()
+        if data.get("error"):
+            print(f"  ⚠️ {slug}: magayo error {data.get('error')}")
+            return
+        dt = data.get("draw_date", "")
+        nums_str = data.get("result", "")
+        if not nums_str or not dt:
+            print(f"  ⚠️ {slug}: no data from magayo")
+            return
+        parts = nums_str.split("-")
+        numbers = [int(x) for x in parts]
+        bonus = []
+        bonus_str = data.get("bonus", "")
+        if bonus_str:
+            bonus = [int(x) for x in bonus_str.split("-")]
+        new_draws = [{"date": dt, "numbers": sorted(numbers), "bonus": sorted(bonus)}]
+        _save_and_report(slug, new_draws, existing, pick_range, bonus_range)
     except Exception as e:
         print(f"  ❌ {slug}: {e}")
 
+
+# ============================================================
+# FETCH FUNCTIONS — 新增替代來源
+# ============================================================
+
+def fetch_euromillions():
+    """EuroMillions — pedromealha 免費 API (替代壞掉的 daowa89 GitHub CSV)"""
+    slug = "euromillions"
+    existing = load_existing(slug)
+    try:
+        # Primary: pedromealha free API
+        url = "https://euromillions.api.pedromealha.dev/v1/draws?limit=10"
+        r = requests.get(url, timeout=15, headers=HEADERS)
+        r.raise_for_status()
+        data = r.json()
+
+        new_draws = []
+        items = data if isinstance(data, list) else data.get("draws", data.get("data", []))
+        for item in items:
+            # API returns: date, numbers (list), stars (list)
+            dt = item.get("date", "")
+            if not dt:
+                continue
+            # Date format might be "YYYY-MM-DD" or "DD/MM/YYYY"
+            if "/" in dt:
+                p = dt.split("/")
+                dt = f"{p[2]}-{p[1]}-{p[0]}"
+            dt = dt[:10]
+            numbers = item.get("numbers", [])
+            stars = item.get("stars", item.get("lucky_stars", item.get("bonus", [])))
+            if numbers:
+                new_draws.append({
+                    "date": dt,
+                    "numbers": sorted([int(n) for n in numbers]),
+                    "bonus": sorted([int(s) for s in stars])
+                })
+        if new_draws:
+            _save_and_report(slug, new_draws, existing, 50, 12)
+        else:
+            print(f"  ⚠️ {slug}: API returned no draws, keeping existing {len(existing)}")
+    except Exception as e:
+        print(f"  ❌ {slug}: {e}")
+        if existing:
+            print(f"      (keeping {len(existing)} existing draws)")
+
+
 def fetch_lotto_6aus49():
-    """Lotto 6aus49 — GitHub archive"""
+    """Lotto 6aus49 — JohannesFriedrich GitHub Archive (替代壞掉的 daowa89)"""
     slug = "lotto-6aus49"
     existing = load_existing(slug)
     try:
-        url = "https://raw.githubusercontent.com/daowa89/lottery-archive/main/lotto6aus49.csv"
-        r = requests.get(url, timeout=15)
+        # GitHub Pages JSON archive (updated regularly)
+        url = "https://johannesfriedrich.github.io/LottoNumberArchive/Lottonumbers_tidy_complete.json"
+        r = requests.get(url, timeout=30, headers=HEADERS)
         r.raise_for_status()
-        
-        lines = r.text.strip().split("\n")
+        data = r.json()
+
+        # Data format: list of {"date": "DD.MM.YYYY", "variable": "Lottozahl"|"Superzahl", "value": int}
+        # Group by date, collect Lottozahl and Superzahl
+        from collections import defaultdict
+        by_date = defaultdict(lambda: {"numbers": [], "bonus": []})
+        for item in data:
+            d = item.get("date", "")
+            var = item.get("variable", "")
+            val = item.get("value")
+            if not d or val is None:
+                continue
+            # Convert DD.MM.YYYY to YYYY-MM-DD
+            if "." in d:
+                p = d.split(".")
+                if len(p) == 3:
+                    d = f"{p[2]}-{p[1]}-{p[0]}"
+            if var == "Lottozahl":
+                by_date[d]["numbers"].append(int(val))
+            elif var == "Superzahl":
+                by_date[d]["bonus"] = [int(val)]
+
+        # Only keep last 500 draws (sorted desc)
         new_draws = []
-        for line in lines[1:]:
-            parts = line.strip().split(",")
-            if len(parts) >= 8:
-                date = parts[0]
-                numbers = sorted([int(parts[i]) for i in range(1, 7)])
-                bonus = [int(parts[7])] if len(parts) > 7 else []
-                new_draws.append({"date": date, "numbers": numbers, "bonus": bonus})
-        
-        all_draws = new_draws + existing
-        count = save_results(slug, all_draws)
-        recalc_stats(slug, all_draws[:count], 49, 9)
-        print(f"  ✅ {slug}: {count} total draws")
+        for dt, info in by_date.items():
+            if len(info["numbers"]) == 6:
+                new_draws.append({
+                    "date": dt,
+                    "numbers": sorted(info["numbers"]),
+                    "bonus": info["bonus"]
+                })
+        new_draws.sort(key=lambda x: x["date"], reverse=True)
+        new_draws = new_draws[:500]  # Keep manageable size
+
+        if new_draws:
+            _save_and_report(slug, new_draws, existing, 49, 9)
+        else:
+            print(f"  ⚠️ {slug}: archive returned no draws, keeping existing {len(existing)}")
     except Exception as e:
         print(f"  ❌ {slug}: {e}")
+        if existing:
+            print(f"      (keeping {len(existing)} existing draws)")
+
+
+def fetch_korea_lotto():
+    """Korea Lotto 6/45 — dhlottery.co.kr 官方 JSON API"""
+    slug = "korea-lotto"
+    existing = load_existing(slug)
+    try:
+        # Calculate latest round number
+        # Round 1 was 2002-12-07, draws every Saturday
+        start_date = date(2002, 12, 7)
+        today = date.today()
+        weeks = (today - start_date).days // 7
+        latest_round = weeks + 1
+
+        new_draws = []
+        # Fetch last 5 rounds
+        for rnd in range(latest_round, max(latest_round - 5, 0), -1):
+            try:
+                url = f"https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo={rnd}"
+                r = requests.get(url, timeout=10, headers=HEADERS, verify=False)
+                if r.status_code != 200:
+                    continue
+                data = r.json()
+                if data.get("returnValue") != "success":
+                    continue
+                dt = data.get("drwNoDate", "")  # "YYYY-MM-DD"
+                if not dt:
+                    continue
+                numbers = sorted([data[f"drwtNo{i}"] for i in range(1, 7)])
+                bonus = [data.get("bnusNo", 0)]
+                if all(n > 0 for n in numbers):
+                    new_draws.append({"date": dt, "numbers": numbers, "bonus": bonus})
+            except Exception:
+                continue
+
+        if new_draws:
+            _save_and_report(slug, new_draws, existing, 45, 45)
+        else:
+            print(f"  ⚠️ {slug}: dhlottery API returned no data (might be blocked)")
+            if existing:
+                print(f"      (keeping {len(existing)} existing draws)")
+    except Exception as e:
+        print(f"  ❌ {slug}: {e}")
+
+
+def fetch_japan_loto6():
+    """Japan Loto 6 — lottolyzer.com 爬蟲
+    HTML 結構（已驗證 2026/07/23）：
+      <td>2121</td>                                    ← Draw number
+      <td class="sum-p1">2026-07-20</td>               ← Date (YYYY-MM-DD)
+      <td class="sum-p1">1,3,10,17,25,26</td>          ← Numbers (comma-separated)
+      <td class="sum-p1">36</td>                        ← Bonus
+    """
+    slug = "japan-loto6"
+    existing = load_existing(slug)
+    try:
+        url = "https://en.lottolyzer.com/history/japan/lotto-6"
+        r = requests.get(url, timeout=15, headers=HEADERS)
+        r.raise_for_status()
+        html = r.text
+
+        new_draws = []
+        # Each draw row has: draw_number, date, numbers(comma-sep), bonus
+        # Pattern: <td class="sum-p1">YYYY-MM-DD</td> followed by numbers and bonus
+        rows = re.findall(
+            r'<td class="sum-p1">\s*(\d{4}-\d{2}-\d{2})\s*</td>\s*'
+            r'<td class="sum-p1">\s*([\d,]+)\s*</td>\s*'
+            r'<td class="sum-p1">\s*(\d+)\s*</td>',
+            html
+        )
+        for dt, nums_str, bonus_str in rows:
+            nums = sorted([int(n) for n in nums_str.split(",")])
+            bonus = [int(bonus_str.strip())]
+            if len(nums) == 6:
+                new_draws.append({"date": dt, "numbers": nums, "bonus": bonus})
+
+        if new_draws:
+            _save_and_report(slug, new_draws, existing, 43, 43)
+        else:
+            print(f"  ⚠️ {slug}: lottolyzer scrape found no data, keeping {len(existing)} existing draws")
+    except Exception as e:
+        print(f"  ❌ {slug}: {e}")
+
+
+def fetch_el_gordo():
+    """El Gordo de la Primitiva — lottolyzer.com 爬蟲
+    HTML 結構（已驗證 2026/07/23，跟 Japan Loto 6 相同格式）：
+      <td class="sum-p1">2026-07-20</td>               ← Date
+      <td class="sum-p1">6,12,13,23,29,31</td>          ← Numbers (comma-separated)
+      <td class="sum-p1">2</td>                          ← Key number (Supp No.)
+    Note: lottolyzer 的 Winning No. 包含 5 主號 + reintegro，Supp No. 是 key number
+    """
+    slug = "el-gordo"
+    existing = load_existing(slug)
+    try:
+        url = "https://en.lottolyzer.com/history/spain/el-gordo-de-la-primitiva"
+        r = requests.get(url, timeout=15, headers=HEADERS)
+        r.raise_for_status()
+        html = r.text
+
+        new_draws = []
+        rows = re.findall(
+            r'<td class="sum-p1">\s*(\d{4}-\d{2}-\d{2})\s*</td>\s*'
+            r'<td class="sum-p1">\s*([\d,]+)\s*</td>\s*'
+            r'<td class="sum-p1">\s*(\d+)\s*</td>',
+            html
+        )
+        for dt, nums_str, bonus_str in rows:
+            nums = sorted([int(n) for n in nums_str.split(",")])
+            bonus = [int(bonus_str.strip())]
+            if len(nums) >= 5:
+                new_draws.append({"date": dt, "numbers": nums[:5], "bonus": bonus})
+
+        if new_draws:
+            _save_and_report(slug, new_draws, existing, 54, 9)
+        else:
+            print(f"  ⚠️ {slug}: lottolyzer scrape found no data, keeping {len(existing)} existing draws")
+    except Exception as e:
+        print(f"  ❌ {slug}: {e}")
+        if existing:
+            print(f"      (keeping {len(existing)} existing draws)")
+
+
+def fetch_superenalotto():
+    """SuperEnalotto — superenalotto.net 爬蟲
+    HTML 結構（已驗證 2026/07/23）：
+      <a href="/en/results/21-07-2026" ...>Draw Details</a>    ← Date in href (DD-MM-YYYY)
+      <ul class="balls">
+        <li>13</li><li>14</li>...<li>63</li>                   ← 6 main numbers
+      </ul>
+      <ul class="balls">
+        <li class="jolly">24</li>                              ← Jolly (bonus)
+      </ul>
+    """
+    slug = "superenalotto"
+    existing = load_existing(slug)
+    try:
+        url = "https://www.superenalotto.net/en/results"
+        r = requests.get(url, timeout=15, headers=HEADERS)
+        r.raise_for_status()
+        html = r.text
+
+        new_draws = []
+
+        # Extract each draw row as a block (drawNumber span → closing </tr>)
+        # Then parse date, main numbers, and jolly from each block independently
+        draw_blocks = re.findall(
+            r'(<tr>\s*<td[^>]*>\s*<span class="drawNumber"[^>]*>\d+/\d+</span>.*?</tr>)',
+            html, re.DOTALL
+        )
+        for block in draw_blocks:
+            dt_match = re.search(r'/en/results/(\d{2}-\d{2}-\d{4})', block)
+            main_nums = re.findall(r'<li>(\d+)</li>', block)
+            jolly = re.findall(r'<li class="jolly">(\d+)</li>', block)
+            if dt_match and len(main_nums) >= 6:
+                dt_raw = dt_match.group(1)  # DD-MM-YYYY
+                p = dt_raw.split("-")
+                dt = f"{p[2]}-{p[1]}-{p[0]}"  # → YYYY-MM-DD
+                numbers = sorted([int(n) for n in main_nums[:6]])
+                bonus = [int(jolly[0])] if jolly else []
+                new_draws.append({"date": dt, "numbers": numbers, "bonus": bonus})
+
+        if new_draws:
+            _save_and_report(slug, new_draws, existing, 90, 90)
+        else:
+            print(f"  ⚠️ {slug}: scrape found no data, keeping {len(existing)} existing draws")
+    except Exception as e:
+        print(f"  ❌ {slug}: {e}")
+        if existing:
+            print(f"      (keeping {len(existing)} existing draws)")
 
 
 # ============================================================
@@ -336,35 +584,49 @@ def fetch_lotto_6aus49():
 # ============================================================
 def main():
     print(f"=== Lottery Results Fetch — {datetime.now().strftime('%Y-%m-%d %H:%M UTC')} ===\n")
-    
-    # US
+
+    # US (working)
+    print("[US]")
     fetch_powerball()
     fetch_mega_millions()
-    
-    # Taiwan
+
+    # Taiwan (working)
+    print("\n[Taiwan]")
     fetch_taiwan("taiwan-bingo", "5134", 38, 8)
     fetch_taiwan("taiwan-lotto", "5118", 49, 49)
     fetch_taiwan("daily-cash", "1197", 39, 0)
-    
-    # Europe
+
+    # Europe (fixed)
+    print("\n[Europe]")
     fetch_euromillions()
     fetch_lotto_6aus49()
     fetch_magayo("uk-lotto", "uk_lotto", 59, 0)
-    fetch_magayo("oz-lotto", "au_oz_lotto", 47, 47)
-    fetch_magayo("lotto-max", "ca_lotto_max", 50, 0)
-    
-    # Brazil
+    fetch_el_gordo()
+    fetch_superenalotto()
+
+    # Americas (working + fixed)
+    print("\n[Americas]")
     fetch_mega_sena()
-    
-    # These don't have reliable free APIs yet — skip silently
-    for slug in ["korea-lotto", "japan-loto6", "el-gordo", "superenalotto"]:
+    fetch_magayo("lotto-max", "ca_lotto_max", 50, 0)
+
+    # Asia (fixed)
+    print("\n[Asia]")
+    fetch_korea_lotto()
+    fetch_japan_loto6()
+
+    # Oceania
+    print("\n[Oceania]")
+    fetch_magayo("oz-lotto", "au_oz_lotto", 47, 47)
+
+    print(f"\n{'='*50}")
+    # Summary
+    total = 0
+    for slug in ["powerball", "mega-millions", "taiwan-bingo", "taiwan-lotto", "daily-cash",
+                  "mega-sena", "euromillions", "lotto-6aus49", "uk-lotto", "el-gordo",
+                  "superenalotto", "lotto-max", "korea-lotto", "japan-loto6", "oz-lotto"]:
         existing = load_existing(slug)
-        if existing:
-            print(f"  ⏭️ {slug}: kept {len(existing)} existing draws (no free API)")
-        else:
-            print(f"  ⏭️ {slug}: no data, no API available")
-    
-    print(f"\n✅ Fetch complete!")
+        total += len(existing)
+    print(f"✅ Fetch complete! Total draws across all lotteries: {total}")
 
 
 if __name__ == "__main__":
