@@ -541,6 +541,19 @@ class LotteryRedirectMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 app.add_middleware(LotteryRedirectMiddleware)
+
+# ---- www → non-www 301 redirect middleware ----
+class WwwRedirectMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        host = request.headers.get("host", "")
+        if host.startswith("www."):
+            from starlette.responses import RedirectResponse
+            new_url = str(request.url).replace("://www.", "://", 1)
+            return RedirectResponse(url=new_url, status_code=301)
+        return await call_next(request)
+
+app.add_middleware(WwwRedirectMiddleware)
+
 # CORS：明確列出允許來源，支援帶 Authorization header 的請求
 _cors_origins = ALLOWED_ORIGINS if ALLOWED_ORIGINS else ["*"]
 app.add_middleware(
@@ -3182,6 +3195,10 @@ def _do_analyze(stock_id: str, tf: str = "D",
         _live_price = float(_qc["data"]["price"])
         if _live_price > 0:
             price = round(_live_price, 2)
+            # 同步更新 closes/closes_full 最後一根，讓下游所有計算
+            # （支撐距離、防守位、損益比、乖離率、雷達）用同一個價格基準
+            closes[-1] = _live_price
+            closes_full[-1] = _live_price
 
     # 股名
     stock_name = get_stock_name(symbol)
@@ -3758,6 +3775,27 @@ def _do_analyze(stock_id: str, tf: str = "D",
         }
     except Exception as _tpe:
         result["radar"] = {"score": 0, "label": "計算失敗", "error": str(_tpe)}
+
+    # ── kbar_action 結合雷達+量能上下文（雷達算完後才能做）──
+    _radar = result.get("radar") or {}
+    _r_score = _radar.get("score", 0)
+    _r_vol_r = _radar.get("vol_ratio", 1.0)
+    if kbar_action:
+        kbar_bullish_check = any(k in kbar_pattern for k in ["錘頭","多頭吞噬","早晨之星","三紅兵","穿刺線","大紅棒"]) if kbar_pattern else False
+        kbar_bearish_check = any(k in kbar_pattern for k in ["射擊之星","空頭吞噬","黃昏之星","三烏鴉","烏雲蓋頂","大黑棒"]) if kbar_pattern else False
+        # 雷達強度修飾
+        if _r_score >= 3 and kbar_bullish_check:
+            kbar_action += f"（雷達 {_r_score}/4 亮，訊號較可靠）"
+        elif _r_score <= 1 and kbar_bullish_check:
+            kbar_action += f"（但雷達僅 {_r_score}/4，力道待確認）"
+        elif _r_score >= 3 and kbar_bearish_check:
+            kbar_action += f"（雷達 {_r_score}/4 亮但K棒空頭，留意背離）"
+        # 量能修飾
+        if _r_vol_r >= 1.5:
+            kbar_action += f"，量比 {_r_vol_r}x 放量確認"
+        elif _r_vol_r < 0.8:
+            kbar_action += f"，量比僅 {_r_vol_r}x 縮量，明日需量增確認"
+        result["kbar_action"] = kbar_action
 
     _cache_set(_cache_key, result)
 
@@ -6640,13 +6678,20 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
     kp_bearish  = any(x in kline_pattern for x in ["空頭", "黃昏", "流星", "跌破", "量增大黑", "連三黑"])
     kp_color    = "#4ade80" if kp_bullish else ("#f87171" if kp_bearish else "#fbbf24")
 
-    # ── 趨勢文字 ──
+    # ── 趨勢文字（帶入實際數據，消除模板感）──
+    _r_ma20 = round(float(d.get("ma_values", {}).get("ma20", 0)), 1)
+    _r_ma60 = round(float(d.get("ma_values", {}).get("ma60", 0)), 1)
+    _r_slope = tp_ma20_slope  # "up"/"down"/"flat"
     if trend == "上升趨勢":
-        trend_desc = "均線三線多頭排列，短均站在長均之上，回測均線是買點；趨勢未明確反轉前，以順勢操作為主。"
+        _ma_gap_pct = round((_r_ma20 - _r_ma60) / _r_ma60 * 100, 1) if _r_ma60 > 0 else 0
+        _slope_word = "趨勢加速擴大中" if _r_slope == "up" else ("但動能趨緩" if _r_slope == "down" else "穩定進行中")
+        trend_desc = f"MA20({_r_ma20}) 站上 MA60({_r_ma60})，兩線差距 {_ma_gap_pct}%，多頭排列{_slope_word}。回測均線是買點，趨勢未反轉前順勢操作為主。"
     elif trend == "下降趨勢":
-        trend_desc = "均線三線空頭排列，短均在長均之下，反彈壓力明顯；逆勢做多風險較高，等待趨勢反轉再評估。"
+        _ma_gap_pct = round((_r_ma60 - _r_ma20) / _r_ma60 * 100, 1) if _r_ma60 > 0 else 0
+        _slope_word = "空方加速" if _r_slope == "down" else ("但跌勢趨緩" if _r_slope == "up" else "")
+        trend_desc = f"MA20({_r_ma20}) 在 MA60({_r_ma60}) 下方，差距 {_ma_gap_pct}%，空頭排列{_slope_word}。反彈壓力明顯，逆勢做多風險高。"
     else:
-        trend_desc = "均線糾結，多空交戰，方向未明；宜等待均線方向明確或突破關鍵位後再跟進。"
+        trend_desc = f"MA20({_r_ma20}) 與 MA60({_r_ma60}) 相近糾結，多空交戰方向未明。等均線分離或突破關鍵位再跟進。"
 
     # ── 操作建議文字 ──
     # 突破型態：開高走低風險判斷
@@ -6692,7 +6737,28 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
         _bias_text = f"\n\n🟡 出場風險【中】：MA5 正乖離 {_bias5_str} 介於 5%~10%，股價偏離均線，若出現黑K或量縮應注意出場。"
     elif tp_bias_exit_warning == "小":
         _bias_text = f"\n\n🟢 出場風險【小】：KD 死叉且 MACD 動能向下，趨勢轉弱初期，建議提高警覺，設好防守位 {stop_loss}。"
-    op_text = op_text + _bias_text
+    # ── 基本面補充（有數據時才顯示）──
+    _fund_text = ""
+    _r_per = d.get("per")
+    _r_div = d.get("dividend_yield")
+    _r_eps = d.get("eps_ttm")
+    if _r_per is not None and _r_div is not None:
+        try:
+            _per_f = float(_r_per)
+            _div_f = float(_r_div)
+            if _per_f > 0:
+                _fund_text = f"\n\n📊 基本面：本益比 {_per_f:.1f}，殖利率 {_div_f:.1f}%"
+                if _per_f > 30:
+                    _fund_text += "（估值偏高，追高需謹慎）"
+                elif _per_f < 12 and _div_f > 3:
+                    _fund_text += "（估值偏低且高殖利率，基本面支持）"
+                elif _per_f < 12:
+                    _fund_text += "（估值偏低）"
+                if _r_eps is not None:
+                    _fund_text += f"，EPS {float(_r_eps):.2f}"
+        except (ValueError, TypeError):
+            pass
+    op_text = op_text + _bias_text + _fund_text
 
     # ── 多空雷達補充說明 ──
     _tp_missing = []
@@ -6804,6 +6870,7 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
 <meta property="og:title" content="{stock_id} {stock_name} 分析報告">
 <meta property="og:description" content="{trend}｜支撐 {support}｜壓力 {resistance}｜損益比 {rr_ratio:.2f}">
 <meta property="og:type" content="article">
+<link rel="canonical" href="{FRONTEND_URL}/report/{stock_id}">
 <script type="application/ld+json">{json_ld}</script>
 <style>
 *{{box-sizing:border-box;margin:0;padding:0}}
@@ -6915,22 +6982,22 @@ function toggleTheme(){{
         <div style="flex:1;min-width:100px;padding:8px 12px;border-radius:8px;background:{tp_trend_bg};text-align:center">
           <div style="font-size:11px;color:var(--text3);margin-bottom:3px">① 趨勢</div>
           <div style="font-size:12px;font-weight:600;color:{tp_trend_color}">月線{'>' if tp_trend else '<'}季線 {tp_trend_icon}</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:2px">MA20={tp_ma20} / MA60={tp_ma60}</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px">MA20=<b>{tp_ma20}</b> / MA60=<b>{tp_ma60}</b></div>
         </div>
         <div style="flex:1;min-width:100px;padding:8px 12px;border-radius:8px;background:{tp_macd_bg};text-align:center">
           <div style="font-size:11px;color:var(--text3);margin-bottom:3px">② MACD</div>
-          <div style="font-size:12px;font-weight:600;color:{tp_macd_color}">柱體{'正' if tp_macd else '負'} {tp_macd_icon}</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:2px">Histogram={tp_hist}</div>
+          <div style="font-size:12px;font-weight:600;color:{tp_macd_color}">動能{'↗' if tp_macd else '↘'} {tp_macd_icon}</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px">MACD柱體=<b>{tp_hist}</b></div>
         </div>
         <div style="flex:1;min-width:100px;padding:8px 12px;border-radius:8px;background:{tp_vol_bg};text-align:center">
           <div style="font-size:11px;color:var(--text3);margin-bottom:3px">③ 資金籌碼</div>
           <div style="font-size:12px;font-weight:600;color:{tp_vol_color}">量{'放大' if tp_vol else '縮'} {tp_vol_icon}</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:2px">量比={tp_vol_ratio}x</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px">量比=<b>{tp_vol_ratio}x</b></div>
         </div>
         <div style="flex:1;min-width:100px;padding:8px 12px;border-radius:8px;background:{tp_pos_bg};text-align:center">
           <div style="font-size:11px;color:var(--text3);margin-bottom:3px">④ 位置</div>
           <div style="font-size:12px;font-weight:600;color:{tp_pos_color}">{'適中' if tp_pos else '偏離'} {tp_pos_icon}</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:2px">MA5乖離={tp_bias5 if tp_bias5 is not None else '-'}%</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px">MA5乖離=<b>{tp_bias5 if tp_bias5 is not None else '-'}%</b></div>
         </div>
       </div>
       {f'<div style="margin-top:8px;padding:6px 10px;border-radius:6px;background:#fffbeb;font-size:11px;color:#92400e">T4 趨勢斜率：MA20 方向{"↗ 向上" if tp_ma20_slope == "up" else "↘ 向下" if tp_ma20_slope == "down" else "→ 持平"}{"，短均跌破中均 ⚠" if tp_ma5_cross else ""}</div>' if tp_ma20_slope != "flat" or tp_ma5_cross else ''}
@@ -7020,8 +7087,9 @@ function toggleTheme(){{
         <div style="font-size:13px;color:var(--text);line-height:1.6">{tp_position_text}</div>
         <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;font-size:11px">
           <span style="padding:2px 8px;border-radius:20px;background:{tp_trend_bg};color:{tp_trend_color}">① 趨勢 {tp_trend_icon}</span>
-          <span style="padding:2px 8px;border-radius:20px;background:{tp_macd_bg};color:{tp_macd_color}">② MACD {tp_macd_icon}</span>
+          <span style="padding:2px 8px;border-radius:20px;background:{tp_macd_bg};color:{tp_macd_color}">② 動能 {tp_macd_icon}</span>
           <span style="padding:2px 8px;border-radius:20px;background:{tp_vol_bg};color:{tp_vol_color}">③ 量能 {tp_vol_icon}</span>
+          <span style="padding:2px 8px;border-radius:20px;background:{tp_pos_bg};color:{tp_pos_color}">④ 位置 {tp_pos_icon}</span>
         </div>
         <div style="margin-top:8px;font-size:11px;color:var(--text3)">
           MA5 乖離：<strong style="color:{_bias5_color}">{_bias5_str}</strong>
@@ -7392,7 +7460,7 @@ def report_generate(req: ReportReq, user: dict = Depends(require_user)):
     conn.close()
     if cached:
         if 'id="basic-info"' in (cached["report_html"] or ""):
-            return {"ok": True, "url": f"{BACKEND_URL}/report/{stock_id}-{report_date}"}
+            return {"ok": True, "url": f"{BACKEND_URL}/report/{stock_id}"}
         # 舊格式（無七欄位）→ 刪除快取，強制重新生成
         conn = _db_conn()
         conn.execute(
@@ -7423,7 +7491,7 @@ def report_generate(req: ReportReq, user: dict = Depends(require_user)):
     finally:
         conn.close()
 
-    return {"ok": True, "url": f"{BACKEND_URL}/report/{stock_id}-{report_date}"}
+    return {"ok": True, "url": f"{BACKEND_URL}/report/{stock_id}"}
 
 
 @app.get("/report/", include_in_schema=False)
@@ -7433,13 +7501,14 @@ def get_report_empty():
 
 @app.get("/report/{slug}")
 def get_report(slug: str):
-    from fastapi.responses import HTMLResponse
+    from fastapi.responses import HTMLResponse, RedirectResponse
+    # 帶日期的舊 URL（如 /report/2330-2026-07-24）→ 301 到固定 URL
     m = _re.match(r"^([A-Za-z0-9]+)-(\d{4}-\d{2}-\d{2})$", slug)
     if m:
-        stock_id, report_date = m.group(1).upper(), m.group(2)
-    else:
-        stock_id = slug.upper()
-        report_date = _taipei_today()
+        return RedirectResponse(url=f"/report/{m.group(1).upper()}", status_code=301)
+
+    stock_id = slug.upper()
+    report_date = _taipei_today()
 
     # Validate stock code format (1-6 alphanumeric chars)
     if not _re.match(r"^[A-Z0-9]{1,6}$", stock_id):
@@ -7447,21 +7516,19 @@ def get_report(slug: str):
 
     try:
         conn = _db_conn()
+        # 優先找今天的報告，沒有則找最新一筆
         row = conn.execute(
-            "SELECT report_html FROM stock_reports WHERE stock_id=? AND report_date=? ORDER BY created_at DESC LIMIT 1",
+            "SELECT report_html, report_date FROM stock_reports WHERE stock_id=? AND report_date=? ORDER BY created_at DESC LIMIT 1",
             (stock_id, report_date)
         ).fetchone()
         if not row:
             row = conn.execute(
-                "SELECT report_html, report_date FROM stock_reports WHERE stock_id=? ORDER BY created_at DESC LIMIT 1",
+                "SELECT report_html, report_date FROM stock_reports WHERE stock_id=? ORDER BY report_date DESC, created_at DESC LIMIT 1",
                 (stock_id,)
             ).fetchone()
         conn.close()
     except Exception:
         return HTMLResponse("<html><body><h1>503</h1><p>Service temporarily unavailable.</p><a href='/'>← Home</a></body></html>", status_code=503)
-
-    if row and str(row["report_date"] if "report_date" in row.keys() else '')[:10] != report_date:
-        row = None  # 報告日期不符，強制重算
 
     if row:
         html = row["report_html"] or ""
@@ -7599,7 +7666,7 @@ def picks_page():
         "numberOfItems": count,
         "itemListElement": [
             {"@type": "ListItem", "position": i + 1,
-             "url": f"{BACKEND_URL}/report/{p['stock_id']}-{date_str}",
+             "url": f"{BACKEND_URL}/report/{p['stock_id']}",
              "name": f"{p['stock_id']} {p.get('stock_name','')}"}
             for i, p in enumerate(picks)
         ],
@@ -7830,8 +7897,7 @@ def sitemap():
     for sid in all_stock_ids:
         priority = "0.8" if sid in hardcoded_set else "0.6"
         locs.append(f"  <url><loc>{FRONTEND_URL}/report/{sid}</loc><changefreq>daily</changefreq><priority>{priority}</priority></url>")
-    for r in reports:
-        locs.append(f"  <url><loc>{FRONTEND_URL}/report/{r['stock_id']}-{r['report_date']}</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>")
+    # 不再列帶日期的 URL（舊 URL 已由路由 301 到固定 URL）
 
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     xml += "\n".join(locs) + "\n</urlset>"
