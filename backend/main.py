@@ -1602,8 +1602,8 @@ def find_support_resistance(highs, lows, closes, volumes, price, channel_support
 # ══════════════════════════════════════════════════════════
 # 風險評估與條列摘要
 # ══════════════════════════════════════════════════════════
-def calc_risk_level(price, support, resistance, rr_ratio, near_top, near_bot, pattern):
-    """回傳風險等級與條列摘要"""
+def calc_risk_level(price, support, resistance, rr_ratio, near_top, near_bot, pattern, vol_ratio=None):
+    """回傳風險等級與條列摘要（含量能判斷）"""
     sup_dist = (price - support) / price * 100
     res_dist = (resistance - price) / price * 100
 
@@ -1636,6 +1636,22 @@ def calc_risk_level(price, support, resistance, rr_ratio, near_top, near_bot, pa
         risk_level = "watch"
         risk_label = "觀望"
         risk_color = "gray"
+
+    # 量能修正：縮量（量比 < 0.6）時，低風險升為留意、留意升為高風險
+    if vol_ratio is not None:
+        try:
+            vr = float(vol_ratio)
+            if vr < 0.6:
+                if risk_level == "low":
+                    risk_level = "medium"
+                    risk_label = "留意（縮量）"
+                    risk_color = "amber"
+                elif risk_level == "watch":
+                    risk_level = "medium"
+                    risk_label = "留意（縮量）"
+                    risk_color = "amber"
+        except (ValueError, TypeError):
+            pass
 
     return risk_level, risk_label, risk_color
 
@@ -3404,9 +3420,16 @@ def _do_analyze(stock_id: str, tf: str = "D",
     rr_ratio = round(reward / risk, 2) if risk > 0 else 0
     rr_basis  = "防守位"               # 說明計算基礎，供前端顯示
 
-    # 風險等級
+    # 快速計算量比（供風險評估用）
+    _quick_vol_ratio = None
+    if len(volumes) >= 20:
+        _qv5  = sum(float(v) for v in volumes[-5:]) / 5
+        _qv20 = sum(float(v) for v in volumes[-20:]) / 20
+        _quick_vol_ratio = round(_qv5 / _qv20, 2) if _qv20 > 0 else 1.0
+
+    # 風險等級（含量能判斷）
     risk_level, risk_label, risk_color = calc_risk_level(
-        price, support, resistance, rr_ratio, near_top, near_bot, pattern)
+        price, support, resistance, rr_ratio, near_top, near_bot, pattern, vol_ratio=_quick_vol_ratio)
 
     # B3: K 線型態勝率統一從 detect_kbar_pattern 取得（不再呼叫 detect_kline_patterns）
     k_pattern = kbar_pattern or "常態 K 線（無觸發極端型態）"
@@ -3758,7 +3781,7 @@ def _do_analyze(stock_id: str, tf: str = "D",
             _tp_macd = bool(_hist_v > 0)             # 無法判斷，維持原條件
 
         # 雷達三：資金籌碼 — 近5日均量 > 20日均量（量能放大）
-        _tp_vol   = bool(float(_vol_r) >= 1.2)
+        _tp_vol   = bool(float(_vol_r) >= 1.3)
 
         # T1: 雷達四：位置 — MA5 乖離 -3%~+3%（剛站上均線，未過熱）
         _bias5  = round((price - float(_ma5_v))  / float(_ma5_v)  * 100, 2) if _ma5_v  and float(_ma5_v)  > 0 else None
@@ -6780,19 +6803,26 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
                 f"明日若收盤跌破今日低點 {today_low}，視為突破失敗訊號，應出場。"
             )
 
+    # 合併結論邏輯：優先用 _do_analyze 產出的結論（d["warning"]），避免兩套平行邏輯矛盾
+    _conclusion_text = d.get("warning", "")
+    # 從結論中提取「操作：」後面的文字
+    _conclusion_op = ""
+    if "操作：" in _conclusion_text:
+        _conclusion_op = _conclusion_text.split("操作：", 1)[1].strip()
+
     if kbar_action:
         op_text = kbar_action + _breakout_risk_text
     elif today_breakout:
         op_text = (f"今日突破前高 {prev_high}，突破型態確立。可持有，防守位 {stop_loss}，目標壓力 {resistance}，損益比 {rr_ratio:.2f}。"
                    + _breakout_risk_text)
+    elif _conclusion_op:
+        # 使用結論的操作建議（位置分析更精準），前面加上位置描述
+        _conclusion_pos = _conclusion_text.split("操作：")[0].strip().rstrip("。，")
+        op_text = f"{_conclusion_pos}。\n\n操作建議：{_conclusion_op}"
     elif tp_score == 0:
-        op_text = f"多空雷達三格全滅，技術面偏弱，暫不適合進場。等待趨勢翻多、MACD 翻正、量能放大後再評估。"
+        op_text = f"多空雷達四格全滅，技術面偏弱，暫不適合進場。等待趨勢翻多、MACD 翻正、量能放大後再評估。"
     elif tp_score <= 1:
         op_text = f"多空雷達訊號不足，觀望為主。防守位 {stop_loss}，待雷達訊號補齊後再考慮進場。"
-    elif trend == "上升趨勢" and rr_ratio >= 2:
-        op_text = f"趨勢向上，損益比 {rr_ratio:.2f} 合理。防守位 {stop_loss}，目標壓力 {resistance}。"
-    elif trend == "下降趨勢" or rr_ratio < 1:
-        op_text = f"趨勢偏弱或損益比 {rr_ratio:.2f} 不理想，建議觀望。等待趨勢反轉訊號，跌破 {stop_loss} 嚴格停損。"
     else:
         op_text = f"趨勢盤整，等待方向確認。關注能否突破壓力 {resistance}，防守位 {stop_loss}，損益比 {rr_ratio:.2f}。"
 
@@ -6837,7 +6867,7 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
     _tp_missing = []
     if not tp_trend: _tp_missing.append(f"趨勢（需 MA20 {tp_ma20} > MA60 {tp_ma60}）")
     if not tp_macd:  _tp_missing.append(f"MACD（需柱體翻正，目前 {tp_hist}）")
-    if not tp_vol:   _tp_missing.append(f"量能（需量比 ≥1.2，目前 {tp_vol_ratio}x）")
+    if not tp_vol:   _tp_missing.append(f"量能（需量比 ≥1.3，目前 {tp_vol_ratio}x）")
     if tp_score == 3:
         tp_supplement_html = ""
     elif _tp_missing:
