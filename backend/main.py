@@ -2996,8 +2996,8 @@ def _kd_status_desc(k_arr, d_arr) -> dict:
         return {"text": "KD資料不足", "direction": "neutral", "k": None, "d": None}
     k_now, d_now   = float(vk[-1]), float(vd[-1])
     k_prev, d_prev = float(vk[-2]), float(vd[-2])
-    golden = k_now > d_now and k_prev <= d_prev
-    death  = k_now < d_now and k_prev >= d_prev
+    golden = k_now > d_now + 0.5 and k_prev <= d_prev + 0.5   # 差距>0.5才算金叉
+    death  = k_now < d_now - 0.5 and k_prev >= d_prev - 0.5   # 差距>0.5才算死叉
     if k_now >= 80:
         zone, zone_dir = "超買區（>80），注意高檔鈍化風險", "warning"
     elif k_now <= 20:
@@ -3011,6 +3011,8 @@ def _kd_status_desc(k_arr, d_arr) -> dict:
     return {
         "text": f"K={k_now:.1f}，D={d_now:.1f}，位於{zone}{cross}",
         "direction": direction, "k": k_now, "d": d_now,
+        "k_change": round(k_now - k_prev, 1),
+        "d_change": round(d_now - d_prev, 1),
         "golden_cross": golden, "death_cross": death,
     }
 
@@ -3063,6 +3065,9 @@ def _vol_analysis_desc(volumes, closes, opens) -> dict:
     return {
         "text": f"近5日均量 {round(avg_5):,} 張，20日均量 {round(avg_20):,} 張，比值 {ratio:.2f}x，{note}",
         "ratio": round(ratio, 2), "avg_5": round(avg_5), "avg_20": round(avg_20),
+        "today_vol": round(vols[-1]) if vols else 0,
+        "yesterday_vol": round(vols[-2]) if len(vols) >= 2 else 0,
+        "today_vs_yesterday": round(vols[-1] / vols[-2], 2) if len(vols) >= 2 and vols[-2] > 0 else 1.0,
     }
 
 
@@ -3211,7 +3216,7 @@ def _do_analyze(stock_id: str, tf: str = "D",
     _ma20_last = calc_ma(closes, 20)[-1]
     _ma60_last = calc_ma(closes, 60)[-1]
     if not np.isnan(_ma20_last) and not np.isnan(_ma60_last):
-        trend = "上升趨勢" if _ma20_last > _ma60_last * 1.005 else "下降趨勢" if _ma20_last < _ma60_last * 0.995 else "盤整"
+        trend = "上升趨勢" if _ma20_last > _ma60_last * 1.003 else "下降趨勢" if _ma20_last < _ma60_last * 0.997 else "盤整"
     else:
         avail = [(p, calc_ma(closes, p)[-1]) for p in sorted(ma_periods)
                  if not np.isnan(calc_ma(closes, p)[-1])]
@@ -3341,7 +3346,7 @@ def _do_analyze(stock_id: str, tf: str = "D",
         pattern, pattern_sub = detect_pattern(price, support, resistance, ch_lo, ch_hi)
 
     # K棒型態辨識（B3: 統一為單一函式，同時回傳型態名、預警、方向、勝率）
-    kbar_pattern, kbar_warning, kbar_dir, kbar_win_rate = detect_kbar_pattern(opens, highs, lows, closes)
+    kbar_pattern, kbar_warning, kbar_dir, kbar_win_rate = detect_kbar_pattern(opens, highs, lows, closes, volumes)
 
     # 葛蘭碧（加量能過濾）
     ma20_arr = calc_ma(closes, 20)
@@ -3380,11 +3385,10 @@ def _do_analyze(stock_id: str, tf: str = "D",
         raw_stop = round(price * 0.95, 2)
     else:
         raw_stop = round(support * 0.985, 2)
-    min_stop  = round(price * 0.98, 2)   # 最近不能超過現價 -2%（太緊容易被洗）
-    max_stop  = round(price * 0.90, 2)   # 最遠不超過現價 -10%（太遠失去意義）
-    # B2: 修正邏輯 — raw_stop 夾在 max_stop ~ min_stop 之間
-    # 原寫法 min(min_stop, max(...)) 會讓結果永遠 ≤ min_stop，防守位被壓死在 -2%
-    stop_loss = max(max_stop, min(raw_stop, min_stop))
+    stop_nearest = round(price * 0.98, 2)   # 最近：不能超過現價 -2%（太緊容易被洗）
+    stop_farthest = round(price * 0.90, 2)  # 最遠：不超過現價 -10%（太遠失去意義）
+    # raw_stop 夾在 stop_farthest ~ stop_nearest 之間
+    stop_loss = max(stop_farthest, min(raw_stop, stop_nearest))
 
     # 目標價
     target1 = resistance
@@ -3576,6 +3580,42 @@ def _do_analyze(stock_id: str, tf: str = "D",
         kd_status, macd_status, kbar_simple, institutional
     )
 
+    # ── 歷史回測：過去同型態出現時的漲跌統計 ──
+    _kbar_backtest = None
+    if kbar_pattern and len(closes) > 60:
+        _bt_key = None
+        for _bk in ["錘頭","射擊之星","多頭吞噬","空頭吞噬","早晨之星","黃昏之星",
+                     "三紅兵","三烏鴉","穿刺線","烏雲蓋頂","大紅棒","大黑棒"]:
+            if _bk in kbar_pattern:
+                _bt_key = _bk
+                break
+        if _bt_key:
+            _bt_ups, _bt_downs, _bt_total = 0, 0, 0
+            for _bi in range(3, min(len(closes) - 3, 200)):
+                _seg_o = opens[:len(opens)-_bi]
+                _seg_h = highs[:len(highs)-_bi]
+                _seg_l = lows[:len(lows)-_bi]
+                _seg_c = closes[:len(closes)-_bi]
+                if len(_seg_c) < 5:
+                    break
+                _p_str, _, _, _ = detect_kbar_pattern(_seg_o, _seg_h, _seg_l, _seg_c)
+                if _bt_key in _p_str:
+                    _next_idx = len(closes) - _bi
+                    if _next_idx < len(closes):
+                        if closes[_next_idx] > closes[_next_idx - 1]:
+                            _bt_ups += 1
+                        else:
+                            _bt_downs += 1
+                        _bt_total += 1
+                    if _bt_total >= 5:
+                        break
+            if _bt_total >= 2:
+                _kbar_backtest = {
+                    "pattern": _bt_key, "total": _bt_total,
+                    "ups": _bt_ups, "downs": _bt_downs,
+                    "win_pct": round(_bt_ups / _bt_total * 100) if _bt_total > 0 else 50,
+                }
+
     # K 線資料
     bars = []
     for i in range(len(df)):
@@ -3633,6 +3673,7 @@ def _do_analyze(stock_id: str, tf: str = "D",
         "vol_analysis":  vol_analysis,
         "institutional": institutional,
         "risk_factors":  risk_factors,
+        "kbar_backtest": _kbar_backtest,
     }
 
     # 基本面（非同步，抓失敗不影響結果）
@@ -3731,14 +3772,14 @@ def _do_analyze(stock_id: str, tf: str = "D",
         _bias_entry = bool(_tp_score == 4)
 
         # T7: 出場訊號（加入 MA5 跌破 MA20）
-        _ma5_arr = calc_ma(closes, 20)  # 這裡要用 ma5
         _ma5_cross_below_ma20 = False
         if _ma5_v and _ma20_v and float(_ma5_v) < float(_ma20_v):
             # 確認前一天 MA5 還在 MA20 上方（今天剛跌破）
             _ma5_full = calc_ma(closes, 5)
-            if len(_ma5_full) >= 2 and len(_ma20_arr) >= 2:
+            _ma20_full = calc_ma(closes, 20)
+            if len(_ma5_full) >= 2 and len(_ma20_full) >= 2:
                 _prev_ma5 = _ma5_full[-2] if not np.isnan(_ma5_full[-2]) else None
-                _prev_ma20 = _ma20_arr[-2] if not np.isnan(_ma20_arr[-2]) else None
+                _prev_ma20 = _ma20_full[-2] if not np.isnan(_ma20_full[-2]) else None
                 if _prev_ma5 and _prev_ma20 and _prev_ma5 >= _prev_ma20:
                     _ma5_cross_below_ma20 = True
 
@@ -4933,20 +4974,29 @@ def get_peers(stock_id: str, limit: int = 15, user: dict = Depends(require_user)
 
 
 
-def detect_kbar_pattern(opens, highs, lows, closes):
+def detect_kbar_pattern(opens, highs, lows, closes, volumes=None):
     """
-    辨識最近 K 棒型態（單根/兩根/三根）
+    辨識最近 K 棒型態（單根/兩根/三根），含量能確認
     回傳：
       kbar_pattern: str  已確認的型態名稱（空字串=無）
       kbar_warning: str  預警文字（明天若...將形成...）
     """
     n = len(closes)
     if n < 3:
-        return "", "", "neutral"
+        return "", "", "neutral", 0.50
 
     o1,h1,l1,c1 = opens[-1],highs[-1],lows[-1],closes[-1]  # 最新根
     o2,h2,l2,c2 = opens[-2],highs[-2],lows[-2],closes[-2]  # 前一根
     o3,h3,l3,c3 = opens[-3],highs[-3],lows[-3],closes[-3]  # 前兩根
+
+    # 量能確認（今日量 vs 前一日量）
+    _vol_up = False   # 今日量 > 昨日量
+    _vol_down = False # 今日量 < 昨日量 * 0.7
+    if volumes is not None and len(volumes) >= 2:
+        v1, v2 = float(volumes[-1]), float(volumes[-2])
+        if v2 > 0:
+            _vol_up = v1 > v2 * 1.1     # 量增 10% 以上
+            _vol_down = v1 < v2 * 0.7    # 量縮 30% 以上
 
     body1 = abs(c1 - o1)
     body2 = abs(c2 - o2)
@@ -5010,14 +5060,16 @@ def detect_kbar_pattern(opens, highs, lows, closes):
     if (is_red1 and not is_red2
             and o1 <= c2 and c1 >= o2
             and body1 > body2):
-        patterns.append("多頭吞噬（底部反轉）")
+        _vol_tag = "，量增確認" if _vol_up else ("，量未配合" if _vol_down else "")
+        patterns.append(f"多頭吞噬（底部反轉{_vol_tag}）")
         warnings.append("出現多頭吞噬，明天若繼續收紅，底部反轉確認")
 
     # 空頭吞噬（黑吞紅）
     elif (not is_red1 and is_red2
             and o1 >= c2 and c1 <= o2
             and body1 > body2):
-        patterns.append("空頭吞噬（頂部反轉）")
+        _vol_tag = "，量增確認" if _vol_up else ""
+        patterns.append(f"空頭吞噬（頂部反轉{_vol_tag}）")
         warnings.append("出現空頭吞噬，明天若繼續收黑，頂部反轉確認")
 
     # 孕線（母子）
@@ -6590,12 +6642,33 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
     ma_color    = "#4ade80" if ma_dir == "bullish" else ("#f87171" if ma_dir == "bearish" else "#fbbf24")
     kd_dir      = kd_status.get("direction", "neutral")
     kd_text     = kd_status.get("text", "")
+    # 加入 KD 方向變化
+    _kd_k_chg = kd_status.get("k_change")
+    _kd_d_chg = kd_status.get("d_change")
+    if _kd_k_chg is not None and kd_text:
+        _k_arrow = "↑" if _kd_k_chg > 0 else ("↓" if _kd_k_chg < 0 else "→")
+        _d_arrow = "↑" if _kd_d_chg > 0 else ("↓" if _kd_d_chg < 0 else "→")
+        kd_text = kd_text.replace(
+            f"K={kd_status.get('k', 0):.1f}",
+            f"K={kd_status.get('k', 0):.1f}({_k_arrow}{abs(_kd_k_chg):.1f})"
+        ).replace(
+            f"D={kd_status.get('d', 0):.1f}",
+            f"D={kd_status.get('d', 0):.1f}({_d_arrow}{abs(_kd_d_chg):.1f})"
+        )
     kd_color    = "#4ade80" if kd_dir in ("bullish",) else ("#f87171" if kd_dir == "bearish" else "#fbbf24")
     macd_dir    = macd_status.get("direction", "neutral")
     macd_text   = macd_status.get("text", "")
     macd_color  = {"bullish": "#4ade80", "slightly_bullish": "#86efac",
                    "bearish": "#f87171", "slightly_bearish": "#fca5a5"}.get(macd_dir, "#8faabf")
     vol_text    = vol_analysis.get("text", "")
+    # 加入今日 vs 昨日量比較
+    _tv = vol_analysis.get("today_vol", 0)
+    _yv = vol_analysis.get("yesterday_vol", 0)
+    if _tv > 0 and _yv > 0:
+        _tv_ratio = _tv / _yv
+        _tv_arrow = "↑" if _tv_ratio > 1.05 else ("↓" if _tv_ratio < 0.95 else "→")
+        _tv_pct = round(abs(_tv_ratio - 1) * 100)
+        vol_text += f"，今日 {_tv:,} 張 vs 昨日 {_yv:,} 張 {_tv_arrow}{_tv_pct}%"
     rr_color    = "#4ade80" if rr_ratio >= 2 else ("#fbbf24" if rr_ratio >= 1 else "#f87171")
 
     # ── 多空雷達變數 ──
@@ -6803,6 +6876,18 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
         f'font-size:13px;color:var(--text);line-height:1.6">{kbar_action}</div>'
         if kbar_action else ""
     )
+    # 歷史回測顯示
+    _bt = d.get("kbar_backtest")
+    kbar_backtest_html = ""
+    if _bt and _bt.get("total", 0) >= 2:
+        _bt_color = "#4ade80" if _bt["win_pct"] >= 55 else ("#fbbf24" if _bt["win_pct"] >= 45 else "#f87171")
+        kbar_backtest_html = (
+            f'<div style="margin-top:8px;font-size:12px;color:var(--text3);padding:8px 10px;'
+            f'background:var(--bg2);border-radius:6px;border-left:3px solid {_bt_color}">'
+            f'📊 歷史回測：過去{_bt["total"]}次出現「{_bt["pattern"]}」'
+            f'→ 隔日上漲 {_bt["ups"]} 次、下跌 {_bt["downs"]} 次'
+            f'（勝率 <b style="color:{_bt_color}">{_bt["win_pct"]}%</b>）</div>'
+        )
     kd_row_html = (
         f'<div class="irow"><div class="idot" style="background:{kd_color}"></div>'
         f'<div style="font-size:13px;line-height:1.6;color:var(--text)">'
@@ -6955,7 +7040,8 @@ function toggleTheme(){{
   <section class="card" id="basic-info">
     <span class="tag" style="background:{risk_color}22;color:{risk_color}">{risk_label}</span>{market_tag_html}
     <div style="font-size:26px;font-weight:700;margin-bottom:4px">{stock_id} {stock_name}</div>
-    <div style="font-size:13px;color:var(--text3);margin-bottom:16px">分析日期：{report_date}</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:4px">分析日期：{report_date}</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:16px">資料來源：FinMind + Yahoo Finance｜K線 {len(d.get('bars', []))} 根</div>
     <div class="row">
       <div class="stat">
         <div class="stat-label">現價</div>
@@ -7048,9 +7134,8 @@ function toggleTheme(){{
         <div style="font-size:12px;color:var(--text3)">大數據歷史勝率 <span style="color:{wr_color};font-weight:700">{wr_pct}%</span></div>
       </div>
     </div>
-    {kbar_action_html}
+    {kbar_action_html}{kbar_backtest_html}
   </section>
-
 
   <!-- 5. 動能指標 -->
   <section class="card" id="momentum">
