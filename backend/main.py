@@ -47,6 +47,12 @@ JWT_EXPIRE_DAYS = 15   # token 有效期（15 天）
 if JWT_SECRET == "change-me-in-production-please":
     print("⚠️  [JWT] 使用預設 JWT_SECRET，正式環境請設定 JWT_SECRET 環境變數！")
 
+# 管理後台金鑰（安全性修正 2026/07/26：原本共用 JWT_SECRET 前16碼，已改成獨立金鑰）
+# 請在 Zeabur 設定環境變數 ADMIN_API_KEY（建議用一長串隨機字串）
+ADMIN_API_KEY = os.environ.get("ADMIN_API_KEY", "")
+if not ADMIN_API_KEY:
+    print("⚠️  [ADMIN] 未設定 ADMIN_API_KEY，管理後台端點（/admin/*）將全部無法存取，請至 Zeabur 設定此環境變數。")
+
 # 綠界 Webhook 驗證用
 ECPAY_MERCHANT_ID = os.environ.get("ECPAY_MERCHANT_ID", "3443173")
 ECPAY_HASH_KEY = os.environ.get("ECPAY_HASH_KEY", "")
@@ -71,7 +77,9 @@ VAPID_SUBJECT     = os.environ.get("VAPID_SUBJECT", f"mailto:{os.environ.get('SM
 
 # Threads OAuth
 THREADS_APP_ID     = os.environ.get("THREADS_APP_ID",     "1011864388160019")
-THREADS_APP_SECRET = os.environ.get("THREADS_APP_SECRET", "0af6b8665441f7940a5f4d0edbc7fe42")
+# 安全性修正（2026/07/26）：舊版此處寫死真實密鑰，已移除。Threads 自動發文功能已暫停，
+# 若之後要重新啟用，請先去 Meta 開發者後台重新產生 App Secret，再設定 Zeabur 環境變數 THREADS_APP_SECRET。
+THREADS_APP_SECRET = os.environ.get("THREADS_APP_SECRET", "")
 THREADS_REDIRECT_URI = os.environ.get("THREADS_REDIRECT_URI", "https://api.softglow-ai.com/auth/threads/callback")
 THREADS_SCOPE      = "threads_basic,threads_content_publish"
 
@@ -2653,16 +2661,20 @@ def _db_init():
             pass  # 欄位已存在，忽略
 
     # 自動建立管理員帳號（已存在則不覆蓋）
-    # B4: 密碼改從環境變數讀取，不再寫死在原始碼
+    # 安全性修正（2026/07/26）：舊版此處在環境變數未設定時會 fallback 到寫死的真實密碼 "630428"，已移除。
+    # 現在若未設定 ADMIN_DEFAULT_PWD，會直接跳過建立管理員帳號，不會再用預設密碼建帳號。
     ADMIN_EMAIL  = os.environ.get("ADMIN_EMAIL", "watione@yahoo.com.tw")
-    ADMIN_PWD    = os.environ.get("ADMIN_DEFAULT_PWD", "630428")
+    ADMIN_PWD    = os.environ.get("ADMIN_DEFAULT_PWD", "")
     ADMIN_EXPIRE = "2099-12-31"
     existing = conn.execute("SELECT id FROM members WHERE email=?", (ADMIN_EMAIL,)).fetchone()
     if not existing:
-        conn.execute(
-            "INSERT INTO members (email, password, plan, expire_at) VALUES (?, ?, ?, ?)",
-            (ADMIN_EMAIL, _hash_pw(ADMIN_PWD), "yearly", ADMIN_EXPIRE)
-        )
+        if not ADMIN_PWD:
+            print("⚠️  [ADMIN] 未設定環境變數 ADMIN_DEFAULT_PWD，略過建立管理員帳號。")
+        else:
+            conn.execute(
+                "INSERT INTO members (email, password, plan, expire_at) VALUES (?, ?, ?, ?)",
+                (ADMIN_EMAIL, _hash_pw(ADMIN_PWD), "yearly", ADMIN_EXPIRE)
+            )
         conn.commit()
         print(f"   ✅ 管理員帳號已建立：{ADMIN_EMAIL}")
     else:
@@ -4475,13 +4487,13 @@ def get_realtime(stock_id: str):
 # ══════════════════════════════════════════════════════════
 
 def _check_admin(key: str):
-    """驗證管理者 key = JWT_SECRET 前 16 碼"""
-    if key != JWT_SECRET[:16]:
+    """驗證管理者 key，需與環境變數 ADMIN_API_KEY 相符（未設定時一律拒絕）"""
+    if not ADMIN_API_KEY or key != ADMIN_API_KEY:
         raise HTTPException(status_code=403, detail="無權限")
 
 @app.get("/admin/backup-db")
 def backup_db(key: str = ""):
-    """下載 members.db 備份，key = JWT_SECRET 前16碼"""
+    """下載 members.db 備份，key = 環境變數 ADMIN_API_KEY 的值"""
     from fastapi.responses import FileResponse
     _check_admin(key)
     if not os.path.exists(DB_PATH):

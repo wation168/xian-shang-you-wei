@@ -4638,12 +4638,10 @@ function adminTap(){
   _adminTapTimer = setTimeout(()=>{ _adminTapCount=0; }, 1500);
   if(_adminTapCount >= 5){
     _adminTapCount = 0;
-    // 預填管理員帳密
-    document.getElementById('loginEmail').value = 'watione@yahoo.com.tw';
-    document.getElementById('loginPwd').value = '630428';
+    // 安全性修正（2026/07/26）：原本這裡會自動把管理員帳號密碼填進登入框並自動送出，
+    // 因為這段程式碼會送到每個訪客的瀏覽器執行，等於帳密直接公開在網站原始碼裡。
+    // 已移除自動填入，改成只開登入視窗，管理員自己手動輸入帳密。
     showLoginModal();
-    // 自動登入
-    setTimeout(doLogin, 200);
   }
 }
 
