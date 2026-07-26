@@ -991,7 +991,7 @@ async def serve_favicon():
 @app.get("/robots.txt", include_in_schema=False)
 async def serve_robots():
     from fastapi.responses import PlainTextResponse
-    return PlainTextResponse("User-agent: *\nAllow: /\n\nSitemap: https://softglow-ai.com/sitemap.xml")
+    return PlainTextResponse("User-agent: *\nAllow: /\nDisallow: /*?q=\n\nSitemap: https://softglow-ai.com/sitemap.xml")
 
 
 # ══════════════════════════════════════════════════════════
