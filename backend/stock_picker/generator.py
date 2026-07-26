@@ -403,3 +403,349 @@ body{{background:#020817;color:#f1f5f9;font-family:-apple-system,BlinkMacSystemF
         f.write(html)
     print(f"[generator] ✅ 全台掃描輸出：{scan_path}（{len(stocks_data)} 檔）")
     return scan_path
+
+
+# ──────────────────────────────────────────
+# 深度選股結果輸出（2026/07/26 新增）
+# 對應 main.py 第5989行 _run_deep_analysis_job 呼叫：
+#   from generator import generate_deep_analysis
+#   generate_deep_analysis(results)
+# results 格式對應新版 finmind_filter.py 的 run_deep_scan() 回傳格式，
+# 欄位包含：matched_conditions / score / confidence / warnings /
+# stop_loss / stop_loss_pct / risk_level / support / resistance 等
+#
+# 風格：混合 render_card（豐富度）+ generate_scan_result（風險分區）
+# ──────────────────────────────────────────
+
+def _deep_confidence_color(confidence: str) -> str:
+    if "高信心" in (confidence or ""):
+        return "#22c55e"
+    if "中信心" in (confidence or ""):
+        return "#f59e0b"
+    return "#94a3b8"
+
+
+def _deep_risk_color(risk_level: str) -> str:
+    return {"低": "#22c55e", "中": "#f59e0b", "高": "#ef4444"}.get(risk_level, "#94a3b8")
+
+
+def _deep_condition_label(cond: str) -> str:
+    """把 matched_conditions 裡的內部代號轉成使用者看得懂的中文"""
+    mapping = {
+        "cond1_低檔起漲":                    "低檔起漲",
+        "cond2_高點拉回起漲(買1)":            "高點拉回起漲（買1）",
+        "cond3_均線突破(買2)":                "均線突破（買2）",
+        "cond3_均線突破(買2)_量能未確認":      "均線突破（買2）⚠量能未確認",
+        "MACD動能加速中":                     "MACD動能加速",
+    }
+    return mapping.get(cond, cond)
+
+
+def render_deep_card(s: dict) -> str:
+    """深度選股個股卡片：風險等級配色 + 豐富內容（比照精選股卡片）"""
+    risk_level  = s.get("risk_level", "中")
+    risk_color  = _deep_risk_color(risk_level)
+    conf_color  = _deep_confidence_color(s.get("confidence", ""))
+    score       = s.get("score", 0)
+
+    change      = s.get("change", 0)
+    change_pct  = s.get("change_pct", 0)
+    change_color = "#ef4444" if change > 0 else ("#22c55e" if change < 0 else "#94a3b8")
+    change_sign  = "+" if change > 0 else ""
+
+    cond_badges = "".join(
+        f'<span style="font-size:10px;padding:2px 10px;border-radius:20px;'
+        f'background:#1e293b;color:#a78bfa;font-weight:600">{_deep_condition_label(c)}</span>'
+        for c in s.get("matched_conditions", [])
+    )
+
+    vol_ratio = s.get("vol_ratio", 0)
+    vol_color = "#22c55e" if vol_ratio >= 1.5 else "#f59e0b" if vol_ratio >= 1.2 else "#94a3b8"
+
+    warnings_html = ""
+    if s.get("warnings"):
+        warn_lines = "".join(f'<div>⚠️ {w}</div>' for w in s["warnings"])
+        warnings_html = (
+            f'<div style="background:#1a0a0a;border:1px solid #7f1d1d;border-radius:10px;'
+            f'padding:10px 12px;font-size:11px;color:#fca5a5;line-height:1.6;margin-top:8px">'
+            f'{warn_lines}</div>'
+        )
+
+    fund_parts = []
+    if s.get("per") is not None:
+        fund_parts.append(f'本益比 {s["per"]}')
+    if s.get("dividend_yield") is not None:
+        fund_parts.append(f'殖利率 {s["dividend_yield"]}%')
+    if s.get("eps_ttm") is not None:
+        eps_yoy = s.get("eps_yoy")
+        yoy_txt = f'（YoY {eps_yoy:+.1f}%）' if eps_yoy is not None else ""
+        fund_parts.append(f'近四季EPS {s["eps_ttm"]}{yoy_txt}')
+    fund_html = ""
+    if fund_parts:
+        fund_html = (
+            f'<div style="color:#64748b;font-size:11px;margin-top:6px">'
+            f'{"　".join(fund_parts)}</div>'
+        )
+
+    return f"""
+<div style="background:#0f172a;border:1px solid {risk_color}44;border-radius:16px;padding:20px;
+     display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden">
+  <div style="position:absolute;top:16px;right:16px;width:52px;height:52px;border-radius:50%;
+       background:conic-gradient({conf_color} {min(score,10) * 36}deg, #1e293b 0deg);
+       display:flex;align-items:center;justify-content:center">
+    <div style="width:40px;height:40px;border-radius:50%;background:#0f172a;
+         display:flex;align-items:center;justify-content:center;
+         font-size:13px;font-weight:700;color:{conf_color}">{score}</div>
+  </div>
+  <div style="padding-right:60px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      <span style="font-size:17px;font-weight:700;color:#f1f5f9">{s['stock_id']}</span>
+      <span style="font-size:13px;color:#64748b">{s.get('stock_name', '')}</span>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <span style="font-size:10px;padding:2px 8px;border-radius:20px;
+            background:{conf_color}22;color:{conf_color};font-weight:700">{s.get('confidence','一般')}</span>
+      <span style="font-size:10px;padding:2px 8px;border-radius:20px;
+            background:{risk_color}22;color:{risk_color};font-weight:600">風險：{risk_level}</span>
+      <span style="font-size:10px;padding:2px 8px;border-radius:20px;
+            background:#1e293b;color:{vol_color}">📊 量比 {vol_ratio}x</span>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">{cond_badges}</div>
+  </div>
+  <div style="display:flex;gap:16px;font-size:12px;color:#64748b;flex-wrap:wrap">
+    <span>現價 <strong style="color:#f1f5f9;font-size:15px">{s['price']}</strong>
+      <span style="color:{change_color}">{change_sign}{change} ({change_sign}{change_pct}%)</span></span>
+    <span>MA5 <strong style="color:#94a3b8">{s.get('ma5','—')}</strong>
+      MA20 <strong style="color:#94a3b8">{s.get('ma20','—')}</strong>
+      MA60 <strong style="color:#94a3b8">{s.get('ma60','—')}</strong></span>
+  </div>
+  <div style="background:#1e293b;border-radius:10px;padding:12px;font-size:12px;line-height:1.8">
+    <div style="display:flex;justify-content:space-between;color:#e2e8f0">
+      <span>支撐 <b style="color:#22c55e">{s.get('support','—')}</b>　壓力 <b style="color:#f59e0b">{s.get('resistance','—')}</b></span>
+      <span>風報比 <b style="color:#e2e8f0">{s.get('rr_ratio','—')}x</b></span>
+    </div>
+    <div style="display:flex;justify-content:space-between;color:#e2e8f0;margin-top:4px">
+      <span>停損 <b style="color:#ef4444">{s.get('stop_loss','—')}</b>
+        <span style="color:#64748b">（-{s.get('stop_loss_pct','—')}%，依{s.get('stop_loss_basis','—')}）</span></span>
+    </div>
+    <div style="color:#64748b;margin-top:4px">
+      MACD DIF {s.get('macd_dif','—')}　DEA {s.get('macd_dea','—')}　柱 {s.get('macd_hist','—')}
+      {f"　法人連買 {s['consecutive_buy_days']}日" if s.get('consecutive_buy_days', 0) >= 2 else ""}
+    </div>
+    {fund_html}
+  </div>
+  {warnings_html}
+</div>"""
+
+
+_AD_PUB = "ca-pub-1768270548115739"
+_AD_SLOT_ARTICLE = "2793159185"   # 內文區廣告（跟全站其他頁面共用同一個真實廣告單元）
+_AD_SLOT_BOTTOM   = "4182262477"  # 底部廣告（跟全站其他頁面共用同一個真實廣告單元）
+
+
+def _ad_slot(slot_id: str, position_index: int = 0) -> str:
+    """
+    AdSense 廣告位，深色主題樣式，預留min-height避免CLS版位跳動。
+    使用全站共用的兩個真實廣告單元ID（非auto佔位），依位置交替使用：
+    偶數位置用內文廣告ID，奇數位置用底部廣告ID。
+    """
+    real_slot = _AD_SLOT_ARTICLE if position_index % 2 == 0 else _AD_SLOT_BOTTOM
+    return f'''
+<div style="min-height:250px;margin:20px 0;display:flex;align-items:center;justify-content:center;
+     background:#0f172a;border:1px dashed #334155;border-radius:12px;overflow:hidden">
+  <ins class="adsbygoogle" style="display:block;width:100%;min-height:250px"
+       data-ad-client="{_AD_PUB}"
+       data-ad-slot="{real_slot}"
+       data-ad-format="auto"
+       data-full-width-responsive="true"
+       id="{slot_id}"></ins>
+</div>
+<script>try{{(adsbygoogle = window.adsbygoogle || []).push({{}});}}catch(e){{}}</script>'''
+
+
+def generate_deep_analysis(results: list[dict], note: str = "") -> str:
+    """
+    深度選股結果輸出，依風險等級分三區（低/中/高），每區內依分數排序。
+    對應 main.py _run_deep_analysis_job 的呼叫，輸出至
+    stock_picker/output/deep_analysis.html（main.py 讀取這個固定路徑存進DB）
+
+    2026/07/26 新增：
+      - note 參數：公開版顯示「延遲一交易日」的說明
+      - 3~5 則 AdSense 廣告位，依當日入選股票數量自動增減，避免內容少廣告多
+      - 醒目的「即時資料在 App」導流CTA（比delay note更顯眼，是這頁的主要轉換點）
+      - 補上全站規定的 cookie-consent.css / softglow-cookies.js，符合GDPR+AdSense規則
+    """
+    low_risk  = sorted([r for r in results if r.get("risk_level") == "低"],
+                       key=lambda x: x.get("score", 0), reverse=True)
+    mid_risk  = sorted([r for r in results if r.get("risk_level") == "中"],
+                       key=lambda x: x.get("score", 0), reverse=True)
+    high_risk = sorted([r for r in results if r.get("risk_level") == "高"],
+                       key=lambda x: x.get("score", 0), reverse=True)
+    generated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    # 固定加厚內容（不隨每日結果變動，給Google爬蟲穩定可索引的文字內容）
+    seo_content = '''
+<div style="background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px;margin-bottom:24px;line-height:1.8">
+  <h2 style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:10px">什麼是深度選股？</h2>
+  <p style="font-size:13px;color:#94a3b8;margin-bottom:14px">
+    深度選股是從台股成交量前150大個股中，用「三重確認」機制自動篩選出技術面剛轉強的股票。
+    三個條件必須同時成立才有資格入選：① 月季線金叉（20日均線由下往上穿越60日均線，且金叉後
+    未再翻回空頭）② 股價站上月線（現價需在20日均線之上）③ MACD金叉（快線由下往上穿越慢線，
+    3日內發生）。三個條件都通過後，系統再依股價位置（低檔起漲、高點拉回起漲、均線突破）、
+    量能強弱、法人籌碼動向等因子加分，分數愈高代表訊號愈強。
+  </p>
+  <h2 style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:10px">停損價怎麼計算？</h2>
+  <p style="font-size:13px;color:#94a3b8;margin-bottom:14px">
+    系統會依股票符合的型態，分別計算近20日低點、拉回段低點、月線價位這幾種可能的停損位置，
+    再取其中「離現價最近、風險最低」的一個當作建議停損價，並換算成距現價的百分比，分為低
+    （5%以內）、中（5~10%）、高（10%以上）三個風險等級，方便快速判斷承擔的下檔風險大小。
+  </p>
+  <h2 style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:10px">常見問題</h2>
+  <div style="font-size:13px;color:#94a3b8">
+    <p style="margin-bottom:10px"><b style="color:#e2e8f0">Q：這份名單多久更新一次？</b><br>
+    A：每個交易日收盤後 17:00 自動掃描更新一次，本頁顯示的是延遲一個交易日的資料，即時結果需登入App查看。</p>
+    <p style="margin-bottom:10px"><b style="color:#e2e8f0">Q：信心等級是怎麼判斷的？</b><br>
+    A：依加分項目總分區分，5分以上為高信心🔥，3~4分為中信心⭐，1~2分為一般，分數愈高代表符合的技術訊號愈多重。</p>
+    <p><b style="color:#e2e8f0">Q：這份名單可以直接照著買嗎？</b><br>
+    A：不建議。本頁資料為技術面自動化篩選結果，僅供研究參考，不構成投資建議，請自行評估風險並設好停損。</p>
+  </div>
+</div>'''
+
+    section_meta = {
+        "low":  ("🟢 低風險", "#22c55e", low_risk,  "停損距現價5%以內"),
+        "mid":  ("🟡 中風險", "#f59e0b", mid_risk,  "停損距現價5~10%"),
+        "high": ("🔴 高風險", "#ef4444", high_risk, "停損距現價10%以上，謹慎操作"),
+    }
+    rendered_keys = [k for k in ("low", "mid", "high") if section_meta[k][2]]
+
+    # 廣告位計數器：確保多則廣告交替使用兩個真實slot ID，而不是全部同一個
+    _ad_counter = [0]
+    def _next_ad(label: str) -> str:
+        idx = _ad_counter[0]
+        _ad_counter[0] += 1
+        return _ad_slot(label, idx)
+
+    def _section_html(key: str) -> str:
+        title, color, items, note_text = section_meta[key]
+        if len(items) >= 6:
+            # 卡片數夠多時，這一區內部再插一則廣告，分成前後兩半
+            half = len(items) // 2
+            cards_first  = "\n".join(render_deep_card(s) for s in items[:half])
+            cards_second = "\n".join(render_deep_card(s) for s in items[half:])
+            return (
+                f'<div style="margin-bottom:40px">'
+                f'<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'
+                f'<h2 style="font-size:18px;font-weight:700;color:{color}">{title}</h2>'
+                f'<span style="font-size:12px;color:#475569">{len(items)} 檔　{note_text}</span></div>'
+                f'<div class="grid">{cards_first}</div>'
+                f'{_next_ad(f"ad-{key}-split")}'
+                f'<div class="grid">{cards_second}</div></div>'
+            )
+        cards = "\n".join(render_deep_card(s) for s in items)
+        return (
+            f'<div style="margin-bottom:40px">'
+            f'<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'
+            f'<h2 style="font-size:18px;font-weight:700;color:{color}">{title}</h2>'
+            f'<span style="font-size:12px;color:#475569">{len(items)} 檔　{note_text}</span></div>'
+            f'<div class="grid">{cards}</div></div>'
+        )
+
+    # ── 組裝內容區塊，廣告依內容量自動插入 3~5 則 ──
+    body_parts = [_next_ad("ad-top")]  # 廣告①：固定在最上方
+
+    if not rendered_keys:
+        body_parts.append(
+            '<div style="padding:32px 0;text-align:center;color:#475569">當時無符合三重確認條件的股票</div>'
+        )
+        body_parts.append(_next_ad("ad-empty-mid"))  # 廣告②：內容空白時補一則，維持最低3則
+    else:
+        for i, key in enumerate(rendered_keys):
+            body_parts.append(_section_html(key))
+            is_last = (i == len(rendered_keys) - 1)
+            if not is_last:
+                body_parts.append(_next_ad(f"ad-between-{key}"))  # 廣告：區塊間插入
+            elif len(rendered_keys) == 1:
+                # 只有一區時，硬性補一則廣告確保最低3則
+                body_parts.append(_next_ad("ad-single-section-mid"))
+
+    body_parts.append(_next_ad("ad-bottom"))  # 廣告：固定在最下方（配合免責聲明前）
+    body = "".join(body_parts)
+
+    total = len(results)
+    high_conf_count = sum(1 for r in results if "高信心" in (r.get("confidence") or ""))
+
+    note_banner = ""
+    if note:
+        note_banner = (
+            f'<div style="background:#1e293b;border:1px solid #334155;border-radius:10px;'
+            f'padding:12px 16px;margin-bottom:12px;font-size:12px;color:#94a3b8;text-align:center">'
+            f'{note}</div>'
+        )
+
+    # 醒目的「即時資料在App」導流CTA，這是整頁的主要轉換目的
+    live_cta = '''
+<div onclick="location.href='https://softglow-ai.com/'"
+  style="background:linear-gradient(135deg,#1a3a2a 0%,#0f2d1f 100%);border:1.5px solid #2d6a4f;
+  border-radius:14px;padding:18px 20px;margin-bottom:24px;cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  box-shadow:0 2px 16px rgba(29,158,117,0.2)">
+  <div>
+    <div style="font-size:16px;font-weight:800;color:#4ade80;margin-bottom:4px">📲 想看今天最新即時分析？</div>
+    <div style="font-size:12px;color:#86efac;line-height:1.6">
+      本頁資料為延遲一個交易日，即時深度選股結果、股票代號、完整停損建議<br>
+      都在 <b>App 內登入後</b> 立即查看，每個交易日 17:00 更新
+    </div>
+  </div>
+  <div style="background:#22c55e;color:#02120a;font-size:13px;font-weight:800;padding:10px 18px;
+    border-radius:10px;white-space:nowrap;flex-shrink:0">立即前往 ›</div>
+</div>'''
+
+    html = f"""<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>深度選股 — {generated_at[:10]}</title>
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<style>
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{background:#020817;color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;padding:24px 16px 48px}}
+.container{{max-width:1200px;margin:0 auto}}
+.grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}}
+.stat{{background:#0f172a;border:1px solid #1e293b;border-radius:10px;padding:10px 16px;font-size:12px;color:#64748b}}
+.stat strong{{display:block;font-size:18px;font-weight:700;color:#f1f5f9;margin-bottom:2px}}
+.disclaimer{{margin-top:32px;padding:16px;background:#0f172a;border-radius:10px;font-size:11px;color:#475569;line-height:1.7}}
+@media(max-width:600px){{.grid{{grid-template-columns:1fr}}}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div style="margin-bottom:20px">
+    <h1 style="font-size:22px;font-weight:700;margin-bottom:6px">🎯 深度選股</h1>
+    <p style="font-size:13px;color:#64748b">產生時間：{generated_at}　｜　篩選條件：月季線金叉＋站上月線＋MACD金叉（三重確認）</p>
+  </div>
+  {note_banner}
+  {live_cta}
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px">
+    <div class="stat"><strong>{total}</strong>檔入選</div>
+    <div class="stat"><strong style="color:#22c55e">{high_conf_count}</strong>檔高信心🔥</div>
+    <div class="stat"><strong style="color:#22c55e">{len(low_risk)}</strong>低風險</div>
+    <div class="stat"><strong style="color:#f59e0b">{len(mid_risk)}</strong>中風險</div>
+    <div class="stat"><strong style="color:#ef4444">{len(high_risk)}</strong>高風險</div>
+  </div>
+  {body}
+  {seo_content}
+  <div class="disclaimer">⚠️ 本頁面資料僅供參考，不構成買賣建議。停損價為系統依技術結構試算，非保證有效，股市有風險，請自行評估後決策。</div>
+</div>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739" crossorigin="anonymous"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>"""
+
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    deep_path = os.path.join(OUTPUT_DIR, "deep_analysis.html")
+    with open(deep_path, "w", encoding="utf-8") as f:
+        f.write(html)
+    ad_count = html.count('class="adsbygoogle"')
+    print(f"[generator] ✅ 深度選股輸出：{deep_path}（{total} 檔，高信心 {high_conf_count} 檔，廣告位 {ad_count} 則）")
+    return deep_path

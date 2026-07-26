@@ -196,6 +196,9 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
         <button class="action-btn" onclick="showSection('prebuild')">
           <span class="icon">🔍</span>預建 SEO 選股
         </button>
+        <button class="action-btn" onclick="showSection('deepanalysis')">
+          <span class="icon">🎯</span>深度選股
+        </button>
       </div>
     </div>
 
@@ -293,6 +296,14 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
       <div class="result-box" id="picksResult" style="margin-top:10px"></div>
     </div>
 
+    <!-- 深度選股手動觸發 -->
+    <div class="card" id="sec-deepanalysis" style="display:none">
+      <div class="card-title">🎯 深度選股</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6">手動觸發深度選股分析（三重確認：月季線金叉、股價站上月線、MACD金叉），背景執行完成後更新 App 內即時資料與跑馬燈。平日 17:00 自動執行。</p>
+      <button class="inline-btn" id="runDeepAnalysisBtn" onclick="doRunDeepAnalysis(this)">🎯 立即執行深度選股</button>
+      <div class="result-box" id="deepAnalysisResult" style="margin-top:10px"></div>
+    </div>
+
   </div>
 </div>
 
@@ -353,7 +364,7 @@ if(sessionStorage.getItem('adminAuth')==='1'){
 
 // ── 顯示/隱藏區塊 ──
 function showSection(name){
-  ['grant','reset','members','messages','blocklist','earlybird','prebuild'].forEach(s=>{
+  ['grant','reset','members','messages','blocklist','earlybird','prebuild','deepanalysis'].forEach(s=>{
     document.getElementById('sec-'+s).style.display = s===name ? 'block' : 'none';
   });
   if(name==='members') loadMembers();
@@ -834,6 +845,34 @@ async function doRunOpeningScan(btn){
   }finally{
     btn.disabled = false;
     btn.textContent = '⚡ 立即抓取開盤熱門股';
+  }
+}
+
+// ── 深度選股手動觸發 ──
+async function doRunDeepAnalysis(btn){
+  btn.disabled = true;
+  btn.textContent = '⏳ 執行中...';
+  const res = document.getElementById('deepAnalysisResult');
+  res.className = 'result-box show';
+  res.textContent = '深度選股分析已送出，背景執行中（約需數分鐘，完成後會自動更新 App 內即時資料與跑馬燈）...';
+  try{
+    const r = await fetch(`${API}/admin/run-deep-analysis?key=${getAdminKey()}`, {
+      method:'POST', signal: AbortSignal.timeout(60000)
+    });
+    const data = await r.json();
+    if(r.ok){
+      res.textContent = `✅ ${data.msg || '已開始執行'}`;
+      res.className = 'result-box show success';
+    } else {
+      res.textContent = '❌ 失敗：'+(data.detail||'未知錯誤');
+      res.className = 'result-box show error';
+    }
+  }catch(e){
+    res.textContent = '❌ 連線失敗或逾時：'+e.message;
+    res.className = 'result-box show error';
+  }finally{
+    btn.disabled = false;
+    btn.textContent = '🎯 立即執行深度選股';
   }
 }
 

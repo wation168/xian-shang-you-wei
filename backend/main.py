@@ -5976,14 +5976,22 @@ def _fetch_opening_volume_top20() -> list:
 
 
 def _run_deep_analysis_job():
-    """每個交易日 17:00 執行：深度選股掃描"""
+    """
+    每個交易日 17:00 執行：深度選股掃描
+
+    2026/07/26 改版：資料輪替機制
+      - 即時結果（今天剛跑出來的）存成 JSON，供 /api/deep-analysis 給 App 內
+        登入使用者即時查看（免費看基本資訊，付費看完整含股票代號）
+      - 公開版 /deep-analysis 網頁改成顯示「上一次」的資料（等於延遲一個交易日），
+        資訊透明標註延遲時間，可以放心當 SEO/導流頁面公開，不會洩漏當天即時訊號
+    """
     from zoneinfo import ZoneInfo as _ZI3
     now = datetime.now(_ZI3("Asia/Taipei"))
     if now.weekday() >= 5:
         return
     print(f"[deep_analysis] 開始執行 {now.strftime('%H:%M')}")
     try:
-        import sys, os
+        import sys, os, json as _json_deep
         sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "stock_picker"))
         from crawler import fetch_twse_volume_top
         from finmind_filter import run_deep_scan
@@ -5996,18 +6004,52 @@ def _run_deep_analysis_job():
             return
 
         results = run_deep_scan(top_ids, name_dict=name_dict, finmind_token=FINMIND_TOKEN)
-        generate_deep_analysis(results)
         print(f"[deep_analysis] 完成，{len(results)} 檔入選")
-        # 把 HTML 存進 DB（避免 Zeabur 重啟後檔案消失）
-        _da_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "stock_picker", "output", "deep_analysis.html")
-        if os.path.exists(_da_path):
-            with open(_da_path, "r", encoding="utf-8") as _f:
-                _da_html = _f.read()
-            _dc = _db_conn()
-            _dc.execute("INSERT OR REPLACE INTO html_pages (key, content, updated_at) VALUES (?, ?, datetime('now','+8 hours'))", ("deep_analysis", _da_html))
-            _dc.commit()
-            _dc.close()
-            print("[deep_analysis] HTML 已存入 DB")
+
+        _dc = _db_conn()
+
+        # ① 先把「上一次」存的即時資料讀出來（這份資料現在已經滿一個交易日，
+        #    可以安心拿去產生公開版頁面了）
+        _stale_row = _dc.execute(
+            "SELECT content, updated_at FROM html_pages WHERE key='deep_analysis_data'"
+        ).fetchone()
+
+        # ② 把「今天」的即時資料存成 JSON，供 /api/deep-analysis 站內頁即時使用
+        _dc.execute(
+            "INSERT OR REPLACE INTO html_pages (key, content, updated_at) VALUES (?, ?, datetime('now','+8 hours'))",
+            ("deep_analysis_data", _json_deep.dumps(results, ensure_ascii=False))
+        )
+        _dc.commit()
+        print("[deep_analysis] 即時資料(JSON)已存入DB，供App內站內頁使用")
+
+        # ③ 用「上一次」的資料（延遲一個交易日，安全公開）重新產生公開版HTML頁
+        if _stale_row and _stale_row["content"]:
+            try:
+                _stale_results = _json_deep.loads(_stale_row["content"])
+            except Exception:
+                _stale_results = []
+            _stale_date = (_stale_row["updated_at"] or "")[:10]
+            _note = (
+                f"⏰ 本頁資料為 {_stale_date} 收盤後分析（延遲一個交易日），"
+                f"即時分析請登入 App 查看" if _stale_date else
+                "⏰ 本頁為延遲資料，即時分析請登入 App 查看"
+            )
+            generate_deep_analysis(_stale_results, note=_note)
+
+            _da_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "stock_picker", "output", "deep_analysis.html")
+            if os.path.exists(_da_path):
+                with open(_da_path, "r", encoding="utf-8") as _f:
+                    _da_html = _f.read()
+                _dc.execute(
+                    "INSERT OR REPLACE INTO html_pages (key, content, updated_at) VALUES (?, ?, datetime('now','+8 hours'))",
+                    ("deep_analysis", _da_html)
+                )
+                _dc.commit()
+                print(f"[deep_analysis] 公開版HTML已更新（顯示 {_stale_date} 的延遲資料）")
+        else:
+            print("[deep_analysis] 尚無前一次資料可產生公開版（首次執行，屬正常現象，明天起會開始顯示）")
+
+        _dc.close()
     except Exception as e:
         print(f"[deep_analysis] 執行失敗：{e}")
         import traceback
@@ -8881,7 +8923,11 @@ async def portfolio_analysis(current_user: dict = Depends(get_current_user)):
 
 @app.get("/deep-analysis")
 def deep_analysis_page():
-    """回傳深度選股 HTML 頁面（優先從 DB 讀，重啟不消失）"""
+    """
+    公開版深度選股 HTML 頁面（優先從 DB 讀，重啟不消失）
+    2026/07/26 起：這裡顯示的是「延遲一個交易日」的資料，當作 SEO/導流頁面用，
+    頁面本身會清楚標註延遲時間。即時資料改由 /api/deep-analysis 供 App 內使用。
+    """
     import os
     # 優先從 DB 讀
     _dc = _db_conn()
@@ -8902,6 +8948,58 @@ def deep_analysis_page():
     <h2>深度選股報告尚未產出</h2>
     <p>每個交易日 17:00 自動更新</p>
     </body></html>""", status_code=200)
+
+
+@app.get("/api/deep-analysis")
+def api_deep_analysis():
+    """
+    即時深度選股資料（JSON），供 App 內站內頁面使用。
+    2026/07/26 新增。回傳今天最新一次跑出來的完整結果（不分免費/付費，
+    是否模糊股票代號/名稱由前端依登入狀態自行決定，跟現有 _applyResultMasks
+    機制一致，後端只負責提供資料）。
+    """
+    _dc = _db_conn()
+    _row = _dc.execute("SELECT content, updated_at FROM html_pages WHERE key='deep_analysis_data'").fetchone()
+    _dc.close()
+    if not _row or not _row["content"]:
+        return {"data": [], "updated_at": None}
+    import json as _json_api
+    try:
+        _data = _json_api.loads(_row["content"])
+    except Exception:
+        _data = []
+    return {"data": _data, "updated_at": _row["updated_at"]}
+
+
+@app.get("/deep-analysis-status")
+def deep_analysis_status():
+    """
+    給首頁跑馬燈用的輕量狀態查詢。
+    2026/07/26 新增。只有「今天」產生的資料才回傳 available=true，
+    避免服務重啟、排程還沒跑時顯示昨天的舊提示。
+    """
+    from zoneinfo import ZoneInfo as _ZI4
+    today = datetime.now(_ZI4("Asia/Taipei")).strftime("%Y-%m-%d")
+    _dc = _db_conn()
+    _row = _dc.execute("SELECT content, updated_at FROM html_pages WHERE key='deep_analysis_data'").fetchone()
+    _dc.close()
+    if not _row or not _row["content"]:
+        return {"available": False}
+    updated_date = (_row["updated_at"] or "")[:10]
+    if updated_date != today:
+        return {"available": False}
+    import json as _json_status
+    try:
+        _data = _json_status.loads(_row["content"])
+    except Exception:
+        _data = []
+    high_conf = sum(1 for r in _data if "高信心" in (r.get("confidence") or ""))
+    return {
+        "available": True,
+        "updated_at": _row["updated_at"],
+        "count": len(_data),
+        "high_confidence_count": high_conf,
+    }
 
 
 @app.post("/admin/run-deep-analysis")
