@@ -6092,7 +6092,9 @@ def get_opening_picks():
     updated_at = _OPENING_TOP20.get("updated_at")
 
     if not base_data:
-        return {"data": base_data, "updated_at": updated_at}
+        # 2026/07/27：沒資料時也帶上查詢時間，前端才能一律顯示時間那一行
+        return {"data": base_data, "updated_at": updated_at,
+                "server_time": _taipei_now_str("%Y-%m-%d %H:%M")}
 
     enriched = []
     for item in base_data:
@@ -6119,7 +6121,8 @@ def get_opening_picks():
             pass
         enriched.append(new_item)
 
-    return {"data": enriched, "updated_at": updated_at}
+    return {"data": enriched, "updated_at": updated_at,
+            "server_time": _taipei_now_str("%Y-%m-%d %H:%M")}
 
 
 @app.post("/webhook/ecpay")
@@ -8944,32 +8947,118 @@ def deep_analysis_page():
     if os.path.exists(out_path):
         with open(out_path, "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
-    return HTMLResponse(content="""
-    <html><body style="background:#0f172a;color:#94a3b8;font-family:sans-serif;padding:40px;text-align:center">
-    <h2>深度選股報告尚未產出</h2>
+    # 連檔案都沒有時的最後 fallback。
+    # 2026/07/27：這裡原本完全沒有時間資訊，使用者無法判斷是「今天還沒跑」還是
+    # 「系統壞掉很久了」，所以一律把查詢當下的台北時間顯示出來。
+    _fb_now = _taipei_now_str("%Y-%m-%d %H:%M")
+    return HTMLResponse(content=f"""
+    <html><head><meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1"></head>
+    <body style="background:#0f172a;color:#94a3b8;font-family:sans-serif;padding:40px;text-align:center">
+    <h2 style="color:#f1f5f9">深度選股報告尚未產出</h2>
     <p>每個交易日 17:00 自動更新</p>
+    <p style="font-size:13px;color:#64748b;margin-top:16px">查詢時間：{_fb_now}</p>
     </body></html>""", status_code=200)
 
 
+def _deep_is_premium(user: dict | None) -> bool:
+    """
+    深度選股專用：判斷此使用者是否有權看到完整股票代號/名稱。
+
+    判斷條件與 require_paid_user() 完全一致（邀請制解鎖 > 付費方案 > 到期日），
+    差別只在這裡不拋 403，而是回傳 True/False——因為深度選股要讓免費會員與
+    未登入者也能看到遮罩版預覽（導流用），不是整個擋掉。
+    """
+    if not user:
+        return False
+    if _is_referral_active(user):
+        return True
+    if user.get("plan") == "free":
+        return False
+    exp = user.get("expire_at")
+    if exp and exp < _date_cls.today().isoformat():
+        return False
+    return True
+
+
+def _deep_mask_item(item: dict) -> dict:
+    """
+    伺服器端遮罩單筆深度選股結果。
+
+    只把「股票代號」與「股票名稱」換成遮罩字串，其餘欄位（現價/支撐/壓力/停損/
+    信心/風險/量比/警示等）原樣保留——與前端 showDeepAnalysisPage() 只對
+    stock_id / stock_name 套用 blur 的顯示行為完全一致，免費會員畫面不會有落差。
+
+    另外會掃過所有字串欄位（含 list / dict 巢狀），把可能夾帶在文字裡的真實代號或
+    名稱一併替換，避免有人從 warnings / score_factors 這類敘述欄位反推出是哪一檔。
+    """
+    if not isinstance(item, dict):
+        return item
+
+    MASK = "＊＊＊＊"
+    real_id = str(item.get("stock_id") or "")
+    real_name = str(item.get("stock_name") or "")
+
+    def _scrub(v):
+        if isinstance(v, str):
+            if real_id:
+                v = v.replace(real_id, MASK)
+            if real_name:
+                v = v.replace(real_name, MASK)
+            return v
+        if isinstance(v, list):
+            return [_scrub(x) for x in v]
+        if isinstance(v, dict):
+            return {k: _scrub(x) for k, x in v.items()}
+        return v
+
+    masked = {k: _scrub(v) for k, v in item.items()}
+    masked["stock_id"] = MASK
+    masked["stock_name"] = MASK
+    masked["masked"] = True
+    return masked
+
+
 @app.get("/api/deep-analysis")
-def api_deep_analysis():
+def api_deep_analysis(user: dict | None = Depends(get_current_user)):
     """
     即時深度選股資料（JSON），供 App 內站內頁面使用。
-    2026/07/26 新增。回傳今天最新一次跑出來的完整結果（不分免費/付費，
-    是否模糊股票代號/名稱由前端依登入狀態自行決定，跟現有 _applyResultMasks
-    機制一致，後端只負責提供資料）。
+    2026/07/26 新增；2026/07/27 修正付費牆漏洞。
+
+    修正前的問題：這個端點完全沒有驗證身分，任何人（含未登入、未付費）
+      只要直接呼叫網址就能拿到完整、未遮罩的股票代號與名稱。前端的模糊效果
+      只是畫面樣式，真實資料早已送到瀏覽器，付費牆等同虛設。
+
+    修正後的行為：改由後端自行判斷登入/付費狀態——
+      付費有效（含邀請制解鎖）→ 回傳完整資料
+      免費會員 / 未登入      → 股票代號與名稱在伺服器端就換成遮罩字串才送出，
+                               其餘欄位照給，維持免費預覽與導流效果不變
     """
     _dc = _db_conn()
     _row = _dc.execute("SELECT content, updated_at FROM html_pages WHERE key='deep_analysis_data'").fetchone()
     _dc.close()
+    # server_time：查詢當下的台北時間，一律回傳。
+    # 前端要求「不管有沒有資料都要顯示日期時間」，沒資料時 updated_at 是 None，
+    # 前端就改用這個時間顯示「查詢時間」，不能讓時間那一行整個消失。
+    _server_time = _taipei_now_str("%Y-%m-%d %H:%M")
+    _is_premium = _deep_is_premium(user)
+
     if not _row or not _row["content"]:
-        return {"data": [], "updated_at": None}
+        return {"data": [], "updated_at": None,
+                "server_time": _server_time, "masked": not _is_premium}
     import json as _json_api
     try:
         _data = _json_api.loads(_row["content"])
     except Exception:
         _data = []
-    return {"data": _data, "updated_at": _row["updated_at"]}
+
+    if not _is_premium:
+        _data = [_deep_mask_item(_it) for _it in _data]
+        return {"data": _data, "updated_at": _row["updated_at"],
+                "server_time": _server_time, "masked": True}
+
+    return {"data": _data, "updated_at": _row["updated_at"],
+            "server_time": _server_time, "masked": False}
 
 
 @app.get("/deep-analysis-status")

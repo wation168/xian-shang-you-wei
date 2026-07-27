@@ -4787,7 +4787,10 @@ async function showPicksPage(){
     if (!res.ok) throw new Error('載入失敗');
     const j = await res.json();
     const items = j.data || [];
-    const updatedAt = j.updated_at ? `<div style="font-size:11px;color:var(--text3);margin-bottom:12px">更新時間：${j.updated_at}</div>` : '';
+    // 2026/07/27：時間一律顯示，不管有沒有資料。
+    const updatedAt = j.updated_at
+      ? `<div style="font-size:11px;color:var(--text3);margin-bottom:12px">更新時間：${j.updated_at}</div>`
+      : `<div style="font-size:11px;color:var(--text3);margin-bottom:12px">尚未更新　查詢時間：${j.server_time || '—'}</div>`;
 
     const deepCard = `
       <div onclick="showPage('deepanalysis')"
@@ -4887,11 +4890,19 @@ async function showDeepAnalysisPage(){
   el.innerHTML = '<div style="padding:20px 0;text-align:center;color:var(--text3)">載入中...</div>';
 
   try{
-    const res = await fetch(`${getAPI()}/api/deep-analysis`);
+    // 2026/07/27：必須帶上登入 token，後端才知道你是不是付費會員。
+    // 後端已改為「免費/未登入在伺服器端就把代號名稱遮罩掉」，沒帶 token
+    // 的話連付費會員也只會拿到遮罩版資料。
+    const res = await fetch(`${getAPI()}/api/deep-analysis`, { headers: _authHeaders() });
     if(!res.ok) throw new Error('載入失敗');
     const j = await res.json();
     const items = j.data || [];
-    const updatedAt = j.updated_at ? `<div style="font-size:11px;color:var(--text3);margin-bottom:12px">更新時間：${j.updated_at}</div>` : '';
+    // 2026/07/27：時間一律顯示，不管有沒有資料。有 updated_at 就顯示資料更新時間；
+    // 沒有（今天還沒跑出來）就顯示後端回傳的查詢時間並標明尚未更新，
+    // 使用者才分得出「今天還沒跑」跟「系統壞掉」。
+    const updatedAt = j.updated_at
+      ? `<div style="font-size:11px;color:var(--text3);margin-bottom:12px">更新時間：${j.updated_at}</div>`
+      : `<div style="font-size:11px;color:var(--text3);margin-bottom:12px">尚未更新　查詢時間：${j.server_time || '—'}</div>`;
 
     const header = `
       <div style="font-size:16px;font-weight:700;padding:10px 0 4px">🎯 深度選股</div>
