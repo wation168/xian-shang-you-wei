@@ -6345,7 +6345,8 @@ class ContactMessage(BaseModel):
 class DeleteToken(BaseModel):
     token: str
 
-CONTACT_ADMIN_PWD = "630428"
+# 安全性修正（2026/07/27）：移除寫死的 "630428"，統一改用 ADMIN_API_KEY 環境變數比對
+CONTACT_ADMIN_PWD = ADMIN_API_KEY
 
 
 @app.post("/api/contact")
@@ -6442,8 +6443,8 @@ async def get_contact_messages():
 @app.delete("/api/contact/{msg_id}")
 async def delete_contact_message(msg_id: int, body: DeleteToken):
     # 留言者刪除：token="owner"（前端 localStorage 記住自己的 id）
-    # 管理員刪除：token="630428"
-    if body.token not in ("owner", CONTACT_ADMIN_PWD):
+    # 管理員刪除：token=ADMIN_API_KEY
+    if body.token != "owner" and (not CONTACT_ADMIN_PWD or body.token != CONTACT_ADMIN_PWD):
         raise HTTPException(status_code=403, detail="無刪除權限")
 
     with sqlite3.connect(DB_PATH) as conn:
@@ -6468,7 +6469,7 @@ class BlockReq(BaseModel):
 
 @app.post("/api/contact/{msg_id}/reply")
 async def reply_contact_message(msg_id: int, body: ReplyReq):
-    if body.token != CONTACT_ADMIN_PWD:
+    if not CONTACT_ADMIN_PWD or body.token != CONTACT_ADMIN_PWD:
         raise HTTPException(status_code=403, detail="無權限")
     reply_text = body.reply.strip()
     if not reply_text:
@@ -6487,7 +6488,7 @@ async def reply_contact_message(msg_id: int, body: ReplyReq):
 
 @app.post("/api/block")
 async def block_user(body: BlockReq):
-    if body.token != CONTACT_ADMIN_PWD:
+    if not CONTACT_ADMIN_PWD or body.token != CONTACT_ADMIN_PWD:
         raise HTTPException(status_code=403, detail="無權限")
     if body.block_type not in ("comment", "login"):
         raise HTTPException(status_code=400, detail="block_type 必須為 comment 或 login")
@@ -6504,7 +6505,7 @@ async def block_user(body: BlockReq):
 
 @app.delete("/api/block/{email}")
 async def unblock_user(email: str, token: str):
-    if token != CONTACT_ADMIN_PWD:
+    if not CONTACT_ADMIN_PWD or token != CONTACT_ADMIN_PWD:
         raise HTTPException(status_code=403, detail="無權限")
     with sqlite3.connect(DB_PATH) as conn:
         cur = conn.execute("DELETE FROM blocked_users WHERE email=?", (email,))
@@ -6515,7 +6516,7 @@ async def unblock_user(email: str, token: str):
 
 @app.get("/api/block")
 async def get_blocked_users(token: str):
-    if token != CONTACT_ADMIN_PWD:
+    if not CONTACT_ADMIN_PWD or token != CONTACT_ADMIN_PWD:
         raise HTTPException(status_code=403, detail="無權限")
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row

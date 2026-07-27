@@ -685,7 +685,7 @@ async function submitReply(id){
   try{
     const r=await fetch(`${API}/api/contact/${id}/reply`,{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({token:ADMIN_PWD,reply:txt})
+      body:JSON.stringify({token:getAdminKey(),reply:txt})
     });
     if(r.ok){toast('✅ 回覆已送出');loadContactMessages();}
     else{const d=await r.json();toast('❌ '+(d.detail||'失敗'));}
@@ -697,7 +697,7 @@ async function adminDeleteMsg(id){
   try{
     const r=await fetch(`${API}/api/contact/${id}`,{
       method:'DELETE',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({token:ADMIN_PWD})
+      body:JSON.stringify({token:getAdminKey()})
     });
     if(r.ok){toast('✅ 已刪除');allContactMsgs=allContactMsgs.filter(m=>m.id!==id);renderContactMessages(document.getElementById('msgSearchInput').value.trim());}
     else{const d=await r.json();toast('❌ '+(d.detail||'失敗'));}
@@ -711,7 +711,7 @@ async function doBlock(email,msgId){
   try{
     const r=await fetch(`${API}/api/block`,{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({token:ADMIN_PWD,email,block_type:blockType})
+      body:JSON.stringify({token:getAdminKey(),email,block_type:blockType})
     });
     if(r.ok){toast(`✅ 已封鎖 ${email}`);}
     else{const d=await r.json();toast('❌ '+(d.detail||'失敗'));}
@@ -723,7 +723,7 @@ async function loadBlocklist(){
   const el=document.getElementById('blockList');
   el.innerHTML='<div style="color:var(--text3);font-size:13px">載入中...</div>';
   try{
-    const r=await fetch(`${API}/api/block?token=${ADMIN_PWD}`);
+    const r=await fetch(`${API}/api/block?token=${getAdminKey()}`);
     const data=await r.json();
     const list=data.blocked||[];
     if(!list.length){el.innerHTML='<div style="color:var(--text3);font-size:13px">目前無封鎖記錄</div>';return;}
@@ -743,7 +743,7 @@ async function loadBlocklist(){
 async function doUnblock(email){
   if(!confirm(`確定解除封鎖 ${email}？`)) return;
   try{
-    const r=await fetch(`${API}/api/block/${encodeURIComponent(email)}?token=${ADMIN_PWD}`,{method:'DELETE'});
+    const r=await fetch(`${API}/api/block/${encodeURIComponent(email)}?token=${getAdminKey()}`,{method:'DELETE'});
     if(r.ok){toast('✅ 已解除封鎖');loadBlocklist();}
     else{const d=await r.json();toast('❌ '+(d.detail||'失敗'));}
   }catch(e){toast('連線失敗');}
