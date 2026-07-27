@@ -513,6 +513,17 @@ app = FastAPI(
 )
 
 
+# ---- ECPay 簽章驗證模組（獨立檔案 ecpay_verify.py，邏輯不寫在 main.py） ----
+try:
+    import ecpay_verify as _ecpay_verify_mod
+    if getattr(_ecpay_verify_mod, "router", None) is not None:
+        app.include_router(_ecpay_verify_mod.router)
+    print("✅ ecpay_verify 模組已載入")
+except Exception as _e:
+    _ecpay_verify_mod = None
+    print(f"⚠️ ecpay_verify 模組載入失敗（webhook 仍會照舊運作）：{_e}")
+
+
 # ---- Lottery subdomain 301 redirect middleware ----
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -6131,6 +6142,13 @@ async def webhook_ecpay(request: Request):
     params = dict(body)
     print(f"   ECPay Webhook: {params}")
 
+    # 驗證 CheckMacValue 簽章（邏輯全在 ecpay_verify.py，預設為觀察模式不阻擋）
+    if _ecpay_verify_mod is not None:
+        if not _ecpay_verify_mod.check_webhook(
+            params, ECPAY_HASH_KEY, ECPAY_HASH_IV, DB_PATH, "ecpay"
+        ):
+            return JSONResponse(content="0|Error")
+
     # 驗證 MerchantID（CheckMacValue 因收款連結格式不同暫以 MerchantID 驗證）
     if params.get("MerchantID") != ECPAY_MERCHANT_ID:
         print(f"   ❌ MerchantID 不符：{params.get('MerchantID')}")
@@ -8404,6 +8422,13 @@ async def webhook_ecpay_recurring(request: Request):
     body = await request.form()
     params = dict(body)
     print(f"[定期定額 Webhook] {params}")
+
+    # 驗證 CheckMacValue 簽章（邏輯全在 ecpay_verify.py，預設為觀察模式不阻擋）
+    if _ecpay_verify_mod is not None:
+        if not _ecpay_verify_mod.check_webhook(
+            params, ECPAY_HASH_KEY, ECPAY_HASH_IV, DB_PATH, "ecpay_recurring"
+        ):
+            return JSONResponse(content="0|Error")
 
     if params.get("MerchantID") != ECPAY_MERCHANT_ID:
         print(f"[定期定額] ❌ MerchantID 不符")
