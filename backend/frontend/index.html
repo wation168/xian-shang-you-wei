@@ -4923,64 +4923,192 @@ async function showDeepAnalysisPage(){
     }
 
     const locked = !_hasPremium();
-    const lockMsg = _authUser ? '升級付費方案查看股票代號' : '登入後查看股票代號';
+    const lockMsg = _authUser ? '升級付費方案，解鎖股票代號' : '登入後解鎖股票代號';
     const lockAction = _authUser ? 'showUpgradeModal()' : 'showLoginModal()';
 
-    const unlockBanner = locked ? `
-      <div onclick="${lockAction}" style="background:var(--bg2);border:1px dashed var(--green);border-radius:10px;
-        padding:10px 14px;margin-bottom:12px;text-align:center;cursor:pointer;font-size:12px;color:var(--green);font-weight:600">
-        🔒 ${lockMsg}
-      </div>` : '';
+    // 未解鎖時：整張卡點下去導向升級／登入；已解鎖：點下去直接跑該檔完整技術分析
+    const cardClick = (id) => locked ? lockAction : `qpAndHome('${id}')`;
 
-    const cards = items.map(s => {
-      const confidence = s.confidence || '一般';
-      const confColor = confidence.includes('高信心') ? 'var(--up)' : confidence.includes('中信心') ? '#f59e0b' : 'var(--text3)';
-      const riskLevel  = s.risk_level || '中';
-      const riskColor  = riskLevel === '低' ? 'var(--up)' : riskLevel === '高' ? 'var(--dn)' : '#f59e0b';
+    // 風險等級用獨立的藍/琥珀/紅危險色階，跟「紅漲綠跌」的價格語意分開，避免混淆——
+    // 風險是「危不危險」，跟股價當天漲跌方向是兩件事，不能共用同一組顏色語言。
+    const riskMeta = {
+      '低': { color:'#3B82F6', bg:'rgba(59,130,246,.12)', label:'低風險', desc:'停損距現價 5% 以內' },
+      '中': { color:'var(--amber)', bg:'var(--amber-l)', label:'中風險', desc:'停損距現價 5～10%' },
+      '高': { color:'#DC2626', bg:'rgba(220,38,38,.12)', label:'高風險', desc:'停損距現價 10% 以上' },
+    };
+
+    const renderCard = (s) => {
+      const conf      = s.confidence || '一般';
+      const score     = s.score ?? 0;
+      const confColor = conf.includes('高信心') ? '#7C3AED'
+                      : conf.includes('中信心') ? 'var(--amber)' : 'var(--text3)';
+      const rMeta     = riskMeta[s.risk_level] || riskMeta['中'];
+
+      // 今日漲跌：台股慣例紅漲綠跌，一律用 --up(紅)/--dn(綠)，不能反
+      const chg = Number(s.change_pct);
+      const hasChg = Number.isFinite(chg) && chg !== 0;
+      const chgColor = chg > 0 ? 'var(--up)' : chg < 0 ? 'var(--dn)' : 'var(--text3)';
+      const chgSign  = chg > 0 ? '+' : '';
+      const chgHtml  = hasChg
+        ? `<span style="font-size:14px;font-weight:700;color:${chgColor};margin-left:6px">${chgSign}${chg.toFixed(2)}%</span>`
+        : '';
+
+      // 三重確認清單：明確列出①②③都通過的具體依據，不是只憑信任「有入選就代表符合」。
+      const gate1 = Number.isFinite(s.ma_cross_days_ago)
+        ? (s.ma_cross_days_ago === 0 ? '就在今天發生' : `${s.ma_cross_days_ago} 個交易日前發生`)
+        : null;
+      const gate2 = Number.isFinite(s.above_ma20_pct)
+        ? `現價高於月線 ${s.above_ma20_pct}%` : null;
+      const gate3 = Number.isFinite(s.macd_cross_days_ago)
+        ? (s.macd_cross_days_ago === 0 ? '就在今天發生' : `${s.macd_cross_days_ago} 個交易日前發生`)
+        : null;
+      const gates = [
+        ['月季線金叉', gate1], ['站上月線', gate2], ['MACD金叉', gate3],
+      ].filter(([, detail]) => detail);
+      const gateHtml = gates.length ? `
+        <div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:10px 12px;margin-bottom:12px">
+          <div style="font-size:10px;color:#3B82F6;font-weight:700;margin-bottom:6px;letter-spacing:.5px">三重確認・全部通過</div>
+          ${gates.map(([name, detail]) => `
+            <div style="display:flex;align-items:baseline;gap:6px;font-size:13px;padding:2px 0">
+              <span style="color:#3B82F6;font-weight:800">✓</span>
+              <span style="color:var(--text);font-weight:700">${name}</span>
+              <span style="color:var(--text3);font-size:12px">${detail}</span>
+            </div>`).join('')}
+        </div>` : '';
+
+      const price = Number(s.price), sl = Number(s.stop_loss), res = Number(s.resistance);
+      const hasRuler = [price, sl, res].every(v => Number.isFinite(v) && v > 0) && res > sl;
+      let rulerHtml = '';
+      if (hasRuler) {
+        // 風險尺：把停損→現價→壓力按真實價格比例畫在同一條軸上。
+        // 台股紅漲綠跌：往壓力（上檔／價格更高）＝紅，往停損（下檔／價格更低）＝綠，
+        // 跟股價漲跌顏色語意保持一致，不能用「好=綠、壞=紅」的直覺配色。
+        const pos      = Math.min(97, Math.max(3, (price - sl) / (res - sl) * 100));
+        const downPct  = ((price - sl) / price * 100).toFixed(1);
+        const upPct    = ((res - price) / price * 100).toFixed(1);
+        const rr       = s.rr_ratio ?? '—';
+        const rrColor  = (Number(rr) >= 1.5) ? '#3B82F6' : (Number(rr) >= 1) ? 'var(--amber)' : 'var(--dn)';
+        rulerHtml = `
+          <div style="margin:14px 0 12px">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:6px">
+              <span>下檔 <b style="color:var(--dn)">${downPct}%</b></span>
+              <span>風報比 <b style="color:${rrColor}">${rr}x</b></span>
+              <span>上檔 <b style="color:var(--up)">${upPct}%</b></span>
+            </div>
+            <div style="position:relative;height:10px;border-radius:99px;overflow:hidden;background:var(--bg3)">
+              <div style="position:absolute;inset:0 auto 0 0;width:${pos}%;background:var(--dn);opacity:.6"></div>
+              <div style="position:absolute;inset:0 0 0 ${pos}%;background:var(--up);opacity:.6"></div>
+              <div style="position:absolute;top:-3px;left:${pos}%;width:3px;height:16px;border-radius:2px;
+                   background:var(--text);transform:translateX(-50%)"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:6px">
+              <span>停損 <b style="color:var(--dn)">${sl}</b></span>
+              <span style="color:var(--text);font-weight:800;font-size:12px">現價 ${price}</span>
+              <span>壓力 <b style="color:var(--up)">${res}</b></span>
+            </div>
+          </div>`;
+      }
 
       const condBadges = (s.matched_conditions || []).map(c =>
-        `<span style="font-size:10px;padding:2px 8px;border-radius:20px;background:var(--bg);color:#a78bfa">${_DEEP_COND_LABELS[c] || c}</span>`
+        `<span style="font-size:11px;padding:3px 9px;border-radius:20px;background:rgba(124,58,237,.1);color:#7C3AED;font-weight:600">${_DEEP_COND_LABELS[c] || c}</span>`
       ).join('');
 
+      const instBadge = (s.consecutive_buy_days >= 2)
+        ? `<span style="font-size:11px;padding:3px 9px;border-radius:20px;background:var(--up-l);color:var(--up);font-weight:600">法人連買 ${s.consecutive_buy_days} 日</span>` : '';
+
       const warnHtml = (s.warnings && s.warnings.length)
-        ? `<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);border-radius:8px;
-             padding:8px 10px;font-size:11px;color:var(--dn);margin-top:8px;line-height:1.6">
-             ${s.warnings.map(w => '⚠️ ' + w).join('<br>')}
-           </div>`
-        : '';
+        ? `<div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px;
+             font-size:12px;color:var(--text2);line-height:1.8">
+             ${s.warnings.map(w => `<div>⚠️ ${w}</div>`).join('')}
+           </div>` : '';
 
-      const idNameBlurStyle = locked
-        ? 'filter:blur(6px);user-select:none;pointer-events:none'
-        : '';
+      const idBlur = locked ? 'filter:blur(7px);user-select:none' : '';
+      const footer = locked
+        ? `<div style="display:flex;align-items:center;justify-content:center;gap:5px;margin-top:12px;
+             padding-top:11px;border-top:1px solid var(--border);font-size:12px;color:var(--green);font-weight:700">
+             🔒 ${lockMsg}</div>`
+        : `<div style="display:flex;align-items:center;justify-content:flex-end;gap:3px;margin-top:12px;
+             padding-top:11px;border-top:1px solid var(--border);font-size:12px;color:var(--green);font-weight:700">
+             查看完整技術分析 ›</div>`;
 
-      return `<div style="background:var(--bg2);border-radius:14px;padding:16px;margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:8px">
-          <div style="${idNameBlurStyle}">
-            <span style="font-size:16px;font-weight:700;color:var(--text)">${s.stock_id}</span>
-            <span style="font-size:13px;color:var(--text3);margin-left:6px">${s.stock_name}</span>
+      return `<div onclick="${cardClick(s.stock_id)}" style="background:var(--bg2);border:1px solid var(--border);
+           border-left:4px solid ${rMeta.color};border-radius:var(--radius-lg);padding:16px;margin-bottom:12px;cursor:pointer">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+          <div style="${idBlur};min-width:0">
+            <div style="font-size:20px;font-weight:800;color:var(--text);line-height:1.3">${s.stock_name}${chgHtml}</div>
+            <div style="font-size:13px;color:var(--text3);font-family:var(--mono);margin-top:2px">${s.stock_id}${hasRuler ? `　現價 ${price}` : ''}</div>
           </div>
-          <span style="font-size:11px;padding:2px 10px;border-radius:20px;background:var(--bg);color:${confColor};font-weight:700;white-space:nowrap">${confidence}</span>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0">
+            <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;
+                  border-radius:50%;border:2.5px solid ${confColor};color:${confColor};
+                  font-size:14px;font-weight:800;font-family:var(--mono)">${score}</span>
+            <span style="font-size:10px;color:${confColor};font-weight:700;white-space:nowrap">${conf}</span>
+          </div>
         </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
-          <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:var(--bg);color:${riskColor}">風險：${riskLevel}</span>
-          <span style="font-size:10px;padding:2px 8px;border-radius:20px;background:var(--bg);color:var(--text3)">量比 ${s.vol_ratio ?? '—'}x</span>
-          ${condBadges}
+        <div style="display:flex;align-items:center;gap:6px;margin-top:10px">
+          <span style="font-size:12px;font-weight:800;padding:3px 10px;border-radius:20px;background:${rMeta.bg};color:${rMeta.color}">風險：${rMeta.label.replace('風險','')}</span>
         </div>
-        <div style="font-size:12px;color:var(--text3);line-height:1.9">
-          現價 <b style="color:var(--text)">${s.price ?? '—'}</b>　
-          支撐 <b style="color:var(--up)">${s.support ?? '—'}</b>　壓力 <b style="color:#f59e0b">${s.resistance ?? '—'}</b><br>
-          停損 <b style="color:var(--dn)">${s.stop_loss ?? '—'}</b>
-          <span style="color:var(--text3)">（-${s.stop_loss_pct ?? '—'}%，依${s.stop_loss_basis ?? '—'}）</span>
+        ${gateHtml}
+        ${rulerHtml}
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <span style="font-size:11px;padding:3px 9px;border-radius:20px;background:var(--bg3);color:var(--text2);font-weight:600">量比 ${s.vol_ratio ?? '—'}x</span>
+          ${instBadge}${condBadges}
+        </div>
+        ${condBadges || instBadge ? `<div style="font-size:10px;color:var(--text3);margin-top:4px">↑ 加分項目（非入選必要條件）</div>` : ''}
+        <div style="font-size:11px;color:var(--text3);margin-top:9px">
+          停損依${s.stop_loss_basis ?? '—'}　跌破 ${s.stop_loss ?? '—'} 出場（-${s.stop_loss_pct ?? '—'}%）
         </div>
         ${warnHtml}
+        ${footer}
       </div>`;
-    }).join('');
+    };
+
+    // 依風險分區，每區內已由後端依分數排序
+    const groups = ['低','中','高']
+      .map(k => ({ k, meta: riskMeta[k], list: items.filter(s => (s.risk_level || '中') === k) }))
+      .filter(g => g.list.length);
+
+    const sections = groups.map(g => `
+      <div style="margin-bottom:18px">
+        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:8px">
+          <span style="font-size:13px;font-weight:800;color:${g.meta.color}">${g.meta.label}</span>
+          <span style="font-size:11px;color:var(--text3)">${g.list.length} 檔　${g.meta.desc}</span>
+        </div>
+        ${g.list.map(renderCard).join('')}
+      </div>`).join('');
+
+    const unlockBanner = locked ? `
+      <div onclick="${lockAction}" style="background:var(--bg2);border:1px solid var(--green);
+        border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;cursor:pointer;
+        display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <div>
+          <div style="font-size:13px;font-weight:800;color:var(--green);margin-bottom:2px">🔒 ${lockMsg}</div>
+          <div style="font-size:11px;color:var(--text3);line-height:1.5">
+            停損、風報比、籌碼都已完整顯示，解鎖後可看代號並直接跑完整技術分析
+          </div>
+        </div>
+        <span style="font-size:18px;color:var(--green);flex-shrink:0">›</span>
+      </div>` : '';
+
+    const summary = `
+      <div style="display:flex;gap:14px;padding:10px 0 14px;border-bottom:1px solid var(--border);margin-bottom:14px">
+        <div><div style="font-size:19px;font-weight:800;color:var(--text);font-family:var(--mono)">${items.length}</div>
+             <div style="font-size:10px;color:var(--text3)">檔入選</div></div>
+        <div><div style="font-size:19px;font-weight:800;color:var(--up);font-family:var(--mono)">${items.filter(s=>(s.confidence||'').includes('高信心')).length}</div>
+             <div style="font-size:10px;color:var(--text3)">高信心</div></div>
+        <div><div style="font-size:19px;font-weight:800;color:var(--green);font-family:var(--mono)">${items.filter(s=>(s.risk_level||'')==='低').length}</div>
+             <div style="font-size:10px;color:var(--text3)">低風險</div></div>
+      </div>`;
 
     el.innerHTML = `
       <div style="padding:8px 0 16px">
         ${header}
+        ${summary}
         ${unlockBanner}
-        ${cards}
+        ${sections}
+        <div style="font-size:10px;color:var(--text3);line-height:1.7;padding:12px 0 0;border-top:1px solid var(--border)">
+          本頁為技術面自動化篩選結果，僅供研究參考，不構成投資建議。停損價為系統依技術結構試算，請自行評估風險。
+        </div>
       </div>`;
   }catch(e){
     el.innerHTML = `<div style="padding:40px 0;text-align:center;color:var(--text3)">載入失敗，請稍後再試</div>`;

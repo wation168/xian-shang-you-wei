@@ -596,9 +596,10 @@ def generate_deep_analysis(results: list[dict], note: str = "") -> str:
   </p>
   <h2 style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:10px">停損價怎麼計算？</h2>
   <p style="font-size:13px;color:#94a3b8;margin-bottom:14px">
-    系統會依股票符合的型態，分別計算近20日低點、拉回段低點、月線價位這幾種可能的停損位置，
-    再取其中「離現價最近、風險最低」的一個當作建議停損價，並換算成距現價的百分比，分為低
-    （5%以內）、中（5~10%）、高（10%以上）三個風險等級，方便快速判斷承擔的下檔風險大小。
+    系統會計算「起漲低點」（這波漲勢的月季線金叉那天到現在的最低價）、月線、
+    前一根K棒低點這三個可能的停損位置，再取其中「離現價最近、風險最低」的一個
+    當作建議停損價，並換算成距現價的百分比，分為低（5%以內）、中（5~10%）、
+    高（10%以上）三個風險等級，方便快速判斷承擔的下檔風險大小。
   </p>
   <h2 style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:10px">常見問題</h2>
   <div style="font-size:13px;color:#94a3b8">

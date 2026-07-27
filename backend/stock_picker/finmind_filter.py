@@ -191,16 +191,22 @@ def _macd(closes: list[float]) -> tuple[list[float], list[float], list[float]]:
     return dif, dea, hist
 
 
-def _check_ma_golden_cross(ma20: list, ma60: list, lookback: int) -> bool:
+def _find_ma_golden_cross_index(ma20: list, ma60: list, lookback: int) -> int | None:
     """
-    月季線金叉：往回 lookback 個交易日內，MA20 曾由下往上穿越 MA60，
+    找出月季線金叉發生在第幾天（索引）。
+    條件：往回 lookback 個交易日內，MA20 曾由下往上穿越 MA60，
     且從金叉那天到現在，MA20 一直保持在 MA60 之上（沒有翻回空頭）。
+    找不到符合條件的金叉則回傳 None。
+
+    這個索引同時用在兩個地方：① 判斷是否入選（月季線金叉條件）
+    ② 計算停損時的「起漲低點」——金叉那天就是這波漲勢的起點，
+    起漲低點＝金叉當天到現在這段期間的最低價。
     """
     n = len(ma20)
     if n < 2 or ma20[-1] is None or ma60[-1] is None:
-        return False
+        return None
     if ma20[-1] <= ma60[-1]:
-        return False  # 現在不是多頭排列，直接淘汰
+        return None  # 現在不是多頭排列，直接淘汰
     start = max(1, n - lookback)
     cross_idx = None
     for i in range(start, n):
@@ -209,26 +215,41 @@ def _check_ma_golden_cross(ma20: list, ma60: list, lookback: int) -> bool:
         if ma20[i - 1] <= ma60[i - 1] and ma20[i] > ma60[i]:
             cross_idx = i
     if cross_idx is None:
-        return False
+        return None
     # 金叉後不可再翻回空頭
     for i in range(cross_idx, n):
         if ma20[i] is None or ma60[i] is None:
             continue
         if ma20[i] <= ma60[i]:
-            return False
-    return True
+            return None
+    return cross_idx
+
+
+def _check_ma_golden_cross(ma20: list, ma60: list, lookback: int) -> bool:
+    """月季線金叉是否成立（不含起漲低點索引，供選股條件判斷用）"""
+    return _find_ma_golden_cross_index(ma20, ma60, lookback) is not None
+
+
+def _find_macd_golden_cross_index(dif: list, dea: list, within_days: int) -> int | None:
+    """
+    找出 MACD 金叉發生在第幾天（索引）：DIF 由下往上穿越 DEA，
+    且發生在最近 within_days 個交易日內。取範圍內「最近一次」的金叉。
+    找不到則回傳 None。
+    """
+    n = len(dif)
+    if n < 2:
+        return None
+    start = max(1, n - within_days)
+    cross_idx = None
+    for i in range(start, n):
+        if dif[i - 1] <= dea[i - 1] and dif[i] > dea[i]:
+            cross_idx = i
+    return cross_idx
 
 
 def _check_macd_golden_cross(dif: list, dea: list, within_days: int) -> bool:
-    """MACD金叉：DIF 由下往上穿越 DEA，且發生在最近 within_days 個交易日內"""
-    n = len(dif)
-    if n < 2:
-        return False
-    start = max(1, n - within_days)
-    for i in range(start, n):
-        if dif[i - 1] <= dea[i - 1] and dif[i] > dea[i]:
-            return True
-    return False
+    """MACD金叉是否成立（不含索引，供選股條件判斷用）"""
+    return _find_macd_golden_cross_index(dif, dea, within_days) is not None
 
 
 def _classify_position(closes: list[float], ma20_now: float,
@@ -267,21 +288,28 @@ def _classify_position(closes: list[float], ma20_now: float,
 
 
 def _calc_stop_loss(closes: list[float], lows: list[float],
-                    ma20_now: float) -> tuple[float, float, str]:
+                    ma20_now: float, lift_off_low: float | None) -> tuple[float, float, str]:
     """
-    停損價：分別算出「近20日低點 / 拉回段低點(近10日低點) / 月線」三個候選，
+    停損價：分別算出「起漲低點 / 月線 / 前一根低點」三個候選，
     取其中「在現價之下且離現價最近」的一個（＝下檔風險最小的那個）。
     回傳 (停損價, 距現價百分比, 依據名稱)
+
+    2026/07/27 修正：原本用「近20日低點／近10日低點」不是正確依據，
+    改成：
+      起漲低點：月季線金叉那天到現在這段期間的最低價（這波漲勢真正的起點，
+               lift_off_low 由呼叫端傳入，抓不到金叉日期時為 None）
+      月線　　：MA20 現值
+      前一根低點：昨天那根K棒的最低價（單日，不是近N日區間低點）
     """
     price = closes[-1]
     candidates: list[tuple[float, str]] = []
 
-    if len(lows) >= 20:
-        candidates.append((min(lows[-20:]), "近20日低點"))
-    if len(lows) >= 10:
-        candidates.append((min(lows[-10:]), "拉回段低點"))
+    if lift_off_low:
+        candidates.append((lift_off_low, "起漲低點"))
     if ma20_now:
         candidates.append((ma20_now, "月線"))
+    if len(lows) >= 2:
+        candidates.append((lows[-2], "前一根低點"))
 
     valid = [(v, name) for v, name in candidates if v and v < price]
     if not valid:
@@ -348,16 +376,21 @@ def deep_analyze_stock(stock_id: str, stock_name: str = "") -> dict | None:
     vol_ratio = round(vol5 / vol20, 2) if vol20 > 0 else 0
 
     # ── 三重確認 ──────────────────────────────────
-    # ① 月季線金叉
-    if not _check_ma_golden_cross(ma20_l, ma60_l, DEEP_CFG["ma_cross_lookback"]):
+    # ① 月季線金叉（同時取得金叉索引，等下算「起漲低點」停損依據要用）
+    cross_idx = _find_ma_golden_cross_index(ma20_l, ma60_l, DEEP_CFG["ma_cross_lookback"])
+    if cross_idx is None:
         return None
+    lift_off_low = min(lows[cross_idx:])   # 金叉那天到現在這段期間的最低價＝起漲低點
+    ma_cross_days_ago = (len(closes) - 1) - cross_idx   # 幾個交易日前發生金叉，0＝就是今天
     # ② 站上月線
     if price <= ma20:
         return None
     # ③ MACD金叉
     dif, dea, hist = _macd(closes)
-    if not dif or not _check_macd_golden_cross(dif, dea, DEEP_CFG["macd_cross_days"]):
+    macd_cross_idx = _find_macd_golden_cross_index(dif, dea, DEEP_CFG["macd_cross_days"]) if dif else None
+    if macd_cross_idx is None:
         return None
+    macd_cross_days_ago = (len(dif) - 1) - macd_cross_idx
 
     # ── 通過三重確認，開始加分 ──────────────────────
     matched, score = _classify_position(closes, ma20, vol_ratio)
@@ -390,7 +423,7 @@ def deep_analyze_stock(stock_id: str, stock_name: str = "") -> dict | None:
         score += 1
 
     # ── 停損 / 支撐壓力 / 風險 ──────────────────────
-    stop_loss, stop_loss_pct, stop_loss_basis = _calc_stop_loss(closes, lows, ma20)
+    stop_loss, stop_loss_pct, stop_loss_basis = _calc_stop_loss(closes, lows, ma20, lift_off_low)
     risk_level = _risk_level(stop_loss_pct)
 
     support    = round(min(lows[-20:]), 2) if len(lows) >= 20 else round(min(lows), 2)
@@ -420,6 +453,9 @@ def deep_analyze_stock(stock_id: str, stock_name: str = "") -> dict | None:
     if inst and inst_5d_total < 0:
         warnings.append(f"近5日法人合計賣超 {abs(inst_5d_total):,} 張，籌碼面偏弱")
 
+    # 站上月線的幅度（②的具體證據，方便UI顯示「現價高於月線多少%」）
+    above_ma20_pct = round((price - ma20) / ma20 * 100, 2) if ma20 else None
+
     return {
         "stock_id":             stock_id,
         "stock_name":           stock_name or stock_id,
@@ -444,6 +480,10 @@ def deep_analyze_stock(stock_id: str, stock_name: str = "") -> dict | None:
         "stop_loss":            stop_loss,
         "stop_loss_pct":        stop_loss_pct,
         "stop_loss_basis":      stop_loss_basis,
+        # 三重確認的具體證據，讓前端能明確列出「為什麼入選」，不用只憑信任
+        "ma_cross_days_ago":    ma_cross_days_ago,   # ①月季線金叉發生在幾個交易日前
+        "above_ma20_pct":       above_ma20_pct,      # ②現價高於月線的百分比
+        "macd_cross_days_ago":  macd_cross_days_ago, # ③MACD金叉發生在幾個交易日前
         "rr_ratio":             rr_ratio,
         "consecutive_buy_days": consecutive_buy_days,
         "inst_5d_total":        inst_5d_total,
