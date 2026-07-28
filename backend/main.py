@@ -8015,10 +8015,20 @@ def sitemap():
     ).fetchall()
     conn.close()
 
-    # 取得全台股清單
+    # 取得已成功產生過報告的股票清單
+    # 2026/07/28修正：原本用 get_all_stock_info() 把全市場股票全部塞進 sitemap。
+    # 其中少數股票即時產報時抓不到資料（例如1230似乎抓不TWSE資料），
+    # 讓Google爬到後回傳404，被記錄為 coverage 問題。
+    # 改成只列已經在 stock_reports 表確認成功過的代號，保證 sitemap 網址100%打得開。
+    # 未來有新產報成功會隨 SEO_CACHE 過期重新產生時自動補上，不需人工操作。
     try:
-        all_stocks = get_all_stock_info()
-        all_stock_ids = [s["stock_id"] for s in all_stocks if str(s.get("stock_id","")).isdigit() and len(str(s.get("stock_id",""))) == 4]
+        conn2 = _db_conn()
+        all_stock_ids = [r[0] for r in conn2.execute(
+            "SELECT DISTINCT stock_id FROM stock_reports"
+        ).fetchall()]
+        conn2.close()
+        if not all_stock_ids:
+            all_stock_ids = _SEO_HARDCODED_STOCKS
     except Exception:
         all_stock_ids = _SEO_HARDCODED_STOCKS
 
