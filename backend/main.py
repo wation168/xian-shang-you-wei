@@ -3202,6 +3202,9 @@ def _do_analyze(stock_id: str, tf: str = "D",
                     cached["price"]      = round(_live, 2)
                     cached["change"]     = _qc_c["data"].get("change")
                     cached["change_pct"] = _qc_c["data"].get("change_pct")
+                    # 這次補抓成功，清掉先前「報價更新中」的提示
+                    if cached.get("price_note") == "報價更新中，現價暫以前一交易日收盤價顯示":
+                        cached["price_note"] = None
         return cached
 
     period, interval = PERIOD_MAP.get(tf.upper(), ("3y", "1d"))
@@ -3228,6 +3231,7 @@ def _do_analyze(stock_id: str, tf: str = "D",
 
     # 一律用即時報價覆蓋現價（FinMind 最新成交價/收盤價，避免 Yahoo K 線延遲導致現價過期）
     _sid = stock_id.strip().upper()
+    _live_quote_ok = False   # 是否真的拿到即時報價（失敗時 price 會是昨收，不可長時間快取）
     _qc = _QUOTE_CACHE.get(_sid)
     if not _qc or _qc.get("expires", 0) < _time_mod.time():
         try:
@@ -3243,6 +3247,7 @@ def _do_analyze(stock_id: str, tf: str = "D",
             # （支撐距離、防守位、損益比、乖離率、雷達）用同一個價格基準
             closes[-1] = _live_price
             closes_full[-1] = _live_price
+            _live_quote_ok = True
 
     # 股名
     stock_name = get_stock_name(symbol)
@@ -3884,7 +3889,23 @@ def _do_analyze(stock_id: str, tf: str = "D",
             kbar_action += f"，量比僅 {_r_vol_r}x 縮量，明日需量增確認"
         result["kbar_action"] = kbar_action
 
-    _cache_set(_cache_key, result)
+    # 明確告知：支撐／壓力／K棒型態／操作建議這整包分析，是以「最近一根完整收盤 K 棒」
+    # 為基準計算的，不是逐筆即時運算。上面「現價」欄位可能已經換成即時價，
+    # 但下面這段解析內容本身不會跟著現價即時重算，所以固定加註提示，不管有沒有抓到即時報價都加。
+    result["warning"] = (result.get("warning") or "") + "（本分析以最近收盤資料計算，盤中僅供參考）"
+
+    # 盤中若即時報價三層來源全失敗，price 會停留在 K 線最後一根（＝昨收），
+    # 整份分析（支撐距離／防守位／損益比／雷達）都建立在錯的價格基準上。
+    # 此時不可用正常 15 分鐘快取鎖住，否則使用者會看到一份看似正常、實際價格錯誤的報告。
+    if _is_trading_session() and not _live_quote_ok:
+        result["price_note"] = "報價更新中，現價暫以前一交易日收盤價顯示"
+        # 只快取約 60 秒（用回推 ts 的方式縮短），讓下一次請求盡快重試即時報價
+        _analyze_cache[_cache_key] = {
+            "ts":   _time.time() - max(0, _get_analyze_cache_ttl() - 60),
+            "data": result,
+        }
+    else:
+        _cache_set(_cache_key, result)
 
     # 計入查詢次數（免費用戶）
     if user and user["plan"] == "free":
@@ -4198,6 +4219,20 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
             pass
 
     code = stock_id.strip().replace(".TW", "").replace(".TWO", "").upper()
+
+    # 防呆：代號含非 ASCII（例如誤存成中文股名）時，三個外部 API 的網址都會組不出來，
+    # 造成 'ascii' codec can't encode 例外並重複刷 log。這裡直接短路，不再對外呼叫。
+    try:
+        code.encode("ascii")
+    except UnicodeEncodeError:
+        _safe_print(f"[QUOTE] 代號含非 ASCII 字元，略過外部查詢：{code}")
+        return {
+            "stock_id": code, "price": None, "change": None, "change_pct": None,
+            "open": None, "high": None, "low": None, "volume": None,
+            "in_session": _is_trading_session(), "price_source": "invalid_code",
+            "price_note": "股票代號格式錯誤",
+        }
+
     now_ts = _time_mod.time()
     in_session = _is_trading_session()
 
@@ -8706,6 +8741,19 @@ async def add_portfolio(request: Request, current_user: dict = Depends(get_curre
 
     if not stock_id or cost_price <= 0:
         raise HTTPException(status_code=400, detail="請輸入正確的股號與成本價")
+
+    # 名稱轉代號：非純數字視為中文股名，從對照表解析（比照 create_alert 的作法）
+    # 若不轉換，中文股名會被直接存進 portfolios，之後每次持股分析都會拿中文去組
+    # 外部 API 網址，造成 UnicodeEncodeError 並反覆失敗
+    if not stock_id.replace(".", "").isdigit():
+        resolved = _name_to_code.get(stock_id)
+        if not resolved:
+            resolved = next((code for name, code in _name_to_code.items() if stock_id in name), None)
+        if resolved:
+            stock_id = resolved
+        else:
+            raise HTTPException(status_code=404, detail=f"找不到股票：{stock_id}")
+    stock_id = stock_id.upper()
 
     conn = _db_conn()
     # 免費會員限 1 支
