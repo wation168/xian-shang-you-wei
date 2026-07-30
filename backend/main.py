@@ -679,47 +679,41 @@ async def serve_patterns_locale_html(locale: str, filename: str):
         return RedirectResponse(f"/patterns/{locale}/{new_slug}.html", status_code=301)
     return RedirectResponse(f"/patterns/{locale}/", status_code=301)
 
-@app.get("/blog/{filename}.html", include_in_schema=False)
-async def serve_blog_html(filename: str):
-    from fastapi.responses import FileResponse
+def _serve_locale_file(dirname: str, filename: str, locale: str | None = None, valid_locales: tuple | None = None):
+    """
+    2026/07/30：共用的靜態頁面服務邏輯，取代 blog/comparisons 每個路由各自複製貼上的
+    「檢查locale合法性→組路徑→檔案存在就回傳→不存在回404」邏輯，行為完全不變。
+    """
     import os as _os
-    path = _os.path.join(_FRONTEND_DIR, "blog", f"{filename}.html")
+    from fastapi.responses import FileResponse
+    if locale is not None:
+        if valid_locales and locale not in valid_locales:
+            return JSONResponse({"detail": "Not Found"}, status_code=404)
+        path = _os.path.join(_FRONTEND_DIR, dirname, locale, filename)
+    else:
+        path = _os.path.join(_FRONTEND_DIR, dirname, filename)
     if _os.path.isfile(path):
         return FileResponse(path)
     return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+
+@app.get("/blog/{filename}.html", include_in_schema=False)
+async def serve_blog_html(filename: str):
+    return _serve_locale_file("blog", f"{filename}.html")
 
 @app.get("/blog", include_in_schema=False)
 @app.get("/blog/", include_in_schema=False)
 async def serve_blog_index():
-    from fastapi.responses import FileResponse
-    import os as _os
-    path = _os.path.join(_FRONTEND_DIR, "blog", "index.html")
-    if _os.path.isfile(path):
-        return FileResponse(path)
-    return JSONResponse({"detail": "Not Found"}, status_code=404)
+    return _serve_locale_file("blog", "index.html")
 
 @app.get("/blog/{locale}/{filename}.html", include_in_schema=False)
 async def serve_blog_locale_html(locale: str, filename: str):
-    from fastapi.responses import FileResponse
-    import os as _os
-    if locale not in ("en", "ja", "ko"):
-        return JSONResponse({"detail": "Not Found"}, status_code=404)
-    path = _os.path.join(_FRONTEND_DIR, "blog", locale, f"{filename}.html")
-    if _os.path.isfile(path):
-        return FileResponse(path)
-    return JSONResponse({"detail": "Not Found"}, status_code=404)
+    return _serve_locale_file("blog", f"{filename}.html", locale, ("en", "ja", "ko"))
 
 @app.get("/blog/{locale}", include_in_schema=False)
 @app.get("/blog/{locale}/", include_in_schema=False)
 async def serve_blog_locale_index(locale: str):
-    from fastapi.responses import FileResponse
-    import os as _os
-    if locale not in ("en", "ja", "ko"):
-        return JSONResponse({"detail": "Not Found"}, status_code=404)
-    path = _os.path.join(_FRONTEND_DIR, "blog", locale, "index.html")
-    if _os.path.isfile(path):
-        return FileResponse(path)
-    return JSONResponse({"detail": "Not Found"}, status_code=404)
+    return _serve_locale_file("blog", "index.html", locale, ("en", "ja", "ko"))
 
 # ---- Tools 路由 ----
 _TOOLS_LOCALES = ("en","ja","ko","es","pt","id","de","fr","zh-CN")
@@ -896,45 +890,21 @@ _COMP_LOCALES = ("en","ja","ko","es","pt","id","de","fr","zh-CN","zh-TW")
 
 @app.get("/comparisons/{filename}.html", include_in_schema=False)
 async def serve_comparisons_html(filename: str):
-    from fastapi.responses import FileResponse
-    import os as _os
-    path = _os.path.join(_FRONTEND_DIR, "comparisons", f"{filename}.html")
-    if _os.path.isfile(path):
-        return FileResponse(path)
-    return JSONResponse({"detail": "Not Found"}, status_code=404)
+    return _serve_locale_file("comparisons", f"{filename}.html")
 
 @app.get("/comparisons", include_in_schema=False)
 @app.get("/comparisons/", include_in_schema=False)
 async def serve_comparisons_index():
-    from fastapi.responses import FileResponse
-    import os as _os
-    path = _os.path.join(_FRONTEND_DIR, "comparisons", "index.html")
-    if _os.path.isfile(path):
-        return FileResponse(path)
-    return JSONResponse({"detail": "Not Found"}, status_code=404)
+    return _serve_locale_file("comparisons", "index.html")
 
 @app.get("/comparisons/{locale}/{filename}.html", include_in_schema=False)
 async def serve_comparisons_locale_html(locale: str, filename: str):
-    from fastapi.responses import FileResponse
-    import os as _os
-    if locale not in _COMP_LOCALES:
-        return JSONResponse({"detail": "Not Found"}, status_code=404)
-    path = _os.path.join(_FRONTEND_DIR, "comparisons", locale, f"{filename}.html")
-    if _os.path.isfile(path):
-        return FileResponse(path)
-    return JSONResponse({"detail": "Not Found"}, status_code=404)
+    return _serve_locale_file("comparisons", f"{filename}.html", locale, _COMP_LOCALES)
 
 @app.get("/comparisons/{locale}", include_in_schema=False)
 @app.get("/comparisons/{locale}/", include_in_schema=False)
 async def serve_comparisons_locale_index(locale: str):
-    from fastapi.responses import FileResponse
-    import os as _os
-    if locale not in _COMP_LOCALES:
-        return JSONResponse({"detail": "Not Found"}, status_code=404)
-    path = _os.path.join(_FRONTEND_DIR, "comparisons", locale, "index.html")
-    if _os.path.isfile(path):
-        return FileResponse(path)
-    return JSONResponse({"detail": "Not Found"}, status_code=404)
+    return _serve_locale_file("comparisons", "index.html", locale, _COMP_LOCALES)
 
 # ---- JS 靜態檔路由 (cookie-consent.css, softglow-cookies.js 等) ----
 @app.get("/js/{js_filename:path}", include_in_schema=False)
@@ -1040,6 +1010,30 @@ def calc_ma(closes: np.ndarray, period: int) -> np.ndarray:
     return pd.Series(closes).rolling(period).mean().values
 
 
+def _parse_tw_num(s):
+    """解析TWSE/TPEX月報表數字欄位，'--'/空字串/'X' 一律當0。"""
+    return float(str(s).replace(",", "")) if str(s).strip() not in ("--", "", "X") else 0.0
+
+
+def _fetch_tw_month_report_row(url: str, data_key: str, roc_date: str, source_label: str, code: str):
+    """
+    2026/07/30：抽出的共用函式，取代 fetch_df_finmind() 裡原本上市(TWSE)/上櫃(TPEX)
+    兩段幾乎一樣的月報表抓取+解析程式碼，只有URL/JSON資料key/log標籤不同。
+    找到當日資料回傳 (open, high, low, close, volume)，找不到或抓取失敗回傳 None。
+    """
+    try:
+        req = _ur.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with _ur.urlopen(req, timeout=8) as r:
+            raw = _j.loads(r.read())
+        for row in raw.get(data_key, []):
+            if str(row[0]).strip() == roc_date:
+                return (_parse_tw_num(row[3]), _parse_tw_num(row[4]),
+                        _parse_tw_num(row[5]), _parse_tw_num(row[6]), _parse_tw_num(row[1]))
+        return None
+    except Exception as _e:
+        print(f"   {source_label} 月報補棒失敗 {code}：{_e}")
+        return None
+
 
 def fetch_df_finmind(stock_id: str, period: str, interval: str):
     """
@@ -1130,6 +1124,9 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
                     print(f"   tick_snapshot 補棒失敗 {code}：{_e}")
 
         # ── TWSE/TPEX 月報補今日 K 棒（上述來源均無資料時的最終 fallback）──
+        # 2026/07/30：上市/上櫃兩段原本各自複製貼上一份幾乎一樣的抓取/解析邏輯，
+        # 只有URL、JSON資料key、log標籤不同，改用共用函式 _fetch_tw_month_report_row()，
+        # 抓取/解析行為完全不變，只是不用維護兩份。
         if today_ts not in df.index:
             today_obj = date.today()
             roc_year  = today_obj.year - 1911
@@ -1137,72 +1134,32 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
             yyyymmdd  = today_obj.strftime("%Y%m%d")
             mm        = today_obj.strftime("%m")
 
-            def _parse_tw_num(s):
-                return float(str(s).replace(",", "")) if str(s).strip() not in ("--", "", "X") else 0.0
-
             filled = False
             _is_otc = _market_cache.get(code, "") in ("otc", "rotc")
             if not _is_otc:
-                # 上市：TWSE STOCK_DAY
-                try:
-                    twse_url = (f"https://www.twse.com.tw/exchangeReport/STOCK_DAY"
-                                f"?response=json&date={yyyymmdd}&stockNo={code}")
-                    twse_req = _ur.Request(twse_url, headers={"User-Agent": "Mozilla/5.0"})
-                    with _ur.urlopen(twse_req, timeout=8) as tr:
-                        twse_raw = _j.loads(tr.read())
-                    for row in twse_raw.get("data", []):
-                        if str(row[0]).strip() == roc_date:
-                            op  = _parse_tw_num(row[3])
-                            hi  = _parse_tw_num(row[4])
-                            lo  = _parse_tw_num(row[5])
-                            cp  = _parse_tw_num(row[6])
-                            vol = _parse_tw_num(row[1])
-                            _qt = _QUOTE_CACHE.get(code)
-                            if not _qt or not (_qt.get("data") or {}).get("in_session"):
-                                cp = 0
-                            if cp > 0:
-                                today_bar = pd.DataFrame(
-                                    [[op, hi, lo, cp, vol]],
-                                    index=[today_ts],
-                                    columns=["Open", "High", "Low", "Close", "Volume"]
-                                )
-                                df = pd.concat([df, today_bar])
-                                print(f"   TWSE 月報補今日 K 棒：{code} close={cp}")
-                                filled = True
-                            break
-                except Exception as _e:
-                    print(f"   TWSE 月報補棒失敗 {code}：{_e}")
+                _mr_url = (f"https://www.twse.com.tw/exchangeReport/STOCK_DAY"
+                           f"?response=json&date={yyyymmdd}&stockNo={code}")
+                _mr_row = _fetch_tw_month_report_row(_mr_url, "data", roc_date, "TWSE", code)
             else:
-                # 上櫃：TPEX st43
-                try:
-                    tpex_d   = f"{roc_year}/{mm}"
-                    tpex_url = (f"https://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info"
-                                f"/st43_result.php?l=zh-tw&d={tpex_d}&stkno={code}")
-                    tpex_req = _ur.Request(tpex_url, headers={"User-Agent": "Mozilla/5.0"})
-                    with _ur.urlopen(tpex_req, timeout=8) as pr:
-                        tpex_raw = _j.loads(pr.read())
-                    for row in tpex_raw.get("aaData", []):
-                        if str(row[0]).strip() == roc_date:
-                            op  = _parse_tw_num(row[3])
-                            hi  = _parse_tw_num(row[4])
-                            lo  = _parse_tw_num(row[5])
-                            cp  = _parse_tw_num(row[6])
-                            vol = _parse_tw_num(row[1])
-                            _qt = _QUOTE_CACHE.get(code)
-                            if not _qt or not (_qt.get("data") or {}).get("in_session"):
-                                cp = 0
-                            if cp > 0:
-                                today_bar = pd.DataFrame(
-                                    [[op, hi, lo, cp, vol]],
-                                    index=[today_ts],
-                                    columns=["Open", "High", "Low", "Close", "Volume"]
-                                )
-                                df = pd.concat([df, today_bar])
-                                print(f"   TPEX 月報補今日 K 棒：{code} close={cp}")
-                                filled = True
-                            break
-                except Exception as _e:
-                    print(f"   TPEX 月報補棒失敗 {code}：{_e}")
+                _tpex_d = f"{roc_year}/{mm}"
+                _mr_url = (f"https://www.tpex.org.tw/web/stock/aftertrading/daily_trading_info"
+                           f"/st43_result.php?l=zh-tw&d={_tpex_d}&stkno={code}")
+                _mr_row = _fetch_tw_month_report_row(_mr_url, "aaData", roc_date, "TPEX", code)
+
+            if _mr_row:
+                op, hi, lo, cp, vol = _mr_row
+                _qt = _QUOTE_CACHE.get(code)
+                if not _qt or not (_qt.get("data") or {}).get("in_session"):
+                    cp = 0
+                if cp > 0:
+                    today_bar = pd.DataFrame(
+                        [[op, hi, lo, cp, vol]],
+                        index=[today_ts],
+                        columns=["Open", "High", "Low", "Close", "Volume"]
+                    )
+                    df = pd.concat([df, today_bar])
+                    print(f"   {'TWSE' if not _is_otc else 'TPEX'} 月報補今日 K 棒：{code} close={cp}")
+                    filled = True
 
         # 週線/月線重採樣
         if interval == "1wk":
