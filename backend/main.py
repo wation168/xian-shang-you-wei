@@ -4531,7 +4531,7 @@ def _check_admin(key: str):
         raise HTTPException(status_code=403, detail="無權限")
 
 @app.get("/admin/backup-db")
-def backup_db(key: str = ""):
+def backup_db(key: str = Header(default="", alias="X-Admin-Key")):
     """下載 members.db 備份，key = 環境變數 ADMIN_API_KEY 的值"""
     from fastapi.responses import FileResponse
     _check_admin(key)
@@ -4543,7 +4543,7 @@ def backup_db(key: str = ""):
 
 
 @app.get("/admin/members")
-def admin_list_members(key: str = ""):
+def admin_list_members(key: str = Header(default="", alias="X-Admin-Key")):
     """列出所有會員"""
     _check_admin(key)
     conn = _db_conn()
@@ -4566,7 +4566,7 @@ def admin_list_members(key: str = ""):
 
 
 @app.post("/admin/grant")
-def admin_grant(key: str = "", email: str = "", plan: str = "monthly", days: int = 30):
+def admin_grant(key: str = Header(default="", alias="X-Admin-Key"), email: str = "", plan: str = "monthly", days: int = 30):
     """
     手動開通或延長會員
     plan: free / monthly / quarterly / yearly
@@ -4643,7 +4643,7 @@ def admin_grant(key: str = "", email: str = "", plan: str = "monthly", days: int
 
 
 @app.post("/admin/reset-password")
-def admin_reset_password(key: str = "", email: str = "", new_password: str = ""):
+def admin_reset_password(key: str = Header(default="", alias="X-Admin-Key"), email: str = "", new_password: str = ""):
     """重設某用戶密碼，可指定新密碼或自動產生"""
     _check_admin(key)
     email = email.strip().lower()
@@ -4678,7 +4678,7 @@ class _DeleteMemberReq(BaseModel):
     email: str = ""
 
 @app.post("/admin/delete-member")
-def admin_delete_member(req: _DeleteMemberReq, key: str = ""):
+def admin_delete_member(req: _DeleteMemberReq, key: str = Header(default="", alias="X-Admin-Key")):
     """刪除會員帳號"""
     _check_admin(key)
     email = req.email.strip().lower()
@@ -4689,7 +4689,7 @@ def admin_delete_member(req: _DeleteMemberReq, key: str = ""):
     return {"ok": True, "deleted": email}
 
 @app.post("/admin/clear-cache")
-def admin_clear_cache(key: str = ""):
+def admin_clear_cache(key: str = Header(default="", alias="X-Admin-Key")):
     """清除 _analyze_cache 和 _QUOTE_CACHE（強制下次查詢重新抓）"""
     _check_admin(key)
     n = len(_analyze_cache)
@@ -4700,7 +4700,7 @@ def admin_clear_cache(key: str = ""):
 
 
 @app.get("/admin/run-opening-scan")
-async def admin_run_opening_scan(key: str = Query(...)):
+async def admin_run_opening_scan(key: str = Header(..., alias="X-Admin-Key")):
     _check_admin(key)
     try:
         import threading as _thr
@@ -4717,7 +4717,7 @@ class _BatchUpgradeReq(BaseModel):
 
 
 @app.post("/admin/batch-upgrade")
-def admin_batch_upgrade(req: _BatchUpgradeReq, key: str = ""):
+def admin_batch_upgrade(req: _BatchUpgradeReq, key: str = Header(default="", alias="X-Admin-Key")):
     """批次升級免費會員（升級+寄通知信）"""
     _check_admin(key)
     from datetime import datetime, timedelta
@@ -4788,7 +4788,7 @@ _HOT_STOCKS = [
 
 
 @app.post("/admin/prebuild-reports")
-def admin_prebuild_reports(key: str = ""):
+def admin_prebuild_reports(key: str = Header(default="", alias="X-Admin-Key")):
     """批次預建熱門股報告頁（後台執行，SEO 用）"""
     _check_admin(key)
     import threading
@@ -6233,7 +6233,7 @@ async def block_user(body: BlockReq):
 
 
 @app.delete("/api/block/{email}")
-async def unblock_user(email: str, token: str):
+async def unblock_user(email: str, token: str = Header(default="", alias="X-Admin-Key")):
     if not CONTACT_ADMIN_PWD or token != CONTACT_ADMIN_PWD:
         raise HTTPException(status_code=403, detail="無權限")
     with sqlite3.connect(DB_PATH) as conn:
@@ -6244,7 +6244,7 @@ async def unblock_user(email: str, token: str):
 
 
 @app.get("/api/block")
-async def get_blocked_users(token: str):
+async def get_blocked_users(token: str = Header(default="", alias="X-Admin-Key")):
     if not CONTACT_ADMIN_PWD or token != CONTACT_ADMIN_PWD:
         raise HTTPException(status_code=403, detail="無權限")
     with sqlite3.connect(DB_PATH) as conn:
@@ -8845,7 +8845,7 @@ def deep_analysis_status():
 
 
 @app.post("/admin/run-deep-analysis")
-async def admin_run_deep_analysis(key: str = Query(...)):
+async def admin_run_deep_analysis(key: str = Header(..., alias="X-Admin-Key")):
     """管理員手動觸發深度選股（背景執行）"""
     _check_admin(key)
     import threading
@@ -9208,7 +9208,7 @@ def _run_batch_report_job():
 
 @app.post("/admin/batch-generate-reports")
 async def admin_batch_generate_reports(
-    key: str = Query(...),
+    key: str = Header(..., alias="X-Admin-Key"),
     batch_size: int = Query(default=200),
     offset: int = Query(default=0)
 ):

@@ -330,7 +330,7 @@ async function doAdminLogin(){
   err.textContent = '驗證中…';
   let ok = false;
   try{
-    const r = await fetch(`${API}/admin/members?key=${encodeURIComponent(pwd)}`);
+    const r = await fetch(`${API}/admin/members`,{headers:{'X-Admin-Key':pwd}});
     ok = r.ok;
   }catch(e){
     err.textContent = '連線失敗，請稍後再試';
@@ -384,7 +384,7 @@ function toast(msg, dur=2500){
 async function loadStats(){
   try{
     const [mr, sr] = await Promise.all([
-      fetch(`${API}/admin/members?key=${getAdminKey()}`),
+      fetch(`${API}/admin/members`,{headers:{'X-Admin-Key':getAdminKey()}}),
       fetch(`${API}/api/stats`)
     ]);
     if(!mr.ok) return;
@@ -409,7 +409,7 @@ async function loadMembers(){
   const el=document.getElementById('memberList');
   el.innerHTML='<div style="color:var(--text3);font-size:13px">載入中...</div>';
   try{
-    const r=await fetch(`${API}/admin/members?key=${getAdminKey()}`);
+    const r=await fetch(`${API}/admin/members`,{headers:{'X-Admin-Key':getAdminKey()}});
     if(!r.ok) throw new Error();
     const data=await r.json();
     const members=data.members||data||[];
@@ -503,9 +503,9 @@ async function loadMembers(){
       res.textContent='處理中...';
       try{
         const url=newPwd
-          ?`${API}/admin/reset-password?key=${getAdminKey()}&email=${encodeURIComponent(email)}&new_password=${encodeURIComponent(newPwd)}`
-          :`${API}/admin/reset-password?key=${getAdminKey()}&email=${encodeURIComponent(email)}`;
-        const r=await fetch(url,{method:'POST'});
+          ?`${API}/admin/reset-password?email=${encodeURIComponent(email)}&new_password=${encodeURIComponent(newPwd)}`
+          :`${API}/admin/reset-password?email=${encodeURIComponent(email)}`;
+        const r=await fetch(url,{method:'POST',headers:{'X-Admin-Key':getAdminKey()}});
         const d=await r.json();
         if(d.new_password){
           res.innerHTML=`<span style="color:var(--green)">✅ 密碼已更新：<b>${d.new_password}</b></span>`;
@@ -532,7 +532,7 @@ async function doGrant(){
   if(!email){res.textContent='請輸入 Email';res.className='result-box show error';return;}
   res.textContent='開通中...';res.className='result-box show';
   try{
-    const r=await fetch(`${API}/admin/grant?key=${getAdminKey()}&email=${encodeURIComponent(email)}&plan=${plan}&days=${days}`,{method:'POST'});
+    const r=await fetch(`${API}/admin/grant?email=${encodeURIComponent(email)}&plan=${plan}&days=${days}`,{method:'POST',headers:{'X-Admin-Key':getAdminKey()}});
     const data=await r.json();
     if(!r.ok){res.textContent='失敗：'+(data.detail||'未知錯誤');res.className='result-box show error';return;}
     const pwd=data.password||data.temp_password||'（請查看後端回傳）';
@@ -555,7 +555,7 @@ async function doExtend(){
   res.textContent='延長中...';res.className='result-box show';
   try{
     // 用 quarterly + 指定 days 延長，不重設密碼（grant 會從現有到期日往後加）
-    const r=await fetch(`${API}/admin/grant?key=${getAdminKey()}&email=${encodeURIComponent(email)}&plan=quarterly&days=${days}`,{method:'POST'});
+    const r=await fetch(`${API}/admin/grant?email=${encodeURIComponent(email)}&plan=quarterly&days=${days}`,{method:'POST',headers:{'X-Admin-Key':getAdminKey()}});
     const data=await r.json();
     if(!r.ok){res.textContent='失敗：'+(data.detail||'未知錯誤');res.className='result-box show error';return;}
     res.textContent=`✅ 延長成功！\n帳號：${email}\n延長：${days} 天\n新到期日：${data.expire_at||'請至會員列表確認'}`;
@@ -574,7 +574,7 @@ async function doReset(){
   if(!email){res.textContent='請輸入 Email';res.className='result-box show error';return;}
   res.textContent='重設中...';res.className='result-box show';
   try{
-    const r=await fetch(`${API}/admin/reset-password?key=${getAdminKey()}&email=${encodeURIComponent(email)}`,{method:'POST'});
+    const r=await fetch(`${API}/admin/reset-password?email=${encodeURIComponent(email)}`,{method:'POST',headers:{'X-Admin-Key':getAdminKey()}});
     const data=await r.json();
     if(!r.ok){res.textContent='失敗：'+(data.detail||'未知錯誤');res.className='result-box show error';return;}
     const pwd=data.password||data.new_password||'（請查看後端回傳）';
@@ -590,9 +590,9 @@ async function doReset(){
 async function doDelete(email){
   if(!confirm(`確定要刪除帳號 ${email}？此操作無法復原！`)) return;
   try{
-    const r=await fetch(`${API}/admin/delete-member?key=${getAdminKey()}`,{
+    const r=await fetch(`${API}/admin/delete-member`,{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{'Content-Type':'application/json','X-Admin-Key':getAdminKey()},
       body:JSON.stringify({email})
     });
     const data=await r.json();
@@ -609,10 +609,21 @@ async function quickReset(email){
 
 // ── 備份 ──
 
-function doBackup(){
-  const url=`${API}/admin/backup-db?key=${getAdminKey()}`;
-  window.open(url,'_blank');
+async function doBackup(){
   toast('📥 備份下載中...');
+  try{
+    const r = await fetch(`${API}/admin/backup-db`,{headers:{'X-Admin-Key':getAdminKey()}});
+    if(!r.ok){toast('❌ 備份失敗，請確認金鑰');return;}
+    const blob = await r.blob();
+    const cd = r.headers.get('content-disposition')||'';
+    const m = cd.match(/filename="?([^";]+)"?/);
+    const fname = m ? m[1] : 'members_backup.db';
+    const dlUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = dlUrl; a.download = fname;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(dlUrl);
+  }catch(e){toast('❌ 連線失敗');}
 }
 
 // ── 留言管理 ──
@@ -723,7 +734,7 @@ async function loadBlocklist(){
   const el=document.getElementById('blockList');
   el.innerHTML='<div style="color:var(--text3);font-size:13px">載入中...</div>';
   try{
-    const r=await fetch(`${API}/api/block?token=${getAdminKey()}`);
+    const r=await fetch(`${API}/api/block`,{headers:{'X-Admin-Key':getAdminKey()}});
     const data=await r.json();
     const list=data.blocked||[];
     if(!list.length){el.innerHTML='<div style="color:var(--text3);font-size:13px">目前無封鎖記錄</div>';return;}
@@ -743,7 +754,7 @@ async function loadBlocklist(){
 async function doUnblock(email){
   if(!confirm(`確定解除封鎖 ${email}？`)) return;
   try{
-    const r=await fetch(`${API}/api/block/${encodeURIComponent(email)}?token=${getAdminKey()}`,{method:'DELETE'});
+    const r=await fetch(`${API}/api/block/${encodeURIComponent(email)}`,{method:'DELETE',headers:{'X-Admin-Key':getAdminKey()}});
     if(r.ok){toast('✅ 已解除封鎖');loadBlocklist();}
     else{const d=await r.json();toast('❌ '+(d.detail||'失敗'));}
   }catch(e){toast('連線失敗');}
@@ -756,7 +767,7 @@ async function loadFreeMembers(){
   el.innerHTML = '<div style="color:var(--text3);font-size:13px">載入中...</div>';
   document.getElementById('earlybirdBatchRow').style.display = 'none';
   try{
-    const r = await fetch(`${API}/admin/members?key=${getAdminKey()}`);
+    const r = await fetch(`${API}/admin/members`,{headers:{'X-Admin-Key':getAdminKey()}});
     if(!r.ok) throw new Error();
     const data = await r.json();
     const members = data.members || data || [];
@@ -799,9 +810,9 @@ async function doEarlyBirdUpgrade(){
   res.textContent = `升級中... (0/${emails.length})`;
   res.className = 'result-box show';
   try{
-    const r = await fetch(`${API}/admin/batch-upgrade?key=${getAdminKey()}`, {
+    const r = await fetch(`${API}/admin/batch-upgrade`, {
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{'Content-Type':'application/json','X-Admin-Key':getAdminKey()},
       body: JSON.stringify({emails, plan, days})
     });
     const data = await r.json();
@@ -828,8 +839,8 @@ async function doRunOpeningScan(btn){
   res.className = 'result-box show';
   res.textContent = '開盤熱門股抓取中...';
   try{
-    const r = await fetch(`${API}/admin/run-opening-scan?key=${getAdminKey()}`, {
-      method:'GET', signal: AbortSignal.timeout(60000)
+    const r = await fetch(`${API}/admin/run-opening-scan`, {
+      method:'GET', signal: AbortSignal.timeout(60000), headers:{'X-Admin-Key':getAdminKey()}
     });
     const data = await r.json();
     if(r.ok){
@@ -856,8 +867,8 @@ async function doRunDeepAnalysis(btn){
   res.className = 'result-box show';
   res.textContent = '深度選股分析已送出，背景執行中（約需數分鐘，完成後會自動更新 App 內即時資料與跑馬燈）...';
   try{
-    const r = await fetch(`${API}/admin/run-deep-analysis?key=${getAdminKey()}`, {
-      method:'POST', signal: AbortSignal.timeout(60000)
+    const r = await fetch(`${API}/admin/run-deep-analysis`, {
+      method:'POST', signal: AbortSignal.timeout(60000), headers:{'X-Admin-Key':getAdminKey()}
     });
     const data = await r.json();
     if(r.ok){
@@ -880,7 +891,7 @@ async function doClearCache(btn){
   btn.disabled = true;
   btn.textContent = '⏳ 清除中...';
   try{
-    const r = await fetch(`${API}/admin/clear-cache?key=${getAdminKey()}`, {method:'POST'});
+    const r = await fetch(`${API}/admin/clear-cache`, {method:'POST',headers:{'X-Admin-Key':getAdminKey()}});
     const data = await r.json();
     toast(r.ok ? data.message : '❌ '+(data.detail||'失敗'));
   }catch(e){
@@ -900,7 +911,7 @@ async function _doPrebuildReports_unused(btn){
   res.className = 'result-box show';
   res.textContent = '請求中...';
   try{
-    const r = await fetch(`${API}/admin/prebuild-reports?key=${getAdminKey()}`, {method:'POST'});
+    const r = await fetch(`${API}/admin/prebuild-reports`, {method:'POST',headers:{'X-Admin-Key':getAdminKey()}});
     const data = await r.json();
     if(r.ok){
       res.textContent = `✅ ${data.message}`;
