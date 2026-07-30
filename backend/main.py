@@ -4531,8 +4531,12 @@ def _check_admin(key: str):
         raise HTTPException(status_code=403, detail="無權限")
 
 @app.get("/admin/backup-db")
-def backup_db(key: str = Header(default="", alias="X-Admin-Key")):
-    """下載 members.db 備份，key = 環境變數 ADMIN_API_KEY 的值"""
+def backup_db(key: str = ""):  # 2026/07/30：唯一保留query string的admin端點，見下方註解
+    """下載 members.db 備份，key = 環境變數 ADMIN_API_KEY 的值
+    2026/07/30：其餘12個admin端點皆已改用 X-Admin-Key header 傳遞金鑰，
+    唯獨這個端點維持 query string，因為前端改用 fetch+blob 下載大型二進位檔案
+    時在正式環境會出現 net::ERR_FAILED（推測是Zeabur反向代理層對fetch()串流
+    大型檔案的處理跟直接瀏覽器導覽不同），優先確保備份功能穩定可用。"""
     from fastapi.responses import FileResponse
     _check_admin(key)
     if not os.path.exists(DB_PATH):

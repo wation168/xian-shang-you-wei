@@ -609,21 +609,14 @@ async function quickReset(email){
 
 // ── 備份 ──
 
-async function doBackup(){
+// 2026/07/30：其餘16處已改用 X-Admin-Key header，唯獨這裡改回 query string。
+// 原因：改成 fetch()+blob 下載在正式環境對大型二進位檔案會出現 net::ERR_FAILED，
+// 推測是Zeabur反向代理層處理 fetch 串流大檔案跟直接瀏覽器導覽行為不同，
+// 優先確保備份功能穩定可用，這裡維持原本 window.open 的做法。
+function doBackup(){
+  const url=`${API}/admin/backup-db?key=${getAdminKey()}`;
+  window.open(url,'_blank');
   toast('📥 備份下載中...');
-  try{
-    const r = await fetch(`${API}/admin/backup-db`,{headers:{'X-Admin-Key':getAdminKey()}});
-    if(!r.ok){toast('❌ 備份失敗，請確認金鑰');return;}
-    const blob = await r.blob();
-    const cd = r.headers.get('content-disposition')||'';
-    const m = cd.match(/filename="?([^";]+)"?/);
-    const fname = m ? m[1] : 'members_backup.db';
-    const dlUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = dlUrl; a.download = fname;
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(dlUrl);
-  }catch(e){toast('❌ 連線失敗');}
 }
 
 // ── 留言管理 ──
