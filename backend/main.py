@@ -269,19 +269,15 @@ async def lifespan(app: FastAPI):
                 conn.close()
                 if not alerts:
                     return
-                # 每股只呼叫一次 get_quote（利用 _QUOTE_CACHE）
+                # 每股只呼叫一次 get_quote（利用 _QUOTE_CACHE，2026/07/30 改用共用函式）
                 stock_prices: dict = {}
                 for _a in alerts:
                     sid = _a["stock_id"]
                     if sid in stock_prices:
                         continue
                     try:
-                        _code = sid.strip().upper()
-                        _qc = _QUOTE_CACHE.get(_code)
-                        if not (_qc and (_qc["expires"] == 0 or _time_alert.time() < _qc["expires"])):
-                            get_quote(_code, user=None)
-                            _qc = _QUOTE_CACHE.get(_code)
-                        stock_prices[sid] = float(_qc["data"]["price"]) if (_qc and _qc["data"].get("price")) else None
+                        _qd = _get_live_quote_data(sid)
+                        stock_prices[sid] = float(_qd["price"]) if _qd else None
                     except Exception:
                         stock_prices[sid] = None
                 conn = _db_conn()
@@ -2916,22 +2912,15 @@ def get_kline(stock_id: str, tf: str = "D", user: dict = Depends(require_user)):
             "volume": int(row["Volume"]) if not np.isnan(row["Volume"]) else 0,
         })
 
-    # 日K：若最後一根不是今日，嘗試從 _QUOTE_CACHE 補今日即時K棒
+    # 日K：若最後一根不是今日，嘗試從 _QUOTE_CACHE 補今日即時K棒（2026/07/30 改用共用函式）
+    chart_note = None
     if tf.upper() == "D" and records:
         from zoneinfo import ZoneInfo as _ZI
         _tw_today = datetime.now(_ZI("Asia/Taipei")).strftime("%Y-%m-%d")
         if records[-1]["date"] != _tw_today:
             _code = stock_id.strip().upper().replace(".TW", "").replace(".TWO", "")
-            _qc = _QUOTE_CACHE.get(_code)
-            # 快取不存在或已過期，主動呼叫 get_quote() 取得即時報價
-            if not (_qc and (_qc["expires"] == 0 or _time_mod.time() < _qc["expires"])):
-                try:
-                    get_quote(_code, user=None)
-                    _qc = _QUOTE_CACHE.get(_code)
-                except Exception:
-                    _qc = None
-            if _qc and (_qc["expires"] == 0 or _time_mod.time() < _qc["expires"]):
-                _q = _qc["data"]
+            _q = _get_live_quote_data(_code)
+            if _q:
                 _c = _q.get("price")
                 _o = _q.get("open") or _c
                 _h = _q.get("high") or _c
@@ -2943,8 +2932,13 @@ def get_kline(stock_id: str, tf: str = "D", user: dict = Depends(require_user)):
                         "open": _o, "high": _h, "low": _l, "close": _c,
                         "volume": int(_v) if _v else 0,
                     })
+                else:
+                    chart_note = "今日K棒資料更新中，稍後重新整理即可看到"
+            else:
+                # 2026/07/30：三層報價來源同時暫時失敗時，不再讓圖表悄悄停留在昨天，改為明確告知前端
+                chart_note = "今日K棒資料更新中，稍後重新整理即可看到"
 
-    return {"symbol": symbol, "tf": tf, "count": len(records), "bars": records}
+    return {"symbol": symbol, "tf": tf, "count": len(records), "bars": records, "chart_note": chart_note}
 
 
 def _classify_kbar_simple(opens, highs, lows, closes, volumes) -> dict:
@@ -3184,24 +3178,17 @@ def _do_analyze(stock_id: str, tf: str = "D",
     _cache_key = f"{stock_id.strip().upper()}_{tf.upper()}_{_taipei_today().replace('-', '')}"
     cached = _cache_get(_cache_key)
     if cached:
-        # 盤中即使快取命中，仍用最新報價覆蓋 price/change/change_pct
+        # 盤中即使快取命中，仍用最新報價覆蓋 price/change/change_pct（2026/07/30 改用共用函式）
         # 避免 _analyze_cache 15 分鐘內鎖住舊成交價
         if _is_trading_session():
-            _sid_c = stock_id.strip().upper()
-            _qc_c  = _QUOTE_CACHE.get(_sid_c)
-            if not _qc_c or _qc_c.get("expires", 0) < _time_mod.time():
-                try:
-                    get_quote(_sid_c, user=None)
-                    _qc_c = _QUOTE_CACHE.get(_sid_c)
-                except Exception:
-                    _qc_c = None
-            if _qc_c and _qc_c.get("data", {}).get("price"):
-                _live = float(_qc_c["data"]["price"])
+            _qd_c = _get_live_quote_data(stock_id)
+            if _qd_c:
+                _live = float(_qd_c["price"])
                 if _live > 0:
                     cached = dict(cached)
                     cached["price"]      = round(_live, 2)
-                    cached["change"]     = _qc_c["data"].get("change")
-                    cached["change_pct"] = _qc_c["data"].get("change_pct")
+                    cached["change"]     = _qd_c.get("change")
+                    cached["change_pct"] = _qd_c.get("change_pct")
                     # 這次補抓成功，清掉先前「報價更新中」的提示
                     if cached.get("price_note") == "報價更新中，現價暫以前一交易日收盤價顯示":
                         cached["price_note"] = None
@@ -3229,18 +3216,12 @@ def _do_analyze(stock_id: str, tf: str = "D",
     volumes    = df["Volume"].values.astype(float)
     price      = round(float(closes[-1]), 2)
 
-    # 一律用即時報價覆蓋現價（FinMind 最新成交價/收盤價，避免 Yahoo K 線延遲導致現價過期）
+    # 一律用即時報價覆蓋現價（FinMind 最新成交價/收盤價，避免 Yahoo K 線延遲導致現價過期，2026/07/30 改用共用函式）
     _sid = stock_id.strip().upper()
     _live_quote_ok = False   # 是否真的拿到即時報價（失敗時 price 會是昨收，不可長時間快取）
-    _qc = _QUOTE_CACHE.get(_sid)
-    if not _qc or _qc.get("expires", 0) < _time_mod.time():
-        try:
-            get_quote(_sid, user=None)
-            _qc = _QUOTE_CACHE.get(_sid)
-        except Exception:
-            _qc = None
-    if _qc and _qc.get("data", {}).get("price"):
-        _live_price = float(_qc["data"]["price"])
+    _qd = _get_live_quote_data(_sid)
+    if _qd:
+        _live_price = float(_qd["price"])
         if _live_price > 0:
             price = round(_live_price, 2)
             # 同步更新 closes/closes_full 最後一根，讓下游所有計算
@@ -4452,6 +4433,25 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
     return result
 
 
+def _get_live_quote_data(code: str) -> dict | None:
+    """統一的『查快取→過期就補抓一次get_quote()→回傳報價資料或None』邏輯。
+    2026/07/30：取代main.py內原本8處幾乎相同的重複程式碼（get_quote()呼叫方各自複製貼上
+    「查快取/重抓/例外處理」），邏輯本身不變，只是集中維護、行為統一，之後同一種bug只需修一處。
+    回傳 _QUOTE_CACHE 裡的 data dict（含price/change/change_pct/open/high/low/volume...），
+    沒有拿到有效報價（price）時回傳 None。"""
+    code = code.strip().upper()
+    _qc = _QUOTE_CACHE.get(code)
+    if not _qc or _qc.get("expires", 0) < _time_mod.time():
+        try:
+            get_quote(code, user=None)
+            _qc = _QUOTE_CACHE.get(code)
+        except Exception:
+            _qc = None
+    if _qc and _qc.get("data", {}).get("price"):
+        return _qc["data"]
+    return None
+
+
 @app.get("/api/realtime/{stock_id}")
 def get_realtime(stock_id: str):
     """
@@ -4467,17 +4467,10 @@ def get_realtime(stock_id: str):
     in_sess = _is_trading_session()
     q = {}
 
-    # 1. 盤中：先從 get_quote 快取取（包含 TWSE MIS 原始資料）
+    # 1. 盤中：先從 get_quote 快取取（包含 TWSE MIS 原始資料，2026/07/30 改用共用函式）
     if in_sess:
-        cached = _QUOTE_CACHE.get(code)
-        if not cached or (_time_mod.time() >= cached.get("expires", 0)):
-            try:
-                get_quote(code, user=None)
-                cached = _QUOTE_CACHE.get(code)
-            except Exception:
-                pass
-        if cached and cached.get("data"):
-            d = cached["data"]
+        d = _get_live_quote_data(code)
+        if d:
             q = {
                 "n": _name_cache.get(code, code),
                 "z": str(d.get("price") or ""),
@@ -5907,20 +5900,13 @@ def _fetch_opening_volume_top20() -> list:
     results.sort(key=lambda x: x["volume"], reverse=True)
     top20 = results[:20]
 
-    # 補即時價（走 FinMind，與個股分析同源，不走被擋的 MIS）
+    # 補即時價（走 FinMind，與個股分析同源，不走被擋的 MIS，2026/07/30 改用共用函式）
     for item in top20:
         try:
-            _c = item["stock_id"]
-            _qc = _QUOTE_CACHE.get(_c)
-            if not (_qc and _qc.get("data", {}).get("price") and _time_mod.time() < _qc.get("expires", 0)):
-                try:
-                    get_quote(_c, user=None)
-                    _qc = _QUOTE_CACHE.get(_c)
-                except Exception:
-                    _qc = None
-            if _qc and _qc.get("data", {}).get("price"):
-                _p = float(_qc["data"]["price"])
-                _chg = float(_qc["data"].get("change", 0))
+            _qd = _get_live_quote_data(item["stock_id"])
+            if _qd:
+                _p = float(_qd["price"])
+                _chg = float(_qd.get("change", 0))
                 _prev = _p - _chg
                 if _p > 0:
                     item["price"] = round(_p, 2)
@@ -6058,18 +6044,11 @@ def get_opening_picks():
         code = item.get("stock_id", "")
         new_item = dict(item)
         try:
-            # 先查 _QUOTE_CACHE（個股分析同源，不走被擋的 MIS）
-            _qc = _QUOTE_CACHE.get(code)
-            if not (_qc and _qc.get("data", {}).get("price") and _time_mod.time() < _qc.get("expires", 0)):
-                # 快取沒有，呼叫 get_quote 補抓（走 FinMind tick_snapshot）
-                try:
-                    get_quote(code, user=None)
-                    _qc = _QUOTE_CACHE.get(code)
-                except Exception:
-                    _qc = None
-            if _qc and _qc.get("data", {}).get("price"):
-                _p   = float(_qc["data"]["price"])
-                _chg = float(_qc["data"].get("change", 0))
+            # 先查 _QUOTE_CACHE（個股分析同源，不走被擋的 MIS，2026/07/30 改用共用函式）
+            _qd = _get_live_quote_data(code)
+            if _qd:
+                _p   = float(_qd["price"])
+                _chg = float(_qd.get("change", 0))
                 _prev = _p - _chg
                 if _p > 0:
                     new_item["price"] = round(_p, 2)
@@ -8524,6 +8503,7 @@ async def portfolio_analysis(current_user: dict = Depends(get_current_user)):
             stock_name = sid  # 預設先用股號
 
         # 取即時報價：優先走 get_quote（TWSE MIS → FinMind 備援），比 get_quote_live 更可靠
+        # 2026/07/30 改用共用函式，get_quote_live 備援邏輯保留不動
         try:
             def _safe_price(v):
                 try:
@@ -8531,13 +8511,8 @@ async def portfolio_analysis(current_user: dict = Depends(get_current_user)):
                     return f if f > 0 else None
                 except Exception:
                     return None
-            # 先嘗試從 _QUOTE_CACHE 取（get_quote 已存入）
-            _qc = _QUOTE_CACHE.get(sid.upper())
-            if not _qc or (_qc["expires"] != 0 and _time_mod.time() >= _qc["expires"]):
-                get_quote(sid, user=None)
-                _qc = _QUOTE_CACHE.get(sid.upper())
-            if _qc and _qc.get("data"):
-                _qd = _qc["data"]
+            _qd = _get_live_quote_data(sid)
+            if _qd:
                 price = _safe_price(_qd.get("price")) or _safe_price(_qd.get("z")) or _safe_price(_qd.get("y")) or 0.0
             else:
                 q = get_quote_live(sid)

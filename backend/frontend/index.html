@@ -846,6 +846,7 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
       </div>
 
       <div class="xhair" id="xhairBar"><span style="color:var(--text3)">滑動查看K棒</span></div>
+      <div id="chartNoteBar" style="display:none;font-size:10.5px;color:var(--text3);padding:1px 4px 5px"></div>
       <div class="chart-wrap">
         <canvas class="kc" id="kChart" height="260" aria-label="K線圖"></canvas>
         <canvas class="draw-layer" id="drawLayer" height="260"></canvas>
@@ -2216,7 +2217,7 @@ async function analyzeStock(){
       signal:AbortSignal.timeout(15000),
       headers:_authHeaders?_authHeaders():{}
     });
-    if(kr.ok){const kd=await kr.json();data.bars=kd.bars;data.tf=currentTF;}
+    if(kr.ok){const kd=await kr.json();data.bars=kd.bars;data.tf=currentTF;data.chart_note=kd.chart_note||null;}
   }catch(_ke){}
   const _now=new Date(Date.now()+8*3600000); // 固定 UTC+8 台灣時間，不依賴瀏覽器時區
   const _pad=n=>String(n).padStart(2,'0');
@@ -2281,7 +2282,7 @@ function renderResult(d,enabledMA){
         trend,pattern,pattern_sub,stop_loss,target1,target2,risk_reward,
         target_price,
         risk_level,risk_label,summary,channel,
-        buy_signals,sell_signals,buy_stops,bars,symbol,stock_name,stock_id,tf,
+        buy_signals,sell_signals,buy_stops,bars,symbol,stock_name,stock_id,tf,chart_note,
         breakout_idx,breakdown_idx,breakout_stale,breakdown_stale,
         kbar_pattern,kbar_warning,kbar_dir,kbar_action,conflict_note,rr_basis,
         indicators}=d;
@@ -2384,6 +2385,11 @@ function renderResult(d,enabledMA){
   // 圖表
   const tfL={D:'日K',W:'週K',M:'月K'}[tf]||'日K';
   document.getElementById('chartName').textContent=`${stockLabel} · ${tfL}`;
+  const _chartNoteEl=document.getElementById('chartNoteBar');
+  if(_chartNoteEl){
+    if(chart_note){_chartNoteEl.textContent=`ℹ️ ${chart_note}`;_chartNoteEl.style.display='block';}
+    else{_chartNoteEl.style.display='none';}
+  }
   C.bars=bars;C.support=support;C.resistance=resistance;
   C.targetPrice=target_price||null;
   C.buyIdx=buy_signals;C.sellIdx=sell_signals;
@@ -2850,6 +2856,15 @@ function drawChart(){
     vCtx.fillStyle=isUp?'rgba(214,59,59,.65)':'rgba(26,143,94,.65)';
     vCtx.fillRect(x-bodyW/2,VH-VP-vh,bodyW,vh);
   });
+  // 2026/07/30：量圖右上角補上峰值張數，避免使用者只看到長條圖卻不知道實際數值
+  {
+    const volMaxLabel=`峰值 ${Math.round(volMax/1000).toLocaleString()}張`;
+    vCtx.font='9px sans-serif';
+    vCtx.fillStyle=dark?'rgba(255,255,255,.45)':'rgba(0,0,0,.4)';
+    vCtx.textAlign='right';
+    vCtx.fillText(volMaxLabel,W-PR-2,10);
+    vCtx.textAlign='left';
+  }
 
   // 買賣點
   const drawSig=(gIdx,type)=>{
@@ -2965,7 +2980,10 @@ function attachInteractions(){
     if(e.touches.length===1){
       const t=e.touches[0];
       const dxAbs=Math.abs(t.clientX-(C._txStart||t.clientX));
-      if(C._touchMode==='pending') C._touchMode=dxAbs>12?'drag':'crosshair';
+      // 2026/07/30 修正：原本只在第一次touchmove判斷一次模式，若當下移動幅度剛好還很小
+      // 就會永久鎖定成十字線模式，之後手指怎麼滑都無法進入拖曳（手機難以移動K線圖的根因）。
+      // 改成持續判斷：只要累積位移超過門檻，任何時候都能升級成拖曳模式，且一旦拖曳就不再降級。
+      if(C._touchMode!=='drag' && dxAbs>10) C._touchMode='drag';
       if(C._touchMode==='drag'){
         const W=kCv.getBoundingClientRect().width;
         const pxPerBar=(W-56)/C.viewCount;
@@ -3019,6 +3037,7 @@ function attachInteractions(){
       <span style="color:${dnC}">低${b.low}</span>
       <span style="color:${isUp?upC:dnC}">收${b.close}</span>
       <span style="color:${isUp?upC:dnC}">${isUp?'+':''}${chg}%</span>
+      <span style="color:var(--text3)">量${Math.round((b.volume||0)/1000).toLocaleString()}張</span>
       ${C.maArrays.filter(m=>isVis('ma'+m.n)).map(m=>{
         const v=m.data[offset+idx];
         return v!=null?'<span style="color:'+m.color+'">M'+m.n+' '+v+'</span>':'';
