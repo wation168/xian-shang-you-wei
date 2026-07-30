@@ -5371,8 +5371,9 @@ class ChangePasswordReq(BaseModel):
     new_password: str
 
 
-@app.post("/auth/register")
-def auth_register(req: RegisterReq, ref: str = "", request: Request = None):
+def _register_account(req: RegisterReq, ref: str, request: Request, success_message: str):
+    """/auth/register 與 /register 共用邏輯：兩者行為完全相同（plan 欄位DB預設值即為'free'），
+    只有回傳訊息文字不同，故合併為共用函式，2026/07/30 抽出。"""
     email = req.email.strip().lower()
     if not _re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
         raise HTTPException(status_code=400, detail="Email 格式不正確")
@@ -5399,56 +5400,6 @@ def auth_register(req: RegisterReq, ref: str = "", request: Request = None):
                 )
     try:
         conn.execute(
-            "INSERT INTO members (email, password) VALUES (?, ?)",
-            (email, _hash_pw(req.password))
-        )
-        conn.commit()
-    except sqlite3.IntegrityError:
-        conn.close()
-        raise HTTPException(status_code=409, detail="此 Email 已註冊")
-    _get_or_create_referral_code(email)
-    if inviter_email:
-        dupe = conn.execute(
-            "SELECT id FROM referral_logs WHERE invitee_email=? AND inviter_email=?",
-            (email, inviter_email)
-        ).fetchone()
-        if not dupe:
-            conn.execute(
-                "INSERT INTO referral_logs (inviter_email, invitee_email, invitee_ip) VALUES (?,?,?)",
-                (inviter_email, email, client_ip)
-            )
-            conn.commit()
-    conn.close()
-    return {"ok": True, "message": "註冊成功"}
-
-
-@app.post("/register")
-def register_free(req: RegisterReq, ref: str = "", request: Request = None):
-    email = req.email.strip().lower()
-    if not _re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
-        raise HTTPException(status_code=400, detail="Email 格式不正確")
-    if len(req.password) < 6:
-        raise HTTPException(status_code=400, detail="密碼至少 6 個字元")
-    conn = _db_conn()
-    client_ip = request.client.host if request else ""
-    inviter_email = None
-    if ref:
-        inviter_row = conn.execute(
-            "SELECT user_email FROM referral_codes WHERE code=?", (ref.upper().strip(),)
-        ).fetchone()
-        if inviter_row and inviter_row["user_email"] != email:
-            inviter_email = inviter_row["user_email"]
-            if client_ip and conn.execute(
-                "SELECT id FROM referral_logs WHERE inviter_email=? AND invitee_ip=?",
-                (inviter_email, client_ip)
-            ).fetchone():
-                conn.close()
-                raise HTTPException(
-                    status_code=400,
-                    detail="此網路環境已有使用該邀請碼的帳號，請改用手機電信網路重新嘗試"
-                )
-    try:
-        conn.execute(
             "INSERT INTO members (email, password, plan) VALUES (?, ?, 'free')",
             (email, _hash_pw(req.password))
         )
@@ -5469,23 +5420,29 @@ def register_free(req: RegisterReq, ref: str = "", request: Request = None):
             )
             conn.commit()
     conn.close()
-    return {"ok": True, "message": "免費帳號建立成功"}
+    return {"ok": True, "message": success_message}
 
 
-@app.post("/auth/login")
-def auth_login(req: LoginReq):
-    email = req.email.strip().lower()
-    conn = _db_conn()
-    row = conn.execute("SELECT * FROM members WHERE email=?", (email,)).fetchone()
-    if not row or not _verify_pw(req.password, row["password"]):
-        conn.close()
-        raise HTTPException(status_code=401, detail="帳號或密碼錯誤")
-    blocked = conn.execute(
+@app.post("/auth/register")
+def auth_register(req: RegisterReq, ref: str = "", request: Request = None):
+    return _register_account(req, ref, request, "註冊成功")
+
+
+@app.post("/register")
+def register_free(req: RegisterReq, ref: str = "", request: Request = None):
+    return _register_account(req, ref, request, "免費帳號建立成功")
+
+
+def _is_login_blocked(conn, email: str):
+    """封鎖名單查詢，auth_login/auth_google共用，2026/07/30抽出，SQL與行為完全不變。"""
+    return conn.execute(
         "SELECT email FROM blocked_users WHERE email=? AND block_type='login'", (email,)
     ).fetchone()
-    if blocked:
-        conn.close()
-        raise HTTPException(status_code=403, detail="帳號已被停用，請聯絡客服")
+
+
+def _issue_login_session(conn, row, email: str):
+    """建立session、簽發JWT、組回傳格式，auth_login/auth_google共用，2026/07/30抽出。
+    呼叫前conn仍須是開啟狀態、row須已確認存在；本函式負責commit並close conn。"""
     session_id = secrets.token_hex(16)
     conn.execute("UPDATE members SET last_login=datetime('now','+8 hours'), session_id=? WHERE id=?", (session_id, row["id"]))
     conn.commit()
@@ -5508,6 +5465,20 @@ def auth_login(req: LoginReq):
     }
 
 
+@app.post("/auth/login")
+def auth_login(req: LoginReq):
+    email = req.email.strip().lower()
+    conn = _db_conn()
+    row = conn.execute("SELECT * FROM members WHERE email=?", (email,)).fetchone()
+    if not row or not _verify_pw(req.password, row["password"]):
+        conn.close()
+        raise HTTPException(status_code=401, detail="帳號或密碼錯誤")
+    if _is_login_blocked(conn, email):
+        conn.close()
+        raise HTTPException(status_code=403, detail="帳號已被停用，請聯絡客服")
+    return _issue_login_session(conn, row, email)
+
+
 class GoogleLoginReq(BaseModel):
     google_token: str
 
@@ -5527,10 +5498,7 @@ def auth_google(req: GoogleLoginReq):
         raise HTTPException(status_code=400, detail="無法取得 Google 帳號 Email")
 
     conn = _db_conn()
-    blocked = conn.execute(
-        "SELECT email FROM blocked_users WHERE email=? AND block_type='login'", (email,)
-    ).fetchone()
-    if blocked:
+    if _is_login_blocked(conn, email):
         conn.close()
         raise HTTPException(status_code=403, detail="帳號已被停用，請聯絡客服")
 
@@ -5545,29 +5513,7 @@ def auth_google(req: GoogleLoginReq):
         _get_or_create_referral_code(email)
         row = conn.execute("SELECT * FROM members WHERE email=?", (email,)).fetchone()
 
-    session_id = secrets.token_hex(16)
-    conn.execute(
-        "UPDATE members SET last_login=datetime('now','+8 hours'), session_id=? WHERE id=?",
-        (session_id, row["id"])
-    )
-    conn.commit()
-    conn.close()
-
-    payload = {
-        "sub": row["id"],
-        "email": email,
-        "plan": row["plan"],
-        "ver": row["token_ver"],
-        "sid": session_id,
-        "exp": _time_mod.time() + JWT_EXPIRE_DAYS * 86400,
-    }
-    token = _jwt_create(payload)
-    return {
-        "token": token,
-        "email": email,
-        "plan": row["plan"],
-        "expire_at": row["expire_at"],
-    }
+    return _issue_login_session(conn, row, email)
 
 
 @app.get("/auth/me")
