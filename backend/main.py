@@ -906,6 +906,16 @@ async def serve_comparisons_locale_html(locale: str, filename: str):
 async def serve_comparisons_locale_index(locale: str):
     return _serve_locale_file("comparisons", "index.html", locale, _COMP_LOCALES)
 
+# ---- Home（多語系首頁＋法律頁面）路由 ----
+@app.get("/home/{locale}/{filename}.html", include_in_schema=False)
+async def serve_home_locale_html(locale: str, filename: str):
+    return _serve_locale_file("home", f"{filename}.html", locale, _COMP_LOCALES)
+
+@app.get("/home/{locale}", include_in_schema=False)
+@app.get("/home/{locale}/", include_in_schema=False)
+async def serve_home_locale_index(locale: str):
+    return _serve_locale_file("home", "homepage.html", locale, _COMP_LOCALES)
+
 # ---- JS 靜態檔路由 (cookie-consent.css, softglow-cookies.js 等) ----
 @app.get("/js/{js_filename:path}", include_in_schema=False)
 async def serve_js_files(js_filename: str):
