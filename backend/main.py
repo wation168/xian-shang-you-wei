@@ -529,34 +529,40 @@ class LotteryRedirectMiddleware(BaseHTTPMiddleware):
         if "lottery.softglow-ai.com" in host:
             from starlette.responses import RedirectResponse
             path = request.url.path
-            parts = path.strip("/").split("/")
-            if len(parts) >= 2:
+            parts = [p for p in path.strip("/").split("/") if p]
+            _known_locales = ("en","ja","ko","fr","de","es","pt","id","zh-CN")
+            if parts and parts[0] in _known_locales:
                 locale = parts[0]
-                lottery_slug = parts[1] if len(parts) > 1 else ""
-                page_type = parts[2] if len(parts) > 2 else ""
-                if locale in ("en","ja","ko","fr","de","es","pt","id","zh-CN"):
-                    if page_type == "number-generator":
-                        # 選號產生器新版改為全站共用一頁，不再逐彩票分頁（2026/08/02修正）
-                        new_path = f"/lottery/{locale}/number-generator.html"
-                    elif page_type:
-                        new_path = f"/lottery/{locale}/{lottery_slug}-{page_type}.html"
-                    elif lottery_slug:
-                        new_path = f"/lottery/{locale}/{lottery_slug}.html"
-                    else:
-                        new_path = f"/lottery/{locale}/"
-                elif locale == "zh-TW":
-                    if page_type == "number-generator":
-                        new_path = "/lottery/number-generator.html"
-                    elif page_type:
-                        new_path = f"/lottery/{lottery_slug}-{page_type}.html"
-                    elif lottery_slug:
-                        new_path = f"/lottery/{lottery_slug}.html"
-                    else:
-                        new_path = "/lottery/"
+                rest = parts[1:]
+            elif parts and parts[0] == "zh-TW":
+                locale = "zh-TW"
+                rest = parts[1:]
+            else:
+                # 舊網址沒有語言前綴（第一段直接是彩票/工具代號），預設視為繁中版
+                # 2026/08/02修正：避免第一段被誤判成語言代碼、導致整批網址錯轉去彩票首頁
+                locale = "zh-TW"
+                rest = parts
+            lottery_slug = rest[0] if len(rest) > 0 else ""
+            page_type = rest[1] if len(rest) > 1 else ""
+            if locale in _known_locales:
+                if page_type == "number-generator":
+                    # 選號產生器新版改為全站共用一頁，不再逐彩票分頁（2026/08/02修正）
+                    new_path = f"/lottery/{locale}/number-generator.html"
+                elif page_type:
+                    new_path = f"/lottery/{locale}/{lottery_slug}-{page_type}.html"
+                elif lottery_slug:
+                    new_path = f"/lottery/{locale}/{lottery_slug}.html"
+                else:
+                    new_path = f"/lottery/{locale}/"
+            else:
+                if page_type == "number-generator":
+                    new_path = "/lottery/number-generator.html"
+                elif page_type:
+                    new_path = f"/lottery/{lottery_slug}-{page_type}.html"
+                elif lottery_slug:
+                    new_path = f"/lottery/{lottery_slug}.html"
                 else:
                     new_path = "/lottery/"
-            else:
-                new_path = "/lottery/"
             return RedirectResponse(url=f"https://softglow-ai.com{new_path}", status_code=301)
         return await call_next(request)
 
