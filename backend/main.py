@@ -535,14 +535,19 @@ class LotteryRedirectMiddleware(BaseHTTPMiddleware):
                 lottery_slug = parts[1] if len(parts) > 1 else ""
                 page_type = parts[2] if len(parts) > 2 else ""
                 if locale in ("en","ja","ko","fr","de","es","pt","id","zh-CN"):
-                    if page_type:
+                    if page_type == "number-generator":
+                        # 選號產生器新版改為全站共用一頁，不再逐彩票分頁（2026/08/02修正）
+                        new_path = f"/lottery/{locale}/number-generator.html"
+                    elif page_type:
                         new_path = f"/lottery/{locale}/{lottery_slug}-{page_type}.html"
                     elif lottery_slug:
                         new_path = f"/lottery/{locale}/{lottery_slug}.html"
                     else:
                         new_path = f"/lottery/{locale}/"
                 elif locale == "zh-TW":
-                    if page_type:
+                    if page_type == "number-generator":
+                        new_path = "/lottery/number-generator.html"
+                    elif page_type:
                         new_path = f"/lottery/{lottery_slug}-{page_type}.html"
                     elif lottery_slug:
                         new_path = f"/lottery/{lottery_slug}.html"
