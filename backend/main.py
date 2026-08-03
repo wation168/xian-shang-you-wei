@@ -754,6 +754,15 @@ async def serve_tools_chart_js():
         return FileResponse(path, media_type="application/javascript")
     return JSONResponse({"detail": "Not Found"}, status_code=404)
 
+@app.get("/quiz/{filename}.html", include_in_schema=False)
+async def serve_quiz_html(filename: str):
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "quiz", f"{filename}.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
 @app.get("/tools/{filename}.html", include_in_schema=False)
 async def serve_tools_html(filename: str):
     from fastapi.responses import FileResponse

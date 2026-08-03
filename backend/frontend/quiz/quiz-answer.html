@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>學測評量 · 作答中</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --paper:#FBF7EE; --ink:#2B2620; --line:#E4DBC8; --accent:#D94F4F; --correct:#2E9E5B; --wrong:#D94F4F; }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper); color:var(--ink); font-family:'Noto Sans TC', sans-serif;
+    min-height:100vh; display:flex; justify-content:center; padding:2rem 1.2rem 4rem;
+  }
+  .sheet{ width:100%; max-width:560px; }
+  h1{ font-family:'Zen Maru Gothic', sans-serif; font-size:1.5rem; margin:0 0 1.2rem; }
+  .progress{
+    font-size:0.85rem; color:#8A8171; font-weight:700; margin-bottom:1rem;
+  }
+  .qcard{
+    background:#fff; border-radius:14px; padding:1.5rem;
+    box-shadow:0 1px 0 rgba(0,0,0,0.04), 0 8px 24px -12px rgba(43,38,32,0.18);
+    margin-bottom:1.2rem;
+  }
+  .qtext{ font-size:1.05rem; line-height:1.7; margin-bottom:1.2rem; white-space:pre-wrap; }
+  .opt{
+    display:block; width:100%; text-align:left; border:1.5px solid var(--line);
+    background:#fff; border-radius:10px; padding:0.85rem 1rem; margin-bottom:0.6rem;
+    font-family:'Noto Sans TC', sans-serif; font-size:0.98rem; cursor:pointer;
+    transition:all 0.15s ease;
+  }
+  .opt:hover{ border-color:var(--accent); }
+  .opt.selected{ border-color:var(--accent); background:color-mix(in srgb, var(--accent) 10%, white); font-weight:700; }
+  .opt.correct{ border-color:var(--correct); background:color-mix(in srgb, var(--correct) 12%, white); }
+  .opt.wrong{ border-color:var(--wrong); background:color-mix(in srgb, var(--wrong) 12%, white); }
+  .feedback{ margin-top:0.8rem; font-size:0.92rem; font-weight:700; }
+  .feedback.correct{ color:var(--correct); }
+  .feedback.wrong{ color:var(--wrong); }
+  .nav-btns{ display:flex; gap:0.8rem; margin-top:1.5rem; }
+  button.primary{
+    flex:1; border:none; border-radius:12px; padding:1rem;
+    font-family:'Noto Sans TC', sans-serif; font-size:1.02rem; font-weight:700;
+    color:#fff; background:var(--accent); cursor:pointer;
+  }
+  button.primary:disabled{ opacity:0.4; cursor:not-allowed; }
+  .error-box{
+    background:#FDECEC; border:1.5px solid #E8A0A0; color:#A33; border-radius:10px;
+    padding:0.9rem 1rem; margin-bottom:1.2rem; font-size:0.9rem;
+  }
+  .result-card{ text-align:center; padding:2.5rem 1.5rem; }
+  .result-score{ font-family:'Zen Maru Gothic', sans-serif; font-size:3rem; font-weight:700; margin:0.5rem 0; }
+</style>
+</head>
+<body>
+<div class="sheet" id="app">
+  <h1>作答中</h1>
+  <div id="content">載入題目中...</div>
+</div>
+
+<script>
+  const API_BASE = '/quiz-api';
+  const params = new URLSearchParams(location.search);
+  const sessionId = params.get('session_id');
+  const content = document.getElementById('content');
+
+  let questions = [];
+  let currentIndex = 0;
+  let answers = {}; // question_id -> 選的答案
+  let feedbackShown = {}; // question_id -> {is_correct, correct_option}
+
+  function renderError(msg){
+    content.innerHTML = `<div class="error-box">${msg}</div>`;
+  }
+
+  async function loadQuestions(){
+    if(!sessionId){ renderError('網址缺少 session_id，請從測驗設定頁重新開始。'); return; }
+    try{
+      const res = await fetch(`${API_BASE}/api/exam-sessions/${sessionId}/questions`);
+      if(!res.ok) throw new Error(`載入題目失敗（${res.status}）`);
+      questions = await res.json();
+      if(questions.length === 0){ renderError('這個範圍沒有題目。'); return; }
+      renderQuestion();
+    }catch(e){ renderError(e.message); }
+  }
+
+  function renderQuestion(){
+    const q = questions[currentIndex];
+    const fb = feedbackShown[q.id];
+    const optionsHtml = (q.options || []).map(o=>{
+      let cls = 'opt';
+      if(answers[q.id] === o.key) cls += ' selected';
+      if(fb){
+        if(o.key === fb.correct_option) cls += ' correct';
+        else if(o.key === answers[q.id] && !fb.is_correct) cls += ' wrong';
+      }
+      return `<button class="${cls}" data-key="${o.key}" ${fb ? 'disabled' : ''}>(${o.key}) ${o.text}</button>`;
+    }).join('');
+
+    let feedbackHtml = '';
+    if(fb){
+      feedbackHtml = fb.is_correct
+        ? `<div class="feedback correct">✓ 答對了！</div>`
+        : `<div class="feedback wrong">✗ 答錯了，正確答案是 (${fb.correct_option})</div>`;
+    }
+
+    content.innerHTML = `
+      <div class="progress">第 ${currentIndex+1} / ${questions.length} 題</div>
+      <div class="qcard">
+        <div class="qtext">${q.question_text}</div>
+        ${optionsHtml}
+        ${feedbackHtml}
+      </div>
+      <div class="nav-btns">
+        <button class="primary" id="nextBtn" ${fb ? '' : 'disabled'}>
+          ${currentIndex === questions.length - 1 ? '交卷看成績' : '下一題'}
+        </button>
+      </div>
+    `;
+
+    content.querySelectorAll('.opt').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        if(feedbackShown[q.id]) return; // 已經送出過答案，不能重選
+        answers[q.id] = btn.dataset.key;
+        await submitAnswer(q);
+      });
+    });
+
+    const nextBtn = document.getElementById('nextBtn');
+    nextBtn.addEventListener('click', ()=>{
+      if(currentIndex < questions.length - 1){
+        currentIndex++;
+        renderQuestion();
+      }else{
+        finishExam();
+      }
+    });
+  }
+
+  async function submitAnswer(q){
+    try{
+      const res = await fetch(`${API_BASE}/api/exam-sessions/${sessionId}/answers`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          exam_session_id: sessionId,
+          question_id: q.id,
+          submitted_answer: answers[q.id],
+        }),
+      });
+      if(!res.ok){
+        const err = await res.json().catch(()=>({detail:'送出答案失敗'}));
+        throw new Error(err.detail);
+      }
+      const data = await res.json();
+      feedbackShown[q.id] = { is_correct: data.is_correct, correct_option: data.correct_option };
+      renderQuestion();
+    }catch(e){
+      renderError(e.message);
+    }
+  }
+
+  async function finishExam(){
+    content.innerHTML = '結算成績中...';
+    try{
+      const res = await fetch(`${API_BASE}/api/exam-sessions/${sessionId}/finish`, { method:'POST' });
+      if(!res.ok) throw new Error(`結算失敗（${res.status}）`);
+      const data = await res.json();
+      const pct = data.total_answered ? Math.round(data.correct_count / data.total_answered * 100) : 0;
+      content.innerHTML = `
+        <div class="qcard result-card">
+          <div style="color:#8A8171; font-weight:700;">測驗結束</div>
+          <div class="result-score">${data.correct_count} / ${data.total_answered}</div>
+          <div style="color:#8A8171;">答對率 ${pct}%</div>
+          <div class="nav-btns">
+            <button class="primary" onclick="location.href='quiz-selector.html'">再測一次</button>
+          </div>
+        </div>
+      `;
+    }catch(e){ renderError(e.message); }
+  }
+
+  loadQuestions();
+</script>
+</body>
+</html>
