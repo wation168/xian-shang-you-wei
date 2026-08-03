@@ -614,6 +614,13 @@ async def serve_stock_app():
     from fastapi.responses import FileResponse
     return FileResponse(os.path.join(_FRONTEND_DIR, "index.html"))
 
+try:
+    from quiz.main import app as _quiz_app
+    app.mount("/quiz-api", _quiz_app)
+    print("✅ quiz 學測評量子服務已掛載")
+except Exception as _e:
+    print(f"⚠️ quiz 學測評量子服務載入失敗（不影響主站）：{_e}")
+
 @app.get("/stock/landing", include_in_schema=False)
 @app.get("/stock/landing.html", include_in_schema=False)
 async def serve_stock_landing():
