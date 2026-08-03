@@ -4141,7 +4141,11 @@ def get_quote_live(stock_id: str):
         prev     = rows[-2] if len(rows) >= 2 else None
 
         z = _sf(latest.get("close")) if is_today else None
-        y = _sf(prev.get("close")) if prev else _sf(latest.get("close"))
+        # 修正（2026/08/03）：只有latest真的是「今天」時，y才代表「昨收」，用prev。
+        # 若latest不是今天（FinMind當日資料尚未發布），y應直接顯示「目前可取得的最新一筆」
+        # （也就是latest本身），不能再往前退一天用prev，否則會多顯示一天前的舊資料。
+        y = (_sf(prev.get("close")) if prev else _sf(latest.get("close"))) if is_today \
+            else _sf(latest.get("close"))
 
         result = {
             "z": z,
