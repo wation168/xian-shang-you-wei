@@ -3195,17 +3195,18 @@ def _do_analyze(stock_id: str, tf: str = "D",
     _cache_key = f"{stock_id.strip().upper()}_{tf.upper()}_{_taipei_today().replace('-', '')}"
     cached = _cache_get(_cache_key)
     if cached:
-        # 盤中即使快取命中，仍用最新報價覆蓋 price/change/change_pct（2026/07/30 改用共用函式）
-        # 避免 _analyze_cache 15 分鐘內鎖住舊成交價
+        # 做法A（2026/08/04）：盤中快取命中時，即時報價「只更新 display_price（畫面現價）
+        # 與 change/change_pct」，不再覆蓋 price / analysis_price（分析基準）。
+        # 分析基準永遠鎖定當初算好的收盤 K 棒，即時價只影響畫面現價那個數字。
         if _is_trading_session():
             _qd_c = _get_live_quote_data(stock_id)
             if _qd_c:
                 _live = float(_qd_c["price"])
                 if _live > 0:
                     cached = dict(cached)
-                    cached["price"]      = round(_live, 2)
-                    cached["change"]     = _qd_c.get("change")
-                    cached["change_pct"] = _qd_c.get("change_pct")
+                    cached["display_price"] = round(_live, 2)   # 只動畫面現價
+                    cached["change"]        = _qd_c.get("change")
+                    cached["change_pct"]    = _qd_c.get("change_pct")
                     # 這次補抓成功，清掉先前「報價更新中」的提示
                     if cached.get("price_note") == "報價更新中，現價暫以前一交易日收盤價顯示":
                         cached["price_note"] = None
@@ -3233,18 +3234,31 @@ def _do_analyze(stock_id: str, tf: str = "D",
     volumes    = df["Volume"].values.astype(float)
     price      = round(float(closes[-1]), 2)
 
-    # 一律用即時報價覆蓋現價（FinMind 最新成交價/收盤價，避免 Yahoo K 線延遲導致現價過期，2026/07/30 改用共用函式）
+    # ── 做法A（2026/08/04）：分析基準與顯示現價徹底切開 ──
+    # price（＝分析基準）永遠鎖定「最近一根確定收盤 K 棒」，即時報價「不再覆蓋」它，
+    # 也「不再改動 closes[-1] / closes_full[-1]」——所以下游全部分析
+    # （支撐距離、防守位、損益比、乖離率、雷達）都建立在穩定的收盤基準上，
+    # 即時報價抓不到 / 抓成昨收，都不會再污染分析結論。
+    # 即時報價只放進 display_price（畫面現價用），與分析完全脫鉤。
+    #
+    # analysis_price ：分析基準（確定收盤），下游計算與 result 分析欄位都用它（＝price 變數）
+    # display_price  ：畫面現價（盤中即時，抓不到就等於收盤基準）
+    # price_basis_date：分析基準是哪一天的收盤（給前端時間標示用）
     _sid = stock_id.strip().upper()
-    _live_quote_ok = False   # 是否真的拿到即時報價（失敗時 price 會是昨收，不可長時間快取）
+    analysis_price   = price                              # 分析基準＝確定收盤，永不被即時價覆蓋
+    price_basis_date = _taipei_today()                    # 收盤 K 棒基準日（下方會依 df 實際日期校正）
+    try:
+        _basis_dt = df.index[-1]
+        price_basis_date = _basis_dt.strftime("%Y-%m-%d")
+    except Exception:
+        pass
+    display_price  = price                                # 預設＝收盤基準；抓到即時價才覆蓋
+    _live_quote_ok = False                                # 是否真的拿到即時報價（僅影響 display 與快取時效）
     _qd = _get_live_quote_data(_sid)
     if _qd:
         _live_price = float(_qd["price"])
         if _live_price > 0:
-            price = round(_live_price, 2)
-            # 同步更新 closes/closes_full 最後一根，讓下游所有計算
-            # （支撐距離、防守位、損益比、乖離率、雷達）用同一個價格基準
-            closes[-1] = _live_price
-            closes_full[-1] = _live_price
+            display_price  = round(_live_price, 2)        # 只更新畫面現價，不碰 price / closes[-1]
             _live_quote_ok = True
 
     # 股名
@@ -3679,9 +3693,25 @@ def _do_analyze(stock_id: str, tf: str = "D",
             "volume": int(df["Volume"].iloc[i]) if not np.isnan(df["Volume"].iloc[i]) else 0,
         })
 
+    # 做法A：分析基準與顯示現價的落差說明（給前端顯示，白話告知使用者）
+    _basis_gap = None
+    if display_price and analysis_price and analysis_price > 0:
+        _gap_pct = round((display_price - analysis_price) / analysis_price * 100, 2)
+        if abs(_gap_pct) >= 0.01:
+            _basis_gap = _gap_pct
+    _basis_md = price_basis_date[5:].replace("-", "/") if price_basis_date and len(price_basis_date) >= 10 else price_basis_date
+    if _is_trading_session() and _live_quote_ok and _basis_gap is not None:
+        _price_basis_note = f"上方現價為即時參考；以下分析（支撐、壓力、防守位、損益比）以 {_basis_md} 收盤價為基準計算，兩者盤中可能有落差，屬正常。"
+    else:
+        _price_basis_note = f"本分析以 {_basis_md} 收盤價為基準計算。"
+
     result = {
         "symbol": symbol, "stock_id": stock_id, "stock_name": stock_name, "tf": tf,
         "price": price,
+        "analysis_price": analysis_price,      # 做法A：分析基準（確定收盤），下游分析欄位皆用此
+        "display_price": display_price,        # 做法A：畫面現價（盤中即時，抓不到＝收盤基準）
+        "price_basis_date": price_basis_date,  # 做法A：分析基準是哪一天的收盤
+        "price_basis_note": _price_basis_note, # 做法A：白話說明（給使用者看，第10點）
         "support": support, "support_desc": supp_detail["support_desc"],
         "support_source": supp_detail["support_source"],
         "support_candidates": supp_detail["all_candidates"],
@@ -3888,22 +3918,17 @@ def _do_analyze(stock_id: str, tf: str = "D",
         result["kbar_action"] = kbar_action
 
     # 明確告知：支撐／壓力／K棒型態／操作建議這整包分析，是以「最近一根完整收盤 K 棒」
-    # 為基準計算的，不是逐筆即時運算。上面「現價」欄位可能已經換成即時價，
-    # 但下面這段解析內容本身不會跟著現價即時重算，所以固定加註提示，不管有沒有抓到即時報價都加。
+    # 為基準計算的，不是逐筆即時運算。（做法A後 price_basis_note 已詳細說明基準日，
+    # 此句保留作為 warning 內的簡短提示，與 price_basis_note 相輔。）
     result["warning"] = (result.get("warning") or "") + "（本分析以最近收盤資料計算，盤中僅供參考）"
 
-    # 盤中若即時報價三層來源全失敗，price 會停留在 K 線最後一根（＝昨收），
-    # 整份分析（支撐距離／防守位／損益比／雷達）都建立在錯的價格基準上。
-    # 此時不可用正常 15 分鐘快取鎖住，否則使用者會看到一份看似正常、實際價格錯誤的報告。
+    # 做法A（2026/08/04）：分析基準已與即時報價脫鉤——即時報價抓不到，
+    # 只代表「畫面現價」暫時等於收盤基準，分析（支撐/防守位/損益比/雷達）本身完全正確，
+    # 不再有「分析建立在錯的價格基準上」的問題，因此不再需要縮短快取為 60 秒的補救。
+    # 盤中即時價抓失敗時，只在畫面現價旁提示，分析照常快取。
     if _is_trading_session() and not _live_quote_ok:
-        result["price_note"] = "報價更新中，現價暫以前一交易日收盤價顯示"
-        # 只快取約 60 秒（用回推 ts 的方式縮短），讓下一次請求盡快重試即時報價
-        _analyze_cache[_cache_key] = {
-            "ts":   _time.time() - max(0, _get_analyze_cache_ttl() - 60),
-            "data": result,
-        }
-    else:
-        _cache_set(_cache_key, result)
+        result["price_note"] = "現價更新中，暫以收盤價顯示（分析不受影響）"
+    _cache_set(_cache_key, result)
 
     # 計入查詢次數（免費用戶）
     if user and user["plan"] == "free":
@@ -8117,16 +8142,16 @@ async def webhook_ecpay_recurring(request: Request):
         if not _ecpay_verify_mod.check_webhook(
             params, ECPAY_HASH_KEY, ECPAY_HASH_IV, DB_PATH, "ecpay_recurring"
         ):
-            return JSONResponse(content="0|Error")
+            return PlainTextResponse(content="0|Error")
 
     if params.get("MerchantID") != ECPAY_MERCHANT_ID:
         print(f"[定期定額] ❌ MerchantID 不符")
-        return JSONResponse(content="0|Error")
+        return PlainTextResponse(content="0|Error")
 
     rtn_code = params.get("RtnCode", "0")
     if rtn_code != "1":
         print(f"[定期定額] 非成功狀態 RtnCode={rtn_code}，略過")
-        return JSONResponse(content="1|OK")
+        return PlainTextResponse(content="1|OK")
 
     email        = params.get("CustomField1", "").strip().lower()
     trade_no_w   = params.get("MerchantTradeNo", "")
@@ -8137,7 +8162,7 @@ async def webhook_ecpay_recurring(request: Request):
 
     if not email:
         print("[定期定額] ❌ email 為空")
-        return JSONResponse(content="1|OK")
+        return PlainTextResponse(content="1|OK")
 
     # 冪等保護
     _tmp = _db_conn()
@@ -8154,7 +8179,7 @@ async def webhook_ecpay_recurring(request: Request):
 
     if _already:
         print(f"[定期定額] ⚠️ 重複 Webhook {trade_no_w} exec={exec_log}")
-        return JSONResponse(content="1|OK")
+        return PlainTextResponse(content="1|OK")
 
     # 判斷天數與方案（item_name + amount 雙重保障）
     _amount_int = int(amount) if str(amount).isdigit() else 0
@@ -8218,7 +8243,7 @@ async def webhook_ecpay_recurring(request: Request):
         except Exception as e:
             print(f"[定期定額] 建立帳號失敗: {e}")
             conn.close()
-            return JSONResponse(content="1|OK")
+            return PlainTextResponse(content="1|OK")
         conn.close()
         _send_email(email, "【線上有位】歡迎！您的帳號已開通（定期訂閱）",
             f"""<div style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px">
@@ -8255,7 +8280,7 @@ async def webhook_ecpay_recurring(request: Request):
     except Exception:
         pass
 
-    return JSONResponse(content="1|OK")
+    return PlainTextResponse(content="1|OK")
 
 
 # ─────────────────────────────────────────────

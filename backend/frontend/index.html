@@ -742,6 +742,9 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
       </div>
     </div>
 
+    <!-- 做法A（2026/08/04）：分析基準白話說明橫幅 — 讓使用者清楚知道「現價是即時的、分析是收盤基準的」 -->
+    <div id="priceBasisNote" style="display:none;background:var(--bg2);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:8px 12px;margin-bottom:12px;font-size:11px;color:var(--text2);line-height:1.5"></div>
+
     <!-- 損益比直覺卡 -->
     <div class="rr-card">
       <div class="rr-left">
@@ -2297,6 +2300,11 @@ function renderResult(d,enabledMA){
         kbar_pattern,kbar_warning,kbar_dir,kbar_action,conflict_note,rr_basis,
         indicators}=d;
   _indicators = indicators||null;
+  // 做法A（2026/08/04）：分析基準與畫面現價分離
+  //   price（＝analysis_price）＝分析基準（確定收盤），支撐/壓力/防守位/損益比距離都用它
+  //   displayPrice＝畫面大字現價（盤中即時，抓不到就等於收盤基準）
+  //   後端沒回新欄位時 fallback 回舊的 price，確保新舊相容
+  const displayPrice = (d.display_price != null) ? d.display_price : price;
 
   // 風險卡
   document.getElementById('riskCard').className=`risk-card risk-${risk_level}`;
@@ -2362,7 +2370,24 @@ function renderResult(d,enabledMA){
   }).join('');
 
   // 指標卡
-  _animateNumber(document.getElementById('m-price'), price, 2, 600);
+  // 做法A：大字現價顯示 displayPrice（畫面現價/即時價），與下方分析數字（用收盤基準 price）分離
+  _animateNumber(document.getElementById('m-price'), displayPrice, 2, 600);
+
+  // 做法A：分析基準白話說明（第10點）— 有後端說明句才顯示，並在現價與收盤基準有落差時補上具體數字
+  const _basisNoteEl = document.getElementById('priceBasisNote');
+  if(_basisNoteEl){
+    if(d.price_basis_note){
+      let _noteHtml = `💡 ${d.price_basis_note}`;
+      // 現價與分析基準有明顯落差時，補一句具體對照，讓使用者一眼看懂落差來源
+      if(d.analysis_price != null && displayPrice != null && d.analysis_price !== displayPrice){
+        _noteHtml += `<br><span style="color:var(--text3)">（現價 ${(+displayPrice).toFixed(2)}　·　分析基準 ${(+d.analysis_price).toFixed(2)}）</span>`;
+      }
+      _basisNoteEl.innerHTML = _noteHtml;
+      _basisNoteEl.style.display = 'block';
+    } else {
+      _basisNoteEl.style.display = 'none';
+    }
+  }
   const tEl=document.getElementById('m-trend');
   tEl.textContent=trend;tEl.className='m-val'+(trend==='上升趨勢'?' tw-dn':trend==='下降趨勢'?' tw-up':'');
   document.getElementById('m-pat').textContent=pattern;
