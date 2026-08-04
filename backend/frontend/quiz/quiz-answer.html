@@ -38,6 +38,12 @@
   .feedback{ margin-top:0.8rem; font-size:0.92rem; font-weight:700; }
   .feedback.correct{ color:var(--correct); }
   .feedback.wrong{ color:var(--wrong); }
+  .explain{
+    margin-top:0.7rem; padding:0.8rem 1rem; background:#FBF7EE;
+    border-left:3px solid var(--accent); border-radius:6px;
+    font-size:0.9rem; line-height:1.6; color:#5A5344; font-weight:400;
+  }
+  .explain b{ color:var(--ink); }
   .nav-btns{ display:flex; gap:0.8rem; margin-top:1.5rem; }
   button.primary{
     flex:1; border:none; border-radius:12px; padding:1rem;
@@ -103,6 +109,9 @@
       feedbackHtml = fb.is_correct
         ? `<div class="feedback correct">✓ 答對了！</div>`
         : `<div class="feedback wrong">✗ 答錯了，正確答案是 (${fb.correct_option})</div>`;
+      if(fb.explanation){
+        feedbackHtml += `<div class="explain"><b>詳解：</b>${fb.explanation}</div>`;
+      }
     }
 
     content.innerHTML = `
@@ -154,7 +163,7 @@
         throw new Error(err.detail);
       }
       const data = await res.json();
-      feedbackShown[q.id] = { is_correct: data.is_correct, correct_option: data.correct_option };
+      feedbackShown[q.id] = { is_correct: data.is_correct, correct_option: data.correct_option, explanation: data.explanation };
       renderQuestion();
     }catch(e){
       renderError(e.message);
