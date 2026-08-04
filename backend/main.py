@@ -1000,15 +1000,38 @@ async def serve_manifest():
         "theme_color": "#1D9E75",
         "orientation": "portrait-primary",
         "icons": [
-            {"src": "https://stock-navigator.zeabur.app/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
-            {"src": "https://stock-navigator.zeabur.app/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+            {"src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+            {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
         ]
     })
 
 @app.get("/favicon.ico", include_in_schema=False)
 async def serve_favicon():
-    from fastapi.responses import RedirectResponse
-    return RedirectResponse("https://stock-navigator.zeabur.app/favicon.ico")
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "favicon.ico")
+    if _os.path.isfile(path):
+        return FileResponse(path, media_type="image/x-icon")
+    from fastapi.responses import JSONResponse
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/icon-192.png", include_in_schema=False)
+async def serve_icon_192():
+    from fastapi.responses import FileResponse, JSONResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "icon-192.png")
+    if _os.path.isfile(path):
+        return FileResponse(path, media_type="image/png")
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/icon-512.png", include_in_schema=False)
+async def serve_icon_512():
+    from fastapi.responses import FileResponse, JSONResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "icon-512.png")
+    if _os.path.isfile(path):
+        return FileResponse(path, media_type="image/png")
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
 
 @app.get("/robots.txt", include_in_schema=False)
 async def serve_robots():
