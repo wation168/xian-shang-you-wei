@@ -201,7 +201,8 @@ async def lifespan(app: FastAPI):
                 conn = _db_conn()
                 members = conn.execute(
                     "SELECT email, expire_at, last_expire_notice_date FROM members "
-                    "WHERE plan != 'free' AND expire_at IS NOT NULL AND expire_at >= ?",
+                    "WHERE plan != 'free' AND expire_at IS NOT NULL AND expire_at >= ? "
+                    "AND merchant_trade_no IS NULL",
                     (today_str,)
                 ).fetchall()
                 conn.close()
@@ -326,7 +327,7 @@ async def lifespan(app: FastAPI):
                                 f'<p style="margin:0;font-size:15px;color:#166534;font-weight:700">{_body}</p></div>'
                             ),
                             cta_text="立即查看",
-                            cta_url=FRONTEND_URL,
+                            cta_url=f"{FRONTEND_URL}/stock",
                             with_ad=True,
                             card_bg="#f0fdf4", card_border="#86efac", title_color="#166534",
                         ))
@@ -4832,7 +4833,7 @@ def admin_grant(key: str = Header(default="", alias="X-Admin-Key"), email: str =
                     f'{extra_html}'
                 ),
                 cta_text="立即登入使用",
-                cta_url=FRONTEND_URL,
+                cta_url=f"{FRONTEND_URL}/stock",
                 with_ad=True,
                 card_bg="#f0fdf4", card_border="#86efac", title_color="#166534",
             )
@@ -4901,7 +4902,7 @@ def admin_reset_password(key: str = Header(default="", alias="X-Admin-Key"), ema
                     f'若您並未申請重設密碼，請立即來信客服協助處理。</p>'
                 ),
                 cta_text="立即登入",
-                cta_url=FRONTEND_URL,
+                cta_url=f"{FRONTEND_URL}/stock",
                 with_ad=False,
                 card_bg="#eff6ff", card_border="#bfdbfe", title_color="#1e40af",
             )
@@ -5000,7 +5001,7 @@ def admin_batch_upgrade(req: _BatchUpgradeReq, key: str = Header(default="", ali
                         f'</table>'
                     ),
                     cta_text="立即登入使用",
-                    cta_url="https://softglow-ai.com",
+                    cta_url=f"{FRONTEND_URL}/stock",
                     with_ad=True,
                     card_bg="#f0fdf4", card_border="#86efac", title_color="#166534",
                 )
@@ -8482,7 +8483,7 @@ async def webhook_ecpay_recurring(request: Request):
                     f'取消後現有效期仍可使用至到期日為止。</p></div>'
                 ),
                 cta_text="立即使用",
-                cta_url="https://softglow-ai.com",
+                cta_url=f"{FRONTEND_URL}/stock",
                 with_ad=True,
                 card_bg="#f0fdf4", card_border="#86efac", title_color="#166534",
             )
@@ -8526,7 +8527,7 @@ async def webhook_ecpay_recurring(request: Request):
                     f'若日後想停止，可登入會員中心點選「取消訂閱」，取消後現有效期仍可使用至到期日為止。</p></div>'
                 ),
                 cta_text="立即登入使用",
-                cta_url="https://softglow-ai.com",
+                cta_url=f"{FRONTEND_URL}/stock",
                 with_ad=True,
                 card_bg="#f0fdf4", card_border="#86efac", title_color="#166534",
             )
