@@ -214,31 +214,39 @@ async def lifespan(app: FastAPI):
                         continue
                     if delta == 3:
                         _send_email(m["email"], "【線上有位】訂閱即將到期",
-                            f'<div style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px">'
-                            f'<div style="text-align:center;margin-bottom:24px"><h1 style="font-size:24px;color:#1D9E75;margin:0">線上<span style="color:#333">有位</span></h1><p style="color:#666;font-size:13px;margin:4px 0 0">台股技術分析輔助系統</p></div>'
-                            + _SOFTGLOW_AD +
-                            f'<div style="background:#fff8e1;border-radius:12px;padding:24px;margin-bottom:20px;border:1px solid #fcd34d">'
-                            f'<h2 style="margin:0 0 12px;font-size:18px;color:#92400e">⏰ 訂閱即將到期</h2>'
-                            f'<p style="color:#555;margin:0 0 16px">您的訂閱將於 <b>{m["expire_at"]}</b> 到期（剩 3 天），請把握時間續訂，避免服務中斷。</p>'
-                            f'<a href="{FRONTEND_URL}/stock/landing#pricing" style="background:#f59e0b;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:700">立即續訂</a></div>'
-                            + _SOFTGLOW_AD +
-                            f'<div style="border-top:1px solid #e5e7eb;padding-top:16px;text-align:center;color:#9ca3af;font-size:12px">'
-                            f'<p style="margin:0">如有問題請聯繫客服：<a href="mailto:watione@yahoo.com.tw" style="color:#1D9E75">watione@yahoo.com.tw</a></p>'
-                            f'<p style="margin:4px 0 0">線上有位 © 2026</p></div></div>')
+                            _render_email(
+                                title="訂閱即將到期",
+                                title_icon="⏰",
+                                body_html=(
+                                    f'<p style="color:#444;margin:0 0 12px;font-size:14px;line-height:1.7">親愛的會員您好，</p>'
+                                    f'<p style="color:#444;margin:0 0 16px;font-size:14px;line-height:1.7">'
+                                    f'您的付費方案將於 <b>{m["expire_at"]}</b> 到期（剩 3 天）。為避免即時分析、深度選股、到價提醒等會員功能中斷，'
+                                    f'建議您把握時間續訂。若您已設定定期定額自動續約，系統將自動為您扣款，可忽略本提醒。</p>'
+                                ),
+                                cta_text="立即續訂",
+                                cta_url=f"{FRONTEND_URL}/stock/landing#pricing",
+                                with_ad=True,
+                                accent="#f59e0b",
+                                card_bg="#fff8e1", card_border="#fcd34d", title_color="#92400e",
+                            ))
                         _update_notice_date(m["email"], today_str)
                     elif delta == 0:
                         _send_email(m["email"], "【線上有位】訂閱已到期",
-                            f'<div style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px">'
-                            f'<div style="text-align:center;margin-bottom:24px"><h1 style="font-size:24px;color:#1D9E75;margin:0">線上<span style="color:#333">有位</span></h1><p style="color:#666;font-size:13px;margin:4px 0 0">台股技術分析輔助系統</p></div>'
-                            + _SOFTGLOW_AD +
-                            f'<div style="background:#fef2f2;border-radius:12px;padding:24px;margin-bottom:20px;border:1px solid #fca5a5">'
-                            f'<h2 style="margin:0 0 12px;font-size:18px;color:#991b1b">📅 訂閱已到期</h2>'
-                            f'<p style="color:#555;margin:0 0 16px">您的訂閱已於今日（{today_str}）到期，部分功能已暫停。續訂後立即恢復所有功能。</p>'
-                            f'<a href="{FRONTEND_URL}/stock/landing#pricing" style="background:#ef4444;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:700">立即續訂</a></div>'
-                            + _SOFTGLOW_AD +
-                            f'<div style="border-top:1px solid #e5e7eb;padding-top:16px;text-align:center;color:#9ca3af;font-size:12px">'
-                            f'<p style="margin:0">如有問題請聯繫客服：<a href="mailto:watione@yahoo.com.tw" style="color:#1D9E75">watione@yahoo.com.tw</a></p>'
-                            f'<p style="margin:4px 0 0">線上有位 © 2026</p></div></div>')
+                            _render_email(
+                                title="訂閱已到期",
+                                title_icon="📅",
+                                body_html=(
+                                    f'<p style="color:#444;margin:0 0 12px;font-size:14px;line-height:1.7">親愛的會員您好，</p>'
+                                    f'<p style="color:#444;margin:0 0 16px;font-size:14px;line-height:1.7">'
+                                    f'您的付費方案已於今日（{today_str}）到期，即時分析、深度選股、到價提醒等會員功能已暫停使用。'
+                                    f'完成續訂後，所有功能將立即恢復，您的持股追蹤與提醒設定都會保留。歡迎隨時回來繼續使用。</p>'
+                                ),
+                                cta_text="立即續訂",
+                                cta_url=f"{FRONTEND_URL}/stock/landing#pricing",
+                                with_ad=True,
+                                accent="#ef4444",
+                                card_bg="#fef2f2", card_border="#fca5a5", title_color="#991b1b",
+                            ))
                         _update_notice_date(m["email"], today_str)
             except Exception as _e:
                 print(f"   ❌ 到期提醒排程執行失敗：{_e}")
@@ -307,7 +315,21 @@ async def lifespan(app: FastAPI):
                         send_web_push(dict(_sub), _title, _body, "/")
                     # Email
                     _send_email(_a["user_email"], f"【線上有位】{_title}",
-                        f'<p>{_body}</p><p><a href="{FRONTEND_URL}">立即查看</a></p>')
+                        _render_email(
+                            title="到價提醒觸發",
+                            title_icon="🔔",
+                            body_html=(
+                                f'<p style="color:#444;margin:0 0 12px;font-size:14px;line-height:1.7">親愛的會員您好，</p>'
+                                f'<p style="color:#444;margin:0 0 16px;font-size:14px;line-height:1.7">'
+                                f'您設定追蹤的個股已觸及提醒條件，詳情如下。請留意本提醒僅供參考，實際進出場請依您自己的判斷與紀律操作。</p>'
+                                f'<div style="background:#fff;border-radius:8px;padding:14px 16px;border:1px solid #f0f0f0">'
+                                f'<p style="margin:0;font-size:15px;color:#166534;font-weight:700">{_body}</p></div>'
+                            ),
+                            cta_text="立即查看",
+                            cta_url=FRONTEND_URL,
+                            with_ad=True,
+                            card_bg="#f0fdf4", card_border="#86efac", title_color="#166534",
+                        ))
                 conn.commit()
                 conn.close()
             except Exception as _e:
@@ -2365,6 +2387,100 @@ def detect_gann_recross(closes, highs, lows, volumes, ma_period=20, max_bars=2):
     return False, None, None, None, None
 
 
+def detect_gann_sell(closes, highs, lows, volumes, ma_period=20, max_bars=2):
+    """
+    葛蘭碧八大法則賣點偵測（賣5/6/7/8合併版）
+    與 detect_gann_recross（買1~4）對稱，負責「該減碼/出場」的空方訊號。
+    時效限制：訊號觸發根起 ≤ max_bars 根內有效（預設2根）
+
+    賣5：收盤從均線上方跌破到下方，且均線走平/下彎（跌破均線，多方防線失守），觸發根起 ≤2根
+    賣6：收盤在均線下方，高點曾反彈觸碰均線 ±1% 後再度下跌（反彈無力），觸發根起 ≤2根
+    賣7：收盤連續在均線下方，最近一次反彈接近均線後受阻下跌（弱勢整理），觸發根起 ≤2根
+    賣8：收盤正乖離均線過大（短線急漲、漲太多太快），獲利了結訊號（不需在均線下方）
+
+    回傳：(訊號是否成立, 均線值, 均線名稱, 賣點類型描述, 是否為乖離型賣8)
+    """
+    n = len(closes)
+    if n < ma_period + 5:
+        return False, None, None, None, False
+
+    ma = np.full(n, np.nan)
+    for i in range(ma_period - 1, n):
+        ma[i] = closes[i - ma_period + 1: i + 1].mean()
+
+    curr_ma = ma[-1]
+    if np.isnan(curr_ma):
+        return False, None, None, None, False
+
+    name = f"MA{ma_period}"
+
+    TOUCH_BAND = 0.01     # 賣6/7：高點距均線 ±1% 算觸碰
+    DEVIATE_BAND = 0.15   # 賣8：正乖離 ≥15% 視為過大（短線急漲）
+
+    # ── 賣8：正乖離過大（優先判斷，因為它在均線上方也成立）──
+    # 現價相對均線的乖離率；只在「明顯高於均線」時才觸發獲利了結提示
+    deviation = (closes[-1] - curr_ma) / curr_ma if curr_ma > 0 else 0
+    if deviation >= DEVIATE_BAND:
+        return True, round(float(curr_ma), 2), name, f"賣8（正乖離{round(deviation*100,1)}%過大，短線過熱）", True
+
+    # 均線方向：水平或向下才算弱勢（上升趨勢中的拉回不算賣訊）
+    ma_slope_down = ma[-1] <= ma[-(min(5, n))]
+
+    # ── 賣5：找最近一次「從上方跌破到下方」的觸發根 ──
+    trigger_s5 = None
+    for i in range(n - 1, ma_period, -1):
+        if np.isnan(ma[i]) or np.isnan(ma[i - 1]):
+            continue
+        if closes[i - 1] > ma[i - 1] and closes[i] < ma[i]:
+            trigger_s5 = i
+            break
+    if trigger_s5 is not None and (n - 1 - trigger_s5) <= max_bars and ma_slope_down:
+        # 跌破當天量能：帶量下跌更需警惕
+        _avg_vol_20 = float(np.mean(volumes[max(0,trigger_s5-20):trigger_s5])) if trigger_s5 > 0 else 1
+        _trigger_vol = float(volumes[trigger_s5])
+        _vol_big = _trigger_vol > _avg_vol_20 * 1.2  # 帶量跌破
+        sell_type = "賣5（跌破均線，多方防線失守）"
+        if _vol_big:
+            sell_type += "⚠帶量下跌，賣壓沉重"
+        return True, round(float(curr_ma), 2), name, sell_type, False
+
+    # ── 賣6：收盤在均線下方，高點反彈觸碰均線後再下跌 ──
+    trigger_s6 = None
+    for i in range(n - 1, ma_period, -1):
+        if np.isnan(ma[i]):
+            continue
+        if closes[i] < ma[i] and highs[i] >= ma[i] * (1 - TOUCH_BAND):
+            # 確認前一根也在均線下方（不是剛跌破，那是賣5）
+            if not np.isnan(ma[i - 1]) and closes[i - 1] < ma[i - 1]:
+                trigger_s6 = i
+                break
+    if trigger_s6 is not None and (n - 1 - trigger_s6) <= max_bars:
+        return True, round(float(curr_ma), 2), name, "賣6（反彈遇均線受阻，反彈無力）", False
+
+    # ── 賣7：連續在均線下方，最近高點接近均線後受阻下跌 ──
+    if n >= ma_period + 5:
+        recent_5_below = all(
+            not np.isnan(ma[-(j + 1)]) and closes[-(j + 1)] < ma[-(j + 1)]
+            for j in range(5)
+        )
+        had_touch = any(
+            not np.isnan(ma[-(j + 1)]) and highs[-(j + 1)] >= ma[-(j + 1)] * (1 - TOUCH_BAND)
+            for j in range(1, 6)
+        )
+        price_falling = closes[-1] < closes[-2]
+        if recent_5_below and had_touch and price_falling:
+            trigger_s7 = None
+            for j in range(1, 6):
+                i = n - 1 - j
+                if not np.isnan(ma[i]) and highs[i] >= ma[i] * (1 - TOUCH_BAND):
+                    trigger_s7 = i
+                    break
+            if trigger_s7 is not None and (n - 1 - trigger_s7) <= max_bars:
+                return True, round(float(curr_ma), 2), name, "賣7（均線下方弱勢，反彈受阻）", False
+
+    return False, None, None, None, False
+
+
 def calc_breakout_signals(closes, highs, lows, volumes, support, resistance):
     """
     突破壓力 / 跌破支撐訊號
@@ -3418,6 +3534,39 @@ def _do_analyze(stock_id: str, tf: str = "D",
     elif gann_ma20_signal:
         gann_recross = {"ma": gann_ma20_name, "val": gann_ma20_val, "stop": gann_ma20_stop, "type": gann_ma20_type}
 
+    # ── 葛蘭碧賣點偵測（賣5/6/7/8，MA20 / MA60，≤2根時效）──
+    gann_s20_sig, gann_s20_val, gann_s20_name, gann_s20_type, gann_s20_dev = detect_gann_sell(closes, highs, lows, volumes, 20)
+    gann_s60_sig, gann_s60_val, gann_s60_name, gann_s60_type, gann_s60_dev = detect_gann_sell(closes, highs, lows, volumes, 60)
+    # 優先用 MA20（短均線對賣壓較敏感），其次 MA60
+    gann_sell = None
+    if gann_s20_sig:
+        gann_sell = {"ma": gann_s20_name, "val": gann_s20_val, "type": gann_s20_type, "is_deviate": gann_s20_dev}
+    elif gann_s60_sig:
+        gann_sell = {"ma": gann_s60_name, "val": gann_s60_val, "type": gann_s60_type, "is_deviate": gann_s60_dev}
+
+    # ── 量價出場警訊（複用 detect_kbar_pattern 型態結果 + 補爆量判斷）──
+    # 設計原則（帥哥鴻定案）：
+    #  1. 型態複用 kbar_pattern，判斷標準與畫面顯示一致，不重寫、不改 detect_kbar_pattern
+    #  2. 「爆量」= 當日量 ≥ 近20日均量 × 1.5
+    #  3. 不限股價位置（有此量價現象就提醒）
+    #  4. 因型態是收盤才確認、當天來不及出，警訊寫成「隔天盤前行動指令」而非事後描述
+    #  5. 與買賣結論並列、不強制覆蓋（避免多頭回測誤殺）
+    vp_exit_warn = None   # 量價出場警訊（dict 或 None）
+    _bearish_kbar_keys = ("大黑棒", "射擊之星", "流星", "空頭吞噬", "黃昏之星", "烏雲罩頂")
+    _is_bearish_shape = bool(kbar_pattern) and any(k in kbar_pattern for k in _bearish_kbar_keys)
+    if _is_bearish_shape and len(volumes) >= 20:
+        _vp_today_vol = float(volumes[-1])
+        _vp_ma20_vol  = float(np.mean(volumes[-20:]))
+        _vp_vol_x = round(_vp_today_vol / _vp_ma20_vol, 2) if _vp_ma20_vol > 0 else 0
+        if _vp_vol_x >= 1.5:
+            # 明日觀察點：今日大黑棒/長上影的一半價位（收復不了視為賣壓延續）
+            _vp_today_mid = round((float(highs[-1]) + float(lows[-1])) / 2, 2)
+            vp_exit_warn = {
+                "shape": kbar_pattern,
+                "vol_x": _vp_vol_x,
+                "watch": _vp_today_mid,
+            }
+
     # 突破壓力 / 跌破支撐訊號
     breakout_idx, breakdown_idx, breakout_stale, breakdown_stale = calc_breakout_signals(
         closes, highs, lows, volumes, support, resistance)
@@ -3611,6 +3760,37 @@ def _do_analyze(stock_id: str, tf: str = "D",
     # 移除舊的 warning，改用整合結論
     warning = conclusion
 
+    # ── 出場保護補句（帥哥鴻定案：並列呈現、不覆蓋買賣結論，交回使用者隔天盤中執行）──
+    # 優先序：量價出場警訊（最急迫）＞ 葛蘭碧賣點（次要，且與量價警訊去重）
+    _exit_notes = []
+    if vp_exit_warn:
+        # 隔天盤前行動指令：不是「今天出現→立刻減碼」（已收盤來不及），
+        # 而是「今日收盤確認賣壓型態→明日守不住觀察價就在收盤前減碼一半」
+        _exit_notes.append(
+            f"⚠️ 出場保護：今日收盤確認「{vp_exit_warn['shape']}」＋爆量（{vp_exit_warn['vol_x']}倍近月均量），"
+            f"為賣壓警訊。明日操作：若無法收復今日 K 棒中值 {vp_exit_warn['watch']} 附近，"
+            f"建議收盤前先減碼一半，剩餘部位守好防守位 {stop_loss}。"
+        )
+    # 葛蘭碧賣點：只有在「量價警訊沒觸發」時才補（避免對同一根賣壓 K 棒重複講）
+    if gann_sell and not vp_exit_warn:
+        _sell_ma   = gann_sell["ma"]
+        _sell_val  = gann_sell["val"]
+        _sell_type = gann_sell["type"]
+        if gann_sell.get("is_deviate"):
+            # 賣8 乖離過大：短線過熱、獲利了結提示（非趨勢反轉，措辭用「留意回吐、可減碼」）
+            _exit_notes.append(
+                f"⚠️ 出場提醒：{_sell_type}，股價短線急漲、正乖離 {_sell_ma}（{_sell_val}）過大，"
+                f"留意獲利回吐，明日若開高走低可考慮先減碼一半、鎖住獲利。"
+            )
+        else:
+            # 賣5/6/7：均線弱勢訊號
+            _exit_notes.append(
+                f"⚠️ 出場提醒：{_sell_type}（{_sell_ma}={_sell_val}）。"
+                f"明日若持續無法站回 {_sell_ma}，代表均線壓力有效，建議減碼觀望，防守位 {stop_loss}。"
+            )
+    if _exit_notes:
+        warning = conclusion + "\n" + "\n".join(_exit_notes)
+
     # 技術指標
     rsi_arr  = calc_rsi(closes)
     macd_line, macd_sig, macd_hist = calc_macd(closes)
@@ -3729,6 +3909,8 @@ def _do_analyze(stock_id: str, tf: str = "D",
         "kbar_pattern": kbar_pattern, "kbar_warning": kbar_warning,
         "kbar_dir": kbar_dir, "kbar_action": kbar_action,
         "gann_recross": gann_recross,
+        "gann_sell": gann_sell,
+        "vp_exit_warn": vp_exit_warn,
         "today_breakout": today_breakout, "prev_high": prev_high,
         "today_open": round(float(opens[-1]), 2) if len(opens) > 0 else None,
         "today_low":  round(float(lows[-1]),  2) if len(lows)  > 0 else None,
@@ -4635,31 +4817,25 @@ def admin_grant(key: str = Header(default="", alias="X-Admin-Key"), email: str =
 
     def _send_grant_email(to: str, extra_html: str = ""):
         _send_email(to, "【線上有位】🎉 您的方案已開通",
-            f"""<div style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px">
-              <div style="text-align:center;margin-bottom:24px">
-                <h1 style="font-size:24px;color:#1D9E75;margin:0">線上<span style="color:#333">有位</span></h1>
-                <p style="color:#666;font-size:13px;margin:4px 0 0">台股技術分析輔助系統</p>
-              </div>
-              {_SOFTGLOW_AD}
-              <div style="background:#f0fdf4;border-radius:12px;padding:24px;margin-bottom:20px;border:1px solid #86efac">
-                <h2 style="margin:0 0 16px;font-size:18px;color:#166534">🎉 恭喜！升級成功</h2>
-                <p style="color:#555;margin:0 0 16px">您的付費方案已由管理員手動開通，立即登入即可使用。</p>
-                <table style="width:100%;border-collapse:collapse">
-                  <tr><td style="padding:8px 0;color:#888;font-size:13px">方案</td><td style="padding:8px 0;font-weight:700;color:#333">{plan_label}</td></tr>
-                  <tr><td style="padding:8px 0;color:#888;font-size:13px">到期日</td><td style="padding:8px 0;font-weight:700;color:#333">{new_expire}</td></tr>
-                  <tr><td style="padding:8px 0;color:#888;font-size:13px">帳號</td><td style="padding:8px 0;font-weight:700;color:#333">{to}</td></tr>
-                </table>
-              </div>
-              {extra_html}
-              {_SOFTGLOW_AD}
-              <div style="text-align:center;margin-bottom:20px">
-                <a href="{FRONTEND_URL}" style="background:#1D9E75;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px">立即登入使用</a>
-              </div>
-              <div style="border-top:1px solid #e5e7eb;padding-top:16px;text-align:center;color:#9ca3af;font-size:12px">
-                <p style="margin:0">如有問題請聯繫客服：<a href="mailto:watione@yahoo.com.tw" style="color:#1D9E75">watione@yahoo.com.tw</a></p>
-                <p style="margin:4px 0 0">線上有位 © 2026</p>
-              </div>
-            </div>"""
+            _render_email(
+                title="恭喜！您的方案已開通",
+                title_icon="🎉",
+                body_html=(
+                    f'<p style="color:#444;margin:0 0 12px;font-size:14px;line-height:1.7">親愛的會員您好，</p>'
+                    f'<p style="color:#444;margin:0 0 16px;font-size:14px;line-height:1.7">'
+                    f'您的付費方案已由管理員為您手動開通，即刻起可登入使用即時個股分析、深度選股、到價提醒等完整會員功能。</p>'
+                    f'<table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden">'
+                    f'<tr><td style="padding:10px 14px;color:#888;font-size:13px;border-bottom:1px solid #f0f0f0">方案</td><td style="padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;text-align:right">{plan_label}</td></tr>'
+                    f'<tr><td style="padding:10px 14px;color:#888;font-size:13px;border-bottom:1px solid #f0f0f0">到期日</td><td style="padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;text-align:right">{new_expire}</td></tr>'
+                    f'<tr><td style="padding:10px 14px;color:#888;font-size:13px">帳號</td><td style="padding:10px 14px;font-weight:700;font-size:14px;text-align:right">{to}</td></tr>'
+                    f'</table>'
+                    f'{extra_html}'
+                ),
+                cta_text="立即登入使用",
+                cta_url=FRONTEND_URL,
+                with_ad=True,
+                card_bg="#f0fdf4", card_border="#86efac", title_color="#166534",
+            )
         )
 
     conn = _db_conn()
@@ -4683,10 +4859,10 @@ def admin_grant(key: str = Header(default="", alias="X-Admin-Key"), email: str =
         conn.commit()
         conn.close()
         _send_grant_email(email,
-            f"""<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:16px;margin-bottom:20px">
-              <p style="margin:0 0 6px;font-weight:700;color:#92400e">🔑 您的初始密碼</p>
+            f"""<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:16px;margin-top:16px">
+              <p style="margin:0 0 6px;font-weight:700;color:#92400e">🔑 您的初始登入密碼</p>
               <p style="margin:0;font-size:18px;letter-spacing:2px;font-weight:700;color:#333">{password}</p>
-              <p style="margin:8px 0 0;font-size:12px;color:#78350f">登入後請至「我的帳號」修改密碼</p>
+              <p style="margin:8px 0 0;font-size:12px;color:#78350f">為了帳號安全，登入後請至「我的帳號」儘快修改為您自己的密碼。</p>
             </div>"""
         )
         return {"ok": True, "action": "created", "email": email, "password": password, "plan": plan, "expire_at": new_expire}
@@ -4711,13 +4887,24 @@ def admin_reset_password(key: str = Header(default="", alias="X-Admin-Key"), ema
     conn.close()
     try:
         _send_email(email, "線上有位 — 密碼已重設",
-            f"""<div style="font-family:-apple-system,sans-serif;max-width:480px;margin:0 auto;padding:24px">
-              <h2 style="color:#1D9E75">密碼已重設</h2>
-              <p>您的帳號密碼已由管理員重設。</p>
-              <p>新密碼：<strong style="font-size:18px;letter-spacing:2px">{new_pw}</strong></p>
-              <p>請儘快登入後自行修改密碼。</p>
-              <p style="font-size:12px;color:#888">若您未申請重設，請聯絡客服。</p>
-            </div>"""
+            _render_email(
+                title="您的密碼已重設",
+                title_icon="🔑",
+                body_html=(
+                    f'<p style="color:#444;margin:0 0 16px;font-size:14px;line-height:1.7">'
+                    f'您的帳號密碼已由管理員重設，請使用以下新密碼登入：</p>'
+                    f'<div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:16px;text-align:center">'
+                    f'<p style="margin:0 0 6px;font-size:12px;color:#92400e">新密碼</p>'
+                    f'<p style="margin:0;font-size:20px;letter-spacing:2px;font-weight:700;color:#333">{new_pw}</p></div>'
+                    f'<p style="color:#444;margin:16px 0 0;font-size:14px;line-height:1.7">'
+                    f'為了您的帳號安全，登入後請儘快至「我的帳號」修改為您自己的密碼。'
+                    f'若您並未申請重設密碼，請立即來信客服協助處理。</p>'
+                ),
+                cta_text="立即登入",
+                cta_url=FRONTEND_URL,
+                with_ad=False,
+                card_bg="#eff6ff", card_border="#bfdbfe", title_color="#1e40af",
+            )
         )
     except Exception as _e:
         print(f"[admin_reset] 寄信失敗: {_e}")
@@ -4798,28 +4985,25 @@ def admin_batch_upgrade(req: _BatchUpgradeReq, key: str = Header(default="", ali
         email_sent = False
         try:
             _send_email(email, "【線上有位】🎁 早鳥優惠！您的帳號已免費升級",
-                f"""<div style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px">
-                  <div style="text-align:center;margin-bottom:24px">
-                    <h1 style="font-size:24px;color:#1D9E75;margin:0">線上<span style="color:#333">有位</span></h1>
-                    <p style="color:#666;font-size:13px;margin:4px 0 0">台股技術分析輔助系統</p>
-                  </div>
-                  <div style="background:#f0fdf4;border-radius:12px;padding:24px;margin-bottom:20px;border:1px solid #86efac">
-                    <h2 style="margin:0 0 16px;font-size:18px;color:#166534">🎁 恭喜！您已獲得早鳥免費升級</h2>
-                    <p style="color:#555;margin:0 0 16px">感謝您支持線上有位！作為早期用戶，我們為您免費升級了付費方案，讓您體驗完整功能。</p>
-                    <table style="width:100%;border-collapse:collapse">
-                      <tr><td style="padding:8px 0;color:#888;font-size:13px;width:80px">方案</td><td style="padding:8px 0;font-weight:700;color:#333">{plan_label}</td></tr>
-                      <tr><td style="padding:8px 0;color:#888;font-size:13px">到期日</td><td style="padding:8px 0;font-weight:700;color:#333">{new_expire}</td></tr>
-                      <tr><td style="padding:8px 0;color:#888;font-size:13px">帳號</td><td style="padding:8px 0;font-weight:700;color:#333">{email}</td></tr>
-                    </table>
-                  </div>
-                  <div style="text-align:center;margin-bottom:20px">
-                    <a href="https://softglow-ai.com" style="background:#1D9E75;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px">立即登入使用</a>
-                  </div>
-                  <div style="border-top:1px solid #e5e7eb;padding-top:16px;text-align:center;color:#9ca3af;font-size:12px">
-                    <p style="margin:0">如有問題請聯繫：<a href="mailto:watione@yahoo.com.tw" style="color:#1D9E75">watione@yahoo.com.tw</a></p>
-                    <p style="margin:4px 0 0">線上有位 © 2026</p>
-                  </div>
-                </div>"""
+                _render_email(
+                    title="恭喜！您已獲得早鳥免費升級",
+                    title_icon="🎁",
+                    body_html=(
+                        f'<p style="color:#444;margin:0 0 12px;font-size:14px;line-height:1.7">親愛的會員您好，</p>'
+                        f'<p style="color:#444;margin:0 0 16px;font-size:14px;line-height:1.7">'
+                        f'感謝您支持線上有位！作為我們的早期用戶，特別為您免費升級付費方案，'
+                        f'讓您完整體驗即時個股分析、深度選股、到價提醒等會員功能。</p>'
+                        f'<table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden">'
+                        f'<tr><td style="padding:10px 14px;color:#888;font-size:13px;border-bottom:1px solid #f0f0f0">方案</td><td style="padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;text-align:right">{plan_label}</td></tr>'
+                        f'<tr><td style="padding:10px 14px;color:#888;font-size:13px;border-bottom:1px solid #f0f0f0">到期日</td><td style="padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;text-align:right">{new_expire}</td></tr>'
+                        f'<tr><td style="padding:10px 14px;color:#888;font-size:13px">帳號</td><td style="padding:10px 14px;font-weight:700;font-size:14px;text-align:right">{email}</td></tr>'
+                        f'</table>'
+                    ),
+                    cta_text="立即登入使用",
+                    cta_url="https://softglow-ai.com",
+                    with_ad=True,
+                    card_bg="#f0fdf4", card_border="#86efac", title_color="#166534",
+                )
             )
             email_sent = True
         except Exception:
@@ -5759,6 +5943,63 @@ _SOFTGLOW_AD = (
     '<a href="https://watione1.guidemee.cc" style="color:#aaa">前往選購</a></p>'
     '</div>'
 )
+
+
+def _render_email(title, body_html, accent="#1D9E75", title_icon="",
+                  cta_text="", cta_url="", with_ad=True, card_bg="#f0fdf4",
+                  card_border="#86efac", title_color="#166534"):
+    """
+    統一信件模板（帥哥鴻定案 2026/08/05）：
+      頁首(品牌+副標) → [廣告] → 主卡片(標題+body_html) → CTA → [廣告] → 署名 → 頁尾客服
+    參數：
+      title       主標題文字（不含 icon）
+      body_html   卡片內獨有內容（各封信自行組）
+      accent      品牌色（CTA 按鈕、連結）
+      title_icon  標題前的 emoji（可空）
+      cta_text    CTA 按鈕文字（空=不顯示按鈕）
+      cta_url     CTA 連結
+      with_ad     是否插入保健品廣告（密碼類信件設 False）
+      card_bg/card_border/title_color  主卡片配色（依信件語氣調整）
+    """
+    ad_block = _SOFTGLOW_AD if with_ad else ""
+    icon_prefix = f"{title_icon} " if title_icon else ""
+    cta_block = ""
+    if cta_text and cta_url:
+        cta_block = (
+            f'<div style="margin-top:24px;text-align:center">'
+            f'<a href="{cta_url}" style="background:{accent};color:#fff;padding:13px 36px;'
+            f'border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;display:inline-block">{cta_text}</a>'
+            f'</div>'
+        )
+    return (
+        f'<div style="font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;'
+        f'max-width:560px;margin:0 auto;padding:24px;background:#ffffff">'
+        # 頁首
+        f'<div style="text-align:center;margin-bottom:24px">'
+        f'<h1 style="font-size:26px;color:#1D9E75;margin:0">線上<span style="color:#333">有位</span></h1>'
+        f'<p style="color:#888;font-size:12px;margin:4px 0 0;letter-spacing:1px">SoftGlow &middot; 台股技術分析輔助系統</p>'
+        f'</div>'
+        # 廣告（上）
+        f'{ad_block}'
+        # 主卡片
+        f'<div style="background:{card_bg};border-radius:12px;padding:24px 24px 20px;border:1px solid {card_border}">'
+        f'<h2 style="margin:0 0 12px;color:{title_color};font-size:19px">{icon_prefix}{title}</h2>'
+        f'{body_html}'
+        f'</div>'
+        # CTA
+        f'{cta_block}'
+        # 廣告（下）
+        f'{ad_block}'
+        # 署名 + 頁尾
+        f'<div style="border-top:1px solid #eee;margin-top:28px;padding-top:20px;text-align:center">'
+        f'<p style="margin:0;font-size:14px;color:#333;font-weight:600">&mdash; 線上有位 SoftGlow 團隊 敬上</p>'
+        f'<p style="margin:12px 0 0;font-size:12px;color:#9ca3af;line-height:1.8">'
+        f'如未收到相關通知、發票，或有任何帳號問題，<br>'
+        f'歡迎來信客服：<a href="mailto:watione@yahoo.com.tw" style="color:#1D9E75;text-decoration:none">watione@yahoo.com.tw</a><br>'
+        f'線上有位 SoftGlow &copy; 2026'
+        f'</p></div>'
+        f'</div>'
+    )
 
 
 def _send_email(to: str, subject: str, html: str):
@@ -7173,12 +7414,21 @@ async def forgot_password(req: ForgotPwdReq, request: Request):
         conn.close()
         reset_url = f"{FRONTEND_URL}/reset-password.html?token={token}"
         _send_email(email, "線上有位 — 密碼重設連結",
-            f"""<div style="font-family:-apple-system,sans-serif;max-width:480px;margin:0 auto;padding:24px">
-              <h2 style="color:#1D9E75">密碼重設</h2>
-              <p>請點擊以下連結重設密碼（有效期 1 小時）：</p>
-              <p><a href="{reset_url}" style="background:#1D9E75;color:#fff;padding:10px 24px;border-radius:6px;text-decoration:none;font-weight:700">重設密碼</a></p>
-              <p style="font-size:12px;color:#888">若您未申請重設，請忽略此信。</p>
-            </div>"""
+            _render_email(
+                title="密碼重設",
+                title_icon="🔒",
+                body_html=(
+                    f'<p style="color:#444;margin:0 0 16px;font-size:14px;line-height:1.7">'
+                    f'我們收到了您的密碼重設申請。請點擊下方按鈕設定新密碼，'
+                    f'此連結的有效時間為 <b>1 小時</b>，逾時請重新申請。</p>'
+                    f'<p style="color:#444;margin:0;font-size:13px;line-height:1.7;color:#888">'
+                    f'若您並未申請重設密碼，可安心忽略此信，您的帳號密碼不會有任何變動。</p>'
+                ),
+                cta_text="重設密碼",
+                cta_url=reset_url,
+                with_ad=False,
+                card_bg="#eff6ff", card_border="#bfdbfe", title_color="#1e40af",
+            )
         )
     else:
         conn.close()
@@ -8210,25 +8460,32 @@ async def webhook_ecpay_recurring(request: Request):
         conn.close()
         # 寄續約通知信
         _send_email(email, "【線上有位】自動續約成功",
-            f"""<div style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px">
-              <h1 style="font-size:24px;color:#1D9E75;margin:0 0 8px">線上<span style="color:#333">有位</span></h1>
-              <p style="color:#666;font-size:13px;margin:0 0 24px">台股技術分析輔助系統</p>
-              <div style="background:#f0fdf4;border-radius:12px;padding:24px;border:1px solid #86efac">
-                <h2 style="margin:0 0 16px;color:#166534">✅ 自動續約成功</h2>
-                <p style="color:#555;margin:0 0 16px">您的{plan_label}已自動續約，感謝您持續支持！</p>
-                <table style="width:100%;border-collapse:collapse">
-                  <tr><td style="padding:8px 0;color:#888;font-size:13px">方案</td><td style="padding:8px 0;font-weight:700">{plan_label}</td></tr>
-                  <tr><td style="padding:8px 0;color:#888;font-size:13px">扣款金額</td><td style="padding:8px 0;font-weight:700">NT${amount}</td></tr>
-                  <tr><td style="padding:8px 0;color:#888;font-size:13px">新到期日</td><td style="padding:8px 0;font-weight:700">{new_expire}</td></tr>
-                  <tr><td style="padding:8px 0;color:#888;font-size:13px">發票開立方式</td><td style="padding:8px 0;font-weight:700">{_inv_type}</td></tr>
-                  <tr><td style="padding:8px 0;color:#888;font-size:13px">載具/統編</td><td style="padding:8px 0;font-weight:700">{_inv_carrier}</td></tr>
-                </table>
-              </div>
-              <div style="margin-top:24px;text-align:center">
-                <a href="https://softglow-ai.com" style="background:#1D9E75;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:700">立即使用</a>
-              </div>
-              <p style="margin-top:24px;font-size:12px;color:#9ca3af;text-align:center">如需取消訂閱，請聯繫客服：watione@yahoo.com.tw</p>
-            </div>"""
+            _render_email(
+                title="自動續約成功",
+                title_icon="✅",
+                body_html=(
+                    f'<p style="color:#444;margin:0 0 8px;font-size:14px;line-height:1.7">親愛的會員您好，</p>'
+                    f'<p style="color:#444;margin:0 0 16px;font-size:14px;line-height:1.7">'
+                    f'您的{plan_label}已透過綠界定期定額，於今日完成本期自動扣款與續約。感謝您持續支持線上有位，'
+                    f'您的完整會員功能不中斷，可繼續使用即時個股分析、深度選股、到價提醒等服務。</p>'
+                    f'<table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden">'
+                    f'<tr><td style="padding:10px 14px;color:#888;font-size:13px;border-bottom:1px solid #f0f0f0">方案</td><td style="padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;text-align:right">{plan_label}</td></tr>'
+                    f'<tr><td style="padding:10px 14px;color:#888;font-size:13px;border-bottom:1px solid #f0f0f0">本期扣款金額</td><td style="padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;text-align:right">NT${amount}</td></tr>'
+                    f'<tr><td style="padding:10px 14px;color:#888;font-size:13px;border-bottom:1px solid #f0f0f0">新到期日</td><td style="padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;text-align:right">{new_expire}</td></tr>'
+                    f'<tr><td style="padding:10px 14px;color:#888;font-size:13px;border-bottom:1px solid #f0f0f0">發票開立方式</td><td style="padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;text-align:right">{_inv_type}</td></tr>'
+                    f'<tr><td style="padding:10px 14px;color:#888;font-size:13px">載具／統編</td><td style="padding:10px 14px;font-weight:700;font-size:14px;text-align:right">{_inv_carrier}</td></tr>'
+                    f'</table>'
+                    f'<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;margin-top:16px">'
+                    f'<p style="margin:0;font-size:13px;color:#92400e;line-height:1.7">'
+                    f'<b>關於自動續約：</b>本方案為定期定額，系統會於每期到期時自動扣款續約，您無需手動操作。'
+                    f'若您日後想停止自動續約，可登入會員中心點選「取消訂閱」，或來信客服協助辦理，'
+                    f'取消後現有效期仍可使用至到期日為止。</p></div>'
+                ),
+                cta_text="立即使用",
+                cta_url="https://softglow-ai.com",
+                with_ad=True,
+                card_bg="#f0fdf4", card_border="#86efac", title_color="#166534",
+            )
         )
     else:
         # 首次授權成功（第一期）：建立帳號
@@ -8246,24 +8503,33 @@ async def webhook_ecpay_recurring(request: Request):
             return PlainTextResponse(content="1|OK")
         conn.close()
         _send_email(email, "【線上有位】歡迎！您的帳號已開通（定期訂閱）",
-            f"""<div style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px">
-              <h1 style="font-size:24px;color:#1D9E75;margin:0 0 8px">線上<span style="color:#333">有位</span></h1>
-              <div style="background:#f0fdf4;border-radius:12px;padding:24px;border:1px solid #86efac;margin-top:16px">
-                <h2 style="margin:0 0 16px;color:#166534">🎉 帳號已開通（定期訂閱）</h2>
-                <table style="width:100%;border-collapse:collapse">
-                  <tr><td style="padding:8px 0;color:#888;font-size:13px">帳號</td><td style="padding:8px 0;font-weight:700">{email}</td></tr>
-                  <tr><td style="padding:8px 0;color:#888;font-size:13px">密碼</td><td style="padding:8px 0;font-weight:700">您訂購時自行設定的密碼</td></tr>
-                  <tr><td style="padding:8px 0;color:#888;font-size:13px">方案</td><td style="padding:8px 0;font-weight:700">{plan_label}</td></tr>
-                  <tr><td style="padding:8px 0;color:#888;font-size:13px">扣款金額</td><td style="padding:8px 0;font-weight:700">NT${amount}</td></tr>
-                  <tr><td style="padding:8px 0;color:#888;font-size:13px">到期日</td><td style="padding:8px 0;font-weight:700">{new_expire}</td></tr>
-                  <tr><td style="padding:8px 0;color:#888;font-size:13px">發票開立方式</td><td style="padding:8px 0;font-weight:700">{_inv_type}</td></tr>
-                  <tr><td style="padding:8px 0;color:#888;font-size:13px">載具/統編</td><td style="padding:8px 0;font-weight:700">{_inv_carrier}</td></tr>
-                </table>
-              </div>
-              <div style="margin-top:24px;text-align:center">
-                <a href="https://softglow-ai.com" style="background:#1D9E75;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:700">立即登入使用</a>
-              </div>
-            </div>"""
+            _render_email(
+                title="歡迎加入！帳號已開通",
+                title_icon="🎉",
+                body_html=(
+                    f'<p style="color:#444;margin:0 0 8px;font-size:14px;line-height:1.7">親愛的會員您好，</p>'
+                    f'<p style="color:#444;margin:0 0 16px;font-size:14px;line-height:1.7">'
+                    f'感謝您訂閱線上有位！您的定期訂閱首期扣款已完成，帳號已正式開通，'
+                    f'即刻起可登入使用即時個股分析、深度選股、到價提醒等完整會員功能。</p>'
+                    f'<table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden">'
+                    f'<tr><td style="padding:10px 14px;color:#888;font-size:13px;border-bottom:1px solid #f0f0f0">帳號</td><td style="padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;text-align:right">{email}</td></tr>'
+                    f'<tr><td style="padding:10px 14px;color:#888;font-size:13px;border-bottom:1px solid #f0f0f0">密碼</td><td style="padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;text-align:right">您訂購時自行設定的密碼</td></tr>'
+                    f'<tr><td style="padding:10px 14px;color:#888;font-size:13px;border-bottom:1px solid #f0f0f0">方案</td><td style="padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;text-align:right">{plan_label}</td></tr>'
+                    f'<tr><td style="padding:10px 14px;color:#888;font-size:13px;border-bottom:1px solid #f0f0f0">本期扣款金額</td><td style="padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;text-align:right">NT${amount}</td></tr>'
+                    f'<tr><td style="padding:10px 14px;color:#888;font-size:13px;border-bottom:1px solid #f0f0f0">到期日</td><td style="padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;text-align:right">{new_expire}</td></tr>'
+                    f'<tr><td style="padding:10px 14px;color:#888;font-size:13px;border-bottom:1px solid #f0f0f0">發票開立方式</td><td style="padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;text-align:right">{_inv_type}</td></tr>'
+                    f'<tr><td style="padding:10px 14px;color:#888;font-size:13px">載具／統編</td><td style="padding:10px 14px;font-weight:700;font-size:14px;text-align:right">{_inv_carrier}</td></tr>'
+                    f'</table>'
+                    f'<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;margin-top:16px">'
+                    f'<p style="margin:0;font-size:13px;color:#92400e;line-height:1.7">'
+                    f'<b>關於定期訂閱：</b>本方案為定期定額，系統將於每期到期時自動扣款續約，您無需手動操作。'
+                    f'若日後想停止，可登入會員中心點選「取消訂閱」，取消後現有效期仍可使用至到期日為止。</p></div>'
+                ),
+                cta_text="立即登入使用",
+                cta_url="https://softglow-ai.com",
+                with_ad=True,
+                card_bg="#f0fdf4", card_border="#86efac", title_color="#166534",
+            )
         )
 
     # 記錄已處理
@@ -8361,17 +8627,24 @@ async def cancel_recurring(request: Request, current_user: dict = Depends(get_cu
         print(f"[取消定期定額] {email} 結果: {result}")
         if _re.search(r"RtnCode=1(?:[&\s]|$)", result):
             _send_email(email, "【線上有位】定期訂閱已取消",
-                f"""<div style="font-family:-apple-system,sans-serif;max-width:560px;margin:0 auto;padding:24px">
-                  <h1 style="font-size:24px;color:#1D9E75;margin:0 0 8px">線上<span style="color:#333">有位</span></h1>
-                  <div style="background:#fef2f2;border-radius:12px;padding:24px;border:1px solid #fca5a5;margin-top:16px">
-                    <h2 style="margin:0 0 12px;color:#991b1b">已取消定期訂閱</h2>
-                    <p style="color:#555;margin:0 0 12px">您的定期訂閱已成功取消，不會再自動扣款。</p>
-                    <p style="color:#555;margin:0;font-size:13px">本期剩餘天數（至 {member['expire_at']}）仍可繼續使用。</p>
-                  </div>
-                  <p style="margin-top:24px;font-size:13px;color:#9ca3af;text-align:center">
-                    如有問題請聯繫客服：watione@yahoo.com.tw
-                  </p>
-                </div>"""
+                _render_email(
+                    title="定期訂閱已取消",
+                    title_icon="📭",
+                    body_html=(
+                        f'<p style="color:#444;margin:0 0 12px;font-size:14px;line-height:1.7">親愛的會員您好，</p>'
+                        f'<p style="color:#444;margin:0 0 16px;font-size:14px;line-height:1.7">'
+                        f'您的定期訂閱已成功取消，系統之後不會再自動扣款。'
+                        f'您本期已付費的剩餘天數（至 <b>{member["expire_at"]}</b>）仍可正常使用所有會員功能，不受影響。</p>'
+                        f'<p style="color:#444;margin:0;font-size:14px;line-height:1.7">'
+                        f'感謝您這段時間的支持。若您日後想重新啟用，隨時可以再次於網站訂閱，'
+                        f'期待再次為您服務。若有任何問題，也歡迎來信客服。</p>'
+                    ),
+                    cta_text="重新訂閱",
+                    cta_url=f"{FRONTEND_URL}/stock/landing#pricing",
+                    with_ad=True,
+                    card_bg="#fef2f2", card_border="#fca5a5", title_color="#991b1b",
+                    accent="#ef4444",
+                )
             )
             # 管理員通知
             try:
