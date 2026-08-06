@@ -3606,7 +3606,7 @@ def _do_analyze(stock_id: str, tf: str = "D",
     #  4. 因型態是收盤才確認、當天來不及出，警訊寫成「隔天盤前行動指令」而非事後描述
     #  5. 與買賣結論並列、不強制覆蓋（避免多頭回測誤殺）
     vp_exit_warn = None   # 量價出場警訊（dict 或 None）
-    _bearish_kbar_keys = ("大黑棒", "射擊之星", "流星", "空頭吞噬", "黃昏之星", "烏雲罩頂")
+    _bearish_kbar_keys = ("大黑棒", "射擊之星", "流星", "空頭吞噬", "黃昏之星", "烏雲罩頂", "跌停")
     _is_bearish_shape = bool(kbar_pattern) and any(k in kbar_pattern for k in _bearish_kbar_keys)
     if _is_bearish_shape and len(volumes) >= 20:
         _vp_today_vol = float(volumes[-1])
@@ -3716,8 +3716,8 @@ def _do_analyze(stock_id: str, tf: str = "D",
         summary_lines.insert(0, f"圖形型態：{reversal['desc']}，{reversal['position_desc']}")
 
     # K棒方向判斷（含操作建議）
-    kbar_bullish = any(k in kbar_pattern for k in ["錘頭","多頭吞噬","早晨之星","三紅兵","穿刺線","大紅棒"]) if kbar_pattern else False
-    kbar_bearish = any(k in kbar_pattern for k in ["射擊之星","空頭吞噬","黃昏之星","三烏鴉","烏雲蓋頂","大黑棒"]) if kbar_pattern else False
+    kbar_bullish = any(k in kbar_pattern for k in ["錘頭","多頭吞噬","早晨之星","三紅兵","穿刺線","大紅棒","漲停"]) if kbar_pattern else False
+    kbar_bearish = any(k in kbar_pattern for k in ["射擊之星","空頭吞噬","黃昏之星","三烏鴉","烏雲蓋頂","大黑棒","跌停"]) if kbar_pattern else False
     kbar_neutral = not kbar_bullish and not kbar_bearish
 
     # K棒操作說明對照（具體化）
@@ -3881,7 +3881,7 @@ def _do_analyze(stock_id: str, tf: str = "D",
     _kbar_backtest = None
     if kbar_pattern and len(closes) > 60:
         _bt_key = None
-        for _bk in ["錘頭","射擊之星","多頭吞噬","空頭吞噬","早晨之星","黃昏之星",
+        for _bk in ["一字線","錘頭","射擊之星","多頭吞噬","空頭吞噬","早晨之星","黃昏之星",
                      "三紅兵","三烏鴉","穿刺線","烏雲蓋頂","大紅棒","大黑棒"]:
             if _bk in kbar_pattern:
                 _bt_key = _bk
@@ -4042,8 +4042,12 @@ def _do_analyze(stock_id: str, tf: str = "D",
         _hist_v = float(macd_hist[-1]) if len(macd_hist) > 0 and not np.isnan(macd_hist[-1]) else 0.0
         _vol_r  = vol_analysis.get("ratio", 1.0)
 
-        # 雷達一：趨勢 — MA20 > MA60（月線站季線上方）
-        _tp_trend = bool(_ma20_v and _ma60_v and _ma20_v > _ma60_v)
+        # 雷達一：趨勢 — 2026/08/06 改用道氏波峰波谷（與上方主欄位 trend 同一套判斷）
+        # 原本獨立算 MA20>MA60，跟主欄位的道氏趨勢是兩套邏輯，會出現「上升趨勢」但
+        # 雷達顯示「月線<季線❌」互相矛盾的畫面；回測已證實道氏鑑別力優於MA20/MA60
+        # （backtest_trend.py，+1.38% vs -0.05%），直接沿用同一份 trend 判斷結果，
+        # 不再另外計算，兩處保證永遠一致。
+        _tp_trend = bool(trend == "上升趨勢")
 
         # T4: 趨勢斜率判斷 — MA20 近 5 根的方向
         _ma20_arr = calc_ma(closes, 20)
@@ -5379,41 +5383,66 @@ def detect_kbar_pattern(opens, highs, lows, closes, volumes=None):
     patterns = []
     warnings = []
 
+    # ── 跳空判斷（今日K棒範圍與昨日完全不重疊）──
+    # 2026/08/06 新增：原本完全沒有跳空偵測，缺這塊資訊
+    _gap_up = l1 > h2
+    _gap_down = h1 < l2
+    _gap_tag = "跳空" if (_gap_up or _gap_down) else ""
+
     # ── 單根型態（最新K棒）──
 
+    # 一字線（漲跌停鎖死：開=高=低=收，全日幾乎零波動）
+    # 2026/08/06 新增：原本完全沒有這個型態，數值特徵(body/range<0.1)跟十字星重疊，
+    # 一直被誤判成十字星——但一字線代表極端一致的單邊情緒（搶著買或搶著賣到鎖死），
+    # 跟十字星代表的「方向不明、多空拉鋸」意義完全相反，混在一起會誤導使用者。
+    # 用 range/price 是否極小（而非 body/range 比例）當判斷依據，才能跟十字星區分開。
+    if range1 / (c1 or 1) < 0.002:
+        if c1 > c2 * 1.001:
+            patterns.append(f"{_gap_tag}一字線（漲停鎖死，強勢惜售）")
+            warnings.append("今日一字鎖死漲停，若明天開盤不跳空回補，多方強勢未變")
+        elif c1 < c2 * 0.999:
+            patterns.append(f"{_gap_tag}一字線（跌停鎖死，恐慌出逃）")
+            warnings.append("今日一字鎖死跌停，若明天無法收復，空方強勢未變")
+        else:
+            patterns.append(f"{_gap_tag}一字線（平盤鎖死，極端惜售惜買）")
+            warnings.append("今日一字線但接近平盤，方向不明，觀察明天開盤方向")
+
     # 錘頭（底部，下引線長，出現在下跌後）
-    if (lower_shadow1 >= body1 * 2 and upper_shadow1 <= body1 * 0.3
+    elif (lower_shadow1 >= body1 * 2 and upper_shadow1 <= body1 * 0.3
             and body1 / range1 < 0.4):
         if not is_red1:
-            patterns.append("錘頭線（底部反轉訊號）")
+            patterns.append(f"{_gap_tag}錘頭線（底部反轉訊號）")
             warnings.append("出現錘頭線，若明天收紅確認，底部支撐訊號成立")
         else:
-            patterns.append("錘頭線（底部反轉，紅K更佳）")
+            patterns.append(f"{_gap_tag}錘頭線（底部反轉，紅K更佳）")
             warnings.append("出現紅K錘頭線，底部支撐訊號，明天若繼續收紅則確認")
 
     # 流星/射擊之星（頂部，上引線長）
     elif (upper_shadow1 >= body1 * 2 and lower_shadow1 <= body1 * 0.3
             and body1 / range1 < 0.4):
-        patterns.append("射擊之星（頂部壓力訊號）")
+        patterns.append(f"{_gap_tag}射擊之星（頂部壓力訊號）")
         warnings.append("出現射擊之星，若明天收黑確認，注意頂部形成風險")
 
-    # 十字星（開收盤接近）
+    # 十字星（開收盤接近，但範圍正常，非鎖死一字線）
     elif body1 / range1 < 0.1 and range1 > 0:
         if h1 > max(h2, h3):  # 高點在頂部
-            patterns.append("十字星（高點出現，方向未定）")
+            patterns.append(f"{_gap_tag}十字星（高點出現，方向未定）")
             warnings.append("高點出現十字星，方向未明，明天若收黑須注意拉回")
         else:
-            patterns.append("十字星（整理，等待方向）")
+            patterns.append(f"{_gap_tag}十字星（整理，等待方向）")
             warnings.append("出現十字星，整理中，等待明天方向確認")
 
-    # 大紅棒（強攻）
-    elif is_red1 and body1 / range1 > 0.7 and body1 > body2 * 1.5:
-        patterns.append("大紅棒（強勢攻擊）")
+    # 大紅棒（強攻）— 2026/08/06 拿掉「body1 > body2*1.5」這個門檻：
+    # body1/range1>0.7 本身已經是「實體佔全天振幅七成以上」的絕對強度判斷，足以定義
+    # 大紅棒，不需要再跟昨天比較。原本「比昨天大1.5倍」會導致連續強勢（例如連續兩天
+    # 都是大紅棒）時，第二天因為沒有比第一天更大而被漏判成常態K線，是明確的邏輯錯誤。
+    elif is_red1 and body1 / range1 > 0.7:
+        patterns.append(f"{_gap_tag}大紅棒（強勢攻擊）")
         warnings.append("出現大紅棒，若明天不跌破今日一半，多頭強勢延續")
 
-    # 大黑棒（強殺）
-    elif not is_red1 and body1 / range1 > 0.7 and body1 > body2 * 1.5:
-        patterns.append("大黑棒（強勢賣壓）")
+    # 大黑棒（強殺）— 同上，拿掉「比昨天大1.5倍」的門檻
+    elif not is_red1 and body1 / range1 > 0.7:
+        patterns.append(f"{_gap_tag}大黑棒（強勢賣壓）")
         warnings.append("出現大黑棒，若明天無法收復今日一半，空頭延續")
 
     # ── 兩根型態 ──
@@ -5514,8 +5543,8 @@ def detect_kbar_pattern(opens, highs, lows, closes, volumes=None):
     warning_str = warnings[0] if warnings else ""
 
     # 方向標記（供前端配色用）
-    bullish_keys = ["錘頭","多頭吞噬","早晨之星","三紅兵","穿刺線","大紅棒","頭肩底","W底"]
-    bearish_keys = ["射擊之星","空頭吞噬","黃昏之星","三烏鴉","烏雲蓋頂","大黑棒","頭肩頂","M頭"]
+    bullish_keys = ["錘頭","多頭吞噬","早晨之星","三紅兵","穿刺線","大紅棒","頭肩底","W底","漲停"]
+    bearish_keys = ["射擊之星","空頭吞噬","黃昏之星","三烏鴉","烏雲蓋頂","大黑棒","頭肩頂","M頭","跌停"]
     kbar_dir = "bullish" if any(k in pattern_str for k in bullish_keys) \
                else "bearish" if any(k in pattern_str for k in bearish_keys) \
                else "neutral"
@@ -6940,7 +6969,7 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
 
     # ── 多空雷達補充說明 ──
     _tp_missing = []
-    if not tp_trend: _tp_missing.append(f"趨勢（需 MA20 {tp_ma20} > MA60 {tp_ma60}）")
+    if not tp_trend: _tp_missing.append(f"趨勢（需高低點結構轉多，目前 {trend}；參考 MA20 {tp_ma20} / MA60 {tp_ma60}）")
     if not tp_macd:  _tp_missing.append(f"MACD（需柱體翻正，目前 {tp_hist}）")
     if not tp_vol:   _tp_missing.append(f"量能（需量比 ≥1.3，目前 {tp_vol_ratio}x）")
     if tp_score == 3:
@@ -6955,8 +6984,8 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
         tp_supplement_html = ""
 
     # kbar tag 顏色：依多頭/空頭/中性
-    _kbar_bullish_keys = ["錘頭","多頭吞噬","早晨之星","三紅兵","穿刺線","大紅棒"]
-    _kbar_bearish_keys = ["射擊之星","空頭吞噬","黃昏之星","三烏鴉","烏雲蓋頂","大黑棒"]
+    _kbar_bullish_keys = ["錘頭","多頭吞噬","早晨之星","三紅兵","穿刺線","大紅棒","漲停"]
+    _kbar_bearish_keys = ["射擊之星","空頭吞噬","黃昏之星","三烏鴉","烏雲蓋頂","大黑棒","跌停"]
     if any(k in (kbar_pattern or "") for k in _kbar_bullish_keys):
         _kbar_tag_bg, _kbar_tag_color = "#166534", "#bbf7d0"   # 深綠底＋淺綠字
     elif any(k in (kbar_pattern or "") for k in _kbar_bearish_keys):
@@ -7172,8 +7201,8 @@ function toggleTheme(){{
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <div style="flex:1;min-width:100px;padding:8px 12px;border-radius:8px;background:{tp_trend_bg};text-align:center">
           <div style="font-size:11px;color:var(--text3);margin-bottom:3px">① 趨勢</div>
-          <div style="font-size:12px;font-weight:600;color:{tp_trend_color}">月線{'>' if tp_trend else '<'}季線 {tp_trend_icon}</div>
-          <div style="font-size:12px;color:var(--text3);margin-top:2px">MA20=<b>{tp_ma20}</b> / MA60=<b>{tp_ma60}</b></div>
+          <div style="font-size:12px;font-weight:600;color:{tp_trend_color}">{trend} {tp_trend_icon}</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px">參考：MA20=<b>{tp_ma20}</b> / MA60=<b>{tp_ma60}</b></div>
         </div>
         <div style="flex:1;min-width:100px;padding:8px 12px;border-radius:8px;background:{tp_macd_bg};text-align:center">
           <div style="font-size:11px;color:var(--text3);margin-bottom:3px">② MACD</div>
