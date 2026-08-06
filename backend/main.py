@@ -1141,7 +1141,14 @@ def _fetch_tw_month_report_row(url: str, data_key: str, roc_date: str, source_la
     2026/07/30：抽出的共用函式，取代 fetch_df_finmind() 裡原本上市(TWSE)/上櫃(TPEX)
     兩段幾乎一樣的月報表抓取+解析程式碼，只有URL/JSON資料key/log標籤不同。
     找到當日資料回傳 (open, high, low, close, volume)，找不到或抓取失敗回傳 None。
+
+    2026/08/06 修復：原本依賴呼叫者 fetch_df_finmind() 內 import 的 _ur/_j，
+    但本函式是獨立頂層函式，Python 作用域規則下看不到呼叫者的區域變數，
+    導致每次執行都拋 NameError、被自己的 except 默默吃掉回傳 None——
+    這個「收盤後補今日K棒」的最終備援其實從7/30重構後就從未真正成功執行過。
+    現在自己 import，不再依賴呼叫者。
     """
+    import urllib.request as _ur, json as _j
     try:
         req = _ur.Request(url, headers={"User-Agent": "Mozilla/5.0"})
         with _ur.urlopen(req, timeout=8) as r:
@@ -1268,10 +1275,11 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
                 _mr_row = _fetch_tw_month_report_row(_mr_url, "aaData", roc_date, "TPEX", code)
 
             if _mr_row:
+                # 2026/08/06 修復：原本這裡複製了即時快照那段的 in_session 檢查，
+                # 邏輯反了——TWSE/TPEX 月報表本來就是「收盤結算後」才會有當日資料，
+                # 只要 _mr_row 有回傳就代表官方資料已存在，不該用「是否盤中」去擋，
+                # 這正是「13:31後仍卡在前一天收盤價」的根因之一（另一根因見上方NameError修復）。
                 op, hi, lo, cp, vol = _mr_row
-                _qt = _QUOTE_CACHE.get(code)
-                if not _qt or not (_qt.get("data") or {}).get("in_session"):
-                    cp = 0
                 if cp > 0:
                     today_bar = pd.DataFrame(
                         [[op, hi, lo, cp, vol]],
@@ -1761,10 +1769,13 @@ def build_summary(price, support, support_desc, resistance, resistance_desc,
     lines = []
 
     # 趨勢（加細節）
+    # 2026/08/06 修正：trend 已改用道氏波峰波谷判斷（非均線），
+    # 原文案「均線多頭/空頭排列」與實際判斷方式不符，改中性用詞
+    # （呼應同日 _do_analyze 內 conflict_note 的同一次修正）
     trend_map = {
-        "上升趨勢": "均線多頭排列，趨勢偏多，短均在長均之上，回測支撐是買點",
-        "下降趨勢": "均線空頭排列，趨勢偏空，短均在長均之下，反彈壓力是賣點",
-        "盤整":     "均線糾結，多空拉鋸，方向未明，等待突破方向再跟進",
+        "上升趨勢": "近期高低點結構走高，趨勢偏多，回測支撐是買點",
+        "下降趨勢": "近期高低點結構走低，趨勢偏空，反彈壓力是賣點",
+        "盤整":     "高低點結構不明，多空拉鋸，等待突破方向再跟進",
     }
     lines.append(f"趨勢：{trend_map.get(trend, trend)}")
 
