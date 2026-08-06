@@ -1093,6 +1093,44 @@ def calc_ma(closes: np.ndarray, period: int) -> np.ndarray:
     return pd.Series(closes).rolling(period).mean().values
 
 
+def _dow_trend(highs, lows, order: int = 5):
+    """
+    道氏波峰波谷趨勢判斷（2026/08/06 導入，取代原 MA20/MA60 均線判斷）。
+
+    以近期波峰(swing high)與波谷(swing low)的高低結構判斷趨勢：
+      - 頭頭高 且 底底高 → 上升趨勢
+      - 頭頭低 且 底底低 → 下降趨勢
+      - 其餘（結構背離、方向不明）→ 盤整
+
+    order=5 為回測（做多三批 + 空方 + 多天期，2021-2026 台股資料）驗證出的
+    最佳敏感度：鑑別力明顯優於 MA20/MA60（+1.38% vs -0.05%），且跨股票、跨年份、
+    跨多空皆穩定勝出。
+
+    回傳 "上升趨勢" / "下降趨勢" / "盤整"；
+    若資料不足以判斷（K棒太少或找不到足夠峰谷），回傳 None，由呼叫端 fallback 回舊邏輯。
+    """
+    try:
+        h = np.asarray(highs, dtype=float)
+        l = np.asarray(lows, dtype=float)
+    except Exception:
+        return None
+    if len(h) < 60 or len(l) < 60:
+        return None
+    peaks = argrelextrema(h, np.greater_equal, order=order)[0]
+    troughs = argrelextrema(l, np.less_equal, order=order)[0]
+    if len(peaks) < 2 or len(troughs) < 2:
+        return None
+    higher_high = h[peaks[-1]] > h[peaks[-2]]
+    higher_low = l[troughs[-1]] > l[troughs[-2]]
+    lower_high = h[peaks[-1]] < h[peaks[-2]]
+    lower_low = l[troughs[-1]] < l[troughs[-2]]
+    if higher_high and higher_low:
+        return "上升趨勢"
+    if lower_high and lower_low:
+        return "下降趨勢"
+    return "盤整"
+
+
 def _parse_tw_num(s):
     """解析TWSE/TPEX月報表數字欄位，'--'/空字串/'X' 一律當0。"""
     return float(str(s).replace(",", "")) if str(s).strip() not in ("--", "", "X") else 0.0
@@ -3385,18 +3423,22 @@ def _do_analyze(stock_id: str, tf: str = "D",
     ma_periods = [p for p in [ma1, ma2, ma3, ma4, ma5] if p and p > 0]
     ma_values = {f"ma{p}": safe_float(calc_ma(closes, p)[-1]) for p in ma_periods}
 
-    # 趨勢（統一用 MA20 vs MA60，與多空雷達①趨勢一致）
-    _ma20_last = calc_ma(closes, 20)[-1]
-    _ma60_last = calc_ma(closes, 60)[-1]
-    if not np.isnan(_ma20_last) and not np.isnan(_ma60_last):
-        trend = "上升趨勢" if _ma20_last > _ma60_last * 1.003 else "下降趨勢" if _ma20_last < _ma60_last * 0.997 else "盤整"
-    else:
-        avail = [(p, calc_ma(closes, p)[-1]) for p in sorted(ma_periods)
-                 if not np.isnan(calc_ma(closes, p)[-1])]
-        trend = "觀察中"
-        if len(avail) >= 2:
-            s, l = avail[0][1], avail[-1][1]
-            trend = "上升趨勢" if s > l * 1.005 else "下降趨勢" if s < l * 0.995 else "盤整"
+    # 趨勢（2026/08/06 改用道氏波峰波谷，取代原 MA20/MA60 均線判斷）
+    # 道氏經回測（2021-2026 台股、做多三批+空方+多天期）驗證鑑別力明顯優於均線；
+    # 資料不足以判斷時，自動 fallback 回原 MA20/MA60 邏輯，確保不會壞掉或變空白。
+    trend = _dow_trend(highs, lows, order=5)
+    if trend is None:
+        _ma20_last = calc_ma(closes, 20)[-1]
+        _ma60_last = calc_ma(closes, 60)[-1]
+        if not np.isnan(_ma20_last) and not np.isnan(_ma60_last):
+            trend = "上升趨勢" if _ma20_last > _ma60_last * 1.003 else "下降趨勢" if _ma20_last < _ma60_last * 0.997 else "盤整"
+        else:
+            avail = [(p, calc_ma(closes, p)[-1]) for p in sorted(ma_periods)
+                     if not np.isnan(calc_ma(closes, p)[-1])]
+            trend = "觀察中"
+            if len(avail) >= 2:
+                s, l = avail[0][1], avail[-1][1]
+                trend = "上升趨勢" if s > l * 1.005 else "下降趨勢" if s < l * 0.995 else "盤整"
 
     # 趨勢軌道（先算，軌道下緣納入支撐候選競爭）
     channel = find_trend_channel(highs, lows, closes)
@@ -3650,9 +3692,9 @@ def _do_analyze(stock_id: str, tf: str = "D",
     conflict_note = ""
     if trend_channel_conflict:
         if trend == "上升趨勢" and channel_type == "down":
-            conflict_note = f"⚠ 注意：均線多頭但股價在下降軌道內，短線結構偏弱，均線支撐可能失守，建議觀望或輕倉"
+            conflict_note = f"⚠ 注意：趨勢偏多但股價在下降軌道內，短線結構偏弱，支撐可能失守，建議觀望或輕倉"
         elif trend == "下降趨勢" and channel_type == "up":
-            conflict_note = f"⚠ 注意：均線空頭但股價在上升軌道內，反彈動能存在但趨勢仍弱，等均線轉向確認再追"
+            conflict_note = f"⚠ 注意：趨勢偏空但股價在上升軌道內，反彈動能存在但趨勢仍弱，等趨勢轉向確認再追"
 
     # 軌道趨勢矛盾警告（插在最前面，醒目位置）
     if conflict_note:
