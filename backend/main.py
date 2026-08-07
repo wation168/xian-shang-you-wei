@@ -6844,6 +6844,12 @@ def _inject_report_ads(html: str) -> str:
     return html
 # === End AdSense 報告頁廣告注入 ===
 
+# 報告模板版本標記：每次改動 _build_report_html 的 HTML/CSS 結構就要更新這個字串，
+# report_generate 靠這個標記判斷 stock_reports 裡的快取是不是舊模板產生的，
+# 是的話強制重新產生，不然光改版面/文案，使用者會一直看到卡住的舊快取（直到當天
+# 收盤基準換了才會被上面的 price_basis_date 檢查順便救回來，不夠即時）。
+_REPORT_TPL_VERSION = "v2026-08-07-hint"
+
 def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict,
                        news_items: list = None) -> str:
     # ── 取欄位 ──
@@ -7187,6 +7193,7 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
     }, ensure_ascii=False)
 
     return f"""<!DOCTYPE html>
+<!-- report_tpl:{_REPORT_TPL_VERSION} -->
 <html lang="zh-TW">
 <head>
 <!-- Google tag (gtag.js) -->
@@ -7828,14 +7835,16 @@ def report_generate(req: ReportReq, user: dict = Depends(require_user)):
         (stock_id, report_date)
     ).fetchone()
     conn.close()
-    if cached and 'id="basic-info"' in (cached["report_html"] or ""):
+    _cached_html = cached["report_html"] or "" if cached else ""
+    _is_current_tpl = f"report_tpl:{_REPORT_TPL_VERSION}" in _cached_html
+    if cached and 'id="basic-info"' in _cached_html and _is_current_tpl:
         cached_basis = cached["price_basis_date"]
         # 舊資料沒有存 price_basis_date（None）時，維持舊行為直接信任快取，避免無謂重產生
         if cached_basis is None or cached_basis == current_basis:
             return {"ok": True, "url": f"{BACKEND_URL}/report/{stock_id}"}
         # 快取的收盤基準比現在舊 → 收盤資料已更新，強制重新產生
     elif cached:
-        # 舊格式（無七欄位）→ 刪除快取，強制重新生成
+        # 舊格式（無七欄位）或舊模板版本（少了report_tpl標記）→ 刪除快取，強制重新生成
         conn = _db_conn()
         conn.execute(
             "DELETE FROM stock_reports WHERE stock_id=? AND report_date=?",
@@ -7899,6 +7908,12 @@ def get_report(slug: str):
     except Exception:
         return HTMLResponse("<html><body><h1>503</h1><p>Service temporarily unavailable.</p><a href='/'>← Home</a></body></html>", status_code=503)
 
+    # 舊模板版本的快取（沒有 report_tpl 標記）視同沒有，強制走下面的即時產生，
+    # 不然改版面/文案後，公開頁會一直卡在改版前的舊HTML，要等使用者剛好重新
+    # 觸發 report_generate 才會更新，不夠即時。
+    if row and f"report_tpl:{_REPORT_TPL_VERSION}" not in (row["report_html"] or ""):
+        row = None
+
     if row:
         html = row["report_html"] or ""
         if "G-8MBD31GNL8" not in html:
@@ -7920,8 +7935,8 @@ def get_report(slug: str):
         conn = _db_conn()
         try:
             conn.execute(
-                "INSERT OR REPLACE INTO stock_reports (stock_id, report_date, stock_name, report_html) VALUES (?,?,?,?)",
-                (stock_id, report_date, stock_name, html)
+                "INSERT OR REPLACE INTO stock_reports (stock_id, report_date, stock_name, report_html, price_basis_date) VALUES (?,?,?,?,?)",
+                (stock_id, report_date, stock_name, html, d.get("price_basis_date"))
             )
             conn.commit()
         except Exception:
@@ -9686,8 +9701,8 @@ def _run_batch_report_job():
                 report_html = _inject_report_ads(_build_report_html(sid, sname, today, d, news_items))
                 conn = _db_conn()
                 conn.execute(
-                    "INSERT OR REPLACE INTO stock_reports (stock_id, report_date, stock_name, report_html) VALUES (?,?,?,?)",
-                    (sid, today, sname, report_html)
+                    "INSERT OR REPLACE INTO stock_reports (stock_id, report_date, stock_name, report_html, price_basis_date) VALUES (?,?,?,?,?)",
+                    (sid, today, sname, report_html, d.get("price_basis_date"))
                 )
                 conn.commit()
                 conn.close()
