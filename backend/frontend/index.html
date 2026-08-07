@@ -410,6 +410,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .m-val{font-size:15px;font-weight:600;font-family:var(--mono)}
 .m-val.lg{font-size:22px}
 .m-sub{font-size:9px;color:var(--text3);margin-top:1px;line-height:1.3}
+.m-hint{font-size:9px;font-style:italic;color:var(--blue,#3b82f6);opacity:.8;margin-top:3px;line-height:1.3}
 .tw-up{color:var(--up)}.tw-dn{color:var(--dn)}.wa{color:var(--amber)}
 
 /* ── 損益比直覺卡 ── */
@@ -713,32 +714,38 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
     <!-- 指標卡 -->
     <div class="metrics">
       <div class="metric">
-        <div class="m-lbl">現價 <span id="quoteLiveTag" style="display:none;font-size:9px;color:var(--green);font-weight:600;letter-spacing:0.3px">● LIVE</span><span id="quotePrevCloseTag" style="display:none;font-size:9px;color:var(--text3);font-weight:500;margin-left:2px">昨收</span></div>
+        <div class="m-lbl">現價 <span id="quoteLiveTag" style="display:none;font-size:9px;color:var(--green);font-weight:600;letter-spacing:0.3px">● LIVE</span><span id="quotePrevCloseTag" style="display:none;font-size:9px;color:var(--text3);font-weight:500;margin-left:2px">昨收</span><span id="m-price-date" style="font-size:9px;color:var(--text3);font-weight:500;margin-left:2px"></span></div>
         <div class="m-val lg" id="m-price">—</div>
         <div class="m-sub" id="m-change" style="font-size:11px;margin-top:2px"></div>
+        <div class="m-hint">盤中為即時報價，收盤後為最近兩根收盤價的漲跌幅</div>
       </div>
       <div class="metric">
         <div class="m-lbl">趨勢</div>
         <div class="m-val" id="m-trend">—</div>
+        <div class="m-hint">用道氏理論的波峰波谷判斷目前多空方向</div>
       </div>
       <div class="metric">
         <div class="m-lbl">型態</div>
         <div class="m-val" style="font-size:13px" id="m-pat">—</div>
+        <div class="m-hint">現價相對支撐壓力的位置型態</div>
       </div>
       <div class="metric">
         <div class="m-lbl">支撐區</div>
         <div class="m-val tw-dn" id="m-sup">—</div>
         <div class="m-sub" id="m-sup-desc"></div>
+        <div class="m-hint">股價較不容易跌破的價位，回測支撐可作進場參考</div>
       </div>
       <div class="metric">
         <div class="m-lbl">壓力區</div>
         <div class="m-val tw-up" id="m-res">—</div>
         <div class="m-sub" id="m-res-desc"></div>
+        <div class="m-hint">股價較不容易站穩突破的價位，是上漲的阻力</div>
       </div>
       <div class="metric">
         <div class="m-lbl">防守位</div>
         <div class="m-val" id="m-stop">—</div>
         <div class="m-sub tw-up" id="m-stop-d"></div>
+        <div class="m-hint">建議停損參考價，跌破代表原本判斷可能失效</div>
       </div>
     </div>
 
@@ -756,6 +763,7 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
         <div class="rr-desc" id="rr-desc">—</div>
       </div>
     </div>
+    <div class="m-hint" style="margin:-6px 0 12px 2px">損益比＝（目標價−現價）÷（現價−防守位），數字越高代表潛在報酬相對風險越划算</div>
 
     <!-- 位置風險進度條 -->
     <div id="posBarWrap" style="display:none;background:var(--bg2);border-radius:var(--radius);padding:10px 14px;margin-bottom:12px">
@@ -774,13 +782,13 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
     <div id="deepSection" style="display:none;padding:0 0 4px">
       <div class="deep-title">📐 深度分析</div>
       <div class="deep-grid">
-        <div class="deep-card" id="dcard-kbar"><div class="deep-lbl">🕯 K棒型態</div><div id="d-kbar-tag"></div><div class="deep-val" id="d-kbar-name">—</div><div class="deep-sub" id="d-kbar-sub"></div></div>
-        <div class="deep-card" id="dcard-ma"><div class="deep-lbl">📊 均線排列</div><div id="d-ma-tag"></div><div class="deep-sub" id="d-ma-sub"></div></div>
-        <div class="deep-card" id="dcard-kd"><div class="deep-lbl">〽️ KD 指標</div><div id="d-kd-tag"></div><div class="ind-nums" id="d-kd-nums"></div><div class="deep-sub" id="d-kd-sub"></div></div>
-        <div class="deep-card" id="dcard-macd"><div class="deep-lbl">📈 MACD</div><div id="d-macd-tag"></div><div class="ind-nums" id="d-macd-nums"></div><div class="deep-sub" id="d-macd-sub"></div></div>
-        <div class="deep-card full" id="dcard-vol"><div class="deep-lbl">🔊 量能分析</div><div id="d-vol-tag"></div><div class="deep-sub" id="d-vol-sub"></div></div>
-        <div class="deep-card full" id="dcard-inst"><div class="deep-lbl">🏦 法人動向</div><div id="d-inst-rows"><div style="font-size:11px;color:var(--text3)">載入中…</div></div></div>
-        <div class="deep-card full" id="dcard-risk"><div class="deep-lbl">⚡ 風險提示</div><div class="risk-items" id="d-risk-list"></div></div>
+        <div class="deep-card" id="dcard-kbar"><div class="deep-lbl">🕯 K棒型態</div><div id="d-kbar-tag"></div><div class="deep-val" id="d-kbar-name">—</div><div class="deep-sub" id="d-kbar-sub"></div><div class="m-hint">今日蠟燭圖形狀所隱含的多空意義</div></div>
+        <div class="deep-card" id="dcard-ma"><div class="deep-lbl">📊 均線排列</div><div id="d-ma-tag"></div><div class="deep-sub" id="d-ma-sub"></div><div class="m-hint">多條均線的排列方向，判斷中長期趨勢是否一致</div></div>
+        <div class="deep-card" id="dcard-kd"><div class="deep-lbl">〽️ KD 指標</div><div id="d-kd-tag"></div><div class="ind-nums" id="d-kd-nums"></div><div class="deep-sub" id="d-kd-sub"></div><div class="m-hint">短線動能指標，判斷是否超買或超賣</div></div>
+        <div class="deep-card" id="dcard-macd"><div class="deep-lbl">📈 MACD</div><div id="d-macd-tag"></div><div class="ind-nums" id="d-macd-nums"></div><div class="deep-sub" id="d-macd-sub"></div><div class="m-hint">判斷多空動能強弱與趨勢轉折的指標</div></div>
+        <div class="deep-card full" id="dcard-vol"><div class="deep-lbl">🔊 量能分析</div><div id="d-vol-tag"></div><div class="deep-sub" id="d-vol-sub"></div><div class="m-hint">成交量變化，反映買賣力道強弱</div></div>
+        <div class="deep-card full" id="dcard-inst"><div class="deep-lbl">🏦 法人動向</div><div id="d-inst-rows"><div style="font-size:11px;color:var(--text3)">載入中…</div></div><div class="m-hint">外資、投信、自營商近期買賣超情況</div></div>
+        <div class="deep-card full" id="dcard-risk"><div class="deep-lbl">⚡ 風險提示</div><div class="risk-items" id="d-risk-list"></div><div class="m-hint">系統偵測到值得留意的風險與注意事項</div></div>
       </div>
     </div>
 
@@ -2298,6 +2306,7 @@ function renderResult(d,enabledMA){
         buy_signals,sell_signals,buy_stops,bars,symbol,stock_name,stock_id,tf,chart_note,
         breakout_idx,breakdown_idx,breakout_stale,breakdown_stale,
         kbar_pattern,kbar_warning,kbar_dir,kbar_action,conflict_note,rr_basis,
+        price_change_pct,price_basis_date,
         indicators}=d;
   _indicators = indicators||null;
   // 做法A（2026/08/04）：分析基準與畫面現價分離
@@ -2372,6 +2381,15 @@ function renderResult(d,enabledMA){
   // 指標卡
   // 做法A：大字現價顯示 displayPrice（畫面現價/即時價），與下方分析數字（用收盤基準 price）分離
   _animateNumber(document.getElementById('m-price'), displayPrice, 2, 600);
+  // 現價漲跌%（近兩根收盤價計算，不依賴即時報價；盤中若即時報價抓到會由 updateQuoteUI 覆蓋）
+  const changeEl0 = document.getElementById('m-change');
+  if(changeEl0 && price_change_pct!=null){
+    const sign0 = price_change_pct>=0?'+':'';
+    changeEl0.className = `m-sub ${price_change_pct>0?'tw-up':price_change_pct<0?'tw-dn':''}`;
+    changeEl0.textContent = `${sign0}${price_change_pct}%`;
+  }
+  const dateEl0 = document.getElementById('m-price-date');
+  if(dateEl0) dateEl0.textContent = price_basis_date ? price_basis_date.slice(5).replace('-','/') : '';
 
   // 做法A：分析基準白話說明（第10點）— 有後端說明句才顯示，並在現價與收盤基準有落差時補上具體數字
   const _basisNoteEl = document.getElementById('priceBasisNote');

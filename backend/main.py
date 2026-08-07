@@ -2743,12 +2743,13 @@ def _db_init():
             created_at  TEXT    DEFAULT (datetime('now','+8 hours'))
         );
         CREATE TABLE IF NOT EXISTS stock_reports (
-            id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            stock_id    TEXT NOT NULL,
-            report_date TEXT NOT NULL,
-            stock_name  TEXT NOT NULL DEFAULT '',
-            report_html TEXT NOT NULL,
-            created_at  TEXT DEFAULT (datetime('now','+8 hours')),
+            id               INTEGER PRIMARY KEY AUTOINCREMENT,
+            stock_id         TEXT NOT NULL,
+            report_date      TEXT NOT NULL,
+            stock_name       TEXT NOT NULL DEFAULT '',
+            report_html      TEXT NOT NULL,
+            price_basis_date TEXT DEFAULT NULL,
+            created_at       TEXT DEFAULT (datetime('now','+8 hours')),
             UNIQUE(stock_id, report_date)
         );
         CREATE TABLE IF NOT EXISTS referral_codes (
@@ -2856,6 +2857,7 @@ def _db_init():
         ("chat_messages",   "msg_type",        "TEXT DEFAULT 'text'"),
         ("chat_messages",   "image_data",      "TEXT DEFAULT NULL"),
         ("members",         "nickname",        "TEXT DEFAULT NULL"),
+        ("stock_reports",   "price_basis_date", "TEXT DEFAULT NULL"),
     ]
     for table, col, coldef in new_columns:
         try:
@@ -4256,12 +4258,18 @@ def analyze(stock_id: str, tf: str = "D",
                 status_code=429,
                 detail=f"guest_limit|免費試用已達上限（{GUEST_DAILY_LIMIT} 次），登入後每日可查 {FREE_DAILY_LIMIT} 次"
             )
-        # 記錄遊客查詢
-        conn.execute(
-            "INSERT INTO query_log (member_id, date, ip, count) VALUES (0, ?, ?, 1) "
-            "ON CONFLICT(member_id, date, ip) DO UPDATE SET count=count+1",
-            (today, client_ip)
-        )
+        # 記錄遊客查詢（改用 SELECT 再 UPDATE/INSERT，不依賴 ON CONFLICT，
+        # 避免正式環境舊表的 UNIQUE 限制跟程式碼schema對不上時整個報500）
+        if row:
+            conn.execute(
+                "UPDATE query_log SET count=count+1 WHERE member_id=0 AND date=? AND ip=?",
+                (today, client_ip)
+            )
+        else:
+            conn.execute(
+                "INSERT INTO query_log (member_id, date, ip, count) VALUES (0, ?, ?, 1)",
+                (today, client_ip)
+            )
         conn.commit()
         conn.close()
 
@@ -7234,7 +7242,7 @@ body{{background:var(--bg);color:var(--text);font-family:-apple-system,'Noto San
 .stat{{background:var(--stat-bg);border-radius:10px;padding:12px;flex:1;min-width:90px}}
 .stat-label{{font-size:11px;color:var(--text3);margin-bottom:4px}}
 .stat-value{{font-size:18px;font-weight:700}}
-.stat-hint{{font-size:10px;color:var(--text3);opacity:.65;margin-top:3px;line-height:1.3}}
+.stat-hint{{font-size:10px;font-style:italic;color:var(--blue,#3b82f6);opacity:.8;margin-top:3px;line-height:1.3}}
 .irow{{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--irow-border)}}
 .idot{{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}}
 h2{{font-size:15px;font-weight:700;margin-bottom:14px;color:var(--h2)}}
@@ -7803,16 +7811,30 @@ def report_generate(req: ReportReq, user: dict = Depends(require_user)):
     stock_id = req.stock_id.strip().upper()
     report_date = _taipei_today()
 
-    # same-day cache（快取命中不計入次數）
+    # 先拿最新分析（_do_analyze 本身有短TTL快取，不會每次都重打FinMind），
+    # 用它的 price_basis_date 判斷同一天的報告快取是否已經過期（收盤基準換了新的一天）。
+    # 2026/08/07 修正：原本先檢查 stock_reports 當日快取命中就直接return，完全不管
+    # 快取當下的收盤資料是不是最新的，導致一大早（FinMind還沒更新前）產生的報告會
+    # 整天卡在舊的收盤基準，即使資料源已經更新也不會反映。
+    try:
+        d = _do_analyze(stock_id, "D", user=None)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"分析失敗：{e}")
+    current_basis = d.get("price_basis_date")
+
     conn = _db_conn()
     cached = conn.execute(
-        "SELECT report_html FROM stock_reports WHERE stock_id=? AND report_date=?",
+        "SELECT report_html, price_basis_date FROM stock_reports WHERE stock_id=? AND report_date=?",
         (stock_id, report_date)
     ).fetchone()
     conn.close()
-    if cached:
-        if 'id="basic-info"' in (cached["report_html"] or ""):
+    if cached and 'id="basic-info"' in (cached["report_html"] or ""):
+        cached_basis = cached["price_basis_date"]
+        # 舊資料沒有存 price_basis_date（None）時，維持舊行為直接信任快取，避免無謂重產生
+        if cached_basis is None or cached_basis == current_basis:
             return {"ok": True, "url": f"{BACKEND_URL}/report/{stock_id}"}
+        # 快取的收盤基準比現在舊 → 收盤資料已更新，強制重新產生
+    elif cached:
         # 舊格式（無七欄位）→ 刪除快取，強制重新生成
         conn = _db_conn()
         conn.execute(
@@ -7822,11 +7844,6 @@ def report_generate(req: ReportReq, user: dict = Depends(require_user)):
         conn.commit()
         conn.close()
 
-    try:
-        d = _do_analyze(stock_id, "D", user=None)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"分析失敗：{e}")
-
     stock_name = d.get("stock_name", stock_id)
     news_items = _fetch_stock_news(stock_id)
     report_html = _inject_report_ads(_build_report_html(stock_id, stock_name, report_date, d, news_items))
@@ -7834,8 +7851,8 @@ def report_generate(req: ReportReq, user: dict = Depends(require_user)):
     conn = _db_conn()
     try:
         conn.execute(
-            "INSERT OR REPLACE INTO stock_reports (stock_id, report_date, stock_name, report_html) VALUES (?,?,?,?)",
-            (stock_id, report_date, stock_name, report_html)
+            "INSERT OR REPLACE INTO stock_reports (stock_id, report_date, stock_name, report_html, price_basis_date) VALUES (?,?,?,?,?)",
+            (stock_id, report_date, stock_name, report_html, current_basis)
         )
         conn.commit()
     except Exception:
