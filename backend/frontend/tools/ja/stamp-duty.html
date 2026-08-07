@@ -57,7 +57,7 @@
     <p class="calc-subtitle">住宅および商業用物件の不動産譲渡税を即座に計算します</p>
     <div id="calcInputs"><div class="input-group">
   <label for="propertyPrice">物件購入価格</label>
-  <div class="input-row"><span class="input-prefix">¥</span><input type="number" id="propertyPrice" placeholder="500000"  value="500000" step="1000"></div>
+  <div class="input-row"><span class="input-prefix">£</span><input type="number" id="propertyPrice" placeholder="500000"  value="500000" step="1000"></div>
 </div>
   <small class="input-help">購入する物件の総額を入力してください</small>
 <div class="input-group">
@@ -137,23 +137,23 @@ function calculate() {
   if (propertyType === 'residential') {
     const isFirstTimeBuyer = buyerStatus === 'firsttime' && numberOfProperties === 0;
 
-    if (isFirstTimeBuyer) {
-      if (propertyPrice <= 425000) {
+    if (isFirstTimeBuyer && propertyPrice <= 500000) {
+      if (propertyPrice <= 300000) {
         stampDuty = 0;
-      } else if (propertyPrice <= 550000) {
-        stampDuty = (propertyPrice - 425000) * 0.05;
       } else {
-        stampDuty = (550000 - 425000) * 0.05 + (propertyPrice - 550000) * 0.10;
+        stampDuty = (propertyPrice - 300000) * 0.05;
       }
     } else {
-      if (propertyPrice <= 250000) {
-        stampDuty = propertyPrice * 0.03;
+      if (propertyPrice <= 125000) {
+        stampDuty = 0;
+      } else if (propertyPrice <= 250000) {
+        stampDuty = (propertyPrice - 125000) * 0.02;
       } else if (propertyPrice <= 925000) {
-        stampDuty = 250000 * 0.03 + (propertyPrice - 250000) * 0.05;
+        stampDuty = (250000 - 125000) * 0.02 + (propertyPrice - 250000) * 0.05;
       } else if (propertyPrice <= 1500000) {
-        stampDuty = 250000 * 0.03 + (925000 - 250000) * 0.05 + (propertyPrice - 925000) * 0.10;
+        stampDuty = (250000 - 125000) * 0.02 + (925000 - 250000) * 0.05 + (propertyPrice - 925000) * 0.10;
       } else {
-        stampDuty = 250000 * 0.03 + (925000 - 250000) * 0.05 + (1500000 - 925000) * 0.10 + (propertyPrice - 1500000) * 0.17;
+        stampDuty = (250000 - 125000) * 0.02 + (925000 - 250000) * 0.05 + (1500000 - 925000) * 0.10 + (propertyPrice - 1500000) * 0.12;
       }
     }
   } else {
@@ -161,19 +161,17 @@ function calculate() {
       stampDuty = 0;
     } else if (propertyPrice <= 250000) {
       stampDuty = (propertyPrice - 150000) * 0.02;
-    } else if (propertyPrice <= 500000) {
-      stampDuty = (250000 - 150000) * 0.02 + (propertyPrice - 250000) * 0.05;
     } else {
-      stampDuty = (250000 - 150000) * 0.02 + (500000 - 250000) * 0.05 + (propertyPrice - 500000) * 0.10;
+      stampDuty = (250000 - 150000) * 0.02 + (propertyPrice - 250000) * 0.05;
     }
   }
 
   const effectiveRate = (stampDuty / propertyPrice) * 100;
   const totalCost = propertyPrice + stampDuty;
 
-  document.getElementById('stampDutyAmount').textContent = '¥' + stampDuty.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('stampDutyAmount').textContent = '£' + stampDuty.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   document.getElementById('effectiveRate').textContent = effectiveRate.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '%';
-  document.getElementById('totalCost').textContent = '¥' + totalCost.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('totalCost').textContent = '£' + totalCost.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
   document.getElementById('results').classList.add('show');
 }
