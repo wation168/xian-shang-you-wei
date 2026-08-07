@@ -130,18 +130,21 @@ def run_filter(candidate_ids: list[str], news_list: list[dict],
 
 
 # ══════════════════════════════════════════════════════════════════════
-# 深度選股（三重確認）— 2026/07/27 補回
+# 深度選股（雙重確認＋MACD加分）— 2026/07/27 補回，2026/08/07 改MACD為加分項
 #
 # 這一段是給 main.py 的 _run_deep_analysis_job() 用的，入口是 run_deep_scan()。
 # 上面的 analyze_stock / run_filter 是「精選股」用的舊流程，兩者互不影響，
 # 舊功能完全沒有更動。
 #
-# 三重確認（三個條件必須同時成立才有資格入選）：
+# 雙重確認（兩個條件必須同時成立才有資格入選）：
 #   ① 月季線金叉：MA20 由下往上穿越 MA60，且金叉後未再翻回空頭
 #   ② 站上月線　：現價站在 MA20 之上
-#   ③ MACD金叉　：DIF 由下往上穿越 DEA，且發生在 3 個交易日內
 #
-# 通過後再依「股價位置、量能、法人籌碼」加分，分數愈高訊號愈強。
+# MACD金叉（DIF 由下往上穿越 DEA，且發生在 3 個交易日內）2026/08/07 改為加分項，
+# 不再是強制門檻——太多波段初升段的股票會因為 MACD 還沒黃金交叉而被誤刪，
+# 改成「有金叉多加分，沒有金叉不淘汰」。
+#
+# 通過雙重確認後再依「MACD金叉、股價位置、量能、法人籌碼」加分，分數愈高訊號愈強。
 # 回傳欄位與 generator.render_deep_card() 及前端 showDeepAnalysisPage()
 # 所需欄位完全一致。
 # ══════════════════════════════════════════════════════════════════════
@@ -343,7 +346,7 @@ def _confidence(score: int) -> str:
 
 def deep_analyze_stock(stock_id: str, stock_name: str = "") -> dict | None:
     """
-    對單一股票做三重確認深度分析。
+    對單一股票做雙重確認＋加分的深度分析。
     通過回傳完整結果 dict，未通過回傳 None。
     """
     prices = fetch_price_history(stock_id, days=150)
@@ -354,6 +357,7 @@ def deep_analyze_stock(stock_id: str, stock_name: str = "") -> dict | None:
     lows   = [p["low"]    for p in prices if p["close"] > 0]
     highs  = [p["high"]   for p in prices if p["close"] > 0]
     vols   = [p["volume"] for p in prices if p["close"] > 0]
+    dates  = [p["date"]   for p in prices if p["close"] > 0]
     if len(closes) < 65:
         return None
 
@@ -375,25 +379,29 @@ def deep_analyze_stock(stock_id: str, stock_name: str = "") -> dict | None:
         return None
     vol_ratio = round(vol5 / vol20, 2) if vol20 > 0 else 0
 
-    # ── 三重確認 ──────────────────────────────────
+    # ── 雙重確認（硬條件）──────────────────────────
     # ① 月季線金叉（同時取得金叉索引，等下算「起漲低點」停損依據要用）
     cross_idx = _find_ma_golden_cross_index(ma20_l, ma60_l, DEEP_CFG["ma_cross_lookback"])
     if cross_idx is None:
         return None
     lift_off_low = min(lows[cross_idx:])   # 金叉那天到現在這段期間的最低價＝起漲低點
     ma_cross_days_ago = (len(closes) - 1) - cross_idx   # 幾個交易日前發生金叉，0＝就是今天
+    ma_cross_date = dates[cross_idx]   # 金叉當天的實際日期，供 main.py 選股紀錄表去重用
     # ② 站上月線
     if price <= ma20:
         return None
-    # ③ MACD金叉
+    # ③ MACD金叉：不再是硬條件，只作為下面的加分項（發生在 macd_cross_days 天內才給分）
     dif, dea, hist = _macd(closes)
     macd_cross_idx = _find_macd_golden_cross_index(dif, dea, DEEP_CFG["macd_cross_days"]) if dif else None
-    if macd_cross_idx is None:
-        return None
-    macd_cross_days_ago = (len(dif) - 1) - macd_cross_idx
+    macd_cross_days_ago = (len(dif) - 1) - macd_cross_idx if macd_cross_idx is not None else None
 
-    # ── 通過三重確認，開始加分 ──────────────────────
+    # ── 通過雙重確認，開始加分 ──────────────────────
     matched, score = _classify_position(closes, ma20, vol_ratio)
+
+    # MACD金叉加分（原本是強制門檻，2026/08/07 改成加分項：有金叉代表動能已確認，額外加分）
+    if macd_cross_idx is not None:
+        matched.append("MACD金叉")
+        score += 2
 
     # 量能加分
     if vol_ratio >= 1.5:
@@ -480,8 +488,9 @@ def deep_analyze_stock(stock_id: str, stock_name: str = "") -> dict | None:
         "stop_loss":            stop_loss,
         "stop_loss_pct":        stop_loss_pct,
         "stop_loss_basis":      stop_loss_basis,
-        # 三重確認的具體證據，讓前端能明確列出「為什麼入選」，不用只憑信任
+        # 雙重確認＋加分項的具體證據，讓前端能明確列出「為什麼入選」，不用只憑信任
         "ma_cross_days_ago":    ma_cross_days_ago,   # ①月季線金叉發生在幾個交易日前
+        "ma_cross_date":        ma_cross_date,       # ①月季線金叉發生的實際日期（YYYY-MM-DD）
         "above_ma20_pct":       above_ma20_pct,      # ②現價高於月線的百分比
         "macd_cross_days_ago":  macd_cross_days_ago, # ③MACD金叉發生在幾個交易日前
         "rr_ratio":             rr_ratio,
@@ -512,7 +521,7 @@ def run_deep_scan(candidate_ids: list[str],
       max_results   : 最多回傳幾檔，預設 DEEP_CFG["max_results"]
       delay         : 每檔之間的間隔秒數，預設 DEEP_CFG["api_delay"]
 
-    回傳：通過三重確認的個股清單，依分數由高到低排序
+    回傳：通過雙重確認的個股清單，依分數由高到低排序
     """
     if max_results is None:
         max_results = DEEP_CFG["max_results"]
@@ -527,7 +536,7 @@ def run_deep_scan(candidate_ids: list[str],
     name_dict = name_dict or {}
     passed: list[dict] = []
     total = len(candidate_ids)
-    print(f"[deep_scan] 開始三重確認掃描 {total} 檔候選股...")
+    print(f"[deep_scan] 開始雙重確認掃描 {total} 檔候選股...")
 
     for i, sid in enumerate(candidate_ids, 1):
         try:
@@ -545,7 +554,7 @@ def run_deep_scan(candidate_ids: list[str],
             time.sleep(delay)
 
     passed.sort(key=lambda x: x["score"], reverse=True)
-    print(f"[deep_scan] 掃描完畢，{len(passed)}/{total} 檔通過三重確認，取前 {max_results} 檔")
+    print(f"[deep_scan] 掃描完畢，{len(passed)}/{total} 檔通過雙重確認，取前 {max_results} 檔")
     return passed[:max_results]
 
 

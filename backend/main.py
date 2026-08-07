@@ -2819,6 +2819,21 @@ def _db_init():
             content    TEXT NOT NULL,
             created_at TEXT DEFAULT (datetime('now','+8 hours'))
         );
+        CREATE TABLE IF NOT EXISTS deep_pick_log (
+            id               INTEGER PRIMARY KEY AUTOINCREMENT,
+            stock_id         TEXT NOT NULL,
+            stock_name       TEXT NOT NULL DEFAULT '',
+            cross_date       TEXT NOT NULL,
+            pick_date        TEXT NOT NULL,
+            pick_price       REAL NOT NULL,
+            score            INTEGER DEFAULT 0,
+            confidence       TEXT DEFAULT '',
+            return_20d_pct   REAL DEFAULT NULL,
+            return_20d_date  TEXT DEFAULT NULL,
+            return_20d_price REAL DEFAULT NULL,
+            created_at       TEXT DEFAULT (datetime('now','+8 hours')),
+            UNIQUE(stock_id, cross_date)
+        );
     """)
     conn.commit()
 
@@ -3400,6 +3415,11 @@ def _do_analyze(stock_id: str, tf: str = "D",
     volumes    = df["Volume"].values.astype(float)
     price      = round(float(closes[-1]), 2)
 
+    # 現價漲跌%：用最近兩根收盤價計算，不依賴即時報價（收盤後也能顯示）
+    price_change_pct = None
+    if len(closes) >= 2 and closes[-2] > 0:
+        price_change_pct = round((closes[-1] - closes[-2]) / closes[-2] * 100, 2)
+
     # ── 做法A（2026/08/04）：分析基準與顯示現價徹底切開 ──
     # price（＝分析基準）永遠鎖定「最近一根確定收盤 K 棒」，即時報價「不再覆蓋」它，
     # 也「不再改動 closes[-1] / closes_full[-1]」——所以下游全部分析
@@ -3745,6 +3765,17 @@ def _do_analyze(stock_id: str, tf: str = "D",
             kbar_action = action
             break
 
+    # 孕線特化：若昨天已出現突破/跌破訊號，今天的孕線其實是「突破隔日拉回」而非單純整理，
+    # 用 breakout_idx / breakdown_idx 判斷並改寫成對應的拉回敘事
+    if kbar_pattern and "孕線" in kbar_pattern:
+        _n_bars = len(closes)
+        if breakout_idx is not None and breakout_idx == _n_bars - 2:
+            _bo_price = round(float(closes[breakout_idx]), 2)
+            kbar_action = f"昨日已放量突破，今日縮量拉回整理，屬正常拉回而非反轉，若不跌破昨日突破價 {_bo_price} 可續抱，跌破則出場觀望"
+        elif breakdown_idx is not None and breakdown_idx == _n_bars - 2:
+            _bd_price = round(float(closes[breakdown_idx]), 2)
+            kbar_action = f"昨日已放量跌破，今日縮量反彈整理，屬弱勢反彈非止跌，若無法站回昨日跌破價 {_bd_price} 應持續觀望，站回才重新評估進場"
+
     near_sup = pattern in ("支撐整理",) or (price - support) / price < 0.04
     near_res = pattern in ("壓力整理",) or (resistance - price) / price < 0.04
 
@@ -3942,6 +3973,7 @@ def _do_analyze(stock_id: str, tf: str = "D",
     result = {
         "symbol": symbol, "stock_id": stock_id, "stock_name": stock_name, "tf": tf,
         "price": price,
+        "price_change_pct": price_change_pct,  # 現價漲跌%（近兩根收盤價計算，不依賴即時報價）
         "analysis_price": analysis_price,      # 做法A：分析基準（確定收盤），下游分析欄位皆用此
         "display_price": display_price,        # 做法A：畫面現價（盤中即時，抓不到＝收盤基準）
         "price_basis_date": price_basis_date,  # 做法A：分析基準是哪一天的收盤
@@ -4227,7 +4259,7 @@ def analyze(stock_id: str, tf: str = "D",
         # 記錄遊客查詢
         conn.execute(
             "INSERT INTO query_log (member_id, date, ip, count) VALUES (0, ?, ?, 1) "
-            "ON CONFLICT(member_id, date) DO UPDATE SET count=count+1",
+            "ON CONFLICT(member_id, date, ip) DO UPDATE SET count=count+1",
             (today, client_ip)
         )
         conn.commit()
@@ -6238,6 +6270,75 @@ def _fetch_opening_volume_top20() -> list:
     return top20
 
 
+def _log_deep_pick_events(conn, results: list, pick_date: str):
+    """
+    把今天入選的股票依「金叉事件」記錄一次選股紀錄。
+    去重靠 deep_pick_log 的 UNIQUE(stock_id, cross_date)：同一檔股票只要金叉日期
+    （ma_cross_date）沒變，就代表還是同一次金叉事件，INSERT OR IGNORE 會自動略過，
+    不會每天重複記錄同一次訊號；等到金叉重新發生（cross_date 換了）才會再記一筆。
+    """
+    for r in results:
+        cross_date = r.get("ma_cross_date")
+        if not cross_date:
+            continue
+        try:
+            conn.execute(
+                "INSERT OR IGNORE INTO deep_pick_log "
+                "(stock_id, stock_name, cross_date, pick_date, pick_price, score, confidence) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (r.get("stock_id"), r.get("stock_name", ""), cross_date, pick_date,
+                 r.get("price"), r.get("score", 0), r.get("confidence", ""))
+            )
+        except Exception as e:
+            print(f"[deep_pick_log] 記錄失敗 {r.get('stock_id')}: {e}")
+    conn.commit()
+
+
+def _update_deep_pick_returns(conn):
+    """
+    幫尚未算出20天報酬率的選股紀錄補上結果：抓選股後的實際交易日K棒，
+    滿20個交易日就用第20根的收盤價算報酬率，不足20天的先跳過，下次再檢查。
+    """
+    import sys as _sys4, os as _os4
+    _sp4 = _os4.path.join(_os4.path.dirname(_os4.path.abspath(__file__)), "stock_picker")
+    if _sp4 not in _sys4.path:
+        _sys4.path.insert(0, _sp4)
+    from crawler import fetch_price_history as _fetch_ph
+
+    rows = conn.execute(
+        "SELECT id, stock_id, pick_date, pick_price FROM deep_pick_log WHERE return_20d_pct IS NULL"
+    ).fetchall()
+    for i, row in enumerate(rows):
+        try:
+            prices = _fetch_ph(row["stock_id"], days=60)
+            after = [p for p in prices if p["date"] > row["pick_date"] and p["close"] > 0]
+            if len(after) < 20:
+                continue
+            target = after[19]
+            ret_pct = round((target["close"] - row["pick_price"]) / row["pick_price"] * 100, 2)
+            conn.execute(
+                "UPDATE deep_pick_log SET return_20d_pct=?, return_20d_date=?, return_20d_price=? WHERE id=?",
+                (ret_pct, target["date"], target["close"], row["id"])
+            )
+        except Exception as e:
+            print(f"[deep_pick_log] 更新20天報酬失敗 {row['stock_id']}: {e}")
+        if i < len(rows) - 1:
+            _time.sleep(0.35)   # 避免連續打爆 FinMind API，比照 DEEP_CFG["api_delay"]
+    conn.commit()
+
+
+def _get_deep_track_records(conn, limit: int = 20) -> list[dict]:
+    """給公開頁用：已滿20天、算出報酬率的選股紀錄，最新的在前面"""
+    rows = conn.execute(
+        "SELECT stock_id, stock_name, cross_date, pick_date, pick_price, "
+        "return_20d_pct, return_20d_date, return_20d_price "
+        "FROM deep_pick_log WHERE return_20d_pct IS NOT NULL "
+        "ORDER BY return_20d_date DESC LIMIT ?",
+        (limit,)
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
 def _run_deep_analysis_job():
     """
     每個交易日 17:00 執行：深度選股掃描
@@ -6271,6 +6372,12 @@ def _run_deep_analysis_job():
 
         _dc = _db_conn()
 
+        # ①-0 選股紀錄表：記錄今天入選的金叉事件（同一次金叉只記錄一次，靠DB UNIQUE去重）
+        #     並補齊之前選股中已滿20個交易日的報酬率
+        _log_deep_pick_events(_dc, results, now.strftime("%Y-%m-%d"))
+        _update_deep_pick_returns(_dc)
+        _track_records = _get_deep_track_records(_dc, limit=20)
+
         # ① 先把「上一次」存的即時資料讀出來（這份資料現在已經滿一個交易日，
         #    可以安心拿去產生公開版頁面了）
         _stale_row = _dc.execute(
@@ -6297,7 +6404,7 @@ def _run_deep_analysis_job():
                 f"即時分析請登入 App 查看" if _stale_date else
                 "⏰ 本頁為延遲資料，即時分析請登入 App 查看"
             )
-            generate_deep_analysis(_stale_results, note=_note)
+            generate_deep_analysis(_stale_results, note=_note, track_records=_track_records)
 
             _da_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "stock_picker", "output", "deep_analysis.html")
             if os.path.exists(_da_path):
@@ -7127,6 +7234,7 @@ body{{background:var(--bg);color:var(--text);font-family:-apple-system,'Noto San
 .stat{{background:var(--stat-bg);border-radius:10px;padding:12px;flex:1;min-width:90px}}
 .stat-label{{font-size:11px;color:var(--text3);margin-bottom:4px}}
 .stat-value{{font-size:18px;font-weight:700}}
+.stat-hint{{font-size:10px;color:var(--text3);opacity:.65;margin-top:3px;line-height:1.3}}
 .irow{{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--irow-border)}}
 .idot{{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}}
 h2{{font-size:15px;font-weight:700;margin-bottom:14px;color:var(--h2)}}
@@ -7181,14 +7289,17 @@ function toggleTheme(){{
         <div class="stat-label">現價</div>
         <div class="stat-value" id="livePrice">{price}</div>
         <div style="font-size:13px;margin-top:3px;min-height:18px" id="liveChange"></div>
+        <div class="stat-hint">盤中為即時報價，收盤後為最近兩根收盤價的漲跌幅</div>
       </div>
       <div class="stat">
         <div class="stat-label">趨勢</div>
         <div class="stat-value" style="font-size:15px;color:{ma_color}">{trend}</div>
+        <div class="stat-hint">用道氏理論的波峰波谷判斷目前多空方向</div>
       </div>
       <div class="stat">
         <div class="stat-label">損益比</div>
         <div class="stat-value" style="color:{rr_color}">{rr_ratio:.2f}</div>
+        <div class="stat-hint">潛在獲利÷潛在虧損，數字越高代表越划算</div>
       </div>
     </div>
     <!-- 多空雷達 -->
@@ -7203,21 +7314,25 @@ function toggleTheme(){{
           <div style="font-size:11px;color:var(--text3);margin-bottom:3px">① 趨勢</div>
           <div style="font-size:12px;font-weight:600;color:{tp_trend_color}">{trend} {tp_trend_icon}</div>
           <div style="font-size:12px;color:var(--text3);margin-top:2px">參考：MA20=<b>{tp_ma20}</b> / MA60=<b>{tp_ma60}</b></div>
+          <div class="stat-hint">月線是否站上季線，判斷中期多空</div>
         </div>
         <div style="flex:1;min-width:100px;padding:8px 12px;border-radius:8px;background:{tp_macd_bg};text-align:center">
           <div style="font-size:11px;color:var(--text3);margin-bottom:3px">② MACD</div>
           <div style="font-size:12px;font-weight:600;color:{tp_macd_color}">動能{'↗' if tp_macd else '↘'} {tp_macd_icon}</div>
           <div style="font-size:12px;color:var(--text3);margin-top:2px">MACD柱體=<b>{tp_hist}</b></div>
+          <div class="stat-hint">柱體翻正代表買方動能增強</div>
         </div>
         <div style="flex:1;min-width:100px;padding:8px 12px;border-radius:8px;background:{tp_vol_bg};text-align:center">
           <div style="font-size:11px;color:var(--text3);margin-bottom:3px">③ 資金籌碼</div>
           <div style="font-size:12px;font-weight:600;color:{tp_vol_color}">量{'放大' if tp_vol else '縮'} {tp_vol_icon}</div>
           <div style="font-size:12px;color:var(--text3);margin-top:2px">量比=<b>{tp_vol_ratio}x</b></div>
+          <div class="stat-hint">近5日均量相對20日均量放大倍數</div>
         </div>
         <div style="flex:1;min-width:100px;padding:8px 12px;border-radius:8px;background:{tp_pos_bg};text-align:center">
           <div style="font-size:11px;color:var(--text3);margin-bottom:3px">④ 位置</div>
           <div style="font-size:12px;font-weight:600;color:{tp_pos_color}">{'適中' if tp_pos else '偏離'} {tp_pos_icon}</div>
           <div style="font-size:12px;color:var(--text3);margin-top:2px">MA5乖離=<b>{tp_bias5 if tp_bias5 is not None else '-'}%</b></div>
+          <div class="stat-hint">現價偏離月均線太多代表追高風險高</div>
         </div>
       </div>
       {f'<div style="margin-top:8px;padding:6px 10px;border-radius:6px;background:#fffbeb;font-size:11px;color:#92400e">T4 趨勢斜率：MA20 方向{"↗ 向上" if tp_ma20_slope == "up" else "↘ 向下" if tp_ma20_slope == "down" else "→ 持平"}{"，短均跌破中均 ⚠" if tp_ma5_cross else ""}</div>' if tp_ma20_slope != "flat" or tp_ma5_cross else ''}
@@ -7233,23 +7348,27 @@ function toggleTheme(){{
         <div class="stat-label">支撐位</div>
         <div class="stat-value" style="color:#3b82f6">{support}</div>
         <div style="font-size:11px;color:var(--text3);margin-top:2px">{supp_desc}，距現價 -{sup_dist}%</div>
+        <div class="stat-hint">股價較不容易跌破的價位，回測支撐可作進場參考</div>
       </div>
       <div class="stat">
         <div class="stat-label">壓力位</div>
         <div class="stat-value" style="color:#fbbf24">{resistance}</div>
         <div style="font-size:11px;color:var(--text3);margin-top:2px">{res_desc}，距現價 +{res_dist}%</div>
+        <div class="stat-hint">股價較不容易站穩突破的價位，是上漲的阻力</div>
       </div>
     </div>
     <div style="background:var(--stat-bg);border-radius:10px;padding:12px">
       <div class="stat-label" style="margin-bottom:4px">操作防守位（停損線）</div>
       <div style="font-size:18px;font-weight:700;color:#f87171">{stop_loss}</div>
       <div style="font-size:11px;color:var(--text3);margin-top:2px">距現價 -{stop_dist}%，跌破需停損出場</div>
+      <div class="stat-hint">建議停損參考價，跌破代表原本判斷可能失效</div>
     </div>
   </section>
 
   <!-- 3. 趨勢判斷 -->
   <section class="card" id="trend-analysis">
     <h2>趨勢判斷</h2>
+    <div class="stat-hint" style="margin-bottom:8px">用道氏理論的波峰波谷結構判斷目前中長期多空方向</div>
     <div class="irow">
       <div class="idot" style="background:{ma_color}"></div>
       <div style="font-size:13px;line-height:1.6;color:var(--text)">{ma_text}</div>
@@ -7260,6 +7379,7 @@ function toggleTheme(){{
   <!-- 4. K線型態 -->
   <section class="card" id="kline-pattern">
     <h2>K線型態</h2>
+    <div class="stat-hint" style="margin-bottom:8px">今日蠟燭圖形狀所隱含的多空意義，勝率為歷史同型態的統計數據</div>
     {kbar_tag_html}{kbar_warning_html}
     <div class="irow" style="border-bottom:none">
       <div class="idot" style="background:{kp_color}"></div>
@@ -7274,6 +7394,7 @@ function toggleTheme(){{
   <!-- 5. 動能指標 -->
   <section class="card" id="momentum">
     <h2>動能指標</h2>
+    <div class="stat-hint" style="margin-bottom:8px">KD判斷短線超買超賣，MACD判斷多空動能，量能反映買賣力道強弱</div>
     {kd_row_html}{macd_row_html}{vol_row_html}
   </section>
 
@@ -7284,6 +7405,7 @@ function toggleTheme(){{
       <div class="stat" style="flex:0 0 auto">
         <div class="stat-label">風險等級</div>
         <div class="stat-value" style="color:{risk_color}">{risk_label}</div>
+        <div class="stat-hint">依停損距現價的百分比區分：5%內低、5~10%中、10%以上高</div>
       </div>
       <div class="stat" style="flex:0 0 auto">
         <div class="stat-label">損益比</div>
@@ -7292,6 +7414,7 @@ function toggleTheme(){{
       </div>
     </div>
     <ul style="list-style:none">{risk_items_html}</ul>
+    <div class="stat-hint">系統依技術面自動偵測到值得留意的風險與注意事項</div>
   </section>
 
   <!-- 多空雷達判斷 -->
@@ -7321,6 +7444,7 @@ function toggleTheme(){{
   <!-- 7. 操作建議 -->
   <section class="card" id="operation-advice">
     <h2>操作建議</h2>
+    <div class="stat-hint" style="margin-bottom:8px">綜合多空雷達、K棒型態與支撐壓力位置給出的操作參考，非投資建議</div>
     <div style="font-size:14px;line-height:1.8;color:var(--text);padding:12px;background:var(--stat-bg);border-radius:10px;white-space:pre-line">{op_text}</div>
     {tp_supplement_html}
     <div style="margin-top:12px;display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--text3)">

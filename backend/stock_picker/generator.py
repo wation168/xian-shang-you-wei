@@ -436,6 +436,7 @@ def _deep_condition_label(cond: str) -> str:
         "cond2_高點拉回起漲(買1)":            "高點拉回起漲（買1）",
         "cond3_均線突破(買2)":                "均線突破（買2）",
         "cond3_均線突破(買2)_量能未確認":      "均線突破（買2）⚠量能未確認",
+        "MACD金叉":                          "MACD金叉",
         "MACD動能加速中":                     "MACD動能加速",
     }
     return mapping.get(cond, cond)
@@ -520,21 +521,18 @@ def render_deep_card(s: dict) -> str:
       MA60 <strong style="color:#94a3b8">{s.get('ma60','—')}</strong></span>
   </div>
   <div style="background:#1e293b;border-radius:10px;padding:12px;font-size:12px;line-height:1.8">
-    <div style="display:flex;justify-content:space-between;color:#e2e8f0">
-      <span>支撐 <b style="color:#22c55e">{s.get('support','—')}</b>　壓力 <b style="color:#f59e0b">{s.get('resistance','—')}</b></span>
-      <span>風報比 <b style="color:#e2e8f0">{s.get('rr_ratio','—')}x</b></span>
-    </div>
-    <div style="display:flex;justify-content:space-between;color:#e2e8f0;margin-top:4px">
-      <span>停損 <b style="color:#ef4444">{s.get('stop_loss','—')}</b>
-        <span style="color:#64748b">（-{s.get('stop_loss_pct','—')}%，依{s.get('stop_loss_basis','—')}）</span></span>
-    </div>
-    <div style="color:#64748b;margin-top:4px">
+    <div style="color:#64748b">
       MACD DIF {s.get('macd_dif','—')}　DEA {s.get('macd_dea','—')}　柱 {s.get('macd_hist','—')}
       {f"　法人連買 {s['consecutive_buy_days']}日" if s.get('consecutive_buy_days', 0) >= 2 else ""}
     </div>
     {fund_html}
   </div>
   {warnings_html}
+  <a href="/report/{s['stock_id']}" style="display:block;text-align:center;margin-top:2px;
+     background:#1e293b;border:1px solid #334155;border-radius:10px;padding:10px;
+     font-size:12px;font-weight:600;color:#a78bfa;text-decoration:none">
+    📄 查看 {s['stock_id']} 完整個股報告（支撐壓力、停損、目標價）→
+  </a>
 </div>"""
 
 
@@ -563,7 +561,56 @@ def _ad_slot(slot_id: str, position_index: int = 0) -> str:
 <script>try{{(adsbygoogle = window.adsbygoogle || []).push({{}});}}catch(e){{}}</script>'''
 
 
-def generate_deep_analysis(results: list[dict], note: str = "") -> str:
+def render_track_record_table(records: list[dict]) -> str:
+    """
+    選股成效追蹤表：公開顯示過去選股滿20個交易日後的實際報酬率，
+    讓使用者能檢驗這個機制的真實成效，而不是只看到「今天入選」的名單。
+    records 由 main.py._get_deep_track_records() 提供，已經是滿20天、算出報酬率的紀錄。
+    """
+    if not records:
+        return ""
+    rows_html = []
+    for r in records:
+        pct = r.get("return_20d_pct")
+        color = "#ef4444" if pct > 0 else ("#22c55e" if pct < 0 else "#94a3b8")
+        sign = "+" if pct > 0 else ""
+        rows_html.append(
+            f'<tr style="border-bottom:1px solid #1e293b">'
+            f'<td style="padding:8px 10px;font-size:12px;color:#e2e8f0">{r.get("stock_name","")}</td>'
+            f'<td style="padding:8px 10px;font-size:12px;color:#64748b">{r.get("cross_date","")}</td>'
+            f'<td style="padding:8px 10px;font-size:12px;color:#64748b;text-align:right">{r.get("pick_price","")}</td>'
+            f'<td style="padding:8px 10px;font-size:12px;color:#64748b;text-align:right">{r.get("return_20d_price","")}</td>'
+            f'<td style="padding:8px 10px;font-size:13px;font-weight:700;color:{color};text-align:right">{sign}{pct}%</td>'
+            f'</tr>'
+        )
+    win_count = sum(1 for r in records if (r.get("return_20d_pct") or 0) > 0)
+    win_rate = round(win_count / len(records) * 100) if records else 0
+    return f'''
+<div style="background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px;margin-bottom:24px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+    <h2 style="font-size:16px;font-weight:700;color:#f1f5f9">📊 選股成效追蹤（滿20個交易日的實際報酬率）</h2>
+    <span style="font-size:12px;color:#64748b">近{len(records)}筆　勝率 <b style="color:#e2e8f0">{win_rate}%</b></span>
+  </div>
+  <div style="overflow-x:auto">
+  <table style="width:100%;border-collapse:collapse;min-width:480px">
+    <thead><tr style="border-bottom:1px solid #334155">
+      <th style="padding:0 10px 8px;font-size:11px;color:#64748b;text-align:left">股票</th>
+      <th style="padding:0 10px 8px;font-size:11px;color:#64748b;text-align:left">金叉日期</th>
+      <th style="padding:0 10px 8px;font-size:11px;color:#64748b;text-align:right">選股價</th>
+      <th style="padding:0 10px 8px;font-size:11px;color:#64748b;text-align:right">20日後價</th>
+      <th style="padding:0 10px 8px;font-size:11px;color:#64748b;text-align:right">報酬率</th>
+    </tr></thead>
+    <tbody>{"".join(rows_html)}</tbody>
+  </table>
+  </div>
+  <p style="font-size:11px;color:#475569;margin-top:10px;line-height:1.6">
+    每筆紀錄為選股當天收盤價，與其後第20個交易日收盤價的報酬率，已扣除人為挑選偏差（同一次金叉事件只記錄一次）。
+    僅供檢視機制成效，不代表未來報酬，過去績效不保證未來結果。
+  </p>
+</div>'''
+
+
+def generate_deep_analysis(results: list[dict], note: str = "", track_records: list[dict] | None = None) -> str:
     """
     深度選股結果輸出，依風險等級分三區（低/中/高），每區內依分數排序。
     對應 main.py _run_deep_analysis_job 的呼叫，輸出至
@@ -574,6 +621,10 @@ def generate_deep_analysis(results: list[dict], note: str = "") -> str:
       - 3~5 則 AdSense 廣告位，依當日入選股票數量自動增減，避免內容少廣告多
       - 醒目的「即時資料在 App」導流CTA（比delay note更顯眼，是這頁的主要轉換點）
       - 補上全站規定的 cookie-consent.css / softglow-cookies.js，符合GDPR+AdSense規則
+
+    2026/08/07 新增：
+      - track_records 參數：選股滿20個交易日後的實際報酬率追蹤表，公開顯示，
+        讓使用者能檢驗這個選股機制的真實成效
     """
     low_risk  = sorted([r for r in results if r.get("risk_level") == "低"],
                        key=lambda x: x.get("score", 0), reverse=True)
@@ -588,11 +639,11 @@ def generate_deep_analysis(results: list[dict], note: str = "") -> str:
 <div style="background:#0f172a;border:1px solid #1e293b;border-radius:14px;padding:20px;margin-bottom:24px;line-height:1.8">
   <h2 style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:10px">什麼是深度選股？</h2>
   <p style="font-size:13px;color:#94a3b8;margin-bottom:14px">
-    深度選股是從台股成交量前150大個股中，用「三重確認」機制自動篩選出技術面剛轉強的股票。
-    三個條件必須同時成立才有資格入選：① 月季線金叉（20日均線由下往上穿越60日均線，且金叉後
-    未再翻回空頭）② 股價站上月線（現價需在20日均線之上）③ MACD金叉（快線由下往上穿越慢線，
-    3日內發生）。三個條件都通過後，系統再依股價位置（低檔起漲、高點拉回起漲、均線突破）、
-    量能強弱、法人籌碼動向等因子加分，分數愈高代表訊號愈強。
+    深度選股是從台股成交量前150大個股中，用「雙重確認＋加分」機制自動篩選出技術面剛轉強的股票。
+    兩個條件必須同時成立才有資格入選：① 月季線金叉（20日均線由下往上穿越60日均線，且金叉後
+    未再翻回空頭）② 股價站上月線（現價需在20日均線之上）。通過後系統再依 MACD金叉（快線由下
+    往上穿越慢線，3日內發生）、股價位置（低檔起漲、高點拉回起漲、均線突破）、量能強弱、法人
+    籌碼動向等因子加分，分數愈高代表訊號愈強。
   </p>
   <h2 style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:10px">停損價怎麼計算？</h2>
   <p style="font-size:13px;color:#94a3b8;margin-bottom:14px">
@@ -656,7 +707,7 @@ def generate_deep_analysis(results: list[dict], note: str = "") -> str:
 
     if not rendered_keys:
         body_parts.append(
-            '<div style="padding:32px 0;text-align:center;color:#475569">當時無符合三重確認條件的股票</div>'
+            '<div style="padding:32px 0;text-align:center;color:#475569">當時無符合雙重確認條件的股票</div>'
         )
         body_parts.append(_next_ad("ad-empty-mid"))  # 廣告②：內容空白時補一則，維持最低3則
     else:
@@ -671,6 +722,8 @@ def generate_deep_analysis(results: list[dict], note: str = "") -> str:
 
     body_parts.append(_next_ad("ad-bottom"))  # 廣告：固定在最下方（配合免責聲明前）
     body = "".join(body_parts)
+
+    track_table_html = render_track_record_table(track_records or [])
 
     total = len(results)
     high_conf_count = sum(1 for r in results if "高信心" in (r.get("confidence") or ""))
@@ -723,7 +776,7 @@ body{{background:#020817;color:#f1f5f9;font-family:-apple-system,BlinkMacSystemF
 <div class="container">
   <div style="margin-bottom:20px">
     <h1 style="font-size:22px;font-weight:700;margin-bottom:6px">🎯 深度選股</h1>
-    <p style="font-size:13px;color:#64748b">產生時間：{generated_at}　｜　篩選條件：月季線金叉＋站上月線＋MACD金叉（三重確認）</p>
+    <p style="font-size:13px;color:#64748b">產生時間：{generated_at}　｜　篩選條件：月季線金叉＋站上月線（雙重確認）＋MACD金叉加分</p>
   </div>
   {note_banner}
   {live_cta}
@@ -734,6 +787,7 @@ body{{background:#020817;color:#f1f5f9;font-family:-apple-system,BlinkMacSystemF
     <div class="stat"><strong style="color:#f59e0b">{len(mid_risk)}</strong>中風險</div>
     <div class="stat"><strong style="color:#ef4444">{len(high_risk)}</strong>高風險</div>
   </div>
+  {track_table_html}
   {body}
   {seo_content}
   <div class="disclaimer">⚠️ 本頁面資料僅供參考，不構成買賣建議。停損價為系統依技術結構試算，非保證有效，股市有風險，請自行評估後決策。</div>
