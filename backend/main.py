@@ -758,14 +758,16 @@ async def serve_blog_html(filename: str):
 async def serve_blog_index():
     return _serve_locale_file("blog", "index.html")
 
+_BLOG_LOCALES = ("en", "ja", "ko", "es", "pt", "id", "de", "fr", "zh-CN")
+
 @app.get("/blog/{locale}/{filename}.html", include_in_schema=False)
 async def serve_blog_locale_html(locale: str, filename: str):
-    return _serve_locale_file("blog", f"{filename}.html", locale, ("en", "ja", "ko"))
+    return _serve_locale_file("blog", f"{filename}.html", locale, _BLOG_LOCALES)
 
 @app.get("/blog/{locale}", include_in_schema=False)
 @app.get("/blog/{locale}/", include_in_schema=False)
 async def serve_blog_locale_index(locale: str):
-    return _serve_locale_file("blog", "index.html", locale, ("en", "ja", "ko"))
+    return _serve_locale_file("blog", "index.html", locale, _BLOG_LOCALES)
 
 # ---- Tools 路由 ----
 _TOOLS_LOCALES = ("en","ja","ko","es","pt","id","de","fr","zh-CN")
