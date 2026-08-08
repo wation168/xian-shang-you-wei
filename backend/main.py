@@ -603,6 +603,17 @@ class WwwRedirectMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(WwwRedirectMiddleware)
 
+# ---- API subdomain noindex middleware（api.softglow-ai.com 是後端API專用子網域，不應被搜尋引擎索引）----
+class ApiNoindexMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        host = request.headers.get("host", "")
+        if "api.softglow-ai.com" in host:
+            response.headers["X-Robots-Tag"] = "noindex"
+        return response
+
+app.add_middleware(ApiNoindexMiddleware)
+
 # CORS：明確列出允許來源，支援帶 Authorization header 的請求
 _cors_origins = ALLOWED_ORIGINS if ALLOWED_ORIGINS else ["*"]
 app.add_middleware(
@@ -786,13 +797,31 @@ async def serve_quiz_html(filename: str):
         return FileResponse(path)
     return JSONResponse({"detail": "Not Found"}, status_code=404)
 
+# ── Tools slug redirect map (old renamed slug → actual filename) ──
+_TOOLS_REDIRECTS = {
+    "tax-bracket": "income-tax",
+    "heloc-calculator": "heloc-vs-personal-loan",
+    "protein-intake": "protein-calculator",
+    "pension-calculator": "pension-vs-lump-sum",
+    "roofing-calculator": "roof-area",
+    "water-usage": "water-intake",
+    "pet-insurance": "pet-insurance-calc",
+}
+# zh-CN 專屬：中國稅制沒有 sales tax，僅有增值稅，故導向 vat-calculator（多國增值稅比較工具）
+_TOOLS_REDIRECTS_ZH_CN = {
+    "sales-tax": "vat-calculator",
+}
+
 @app.get("/tools/{filename}.html", include_in_schema=False)
 async def serve_tools_html(filename: str):
-    from fastapi.responses import FileResponse
+    from fastapi.responses import FileResponse, RedirectResponse
     import os as _os
     path = _os.path.join(_FRONTEND_DIR, "tools", f"{filename}.html")
     if _os.path.isfile(path):
         return FileResponse(path)
+    new_slug = _TOOLS_REDIRECTS.get(filename)
+    if new_slug:
+        return RedirectResponse(f"/tools/{new_slug}.html", status_code=301)
     return JSONResponse({"detail": "Not Found"}, status_code=404)
 
 @app.get("/tools", include_in_schema=False)
@@ -807,7 +836,7 @@ async def serve_tools_index():
 
 @app.get("/tools/{locale}/{filename}.html", include_in_schema=False)
 async def serve_tools_locale_html(locale: str, filename: str):
-    from fastapi.responses import FileResponse
+    from fastapi.responses import FileResponse, RedirectResponse
     import os as _os
     if locale not in _TOOLS_LOCALES:
         return JSONResponse({"detail": "Not Found"}, status_code=404)
@@ -817,6 +846,11 @@ async def serve_tools_locale_html(locale: str, filename: str):
             return FileResponse(path)
     except Exception:
         pass
+    new_slug = _TOOLS_REDIRECTS.get(filename)
+    if locale == "zh-CN" and not new_slug:
+        new_slug = _TOOLS_REDIRECTS_ZH_CN.get(filename)
+    if new_slug:
+        return RedirectResponse(f"/tools/{locale}/{new_slug}.html", status_code=301)
     return JSONResponse({"detail": "Not Found"}, status_code=404)
 
 @app.get("/tools/{locale}", include_in_schema=False)
@@ -1057,9 +1091,13 @@ async def serve_icon_512():
     return JSONResponse({"detail": "Not Found"}, status_code=404)
 
 @app.get("/robots.txt", include_in_schema=False)
-async def serve_robots():
+async def serve_robots(request: Request):
     from fastapi.responses import PlainTextResponse
-    return PlainTextResponse("User-agent: *\nAllow: /\nDisallow: /*?q=\n\nSitemap: https://softglow-ai.com/sitemap.xml")
+    host = request.headers.get("host", "")
+    if "api.softglow-ai.com" in host:
+        # api 子網域是後端API專用，不應被搜尋引擎索引
+        return PlainTextResponse("User-agent: *\nDisallow: /")
+    return PlainTextResponse("User-agent: *\nAllow: /\nDisallow: /*?q=\nDisallow: /ws/\n\nSitemap: https://softglow-ai.com/sitemap.xml")
 
 
 # ══════════════════════════════════════════════════════════
