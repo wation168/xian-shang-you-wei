@@ -577,6 +577,13 @@ class LotteryRedirectMiddleware(BaseHTTPMiddleware):
                     new_path = f"/lottery/{locale}/{lottery_slug}.html"
                 else:
                     new_path = f"/lottery/{locale}/"
+                # 2026/08/08修正：該語言若沒有這款外國彩票的頁面（例如ja只做了日本樂透6，
+                # 沒做mega-sena/korea-lotto/uk-lotto/euromillions），fallback到en版，
+                # 跟網站自己首頁導覽的邏輯一致（ja/index.html裡這些外國彩票連結本來就指向en版）
+                if new_path.endswith(".html") and locale != "en":
+                    _full_path = os.path.join(_FRONTEND_DIR, "lottery", new_path[len("/lottery/"):])
+                    if not os.path.isfile(_full_path):
+                        new_path = new_path.replace(f"/lottery/{locale}/", "/lottery/en/", 1)
             else:
                 if page_type == "number-generator":
                     new_path = "/lottery/number-generator.html"
