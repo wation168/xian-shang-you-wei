@@ -92,8 +92,8 @@
 <div class="result-item"><span class="result-label">Emissões Anuais de Alimentação</span><span class="result-value" id="dietEmissions">—</span></div>
 <div class="result-item"><span class="result-label">Emissões Anuais de Aquecimento a Gás</span><span class="result-value" id="gasEmissions">—</span></div>
 <div class="result-highlight"><span class="result-label">Pegada de Carbono Anual Total</span><span class="result-value" id="totalEmissions">—</span></div>
-<div class="result-item"><span class="result-label">Comparação com Média do Reino Unido</span><span class="result-value" id="comparisonUK">—</span></div>
-      <div class="result-interpret show" id="resultInterpret"><strong>O que isso significa?</strong> Os resultados mostram sua pegada de carbono anual em toneladas de CO2 equivalente, dividida por categoria de consumo. Compare seu total com a média do Reino Unido para entender se seu impacto está acima ou abaixo da média nacional. Use estes dados para identificar quais áreas oferecem as melhores oportunidades para reduzir suas emissões.</div>
+<div class="result-item"><span class="result-label">Comparação com Média de Portugal</span><span class="result-value" id="comparisonUK">—</span></div>
+      <div class="result-interpret show" id="resultInterpret"><strong>O que isso significa?</strong> Os resultados mostram sua pegada de carbono anual em toneladas de CO2 equivalente, dividida por categoria de consumo. Compare seu total com a média de Portugal para entender se seu impacto está acima ou abaixo da média nacional. Use estes dados para identificar quais áreas oferecem as melhores oportunidades para reduzir suas emissões.</div>
       <div class="action-bar">
         <button onclick="window.print()">&#x1f5a8; Imprimir</button>
         <button onclick="shareResult()">&#x1f4e4; Compartilhar</button>
@@ -144,8 +144,8 @@ function calculate() {
     return;
   }
 
-  const ukGridEmissionFactor = 0.233;
-  const electricityEmissions = monthlyElectricity * 12 * ukGridEmissionFactor;
+  const gridEmissionFactor = 0.2;
+  const electricityEmissions = monthlyElectricity * 12 * gridEmissionFactor;
 
   const fuelEmissions = {
     'petrol': 2.31,
@@ -170,8 +170,8 @@ function calculate() {
   const totalEmissionsKg = electricityEmissions + transportEmissions + flightEmissions + dietEmissions + gasEmissions;
   const totalEmissionsMetricTonnes = totalEmissionsKg / 1000;
 
-  const ukAverageFootprint = 10.2;
-  const percentageComparisonUK = ((totalEmissionsMetricTonnes / ukAverageFootprint) * 100).toFixed(1);
+  const nationalAverageFootprint = 5.65;
+  const percentageComparisonUK = ((totalEmissionsMetricTonnes / nationalAverageFootprint) * 100).toFixed(1);
 
   document.getElementById('electricityEmissions').textContent = electricityEmissions.toFixed(2);
   document.getElementById('transportEmissions').textContent = (transportEmissions + flightEmissions).toFixed(2);

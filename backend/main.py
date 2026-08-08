@@ -3472,6 +3472,22 @@ def _do_analyze(stock_id: str, tf: str = "D",
             if len(avail) >= 2:
                 s, l = avail[0][1], avail[-1][1]
                 trend = "上升趨勢" if s > l * 1.005 else "下降趨勢" if s < l * 0.995 else "盤整"
+    else:
+        # 2026/08/08：MA20/MA60 校正層——道氏波峰波谷判斷的是「短期結構」，
+        # 容易把長期空頭中的技術性反彈誤判成「上升趨勢」（反之亦然，長期多頭中
+        # 的拉回也可能被誤判成「下降趨勢」）。加一層均線方向校正：若波峰波谷判斷
+        # 跟 MA20/MA60 的相對位置矛盾（例如判上升趨勢，但短均線還在季線下方、
+        # 尚未站上），代表這波結構訊號力道不足，降級為「盤整」而非直接翻轉方向
+        # （翻轉方向風險較高，容易造成另一種誤判）。緩衝帶用 1%（經 6547/6770/2454/
+        # 2303/4908 五支股票回測比較 0.3%/1%/2%/3% 後選定：1% 比 0.3% 觸發頻率降
+        # 約10-15%，但抓假訊號效果仍保留85-90%以上；放寬到2%以上效果會明顯流失）。
+        _ma20_last = calc_ma(closes, 20)[-1]
+        _ma60_last = calc_ma(closes, 60)[-1]
+        if not np.isnan(_ma20_last) and not np.isnan(_ma60_last):
+            if trend == "上升趨勢" and _ma20_last < _ma60_last * 0.99:
+                trend = "盤整"
+            elif trend == "下降趨勢" and _ma20_last > _ma60_last * 1.01:
+                trend = "盤整"
 
     # 趨勢軌道（先算，軌道下緣納入支撐候選競爭）
     channel = find_trend_channel(highs, lows, closes)
@@ -3628,7 +3644,7 @@ def _do_analyze(stock_id: str, tf: str = "D",
     #  4. 因型態是收盤才確認、當天來不及出，警訊寫成「隔天盤前行動指令」而非事後描述
     #  5. 與買賣結論並列、不強制覆蓋（避免多頭回測誤殺）
     vp_exit_warn = None   # 量價出場警訊（dict 或 None）
-    _bearish_kbar_keys = ("大黑棒", "射擊之星", "流星", "空頭吞噬", "黃昏之星", "烏雲罩頂", "跌停")
+    _bearish_kbar_keys = ("大黑棒", "射擊之星", "流星", "空頭吞噬", "黃昏之星", "烏雲罩頂", "跌停", "長上影黑K")
     _is_bearish_shape = bool(kbar_pattern) and any(k in kbar_pattern for k in _bearish_kbar_keys)
     if _is_bearish_shape and len(volumes) >= 20:
         _vp_today_vol = float(volumes[-1])
@@ -3738,8 +3754,8 @@ def _do_analyze(stock_id: str, tf: str = "D",
         summary_lines.insert(0, f"圖形型態：{reversal['desc']}，{reversal['position_desc']}")
 
     # K棒方向判斷（含操作建議）
-    kbar_bullish = any(k in kbar_pattern for k in ["錘頭","多頭吞噬","早晨之星","三紅兵","穿刺線","大紅棒","漲停"]) if kbar_pattern else False
-    kbar_bearish = any(k in kbar_pattern for k in ["射擊之星","空頭吞噬","黃昏之星","三烏鴉","烏雲蓋頂","大黑棒","跌停"]) if kbar_pattern else False
+    kbar_bullish = any(k in kbar_pattern for k in ["錘頭","多頭吞噬","早晨之星","三紅兵","穿刺線","大紅棒","漲停","長下影紅K"]) if kbar_pattern else False
+    kbar_bearish = any(k in kbar_pattern for k in ["射擊之星","空頭吞噬","黃昏之星","三烏鴉","烏雲蓋頂","大黑棒","跌停","長上影黑K"]) if kbar_pattern else False
     kbar_neutral = not kbar_bullish and not kbar_bearish
 
     # K棒操作說明對照（具體化）
@@ -3749,6 +3765,8 @@ def _do_analyze(stock_id: str, tf: str = "D",
         "十字星":       f"方向未定，等明天收盤確認，不宜追高也不宜殺低",
         "大紅棒":       f"今日強攻，明天若縮量整理不跌破今日收盤 {round(float(closes[-1]),2)}，多頭延續可持有",
         "大黑棒":       f"今日強殺，建議出場觀望，等股價回到支撐 {support} 附近且出現止跌訊號再重新評估",
+        "長上影黑K":     f"疑似衝高遭壓回，建議先減碼觀望，明天若無法收復今日高點一半，出場至防守位 {stop_loss}",
+        "長下影紅K":     f"疑似殺低後獲得承接，明天若延續收紅可嘗試進場，防守位設 {stop_loss}",
         "多頭吞噬":     f"底部反轉訊號，明天收紅確認後可設防守位 {stop_loss} 試多",
         "空頭吞噬":     f"頂部反轉訊號，明天收黑確認後建議減碼出場，等回測支撐 {support} 守住再重新布局",
         "孕線":         f"整理型態，等突破今日高低點再進場，不宜在盤中追價",
@@ -3915,7 +3933,7 @@ def _do_analyze(stock_id: str, tf: str = "D",
     if kbar_pattern and len(closes) > 60:
         _bt_key = None
         for _bk in ["一字線","錘頭","射擊之星","多頭吞噬","空頭吞噬","早晨之星","黃昏之星",
-                     "三紅兵","三烏鴉","穿刺線","烏雲蓋頂","大紅棒","大黑棒"]:
+                     "三紅兵","三烏鴉","穿刺線","烏雲蓋頂","大紅棒","大黑棒","長上影黑K","長下影紅K"]:
             if _bk in kbar_pattern:
                 _bt_key = _bk
                 break
@@ -4175,8 +4193,8 @@ def _do_analyze(stock_id: str, tf: str = "D",
     _r_score = _radar.get("score", 0)
     _r_vol_r = _radar.get("vol_ratio", 1.0)
     if kbar_action:
-        kbar_bullish_check = any(k in kbar_pattern for k in ["錘頭","多頭吞噬","早晨之星","三紅兵","穿刺線","大紅棒"]) if kbar_pattern else False
-        kbar_bearish_check = any(k in kbar_pattern for k in ["射擊之星","空頭吞噬","黃昏之星","三烏鴉","烏雲蓋頂","大黑棒"]) if kbar_pattern else False
+        kbar_bullish_check = any(k in kbar_pattern for k in ["錘頭","多頭吞噬","早晨之星","三紅兵","穿刺線","大紅棒","長下影紅K"]) if kbar_pattern else False
+        kbar_bearish_check = any(k in kbar_pattern for k in ["射擊之星","空頭吞噬","黃昏之星","三烏鴉","烏雲蓋頂","大黑棒","長上影黑K"]) if kbar_pattern else False
         # 雷達強度修飾
         if _r_score >= 3 and kbar_bullish_check:
             kbar_action += f"（雷達 {_r_score}/4 亮，訊號較可靠）"
@@ -5034,6 +5052,20 @@ def admin_clear_cache(key: str = Header(default="", alias="X-Admin-Key")):
     return {"cleared": n + q, "message": f"快取已清除（分析 {n} 筆 + 報價 {q} 筆）"}
 
 
+@app.get("/admin/cache-stats")
+def admin_cache_stats(key: str = Header(default="", alias="X-Admin-Key")):
+    """查看目前各全域快取的即時筆數，用來追蹤是否有快取無限增長（記憶體洩漏排查用）"""
+    _check_admin(key)
+    return {
+        "_QUOTE_CACHE": len(_QUOTE_CACHE),
+        "_analyze_cache": len(_analyze_cache),
+        "_CHIPS_CACHE": len(_CHIPS_CACHE),
+        "_market_cache": len(_market_cache),
+        "_name_cache": len(_name_cache),
+        "_stock_info_cache": len(_stock_info_cache),
+    }
+
+
 @app.get("/admin/run-opening-scan")
 async def admin_run_opening_scan(key: str = Header(..., alias="X-Admin-Key")):
     _check_admin(key)
@@ -5472,6 +5504,21 @@ def detect_kbar_pattern(opens, highs, lows, closes, volumes=None):
             patterns.append(f"{_gap_tag}十字星（整理，等待方向）")
             warnings.append("出現十字星，整理中，等待明天方向確認")
 
+    # 長上影黑K（假突破，高檔賣壓）／長下影紅K（假跌破，低檔承接）
+    # 2026/08/07 新增：帥哥鴻用 3231 緯創 2026/08/05 實際K棒（開198／高202.5／低190／收193）
+    # 發現的真實偵測漏洞——body1/range1=0.40，不夠格是大黑棒(>0.7)，上下影線比例也不到
+    # 錘頭/射擊之星要求的2倍，導致這種「衝高被拉回、收黑、帶明顯上影線」的關鍵反轉訊號
+    # 完全沒被任何型態捕捉到，kbar_pattern留空，連帶vp_exit_warn（爆量出場警訊）也不會觸發
+    # （因為它是靠kbar_pattern字串比對關鍵字才會啟動）。
+    # 這裡補上 body1/range1 在 0.1~0.7 之間、但帶有明顯單邊影線（≥range1*0.3）的情況：
+    elif not is_red1 and body1 / range1 <= 0.7 and upper_shadow1 >= range1 * 0.3:
+        patterns.append(f"{_gap_tag}長上影黑K（假突破，高檔賣壓）")
+        warnings.append("今日收黑且帶明顯上影線，疑似衝高遭壓回，若明天無法收復今日高點一半，賣壓恐延續")
+
+    elif is_red1 and body1 / range1 <= 0.7 and lower_shadow1 >= range1 * 0.3:
+        patterns.append(f"{_gap_tag}長下影紅K（假跌破，低檔承接）")
+        warnings.append("今日收紅且帶明顯下影線，疑似殺低後獲得承接，若明天延續收紅，止跌訊號增強")
+
     # 大紅棒（強攻）— 2026/08/06 拿掉「body1 > body2*1.5」這個門檻：
     # body1/range1>0.7 本身已經是「實體佔全天振幅七成以上」的絕對強度判斷，足以定義
     # 大紅棒，不需要再跟昨天比較。原本「比昨天大1.5倍」會導致連續強勢（例如連續兩天
@@ -5583,8 +5630,8 @@ def detect_kbar_pattern(opens, highs, lows, closes, volumes=None):
     warning_str = warnings[0] if warnings else ""
 
     # 方向標記（供前端配色用）
-    bullish_keys = ["錘頭","多頭吞噬","早晨之星","三紅兵","穿刺線","大紅棒","頭肩底","W底","漲停"]
-    bearish_keys = ["射擊之星","空頭吞噬","黃昏之星","三烏鴉","烏雲蓋頂","大黑棒","頭肩頂","M頭","跌停"]
+    bullish_keys = ["錘頭","多頭吞噬","早晨之星","三紅兵","穿刺線","大紅棒","頭肩底","W底","漲停","長下影紅K"]
+    bearish_keys = ["射擊之星","空頭吞噬","黃昏之星","三烏鴉","烏雲蓋頂","大黑棒","頭肩頂","M頭","跌停","長上影黑K"]
     kbar_dir = "bullish" if any(k in pattern_str for k in bullish_keys) \
                else "bearish" if any(k in pattern_str for k in bearish_keys) \
                else "neutral"
@@ -5598,6 +5645,10 @@ def detect_kbar_pattern(opens, highs, lows, closes, volumes=None):
         "錘頭": 0.53, "射擊之星": 0.53,
         "穿刺線": 0.55, "烏雲蓋頂": 0.55,
         "十字星": 0.52, "孕線": 0.52,
+        # 2026/08/07 新增：靜態預設值，屬保守估計（介於錘頭/射擊之星與穿刺線/烏雲蓋頂之間）；
+        # 個股實際勝率仍以 _kbar_backtest（同股票歷史同型態統計）動態算出的結果為準，
+        # 這裡只是資料不足時的靜態備援
+        "長上影黑K": 0.54, "長下影紅K": 0.54,
     }
     win_rate = 0.50
     for key, rate in _WIN_RATE_MAP.items():
@@ -5743,6 +5794,11 @@ def get_chips(stock_id: str, days: int = 30, user: dict = Depends(require_user))
     result["stock_id"] = code
     result["query_days"] = days
     _CHIPS_CACHE[_chips_key] = {"data": result, "expires": _time_mod.time() + 86400}
+    if len(_CHIPS_CACHE) > 200:
+        _cc_cutoff = _time_mod.time()
+        _cc_expired = [k for k, v in _CHIPS_CACHE.items() if v["expires"] < _cc_cutoff]
+        for _k in _cc_expired:
+            _CHIPS_CACHE.pop(_k, None)
     return result
 
 
@@ -7105,8 +7161,8 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
         tp_supplement_html = ""
 
     # kbar tag 顏色：依多頭/空頭/中性
-    _kbar_bullish_keys = ["錘頭","多頭吞噬","早晨之星","三紅兵","穿刺線","大紅棒","漲停"]
-    _kbar_bearish_keys = ["射擊之星","空頭吞噬","黃昏之星","三烏鴉","烏雲蓋頂","大黑棒","跌停"]
+    _kbar_bullish_keys = ["錘頭","多頭吞噬","早晨之星","三紅兵","穿刺線","大紅棒","漲停","長下影紅K"]
+    _kbar_bearish_keys = ["射擊之星","空頭吞噬","黃昏之星","三烏鴉","烏雲蓋頂","大黑棒","跌停","長上影黑K"]
     if any(k in (kbar_pattern or "") for k in _kbar_bullish_keys):
         _kbar_tag_bg, _kbar_tag_color = "#166534", "#bbf7d0"   # 深綠底＋淺綠字
     elif any(k in (kbar_pattern or "") for k in _kbar_bearish_keys):
