@@ -56,6 +56,11 @@
     <h1>Estimador de Seguro de Responsabilidade Civil</h1>
     <p class="calc-subtitle">Estime sua cobertura de seguro de responsabilidade civil baseado no patrimônio líquido e exposição ao risco</p>
     <div id="calcInputs"><div class="input-group">
+  <label for="ptRegion">Região</label>
+  <div class="input-row"><select id="ptRegion" onchange="calculate()"><option value="PT" selected>🇵🇹 Portugal</option><option value="BR">🇧🇷 Brasil</option></select></div>
+</div>
+  <small class="input-help">Selecione sua região para exibir valores em Euro (€) ou Real (R$)</small>
+<div class="input-group">
   <label for="netWorth">Patrimônio Líquido (Ativos - Passivos)</label>
   <div class="input-row"><span class="input-prefix">€</span><input type="number" id="netWorth" placeholder="250000"  value="250000" step="1000"></div>
 </div>
@@ -114,7 +119,12 @@
 </div></div>
 <footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/home/pt/privacy.html">Privacy</a><a href="/home/pt/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
 <script>
-function calculate() { const netWorthInput = document.getElementById('netWorth'); const riskExposureInput = document.getElementById('riskExposure'); if (!netWorthInput.value || !riskExposureInput.value) { alert('Please enter all required values'); return; } const netWorth = parseFloat(netWorthInput.value); const riskExposure = parseFloat(riskExposureInput.value); if (netWorth < 0 || riskExposure < 0.5 || riskExposure > 2.0) { alert('Please enter valid values. Net worth must be positive and risk exposure between 0.5 and 2.0'); return; } const estimatedCoverage = netWorth * riskExposure; const coveragePercentage = (riskExposure * 100).toFixed(1); const monthlyPremium = (estimatedCoverage * 0.008) / 12; document.getElementById('estimatedCoverage').textContent = 'R$' + estimatedCoverage.toLocaleString('en-GB', { maximumFractionDigits: 0 }); document.getElementById('coveragePercentage').textContent = coveragePercentage + '%'; document.getElementById('monthlyEstimate').textContent = 'R$' + monthlyPremium.toLocaleString('en-GB', { maximumFractionDigits: 2 }); document.getElementById('results').classList.add('show'); }
+function calculate() {
+  const ptRegion = document.getElementById('ptRegion')?.value || 'PT';
+  const currencySymbol = ptRegion === 'BR' ? 'R$' : '€';
+  const currencyLocale = ptRegion === 'BR' ? 'pt-BR' : 'pt-PT';
+  document.querySelectorAll('.input-prefix').forEach(function(el){ el.textContent = currencySymbol; });
+ const netWorthInput = document.getElementById('netWorth'); const riskExposureInput = document.getElementById('riskExposure'); if (!netWorthInput.value || !riskExposureInput.value) { alert('Please enter all required values'); return; } const netWorth = parseFloat(netWorthInput.value); const riskExposure = parseFloat(riskExposureInput.value); if (netWorth < 0 || riskExposure < 0.5 || riskExposure > 2.0) { alert('Please enter valid values. Net worth must be positive and risk exposure between 0.5 and 2.0'); return; } const estimatedCoverage = netWorth * riskExposure; const coveragePercentage = (riskExposure * 100).toFixed(1); const monthlyPremium = (estimatedCoverage * 0.008) / 12; document.getElementById('estimatedCoverage').textContent = currencySymbol + estimatedCoverage.toLocaleString(currencyLocale, { maximumFractionDigits: 0 }); document.getElementById('coveragePercentage').textContent = coveragePercentage + '%'; document.getElementById('monthlyEstimate').textContent = currencySymbol + monthlyPremium.toLocaleString(currencyLocale, { maximumFractionDigits: 2 }); document.getElementById('results').classList.add('show'); }
 function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copiado!';setTimeout(function(){b.textContent='Compartilhar'},1500);}}
 document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
 </script>

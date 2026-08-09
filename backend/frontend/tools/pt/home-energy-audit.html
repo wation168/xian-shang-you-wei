@@ -56,6 +56,11 @@
     <h1>Ferramenta de Auditoria Energética Residencial</h1>
     <p class="calc-subtitle">Analise o consumo de energia dos seus eletrodomésticos e identifique oportunidades de economia</p>
     <div id="calcInputs"><div class="input-group">
+  <label for="ptRegion">Região</label>
+  <div class="input-row"><select id="ptRegion" onchange="calculate()"><option value="PT" selected>🇵🇹 Portugal</option><option value="BR">🇧🇷 Brasil</option></select></div>
+</div>
+  <small class="input-help">Selecione sua região para exibir valores em Euro (€) ou Real (R$)</small>
+<div class="input-group">
   <label for="refrigerator_watts">Consumo de Energia do Refrigerador (Watts)</label>
   <div class="input-row"><input type="number" id="refrigerator_watts" placeholder="150"  value="150" step="10"><span class="input-suffix">W</span></div>
 </div>
@@ -227,6 +232,10 @@
 <footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/home/pt/privacy.html">Privacy</a><a href="/home/pt/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
 <script>
 function calculate() {
+  const ptRegion = document.getElementById('ptRegion')?.value || 'PT';
+  const currencySymbol = ptRegion === 'BR' ? 'R$' : '€';
+  document.querySelectorAll('.input-prefix').forEach(function(el){ el.textContent = currencySymbol; });
+
   const refrigeratorWatts = parseFloat(document.getElementById('refrigerator_watts').value);
   const refrigeratorHours = parseFloat(document.getElementById('refrigerator_hours').value);
   const washingMachineWatts = parseFloat(document.getElementById('washing_machine_watts').value);
@@ -306,21 +315,21 @@ function calculate() {
 
   const highestConsumer = costs.reduce((max, item) => item.cost > max.cost ? item : max);
 
-  document.getElementById('refrigerator_monthly').textContent = 'R$' + refrigeratorMonthly.toFixed(2);
-  document.getElementById('washing_machine_monthly').textContent = 'R$' + washingMachineMonthly.toFixed(2);
-  document.getElementById('dishwasher_monthly').textContent = 'R$' + dishwasherMonthly.toFixed(2);
-  document.getElementById('oven_monthly').textContent = 'R$' + ovenMonthly.toFixed(2);
-  document.getElementById('microwave_monthly').textContent = 'R$' + microwaveMonthly.toFixed(2);
-  document.getElementById('tv_monthly').textContent = 'R$' + tvMonthly.toFixed(2);
-  document.getElementById('boiler_monthly').textContent = 'R$' + boilerMonthly.toFixed(2);
-  document.getElementById('heating_monthly').textContent = 'R$' + heatingMonthly.toFixed(2);
-  document.getElementById('ac_monthly').textContent = 'R$' + acMonthly.toFixed(2);
-  document.getElementById('lighting_monthly').textContent = 'R$' + lightingMonthly.toFixed(2);
-  document.getElementById('total_monthly_cost').textContent = 'R$' + totalMonthly.toFixed(2);
-  document.getElementById('total_annual_cost').textContent = 'R$' + totalAnnual.toFixed(2);
+  document.getElementById('refrigerator_monthly').textContent = currencySymbol + refrigeratorMonthly.toFixed(2);
+  document.getElementById('washing_machine_monthly').textContent = currencySymbol + washingMachineMonthly.toFixed(2);
+  document.getElementById('dishwasher_monthly').textContent = currencySymbol + dishwasherMonthly.toFixed(2);
+  document.getElementById('oven_monthly').textContent = currencySymbol + ovenMonthly.toFixed(2);
+  document.getElementById('microwave_monthly').textContent = currencySymbol + microwaveMonthly.toFixed(2);
+  document.getElementById('tv_monthly').textContent = currencySymbol + tvMonthly.toFixed(2);
+  document.getElementById('boiler_monthly').textContent = currencySymbol + boilerMonthly.toFixed(2);
+  document.getElementById('heating_monthly').textContent = currencySymbol + heatingMonthly.toFixed(2);
+  document.getElementById('ac_monthly').textContent = currencySymbol + acMonthly.toFixed(2);
+  document.getElementById('lighting_monthly').textContent = currencySymbol + lightingMonthly.toFixed(2);
+  document.getElementById('total_monthly_cost').textContent = currencySymbol + totalMonthly.toFixed(2);
+  document.getElementById('total_annual_cost').textContent = currencySymbol + totalAnnual.toFixed(2);
   document.getElementById('total_daily_kwh').textContent = totalDailyKwh.toFixed(2) + ' kWh';
-  document.getElementById('highest_consumer').textContent = highestConsumer.name + ' (R$' + highestConsumer.cost.toFixed(2) + '/month)';
-  document.getElementById('consumption_breakdown').textContent = 'Analyzed ' + costs.length + ' appliances';
+  document.getElementById('highest_consumer').textContent = highestConsumer.name + ' (' + currencySymbol + highestConsumer.cost.toFixed(2) + '/mês)';
+  document.getElementById('consumption_breakdown').textContent = 'Analisados ' + costs.length + ' aparelhos';
 
   document.querySelector('.results-container').classList.add('show');
 }

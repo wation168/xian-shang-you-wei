@@ -56,6 +56,11 @@
     <h1>Calculadora DCF</h1>
     <p class="calc-subtitle">Calcule o valor intrínseco da empresa usando análise de fluxo de caixa descontado</p>
     <div id="calcInputs"><div class="input-group">
+  <label for="ptRegion">Região</label>
+  <div class="input-row"><select id="ptRegion" onchange="calculate()"><option value="PT" selected>🇵🇹 Portugal</option><option value="BR">🇧🇷 Brasil</option></select></div>
+</div>
+  <small class="input-help">Selecione sua região para exibir valores em Euro (€) ou Real (R$)</small>
+<div class="input-group">
   <label for="yearOne">Fluxo de Caixa Ano 1</label>
   <div class="input-row"><span class="input-prefix">€</span><input type="number" id="yearOne" placeholder="50000"  value="50000" step="1"></div>
 </div>
@@ -157,6 +162,11 @@
 <footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/home/pt/privacy.html">Privacy</a><a href="/home/pt/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
 <script>
 function calculate() {
+  const ptRegion = document.getElementById('ptRegion')?.value || 'PT';
+  const currencySymbol = ptRegion === 'BR' ? 'R$' : '€';
+  const currencyLocale = ptRegion === 'BR' ? 'pt-BR' : 'pt-PT';
+  document.querySelectorAll('.input-prefix').forEach(function(el){ el.textContent = currencySymbol; });
+
   const y1 = parseFloat(document.getElementById('yearOne').value);
   const y2 = parseFloat(document.getElementById('yearTwo').value);
   const y3 = parseFloat(document.getElementById('yearThree').value);
@@ -198,11 +208,11 @@ function calculate() {
   const equityValue = enterpriseValue - netDebt;
   const valuePerShare = equityValue / shares;
 
-  document.getElementById('pvCashFlows').textContent = 'R$' + pvCashFlows.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
-  document.getElementById('pvTerminal').textContent = 'R$' + pvTerminal.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
-  document.getElementById('enterpriseValue').textContent = 'R$' + enterpriseValue.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
-  document.getElementById('equityValue').textContent = 'R$' + equityValue.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
-  document.getElementById('valuePerShare').textContent = 'R$' + valuePerShare.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('pvCashFlows').textContent = currencySymbol + pvCashFlows.toLocaleString(currencyLocale, {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('pvTerminal').textContent = currencySymbol + pvTerminal.toLocaleString(currencyLocale, {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('enterpriseValue').textContent = currencySymbol + enterpriseValue.toLocaleString(currencyLocale, {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('equityValue').textContent = currencySymbol + equityValue.toLocaleString(currencyLocale, {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('valuePerShare').textContent = currencySymbol + valuePerShare.toLocaleString(currencyLocale, {maximumFractionDigits: 2, minimumFractionDigits: 2});
 
   document.getElementById('results').classList.add('show');
 }

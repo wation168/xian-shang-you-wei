@@ -56,6 +56,11 @@
     <h1>Calculadora de Substituição de Renda</h1>
     <p class="calc-subtitle">Determine a cobertura de seguro necessária para substituir sua renda mensal</p>
     <div id="calcInputs"><div class="input-group">
+  <label for="ptRegion">Região</label>
+  <div class="input-row"><select id="ptRegion" onchange="calculate()"><option value="PT" selected>🇵🇹 Portugal</option><option value="BR">🇧🇷 Brasil</option></select></div>
+</div>
+  <small class="input-help">Selecione sua região para exibir valores em Euro (€) ou Real (R$)</small>
+<div class="input-group">
   <label for="monthlyIncome">Renda Mensal</label>
   <div class="input-row"><span class="input-prefix">€</span><input type="number" id="monthlyIncome" placeholder="5000"  step="0.01"></div>
 </div>
@@ -114,7 +119,12 @@
 </div></div>
 <footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/home/pt/privacy.html">Privacy</a><a href="/home/pt/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
 <script>
-function calculate() { const monthlyIncome = document.getElementById('monthlyIncome').value; const monthsNeeded = document.getElementById('monthsNeeded').value; if (!monthlyIncome || !monthsNeeded || monthlyIncome <= 0 || monthsNeeded <= 0) { alert('Please enter valid monthly income and months needed'); return; } const totalReplacement = parseFloat(monthlyIncome) * parseInt(monthsNeeded); const yearsCovered = parseInt(monthsNeeded) / 12; const annualIncome = parseFloat(monthlyIncome) * 12; document.getElementById('totalReplacement').textContent = 'R$' + totalReplacement.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2}); document.getElementById('yearsCovered').textContent = yearsCovered.toLocaleString('en-GB', {minimumFractionDigits: 1, maximumFractionDigits: 1}); document.getElementById('annualIncome').textContent = 'R$' + annualIncome.toLocaleString('en-GB', {minimumFractionDigits: 2, maximumFractionDigits: 2}); document.getElementById('results').classList.add('show'); }
+function calculate() {
+  const ptRegion = document.getElementById('ptRegion')?.value || 'PT';
+  const currencySymbol = ptRegion === 'BR' ? 'R$' : '€';
+  const currencyLocale = ptRegion === 'BR' ? 'pt-BR' : 'pt-PT';
+  document.querySelectorAll('.input-prefix').forEach(function(el){ el.textContent = currencySymbol; });
+ const monthlyIncome = document.getElementById('monthlyIncome').value; const monthsNeeded = document.getElementById('monthsNeeded').value; if (!monthlyIncome || !monthsNeeded || monthlyIncome <= 0 || monthsNeeded <= 0) { alert('Please enter valid monthly income and months needed'); return; } const totalReplacement = parseFloat(monthlyIncome) * parseInt(monthsNeeded); const yearsCovered = parseInt(monthsNeeded) / 12; const annualIncome = parseFloat(monthlyIncome) * 12; document.getElementById('totalReplacement').textContent = currencySymbol + totalReplacement.toLocaleString(currencyLocale, {minimumFractionDigits: 2, maximumFractionDigits: 2}); document.getElementById('yearsCovered').textContent = yearsCovered.toLocaleString('en-GB', {minimumFractionDigits: 1, maximumFractionDigits: 1}); document.getElementById('annualIncome').textContent = currencySymbol + annualIncome.toLocaleString(currencyLocale, {minimumFractionDigits: 2, maximumFractionDigits: 2}); document.getElementById('results').classList.add('show'); }
 function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copiado!';setTimeout(function(){b.textContent='Compartilhar'},1500);}}
 document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
 </script>
