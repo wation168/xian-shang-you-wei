@@ -6483,6 +6483,19 @@ def _run_deep_analysis_job():
 
         _dc = _db_conn()
 
+        # ①-0a 顯示層去重（2026/08/10補）：deep_pick_log的UNIQUE(stock_id, cross_date)
+        #     原本只防止「記錄」重複寫入，沒有真正過濾「今天要顯示的入選清單」，
+        #     導致同一次金叉只要條件持續成立就天天重複顯示。這裡查出已經記錄過的
+        #     (股票代號, 金叉日期)組合，把results裡已經提示過的股票濾掉，
+        #     只留下真正的新訊號（金叉日期換了才會再出現）。
+        _seen_events = {
+            (row["stock_id"], row["cross_date"])
+            for row in _dc.execute("SELECT stock_id, cross_date FROM deep_pick_log").fetchall()
+        }
+        _before_dedup = len(results)
+        results = [r for r in results if (r.get("stock_id"), r.get("ma_cross_date")) not in _seen_events]
+        print(f"[deep_analysis] 顯示層去重：{_before_dedup}檔中有{_before_dedup - len(results)}檔是舊金叉事件已提示過，剩{len(results)}檔新訊號")
+
         # ①-0 選股紀錄表：記錄今天入選的金叉事件（同一次金叉只記錄一次，靠DB UNIQUE去重）
         #     並補齊之前選股中已滿20個交易日的報酬率
         _log_deep_pick_events(_dc, results, now.strftime("%Y-%m-%d"))
