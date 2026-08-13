@@ -549,9 +549,13 @@ from starlette.middleware.base import BaseHTTPMiddleware
 class LotteryRedirectMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
         host = request.headers.get("host", "")
-        if "lottery.softglow-ai.com" in host:
+        path = request.url.path
+        # 2026/08/13修正：這個middleware原本會把lottery子網域下「所有」路徑都當成
+        # 舊版彩票頁面網址硬轉址，結果連/api/開頭的路徑（例如排程用的cron端點）也被
+        # 一起攔截轉成亂七八糟的網址，回應301但轉去不存在的頁面。/api/開頭的路徑
+        # 一律放行給後面的正常路由處理，不做轉址。
+        if "lottery.softglow-ai.com" in host and not path.startswith("/api/"):
             from starlette.responses import RedirectResponse
-            path = request.url.path
             parts = [p for p in path.strip("/").split("/") if p]
             _known_locales = ("en","ja","ko","fr","de","es","pt","id","zh-CN")
             if parts and parts[0] in _known_locales:
