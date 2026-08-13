@@ -442,6 +442,75 @@ def _deep_condition_label(cond: str) -> str:
     return mapping.get(cond, cond)
 
 
+def _deep_conclusion(s: dict) -> str:
+    """
+    深度選股白話結論（2026/08/13新增，2026/08/13追加K棒突破隔日拉回敘事）。
+
+    背景：main.py 個股解析（_do_analyze）會組出一句「靠近支撐XX，出現多頭K棒，操作：...」
+    的白話結論，但深度選股原本只有條件徽章+警示清單，沒有整合成一句話的說明，使用者要
+    自己拼湊。這裡用深度選股本來就有算的欄位（入選型態、金叉天數、量能、法人、防守位、
+    損益比）組成同樣風格的白話句子，用詞跟個股解析統一用「防守位」「損益比」，不再各講各的。
+    另外深度選股現在也接上了跟個股解析同一套K棒型態偵測（見 finmind_filter.py 的
+    kbar_pattern/breakout_pullback_note，函式來自共用的 kbar_indicators.py），若當日符合
+    「孕線＋前一天已突破/跌破」的情境，會附加跟個股解析一致的「突破隔日拉回」判斷。
+
+    全部欄位都從 s（deep_analyze_stock 的回傳值）動態取值，沒有寫死任何股票代號或數字。
+    """
+    conds = s.get("matched_conditions") or []
+
+    lead = "技術面轉強"
+    for c in conds:
+        if c.startswith("cond1_"):
+            lead = "股價從相對低檔重新轉強"
+            break
+        if c.startswith("cond2_"):
+            lead = "股價從高點拉回整理後再度轉強"
+            break
+        if c.startswith("cond3_"):
+            lead = ("股價持續突破且量能同步放大確認" if "量能未確認" not in c
+                     else "股價持續突破，但量能尚未明確放大，訊號稍弱")
+            break
+
+    days_ago = s.get("ma_cross_days_ago")
+    if days_ago == 0:
+        cross_desc = "月季線金叉發生在今日"
+    elif days_ago:
+        cross_desc = f"月季線金叉發生在{days_ago}個交易日前"
+    else:
+        cross_desc = "月季線呈多頭排列"
+
+    above_pct = s.get("above_ma20_pct")
+    above_desc = f"，現價高於月線 {above_pct}%" if above_pct is not None else ""
+    macd_desc = "，MACD已同步金叉" if "MACD金叉" in conds else ""
+
+    buy_days = s.get("consecutive_buy_days", 0) or 0
+    if buy_days >= 3:
+        inst_desc = f"，法人連續買超{buy_days}日"
+    elif buy_days >= 1:
+        inst_desc = "，法人近日轉為買超"
+    else:
+        inst_desc = ""
+
+    stop_loss = s.get("stop_loss")
+    stop_pct  = s.get("stop_loss_pct")
+    rr_ratio  = s.get("rr_ratio")
+    risk_level = s.get("risk_level", "中")
+    confidence = s.get("confidence", "一般")
+    score      = s.get("score", 0)
+
+    pullback_note = s.get("breakout_pullback_note") or ""
+    pullback_sentence = f"K棒觀察：{pullback_note}。" if pullback_note else ""
+
+    return (
+        f"{lead}，{cross_desc}{above_desc}{macd_desc}{inst_desc}，"
+        f"綜合評分 {score} 分（{confidence}）。"
+        f"操作參考：防守位 {stop_loss}（距現價 -{stop_pct}%，{risk_level}風險），"
+        f"損益比約 {rr_ratio}x（以壓力 {s.get('resistance','—')} 為目標估算）。"
+        f"{pullback_sentence}"
+        f"實際進出場請以下方個股完整報告的即時分析為準。"
+    )
+
+
 def render_deep_card(s: dict) -> str:
     """深度選股個股卡片：風險等級配色 + 豐富內容（比照精選股卡片）"""
     risk_level  = s.get("risk_level", "中")
@@ -515,7 +584,8 @@ def render_deep_card(s: dict) -> str:
   </div>
   <div style="display:flex;gap:16px;font-size:12px;color:#64748b;flex-wrap:wrap">
     <span>現價 <strong style="color:#f1f5f9;font-size:15px">{s['price']}</strong>
-      <span style="color:{change_color}">{change_sign}{change} ({change_sign}{change_pct}%)</span></span>
+      <span style="color:{change_color}">{change_sign}{change} ({change_sign}{change_pct}%)</span>
+      {f'<span style="color:#475569;font-size:11px">（{s["price_date"]}）</span>' if s.get('price_date') else ""}</span>
     <span>MA5 <strong style="color:#94a3b8">{s.get('ma5','—')}</strong>
       MA20 <strong style="color:#94a3b8">{s.get('ma20','—')}</strong>
       MA60 <strong style="color:#94a3b8">{s.get('ma60','—')}</strong></span>
@@ -527,11 +597,13 @@ def render_deep_card(s: dict) -> str:
     </div>
     {fund_html}
   </div>
+  <div style="background:#111c34;border:1px solid #1e293b;border-radius:10px;padding:12px;
+       font-size:12px;line-height:1.7;color:#cbd5e1">{_deep_conclusion(s)}</div>
   {warnings_html}
   <a href="/report/{s['stock_id']}" style="display:block;text-align:center;margin-top:2px;
      background:#1e293b;border:1px solid #334155;border-radius:10px;padding:10px;
      font-size:12px;font-weight:600;color:#a78bfa;text-decoration:none">
-    📄 查看 {s['stock_id']} 完整個股報告（支撐壓力、停損、目標價）→
+    📄 查看 {s['stock_id']} 完整個股報告（支撐壓力、防守位、目標價）→
   </a>
 </div>"""
 
@@ -645,11 +717,11 @@ def generate_deep_analysis(results: list[dict], note: str = "", track_records: l
     往上穿越慢線，3日內發生）、股價位置（低檔起漲、高點拉回起漲、均線突破）、量能強弱、法人
     籌碼動向等因子加分，分數愈高代表訊號愈強。
   </p>
-  <h2 style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:10px">停損價怎麼計算？</h2>
+  <h2 style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:10px">防守位怎麼計算？</h2>
   <p style="font-size:13px;color:#94a3b8;margin-bottom:14px">
     系統會計算「起漲低點」（這波漲勢的月季線金叉那天到現在的最低價）、月線、
-    前一根K棒低點這三個可能的停損位置，再取其中「離現價最近、風險最低」的一個
-    當作建議停損價，並換算成距現價的百分比，分為低（5%以內）、中（5~10%）、
+    前一根K棒低點這三個可能的防守位，再取其中「離現價最近、風險最低」的一個
+    當作建議防守位，並換算成距現價的百分比，分為低（5%以內）、中（5~10%）、
     高（10%以上）三個風險等級，方便快速判斷承擔的下檔風險大小。
   </p>
   <h2 style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:10px">常見問題</h2>
@@ -659,14 +731,14 @@ def generate_deep_analysis(results: list[dict], note: str = "", track_records: l
     <p style="margin-bottom:10px"><b style="color:#e2e8f0">Q：信心等級是怎麼判斷的？</b><br>
     A：依加分項目總分區分，5分以上為高信心🔥，3~4分為中信心⭐，1~2分為一般，分數愈高代表符合的技術訊號愈多重。</p>
     <p><b style="color:#e2e8f0">Q：這份名單可以直接照著買嗎？</b><br>
-    A：不建議。本頁資料為技術面自動化篩選結果，僅供研究參考，不構成投資建議，請自行評估風險並設好停損。</p>
+    A：不建議。本頁資料為技術面自動化篩選結果，僅供研究參考，不構成投資建議，請自行評估風險並設好防守位。</p>
   </div>
 </div>'''
 
     section_meta = {
-        "low":  ("🟢 低風險", "#22c55e", low_risk,  "停損距現價5%以內"),
-        "mid":  ("🟡 中風險", "#f59e0b", mid_risk,  "停損距現價5~10%"),
-        "high": ("🔴 高風險", "#ef4444", high_risk, "停損距現價10%以上，謹慎操作"),
+        "low":  ("🟢 低風險", "#22c55e", low_risk,  "防守位距現價5%以內"),
+        "mid":  ("🟡 中風險", "#f59e0b", mid_risk,  "防守位距現價5~10%"),
+        "high": ("🔴 高風險", "#ef4444", high_risk, "防守位距現價10%以上，謹慎操作"),
     }
     rendered_keys = [k for k in ("low", "mid", "high") if section_meta[k][2]]
 
@@ -746,7 +818,7 @@ def generate_deep_analysis(results: list[dict], note: str = "", track_records: l
   <div>
     <div style="font-size:16px;font-weight:800;color:#4ade80;margin-bottom:4px">📲 想看今天最新即時分析？</div>
     <div style="font-size:12px;color:#86efac;line-height:1.6">
-      本頁資料為延遲一個交易日，即時深度選股結果、股票代號、完整停損建議<br>
+      本頁資料為延遲一個交易日，即時深度選股結果、股票代號、完整防守位建議<br>
       都在 <b>App 內登入後</b> 立即查看，每個交易日 17:00 更新
     </div>
   </div>
@@ -790,7 +862,7 @@ body{{background:#020817;color:#f1f5f9;font-family:-apple-system,BlinkMacSystemF
   {track_table_html}
   {body}
   {seo_content}
-  <div class="disclaimer">⚠️ 本頁面資料僅供參考，不構成買賣建議。停損價為系統依技術結構試算，非保證有效，股市有風險，請自行評估後決策。</div>
+  <div class="disclaimer">⚠️ 本頁面資料僅供參考，不構成買賣建議。防守位為系統依技術結構試算，非保證有效，股市有風險，請自行評估後決策。</div>
 </div>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739" crossorigin="anonymous"></script>
 <script src="/js/softglow-cookies.js" defer></script>

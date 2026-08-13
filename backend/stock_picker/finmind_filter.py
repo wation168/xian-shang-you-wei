@@ -17,7 +17,9 @@ finmind_filter.py — 數值篩選層
 """
 
 from crawler import fetch_price_history, fetch_institutional
+from kbar_indicators import detect_kbar_pattern, calc_breakout_signals
 import time
+import numpy as np
 
 
 CFG = {
@@ -354,6 +356,7 @@ def deep_analyze_stock(stock_id: str, stock_name: str = "") -> dict | None:
         return None   # 資料不足以算 MA60
 
     closes = [p["close"] for p in prices if p["close"] > 0]
+    opens  = [p["open"]   for p in prices if p["close"] > 0]
     lows   = [p["low"]    for p in prices if p["close"] > 0]
     highs  = [p["high"]   for p in prices if p["close"] > 0]
     vols   = [p["volume"] for p in prices if p["close"] > 0]
@@ -443,6 +446,32 @@ def deep_analyze_stock(stock_id: str, stock_name: str = "") -> dict | None:
     downside = price - stop_loss
     rr_ratio = round((resistance - price) / downside, 2) if downside > 0 else 0
 
+    # ── K棒型態（2026/08/13新增）─────────────────────
+    # 用main.py個股解析同一套函式（見kbar_indicators.py），純供敘事用，
+    # 刻意不接進score/risk_level/matched_conditions，不改變任何選股結果。
+    kbar_pattern, _kbar_warning, kbar_dir, _kbar_win_rate = detect_kbar_pattern(
+        opens, highs, lows, closes, vols)
+    _breakout_idx, _breakdown_idx, _, _ = calc_breakout_signals(
+        np.array(closes), np.array(highs), np.array(lows), np.array(vols), support, resistance)
+
+    # 突破隔日拉回敘事：跟main.py個股解析同一套判斷——「孕線」型態＋前一天已出現突破/跌破，
+    # 代表今天的孕線其實是正常拉回整理，不是單純方向不明的整理
+    breakout_pullback_note = ""
+    _n_bars = len(closes)
+    if kbar_pattern and "孕線" in kbar_pattern:
+        if _breakout_idx is not None and _breakout_idx == _n_bars - 2:
+            _bo_price = round(float(closes[_breakout_idx]), 2)
+            breakout_pullback_note = (
+                f"昨日已放量突破，今日縮量拉回整理，屬正常拉回而非反轉，"
+                f"若不跌破昨日突破價 {_bo_price} 可續抱"
+            )
+        elif _breakdown_idx is not None and _breakdown_idx == _n_bars - 2:
+            _bd_price = round(float(closes[_breakdown_idx]), 2)
+            breakout_pullback_note = (
+                f"昨日已放量跌破，今日縮量反彈整理，屬弱勢反彈非止跌，"
+                f"若無法站回昨日跌破價 {_bd_price} 應持續觀望"
+            )
+
     # ── 漲跌 ──────────────────────────────────────
     prev_close = closes[-2] if len(closes) >= 2 else price
     change     = round(price - prev_close, 2)
@@ -453,9 +482,9 @@ def deep_analyze_stock(stock_id: str, stock_name: str = "") -> dict | None:
     if vol_ratio < 1.0:
         warnings.append(f"近5日均量低於20日均量（量比 {vol_ratio}x），突破量能不足")
     if stop_loss_pct > 10:
-        warnings.append(f"停損距現價 {stop_loss_pct}%，下檔風險較大，部位請控管")
+        warnings.append(f"防守位距現價 {stop_loss_pct}%，下檔風險較大，部位請控管")
     if rr_ratio and rr_ratio < 1:
-        warnings.append(f"風報比僅 {rr_ratio}x，上檔空間小於下檔風險")
+        warnings.append(f"損益比僅 {rr_ratio}x，上檔空間小於下檔風險")
     if change_pct >= 7:
         warnings.append(f"今日已大漲 {change_pct}%，追高風險提高，建議等拉回")
     if inst and inst_5d_total < 0:
@@ -470,6 +499,7 @@ def deep_analyze_stock(stock_id: str, stock_name: str = "") -> dict | None:
         "price":                round(price, 2),
         "change":               change,
         "change_pct":           change_pct,
+        "price_date":           dates[-1] if dates else None,  # 現價對應的實際交易日（動態取自價格資料，非寫死）
         "ma5":                  ma5,
         "ma20":                 ma20,
         "ma60":                 ma60,
@@ -503,6 +533,11 @@ def deep_analyze_stock(stock_id: str, stock_name: str = "") -> dict | None:
         "dividend_yield":       None,
         "eps_ttm":              None,
         "eps_yoy":              None,
+        # K棒型態敘事欄位（2026/08/13新增，與main.py個股解析同一套函式算出，
+        # 純供白話結論敘事用，不影響score/risk_level/matched_conditions）
+        "kbar_pattern":           kbar_pattern,          # 今日K棒型態名稱，可能為None
+        "kbar_dir":               kbar_dir,              # bullish / bearish / neutral
+        "breakout_pullback_note": breakout_pullback_note,  # 突破隔日拉回敘事，無則為空字串
     }
 
 
