@@ -3714,25 +3714,27 @@ def _do_analyze(stock_id: str, tf: str = "D",
     breakout_idx, breakdown_idx, breakout_stale, breakdown_stale = calc_breakout_signals(
         closes, highs, lows, volumes, support, resistance)
 
-    # 防守位：優先順序
-    # 1. 若軌道下緣距現價 ≤8%，用軌道下緣下 1.5% 作防守位
-    # 2. 若支撐距現價超過 5%，改用現價下方 5%（避免防守位過遠失去意義）
-    # 3. 否則用支撐下 1.5%
-    # 4. 最小距現價 2%，最大不超過現價 10%
-    ch_sup_now = channel.get("support_now") if channel else None
-    sup_dist_pct = (price - support) / price * 100
-    if ch_sup_now and ch_sup_now < price * 0.999:
-        ch_sup_dist_pct = (price - ch_sup_now) / price * 100
-        if ch_sup_dist_pct <= 8:
-            raw_stop = round(ch_sup_now * 0.985, 2)
-        elif sup_dist_pct > 5:
-            raw_stop = round(price * 0.95, 2)
+    # 防守位：2026/08/13改為隨乖離率（現價偏離MA20的幅度）動態調整
+    # （分析引擎第三批候選A，已用60檔台股2022/06~2026/08真實K線資料回測476筆金叉訊號：
+    #  停損率31.3%→24.4%、勝率49.6%→48.9%（誤差範圍內）、平均報酬+0.26%→+0.31%，
+    #  帥哥鴻拍板採用。回測腳本見 scripts/backtest_stop_rr.py，候選B/AB回測後不建議採用未採納）
+    #   乖離 ≥10%（現價已大幅偏離月線，過熱）→ 停損收緊到現價 -3%
+    #   乖離 5%~10%（正常偏熱）→ 停損維持現價 -5%
+    #   乖離 <5%（貼近月線，剛起漲）→ 停損放寬到現價 -8%（避免被月線附近正常雜訊洗出場）
+    _ma20_now = ma_values.get("ma20")
+    if _ma20_now and _ma20_now > 0:
+        deviation_pct = (price - _ma20_now) / _ma20_now * 100
+        if deviation_pct >= 10:
+            _stop_pct = 0.03
+        elif deviation_pct >= 5:
+            _stop_pct = 0.05
         else:
-            raw_stop = round(support * 0.985, 2)
-    elif sup_dist_pct > 5:
-        raw_stop = round(price * 0.95, 2)
+            _stop_pct = 0.08
+        raw_stop = round(price * (1 - _stop_pct), 2)
     else:
-        raw_stop = round(support * 0.985, 2)
+        # MA20資料不足時的保底：沿用原本以支撐為錨的邏輯，避免掛掉
+        sup_dist_pct = (price - support) / price * 100
+        raw_stop = round(price * 0.95, 2) if sup_dist_pct > 5 else round(support * 0.985, 2)
     stop_nearest = round(price * 0.98, 2)   # 最近：不能超過現價 -2%（太緊容易被洗）
     stop_farthest = round(price * 0.90, 2)  # 最遠：不超過現價 -10%（太遠失去意義）
     # raw_stop 夾在 stop_farthest ~ stop_nearest 之間
