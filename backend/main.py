@@ -881,6 +881,36 @@ async def serve_tools_locale_index(locale: str):
     return RedirectResponse(url="/tools/", status_code=302)
 
 
+# ---- Games 遊戲路由（2026/08/15 新增，沿用 /tools/ 的路由模式）----
+@app.get("/games/games.css", include_in_schema=False)
+async def serve_games_css():
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "games", "games.css")
+    if _os.path.isfile(path):
+        return FileResponse(path, media_type="text/css")
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/games/{filename}.html", include_in_schema=False)
+async def serve_games_html(filename: str):
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "games", f"{filename}.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/games", include_in_schema=False)
+@app.get("/games/", include_in_schema=False)
+async def serve_games_index():
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "games", "index.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+
 # ---- Lottery 彩票路由 ----
 _LOTTERY_LOCALES = ("en","ja","ko","fr","de","es","pt","id","zh-CN")
 
@@ -1214,6 +1244,27 @@ def _fetch_tw_month_report_row(url: str, data_key: str, roc_date: str, source_la
         return None
 
 
+def _expected_latest_trading_date(now_tw) -> str:
+    """
+    2026/08/14 新增：資料新鮮度檢查用。
+
+    緣起：帥哥鴻回報「早上08:00看6770，個股現價/K棒還停在更早之前」，
+    查Zeabur log證實main.py當下印出「[QUOTE] 1303 finmind 尚無今日資料，僅補 y_val」——
+    FinMind自己的資料庫在那個時間點還沒把「上一個交易日」的資料更新進來，
+    系統原本沒有任何機制偵測這種狀況，直接把舊資料當最新結果顯示，完全沒有提示。
+
+    這裡刻意只抓最保守的下限：「不管現在幾點，資料來源現在至少應該要有『上一個交易日』
+    的資料」，不去判斷「今天收盤後是否該有今天的資料」（那個時間點FinMind實際更新時間
+    不確定，抓太緊容易在盤中/剛收盤時誤報)。只排除週末，不含國定假日——
+    假日當天資料源沒有新資料是正常的，所以下游用這個值判斷「落後」時，
+    訊息要同時涵蓋「資料源還沒更新」跟「剛好是休市日」兩種可能，不武斷宣稱一定是bug。
+    """
+    d = now_tw.date() - timedelta(days=1)
+    while d.weekday() >= 5:
+        d -= timedelta(days=1)
+    return d.strftime("%Y-%m-%d")
+
+
 def fetch_df_finmind(stock_id: str, period: str, interval: str):
     """
     FinMind 主力抓取台股 K 線資料（TaiwanStockPrice）
@@ -1340,6 +1391,21 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
                     df = pd.concat([df, today_bar])
                     print(f"   {'TWSE' if not _is_otc else 'TPEX'} 月報補今日 K 棒：{code} close={cp}")
                     filled = True
+
+        # ── 資料新鮮度檢查（2026/08/14 新增）──
+        # 上面幾段補棒都失敗時，df 最新一筆可能還停在「上一個交易日更早之前」，
+        # 之前完全沒有偵測機制，會悄悄把舊資料當最新結果分析。
+        # 這裡只做「有沒有明顯落後」的判斷，記在 df.attrs 供 _do_analyze() 讀取後
+        # 加註提示，不在這裡直接印警告或改資料本身。
+        try:
+            if not df.empty:
+                _expected_date = _expected_latest_trading_date(now_tw)
+                _actual_date = df.index.max().strftime("%Y-%m-%d")
+                df.attrs["data_stale"] = _actual_date < _expected_date
+                df.attrs["data_stale_latest"] = _actual_date
+                df.attrs["data_stale_expected"] = _expected_date
+        except Exception as _stale_e:
+            print(f"   資料新鮮度檢查失敗（不影響原本分析）{code}：{_stale_e}")
 
         # 週線/月線重採樣
         if interval == "1wk":
@@ -3459,6 +3525,11 @@ def _do_analyze(stock_id: str, tf: str = "D",
                    f"可能是 Yahoo Finance 暫時無資料，請稍後再試。"
         )
 
+    # 2026/08/14 新增：資料新鮮度旗標，要在 df 被切片/dropna 之前先讀出來，
+    # 避免 pandas .attrs 在後續操作中遺失（.attrs 官方文件標註為實驗性、不保證會傳遞）。
+    _data_stale        = bool(getattr(df, "attrs", {}).get("data_stale"))
+    _data_stale_latest = df.attrs.get("data_stale_latest") if _data_stale else None
+
     df = df[["Open", "High", "Low", "Close", "Volume"]].dropna()
     opens      = df["Open"].values.astype(float)
     closes     = df["Close"].values.astype(float)
@@ -4038,7 +4109,14 @@ def _do_analyze(stock_id: str, tf: str = "D",
         if abs(_gap_pct) >= 0.01:
             _basis_gap = _gap_pct
     _basis_md = price_basis_date[5:].replace("-", "/") if price_basis_date and len(price_basis_date) >= 10 else price_basis_date
-    if _is_trading_session() and _live_quote_ok and _basis_gap is not None:
+    if _data_stale:
+        # 2026/08/14 新增：資料源明顯落後（連上一個交易日的資料都還沒有），
+        # 不管盤中盤後都優先顯示這個提示，蓋過下面兩種正常情境的說明。
+        _price_basis_note = (
+            f"⚠️ 資料來源可能尚未更新，目前顯示的是 {_basis_md} 的收盤資料，"
+            f"與預期的最近交易日有落差（也可能剛好遇到休市日）。如有疑慮，建議稍後再重新查看。"
+        )
+    elif _is_trading_session() and _live_quote_ok and _basis_gap is not None:
         _price_basis_note = f"上方現價為即時參考；以下分析（支撐、壓力、防守位、損益比）以 {_basis_md} 收盤價為基準計算，兩者盤中可能有落差，屬正常。"
     else:
         _price_basis_note = f"本分析以 {_basis_md} 收盤價為基準計算。"
@@ -4051,6 +4129,7 @@ def _do_analyze(stock_id: str, tf: str = "D",
         "display_price": display_price,        # 做法A：畫面現價（盤中即時，抓不到＝收盤基準）
         "price_basis_date": price_basis_date,  # 做法A：分析基準是哪一天的收盤
         "price_basis_note": _price_basis_note, # 做法A：白話說明（給使用者看，第10點）
+        "data_stale": _data_stale,             # 2026/08/14新增：資料源是否明顯落後（供前端另外標示用）
         "support": support, "support_desc": supp_detail["support_desc"],
         "support_source": supp_detail["support_source"],
         "support_candidates": supp_detail["all_candidates"],
@@ -4804,8 +4883,12 @@ def get_quote(stock_id: str, user: dict | None = Depends(get_current_user)):
             pass
 
     # A. 三層來源全失敗時，fallback 使用上一筆快取（如果有）
+    # 2026/08/14 修正：原本直接靜默回傳舊快取，畫面上完全看不出這是舊資料。
+    # 現在附上明確提示，不覆蓋原本快取內容本身（複製一份修改，避免污染 _QUOTE_CACHE）。
     if price_val is None and code in _QUOTE_CACHE:
-        return _QUOTE_CACHE[code]["data"]
+        _stale_cached = dict(_QUOTE_CACHE[code]["data"])
+        _stale_cached["price_note"] = "即時報價來源暫時無法取得，目前顯示為先前快取資料"
+        return _stale_cached
 
     result = {
         "stock_id":     code,
@@ -8407,6 +8490,14 @@ def sitemap():
                 for _lf in sorted(os.listdir(_lang_path)):
                     if _lf.endswith(".html"):
                         locs.append(f'  <url><loc>{FRONTEND_URL}/lottery/{_lang_dir}/{_lf}</loc><changefreq>daily</changefreq><priority>0.6</priority></url>')
+
+    # ── Games 小遊戲專區（2026/08/15 新增，動態掃描磁碟）──
+    _games_base = os.path.join(os.path.dirname(__file__), "frontend", "games")
+    if os.path.isdir(_games_base):
+        locs.append(f"  <url><loc>{FRONTEND_URL}/games/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>")
+        for _gmf in sorted(os.listdir(_games_base)):
+            if _gmf.endswith(".html") and _gmf != "index.html":
+                locs.append(f"  <url><loc>{FRONTEND_URL}/games/{_gmf}</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>")
 
     # 熱門股優先 priority 0.8，其餘 0.6
     hardcoded_set = set(_SEO_HARDCODED_STOCKS)

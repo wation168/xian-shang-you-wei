@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>打地鼠遊戲 - 免費線上打地鼠，測你的反應與手眼協調 | SoftGlow</title>
+<meta name="description" content="免費線上打地鼠遊戲，30秒內盡量點中越多地鼠越好。純網頁小遊戲，免下載免安裝，測試你的反應速度與手眼協調能力。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/whack-a-mole.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/whack-a-mole.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/whack-a-mole.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "打地鼠遊戲", "url": "https://softglow-ai.com/games/whack-a-mole.html", "description": "免費線上打地鼠遊戲，30秒內盡量點中越多地鼠越好。", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "打地鼠遊戲怎麼玩？", "acceptedAnswer": {"@type": "Answer", "text": "按下開始後，9個洞裡會隨機冒出地鼠，看到就趕快點擊，點中會得分。地鼠只會停留很短的時間就縮回去，反應太慢就會錯過。遊戲限時30秒，時間到自動結束並顯示總分。"}}, {"@type": "Question", "name": "這個遊戲能訓練什麼能力？", "acceptedAnswer": {"@type": "Answer", "text": "打地鼠主要訓練的是視覺搜尋速度、反應時間，以及手眼協調——眼睛看到目標後，手（滑鼠或觸控）要盡快移動並準確點擊到目標位置，這跟單純的反應力測試不同，多了「定位」跟「移動」的環節。"}}, {"@type": "Question", "name": "為什麼有時候明明點到地鼠卻沒得分？", "acceptedAnswer": {"@type": "Answer", "text": "地鼠冒出的時間很短，如果點擊的當下地鼠已經縮回去了（即使畫面上動畫還沒完全播完），就不會計分。這是刻意設計的，避免玩家用「亂點整個畫面」的方式取巧洗分數。"}}, {"@type": "Question", "name": "有辦法讓地鼠出現得更密集、更快嗎？", "acceptedAnswer": {"@type": "Answer", "text": "目前是固定隨機的出現節奏跟停留時間，難度會隨機波動增加變化性。如果之後有分難度模式的需求，會再視情況新增。"}}, {"@type": "Question", "name": "多少分算是高手？", "acceptedAnswer": {"@type": "Answer", "text": "一般人30秒大概能點中15~25隻左右，30分以上算是反應很快，超過35分已經是相當熟練的手速跟反應了。建議多玩幾輪，抓自己的最佳成績來挑戰。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="whack-a-mole">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="zh-TW">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<style>
+.wam-board{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;max-width:420px;margin:0 auto}
+.wam-hole{position:relative;aspect-ratio:1/1;border-radius:50%;background:#8b5e34;box-shadow:inset 0 6px 10px rgba(0,0,0,.35);overflow:hidden;cursor:pointer;user-select:none;touch-action:manipulation}
+.wam-hole .wam-mole{position:absolute;left:10%;right:10%;bottom:-100%;top:10%;border-radius:50% 50% 45% 45%;background:#6b4a2f;transition:bottom .12s ease-out;display:flex;align-items:center;justify-content:center;font-size:28px}
+.wam-hole.up .wam-mole{bottom:0}
+.wam-topbar{display:flex;justify-content:center;gap:24px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f}
+.wam-topbar .wam-time{color:#ef4444}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/">工具</a>
+    <a href="/games/">遊戲</a>
+    <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
+    <a href="/">首頁</a>
+  </div>
+  <div class="nav-actions">
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> &gt; <a href="/games/">遊戲</a> &gt; 打地鼠</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>打地鼠遊戲</h1>
+    <p class="game-subtitle">30秒內盡量點中越多地鼠越好，測試你的反應速度與手眼協調</p>
+
+    <div class="wam-topbar">
+      <span>分數：<span id="wamScore">0</span></span>
+      <span class="wam-time">剩餘：<span id="wamTime">30</span>s</span>
+    </div>
+
+    <div class="wam-board" id="wamBoard"></div>
+
+    <div class="game-rating" id="wamRating"></div>
+
+    <div class="game-score-row">
+      <div class="game-score-tile"><div class="gs-label">最佳成績</div><div class="gs-value" id="wamBest">—</div></div>
+    </div>
+    <div class="game-history" id="wamHistory"></div>
+
+    <div class="game-controls">
+      <button class="game-btn" id="wamStartBtn" onclick="wamStart()">▶️ 開始遊戲</button>
+      <button class="game-btn secondary" onclick="shareResult()">📤 分享成績</button>
+    </div>
+  </div>
+
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>打地鼠遊戲的由來</h2><p>打地鼠（Whack-a-Mole）源自1970年代的實體遊樂場機台，玩家拿槌子敲打隨機從洞裡冒出來的地鼠玩偶。這個概念後來被大量改編成電子遊戲、手機App，甚至變成一個常見的比喻（例如「打地鼠式管理」指的是問題不斷冒出、解決一個又冒出另一個的狀況）。線上版把槌子換成滑鼠點擊或觸控，玩法核心完全一樣。</p><h2>這個遊戲測試的能力</h2><p>打地鼠看似簡單，實際上同時考驗好幾種能力：視覺搜尋（要在畫面上快速找到目標）、反應時間（發現目標後多快能開始動作）、手眼協調（精準把游標或手指移到正確位置點擊）。跟單純測反應時間的遊戲相比，打地鼠多了「空間定位」跟「移動」這兩個環節，更接近真實生活中需要快速反應的情境。</p></article>
+
+  <article class="article"><h2>怎麼玩</h2><p>按下「開始遊戲」後，9個洞會在30秒內隨機冒出地鼠，看到地鼠立刻點擊就能得分；地鼠停留時間很短，反應太慢或點擊時機不對就會撲空。時間到遊戲自動結束，會顯示這一輪的總分，系統也會記住這次連線內你的最佳成績。</p><h2>提升成績的小技巧</h2><p>與其緊盯著單一個洞，不如把視線放在整個九宮格的中間，用餘光同時注意四周的變化；滑鼠盡量保持在畫面中央附近，減少移動距離；如果是用觸控裝置，建議用食指而不是姆指操作，準確度通常會更好。</p></article>
+
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>常見問題</h2>
+  <div class="faq-item"><div class="faq-q">打地鼠遊戲怎麼玩？</div><div class="faq-a">按下開始後，9個洞裡會隨機冒出地鼠，看到就趕快點擊，點中會得分。地鼠只會停留很短的時間就縮回去，反應太慢就會錯過。遊戲限時30秒，時間到自動結束並顯示總分。</div></div>
+  <div class="faq-item"><div class="faq-q">這個遊戲能訓練什麼能力？</div><div class="faq-a">打地鼠主要訓練的是視覺搜尋速度、反應時間，以及手眼協調——眼睛看到目標後，手（滑鼠或觸控）要盡快移動並準確點擊到目標位置，這跟單純的反應力測試不同，多了「定位」跟「移動」的環節。</div></div>
+  <div class="faq-item"><div class="faq-q">為什麼有時候明明點到地鼠卻沒得分？</div><div class="faq-a">地鼠冒出的時間很短，如果點擊的當下地鼠已經縮回去了（即使畫面上動畫還沒完全播完），就不會計分。這是刻意設計的，避免玩家用「亂點整個畫面」的方式取巧洗分數。</div></div>
+  <div class="faq-item"><div class="faq-q">有辦法讓地鼠出現得更密集、更快嗎？</div><div class="faq-a">目前是固定隨機的出現節奏跟停留時間，難度會隨機波動增加變化性。如果之後有分難度模式的需求，會再視情況新增。</div></div>
+  <div class="faq-item"><div class="faq-q">多少分算是高手？</div><div class="faq-a">一般人30秒大概能點中15~25隻左右，30分以上算是反應很快，超過35分已經是相當熟練的手速跟反應了。建議多玩幾輪，抓自己的最佳成績來挑戰。</div></div>
+  </section>
+
+  <div class="more-tools"><h3>相關遊戲</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/reaction-time-test.html">反應力測試</a>
+    <a class="tool-pill" href="/games/memory-match.html">記憶翻牌遊戲</a>
+    <a class="tool-pill" href="/games/piano-tiles.html">鋼琴塊遊戲</a>
+    <a class="tool-pill" href="/games/connect-four.html">四子棋遊戲</a>
+    <a class="tool-pill" href="/games/snake.html">貪食蛇遊戲</a>
+    <a class="tool-pill" href="/games/">更多遊戲</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>更多遊戲</h3><a class="tool-pill" href="/games/" style="display:block;margin-top:8px">瀏覽全部遊戲 →</a></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/home/zh-TW/privacy.html">Privacy</a><a href="/home/zh-TW/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// 打地鼠 — 遵循《新工具規劃守則.md》第七節：
+//   7-1 CONFIG集中管理格數/時限/地鼠出現節奏等所有可調數值
+//   7-2 純函式（computeRating/formatTime）跟 UI/計時器邏輯分開
+//   7-3 防錯：地鼠已縮回時點擊不計分、遊戲未開始時點擊無效
+//   7-4 資源清理：所有 setTimeout/setInterval 都存id，遊戲結束、
+//        重新開始、離開頁面前統一 clearAll()
+// ══════════════════════════════════════════════════════════
+const CONFIG = {
+  holesCount: 9,
+  gameDurationSec: 30,
+  moleUpMsMin: 650,
+  moleUpMsMax: 1300,
+  spawnIntervalMsMin: 500,
+  spawnIntervalMsMax: 900,
+  maxActiveMoles: 2,
+  historyLimit: 5,
+  moleEmoji: '🐹',
+  copyRevertMs: 1500,
+  adLoadDelayMs: 2000,
+  ratings: [
+    { max: 10,      label: '🐢 慢慢來，多練幾次手感會變好' },
+    { max: 18,      label: '🙂 中等水準，還有進步空間' },
+    { max: 26,      label: '👍 反應不錯，優於大多數人' },
+    { max: 34,      label: '🏆 高手等級，手速跟反應都很好' },
+    { max: Infinity,label: '⚡ 神級反應，你玩過真的打地鼠機台吧！' }
+  ]
+};
+
+// ── 純函式 ──
+function computeRating(score) {
+  const hit = CONFIG.ratings.find(r => score <= r.max);
+  return hit ? hit.label : '';
+}
+function randBetween(min, max) { return min + Math.random() * (max - min); }
+
+(function () {
+  const board    = document.getElementById('wamBoard');
+  const scoreEl  = document.getElementById('wamScore');
+  const timeEl   = document.getElementById('wamTime');
+  const ratingEl = document.getElementById('wamRating');
+  const bestEl   = document.getElementById('wamBest');
+  const historyEl= document.getElementById('wamHistory');
+  const startBtn = document.getElementById('wamStartBtn');
+
+  let holes = [];
+  let score = 0;
+  let timeLeft = CONFIG.gameDurationSec;
+  let playing = false;
+  let activeCount = 0;
+  let timers = { gameInterval: null, spawnTimeout: null, moleTimeouts: [] };
+  let history = [];
+
+  // 初始化九宮格
+  for (let i = 0; i < CONFIG.holesCount; i++) {
+    const hole = document.createElement('div');
+    hole.className = 'wam-hole';
+    const mole = document.createElement('div');
+    mole.className = 'wam-mole';
+    mole.textContent = CONFIG.moleEmoji;
+    hole.appendChild(mole);
+    hole.addEventListener('click', function () { onHoleClick(i); });
+    board.appendChild(hole);
+    holes.push({ el: hole, up: false });
+  }
+
+  function clearAll() {
+    if (timers.gameInterval) { clearInterval(timers.gameInterval); timers.gameInterval = null; }
+    if (timers.spawnTimeout) { clearTimeout(timers.spawnTimeout); timers.spawnTimeout = null; }
+    timers.moleTimeouts.forEach(clearTimeout);
+    timers.moleTimeouts = [];
+  }
+
+  function setHoleUp(i, up) {
+    holes[i].up = up;
+    holes[i].el.classList.toggle('up', up);
+  }
+
+  function scheduleSpawn() {
+    const delay = randBetween(CONFIG.spawnIntervalMsMin, CONFIG.spawnIntervalMsMax);
+    timers.spawnTimeout = setTimeout(trySpawn, delay);
+  }
+
+  function trySpawn() {
+    if (!playing) return;
+    if (activeCount < CONFIG.maxActiveMoles) {
+      const emptyIdx = holes.map((h, i) => h.up ? -1 : i).filter(i => i >= 0);
+      if (emptyIdx.length) {
+        const idx = emptyIdx[Math.floor(Math.random() * emptyIdx.length)];
+        setHoleUp(idx, true);
+        activeCount++;
+        const upMs = randBetween(CONFIG.moleUpMsMin, CONFIG.moleUpMsMax);
+        const tid = setTimeout(function () {
+          if (holes[idx].up) { setHoleUp(idx, false); activeCount--; }
+        }, upMs);
+        timers.moleTimeouts.push(tid);
+      }
+    }
+    scheduleSpawn();
+  }
+
+  function onHoleClick(i) {
+    if (!playing) return;
+    if (holes[i].up) {
+      setHoleUp(i, false);
+      activeCount--;
+      score++;
+      scoreEl.textContent = score;
+    }
+  }
+
+  function wamStartInternal() {
+    clearAll();
+    holes.forEach((h, i) => setHoleUp(i, false));
+    score = 0;
+    activeCount = 0;
+    timeLeft = CONFIG.gameDurationSec;
+    scoreEl.textContent = '0';
+    timeEl.textContent = String(timeLeft);
+    ratingEl.textContent = '';
+    playing = true;
+    startBtn.disabled = true;
+    startBtn.textContent = '遊戲中…';
+
+    timers.gameInterval = setInterval(function () {
+      timeLeft--;
+      timeEl.textContent = String(Math.max(timeLeft, 0));
+      if (timeLeft <= 0) endGame();
+    }, 1000);
+
+    scheduleSpawn();
+  }
+
+  function endGame() {
+    playing = false;
+    clearAll();
+    holes.forEach((h, i) => setHoleUp(i, false));
+    startBtn.disabled = false;
+    startBtn.textContent = '▶️ 再玩一次';
+    ratingEl.textContent = score + ' 分 — ' + computeRating(score);
+
+    history.unshift(score);
+    history = history.slice(0, CONFIG.historyLimit);
+    const best = Math.max(...history);
+    bestEl.textContent = best + ' 分';
+    historyEl.innerHTML = history.map(function (v) { return '<span>' + v + '分</span>'; }).join('');
+
+    window._wamLastScore = score;
+    window._wamBestScore = best;
+  }
+
+  window.wamStart = wamStartInternal;
+
+  // 7-4 資源清理：離開頁面前清掉所有計時器
+  window.addEventListener('beforeunload', clearAll);
+})();
+
+function shareResult() {
+  const score = window._wamLastScore;
+  const text = (score != null)
+    ? ('我在SoftGlow打地鼠遊戲拿了 ' + score + ' 分！來試試你能打敗我嗎？')
+    : '來玩玩打地鼠遊戲！';
+  if (navigator.share) {
+    navigator.share({ title: document.title, text: text, url: location.href }).catch(function () {});
+  } else {
+    navigator.clipboard.writeText(text + ' ' + location.href);
+    const b = event.target;
+    const old = b.textContent;
+    b.textContent = '已複製！';
+    setTimeout(function () { b.textContent = old; }, CONFIG.copyRevertMs);
+  }
+}
+document.querySelectorAll('.faq-q').forEach(function (q) {
+  q.addEventListener('click', function () { this.parentElement.classList.toggle('open'); });
+});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},CONFIG.adLoadDelayMs);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

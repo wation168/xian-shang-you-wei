@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>記憶翻牌遊戲 - 免費線上配對記憶遊戲 | SoftGlow</title>
+<meta name="description" content="免費線上記憶翻牌遊戲，找出所有配對的卡片，步數越少、時間越短分數越高。純網頁小遊戲，免下載免安裝，訓練短期記憶力。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/memory-match.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/memory-match.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/memory-match.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "記憶翻牌遊戲", "url": "https://softglow-ai.com/games/memory-match.html", "description": "免費線上記憶翻牌遊戲，找出所有配對的卡片，訓練短期記憶力。", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "記憶翻牌遊戲怎麼玩？", "acceptedAnswer": {"@type": "Answer", "text": "畫面上有16張蓋著的卡片（8組配對），每次點擊翻開2張，如果圖案相同就配對成功並保持翻開，不同就會蓋回去。目標是用最少的步數、最短的時間找出全部8組配對。"}}, {"@type": "Question", "name": "記憶翻牌能訓練什麼？", "acceptedAnswer": {"@type": "Answer", "text": "這個遊戲主要訓練的是短期記憶（working memory）跟空間記憶——你要記住哪些位置翻過什麼圖案，並在後續回合裡正確回想起來。研究上這類配對記憶遊戲常被當作簡易的認知訓練活動，適合各年齡層。"}}, {"@type": "Question", "name": "步數是怎麼計算的？", "acceptedAnswer": {"@type": "Answer", "text": "每翻開一組2張卡片（不論配對成功或失敗）就算1步。步數越少代表你記得越準，代表記憶效率越高；步數多半是因為忘記卡片位置而重複翻到已經看過的組合。"}}, {"@type": "Question", "name": "有沒有必勝的技巧？", "acceptedAnswer": {"@type": "Answer", "text": "建議固定用同一個順序掃描（例如由左至右、由上至下），並在心裡默念圖案跟位置的對應；第一輪翻牌盡量把沒看過的位置都翻過一次建立印象，後面配對成功率會大幅提升，步數也會明顯減少。"}}, {"@type": "Question", "name": "最少要幾步才能完成？", "acceptedAnswer": {"@type": "Answer", "text": "8組配對理論上最少8步就能完成（每次翻開都直接配對成功），但這需要完美記憶所有卡片位置，實際上大多數人會落在12~20步之間，10步以內已經算是相當出色的表現。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="memory-match">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="zh-TW">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<style>
+.mm-board{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:420px;margin:0 auto}
+.mm-card{position:relative;aspect-ratio:1/1;border-radius:10px;cursor:pointer;user-select:none;touch-action:manipulation;perspective:600px}
+.mm-card-inner{position:relative;width:100%;height:100%;transition:transform .3s;transform-style:preserve-3d}
+.mm-card.flipped .mm-card-inner,.mm-card.matched .mm-card-inner{transform:rotateY(180deg)}
+.mm-face{position:absolute;inset:0;border-radius:10px;display:flex;align-items:center;justify-content:center;backface-visibility:hidden;font-size:28px}
+.mm-face-back{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-size:18px;font-weight:800}
+.mm-face-front{background:#f8fafc;border:2px solid #e2e8f0;transform:rotateY(180deg)}
+.mm-card.matched .mm-face-front{background:#dcfce7;border-color:#22c55e}
+.mm-topbar{display:flex;justify-content:center;gap:24px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/">工具</a>
+    <a href="/games/">遊戲</a>
+    <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
+    <a href="/">首頁</a>
+  </div>
+  <div class="nav-actions">
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> &gt; <a href="/games/">遊戲</a> &gt; 記憶翻牌</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>記憶翻牌遊戲</h1>
+    <p class="game-subtitle">找出所有配對的卡片，步數越少、時間越短分數越高</p>
+
+    <div class="mm-topbar">
+      <span>步數：<span id="mmMoves">0</span></span>
+      <span>時間：<span id="mmTime">0</span>s</span>
+      <span>配對：<span id="mmPairs">0</span>/8</span>
+    </div>
+
+    <div class="mm-board" id="mmBoard"></div>
+
+    <div class="game-rating" id="mmRating"></div>
+
+    <div class="game-score-row">
+      <div class="game-score-tile"><div class="gs-label">最佳步數</div><div class="gs-value" id="mmBest">—</div></div>
+    </div>
+    <div class="game-history" id="mmHistory"></div>
+
+    <div class="game-controls">
+      <button class="game-btn" id="mmStartBtn" onclick="mmStart()">🔄 重新開始</button>
+      <button class="game-btn secondary" onclick="shareResult()">📤 分享成績</button>
+    </div>
+  </div>
+
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>記憶翻牌是什麼</h2><p>記憶翻牌（Memory Match / Concentration）是一種歷史悠久的配對記憶遊戲：所有卡片正面朝下排列，玩家每次翻開兩張，記住位置與圖案，找出所有相同的配對。這種玩法最早可追溯到傳統紙牌遊戲，後來被廣泛改編成教育教具、桌遊，以及各種電子與網頁版本。</p><h2>對認知能力的幫助</h2><p>配對記憶類遊戲常被用來練習短期記憶（working memory）與專注力，因為玩家必須在腦中暫時儲存多個位置與圖案的對應關係，並隨著遊戲進行不斷更新記憶。這類活動老少咸宜，也常被用在兒童教育與銀髮族認知活動中作為輕量的訓練方式。</p></article>
+
+  <article class="article"><h2>怎麼玩</h2><p>遊戲開始後畫面會出現16張蓋著的卡片，每次點擊翻開2張：如果圖案相同，這兩張會保持翻開狀態並標記為配對成功；如果不同，短暫顯示後會自動蓋回去。持續配對直到所有8組都找到為止，系統會記錄你用了幾步、花了多少時間。</p><h2>如何降低步數</h2><p>第一輪盡量把還沒看過的卡片都翻過一輪建立印象，不要急著猜；翻牌時搭配固定的心理定位法（例如用棋盤座標「左上」「中間」在心裡默念），會比隨機亂翻有效率很多。</p></article>
+
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>常見問題</h2>
+  <div class="faq-item"><div class="faq-q">記憶翻牌遊戲怎麼玩？</div><div class="faq-a">畫面上有16張蓋著的卡片（8組配對），每次點擊翻開2張，如果圖案相同就配對成功並保持翻開，不同就會蓋回去。目標是用最少的步數、最短的時間找出全部8組配對。</div></div>
+  <div class="faq-item"><div class="faq-q">記憶翻牌能訓練什麼？</div><div class="faq-a">這個遊戲主要訓練的是短期記憶（working memory）跟空間記憶——你要記住哪些位置翻過什麼圖案，並在後續回合裡正確回想起來。研究上這類配對記憶遊戲常被當作簡易的認知訓練活動，適合各年齡層。</div></div>
+  <div class="faq-item"><div class="faq-q">步數是怎麼計算的？</div><div class="faq-a">每翻開一組2張卡片（不論配對成功或失敗）就算1步。步數越少代表你記得越準，代表記憶效率越高；步數多半是因為忘記卡片位置而重複翻到已經看過的組合。</div></div>
+  <div class="faq-item"><div class="faq-q">有沒有必勝的技巧？</div><div class="faq-a">建議固定用同一個順序掃描（例如由左至右、由上至下），並在心裡默念圖案跟位置的對應；第一輪翻牌盡量把沒看過的位置都翻過一次建立印象，後面配對成功率會大幅提升，步數也會明顯減少。</div></div>
+  <div class="faq-item"><div class="faq-q">最少要幾步才能完成？</div><div class="faq-a">8組配對理論上最少8步就能完成（每次翻開都直接配對成功），但這需要完美記憶所有卡片位置，實際上大多數人會落在12~20步之間，10步以內已經算是相當出色的表現。</div></div>
+  </section>
+
+  <div class="more-tools"><h3>相關遊戲</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/reaction-time-test.html">反應力測試</a>
+    <a class="tool-pill" href="/games/whack-a-mole.html">打地鼠遊戲</a>
+    <a class="tool-pill" href="/games/piano-tiles.html">鋼琴塊遊戲</a>
+    <a class="tool-pill" href="/games/connect-four.html">四子棋遊戲</a>
+    <a class="tool-pill" href="/games/snake.html">貪食蛇遊戲</a>
+    <a class="tool-pill" href="/games/">更多遊戲</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>更多遊戲</h3><a class="tool-pill" href="/games/" style="display:block;margin-top:8px">瀏覽全部遊戲 →</a></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/home/zh-TW/privacy.html">Privacy</a><a href="/home/zh-TW/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// 記憶翻牌 — 遵循《新工具規劃守則.md》第七節：
+//   7-1 CONFIG集中管理格數/圖案組/計時間隔等所有可調數值
+//   7-2 純函式（shuffle/checkWin）跟 UI/計時器邏輯分開
+//   7-3 防錯：翻牌動畫中或已配對的卡片點擊無效、避免同張卡連點兩次
+//   7-4 資源清理：flip-back的setTimeout與計時interval統一在clearAll()處理
+// ══════════════════════════════════════════════════════════
+const CONFIG = {
+  pairCount: 8,
+  symbols: ['🍎','🍌','🍇','🍒','🍉','🍓','🥝','🍑'],
+  flipBackDelayMs: 800,
+  historyLimit: 5,
+  copyRevertMs: 1500,
+  adLoadDelayMs: 2000
+};
+
+// ── 純函式 ──
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function buildDeck() {
+  const pairs = CONFIG.symbols.slice(0, CONFIG.pairCount);
+  return shuffle(pairs.concat(pairs)).map(function (sym, i) {
+    return { id: i, symbol: sym, flipped: false, matched: false };
+  });
+}
+
+(function () {
+  const board    = document.getElementById('mmBoard');
+  const movesEl  = document.getElementById('mmMoves');
+  const timeEl   = document.getElementById('mmTime');
+  const pairsEl  = document.getElementById('mmPairs');
+  const ratingEl = document.getElementById('mmRating');
+  const bestEl   = document.getElementById('mmBest');
+  const historyEl= document.getElementById('mmHistory');
+
+  let deck = [];
+  let cardEls = [];
+  let openIds = [];
+  let moves = 0;
+  let matchedCount = 0;
+  let elapsedSec = 0;
+  let locked = false;
+  let timers = { tickInterval: null, flipBackTimeout: null };
+  let history = [];
+
+  function clearAll() {
+    if (timers.tickInterval) { clearInterval(timers.tickInterval); timers.tickInterval = null; }
+    if (timers.flipBackTimeout) { clearTimeout(timers.flipBackTimeout); timers.flipBackTimeout = null; }
+  }
+
+  function render() {
+    board.innerHTML = '';
+    cardEls = deck.map(function (card) {
+      const el = document.createElement('div');
+      el.className = 'mm-card';
+      el.innerHTML =
+        '<div class="mm-card-inner">' +
+          '<div class="mm-face mm-face-back">?</div>' +
+          '<div class="mm-face mm-face-front">' + card.symbol + '</div>' +
+        '</div>';
+      el.addEventListener('click', function () { onCardClick(card.id); });
+      board.appendChild(el);
+      return el;
+    });
+  }
+
+  function updateCardUI(id) {
+    const card = deck[id];
+    const el = cardEls[id];
+    el.classList.toggle('flipped', card.flipped);
+    el.classList.toggle('matched', card.matched);
+  }
+
+  function onCardClick(id) {
+    if (locked) return;
+    const card = deck[id];
+    if (card.flipped || card.matched) return;
+    if (openIds.length >= 2) return;
+
+    card.flipped = true;
+    updateCardUI(id);
+    openIds.push(id);
+
+    if (openIds.length === 2) {
+      moves++;
+      movesEl.textContent = String(moves);
+      const [a, b] = openIds;
+      if (deck[a].symbol === deck[b].symbol) {
+        deck[a].matched = true;
+        deck[b].matched = true;
+        updateCardUI(a);
+        updateCardUI(b);
+        openIds = [];
+        matchedCount++;
+        pairsEl.textContent = String(matchedCount);
+        if (matchedCount === CONFIG.pairCount) endGame();
+      } else {
+        locked = true;
+        timers.flipBackTimeout = setTimeout(function () {
+          deck[a].flipped = false;
+          deck[b].flipped = false;
+          updateCardUI(a);
+          updateCardUI(b);
+          openIds = [];
+          locked = false;
+        }, CONFIG.flipBackDelayMs);
+      }
+    }
+  }
+
+  function endGame() {
+    clearAll();
+    ratingEl.textContent = '🎉 完成！共花了 ' + moves + ' 步、' + elapsedSec + ' 秒';
+    history.unshift(moves);
+    history = history.slice(0, CONFIG.historyLimit);
+    const best = Math.min(...history);
+    bestEl.textContent = best + ' 步';
+    historyEl.innerHTML = history.map(function (v) { return '<span>' + v + '步</span>'; }).join('');
+    window._mmLastMoves = moves;
+    window._mmBestMoves = best;
+  }
+
+  function mmStartInternal() {
+    clearAll();
+    deck = buildDeck();
+    openIds = [];
+    moves = 0;
+    matchedCount = 0;
+    elapsedSec = 0;
+    locked = false;
+    movesEl.textContent = '0';
+    timeEl.textContent = '0';
+    pairsEl.textContent = '0';
+    ratingEl.textContent = '';
+    render();
+    timers.tickInterval = setInterval(function () {
+      elapsedSec++;
+      timeEl.textContent = String(elapsedSec);
+    }, 1000);
+  }
+
+  window.mmStart = mmStartInternal;
+  mmStartInternal();
+
+  // 7-4 資源清理：離開頁面前清掉所有計時器
+  window.addEventListener('beforeunload', clearAll);
+})();
+
+function shareResult() {
+  const moves = window._mmLastMoves;
+  const text = (moves != null)
+    ? ('我在SoftGlow記憶翻牌只用了 ' + moves + ' 步就完成！來試試你能贏過我嗎？')
+    : '來玩玩記憶翻牌遊戲！';
+  if (navigator.share) {
+    navigator.share({ title: document.title, text: text, url: location.href }).catch(function () {});
+  } else {
+    navigator.clipboard.writeText(text + ' ' + location.href);
+    const b = event.target;
+    const old = b.textContent;
+    b.textContent = '已複製！';
+    setTimeout(function () { b.textContent = old; }, CONFIG.copyRevertMs);
+  }
+}
+document.querySelectorAll('.faq-q').forEach(function (q) {
+  q.addEventListener('click', function () { this.parentElement.classList.toggle('open'); });
+});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},CONFIG.adLoadDelayMs);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

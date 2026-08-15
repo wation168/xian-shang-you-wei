@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>鋼琴塊遊戲 - 免費線上點黑塊反應遊戲 | SoftGlow</title>
+<meta name="description" content="免費線上鋼琴塊遊戲，黑色方塊往下掉落前趕快點擊，漏接或點錯就結束。純網頁小遊戲，免下載免安裝，測試你的節奏感與反應速度。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/piano-tiles.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/piano-tiles.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/piano-tiles.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "鋼琴塊遊戲", "url": "https://softglow-ai.com/games/piano-tiles.html", "description": "免費線上鋼琴塊遊戲，黑色方塊往下掉落前趕快點擊，漏接或點錯就結束。", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "鋼琴塊遊戲怎麼玩？", "acceptedAnswer": {"@type": "Answer", "text": "黑色方塊會從畫面上方隨機在4個直排其中一排往下掉，趁它還在畫面內時點擊它就得1分；如果黑塊掉出畫面底端沒被點到，遊戲就結束。速度會隨著分數增加越來越快。"}}, {"@type": "Question", "name": "這是正版的Piano Tiles嗎？", "acceptedAnswer": {"@type": "Answer", "text": "不是，這是SoftGlow自製的簡化版點塊反應遊戲，玩法概念類似市面上常見的「鋼琴塊」類型遊戲（黑塊往下掉、點擊避免漏接），但沒有音樂配對、連續軌道等原版功能，單純聚焦在反應速度與節奏感的訓練上。"}}, {"@type": "Question", "name": "為什麼會突然遊戲結束？", "acceptedAnswer": {"@type": "Answer", "text": "遊戲結束通常是因為某個黑塊掉到畫面底端還沒被點擊到（漏接）。隨著分數提高，下落速度跟出現頻率都會加快，難度是刻意設計成漸進式的，越到後面越考驗手速與專注力。"}}, {"@type": "Question", "name": "有什麼訣竅可以拿高分？", "acceptedAnswer": {"@type": "Answer", "text": "盡量讓眼睛看整個畫面的中下段而不是緊盯最上方，這樣能提早發現新出現的黑塊；點擊的時機抓在方塊接近畫面下半部時最穩，太早點擊撲空、太晚又容易來不及，多練習抓節奏感會明顯進步。"}}, {"@type": "Question", "name": "手機上玩會不會不準？", "acceptedAnswer": {"@type": "Answer", "text": "手機觸控整體是準確的，但螢幕更新率、瀏覽器效能跟網路狀況都可能造成些微延遲。如果覺得判定怪怪的，可以試著關閉其他分頁或App釋放效能，通常會有幫助。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="piano-tiles">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="zh-TW">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<style>
+.pt-topbar{display:flex;justify-content:center;gap:24px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f}
+.pt-board{position:relative;width:100%;max-width:340px;aspect-ratio:3/4;margin:0 auto;background:#1e293b;border-radius:12px;overflow:hidden;display:grid;grid-template-columns:repeat(4,1fr)}
+.pt-col{position:relative;border-right:1px solid rgba(255,255,255,.08)}
+.pt-col:last-child{border-right:none}
+.pt-tile{position:absolute;left:2px;right:2px;background:#0f172a;border-radius:4px;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.4)}
+.pt-tile:active{background:#334155}
+.pt-overlay{position:absolute;inset:0;background:rgba(15,23,42,.85);display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:20px}
+.pt-overlay.show{display:flex}
+.pt-overlay .pt-over-title{font-size:20px;font-weight:800;margin-bottom:8px}
+.pt-overlay .pt-over-sub{font-size:13px;color:#cbd5e1}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/">工具</a>
+    <a href="/games/">遊戲</a>
+    <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
+    <a href="/">首頁</a>
+  </div>
+  <div class="nav-actions">
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> &gt; <a href="/games/">遊戲</a> &gt; 鋼琴塊</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>鋼琴塊遊戲</h1>
+    <p class="game-subtitle">黑色方塊掉出畫面前趕快點擊，漏接就結束，速度會越來越快</p>
+
+    <div class="pt-topbar">
+      <span>分數：<span id="ptScore">0</span></span>
+    </div>
+
+    <div class="pt-board" id="ptBoard">
+      <div class="pt-col" data-col="0"></div>
+      <div class="pt-col" data-col="1"></div>
+      <div class="pt-col" data-col="2"></div>
+      <div class="pt-col" data-col="3"></div>
+      <div class="pt-overlay" id="ptOverlay">
+        <div class="pt-over-title" id="ptOverTitle">準備好了嗎？</div>
+        <div class="pt-over-sub" id="ptOverSub">點擊下方按鈕開始</div>
+      </div>
+    </div>
+
+    <div class="game-rating" id="ptRating"></div>
+
+    <div class="game-score-row">
+      <div class="game-score-tile"><div class="gs-label">最佳成績</div><div class="gs-value" id="ptBest">—</div></div>
+    </div>
+    <div class="game-history" id="ptHistory"></div>
+
+    <div class="game-controls">
+      <button class="game-btn" id="ptStartBtn" onclick="ptStart()">▶️ 開始遊戲</button>
+      <button class="game-btn secondary" onclick="shareResult()">📤 分享成績</button>
+    </div>
+  </div>
+
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>鋼琴塊類型遊戲的由來</h2><p>「鋼琴塊」泛指一類「黑塊往下掉、玩家要即時點擊避免漏接」的節奏反應遊戲，這類玩法因為手機遊戲《Piano Tiles》系列而廣為人知，後來衍生出大量類似概念的作品。核心樂趣在於：規則極度簡單（看到黑塊就點），但隨著速度加快會快速拉高難度，形成很強的「再玩一次」驅動力。</p><h2>這個版本的說明</h2><p>這是SoftGlow自製的簡化版本，保留「黑塊掉落、及時點擊、漏接結束、越玩越快」的核心玩法，方便直接在瀏覽器裡玩，不需要下載App，也不會佔用手機儲存空間。</p></article>
+
+  <article class="article"><h2>怎麼玩</h2><p>按下「開始遊戲」後，黑色方塊會不定時從畫面上方4個直排其中一排出現並往下掉，在它還沒掉出畫面底端之前點擊它就能得1分；如果黑塊掉出畫面沒被點到，遊戲立刻結束並顯示這一輪的總分。分數越高，掉落速度跟出現頻率都會逐漸加快。</p><h2>拿高分的方法</h2><p>視線盡量放在畫面中下段，這樣能同時兼顧「還沒點到的塊」跟「即將出現的新塊」；點擊時機建議抓在方塊接近底部三分之一的位置最穩，太早點常常撲空，抓到節奏後分數會明顯提升。</p></article>
+
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>常見問題</h2>
+  <div class="faq-item"><div class="faq-q">鋼琴塊遊戲怎麼玩？</div><div class="faq-a">黑色方塊會從畫面上方隨機在4個直排其中一排往下掉，趁它還在畫面內時點擊它就得1分；如果黑塊掉出畫面底端沒被點到，遊戲就結束。速度會隨著分數增加越來越快。</div></div>
+  <div class="faq-item"><div class="faq-q">這是正版的Piano Tiles嗎？</div><div class="faq-a">不是，這是SoftGlow自製的簡化版點塊反應遊戲，玩法概念類似市面上常見的「鋼琴塊」類型遊戲（黑塊往下掉、點擊避免漏接），但沒有音樂配對、連續軌道等原版功能，單純聚焦在反應速度與節奏感的訓練上。</div></div>
+  <div class="faq-item"><div class="faq-q">為什麼會突然遊戲結束？</div><div class="faq-a">遊戲結束通常是因為某個黑塊掉到畫面底端還沒被點擊到（漏接）。隨著分數提高，下落速度跟出現頻率都會加快，難度是刻意設計成漸進式的，越到後面越考驗手速與專注力。</div></div>
+  <div class="faq-item"><div class="faq-q">有什麼訣竅可以拿高分？</div><div class="faq-a">盡量讓眼睛看整個畫面的中下段而不是緊盯最上方，這樣能提早發現新出現的黑塊；點擊的時機抓在方塊接近畫面下半部時最穩，太早點擊撲空、太晚又容易來不及，多練習抓節奏感會明顯進步。</div></div>
+  <div class="faq-item"><div class="faq-q">手機上玩會不會不準？</div><div class="faq-a">手機觸控整體是準確的，但螢幕更新率、瀏覽器效能跟網路狀況都可能造成些微延遲。如果覺得判定怪怪的，可以試著關閉其他分頁或App釋放效能，通常會有幫助。</div></div>
+  </section>
+
+  <div class="more-tools"><h3>相關遊戲</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/reaction-time-test.html">反應力測試</a>
+    <a class="tool-pill" href="/games/whack-a-mole.html">打地鼠遊戲</a>
+    <a class="tool-pill" href="/games/memory-match.html">記憶翻牌遊戲</a>
+    <a class="tool-pill" href="/games/connect-four.html">四子棋遊戲</a>
+    <a class="tool-pill" href="/games/snake.html">貪食蛇遊戲</a>
+    <a class="tool-pill" href="/games/">更多遊戲</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>更多遊戲</h3><a class="tool-pill" href="/games/" style="display:block;margin-top:8px">瀏覽全部遊戲 →</a></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/home/zh-TW/privacy.html">Privacy</a><a href="/home/zh-TW/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// 鋼琴塊 — 遵循《新工具規劃守則.md》第七節：
+//   7-1 CONFIG集中管理欄數/初始速度/加速幅度/出現頻率等所有可調數值
+//   7-2 純函式（computeRating）跟 requestAnimationFrame遊戲迴圈/DOM分開
+//   7-3 防錯：遊戲結束後點擊不再計分、避免重複觸發game over
+//   7-4 資源清理：rAF與spawn interval統一在clearAll()處理，離開頁面前清除
+// ══════════════════════════════════════════════════════════
+const CONFIG = {
+  columns: 4,
+  initialSpeedPxPerSec: 160,
+  maxSpeedPxPerSec: 620,
+  speedIncreasePerHit: 10,
+  initialSpawnIntervalMs: 850,
+  minSpawnIntervalMs: 340,
+  spawnIntervalDecreasePerHit: 14,
+  tileHeightPx: 90,
+  historyLimit: 5,
+  copyRevertMs: 1500,
+  adLoadDelayMs: 2000,
+  ratings: [
+    { max: 8,       label: '🐢 先熟悉一下節奏，多練幾次會更順手' },
+    { max: 18,      label: '🙂 中等水準，掌握到基本節奏了' },
+    { max: 30,      label: '👍 反應不錯，優於大多數人' },
+    { max: 45,      label: '🏆 高手等級，手速跟節奏感都很好' },
+    { max: Infinity,label: '⚡ 神級表現，你是不是玩過真的音樂遊戲！' }
+  ]
+};
+
+function computeRating(score) {
+  const hit = CONFIG.ratings.find(r => score <= r.max);
+  return hit ? hit.label : '';
+}
+
+(function () {
+  const board     = document.getElementById('ptBoard');
+  const cols      = Array.from(board.querySelectorAll('.pt-col'));
+  const overlay   = document.getElementById('ptOverlay');
+  const overTitle = document.getElementById('ptOverTitle');
+  const overSub   = document.getElementById('ptOverSub');
+  const scoreEl   = document.getElementById('ptScore');
+  const ratingEl  = document.getElementById('ptRating');
+  const bestEl    = document.getElementById('ptBest');
+  const historyEl = document.getElementById('ptHistory');
+  const startBtn  = document.getElementById('ptStartBtn');
+
+  let playing = false;
+  let score = 0;
+  let speedPxPerSec = CONFIG.initialSpeedPxPerSec;
+  let spawnIntervalMs = CONFIG.initialSpawnIntervalMs;
+  let tiles = [];
+  let tileSeq = 0;
+  let rafId = null;
+  let spawnTimerId = null;
+  let lastTs = 0;
+  let history = [];
+
+  function clearAll() {
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+    if (spawnTimerId) { clearTimeout(spawnTimerId); spawnTimerId = null; }
+    tiles.forEach(function (t) { if (t.el && t.el.parentNode) t.el.parentNode.removeChild(t.el); });
+    tiles = [];
+  }
+
+  function spawnTile() {
+    if (!playing) return;
+    const col = Math.floor(Math.random() * CONFIG.columns);
+    const el = document.createElement('div');
+    el.className = 'pt-tile';
+    el.style.height = CONFIG.tileHeightPx + 'px';
+    el.style.top = (-CONFIG.tileHeightPx) + 'px';
+    const id = tileSeq++;
+    el.addEventListener('click', function () { onTileClick(id); });
+    cols[col].appendChild(el);
+    tiles.push({ id: id, col: col, el: el, topPx: -CONFIG.tileHeightPx });
+
+    spawnIntervalMs = Math.max(CONFIG.minSpawnIntervalMs, spawnIntervalMs - CONFIG.spawnIntervalDecreasePerHit);
+    spawnTimerId = setTimeout(spawnTile, spawnIntervalMs);
+  }
+
+  function onTileClick(id) {
+    if (!playing) return;
+    const idx = tiles.findIndex(function (t) { return t.id === id; });
+    if (idx === -1) return;
+    const t = tiles[idx];
+    if (t.el.parentNode) t.el.parentNode.removeChild(t.el);
+    tiles.splice(idx, 1);
+    score++;
+    scoreEl.textContent = String(score);
+    speedPxPerSec = Math.min(CONFIG.maxSpeedPxPerSec, speedPxPerSec + CONFIG.speedIncreasePerHit);
+  }
+
+  function loop(ts) {
+    if (!playing) return;
+    if (!lastTs) lastTs = ts;
+    const dtSec = (ts - lastTs) / 1000;
+    lastTs = ts;
+    const boardHeight = board.clientHeight;
+
+    for (let i = tiles.length - 1; i >= 0; i--) {
+      const t = tiles[i];
+      t.topPx += speedPxPerSec * dtSec;
+      t.el.style.top = t.topPx + 'px';
+      if (t.topPx >= boardHeight) {
+        endGame();
+        return;
+      }
+    }
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function endGame() {
+    playing = false;
+    clearAll();
+    startBtn.disabled = false;
+    startBtn.textContent = '▶️ 再玩一次';
+    overTitle.textContent = '💥 漏接了！';
+    overSub.textContent = '得分：' + score + ' 分';
+    overlay.classList.add('show');
+    ratingEl.textContent = score + ' 分 — ' + computeRating(score);
+
+    history.unshift(score);
+    history = history.slice(0, CONFIG.historyLimit);
+    const best = Math.max(...history);
+    bestEl.textContent = best + ' 分';
+    historyEl.innerHTML = history.map(function (v) { return '<span>' + v + '分</span>'; }).join('');
+    window._ptLastScore = score;
+    window._ptBestScore = best;
+  }
+
+  function ptStartInternal() {
+    clearAll();
+    overlay.classList.remove('show');
+    playing = true;
+    score = 0;
+    speedPxPerSec = CONFIG.initialSpeedPxPerSec;
+    spawnIntervalMs = CONFIG.initialSpawnIntervalMs;
+    lastTs = 0;
+    scoreEl.textContent = '0';
+    ratingEl.textContent = '';
+    startBtn.disabled = true;
+    startBtn.textContent = '遊戲中…';
+
+    spawnTimerId = setTimeout(spawnTile, spawnIntervalMs);
+    rafId = requestAnimationFrame(loop);
+  }
+
+  window.ptStart = ptStartInternal;
+
+  // 7-4 資源清理：離開頁面前清掉 rAF 與計時器
+  window.addEventListener('beforeunload', clearAll);
+})();
+
+function shareResult() {
+  const score = window._ptLastScore;
+  const text = (score != null)
+    ? ('我在SoftGlow鋼琴塊遊戲拿了 ' + score + ' 分！來試試你能打敗我嗎？')
+    : '來玩玩鋼琴塊遊戲！';
+  if (navigator.share) {
+    navigator.share({ title: document.title, text: text, url: location.href }).catch(function () {});
+  } else {
+    navigator.clipboard.writeText(text + ' ' + location.href);
+    const b = event.target;
+    const old = b.textContent;
+    b.textContent = '已複製！';
+    setTimeout(function () { b.textContent = old; }, CONFIG.copyRevertMs);
+  }
+}
+document.querySelectorAll('.faq-q').forEach(function (q) {
+  q.addEventListener('click', function () { this.parentElement.classList.toggle('open'); });
+});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},CONFIG.adLoadDelayMs);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

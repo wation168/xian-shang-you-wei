@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>四子棋遊戲 - 免費線上雙人四子連線 | SoftGlow</title>
+<meta name="description" content="免費線上四子棋（Connect Four）遊戲，兩人輪流下棋，先連成4顆棋子（橫、直、斜皆可）的人獲勝。純網頁小遊戲，免下載免安裝，適合跟朋友輪流對戰。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/connect-four.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/connect-four.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/connect-four.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "四子棋遊戲", "url": "https://softglow-ai.com/games/connect-four.html", "description": "免費線上四子棋（Connect Four）雙人對戰遊戲，先連成4顆棋子的人獲勝。", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "四子棋怎麼玩？", "acceptedAnswer": {"@type": "Answer", "text": "兩位玩家輪流點擊任一直排，棋子會自動落到該排最底端的空格。誰先讓自己的4顆棋子連成一直線（橫、直、斜線皆可）就獲勝，如果棋盤填滿都沒人連線則平手。"}}, {"@type": "Question", "name": "這個版本需要兩個人一起玩嗎？", "acceptedAnswer": {"@type": "Answer", "text": "是的，這是本機雙人輪流對戰版本（Pass and Play），兩人共用同一個裝置，輪流點擊下棋，沒有電腦AI對手，也不需要註冊或連線，適合跟朋友、家人面對面對戰。"}}, {"@type": "Question", "name": "四子棋有必勝策略嗎？", "acceptedAnswer": {"@type": "Answer", "text": "四子棋在理論上已被數學證明：先手方如果從正中間那一排開始下、並且每一步都下出最佳解，是必勝的。不過實戰中對手不一定下最佳解，掌握「優先佔中間」「同時注意多個方向的連線威脅」這兩個原則就能大幅提升勝率。"}}, {"@type": "Question", "name": "為什麼棋子只能落到最底端？", "acceptedAnswer": {"@type": "Answer", "text": "這是四子棋的核心規則——棋子放進某一直排後會受重力影響落到該排目前最低的空位，不能自由選擇放在哪一格。這個限制正是四子棋策略性的來源，因為你沒辦法直接把棋子放到想要的任意位置。"}}, {"@type": "Question", "name": "棋盤大小可以調整嗎？", "acceptedAnswer": {"@type": "Answer", "text": "目前採用標準的7欄×6列棋盤，這是最經典、也是最多人熟悉的四子棋規格。如果之後有需求，會考慮新增不同棋盤大小的模式。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="connect-four">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="zh-TW">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<style>
+.c4-topbar{display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f}
+.c4-turn-dot{width:16px;height:16px;border-radius:50%;display:inline-block;vertical-align:middle}
+.c4-board{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;background:#2563eb;border-radius:12px;padding:8px;width:100%;max-width:420px;margin:0 auto}
+.c4-cell{position:relative;aspect-ratio:1/1;border-radius:50%;background:#f8fafc;cursor:pointer}
+.c4-cell.p1{background:#ef4444}
+.c4-cell.p2{background:#f59e0b}
+.c4-cell.win{box-shadow:0 0 0 3px #22c55e inset}
+.c4-col-hover{opacity:.55}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/">工具</a>
+    <a href="/games/">遊戲</a>
+    <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
+    <a href="/">首頁</a>
+  </div>
+  <div class="nav-actions">
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> &gt; <a href="/games/">遊戲</a> &gt; 四子棋</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>四子棋遊戲</h1>
+    <p class="game-subtitle">兩人輪流下棋，先連成4顆棋子（橫、直、斜皆可）的人獲勝</p>
+
+    <div class="c4-topbar">
+      <span id="c4TurnText">輪到 玩家1</span>
+      <span class="c4-turn-dot" id="c4TurnDot" style="background:#ef4444"></span>
+    </div>
+
+    <div class="c4-board" id="c4Board"></div>
+
+    <div class="game-rating" id="c4Rating"></div>
+
+    <div class="game-score-row">
+      <div class="game-score-tile"><div class="gs-label">玩家1勝場</div><div class="gs-value" id="c4P1Wins">0</div></div>
+      <div class="game-score-tile"><div class="gs-label">玩家2勝場</div><div class="gs-value" id="c4P2Wins">0</div></div>
+    </div>
+
+    <div class="game-controls">
+      <button class="game-btn" onclick="c4Restart()">🔄 重新開始這局</button>
+      <button class="game-btn secondary" onclick="shareResult()">📤 分享成績</button>
+    </div>
+  </div>
+
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>四子棋是什麼</h2><p>四子棋（Connect Four）是一款經典的雙人策略棋盤遊戲，標準棋盤為7欄×6列。兩位玩家輪流把自己顏色的棋子投入其中一欄，棋子會因為重力落到該欄目前最低的空位，率先讓自己的棋子連成橫、直或斜的4連線就獲勝。這款遊戲規則簡單卻蘊含不少策略深度，數十年來一直是家庭與朋友聚會的熱門選擇。</p><h2>策略性從哪裡來</h2><p>四子棋的策略核心在於「重力限制」——你無法把棋子放在任意想要的格子，只能選擇欄位，棋子自動落到底部。這代表每一步棋不只影響當下，還會改變之後雙方能落子的位置，優秀的玩家會同時預想好幾步之後的盤面變化，並留意對手是否在佈局多重連線威脅。</p></article>
+
+  <article class="article"><h2>怎麼玩</h2><p>遊戲開始後畫面會顯示目前輪到哪位玩家，直接點擊任一欄，棋子就會落到該欄最底端的空格。持續輪流下棋，直到有人連成4顆棋子（各方向皆可）獲勝，或棋盤填滿仍無人連線則平手，這時可以按「重新開始這局」再來一輪，勝場數會累計顯示。</p><h2>新手常見策略</h2><p>優先搶佔棋盤正中間那一欄，因為中間欄位能參與的連線方向最多；同時留意對手是否已經有3顆連線只差一步就獲勝，這種情況一定要優先阻擋，比自己進攻更重要。</p></article>
+
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>常見問題</h2>
+  <div class="faq-item"><div class="faq-q">四子棋怎麼玩？</div><div class="faq-a">兩位玩家輪流點擊任一直排，棋子會自動落到該排最底端的空格。誰先讓自己的4顆棋子連成一直線（橫、直、斜線皆可）就獲勝，如果棋盤填滿都沒人連線則平手。</div></div>
+  <div class="faq-item"><div class="faq-q">這個版本需要兩個人一起玩嗎？</div><div class="faq-a">是的，這是本機雙人輪流對戰版本（Pass and Play），兩人共用同一個裝置，輪流點擊下棋，沒有電腦AI對手，也不需要註冊或連線，適合跟朋友、家人面對面對戰。</div></div>
+  <div class="faq-item"><div class="faq-q">四子棋有必勝策略嗎？</div><div class="faq-a">四子棋在理論上已被數學證明：先手方如果從正中間那一排開始下、並且每一步都下出最佳解，是必勝的。不過實戰中對手不一定下最佳解，掌握「優先佔中間」「同時注意多個方向的連線威脅」這兩個原則就能大幅提升勝率。</div></div>
+  <div class="faq-item"><div class="faq-q">為什麼棋子只能落到最底端？</div><div class="faq-a">這是四子棋的核心規則——棋子放進某一直排後會受重力影響落到該排目前最低的空位，不能自由選擇放在哪一格。這個限制正是四子棋策略性的來源，因為你沒辦法直接把棋子放到想要的任意位置。</div></div>
+  <div class="faq-item"><div class="faq-q">棋盤大小可以調整嗎？</div><div class="faq-a">目前採用標準的7欄×6列棋盤，這是最經典、也是最多人熟悉的四子棋規格。如果之後有需求，會考慮新增不同棋盤大小的模式。</div></div>
+  </section>
+
+  <div class="more-tools"><h3>相關遊戲</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/reaction-time-test.html">反應力測試</a>
+    <a class="tool-pill" href="/games/whack-a-mole.html">打地鼠遊戲</a>
+    <a class="tool-pill" href="/games/memory-match.html">記憶翻牌遊戲</a>
+    <a class="tool-pill" href="/games/piano-tiles.html">鋼琴塊遊戲</a>
+    <a class="tool-pill" href="/games/snake.html">貪食蛇遊戲</a>
+    <a class="tool-pill" href="/games/">更多遊戲</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>更多遊戲</h3><a class="tool-pill" href="/games/" style="display:block;margin-top:8px">瀏覽全部遊戲 →</a></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/home/zh-TW/privacy.html">Privacy</a><a href="/home/zh-TW/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// 四子棋 — 遵循《新工具規劃守則.md》第七節：
+//   7-1 CONFIG集中管理列數/欄數/連線長度/棋子顏色等所有可調數值
+//   7-2 純函式（dropPiece/checkWin）不碰DOM，跟畫面渲染完全分開，
+//        方便之後要加AI對手或改棋盤大小都能重用同一套邏輯
+//   7-3 防錯：欄位已滿或遊戲已結束時點擊無效
+//   7-4 這款無非同步計時器，不需額外資源清理
+// ══════════════════════════════════════════════════════════
+const CONFIG = {
+  rows: 6,
+  cols: 7,
+  winLength: 4,
+  playerClass: { 1: 'p1', 2: 'p2' },
+  playerColor: { 1: '#ef4444', 2: '#f59e0b' },
+  playerName: { 1: '玩家1', 2: '玩家2' },
+  copyRevertMs: 1500,
+  adLoadDelayMs: 2000
+};
+
+// ── 純函式：不碰DOM，只操作資料 ──
+function createEmptyBoard() {
+  return Array.from({ length: CONFIG.rows }, function () { return Array(CONFIG.cols).fill(0); });
+}
+function dropPiece(board, col, player) {
+  for (let r = CONFIG.rows - 1; r >= 0; r--) {
+    if (board[r][col] === 0) { board[r][col] = player; return r; }
+  }
+  return -1; // 該欄已滿
+}
+function checkWin(board, row, col, player) {
+  const dirs = [[0, 1], [1, 0], [1, 1], [1, -1]];
+  for (const [dr, dc] of dirs) {
+    const cells = [[row, col]];
+    for (const sign of [1, -1]) {
+      let r = row + dr * sign, c = col + dc * sign;
+      while (r >= 0 && r < CONFIG.rows && c >= 0 && c < CONFIG.cols && board[r][c] === player) {
+        cells.push([r, c]);
+        r += dr * sign; c += dc * sign;
+      }
+    }
+    if (cells.length >= CONFIG.winLength) return cells;
+  }
+  return null;
+}
+function isBoardFull(board) {
+  return board[0].every(function (v) { return v !== 0; });
+}
+
+(function () {
+  const boardEl   = document.getElementById('c4Board');
+  const turnText  = document.getElementById('c4TurnText');
+  const turnDot   = document.getElementById('c4TurnDot');
+  const ratingEl  = document.getElementById('c4Rating');
+  const p1WinsEl  = document.getElementById('c4P1Wins');
+  const p2WinsEl  = document.getElementById('c4P2Wins');
+
+  let board = createEmptyBoard();
+  let current = 1;
+  let gameOver = false;
+  let wins = { 1: 0, 2: 0 };
+  let cellEls = [];
+
+  function render() {
+    boardEl.innerHTML = '';
+    cellEls = [];
+    for (let r = 0; r < CONFIG.rows; r++) {
+      const rowEls = [];
+      for (let c = 0; c < CONFIG.cols; c++) {
+        const el = document.createElement('div');
+        el.className = 'c4-cell';
+        el.addEventListener('click', function () { onColClick(c); });
+        boardEl.appendChild(el);
+        rowEls.push(el);
+      }
+      cellEls.push(rowEls);
+    }
+    syncBoardUI();
+  }
+
+  function syncBoardUI(winCells) {
+    for (let r = 0; r < CONFIG.rows; r++) {
+      for (let c = 0; c < CONFIG.cols; c++) {
+        const v = board[r][c];
+        const el = cellEls[r][c];
+        el.className = 'c4-cell' + (v ? ' ' + CONFIG.playerClass[v] : '');
+      }
+    }
+    if (winCells) {
+      winCells.forEach(function ([r, c]) { cellEls[r][c].classList.add('win'); });
+    }
+  }
+
+  function updateTurnUI() {
+    turnText.textContent = '輪到 ' + CONFIG.playerName[current];
+    turnDot.style.background = CONFIG.playerColor[current];
+  }
+
+  function onColClick(col) {
+    if (gameOver) return;
+    const row = dropPiece(board, col, current);
+    if (row === -1) return; // 該欄已滿，防錯
+    syncBoardUI();
+    const winCells = checkWin(board, row, col, current);
+    if (winCells) {
+      gameOver = true;
+      wins[current]++;
+      p1WinsEl.textContent = String(wins[1]);
+      p2WinsEl.textContent = String(wins[2]);
+      ratingEl.textContent = '🎉 ' + CONFIG.playerName[current] + ' 獲勝！';
+      syncBoardUI(winCells);
+      window._c4LastResult = CONFIG.playerName[current] + ' 獲勝';
+      return;
+    }
+    if (isBoardFull(board)) {
+      gameOver = true;
+      ratingEl.textContent = '🤝 平手！棋盤已滿';
+      window._c4LastResult = '平手';
+      return;
+    }
+    current = current === 1 ? 2 : 1;
+    updateTurnUI();
+  }
+
+  function restartInternal() {
+    board = createEmptyBoard();
+    current = 1;
+    gameOver = false;
+    ratingEl.textContent = '';
+    render();
+    updateTurnUI();
+  }
+
+  window.c4Restart = restartInternal;
+  restartInternal();
+})();
+
+function shareResult() {
+  const text = window._c4LastResult
+    ? ('我在SoftGlow四子棋跟朋友對戰，結果：' + window._c4LastResult + '！來下一局吧')
+    : '來玩玩四子棋，跟朋友輪流對戰！';
+  if (navigator.share) {
+    navigator.share({ title: document.title, text: text, url: location.href }).catch(function () {});
+  } else {
+    navigator.clipboard.writeText(text + ' ' + location.href);
+    const b = event.target;
+    const old = b.textContent;
+    b.textContent = '已複製！';
+    setTimeout(function () { b.textContent = old; }, CONFIG.copyRevertMs);
+  }
+}
+document.querySelectorAll('.faq-q').forEach(function (q) {
+  q.addEventListener('click', function () { this.parentElement.classList.toggle('open'); });
+});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},CONFIG.adLoadDelayMs);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>
