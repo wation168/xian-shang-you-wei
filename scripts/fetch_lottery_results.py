@@ -3,7 +3,7 @@
 fetch_lottery_results.py — 每日抓取各彩種最新開獎結果
 GitHub Actions 用，更新 scripts/lottery_data/results/*.json
 
-資料來源清單（2026/07/23 更新）：
+資料來源清單（2026/08/15 第二十五輪核對更新，修正本段先前跟main()實際呼叫對不上的地方）：
   ✅ powerball        — data.ny.gov 公開 API
   ✅ mega-millions    — data.ny.gov 公開 API
   ✅ taiwan-bingo     — api.taiwanlottery.com 官方 API
@@ -12,13 +12,23 @@ GitHub Actions 用，更新 scripts/lottery_data/results/*.json
   ✅ mega-sena        — caixa.gov.br 官方 API
   ✅ euromillions     — euromillions.api.pedromealha.dev 免費 API
   ✅ lotto-6aus49     — JohannesFriedrich GitHub Archive
-  ✅ uk-lotto         — magayo API（加 DNS fallback）
-  ✅ oz-lotto         — magayo API（加 DNS fallback）
-  ✅ lotto-max        — magayo API（加 DNS fallback）
-  ✅ korea-lotto      — dhlottery.co.kr 官方 JSON API
+  ⚠️ uk-lotto         — 實際上是 lottolyzer.com 爬蟲（見 fetch_lottolyzer 呼叫），不是這段舊註解寫的magayo。
+                        2026/08/15查證：資料檔（backend/frontend/lottery/data/uk-lotto.json）已停在
+                        2026/07/19沒更新，同一個爬蟲函式抓的oz-lotto/korea-lotto都正常更新，判斷是
+                        en.lottolyzer.com/history/united-kingdom/lotto這個頁面本身的抓取有問題
+                        （頁面改版/路徑失效/被擋等），需要看GitHub Actions實際執行log才能確認根因，
+                        雲端沙盒連不到en.lottolyzer.com無法直接測試，未來排查以此為優先方向
+  ✅ oz-lotto         — 實際上是 lottolyzer.com 爬蟲（見 fetch_lottolyzer 呼叫），非magayo，2026/08/15查證資料正常更新
+  ⚠️ lotto-max        — 實際上是 lottolyzer.com 爬蟲（見 fetch_lottolyzer 呼叫），不是magayo。
+                        2026/08/15查證：跟uk-lotto同樣的問題，資料檔停在2026/07/19，
+                        en.lottolyzer.com/history/canada/lotto-max這個頁面的抓取需要進一步排查
+  ✅ korea-lotto      — 實際上是 lottolyzer.com 爬蟲（見 fetch_lottolyzer 呼叫），非官方JSON API，2026/08/15查證資料正常更新
   ✅ japan-loto6      — lottolyzer.com 爬蟲
   ✅ el-gordo         — loteriasyapuestas.es 官網爬蟲
   ✅ superenalotto    — superenalotto.net 爬蟲
+
+  註：fetch_magayo()函式仍留在檔案裡但目前main()完全沒有呼叫它，是死程式碼（可能是之前
+  用過、後來全面改用lottolyzer.com爬蟲但沒清掉舊函式），保留供之後參考不影響運作。
 """
 import json, os, re, sys, socket
 from datetime import datetime, timedelta, date
