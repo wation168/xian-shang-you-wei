@@ -346,11 +346,34 @@
   }
 
   // ---------------------------------------------------------------------------
+  // Games nav entry（2026/08/15 新增）
+  // 全站共用JS動態插入「遊戲」導覽連結，不用逐一改幾百個HTML頁面。
+  // 遊戲目前只有繁中版，故只在 zh-TW 頁面插入，避免把其他語言的
+  // 使用者導去看不懂的內容。
+  // ---------------------------------------------------------------------------
+  function injectGamesNav() {
+    if (META.lang !== 'zh-TW') return;
+    var nav = document.querySelector('.nav-links');
+    if (!nav) return;
+    if (nav.querySelector('a[href="/games/"]')) return; // 該頁本來就有（例如遊戲頁自己）
+    var a = document.createElement('a');
+    a.href = '/games/';
+    a.textContent = '遊戲';
+    var first = nav.querySelector('a');
+    if (first) {
+      first.insertAdjacentElement('afterend', a);
+    } else {
+      nav.appendChild(a);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // Init
   // ---------------------------------------------------------------------------
   document.addEventListener('DOMContentLoaded', function() {
     initSearch();
     initBookmark();
+    injectGamesNav();
   });
 
   // Expose to global for onclick handlers in template
