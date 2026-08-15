@@ -25,8 +25,15 @@
 .wam-hole{position:relative;aspect-ratio:1/1;border-radius:50%;background:#8b5e34;box-shadow:inset 0 6px 10px rgba(0,0,0,.35);overflow:hidden;cursor:pointer;user-select:none;touch-action:manipulation}
 .wam-hole .wam-mole{position:absolute;left:10%;right:10%;bottom:-100%;top:10%;border-radius:50% 50% 45% 45%;background:#6b4a2f;transition:bottom .12s ease-out;display:flex;align-items:center;justify-content:center;font-size:28px}
 .wam-hole.up .wam-mole{bottom:0}
-.wam-topbar{display:flex;justify-content:center;gap:24px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f}
-.wam-topbar .wam-time{color:#ef4444}
+.wam-topbar{display:flex;justify-content:center;align-items:center;gap:18px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f;flex-wrap:wrap;position:relative}
+.wam-topbar .wam-time{color:#ef4444;transition:transform .25s}
+.wam-topbar .wam-time.wam-bonus{animation:wamTimeBonus .6s ease}
+@keyframes wamTimeBonus{0%{transform:scale(1);color:#ef4444}40%{transform:scale(1.3);color:#16a34a}100%{transform:scale(1);color:#ef4444}}
+.wam-level-badge{background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800;transition:transform .3s}
+.wam-level-badge.wam-level-up{animation:wamLevelUp .5s ease}
+@keyframes wamLevelUp{0%{transform:scale(1)}40%{transform:scale(1.35);box-shadow:0 0 14px rgba(59,130,246,.8)}100%{transform:scale(1)}}
+.wam-toast{position:absolute;top:-26px;left:50%;transform:translateX(-50%);background:#16a34a;color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:12px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .3s,top .3s}
+.wam-toast.show{opacity:1;top:-38px}
 </style>
 </head>
 <body>
@@ -57,7 +64,9 @@
 
     <div class="wam-topbar">
       <span>分數：<span id="wamScore">0</span></span>
-      <span class="wam-time">剩餘：<span id="wamTime">30</span>s</span>
+      <span class="wam-time" id="wamTimeWrap">剩餘：<span id="wamTime">30</span>s</span>
+      <span class="wam-level-badge" id="wamLevelBadge">Lv.1</span>
+      <span class="wam-toast" id="wamToast"></span>
     </div>
 
     <div class="wam-board" id="wamBoard"></div>
@@ -97,7 +106,7 @@
     <a class="tool-pill" href="/games/reaction-time-test.html">反應力測試</a>
     <a class="tool-pill" href="/games/memory-match.html">記憶翻牌遊戲</a>
     <a class="tool-pill" href="/games/piano-tiles.html">鋼琴塊遊戲</a>
-    <a class="tool-pill" href="/games/connect-four.html">四子棋遊戲</a>
+    <a class="tool-pill" href="/games/gomoku.html">五子棋遊戲</a>
     <a class="tool-pill" href="/games/snake.html">貪食蛇遊戲</a>
     <a class="tool-pill" href="/games/">更多遊戲</a>
   </div></div>
@@ -123,15 +132,20 @@
 const CONFIG = {
   holesCount: 9,
   gameDurationSec: 30,
-  moleUpMsMin: 650,
-  moleUpMsMax: 1300,
-  spawnIntervalMsMin: 500,
-  spawnIntervalMsMax: 900,
-  maxActiveMoles: 2,
   historyLimit: 5,
   moleEmoji: '🐹',
   copyRevertMs: 1500,
   adLoadDelayMs: 2000,
+  // 2026/08/15 新增：帥哥鴻反饋「秒數到達之前達到一定分數可以增加秒數並且增加難度」
+  // scoreThreshold累積分數達標時，套用該級距的難度設定（地鼠停留變短、出現變密集、
+  // 可同時出現隻數增加），並加上bonusSeconds秒的時間獎勵，讓玩家能持續挑戰更高分。
+  difficultyLevels: [
+    { scoreThreshold: 0,  moleUpMsMin: 650, moleUpMsMax: 1300, spawnIntervalMsMin: 500, spawnIntervalMsMax: 900, maxActiveMoles: 2, bonusSeconds: 0 },
+    { scoreThreshold: 10, moleUpMsMin: 560, moleUpMsMax: 1100, spawnIntervalMsMin: 430, spawnIntervalMsMax: 780, maxActiveMoles: 2, bonusSeconds: 5 },
+    { scoreThreshold: 20, moleUpMsMin: 470, moleUpMsMax: 900,  spawnIntervalMsMin: 360, spawnIntervalMsMax: 660, maxActiveMoles: 3, bonusSeconds: 5 },
+    { scoreThreshold: 32, moleUpMsMin: 390, moleUpMsMax: 740,  spawnIntervalMsMin: 300, spawnIntervalMsMax: 560, maxActiveMoles: 3, bonusSeconds: 5 },
+    { scoreThreshold: 46, moleUpMsMin: 330, moleUpMsMax: 620,  spawnIntervalMsMin: 250, spawnIntervalMsMax: 470, maxActiveMoles: 4, bonusSeconds: 6 }
+  ],
   ratings: [
     { max: 10,      label: '🐢 慢慢來，多練幾次手感會變好' },
     { max: 18,      label: '🙂 中等水準，還有進步空間' },
@@ -147,6 +161,14 @@ function computeRating(score) {
   return hit ? hit.label : '';
 }
 function randBetween(min, max) { return min + Math.random() * (max - min); }
+// 純函式：依目前分數找出應套用的難度級距索引（levels依scoreThreshold遞增排序）
+function levelIndexForScore(score, levels) {
+  let idx = 0;
+  for (let i = 0; i < levels.length; i++) {
+    if (score >= levels[i].scoreThreshold) idx = i;
+  }
+  return idx;
+}
 
 (function () {
   const board    = document.getElementById('wamBoard');
@@ -156,14 +178,19 @@ function randBetween(min, max) { return min + Math.random() * (max - min); }
   const bestEl   = document.getElementById('wamBest');
   const historyEl= document.getElementById('wamHistory');
   const startBtn = document.getElementById('wamStartBtn');
+  const timeWrap = document.getElementById('wamTimeWrap');
+  const levelEl  = document.getElementById('wamLevelBadge');
+  const toastEl  = document.getElementById('wamToast');
 
   let holes = [];
   let score = 0;
   let timeLeft = CONFIG.gameDurationSec;
   let playing = false;
   let activeCount = 0;
-  let timers = { gameInterval: null, spawnTimeout: null, moleTimeouts: [] };
+  let timers = { gameInterval: null, spawnTimeout: null, moleTimeouts: [], toastTimeout: null };
   let history = [];
+  let levelIdx = 0;
+  let curLevel = CONFIG.difficultyLevels[0];
 
   // 初始化九宮格
   for (let i = 0; i < CONFIG.holesCount; i++) {
@@ -181,6 +208,7 @@ function randBetween(min, max) { return min + Math.random() * (max - min); }
   function clearAll() {
     if (timers.gameInterval) { clearInterval(timers.gameInterval); timers.gameInterval = null; }
     if (timers.spawnTimeout) { clearTimeout(timers.spawnTimeout); timers.spawnTimeout = null; }
+    if (timers.toastTimeout) { clearTimeout(timers.toastTimeout); timers.toastTimeout = null; }
     timers.moleTimeouts.forEach(clearTimeout);
     timers.moleTimeouts = [];
   }
@@ -191,19 +219,19 @@ function randBetween(min, max) { return min + Math.random() * (max - min); }
   }
 
   function scheduleSpawn() {
-    const delay = randBetween(CONFIG.spawnIntervalMsMin, CONFIG.spawnIntervalMsMax);
+    const delay = randBetween(curLevel.spawnIntervalMsMin, curLevel.spawnIntervalMsMax);
     timers.spawnTimeout = setTimeout(trySpawn, delay);
   }
 
   function trySpawn() {
     if (!playing) return;
-    if (activeCount < CONFIG.maxActiveMoles) {
+    if (activeCount < curLevel.maxActiveMoles) {
       const emptyIdx = holes.map((h, i) => h.up ? -1 : i).filter(i => i >= 0);
       if (emptyIdx.length) {
         const idx = emptyIdx[Math.floor(Math.random() * emptyIdx.length)];
         setHoleUp(idx, true);
         activeCount++;
-        const upMs = randBetween(CONFIG.moleUpMsMin, CONFIG.moleUpMsMax);
+        const upMs = randBetween(curLevel.moleUpMsMin, curLevel.moleUpMsMax);
         const tid = setTimeout(function () {
           if (holes[idx].up) { setHoleUp(idx, false); activeCount--; }
         }, upMs);
@@ -213,6 +241,34 @@ function randBetween(min, max) { return min + Math.random() * (max - min); }
     scheduleSpawn();
   }
 
+  function showToast(text) {
+    toastEl.textContent = text;
+    toastEl.classList.remove('show');
+    void toastEl.offsetWidth;
+    toastEl.classList.add('show');
+    if (timers.toastTimeout) clearTimeout(timers.toastTimeout);
+    timers.toastTimeout = setTimeout(function () { toastEl.classList.remove('show'); }, 1400);
+  }
+
+  function applyLevelUp() {
+    curLevel = CONFIG.difficultyLevels[levelIdx];
+    levelEl.textContent = 'Lv.' + (levelIdx + 1);
+    levelEl.classList.remove('wam-level-up');
+    void levelEl.offsetWidth;
+    levelEl.classList.add('wam-level-up');
+
+    if (curLevel.bonusSeconds > 0) {
+      timeLeft += curLevel.bonusSeconds;
+      timeEl.textContent = String(timeLeft);
+      timeWrap.classList.remove('wam-bonus');
+      void timeWrap.offsetWidth;
+      timeWrap.classList.add('wam-bonus');
+      showToast('🎉 升級！+' + curLevel.bonusSeconds + '秒，難度提升');
+    } else {
+      showToast('🎉 升級！難度提升');
+    }
+  }
+
   function onHoleClick(i) {
     if (!playing) return;
     if (holes[i].up) {
@@ -220,6 +276,12 @@ function randBetween(min, max) { return min + Math.random() * (max - min); }
       activeCount--;
       score++;
       scoreEl.textContent = score;
+
+      const newLevelIdx = levelIndexForScore(score, CONFIG.difficultyLevels);
+      if (newLevelIdx !== levelIdx) {
+        levelIdx = newLevelIdx;
+        applyLevelUp();
+      }
     }
   }
 
@@ -228,9 +290,13 @@ function randBetween(min, max) { return min + Math.random() * (max - min); }
     holes.forEach((h, i) => setHoleUp(i, false));
     score = 0;
     activeCount = 0;
+    levelIdx = 0;
+    curLevel = CONFIG.difficultyLevels[0];
     timeLeft = CONFIG.gameDurationSec;
     scoreEl.textContent = '0';
     timeEl.textContent = String(timeLeft);
+    levelEl.textContent = 'Lv.1';
+    toastEl.classList.remove('show');
     ratingEl.textContent = '';
     playing = true;
     startBtn.disabled = true;

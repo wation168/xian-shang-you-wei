@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>五子棋遊戲 - 免費線上五子棋，可對戰電腦或雙人對戰 | SoftGlow</title>
+<meta name="description" content="免費線上五子棋遊戲，15x15棋盤，可以單人對戰電腦AI，也可以兩人輪流對戰，先連成5顆棋子（橫、直、斜皆可）的人獲勝。純網頁小遊戲，免下載免安裝。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/gomoku.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/gomoku.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/gomoku.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "五子棋遊戲", "url": "https://softglow-ai.com/games/gomoku.html", "description": "免費線上五子棋遊戲，15x15棋盤，可對戰電腦AI或雙人對戰，先連成5顆棋子的人獲勝。", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "五子棋怎麼玩？", "acceptedAnswer": {"@type": "Answer", "text": "棋盤是15x15的格子，輪到你時直接點擊任一個空格，棋子就會落在你點的那個位置（不會像四子棋一樣受重力影響掉到最底端）。誰先讓自己的5顆棋子連成一直線（橫、直、斜線皆可）就獲勝。"}}, {"@type": "Question", "name": "這個版本一個人也能玩嗎？", "acceptedAnswer": {"@type": "Answer", "text": "可以。預設是「對戰電腦」模式，電腦會自動下棋，一個人就能玩；如果想跟朋友面對面對戰，也可以切換成「本機雙人」模式，兩人輪流點擊同一個畫面下棋，不需要註冊或連線。"}}, {"@type": "Question", "name": "電腦AI很難打贏嗎？", "acceptedAnswer": {"@type": "Answer", "text": "電腦會即時判斷盤面上的威脅：如果自己能一步獲勝一定會下，如果你快要連成5顆一定會擋，其餘時候會用棋型評分（例如「活三」「衝四」）來挑選最有威脅性的落點，屬於中等偏上的難度，需要同時注意多個方向的連線才有機會獲勝。"}}, {"@type": "Question", "name": "為什麼我點的位置棋子沒有出現在那裡？", "acceptedAnswer": {"@type": "Answer", "text": "五子棋是「點哪裡、棋子就落在哪裡」，不會有重力效果。如果棋子沒出現在你點的位置，通常是因為那格已經有棋子了（無法重複下子），或是遊戲還沒開始、正輪到電腦思考中，這幾種情況點擊都不會有反應。"}}, {"@type": "Question", "name": "五子棋是四子棋嗎？兩個有什麼不同？", "acceptedAnswer": {"@type": "Answer", "text": "不一樣。四子棋（Connect Four）是7x6的棋盤，棋子投進某一欄後會受重力落到最底端，連成4顆獲勝；五子棋則是15x15棋盤，可以直接點擊任何空格放棋子，不受重力影響，需要連成5顆才獲勝。兩者規則跟策略完全不同。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="gomoku">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="zh-TW">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<style>
+.gk-mode-row{display:flex;justify-content:center;gap:8px;margin-bottom:14px}
+.gk-mode-btn{border:1px solid var(--game-border);background:#fff;color:#64748b;border-radius:20px;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer}
+.gk-mode-btn.active{background:var(--game-primary);border-color:var(--game-primary);color:#fff}
+.gk-topbar{display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f;min-height:22px}
+.gk-turn-dot{width:16px;height:16px;border-radius:50%;display:inline-block;vertical-align:middle;border:2px solid #94a3b8;box-sizing:border-box}
+.gk-board{display:grid;gap:1px;background:#b9895a;border:3px solid #8b5e34;border-radius:6px;padding:1px;width:100%;max-width:420px;margin:0 auto;aspect-ratio:1/1;transition:opacity .15s}
+.gk-board.thinking{opacity:.7;pointer-events:none}
+.gk-cell{position:relative;aspect-ratio:1/1;background:#deb877;cursor:pointer}
+.gk-stone{position:absolute;left:8%;top:8%;width:84%;height:84%;border-radius:50%;pointer-events:none;opacity:0;transform:scale(.5);transition:opacity .1s,transform .1s}
+.gk-stone.p1{opacity:1;transform:scale(1);background:radial-gradient(circle at 35% 30%,#4b5563,#0f172a);box-shadow:0 2px 3px rgba(0,0,0,.5)}
+.gk-stone.p2{opacity:1;transform:scale(1);background:radial-gradient(circle at 35% 30%,#ffffff,#cbd5e1);box-shadow:0 2px 3px rgba(0,0,0,.4)}
+.gk-stone.win{box-shadow:0 0 0 3px #22c55e,0 2px 4px rgba(0,0,0,.4)}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/">工具</a>
+    <a href="/games/">遊戲</a>
+    <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
+    <a href="/">首頁</a>
+  </div>
+  <div class="nav-actions">
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> &gt; <a href="/games/">遊戲</a> &gt; 五子棋</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>五子棋遊戲</h1>
+    <p class="game-subtitle">15x15棋盤，點擊任一空格即可下子，先連成5顆棋子（橫、直、斜皆可）的人獲勝</p>
+
+    <div class="gk-mode-row">
+      <button class="gk-mode-btn active" id="gkModeAiBtn" onclick="gkSetMode('ai')">🤖 對戰電腦</button>
+      <button class="gk-mode-btn" id="gkMode2pBtn" onclick="gkSetMode('2p')">🧑‍🤝‍🧑 本機雙人</button>
+    </div>
+
+    <div class="gk-topbar">
+      <span id="gkTurnText">輪到 玩家1</span>
+      <span class="gk-turn-dot" id="gkTurnDot" style="background:#0f172a"></span>
+    </div>
+
+    <div class="gk-board" id="gkBoard"></div>
+
+    <div class="game-rating" id="gkRating"></div>
+
+    <div class="game-score-row">
+      <div class="game-score-tile"><div class="gs-label" id="gkP1Label">玩家1勝場</div><div class="gs-value" id="gkP1Wins">0</div></div>
+      <div class="game-score-tile"><div class="gs-label" id="gkP2Label">電腦勝場</div><div class="gs-value" id="gkP2Wins">0</div></div>
+    </div>
+
+    <div class="game-controls">
+      <button class="game-btn" onclick="gkRestart()">🔄 重新開始這局</button>
+      <button class="game-btn secondary" onclick="shareResult()">📤 分享成績</button>
+    </div>
+  </div>
+
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>五子棋是什麼</h2><p>五子棋（Gomoku）是一款歷史悠久的雙人策略棋盤遊戲，在15x15（或更大）的棋盤格線交叉點上輪流放置棋子，率先讓自己的棋子連成橫、直或斜的5連線就獲勝。跟需要專用棋盤的圍棋不同，五子棋規則單純、上手極快，卻同時包含很深的戰術思考，是全世界都很受歡迎的益智對戰遊戲。</p><h2>跟四子棋有什麼不同</h2><p>五子棋和四子棋（Connect Four）雖然名字很像，玩法卻完全不同：四子棋是7x6棋盤，棋子投進某一欄後會受重力落到最底端，只能決定「欄」不能決定「格」；五子棋則是15x15棋盤，可以直接點擊任何空格放棋子，完全不受重力限制，落子位置的自由度大很多，需要連成5顆（不是4顆）才算獲勝。</p></article>
+
+  <article class="article"><h2>怎麼玩</h2><p>遊戲開始後畫面會顯示目前輪到哪位玩家，直接點擊棋盤上任一個空格，棋子就會準確地出現在你點的那個位置。持續輪流下棋，直到有人連成5顆棋子（各方向皆可）獲勝，或棋盤填滿仍無人連線則平手，這時可以按「重新開始這局」再來一輪，勝場數會累計顯示。上方可以切換「對戰電腦」或「本機雙人」兩種模式，一個人也能玩，想找朋友對戰也可以。</p><h2>新手常見策略</h2><p>優先搶佔棋盤正中央附近的位置，因為中央能發展的連線方向最多；同時留意對手是否已經形成「活三」（兩端都還開放的3顆連線），這種棋型下一步很容易變成必勝的「活四」，一定要優先阻擋。同時在多個方向佈局威脅（讓對手顧此失彼），是五子棋進攻的核心技巧。</p></article>
+
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>常見問題</h2>
+  <div class="faq-item"><div class="faq-q">五子棋怎麼玩？</div><div class="faq-a">棋盤是15x15的格子，輪到你時直接點擊任一個空格，棋子就會落在你點的那個位置（不會像四子棋一樣受重力影響掉到最底端）。誰先讓自己的5顆棋子連成一直線（橫、直、斜線皆可）就獲勝。</div></div>
+  <div class="faq-item"><div class="faq-q">這個版本一個人也能玩嗎？</div><div class="faq-a">可以。預設是「對戰電腦」模式，電腦會自動下棋，一個人就能玩；如果想跟朋友面對面對戰，也可以切換成「本機雙人」模式，兩人輪流點擊同一個畫面下棋，不需要註冊或連線。</div></div>
+  <div class="faq-item"><div class="faq-q">電腦AI很難打贏嗎？</div><div class="faq-a">電腦會即時判斷盤面上的威脅：如果自己能一步獲勝一定會下，如果你快要連成5顆一定會擋，其餘時候會用棋型評分（例如「活三」「衝四」）來挑選最有威脅性的落點，屬於中等偏上的難度，需要同時注意多個方向的連線才有機會獲勝。</div></div>
+  <div class="faq-item"><div class="faq-q">為什麼我點的位置棋子沒有出現在那裡？</div><div class="faq-a">五子棋是「點哪裡、棋子就落在哪裡」，不會有重力效果。如果棋子沒出現在你點的位置，通常是因為那格已經有棋子了（無法重複下子），或是遊戲還沒開始、正輪到電腦思考中，這幾種情況點擊都不會有反應。</div></div>
+  <div class="faq-item"><div class="faq-q">五子棋是四子棋嗎？兩個有什麼不同？</div><div class="faq-a">不一樣。四子棋（Connect Four）是7x6的棋盤，棋子投進某一欄後會受重力落到最底端，連成4顆獲勝；五子棋則是15x15棋盤，可以直接點擊任何空格放棋子，不受重力影響，需要連成5顆才算獲勝。兩者規則跟策略完全不同。</div></div>
+  </section>
+
+  <div class="more-tools"><h3>相關遊戲</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/reaction-time-test.html">反應力測試</a>
+    <a class="tool-pill" href="/games/whack-a-mole.html">打地鼠遊戲</a>
+    <a class="tool-pill" href="/games/memory-match.html">記憶翻牌遊戲</a>
+    <a class="tool-pill" href="/games/piano-tiles.html">鋼琴塊遊戲</a>
+    <a class="tool-pill" href="/games/snake.html">貪食蛇遊戲</a>
+    <a class="tool-pill" href="/games/">更多遊戲</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>更多遊戲</h3><a class="tool-pill" href="/games/" style="display:block;margin-top:8px">瀏覽全部遊戲 →</a></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/home/zh-TW/privacy.html">Privacy</a><a href="/home/zh-TW/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// 五子棋 — 遵循《新工具規劃守則.md》第七節：
+//   7-1 CONFIG集中管理棋盤大小/連線長度/棋子顏色/AI思考延遲等所有可調數值
+//   7-2 純函式（checkWin/cellThreatScore/pickAiMove等）完全不碰DOM，
+//        AI邏輯可以獨立測試、重用
+//   7-3 防錯：格子已有棋子、遊戲已結束、電腦思考中點擊一律無效
+//   7-4 資源清理：電腦「思考中」的setTimeout存id，重新開始/切換模式/
+//        離開頁面前統一清除
+//
+//   2026/08/15 全部重寫：帥哥鴻反饋「四子棋是錯的，我要的是五子棋，
+//   而且點擊時放不到對應的位置，每次都出現在最低的位置」——
+//   原本的四子棋（Connect Four，7x6棋盤、棋子會因重力落到欄位最底端）
+//   從一開始就不是使用者要的遊戲。這裡改成正確的五子棋：15x15棋盤、
+//   點哪裡棋子就精確出現在那裡（不受重力影響）、連成5顆才獲勝。
+//   AI改用即時威脅評分（活三/衝四等棋型分數）+ 立即獲勝/立即防守
+//   的判斷邏輯（不是搬用四子棋的minimax，因為15x15棋盤搜尋空間太大
+//   不適合深度搜尋），已用Node.js單元測試驗證：橫/直/斜恰好5連線才
+//   判定獲勝（4連線不算）、點擊位置與棋子落點完全一致、AI會正確
+//   把握自己的獲勝機會、擋下對手的獲勝威脅、開局佔中央、並會處理
+//   對手的「活三」局面。
+// ══════════════════════════════════════════════════════════
+const CONFIG = {
+  boardSize: 15,
+  winLength: 5,
+  playerClass: { 1: 'p1', 2: 'p2' },
+  playerColor: { 1: '#0f172a', 2: '#ffffff' },
+  playerName: { ai: { 1: '你', 2: '電腦' }, '2p': { 1: '玩家1', 2: '玩家2' } },
+  aiThinkMsMin: 350,
+  aiThinkMsMax: 650,
+  copyRevertMs: 1500,
+  adLoadDelayMs: 2000
+};
+const DIRS = [[1, 0], [0, 1], [1, 1], [1, -1]];
+
+// ── 純函式：不碰DOM，只操作資料 ──
+function createEmptyBoard(size) {
+  return Array.from({ length: size }, function () { return Array(size).fill(0); });
+}
+function inBounds(x, y, size) { return x >= 0 && x < size && y >= 0 && y < size; }
+
+function checkWin(board, x, y, player, size, winLen) {
+  for (const [dx, dy] of DIRS) {
+    const cells = [[x, y]];
+    for (const sign of [1, -1]) {
+      let cx = x + dx * sign, cy = y + dy * sign;
+      while (inBounds(cx, cy, size) && board[cy][cx] === player) {
+        cells.push([cx, cy]);
+        cx += dx * sign; cy += dy * sign;
+      }
+    }
+    if (cells.length >= winLen) return cells;
+  }
+  return null;
+}
+function isBoardFull(board) {
+  return board.every(function (row) { return row.every(function (v) { return v !== 0; }); });
+}
+function countDirection(board, x, y, dx, dy, player, size) {
+  let n = 0, cx = x + dx, cy = y + dy;
+  while (inBounds(cx, cy, size) && board[cy][cx] === player) { n++; cx += dx; cy += dy; }
+  return n;
+}
+function patternScore(count, openEnds, winLen) {
+  if (count >= winLen) return 100000;
+  if (count === winLen - 1 && openEnds === 2) return 10000;
+  if (count === winLen - 1 && openEnds === 1) return 1000;
+  if (count === winLen - 2 && openEnds === 2) return 800;
+  if (count === winLen - 2 && openEnds === 1) return 150;
+  if (count === winLen - 3 && openEnds === 2) return 100;
+  if (count === winLen - 3 && openEnds === 1) return 20;
+  if (openEnds === 2) return 10;
+  return 1;
+}
+function lineScoreAt(board, size, x, y, dx, dy, player, winLen) {
+  const fwd = countDirection(board, x, y, dx, dy, player, size);
+  const bwd = countDirection(board, x, y, -dx, -dy, player, size);
+  const count = 1 + fwd + bwd;
+  const posEndX = x + dx * (fwd + 1), posEndY = y + dy * (fwd + 1);
+  const negEndX = x - dx * (bwd + 1), negEndY = y - dy * (bwd + 1);
+  let openEnds = 0;
+  if (inBounds(posEndX, posEndY, size) && board[posEndY][posEndX] === 0) openEnds++;
+  if (inBounds(negEndX, negEndY, size) && board[negEndY][negEndX] === 0) openEnds++;
+  return patternScore(count, openEnds, winLen);
+}
+function cellThreatScore(board, size, x, y, player, winLen) {
+  let total = 0;
+  for (const [dx, dy] of DIRS) total += lineScoreAt(board, size, x, y, dx, dy, player, winLen);
+  return total;
+}
+function placeStoneImmutable(board, x, y, player) {
+  const nb = board.map(function (row) { return row.slice(); });
+  nb[y][x] = player;
+  return nb;
+}
+function candidateCells(board, size) {
+  const has = board.some(function (row) { return row.some(function (v) { return v !== 0; }); });
+  if (!has) return [{ x: Math.floor(size / 2), y: Math.floor(size / 2) }];
+  const seen = new Set();
+  const out = [];
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      if (board[y][x] !== 0) continue;
+      let near = false;
+      for (let dy = -2; dy <= 2 && !near; dy++) {
+        for (let dx = -2; dx <= 2 && !near; dx++) {
+          const nx = x + dx, ny = y + dy;
+          if (inBounds(nx, ny, size) && board[ny][nx] !== 0) near = true;
+        }
+      }
+      if (near) { const k = x + ',' + y; if (!seen.has(k)) { seen.add(k); out.push({ x: x, y: y }); } }
+    }
+  }
+  return out;
+}
+// AI：立即獲勝優先 → 立即防守優先 → 威脅評分（攻擊分+防守分*1.1）挑最高分的格子
+function pickAiMove(board, size, aiPlayer, humanPlayer, winLen) {
+  const candidates = candidateCells(board, size);
+
+  for (const c of candidates) {
+    if (checkWin(placeStoneImmutable(board, c.x, c.y, aiPlayer), c.x, c.y, aiPlayer, size, winLen)) return c;
+  }
+  const blockers = [];
+  for (const c of candidates) {
+    if (checkWin(placeStoneImmutable(board, c.x, c.y, humanPlayer), c.x, c.y, humanPlayer, size, winLen)) blockers.push(c);
+  }
+  if (blockers.length) {
+    blockers.sort(function (a, b) {
+      return cellThreatScore(board, size, b.x, b.y, aiPlayer, winLen) - cellThreatScore(board, size, a.x, a.y, aiPlayer, winLen);
+    });
+    return blockers[0];
+  }
+  let best = candidates[0], bestScore = -Infinity;
+  for (const c of candidates) {
+    const off = cellThreatScore(board, size, c.x, c.y, aiPlayer, winLen);
+    const def = cellThreatScore(board, size, c.x, c.y, humanPlayer, winLen);
+    const score = off + def * 1.1;
+    if (score > bestScore) { bestScore = score; best = c; }
+  }
+  return best;
+}
+
+(function () {
+  const boardEl    = document.getElementById('gkBoard');
+  const turnText   = document.getElementById('gkTurnText');
+  const turnDot    = document.getElementById('gkTurnDot');
+  const ratingEl   = document.getElementById('gkRating');
+  const p1WinsEl   = document.getElementById('gkP1Wins');
+  const p2WinsEl   = document.getElementById('gkP2Wins');
+  const p1LabelEl  = document.getElementById('gkP1Label');
+  const p2LabelEl  = document.getElementById('gkP2Label');
+  const modeAiBtn  = document.getElementById('gkModeAiBtn');
+  const mode2pBtn  = document.getElementById('gkMode2pBtn');
+
+  boardEl.style.gridTemplateColumns = 'repeat(' + CONFIG.boardSize + ', 1fr)';
+  boardEl.style.gridTemplateRows = 'repeat(' + CONFIG.boardSize + ', 1fr)';
+
+  let board = createEmptyBoard(CONFIG.boardSize);
+  let current = 1;
+  let gameOver = false;
+  let wins = { ai: { 1: 0, 2: 0 }, '2p': { 1: 0, 2: 0 } };
+  let cellEls = [];
+  let mode = 'ai'; // 'ai' | '2p'
+  let aiTimerId = null;
+
+  function names() { return CONFIG.playerName[mode]; }
+
+  function clearAiTimer() {
+    if (aiTimerId) { clearTimeout(aiTimerId); aiTimerId = null; }
+    boardEl.classList.remove('thinking');
+  }
+
+  function render() {
+    boardEl.innerHTML = '';
+    cellEls = [];
+    for (let y = 0; y < CONFIG.boardSize; y++) {
+      const rowEls = [];
+      for (let x = 0; x < CONFIG.boardSize; x++) {
+        const cell = document.createElement('div');
+        cell.className = 'gk-cell';
+        const stone = document.createElement('div');
+        stone.className = 'gk-stone';
+        cell.appendChild(stone);
+        // 直接綁定該格自己的(x,y)，點擊時棋子就精確落在這一格，不做任何重力/位移計算
+        cell.addEventListener('click', function () { onCellClick(x, y); });
+        boardEl.appendChild(cell);
+        rowEls.push({ cell: cell, stone: stone });
+      }
+      cellEls.push(rowEls);
+    }
+    syncBoardUI();
+  }
+
+  function syncBoardUI(winCells) {
+    for (let y = 0; y < CONFIG.boardSize; y++) {
+      for (let x = 0; x < CONFIG.boardSize; x++) {
+        const v = board[y][x];
+        const stone = cellEls[y][x].stone;
+        stone.className = 'gk-stone' + (v ? ' ' + CONFIG.playerClass[v] : '');
+      }
+    }
+    if (winCells) {
+      winCells.forEach(function ([x, y]) { cellEls[y][x].stone.classList.add('win'); });
+    }
+  }
+
+  function updateTurnUI() {
+    if (mode === 'ai' && current === 2) {
+      turnText.textContent = '🤖 電腦思考中…';
+    } else {
+      turnText.textContent = '輪到 ' + names()[current];
+    }
+    turnDot.style.background = CONFIG.playerColor[current];
+  }
+
+  function updateLabels() {
+    p1LabelEl.textContent = names()[1] + '勝場';
+    p2LabelEl.textContent = names()[2] + '勝場';
+    p1WinsEl.textContent = String(wins[mode][1]);
+    p2WinsEl.textContent = String(wins[mode][2]);
+  }
+
+  function finishMove(x, y) {
+    const winCells = checkWin(board, x, y, current, CONFIG.boardSize, CONFIG.winLength);
+    if (winCells) {
+      gameOver = true;
+      clearAiTimer();
+      wins[mode][current]++;
+      updateLabels();
+      ratingEl.textContent = '🎉 ' + names()[current] + ' 獲勝！';
+      syncBoardUI(winCells);
+      window._gkLastResult = names()[current] + ' 獲勝';
+      return true;
+    }
+    if (isBoardFull(board)) {
+      gameOver = true;
+      clearAiTimer();
+      ratingEl.textContent = '🤝 平手！棋盤已滿';
+      window._gkLastResult = '平手';
+      return true;
+    }
+    return false;
+  }
+
+  function onCellClick(x, y) {
+    if (gameOver) return; // 7-3 防錯：遊戲已結束
+    if (mode === 'ai' && current === 2) return; // 7-3 防錯：電腦思考中禁止玩家插手
+    if (board[y][x] !== 0) return; // 7-3 防錯：這格已經有棋子，不能重複下
+    board[y][x] = current;
+    syncBoardUI();
+    if (finishMove(x, y)) return;
+    current = current === 1 ? 2 : 1;
+    updateTurnUI();
+    if (mode === 'ai' && current === 2) scheduleAiMove();
+  }
+
+  function scheduleAiMove() {
+    boardEl.classList.add('thinking');
+    const delay = CONFIG.aiThinkMsMin + Math.random() * (CONFIG.aiThinkMsMax - CONFIG.aiThinkMsMin);
+    aiTimerId = setTimeout(function () {
+      aiTimerId = null;
+      boardEl.classList.remove('thinking');
+      if (gameOver) return;
+      const move = pickAiMove(board, CONFIG.boardSize, 2, 1, CONFIG.winLength);
+      board[move.y][move.x] = 2;
+      syncBoardUI();
+      if (finishMove(move.x, move.y)) return;
+      current = 1;
+      updateTurnUI();
+    }, delay);
+  }
+
+  function restartInternal() {
+    clearAiTimer();
+    board = createEmptyBoard(CONFIG.boardSize);
+    current = 1;
+    gameOver = false;
+    ratingEl.textContent = '';
+    updateLabels();
+    render();
+    updateTurnUI();
+  }
+
+  function setModeInternal(m) {
+    if (mode === m) return;
+    mode = m;
+    modeAiBtn.classList.toggle('active', m === 'ai');
+    mode2pBtn.classList.toggle('active', m === '2p');
+    restartInternal();
+  }
+
+  window.gkRestart = restartInternal;
+  window.gkSetMode = setModeInternal;
+  restartInternal();
+
+  // 7-4 資源清理：離開頁面前清掉電腦「思考中」的計時器
+  window.addEventListener('beforeunload', clearAiTimer);
+})();
+
+function shareResult() {
+  const text = window._gkLastResult
+    ? ('我在SoftGlow五子棋跟朋友對戰，結果：' + window._gkLastResult + '！來下一局吧')
+    : '來玩玩五子棋，跟朋友輪流對戰！';
+  if (navigator.share) {
+    navigator.share({ title: document.title, text: text, url: location.href }).catch(function () {});
+  } else {
+    navigator.clipboard.writeText(text + ' ' + location.href);
+    const b = event.target;
+    const old = b.textContent;
+    b.textContent = '已複製！';
+    setTimeout(function () { b.textContent = old; }, CONFIG.copyRevertMs);
+  }
+}
+document.querySelectorAll('.faq-q').forEach(function (q) {
+  q.addEventListener('click', function () { this.parentElement.classList.toggle('open'); });
+});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},CONFIG.adLoadDelayMs);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

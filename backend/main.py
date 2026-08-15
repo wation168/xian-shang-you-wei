@@ -8492,11 +8492,14 @@ def sitemap():
                         locs.append(f'  <url><loc>{FRONTEND_URL}/lottery/{_lang_dir}/{_lf}</loc><changefreq>daily</changefreq><priority>0.6</priority></url>')
 
     # ── Games 小遊戲專區（2026/08/15 新增，動態掃描磁碟）──
+    # connect-four.html 已改成導向 gomoku.html 的redirect頁（不是真的遊戲頁面），
+    # sitemap不應該收錄，避免搜尋引擎把一個空的導向頁當成正式頁面索引。
     _games_base = os.path.join(os.path.dirname(__file__), "frontend", "games")
+    _games_sitemap_exclude = {"index.html", "connect-four.html"}
     if os.path.isdir(_games_base):
         locs.append(f"  <url><loc>{FRONTEND_URL}/games/</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>")
         for _gmf in sorted(os.listdir(_games_base)):
-            if _gmf.endswith(".html") and _gmf != "index.html":
+            if _gmf.endswith(".html") and _gmf not in _games_sitemap_exclude:
                 locs.append(f"  <url><loc>{FRONTEND_URL}/games/{_gmf}</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>")
 
     # 熱門股優先 priority 0.8，其餘 0.6

@@ -91,11 +91,28 @@ img{max-width:100%;height:auto}
 .article-card h3{font-size:16px;font-weight:600;color:#1A202C;margin-bottom:8px;line-height:1.4}
 .article-card p{font-size:13px;color:#718096;line-height:1.7}
 
+/* Entry Grid — 四大服務入口，2026/08/15 新增。
+   四個入口統一大小、統一樣式，各自獨立醒目的按鈕區塊，
+   不要讓任何一個入口被文字或小連結淹沒。*/
+.entry-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:1080px;margin:0 auto 32px;padding:0 20px}
+.entry-card{display:block;text-decoration:none;border-radius:16px;padding:26px 28px;color:#fff;transition:transform 0.2s,box-shadow 0.2s}
+.entry-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.18);text-decoration:none}
+.entry-card .entry-icon{font-size:26px;margin-bottom:8px}
+.entry-card .entry-title{font-size:19px;font-weight:700;margin-bottom:6px}
+.entry-card .entry-desc{font-size:13px;opacity:0.92;line-height:1.6;margin-bottom:14px;min-height:42px}
+.entry-card .entry-cta{display:inline-block;background:rgba(255,255,255,0.22);padding:8px 18px;border-radius:8px;font-weight:600;font-size:14px}
+.entry-card.stock{background:linear-gradient(135deg,#059669 0%,#2563EB 100%)}
+.entry-card.games{background:linear-gradient(135deg,#f59e0b 0%,#ef4444 100%)}
+.entry-card.tools{background:linear-gradient(135deg,#2563EB 0%,#7C3AED 100%)}
+.entry-card.lottery{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)}
+@media(max-width:768px){.entry-grid{grid-template-columns:1fr}}
+
 /* Platform Cards */
 .platform-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
 .platform-card{border:1px solid #E2E8F0;border-radius:12px;padding:28px;position:relative;overflow:hidden}
 .platform-card::before{content:"";position:absolute;top:0;left:0;right:0;height:4px}
 .platform-card.stock::before{background:linear-gradient(90deg,#10B981,#2563EB)}
+.platform-card.games::before{background:linear-gradient(90deg,#f59e0b,#ef4444)}
 .platform-card.lottery::before{background:linear-gradient(90deg,#F59E0B,#EF4444)}
 .platform-card.tools::before{background:linear-gradient(90deg,#2563EB,#7C3AED)}
 .platform-card.deep::before{background:linear-gradient(90deg,#22c55e,#059669)}
@@ -151,6 +168,7 @@ img{max-width:100%;height:auto}
   <a href="/" class="nav-logo">Soft<span>Glow</span></a>
   <div class="nav-links">
     <a href="/tools/">工具</a>
+    <a href="/games/">遊戲</a>
     <a href="/blog/">教學</a>
     <a href="/patterns/index.html">K線型態</a>
     <a href="/stock/">台股分析</a>
@@ -200,31 +218,34 @@ img{max-width:100%;height:auto}
 </div>
 </section>
 
-<!-- Tool Categories -->
-<!-- Stock Analysis Banner -->
-<div style="max-width:1080px;margin:0 auto 16px;padding:0 20px">
-<a href="/landing.html" style="text-decoration:none;display:block;background:linear-gradient(135deg,#059669 0%,#2563EB 100%);border-radius:16px;padding:28px 32px;color:#fff;transition:transform 0.2s,box-shadow 0.2s">
-<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
-<div>
-<div style="font-size:22px;font-weight:700;margin-bottom:6px">🇹🇼 台股個股技術分析 — 多空雷達 · K線型態 · 支撐壓力</div>
-<div style="font-size:14px;opacity:0.9">輸入代號，AI 自動分析 1,700+ 支台股，產出完整報告：進出場訊號、損益比、葛蘭碧買點、法人籌碼</div>
-</div>
-<div style="background:rgba(255,255,255,0.2);padding:10px 24px;border-radius:8px;font-weight:600;font-size:15px;white-space:nowrap">免費分析 →</div>
-</div>
-</a>
-</div>
-
-<!-- Lottery Banner -->
-<div style="max-width:1080px;margin:0 auto 40px;padding:0 20px">
-<a href="/lottery/" style="text-decoration:none;display:block;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:16px;padding:28px 32px;color:#fff;transition:transform 0.2s,box-shadow 0.2s">
-<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
-<div>
-<div style="font-size:22px;font-weight:700;margin-bottom:6px">🎰 全球 15 國彩票開獎 ＋ 12 種智慧選號工具</div>
-<div style="font-size:14px;opacity:0.9">威力彩・大樂透・Powerball・Mega Millions・EuroMillions — 星座、生日、夢境、AI、八字、生肖等選號方式</div>
-</div>
-<div style="background:rgba(255,255,255,0.2);padding:10px 24px;border-radius:8px;font-weight:600;font-size:15px;white-space:nowrap">查看開獎 →</div>
-</div>
-</a>
+<!-- 四大服務入口（2026/08/15 新增）：台股分析／遊戲／熱門工具／彩票，
+     四個等重、獨立、醒目的按鈕區塊，取代原本只有2個銀行式長條banner、
+     其餘功能被小連結淹沒的問題 -->
+<div class="entry-grid">
+  <a href="/landing.html" class="entry-card stock">
+    <div class="entry-icon">🇹🇼</div>
+    <div class="entry-title">台股個股技術分析</div>
+    <div class="entry-desc">輸入代號，AI 自動分析 1,700+ 支台股，產出多空雷達、K線型態、支撐壓力報告</div>
+    <span class="entry-cta">免費分析 →</span>
+  </a>
+  <a href="/games/" class="entry-card games">
+    <div class="entry-icon">🎮</div>
+    <div class="entry-title">免費線上小遊戲</div>
+    <div class="entry-desc">反應力測試、打地鼠、記憶翻牌、鋼琴塊、五子棋、貪食蛇，開瀏覽器就能玩</div>
+    <span class="entry-cta">立即玩 →</span>
+  </a>
+  <a href="#hot-tools" class="entry-card tools">
+    <div class="entry-icon">🔥</div>
+    <div class="entry-title">熱門常用工具</div>
+    <div class="entry-desc">複利計算、房貸試算、投資報酬率等最多人使用的免費計算工具</div>
+    <span class="entry-cta">看熱門工具 →</span>
+  </a>
+  <a href="/lottery/" class="entry-card lottery">
+    <div class="entry-icon">🎰</div>
+    <div class="entry-title">全球彩票開獎</div>
+    <div class="entry-desc">威力彩、大樂透、Powerball 等 15 國彩票開獎＋12 種智慧選號工具</div>
+    <span class="entry-cta">查看開獎 →</span>
+  </a>
 </div>
 
 <div style="max-width:1080px;margin:0 auto 20px;padding:0 20px;text-align:center">
@@ -297,7 +318,7 @@ img{max-width:100%;height:auto}
 <!-- Featured Articles -->
 
   <!-- 熱門工具 -->
-  <section class="section" style="padding:48px 0 32px;">
+  <section class="section" id="hot-tools" style="padding:48px 0 32px;scroll-margin-top:70px;">
     <div class="container">
       <div style="max-width:1080px;margin:20px auto;padding:0 20px;text-align:center">
 <ins class="adsbygoogle" style="display:block;min-width:280px;min-height:90px" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins>
@@ -411,6 +432,11 @@ img{max-width:100%;height:auto}
       <h3>📐 300+ 免費線上工具</h3>
       <p>涵蓋投資理財、貸款、保險、退休規劃、醫療費用、創業商務等 20 大分類，每個工具都附帶 1,200 字以上的原理說明文章與常見問答，不只是計算器，更是學習財務知識的教學平台。</p>
       <a href="/tools/" class="link">瀏覽所有工具 →</a>
+    </div>
+    <div class="platform-card games">
+      <h3>🎮 免費線上小遊戲</h3>
+      <p>反應力測試、打地鼠、記憶翻牌、鋼琴塊、五子棋、貪食蛇等純網頁小遊戲，免下載免安裝，開瀏覽器就能玩，成績可以直接分享給朋友比較。</p>
+      <a href="/games/" class="link">立即玩遊戲 →</a>
     </div>
     <div class="platform-card lottery">
       <h3>🎰 全球彩票開獎資訊</h3>

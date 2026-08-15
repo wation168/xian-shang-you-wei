@@ -21,12 +21,18 @@
 <meta name="sg-lang" content="zh-TW">
 <link rel="stylesheet" href="/js/cookie-consent.css">
 <style>
-.pt-topbar{display:flex;justify-content:center;gap:24px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f}
+.pt-topbar{display:flex;justify-content:center;align-items:center;gap:18px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f;flex-wrap:wrap}
+.pt-level-badge{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800;transition:transform .3s}
+.pt-level-badge.pt-level-up{animation:ptLevelUp .5s ease}
+@keyframes ptLevelUp{0%{transform:scale(1)}40%{transform:scale(1.35);box-shadow:0 0 14px rgba(245,158,11,.8)}100%{transform:scale(1)}}
+/* 2026/08/15 反饋修正：帥哥鴻反饋「接觸的靈敏度不夠」——
+   原本只有小方塊本身可點擊，改成整個直排都是感應區，
+   並改用pointerdown（比click更快、無延遲），且touch-action:none避免手機把點擊誤判成滑動。 */
 .pt-board{position:relative;width:100%;max-width:340px;aspect-ratio:3/4;margin:0 auto;background:#1e293b;border-radius:12px;overflow:hidden;display:grid;grid-template-columns:repeat(4,1fr)}
-.pt-col{position:relative;border-right:1px solid rgba(255,255,255,.08)}
+.pt-col{position:relative;border-right:1px solid rgba(255,255,255,.08);touch-action:none;cursor:pointer}
 .pt-col:last-child{border-right:none}
-.pt-tile{position:absolute;left:2px;right:2px;background:#0f172a;border-radius:4px;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.4)}
-.pt-tile:active{background:#334155}
+.pt-tile{position:absolute;left:2px;right:2px;background:#0f172a;border-radius:4px;pointer-events:none;box-shadow:0 2px 4px rgba(0,0,0,.4)}
+.pt-col:active .pt-tile{background:#334155}
 .pt-overlay{position:absolute;inset:0;background:rgba(15,23,42,.85);display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:20px}
 .pt-overlay.show{display:flex}
 .pt-overlay .pt-over-title{font-size:20px;font-weight:800;margin-bottom:8px}
@@ -61,6 +67,7 @@
 
     <div class="pt-topbar">
       <span>分數：<span id="ptScore">0</span></span>
+      <span class="pt-level-badge" id="ptLevelBadge">Lv.1</span>
     </div>
 
     <div class="pt-board" id="ptBoard">
@@ -83,6 +90,7 @@
 
     <div class="game-controls">
       <button class="game-btn" id="ptStartBtn" onclick="ptStart()">▶️ 開始遊戲</button>
+      <button class="game-btn secondary" id="ptSoundBtn" onclick="ptToggleSound()">🔊 音效</button>
       <button class="game-btn secondary" onclick="shareResult()">📤 分享成績</button>
     </div>
   </div>
@@ -109,7 +117,7 @@
     <a class="tool-pill" href="/games/reaction-time-test.html">反應力測試</a>
     <a class="tool-pill" href="/games/whack-a-mole.html">打地鼠遊戲</a>
     <a class="tool-pill" href="/games/memory-match.html">記憶翻牌遊戲</a>
-    <a class="tool-pill" href="/games/connect-four.html">四子棋遊戲</a>
+    <a class="tool-pill" href="/games/gomoku.html">五子棋遊戲</a>
     <a class="tool-pill" href="/games/snake.html">貪食蛇遊戲</a>
     <a class="tool-pill" href="/games/">更多遊戲</a>
   </div></div>
@@ -143,6 +151,16 @@ const CONFIG = {
   historyLimit: 5,
   copyRevertMs: 1500,
   adLoadDelayMs: 2000,
+  scorePerLevel: 10,
+  sound: {
+    enabled: true,
+    volume: 0.16,
+    noteFreqs: [523.25, 587.33, 659.25, 783.99],
+    noteDurationSec: 0.15,
+    missFreqStart: 300,
+    missFreqEnd: 70,
+    missDurationSec: 0.35
+  },
   ratings: [
     { max: 8,       label: '🐢 先熟悉一下節奏，多練幾次會更順手' },
     { max: 18,      label: '🙂 中等水準，掌握到基本節奏了' },
@@ -156,6 +174,61 @@ function computeRating(score) {
   const hit = CONFIG.ratings.find(r => score <= r.max);
   return hit ? hit.label : '';
 }
+function computeLevel(score) {
+  return 1 + Math.floor(score / CONFIG.scorePerLevel);
+}
+
+// ── 音效：Web Audio API 合成音，不需外部音檔（7-3 防錯：播放失敗不影響遊戲本身） ──
+let audioCtx = null;
+let soundOn = true;
+function getAudioCtx() {
+  if (!CONFIG.sound.enabled) return null;
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch (e) { audioCtx = null; }
+  }
+  if (audioCtx && audioCtx.state === 'suspended') { audioCtx.resume().catch(function () {}); }
+  return audioCtx;
+}
+function playTone(freq, durationSec) {
+  if (!soundOn) return;
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  try {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(CONFIG.sound.volume, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + durationSec);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + durationSec);
+  } catch (e) { /* 音效失敗不應中斷遊戲 */ }
+}
+function playMissSound() {
+  if (!soundOn) return;
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  try {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(CONFIG.sound.missFreqStart, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(CONFIG.sound.missFreqEnd, ctx.currentTime + CONFIG.sound.missDurationSec);
+    gain.gain.setValueAtTime(CONFIG.sound.volume, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + CONFIG.sound.missDurationSec);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + CONFIG.sound.missDurationSec);
+  } catch (e) { /* 音效失敗不應中斷遊戲 */ }
+}
+window.ptToggleSound = function () {
+  soundOn = !soundOn;
+  const btn = document.getElementById('ptSoundBtn');
+  if (btn) btn.textContent = soundOn ? '🔊 音效' : '🔇 靜音';
+  if (soundOn) getAudioCtx();
+};
 
 (function () {
   const board     = document.getElementById('ptBoard');
@@ -168,9 +241,11 @@ function computeRating(score) {
   const bestEl    = document.getElementById('ptBest');
   const historyEl = document.getElementById('ptHistory');
   const startBtn  = document.getElementById('ptStartBtn');
+  const levelEl   = document.getElementById('ptLevelBadge');
 
   let playing = false;
   let score = 0;
+  let level = 1;
   let speedPxPerSec = CONFIG.initialSpeedPxPerSec;
   let spawnIntervalMs = CONFIG.initialSpawnIntervalMs;
   let tiles = [];
@@ -195,7 +270,6 @@ function computeRating(score) {
     el.style.height = CONFIG.tileHeightPx + 'px';
     el.style.top = (-CONFIG.tileHeightPx) + 'px';
     const id = tileSeq++;
-    el.addEventListener('click', function () { onTileClick(id); });
     cols[col].appendChild(el);
     tiles.push({ id: id, col: col, el: el, topPx: -CONFIG.tileHeightPx });
 
@@ -203,17 +277,41 @@ function computeRating(score) {
     spawnTimerId = setTimeout(spawnTile, spawnIntervalMs);
   }
 
-  function onTileClick(id) {
+  function removeTile(t) {
+    const idx = tiles.indexOf(t);
+    if (idx !== -1) tiles.splice(idx, 1);
+    if (t.el && t.el.parentNode) t.el.parentNode.removeChild(t.el);
+  }
+
+  // 靈敏度修正：整個直排都是感應區，不再要求點在小方塊的精確像素範圍內。
+  // 一欄內若同時有多顆方塊，優先消掉最接近底部（最緊急）的那顆，符合玩家直覺。
+  function onColumnHit(col) {
     if (!playing) return;
-    const idx = tiles.findIndex(function (t) { return t.id === id; });
-    if (idx === -1) return;
-    const t = tiles[idx];
-    if (t.el.parentNode) t.el.parentNode.removeChild(t.el);
-    tiles.splice(idx, 1);
+    const candidates = tiles.filter(function (t) { return t.col === col; });
+    if (!candidates.length) return; // 7-3 防錯：該欄目前沒有方塊，點擊不計分也不報錯
+    candidates.sort(function (a, b) { return b.topPx - a.topPx; });
+    const t = candidates[0];
+    removeTile(t);
     score++;
     scoreEl.textContent = String(score);
+    const newLevel = computeLevel(score);
+    if (newLevel !== level) {
+      level = newLevel;
+      levelEl.textContent = 'Lv.' + level;
+      levelEl.classList.remove('pt-level-up');
+      void levelEl.offsetWidth;
+      levelEl.classList.add('pt-level-up');
+    }
     speedPxPerSec = Math.min(CONFIG.maxSpeedPxPerSec, speedPxPerSec + CONFIG.speedIncreasePerHit);
+    playTone(CONFIG.sound.noteFreqs[col % CONFIG.sound.noteFreqs.length], CONFIG.sound.noteDurationSec);
   }
+
+  cols.forEach(function (colEl, colIndex) {
+    colEl.addEventListener('pointerdown', function (e) {
+      e.preventDefault();
+      onColumnHit(colIndex);
+    });
+  });
 
   function loop(ts) {
     if (!playing) return;
@@ -237,6 +335,7 @@ function computeRating(score) {
   function endGame() {
     playing = false;
     clearAll();
+    playMissSound();
     startBtn.disabled = false;
     startBtn.textContent = '▶️ 再玩一次';
     overTitle.textContent = '💥 漏接了！';
@@ -255,13 +354,16 @@ function computeRating(score) {
 
   function ptStartInternal() {
     clearAll();
+    getAudioCtx(); // 在使用者手勢（點擊開始）當下解鎖/建立AudioContext，符合瀏覽器自動播放政策
     overlay.classList.remove('show');
     playing = true;
     score = 0;
+    level = 1;
     speedPxPerSec = CONFIG.initialSpeedPxPerSec;
     spawnIntervalMs = CONFIG.initialSpawnIntervalMs;
     lastTs = 0;
     scoreEl.textContent = '0';
+    levelEl.textContent = 'Lv.1';
     ratingEl.textContent = '';
     startBtn.disabled = true;
     startBtn.textContent = '遊戲中…';

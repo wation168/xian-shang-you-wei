@@ -21,15 +21,28 @@
 <meta name="sg-lang" content="zh-TW">
 <link rel="stylesheet" href="/js/cookie-consent.css">
 <style>
-.sn-topbar{display:flex;justify-content:center;gap:24px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f}
-.sn-board{display:grid;width:100%;max-width:360px;aspect-ratio:1/1;margin:0 auto;background:#0f172a;border-radius:12px;overflow:hidden}
-.sn-cell{background:#0f172a}
-.sn-cell.body{background:#22c55e;border-radius:2px}
-.sn-cell.head{background:#16a34a;border-radius:3px}
-.sn-cell.food{background:#ef4444;border-radius:50%}
-.sn-dpad{display:grid;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(3,48px);gap:4px;justify-content:center;margin:18px auto 0}
-.sn-dpad button{border:none;border-radius:10px;background:#e2e8f0;color:#334155;font-size:18px;cursor:pointer}
-.sn-dpad button:active{background:#cbd5e1}
+/* 2026/08/15 視覺優化：帥哥鴻反饋「貪食蛇太醜了」，
+   原本純色方塊改成：棋盤格底紋、蛇身漸層圓角+尾巴漸淡、
+   蛇頭帶眼睛並依方向旋轉、食物用蘋果emoji+跳動動畫、
+   方向鍵改立體按壓感。 */
+.sn-topbar{display:flex;justify-content:center;align-items:center;gap:18px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f;flex-wrap:wrap}
+.sn-level-badge{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800;transition:transform .3s}
+.sn-level-badge.sn-level-up{animation:snLevelUp .5s ease}
+@keyframes snLevelUp{0%{transform:scale(1)}40%{transform:scale(1.35);box-shadow:0 0 14px rgba(34,197,94,.8)}100%{transform:scale(1)}}
+.sn-board{display:grid;width:100%;max-width:360px;aspect-ratio:1/1;margin:0 auto;border-radius:16px;overflow:hidden;background:linear-gradient(160deg,#132a3a,#0c1e2b);box-shadow:0 10px 28px rgba(15,23,42,.35),inset 0 0 0 2px rgba(255,255,255,.06)}
+.sn-cell{background:transparent}
+.sn-cell.alt{background:rgba(255,255,255,.035)}
+.sn-cell.body{border-radius:7px;background:linear-gradient(135deg,#86efac,#16a34a);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.sn-cell.head{border-radius:8px 8px 6px 6px;background:linear-gradient(135deg,#bbf7d0,#22c55e);position:relative;box-shadow:0 0 10px rgba(34,197,94,.65);transition:transform .08s linear}
+.sn-cell.head::before,.sn-cell.head::after{content:'';position:absolute;width:15%;height:15%;background:#0f172a;border-radius:50%;top:24%}
+.sn-cell.head::before{left:18%}
+.sn-cell.head::after{right:18%}
+.sn-cell.food{display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;animation:snPulse 0.9s ease-in-out infinite}
+@keyframes snPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.22)}}
+@media(max-width:420px){.sn-cell.food{font-size:12px}}
+.sn-dpad{display:grid;grid-template-columns:repeat(3,50px);grid-template-rows:repeat(3,50px);gap:6px;justify-content:center;margin:20px auto 0}
+.sn-dpad button{border:none;border-radius:12px;background:linear-gradient(180deg,#ffffff,#e2e8f0);color:#334155;font-size:20px;font-weight:700;cursor:pointer;box-shadow:0 3px 0 #94a3b8,0 5px 10px rgba(0,0,0,.1);transition:transform .08s,box-shadow .08s}
+.sn-dpad button:active{transform:translateY(3px);box-shadow:0 0 0 #94a3b8}
 .sn-dpad .sn-up{grid-column:2;grid-row:1}
 .sn-dpad .sn-left{grid-column:1;grid-row:2}
 .sn-dpad .sn-right{grid-column:3;grid-row:2}
@@ -64,6 +77,7 @@
 
     <div class="sn-topbar">
       <span>分數：<span id="snScore">0</span></span>
+      <span class="sn-level-badge" id="snLevelBadge">Lv.1</span>
     </div>
 
     <div class="sn-board" id="snBoard"></div>
@@ -111,7 +125,7 @@
     <a class="tool-pill" href="/games/whack-a-mole.html">打地鼠遊戲</a>
     <a class="tool-pill" href="/games/memory-match.html">記憶翻牌遊戲</a>
     <a class="tool-pill" href="/games/piano-tiles.html">鋼琴塊遊戲</a>
-    <a class="tool-pill" href="/games/connect-four.html">四子棋遊戲</a>
+    <a class="tool-pill" href="/games/gomoku.html">五子棋遊戲</a>
     <a class="tool-pill" href="/games/">更多遊戲</a>
   </div></div>
 
@@ -142,7 +156,10 @@ const CONFIG = {
   historyLimit: 5,
   copyRevertMs: 1500,
   adLoadDelayMs: 2000,
+  scorePerLevel: 5,
   opposite: { up: 'down', down: 'up', left: 'right', right: 'left' },
+  headRotation: { up: 0, right: 90, down: 180, left: 270 },
+  foodEmoji: '🍎',
   ratings: [
     { max: 5,       label: '🐢 先熟悉一下操作，多練幾次會更順' },
     { max: 12,      label: '🙂 中等水準，掌握到基本節奏了' },
@@ -167,6 +184,9 @@ function computeRating(score) {
   const hit = CONFIG.ratings.find(r => score <= r.max);
   return hit ? hit.label : '';
 }
+function computeLevel(score) {
+  return 1 + Math.floor(score / CONFIG.scorePerLevel);
+}
 
 (function () {
   const boardEl  = document.getElementById('snBoard');
@@ -175,6 +195,7 @@ function computeRating(score) {
   const bestEl   = document.getElementById('snBest');
   const historyEl= document.getElementById('snHistory');
   const startBtn = document.getElementById('snStartBtn');
+  const levelEl  = document.getElementById('snLevelBadge');
 
   boardEl.style.gridTemplateColumns = 'repeat(' + CONFIG.gridSize + ', 1fr)';
   boardEl.style.gridTemplateRows = 'repeat(' + CONFIG.gridSize + ', 1fr)';
@@ -184,7 +205,7 @@ function computeRating(score) {
     const row = [];
     for (let x = 0; x < CONFIG.gridSize; x++) {
       const el = document.createElement('div');
-      el.className = 'sn-cell';
+      el.className = 'sn-cell' + ((x + y) % 2 === 0 ? ' alt' : '');
       boardEl.appendChild(el);
       row.push(el);
     }
@@ -200,6 +221,7 @@ function computeRating(score) {
   let tickMs = CONFIG.initialTickMs;
   let tickTimerId = null;
   let history = [];
+  let level = 1;
 
   function clearAll() {
     if (tickTimerId) { clearInterval(tickTimerId); tickTimerId = null; }
@@ -216,13 +238,20 @@ function computeRating(score) {
   function render() {
     for (let y = 0; y < CONFIG.gridSize; y++) {
       for (let x = 0; x < CONFIG.gridSize; x++) {
-        cellEls[y][x].className = 'sn-cell';
+        const cell = cellEls[y][x];
+        cell.className = 'sn-cell' + ((x + y) % 2 === 0 ? ' alt' : '');
+        if (cell.textContent) cell.textContent = '';
+        cell.style.transform = '';
       }
     }
     snake.forEach(function (s, i) {
-      cellEls[s.y][s.x].className = 'sn-cell ' + (i === 0 ? 'head' : 'body');
+      const cell = cellEls[s.y][s.x];
+      cell.className += ' ' + (i === 0 ? 'head' : 'body');
+      if (i === 0) cell.style.transform = 'rotate(' + CONFIG.headRotation[dir] + 'deg)';
     });
-    cellEls[food.y][food.x].className = 'sn-cell food';
+    const foodCell = cellEls[food.y][food.x];
+    foodCell.className += ' food';
+    foodCell.textContent = CONFIG.foodEmoji;
   }
 
   function onKeyDown(e) {
@@ -246,6 +275,14 @@ function computeRating(score) {
     if (head.x === food.x && head.y === food.y) {
       score++;
       scoreEl.textContent = String(score);
+      const newLevel = computeLevel(score);
+      if (newLevel !== level) {
+        level = newLevel;
+        levelEl.textContent = 'Lv.' + level;
+        levelEl.classList.remove('sn-level-up');
+        void levelEl.offsetWidth; // 重新觸發動畫
+        levelEl.classList.add('sn-level-up');
+      }
       food = randomEmptyCell();
       tickMs = Math.max(CONFIG.minTickMs, tickMs - CONFIG.tickDecreasePerFood);
       clearAll();
@@ -280,9 +317,11 @@ function computeRating(score) {
     dir = 'right';
     pendingDir = 'right';
     score = 0;
+    level = 1;
     tickMs = CONFIG.initialTickMs;
     playing = true;
     scoreEl.textContent = '0';
+    levelEl.textContent = 'Lv.1';
     ratingEl.textContent = '';
     startBtn.disabled = true;
     startBtn.textContent = '遊戲中…';
