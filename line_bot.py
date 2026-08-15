@@ -1,7 +1,23 @@
 """
-線上有位 LINE Bot
-啟動：python line_bot.py
-需要安裝：pip install line-bot-sdk flask
+⚠️⚠️⚠️ 2026/08/15：這個檔案已經廢棄，不要再用！⚠️⚠️⚠️
+
+原因：
+1. 這個檔案原本在下面直接寫死一組真實的Channel Secret/Channel Access Token，
+   已經被移除改成讀環境變數——但只要這個檔案曾經被git commit過（很可能已經commit了，
+   建立日期是2026/05/07），那組真實金鑰就已經留在git歷史紀錄裡，不會因為這次改成
+   讀環境變數就消失。**強烈建議帥哥鴻立刻去LINE Developers Console把當初申請這組
+   Channel Secret/Access Token的channel直接刪除或重新產生token，視同這組金鑰已外洩。**
+2. 這個檔案設計成獨立的Flask app（要另外用`python line_bot.py`啟動、監聽5000port），
+   從來沒有真正部署上線過（`API_BASE`還寫死`http://localhost:8000`）。
+3. 同樣的LINE Bot功能已經在2026/08/15第二十五輪重新設計、整合進正式運行的
+   `backend/main.py`裡（新路由`POST /webhook/line-bot`），跟main.py同一個FastAPI
+   process執行、不用另外啟動一個Flask服務、直接呼叫既有`_do_analyze()`分析引擎，
+   不會有這個舊檔案裡格式化邏輯欄位對不上目前main.py分析結果的問題。
+
+這個檔案保留只是為了不憑空刪掉帥哥鴻的東西，之後確認main.py那邊運作正常後，
+可以考慮直接刪除這個檔案。
+
+線上有位 LINE Bot（舊版原型，已廢棄）
 """
 
 from flask import Flask, request, abort
@@ -18,10 +34,12 @@ import os
 
 app = Flask(__name__)
 
-# ── 設定區（填入你的資料）──────────────────────────────
-CHANNEL_SECRET       = "7591e5d2cda9e531182568c7e35618dd"  # Channel Secret
-CHANNEL_ACCESS_TOKEN = "q713wTImfugF9kcZ4M73VTan4VjZRpfBiIbqXYYwjqgU1g6sv8bEfIedxGeCJfLOFcvzCB6KW17KCGSMDdaTGy zBkN1/BFZVvmVitT5LlLMoVB5wu2HKyfkrsDzgCS3wK3FLen/Ol5PdCw4+uTrOtAdB04t89/1O/w1cDnyilFU="     # 待填
-API_BASE             = "http://localhost:8000"               # 後端位址
+# ── 設定區 ──────────────────────────────────────────────
+# 2026/08/15：原本這裡寫死真實金鑰，已改成讀環境變數並清空——但這不代表舊金鑰
+# 安全了，git歷史裡舊版本還留著，請務必去LINE Developers Console revoke掉。
+CHANNEL_SECRET       = os.environ.get("LINE_BOT_CHANNEL_SECRET", "")
+CHANNEL_ACCESS_TOKEN = os.environ.get("LINE_BOT_CHANNEL_ACCESS_TOKEN", "")
+API_BASE             = os.environ.get("BACKEND_URL", "http://localhost:8000")
 # ──────────────────────────────────────────────────────
 
 configuration = Configuration(access_token=CHANNEL_ACCESS_TOKEN)

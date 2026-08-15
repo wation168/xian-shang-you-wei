@@ -91,6 +91,11 @@ THREADS_SCOPE      = "threads_basic,threads_content_publish"
 # 因為GOOGLE_CLIENT_ID已經是現成、正在運作的設定）。
 LINE_CHANNEL_ID     = os.environ.get("LINE_CHANNEL_ID", "")
 LINE_CHANNEL_SECRET = os.environ.get("LINE_CHANNEL_SECRET", "")
+# LINE Bot（Messaging API，2026/08/15新增，群組/聊天室打股號查報告用）——
+# 跟上面LINE Login用的LINE_CHANNEL_ID/SECRET是完全不同的LINE channel
+# （LINE Login跟Messaging API是不同channel類型，不能共用），不要搞混
+LINE_BOT_CHANNEL_SECRET       = os.environ.get("LINE_BOT_CHANNEL_SECRET", "")
+LINE_BOT_CHANNEL_ACCESS_TOKEN = os.environ.get("LINE_BOT_CHANNEL_ACCESS_TOKEN", "")
 LINE_REDIRECT_URI   = os.environ.get("LINE_REDIRECT_URI", "https://api.softglow-ai.com/auth/line/callback")
 
 # pywebpush（選裝）
@@ -6433,6 +6438,141 @@ async def auth_line_callback(code: str = Query(default=""), state: str = Query(d
 
     session = _issue_login_session(conn, row, row["email"])
     return RedirectResponse(f"{FRONTEND_URL}{return_url}?line_token={session['token']}")
+
+
+# ══════════════════════════════════════════════════════════
+# LINE Bot（Messaging API）—— 群組/聊天室打股票代號或名稱查報告
+# 2026/08/15新增。設計原則：
+#   1) 使用者輸入「整段訊息」剛好就是股票代號（如2330、2330W、2330週）
+#      或股票名稱（如台積電）時bot才回應；其餘訊息一律不回應，避免在群組洗版
+#   2) 直接呼叫既有 _do_analyze()（跟網站分析引擎/report頁完全同一份邏輯），
+#      不重寫第二套分析或格式化邏輯，避免欄位對不上
+#   3) 回覆內容精簡（股名+現價+漲跌%），完整報告用連結指向既有公開頁
+#      /report/{stock_id}（本來就不需要登入即可看）
+#
+# 這一段程式碼即使LINE_BOT_CHANNEL_SECRET/LINE_BOT_CHANNEL_ACCESS_TOKEN沒設定
+# 也不會讓網站壞掉（webhook收到請求會直接回200但不處理），但要讓bot真的能用：
+#   1. 去LINE Developers Console建立一個「Messaging API」類型的channel
+#      （⚠️跟LINE Login是不同channel類型，不能共用同一個既有channel）
+#   2. Webhook URL設定為 {BACKEND_URL}/webhook/line-bot，並打開Webhook
+#   3. 在LINE Official Account Manager的「回應設定」把「自動回應訊息」關掉，
+#      不然LINE官方的罐頭自動回覆會搶在bot前面回話
+#   4. 在Zeabur設定LINE_BOT_CHANNEL_SECRET/LINE_BOT_CHANNEL_ACCESS_TOKEN
+#      這兩個環境變數（Channel Secret跟Channel Access Token都在該channel的
+#      Basic settings/Messaging API頁籤可以拿到）
+#   5. 要在群組裡用，需要把這個LINE官方帳號加入該群組（一般帳號手動加入即可）
+# ══════════════════════════════════════════════════════════
+
+def _line_bot_verify_signature(body: bytes, signature: str) -> bool:
+    if not LINE_BOT_CHANNEL_SECRET or not signature:
+        return False
+    import base64 as _b64
+    mac = hmac.new(LINE_BOT_CHANNEL_SECRET.encode(), body, hashlib.sha256).digest()
+    expected = _b64.b64encode(mac).decode()
+    return hmac.compare_digest(expected, signature)
+
+
+def _line_bot_resolve_stock(text: str):
+    """把使用者輸入解析成(stock_id, tf)；訊息必須整段就是代號或名稱才觸發，
+    避免在群組聊天裡對每句夾帶數字的話都亂回應。回傳None代表不觸發。"""
+    t = (text or "").strip()
+    if not t or len(t) > 12:
+        return None
+    tf = "D"
+    core = t
+    core_upper = core.upper()
+    if core_upper.endswith("W") and core_upper[:-1].isdigit():
+        tf, core = "W", core[:-1]
+    elif core_upper.endswith("M") and core_upper[:-1].isdigit():
+        tf, core = "M", core[:-1]
+    elif "週" in core or "周" in core:
+        tf, core = "W", core.replace("週", "").replace("周", "").strip()
+    elif "月" in core:
+        tf, core = "M", core.replace("月", "").strip()
+    core = core.strip()
+    if core.isdigit() and 4 <= len(core) <= 6:
+        return core, tf
+    if core in _name_to_code:
+        return _name_to_code[core], tf
+    for cid, cname in STOCK_NAMES.items():
+        if cname == core:
+            return cid, tf
+    return None
+
+
+def _line_bot_reply(reply_token: str, text: str):
+    import urllib.request
+    req = urllib.request.Request(
+        "https://api.line.me/v2/bot/message/reply",
+        data=_json_mod.dumps({"replyToken": reply_token, "messages": [{"type": "text", "text": text[:4900]}]}).encode(),
+        method="POST",
+    )
+    req.add_header("Content-Type", "application/json")
+    req.add_header("Authorization", f"Bearer {LINE_BOT_CHANNEL_ACCESS_TOKEN}")
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            resp.read()
+    except Exception as e:
+        print(f"⚠️ LINE bot reply失敗: {e}")
+
+
+@app.post("/webhook/line-bot", include_in_schema=False)
+async def line_bot_webhook(request: Request):
+    body = await request.body()
+    if not LINE_BOT_CHANNEL_SECRET or not LINE_BOT_CHANNEL_ACCESS_TOKEN:
+        return PlainTextResponse("OK")  # 尚未設定，直接放行不處理，不讓網站壞掉
+
+    signature = request.headers.get("x-line-signature", "")
+    if not _line_bot_verify_signature(body, signature):
+        raise HTTPException(status_code=400, detail="invalid signature")
+
+    try:
+        payload = _json_mod.loads(body)
+    except Exception:
+        return PlainTextResponse("OK")
+
+    for event in payload.get("events", []):
+        try:
+            if event.get("type") != "message":
+                continue
+            message = event.get("message", {})
+            if message.get("type") != "text":
+                continue
+            reply_token = event.get("replyToken", "")
+            if not reply_token:
+                continue
+
+            resolved = _line_bot_resolve_stock(message.get("text", ""))
+            if not resolved:
+                continue  # 不是純代號/純名稱，不回應，避免洗版
+
+            stock_id, tf = resolved
+            try:
+                d = _do_analyze(stock_id, tf, user=None)
+            except HTTPException:
+                _line_bot_reply(reply_token, f"❌ 找不到股票代號：{stock_id}\n請確認代號是否正確（例：2330）")
+                continue
+            except Exception as e:
+                print(f"⚠️ LINE bot分析失敗 {stock_id}: {e}")
+                _line_bot_reply(reply_token, f"⚠️ {stock_id} 分析暫時失敗，請稍後再試")
+                continue
+
+            stock_name = d.get("stock_name", stock_id)
+            disp_price = d.get("display_price", d.get("price", "—"))
+            chg_pct = d.get("change_pct")
+            chg_str = f"（{'+' if (chg_pct or 0) >= 0 else ''}{chg_pct}%）" if chg_pct is not None else ""
+            tf_label = {"D": "日K", "W": "週K", "M": "月K"}.get(tf, "日K")
+            reply_text = (
+                f"📊 {stock_id} {stock_name}（{tf_label}）\n"
+                f"現價 {disp_price}{chg_str}\n"
+                f"完整報告 👉 {BACKEND_URL}/report/{stock_id}\n"
+                f"僅供參考，不構成投資建議"
+            )
+            _line_bot_reply(reply_token, reply_text)
+        except Exception as e:
+            print(f"⚠️ LINE bot事件處理失敗: {e}")
+
+    return PlainTextResponse("OK")
 
 
 @app.get("/auth/me")
