@@ -83,6 +83,16 @@ THREADS_APP_SECRET = os.environ.get("THREADS_APP_SECRET", "")
 THREADS_REDIRECT_URI = os.environ.get("THREADS_REDIRECT_URI", "https://api.softglow-ai.com/auth/threads/callback")
 THREADS_SCOPE      = "threads_basic,threads_content_publish"
 
+# LINE Login（2026/08/15 新增：帥哥鴻要求「用google或line登入」加入遊戲排行榜）
+# 需要在 LINE Developers Console（https://developers.line.biz/console/）建立一個
+# 「LINE Login」channel，把Channel ID / Channel Secret設成Zeabur環境變數
+# LINE_CHANNEL_ID / LINE_CHANNEL_SECRET，並在該channel的Callback URL設定裡
+# 加上 LINE_REDIRECT_URI 這個網址，否則LINE登入按鈕點了會失敗（Google登入不受影響，
+# 因為GOOGLE_CLIENT_ID已經是現成、正在運作的設定）。
+LINE_CHANNEL_ID     = os.environ.get("LINE_CHANNEL_ID", "")
+LINE_CHANNEL_SECRET = os.environ.get("LINE_CHANNEL_SECRET", "")
+LINE_REDIRECT_URI   = os.environ.get("LINE_REDIRECT_URI", "https://api.softglow-ai.com/auth/line/callback")
+
 # pywebpush（選裝）
 try:
     from pywebpush import webpush as _webpush_fn, WebPushException as _WebPushException
@@ -889,6 +899,17 @@ async def serve_games_css():
     path = _os.path.join(_FRONTEND_DIR, "games", "games.css")
     if _os.path.isfile(path):
         return FileResponse(path, media_type="text/css")
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+# 2026/08/15 新增：games-auth.js（排行榜/登入共用JS）原本沒有對應路由會直接404，
+# 用跟games.css一樣的模式補上，用{filename}.js讓之後如果再加其他共用JS也不用重複加路由
+@app.get("/games/{filename}.js", include_in_schema=False)
+async def serve_games_js(filename: str):
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "games", f"{filename}.js")
+    if _os.path.isfile(path):
+        return FileResponse(path, media_type="application/javascript")
     return JSONResponse({"detail": "Not Found"}, status_code=404)
 
 @app.get("/games/{filename}.html", include_in_schema=False)
@@ -2952,6 +2973,15 @@ def _db_init():
             created_at       TEXT DEFAULT (datetime('now','+8 hours')),
             UNIQUE(stock_id, cross_date)
         );
+        CREATE TABLE IF NOT EXISTS game_scores (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            member_id   INTEGER NOT NULL,
+            game_slug   TEXT NOT NULL,
+            score       INTEGER NOT NULL,
+            created_at  TEXT DEFAULT (datetime('now','+8 hours'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_game_scores_slug ON game_scores(game_slug);
+        CREATE INDEX IF NOT EXISTS idx_game_scores_member ON game_scores(member_id, game_slug);
     """)
     conn.commit()
 
@@ -2975,6 +3005,7 @@ def _db_init():
         ("chat_messages",   "image_data",      "TEXT DEFAULT NULL"),
         ("members",         "nickname",        "TEXT DEFAULT NULL"),
         ("stock_reports",   "price_basis_date", "TEXT DEFAULT NULL"),
+        ("members",         "line_user_id",    "TEXT DEFAULT NULL"),
     ]
     for table, col, coldef in new_columns:
         try:
@@ -2983,6 +3014,14 @@ def _db_init():
             print(f"   ✅ 資料庫補欄位：{table}.{col}")
         except Exception:
             pass  # 欄位已存在，忽略
+
+    # line_user_id 需要唯一索引（同一個LINE帳號不能對應到兩筆會員），
+    # NULL值在SQLite的UNIQUE INDEX裡不會互相衝突，所以既有的Email/Google會員不受影響
+    try:
+        conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_members_line_user_id ON members(line_user_id)")
+        conn.commit()
+    except Exception:
+        pass
 
     # 自動建立管理員帳號（已存在則不覆蓋）
     # 安全性修正（2026/07/26）：舊版此處在環境變數未設定時會 fallback 到寫死的真實密碼 "630428"，已移除。
@@ -3092,6 +3131,183 @@ def require_paid_user(user: dict | None = Depends(get_current_user)):
     if user.get("expire_at") and user["expire_at"] < today:
         raise HTTPException(status_code=403, detail="訂閱已到期，請續費後使用")
     return user
+
+
+# ══════════════════════════════════════════════════════════
+# 小遊戲排行榜 API（2026/08/15 新增：帥哥鴻反饋「沒有比賽機制，
+# 可以設定登入加入比賽排名」）
+#
+# 沿用既有會員系統（require_user／JWT），不另外做一套帳號系統：
+#   - 送分（POST /api/games/score）需要登入，分數綁在會員帳號上
+#   - 排行榜（GET /api/games/leaderboard/{slug}）公開瀏覽，不需登入
+#   - 個人排名（GET /api/games/my-rank/{slug}）需要登入
+#
+# 每款遊戲的「分數越低越好」或「越高越好」不一樣（反應時間、翻牌步數
+# 是越小越好；打地鼠/鋼琴塊/貪食蛇是越大越好），用 _GAME_SCORE_DIRECTION
+# 統一設定，排行榜排序、個人最佳成績計算都依這個方向判斷，不是每個
+# API各自寫死排序邏輯。
+#
+# _GAME_SCORE_BOUNDS 是基本防呆用的合理範圍檢查（擋掉明顯亂改的離譜
+# 數值，例如反應時間0毫秒或負數），不是完整的防作弊機制——真要防
+# 刷分數需要伺服器端重新驗證遊戲過程，這款輕量小遊戲先不做到那麼
+# 複雜，之後如果真的發現有人大量刷榜再加強。
+# ══════════════════════════════════════════════════════════
+_GAME_SCORE_DIRECTION = {
+    "reaction-time-test": "asc",   # 反應時間（毫秒），越低越好
+    "memory-match":       "asc",   # 翻牌步數，越少越好
+    "whack-a-mole":       "desc",  # 打地鼠分數，越高越好
+    "piano-tiles":        "desc",  # 鋼琴塊分數，越高越好
+    "snake":               "desc", # 貪食蛇分數，越高越好
+}
+_GAME_SCORE_BOUNDS = {
+    "reaction-time-test": (30, 5000),
+    "memory-match":       (8, 300),
+    "whack-a-mole":       (0, 2000),
+    "piano-tiles":        (0, 5000),
+    "snake":              (0, 500),
+}
+_GAME_NAMES_ZH = {
+    "reaction-time-test": "反應力測試",
+    "memory-match":       "記憶翻牌",
+    "whack-a-mole":       "打地鼠",
+    "piano-tiles":        "鋼琴塊",
+    "snake":              "貪食蛇",
+}
+
+
+class _GameScoreReq(BaseModel):
+    game_slug: str
+    score: int
+
+
+def _game_display_name(row: dict) -> str:
+    """排行榜顯示名稱：優先用暱稱，沒設定暱稱就用匿名代號（不能公開顯示Email，保護隱私）"""
+    nick = (row.get("nickname") or "").strip()
+    if nick:
+        return nick
+    return "玩家" + str(row.get("id", 0)).zfill(4)[-4:]
+
+
+def _game_rank_query(game_slug: str, direction: str, agg: str, better_than_value):
+    """回傳「目前排在這個分數前面的人數 + 1」＝該分數的名次（純SQL輔助函式）"""
+    cmp_op = "<" if direction == "asc" else ">"
+    return (
+        f"""
+        SELECT COUNT(*) + 1 AS rank FROM (
+            SELECT member_id, {agg}(score) AS best
+            FROM game_scores WHERE game_slug=?
+            GROUP BY member_id
+        ) WHERE best {cmp_op} ?
+        """,
+        (game_slug, better_than_value)
+    )
+
+
+@app.post("/api/games/score")
+def submit_game_score(req: _GameScoreReq, user: dict = Depends(require_user)):
+    game_slug = req.game_slug.strip()
+    if game_slug not in _GAME_SCORE_DIRECTION:
+        raise HTTPException(status_code=400, detail="未知的遊戲")
+    lo, hi = _GAME_SCORE_BOUNDS[game_slug]
+    if not (lo <= req.score <= hi):
+        raise HTTPException(status_code=400, detail="分數超出合理範圍")
+
+    direction = _GAME_SCORE_DIRECTION[game_slug]
+    agg = "MIN" if direction == "asc" else "MAX"
+
+    conn = _db_conn()
+    conn.execute(
+        "INSERT INTO game_scores (member_id, game_slug, score) VALUES (?, ?, ?)",
+        (user["id"], game_slug, req.score)
+    )
+    conn.commit()
+
+    best_row = conn.execute(
+        f"SELECT {agg}(score) AS best FROM game_scores WHERE member_id=? AND game_slug=?",
+        (user["id"], game_slug)
+    ).fetchone()
+    personal_best = best_row["best"] if best_row else req.score
+    is_new_best = (req.score == personal_best)
+
+    sql, params = _game_rank_query(game_slug, direction, agg, personal_best)
+    rank_row = conn.execute(sql, params).fetchone()
+    rank = rank_row["rank"] if rank_row else None
+    conn.close()
+
+    return {
+        "ok": True,
+        "score": req.score,
+        "personal_best": personal_best,
+        "is_new_best": is_new_best,
+        "rank": rank,
+    }
+
+
+@app.get("/api/games/leaderboard/{game_slug}")
+def get_game_leaderboard(game_slug: str, limit: int = 20):
+    if game_slug not in _GAME_SCORE_DIRECTION:
+        raise HTTPException(status_code=400, detail="未知的遊戲")
+    limit = max(1, min(limit, 100))
+    direction = _GAME_SCORE_DIRECTION[game_slug]
+    agg = "MIN" if direction == "asc" else "MAX"
+    order = "ASC" if direction == "asc" else "DESC"
+
+    conn = _db_conn()
+    rows = conn.execute(
+        f"""
+        SELECT m.id AS id, m.nickname AS nickname, best.best AS score
+        FROM (
+            SELECT member_id, {agg}(score) AS best
+            FROM game_scores WHERE game_slug=?
+            GROUP BY member_id
+        ) best
+        JOIN members m ON m.id = best.member_id
+        ORDER BY best.best {order}
+        LIMIT ?
+        """,
+        (game_slug, limit)
+    ).fetchall()
+    conn.close()
+
+    leaderboard = [
+        {"rank": i + 1, "name": _game_display_name(dict(r)), "score": r["score"]}
+        for i, r in enumerate(rows)
+    ]
+    return {
+        "game_slug": game_slug,
+        "game_name": _GAME_NAMES_ZH.get(game_slug, game_slug),
+        "direction": direction,
+        "leaderboard": leaderboard,
+    }
+
+
+@app.get("/api/games/my-rank/{game_slug}")
+def get_my_game_rank(game_slug: str, user: dict = Depends(require_user)):
+    if game_slug not in _GAME_SCORE_DIRECTION:
+        raise HTTPException(status_code=400, detail="未知的遊戲")
+    direction = _GAME_SCORE_DIRECTION[game_slug]
+    agg = "MIN" if direction == "asc" else "MAX"
+
+    conn = _db_conn()
+    best_row = conn.execute(
+        f"SELECT {agg}(score) AS best FROM game_scores WHERE member_id=? AND game_slug=?",
+        (user["id"], game_slug)
+    ).fetchone()
+    if not best_row or best_row["best"] is None:
+        conn.close()
+        return {"game_slug": game_slug, "has_score": False}
+
+    personal_best = best_row["best"]
+    sql, params = _game_rank_query(game_slug, direction, agg, personal_best)
+    rank_row = conn.execute(sql, params).fetchone()
+    conn.close()
+    return {
+        "game_slug": game_slug,
+        "has_score": True,
+        "personal_best": personal_best,
+        "rank": rank_row["rank"] if rank_row else None,
+    }
+
 
 def _taipei_today() -> str:
     """台北時間今日日期（YYYY-MM-DD），用於每日查詢次數重置"""
@@ -6102,6 +6318,121 @@ def auth_google(req: GoogleLoginReq):
         row = conn.execute("SELECT * FROM members WHERE email=?", (email,)).fetchone()
 
     return _issue_login_session(conn, row, email)
+
+
+# ══════════════════════════════════════════════════════════
+# LINE Login（2026/08/15 新增，供遊戲排行榜登入用）
+#
+# 跟Google登入的差別：Google用JS SDK在前端直接拿到id token、POST給後端驗證即可，
+# 是「彈窗式」不用整頁跳轉；LINE Login走的是標準OAuth導向流程（沒有等同的JS SDK
+# 彈窗方案），流程是：
+#   1) 前端點「LINE登入」→ 導向 GET /auth/line（本站後端）
+#   2) /auth/line 導向LINE的授權頁，使用者在LINE上同意授權
+#   3) LINE導回 /auth/line/callback（帶code、state）
+#   4) 後端用code換access_token，再用access_token查LINE個人資料（userId/displayName）
+#   5) 用line_user_id找/建立會員、簽發JWT，最後導回原本頁面，網址帶著?line_token=xxx
+#   6) 前端games-auth.js負責從網址讀出line_token、存進localStorage、洗掉網址參數
+#
+# 這一段程式碼即使LINE_CHANNEL_ID/LINE_CHANNEL_SECRET沒設定也不會讓網站壞掉
+# （/auth/line會回503並說明原因），但要讓LINE登入真的能用，需要先去LINE
+# Developers Console建立LINE Login channel、設定Callback URL為LINE_REDIRECT_URI，
+# 並在Zeabur設定LINE_CHANNEL_ID/LINE_CHANNEL_SECRET這兩個環境變數。
+# ══════════════════════════════════════════════════════════
+@app.get("/auth/line")
+async def auth_line_start(return_url: str = Query(default="/games/")):
+    import urllib.parse as _urlparse
+    if not LINE_CHANNEL_ID:
+        raise HTTPException(status_code=503, detail="LINE登入尚未設定，請聯絡網站管理員")
+    if not return_url.startswith("/"):
+        return_url = "/games/"  # 防止open redirect：只允許導回本站的相對路徑
+    state = secrets.token_urlsafe(16) + "|" + return_url
+    params = {
+        "response_type": "code",
+        "client_id": LINE_CHANNEL_ID,
+        "redirect_uri": LINE_REDIRECT_URI,
+        "state": state,
+        "scope": "profile openid",
+    }
+    from fastapi.responses import RedirectResponse
+    url = "https://access.line.me/oauth2/v2.1/authorize?" + _urlparse.urlencode(params)
+    return RedirectResponse(url)
+
+
+@app.get("/auth/line/callback")
+async def auth_line_callback(code: str = Query(default=""), state: str = Query(default=""), error: str = Query(default="")):
+    import urllib.request, urllib.parse as _urlparse, json as _json
+    from fastapi.responses import RedirectResponse
+
+    return_url = "/games/"
+    if "|" in state:
+        _, _ru = state.split("|", 1)
+        if _ru.startswith("/"):
+            return_url = _ru
+
+    def _fail():
+        return RedirectResponse(f"{FRONTEND_URL}{return_url}?line_login=fail")
+
+    if error or not code or not LINE_CHANNEL_ID or not LINE_CHANNEL_SECRET:
+        return _fail()
+
+    token_url = "https://api.line.me/oauth2/v2.1/token"
+    post_data = _urlparse.urlencode({
+        "grant_type": "authorization_code",
+        "code": code,
+        "redirect_uri": LINE_REDIRECT_URI,
+        "client_id": LINE_CHANNEL_ID,
+        "client_secret": LINE_CHANNEL_SECRET,
+    }).encode()
+    req = urllib.request.Request(token_url, data=post_data, method="POST")
+    req.add_header("Content-Type", "application/x-www-form-urlencoded")
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            token_data = _json.loads(resp.read())
+    except Exception:
+        return _fail()
+
+    access_token = token_data.get("access_token", "")
+    if not access_token:
+        return _fail()
+
+    try:
+        profile_req = urllib.request.Request(
+            "https://api.line.me/v2/profile",
+            headers={"Authorization": f"Bearer {access_token}"}
+        )
+        with urllib.request.urlopen(profile_req, timeout=10) as profile_resp:
+            profile = _json.loads(profile_resp.read())
+    except Exception:
+        return _fail()
+
+    line_user_id = profile.get("userId", "")
+    display_name = (profile.get("displayName") or "").strip()[:16]
+    if not line_user_id:
+        return _fail()
+
+    conn = _db_conn()
+    row = conn.execute("SELECT * FROM members WHERE line_user_id=?", (line_user_id,)).fetchone()
+    if not row:
+        # LINE預設不提供Email（要另外向LINE申請email範圍權限），這裡用line_user_id
+        # 組一個內部專用的合成Email，純粹是為了滿足members表email欄位UNIQUE NOT NULL
+        # 的限制，不是真實可聯絡Email——這類帳號無法用忘記密碼、Email通知等功能，
+        # 僅供登入排行榜使用，跟Email/Google帳號的使用情境不同。
+        synth_email = f"line_{line_user_id}@line.softglow-ai.com"
+        rand_pwd = secrets.token_urlsafe(16)
+        conn.execute(
+            "INSERT INTO members (email, password, plan, nickname, line_user_id) VALUES (?, ?, 'free', ?, ?)",
+            (synth_email, _hash_pw(rand_pwd), display_name or None, line_user_id)
+        )
+        conn.commit()
+        row = conn.execute("SELECT * FROM members WHERE line_user_id=?", (line_user_id,)).fetchone()
+    elif display_name and not (row["nickname"] or "").strip():
+        # 第一次登入後如果玩家自己都還沒設定過暱稱，用LINE顯示名稱補上，之後仍可以自己在站上改
+        conn.execute("UPDATE members SET nickname=? WHERE id=?", (display_name, row["id"]))
+        conn.commit()
+        row = conn.execute("SELECT * FROM members WHERE line_user_id=?", (line_user_id,)).fetchone()
+
+    session = _issue_login_session(conn, row, row["email"])
+    return RedirectResponse(f"{FRONTEND_URL}{return_url}?line_token={session['token']}")
 
 
 @app.get("/auth/me")

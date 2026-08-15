@@ -20,6 +20,7 @@
 <meta name="sg-type" content="game">
 <meta name="sg-lang" content="zh-TW">
 <link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
 </head>
 <body>
 <nav class="nav">
@@ -63,6 +64,9 @@
     <div class="game-controls">
       <button class="game-btn secondary" onclick="shareResult()">📤 分享成績</button>
     </div>
+
+    <div class="ga-widget" id="gaWidget"></div>
+    <div class="ga-leaderboard"><h3>🏆 反應力排行榜</h3><div id="gaLeaderboard"></div></div>
   </div>
 
   <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
@@ -203,6 +207,7 @@ function computeStats(history) {
     bestEl.textContent = stats.best != null ? stats.best + ' ms' : '—';
     avgEl.textContent  = stats.avg  != null ? stats.avg  + ' ms' : '—';
     historyEl.innerHTML = history.map(function (v) { return '<span>' + v + 'ms</span>'; }).join('');
+    if (typeof gaSubmitScore === 'function') gaSubmitScore('reaction-time-test', ms);
   }
 
   stage.addEventListener('click', handleStageClick);
@@ -259,6 +264,11 @@ setTimeout(function(){var s=document.createElement('script');s.async=true;s.src=
   <div class="bm-list" id="sgBmList"></div>
 </div>
 
+<script src="/games/games-auth.js"></script>
+<script>
+gaMountAuthWidget('gaWidget');
+gaMountLeaderboard('gaLeaderboard', 'reaction-time-test');
+</script>
 <script src="/common/softglow-common.js"></script>
 <script src="/js/softglow-cookies.js" defer></script>
 </body>

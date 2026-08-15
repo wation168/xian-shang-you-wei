@@ -20,6 +20,7 @@
 <meta name="sg-type" content="game">
 <meta name="sg-lang" content="zh-TW">
 <link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
 <style>
 .mm-board{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:420px;margin:0 auto}
 .mm-card{position:relative;aspect-ratio:1/1;border-radius:10px;cursor:pointer;user-select:none;touch-action:manipulation;perspective:600px}
@@ -77,6 +78,9 @@
       <button class="game-btn" id="mmStartBtn" onclick="mmStart()">🔄 重新開始</button>
       <button class="game-btn secondary" onclick="shareResult()">📤 分享成績</button>
     </div>
+
+    <div class="ga-widget" id="gaWidget"></div>
+    <div class="ga-leaderboard"><h3>🏆 記憶翻牌排行榜</h3><div id="gaLeaderboard"></div></div>
   </div>
 
   <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
@@ -242,6 +246,7 @@ function buildDeck() {
     historyEl.innerHTML = history.map(function (v) { return '<span>' + v + '步</span>'; }).join('');
     window._mmLastMoves = moves;
     window._mmBestMoves = best;
+    if (typeof gaSubmitScore === 'function') gaSubmitScore('memory-match', moves);
   }
 
   function mmStartInternal() {
@@ -313,6 +318,11 @@ setTimeout(function(){var s=document.createElement('script');s.async=true;s.src=
   <div class="bm-list" id="sgBmList"></div>
 </div>
 
+<script src="/games/games-auth.js"></script>
+<script>
+gaMountAuthWidget('gaWidget');
+gaMountLeaderboard('gaLeaderboard', 'memory-match');
+</script>
 <script src="/common/softglow-common.js"></script>
 <script src="/js/softglow-cookies.js" defer></script>
 </body>

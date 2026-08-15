@@ -1108,6 +1108,10 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
         <div style="flex:1;height:1px;background:var(--border2)"></div>
       </div>
       <div id="googleSignInBtn" style="display:flex;justify-content:center;margin-top:4px"></div>
+      <button type="button" onclick="_lineLogin()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;max-width:300px;margin:10px auto 0;padding:10px;background:#06C755;color:#fff;border:none;border-radius:4px;font-size:14px;font-weight:700;cursor:pointer">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 5.69 2 10.2c0 4.05 3.55 7.44 8.35 8.09.33.07.77.22.88.5.1.26.07.66.03.92l-.14.86c-.04.26-.2 1 .87.55 1.08-.46 5.81-3.42 7.93-5.86C21.4 13.5 22 11.93 22 10.2 22 5.69 17.52 2 12 2z" fill="#fff"/></svg>
+        使用 LINE 登入
+      </button>
     </div>
     <div id="forgotView" style="display:none">
       <div class="modal-title">重設密碼</div>
@@ -1145,6 +1149,10 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
         <div style="flex:1;height:1px;background:var(--border2)"></div>
       </div>
       <div id="googleSignInBtnReg" style="display:flex;justify-content:center;margin-top:4px"></div>
+      <button type="button" onclick="_lineLogin()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;max-width:300px;margin:10px auto 0;padding:10px;background:#06C755;color:#fff;border:none;border-radius:4px;font-size:14px;font-weight:700;cursor:pointer">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 5.69 2 10.2c0 4.05 3.55 7.44 8.35 8.09.33.07.77.22.88.5.1.26.07.66.03.92l-.14.86c-.04.26-.2 1 .87.55 1.08-.46 5.81-3.42 7.93-5.86C21.4 13.5 22 11.93 22 10.2 22 5.69 17.52 2 12 2z" fill="#fff"/></svg>
+        使用 LINE 登入
+      </button>
     </div>
   </div>
 </div>
@@ -4148,6 +4156,9 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     if(_hk) _hk.style.display = '';
   });
 
+  // 若剛從 LINE 登入導回，先把網址上的 line_token 存進 localStorage
+  _handleLineCallbackToken();
+
   // 先完成 auth 初始化（await），確保 _authUser 已設定
   await _initAuth();
   _authReady = true;
@@ -4218,6 +4229,31 @@ const GOOGLE_CLIENT_ID = '584257110691-jtn1tf282q4vsfn7c7vhp9c12m6ino1n.apps.goo
 function _getToken(){ return localStorage.getItem('auth_token'); }
 function _setToken(t){ localStorage.setItem('auth_token', t); console.log('[auth] token 已寫入 localStorage，長度:', t ? t.length : 0); }
 function _clearToken(){ localStorage.removeItem('auth_token'); console.log('[auth] token 已從 localStorage 清除'); }
+
+// 導向後端 /auth/line，讓使用者用LINE帳號登入；後端會導回本頁並帶上 ?line_token=xxx
+function _lineLogin(){
+  const returnUrl = location.pathname || '/';
+  location.href = `${getAPI()}/auth/line?return_url=${encodeURIComponent(returnUrl)}`;
+}
+
+// 處理從 /auth/line/callback 導回本頁時網址帶的 line_token（成功）或 line_login=fail（失敗）
+// 必須在 _initAuth() 之前執行，確保 token 已寫入 localStorage 後 _initAuth() 才讀得到
+function _handleLineCallbackToken(){
+  const params = new URLSearchParams(location.search);
+  const lineToken = params.get('line_token');
+  const lineFail = params.get('line_login');
+  if(!lineToken && !lineFail) return;
+  if(lineToken) _setToken(lineToken);
+  if(lineFail === 'fail'){
+    const errEl = document.getElementById('loginErr');
+    if(errEl) errEl.textContent = 'LINE登入失敗，請再試一次';
+  }
+  // 洗掉網址上的 line_token / line_login 參數，避免重新整理時重複處理或外流
+  params.delete('line_token');
+  params.delete('line_login');
+  const qs = params.toString();
+  history.replaceState(null, '', location.pathname + (qs ? `?${qs}` : ''));
+}
 
 async function handleGoogleLogin(response){
   const errEl = document.getElementById('loginErr') || document.getElementById('registerErr');
