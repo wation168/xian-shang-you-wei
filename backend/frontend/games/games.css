@@ -12,7 +12,7 @@
   --game-bg:#f8fafc;
   --game-border:#e2e8f0;
 }
-.game-card{background:#fff;border-radius:16px;padding:28px 24px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:20px}
+.game-card{position:relative;background:#fff;border-radius:16px;padding:28px 24px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:20px}
 .game-card h1{font-size:24px;margin:0 0 6px}
 .game-subtitle{color:#6b7280;font-size:14px;margin:0 0 20px}
 .game-stage{
@@ -42,11 +42,20 @@
 
 /* 排行榜/登入widget（2026/08/15 新增，games-auth.js共用）*/
 .ga-widget{display:flex;justify-content:center;margin:14px 0}
-.ga-login-prompt{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;font-size:13px;color:#64748b}
-.ga-login-tip{font-weight:600}
+/* 2026/08/16：帥哥鴻反饋原本的登入提示太不顯眼，改成醒目的卡片樣式（背景色+邊框+圖示），
+   而不是一行灰色小字，讓沒登入的玩家一眼就注意到可以登入拿排行榜 */
+.ga-login-prompt{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;
+  background:linear-gradient(135deg,#fff7ed,#fef3c7);border:1.5px solid #fcd34d;
+  border-radius:14px;padding:14px 20px;font-size:14px;color:#92400e;width:100%;box-sizing:border-box;
+}
+.ga-login-icon{font-size:22px;flex-shrink:0}
+.ga-login-tip{font-weight:700;color:#78350f}
+.ga-login-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;margin-left:auto}
 .ga-google-btn{display:inline-block;min-height:36px}
 .ga-line-btn{background:#06c755;color:#fff;text-decoration:none;border-radius:20px;padding:8px 16px;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:4px}
 .ga-line-btn:hover{background:#05b34c}
+@media(max-width:480px){.ga-login-prompt{padding:12px 14px}.ga-login-actions{margin-left:0;width:100%;justify-content:center}}
 .ga-logged-in{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;color:#1e3a5f}
 .ga-logout-btn{background:#e2e8f0;color:#334155;border:none;border-radius:16px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer}
 .ga-leaderboard{background:var(--game-bg);border-radius:14px;padding:16px;margin-top:18px}
@@ -58,3 +67,27 @@
 .ga-name{flex:1;color:#1e3a5f;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ga-score{color:var(--game-primary-dark);font-weight:700}
 .ga-empty{text-align:center;color:#94a3b8;font-size:13px;padding:12px 0}
+
+/* 全螢幕放大遊戲（2026/08/16新增，games-auth.js的gaInitFullscreenToggle()共用）*/
+.ga-fullscreen-btn{
+  position:absolute;top:16px;right:16px;z-index:5;
+  background:#eef2ff;color:var(--game-primary-dark);border:1px solid #c7d2fe;
+  border-radius:20px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;
+}
+.ga-fullscreen-btn:hover{background:#e0e7ff}
+@media(max-width:480px){.ga-fullscreen-btn{top:10px;right:10px;padding:6px 10px;font-size:11px}}
+/* 進入全螢幕時：卡片本身撐滿螢幕、內容置中，盤面（各遊戲的xx-board或.game-stage）
+   放大到接近視窗高度，不再受原本max-width限制，兩種瀏覽器前綴都要處理（Safari用webkit前綴）*/
+.game-card:fullscreen{
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  overflow-y:auto;padding:36px 20px;background:#fff;width:100vw;height:100vh;
+}
+.game-card:-webkit-full-screen{
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  overflow-y:auto;padding:36px 20px;background:#fff;width:100vw;height:100vh;
+}
+.game-card:fullscreen [id$="Board"],.game-card:fullscreen .game-stage,
+.game-card:-webkit-full-screen [id$="Board"],.game-card:-webkit-full-screen .game-stage{
+  max-width:min(88vw,75vh)!important;width:min(88vw,75vh)!important;
+}
+.game-card:fullscreen h1,.game-card:-webkit-full-screen h1{font-size:22px}

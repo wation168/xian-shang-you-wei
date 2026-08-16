@@ -230,9 +230,12 @@ async function gaMountAuthWidget(containerId) {
 
   container.innerHTML =
     '<div class="ga-login-prompt">' +
-    '<span class="ga-login-tip">登入才能上排行榜：</span>' +
+    '<span class="ga-login-icon">🏆</span>' +
+    '<span class="ga-login-tip">登入才能把成績存上排行榜，跟朋友比分數！</span>' +
+    '<span class="ga-login-actions">' +
     '<span id="' + containerId + 'Google" class="ga-google-btn"></span>' +
     '<a class="ga-line-btn" href="' + gaLineLoginUrl() + '">💬 用LINE登入</a>' +
+    '</span>' +
     '</div>';
   const googleBtn = document.getElementById(containerId + 'Google');
   if (typeof google !== 'undefined' && google.accounts) {
@@ -266,3 +269,41 @@ function gaHandleLineCallbackToken() {
 document.addEventListener('DOMContentLoaded', function () {
   gaHandleLineCallbackToken();
 });
+
+// ── 全螢幕放大遊戲區（2026/08/16 新增，帥哥鴻反饋想要玩遊戲時畫面能放大）──
+// 找頁面上唯一的 .game-card，插入一顆全螢幕按鈕，點擊後用瀏覽器原生 Fullscreen API
+// 把整張卡片（標題+盤面+分數+排行榜）放大到全螢幕，離開時自動還原，不用使用者自己按ESC以外的操作。
+// 7-3 防錯精神延伸：偵測不到 .game-card 或瀏覽器不支援 Fullscreen API 時安靜跳過，不影響遊戲本身。
+function gaInitFullscreenToggle() {
+  const card = document.querySelector('.game-card');
+  if (!card) return;
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'ga-fullscreen-btn';
+  btn.setAttribute('aria-label', '全螢幕放大遊戲');
+  btn.innerHTML = '⛶ 全螢幕';
+  card.insertBefore(btn, card.firstChild);
+
+  function isFs() {
+    const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+    return fsEl === card;
+  }
+  function updateBtn() {
+    btn.innerHTML = isFs() ? '✕ 離開全螢幕' : '⛶ 全螢幕';
+  }
+  function enter() {
+    const req = card.requestFullscreen || card.webkitRequestFullscreen;
+    if (!req) { gaToast('這個瀏覽器不支援全螢幕'); return; }
+    Promise.resolve(req.call(card)).catch(function () { gaToast('這個瀏覽器不支援全螢幕'); });
+  }
+  function exit() {
+    const ext = document.exitFullscreen || document.webkitExitFullscreen;
+    if (ext) ext.call(document);
+  }
+
+  btn.addEventListener('click', function () { isFs() ? exit() : enter(); });
+  document.addEventListener('fullscreenchange', updateBtn);
+  document.addEventListener('webkitfullscreenchange', updateBtn);
+}
+window.gaInitFullscreenToggle = gaInitFullscreenToggle;

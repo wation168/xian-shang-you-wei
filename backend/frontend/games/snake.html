@@ -30,7 +30,7 @@
 .sn-level-badge{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800;transition:transform .3s}
 .sn-level-badge.sn-level-up{animation:snLevelUp .5s ease}
 @keyframes snLevelUp{0%{transform:scale(1)}40%{transform:scale(1.35);box-shadow:0 0 14px rgba(34,197,94,.8)}100%{transform:scale(1)}}
-.sn-board{display:grid;width:100%;max-width:360px;aspect-ratio:1/1;margin:0 auto;border-radius:16px;overflow:hidden;background:linear-gradient(160deg,#132a3a,#0c1e2b);box-shadow:0 10px 28px rgba(15,23,42,.35),inset 0 0 0 2px rgba(255,255,255,.06)}
+.sn-board{display:grid;width:100%;max-width:360px;aspect-ratio:1/1;margin:0 auto;border-radius:16px;overflow:hidden;background:linear-gradient(160deg,#132a3a,#0c1e2b);box-shadow:0 10px 28px rgba(15,23,42,.35),inset 0 0 0 2px rgba(255,255,255,.06);touch-action:none}
 .sn-cell{background:transparent}
 .sn-cell.alt{background:rgba(255,255,255,.035)}
 .sn-cell.body{border-radius:7px;background:linear-gradient(135deg,#86efac,#16a34a);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
@@ -337,6 +337,28 @@ function computeLevel(score) {
 
   window.snStart = snStartInternal;
 
+  // 2026/08/16新增：帥哥鴻反饋手機希望能直接點/滑畫面控制方向，不只靠下方十字按鈕。
+  // 用滑動手勢（swipe）判斷方向比「點畫面四個象限」更符合手機貪食蛇的操作直覺、
+  // 誤觸機率也更低——記錄手指按下與放開的座標差，取位移較大的軸當作方向。
+  const SWIPE_MIN_PX = 20; // 太小的滑動視為誤觸，忽略
+  let touchStartX = 0, touchStartY = 0;
+  boardEl.addEventListener('touchstart', function (e) {
+    if (!e.touches || !e.touches.length) return;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  boardEl.addEventListener('touchend', function (e) {
+    if (!e.changedTouches || !e.changedTouches.length) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE_MIN_PX) return;
+    if (Math.abs(dx) > Math.abs(dy)) {
+      trySetDir(dx > 0 ? 'right' : 'left');
+    } else {
+      trySetDir(dy > 0 ? 'down' : 'up');
+    }
+  }, { passive: true });
+
   document.addEventListener('keydown', onKeyDown);
   // 7-4 資源清理：離開頁面前清掉計時器與鍵盤事件監聽
   window.addEventListener('beforeunload', function () {
@@ -394,6 +416,7 @@ setTimeout(function(){var s=document.createElement('script');s.async=true;s.src=
 <script>
 gaMountAuthWidget('gaWidget');
 gaMountLeaderboard('gaLeaderboard', 'snake');
+gaInitFullscreenToggle();
 </script>
 <script src="/common/softglow-common.js"></script>
 <script src="/js/softglow-cookies.js" defer></script>
