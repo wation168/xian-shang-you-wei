@@ -8674,16 +8674,12 @@ def get_report(slug: str):
 
     try:
         conn = _db_conn()
-        # 優先找今天的報告，沒有則找最新一筆
+        # 只找「今天」的報告，且必須是最新模板版本才算數（今天以外一律視為過期，
+        # 不能拿來當「已經有資料了」的理由）
         row = conn.execute(
             "SELECT report_html, report_date FROM stock_reports WHERE stock_id=? AND report_date=? ORDER BY created_at DESC LIMIT 1",
             (stock_id, report_date)
         ).fetchone()
-        if not row:
-            row = conn.execute(
-                "SELECT report_html, report_date FROM stock_reports WHERE stock_id=? ORDER BY report_date DESC, created_at DESC LIMIT 1",
-                (stock_id,)
-            ).fetchone()
         conn.close()
     except Exception:
         return HTMLResponse("<html><body><h1>503</h1><p>Service temporarily unavailable.</p><a href='/'>← Home</a></body></html>", status_code=503)
@@ -8695,6 +8691,7 @@ def get_report(slug: str):
         row = None
 
     if row:
+        # 今天已經有（模板版本正確的）報告了，直接用，不用每次都重新分析。
         html = row["report_html"] or ""
         if "G-8MBD31GNL8" not in html:
             _ga = ('<!-- Google tag (gtag.js) -->'
@@ -8706,7 +8703,13 @@ def get_report(slug: str):
         html = html.replace('</body>', REPORT_INJECT + '</body>', 1)
         return HTMLResponse(content=html)
 
-    # 即時產生
+    # 2026/08/16修正：以前的邏輯是「今天沒有就找最舊的一筆頂著用」，結果只要
+    # 這支股票曾經產生過報告，就會被那筆舊資料卡住，下面的「即時產生」永遠
+    # 排不到——像2545、6770、3481這種不在每日批次200支名單內、也沒被使用者
+    # 觸發過report_generate()重新整理的冷門股，就會一直顯示很舊的分析日期。
+    # 改成「今天沒有現成的就先試著即時產生」，只有即時產生本身失敗（例如上游
+    # FinMind暫時取不到資料）才退回舊資料頂著，總比開天窗好；同時把失敗原因
+    # print出來，才看得到Zeabur log，不然完全不知道是為什麼退回舊資料。
     try:
         d = _do_analyze(stock_id, "D", user=None)
         stock_name = d.get("stock_name", stock_id)
@@ -8726,6 +8729,22 @@ def get_report(slug: str):
         html = html.replace('</body>', REPORT_INJECT + '</body>', 1)
         return HTMLResponse(content=html)
     except Exception as e:
+        print(f"[get_report] {stock_id} 即時分析失敗，退回舊資料頂著顯示：{e}")
+        # 即時產生失敗，退回資料庫裡「最新的一筆」（不限日期）頂著顯示，
+        # 至少讓使用者看到舊分析，而不是直接404。
+        try:
+            conn = _db_conn()
+            fallback_row = conn.execute(
+                "SELECT report_html, report_date FROM stock_reports WHERE stock_id=? ORDER BY report_date DESC, created_at DESC LIMIT 1",
+                (stock_id,)
+            ).fetchone()
+            conn.close()
+        except Exception:
+            fallback_row = None
+        if fallback_row:
+            html = fallback_row["report_html"] or ""
+            html = html.replace('</body>', REPORT_INJECT + '</body>', 1)
+            return HTMLResponse(content=html)
         raise HTTPException(status_code=404, detail=f"無法取得 {stock_id} 報告：{e}")
 
 
