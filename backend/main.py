@@ -480,7 +480,12 @@ async def lifespan(app: FastAPI):
         _bg_scheduler.add_job(_clear_quote_cache,       "cron",     hour=9,  minute=0,  day_of_week="mon-fri")
         _bg_scheduler.add_job(_clear_quote_cache,       "cron",     hour=14, minute=0,  day_of_week="mon-fri")  # 收盤後清快取，確保盤後覆盤資料一致
         _bg_scheduler.add_job(_run_補單_job,            "cron",     hour=8,  minute=0)
-        _bg_scheduler.add_job(_run_batch_report_job,    "cron",     hour=18, minute=30)
+        # 2026/08/16取消：帥哥鴻確認當初這支每日批次預產生報告是為了SEO覆蓋率，
+        # 但實際上不是所有股票都會有人搜尋，天天跑一輪去硬產生冷門股報告不划算；
+        # 加上get_report()已修復成「查詢當下沒有今天的資料就即時分析」，資料正確性
+        # 不再依賴這支批次工作。函式定義保留在下面（_run_batch_report_job），
+        # 只是不再排程自動執行；如果之後想針對特定股票手動預產生，
+        # 用既有的 POST /admin/batch-generate-reports 管理端點即可。
         _bg_scheduler.start()
         print("   ✅ APScheduler 排程已啟動（開盤熱門股 09:06、盤中到價提醒每5分鐘、到期通知 09:00、報價快取清除 09:00、補單 08:00）")
 
@@ -2984,6 +2989,10 @@ def _db_init():
             return_20d_price REAL DEFAULT NULL,
             created_at       TEXT DEFAULT (datetime('now','+8 hours')),
             UNIQUE(stock_id, cross_date)
+        );
+        CREATE TABLE IF NOT EXISTS line_push_groups (
+            group_id   TEXT PRIMARY KEY,
+            first_seen TEXT DEFAULT (datetime('now','+8 hours'))
         );
         CREATE TABLE IF NOT EXISTS game_scores (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -6523,6 +6532,79 @@ def _line_bot_reply(reply_token: str, text: str):
         print(f"⚠️ LINE bot reply失敗: {e}")
 
 
+def _line_bot_push(to_id: str, text: str):
+    """主動推播訊息（跟_line_bot_reply不同——reply要靠webhook事件給的短效replyToken，
+       push可以在任何時間點主動發送，例如排程任務結束後通知群組。
+       2026/08/16新增，供深度選股完成通知使用。LINE免費方案每月200則推播額度，
+       每天群組推播1則遠低於額度，不用擔心費用。"""
+    import urllib.request
+    req = urllib.request.Request(
+        "https://api.line.me/v2/bot/message/push",
+        data=_json_mod.dumps({"to": to_id, "messages": [{"type": "text", "text": text[:4900]}]}).encode(),
+        method="POST",
+    )
+    req.add_header("Content-Type", "application/json")
+    req.add_header("Authorization", f"Bearer {LINE_BOT_CHANNEL_ACCESS_TOKEN}")
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            resp.read()
+        return True
+    except Exception as e:
+        print(f"⚠️ LINE bot push失敗（to={to_id}）: {e}")
+        return False
+
+
+def _line_bot_register_group(group_id: str):
+    """記錄機器人所在的LINE群組ID，供之後主動推播（如深度選股完成通知）使用。
+       2026/08/16新增：只要群組裡有人傳訊息給機器人（不限是否觸發股票分析回覆），
+       就會呼叫這裡把groupId記下來，INSERT OR IGNORE避免重複記錄出錯。
+       目前機制沒有排除/取消機制，如果機器人被踢出某個群組，該群組ID會留在
+       表裡但推播只會失敗（LINE API回錯，不會影響其他群組），影響有限，先不處理。"""
+    if not group_id or not LINE_BOT_CHANNEL_ACCESS_TOKEN:
+        return
+    try:
+        conn = _db_conn()
+        conn.execute(
+            "INSERT OR IGNORE INTO line_push_groups (group_id) VALUES (?)",
+            (group_id,)
+        )
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"⚠️ LINE群組ID記錄失敗: {e}")
+
+
+def _line_bot_push_deep_picks_notice(pick_count: int):
+    """深度選股排程（_run_deep_analysis_job）跑完後呼叫：如果今天有新入選的股票，
+       推播一則簡短通知到所有已記錄的LINE群組；沒有新入選就不推播（帥哥鴻2026/08/16
+       確認的需求：只要告知深度選股已出爐即可，沒選出就不用推）。"""
+    if not pick_count or pick_count <= 0:
+        print("[deep_analysis] 今日無新入選股票，不推播LINE通知")
+        return
+    if not LINE_BOT_CHANNEL_ACCESS_TOKEN:
+        return
+    try:
+        conn = _db_conn()
+        group_ids = [r["group_id"] for r in conn.execute("SELECT group_id FROM line_push_groups").fetchall()]
+        conn.close()
+    except Exception as e:
+        print(f"⚠️ 讀取LINE推播群組清單失敗: {e}")
+        return
+    if not group_ids:
+        print("[deep_analysis] 尚未記錄任何LINE群組ID（需先有人在群組內傳過訊息給機器人），略過本次推播")
+        return
+    text = (
+        f"📈 今日深度選股已出爐，共 {pick_count} 檔入選\n"
+        f"完整名單請登入App查看 👉 {FRONTEND_URL}/stock/\n"
+        f"僅供參考，不構成投資建議"
+    )
+    sent = 0
+    for gid in group_ids:
+        if _line_bot_push(gid, text):
+            sent += 1
+    print(f"[deep_analysis] LINE推播完成，{sent}/{len(group_ids)} 個群組成功")
+
+
 @app.post("/webhook/line-bot", include_in_schema=False)
 async def line_bot_webhook(request: Request):
     body = await request.body()
@@ -6540,6 +6622,13 @@ async def line_bot_webhook(request: Request):
 
     for event in payload.get("events", []):
         try:
+            # 2026/08/16新增：不管這則事件是不是會觸發股票分析回覆，只要來源是群組，
+            # 就先把groupId記下來（供之後深度選股完成通知主動推播用），跟下面的
+            # 股票代號比對邏輯彼此獨立，不會互相影響
+            _source = event.get("source", {}) or {}
+            if _source.get("type") == "group":
+                _line_bot_register_group(_source.get("groupId", ""))
+
             if event.get("type") != "message":
                 continue
             message = event.get("message", {})
@@ -7082,6 +7171,13 @@ def _run_deep_analysis_job():
         )
         _dc.commit()
         print("[deep_analysis] 即時資料(JSON)已存入DB，供App內站內頁使用")
+
+        # ②-1 深度選股跑完，緊接著推播LINE通知（2026/08/16新增，帥哥鴻確認需求：
+        #      只要告知「今日深度選股已出爐」即可，今天沒有新入選就不推播）
+        try:
+            _line_bot_push_deep_picks_notice(len(results))
+        except Exception as _e:
+            print(f"[deep_analysis] LINE推播通知失敗（不影響選股本身）: {_e}")
 
         # ③ 用「上一次」的資料（延遲一個交易日，安全公開）重新產生公開版HTML頁
         if _stale_row and _stale_row["content"]:
