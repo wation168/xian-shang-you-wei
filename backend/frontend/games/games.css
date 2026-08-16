@@ -89,5 +89,10 @@
 .game-card:fullscreen [id$="Board"],.game-card:fullscreen .game-stage,
 .game-card:-webkit-full-screen [id$="Board"],.game-card:-webkit-full-screen .game-stage{
   max-width:min(88vw,75vh)!important;width:min(88vw,75vh)!important;
+  /* 2026/08/16修正：帥哥鴻反饋「全螢幕時長度會變短」——.game-card:fullscreen是
+     flex-direction:column的容器，盤面預設flex-shrink:1，當內容總高度超過視窗高度時，
+     瀏覽器會直接把盤面往矮壓縮（違背aspect-ratio跟width設定的比例），而不是交給
+     overflow-y:auto捲動。加flex-shrink:0強制盤面維持自己該有的高度，超出視窗的部分改用捲動處理。*/
+  flex-shrink:0;
 }
 .game-card:fullscreen h1,.game-card:-webkit-full-screen h1{font-size:22px}
