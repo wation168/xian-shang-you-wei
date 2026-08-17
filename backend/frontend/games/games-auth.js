@@ -16,6 +16,7 @@ const GA_CONFIG = {
   tokenStorageKey: 'auth_token', // 跟 frontend/index.html 共用同一把 key，兩邊登入狀態互通
   leaderboardLimit: 20,
   toastMs: 2600,
+  loginReminderDismissKey: 'ga_login_reminder_dismissed', // sessionStorage key，關掉進場彈窗後本次瀏覽不再彈
   gameNames: {
     'reaction-time-test': '反應力測試',
     'memory-match': '記憶翻牌',
@@ -212,6 +213,13 @@ async function _gaFetchNickname() {
 const _gaWidgetContainers = []; // 記錄所有已掛載的登入widget容器id，登入狀態變化時統一重繪
 function gaRenderAllWidgets() {
   _gaWidgetContainers.forEach(function (id) { gaMountAuthWidget(id); });
+  // 2026/08/17新增：登入/登出時同步處理進場彈窗跟盤面常駐提示——
+  // 登入成功就整個拿掉（不需要再提醒）；登出的話重新掛回盤面提示（彈窗不重複打擾，只留常駐提示）
+  if (gaIsLoggedIn()) {
+    _gaRemoveLoginReminders();
+  } else if (_gaReminderGameSlug) {
+    _gaMountBoardBadge();
+  }
 }
 
 async function gaMountAuthWidget(containerId) {
@@ -255,6 +263,7 @@ function gaHandleLineCallbackToken() {
   if (token) {
     gaSetToken(token);
     gaToast('LINE登入成功！');
+    gaRenderAllWidgets(); // 2026/08/17補上：原本LINE登入導回沒重繪widget，登入卡片/提醒要等重新整理頁面才會消失
   } else if (fail === 'fail') {
     gaToast('LINE登入失敗，請再試一次');
   }
@@ -307,3 +316,80 @@ function gaInitFullscreenToggle() {
   document.addEventListener('webkitfullscreenchange', updateBtn);
 }
 window.gaInitFullscreenToggle = gaInitFullscreenToggle;
+
+// ── 登入提醒：進場彈窗＋盤面常駐小提示（2026/08/17新增）──
+// 帥哥鴻反饋：原本的登入提示卡片放在遊戲盤面「下方」，玩家常常沒捲頁面就開始玩，容易完全沒注意到。
+// 新增兩層提醒，遵循既有「未登入完全不影響遊玩」原則（7-3防錯精神延伸），且不重寫送分/登入邏輯：
+//   1. 進場彈窗：未登入時，一進頁面彈出一次，關掉（含點背景、按X、按「先不用」）後這次瀏覽
+//      （sessionStorage，分頁關掉或跳出瀏覽器就重置）不會再彈，不會每次玩都打斷
+//   2. 盤面常駐小提示：疊在遊戲盤面本身左上角（用跟全螢幕按鈕同一套 [id$="Board"]/.game-stage
+//      屬性選擇器涵蓋全部5款有排行榜的遊戲），半透明徽章、pointer-events:none 完全不擋任何遊戲點擊，
+//      登入前持續顯示、登入後（含這次新補的LINE登入導回重繪）自動消失
+let _gaReminderGameSlug = null; // 記住這次呼叫的遊戲slug，供登出後重新掛回盤面提示使用
+function gaInitLoginReminder(gameSlug) {
+  _gaReminderGameSlug = gameSlug;
+  if (gaIsLoggedIn()) return; // 已登入什麼都不用做
+  _gaShowEntryReminder(gameSlug);
+  _gaMountBoardBadge();
+}
+
+function _gaShowEntryReminder(gameSlug) {
+  if (gaIsLoggedIn() || document.getElementById('gaReminderOverlay')) return;
+  let dismissed = false;
+  try { dismissed = sessionStorage.getItem(GA_CONFIG.loginReminderDismissKey) === '1'; } catch (e) { /* 無痕模式等sessionStorage不可用時，直接視為沒關過，仍會彈一次 */ }
+  if (dismissed) return;
+
+  const gameName = GA_CONFIG.gameNames[gameSlug] || '這個遊戲';
+  const overlay = document.createElement('div');
+  overlay.id = 'gaReminderOverlay';
+  overlay.className = 'ga-reminder-overlay';
+  overlay.innerHTML =
+    '<div class="ga-reminder-modal">' +
+    '<button type="button" class="ga-reminder-close" aria-label="關閉">✕</button>' +
+    '<div class="ga-reminder-icon">🏆</div>' +
+    '<div class="ga-reminder-title">登入才能把' + _gaEscape(gameName) + '成績存上排行榜</div>' +
+    '<div class="ga-reminder-sub">不登入也能繼續玩，只是分數不會被記錄下來</div>' +
+    '<div class="ga-reminder-actions">' +
+    '<span id="gaReminderGoogle" class="ga-google-btn"></span>' +
+    '<a class="ga-line-btn" href="' + gaLineLoginUrl() + '">💬 用LINE登入</a>' +
+    '</div>' +
+    '<button type="button" class="ga-reminder-skip">先不用，直接玩</button>' +
+    '</div>';
+  document.body.appendChild(overlay);
+
+  function dismiss() {
+    try { sessionStorage.setItem(GA_CONFIG.loginReminderDismissKey, '1'); } catch (e) {}
+    overlay.remove();
+  }
+  overlay.querySelector('.ga-reminder-close').addEventListener('click', dismiss);
+  overlay.querySelector('.ga-reminder-skip').addEventListener('click', dismiss);
+  overlay.addEventListener('click', function (e) { if (e.target === overlay) dismiss(); }); // 點背景空白處也視為關閉
+
+  const googleBtn = document.getElementById('gaReminderGoogle');
+  if (typeof google !== 'undefined' && google.accounts) {
+    _gaInitGoogleButton(googleBtn);
+  } else {
+    window.addEventListener('load', function () { _gaInitGoogleButton(googleBtn); }, { once: true });
+    setTimeout(function () { _gaInitGoogleButton(googleBtn); }, 1200);
+  }
+}
+
+function _gaMountBoardBadge() {
+  if (gaIsLoggedIn() || document.getElementById('gaBoardBadge')) return;
+  const board = document.querySelector('[id$="Board"], .game-stage');
+  const host = board || document.querySelector('.game-card'); // 找不到盤面時退回整張卡片，不會整個掛載失敗
+  if (!host) return;
+  const badge = document.createElement('div');
+  badge.id = 'gaBoardBadge';
+  badge.className = 'ga-board-badge';
+  badge.textContent = '🔒 登入才能上榜';
+  host.appendChild(badge);
+}
+
+function _gaRemoveLoginReminders() {
+  const overlay = document.getElementById('gaReminderOverlay');
+  if (overlay) overlay.remove();
+  const badge = document.getElementById('gaBoardBadge');
+  if (badge) badge.remove();
+}
+window.gaInitLoginReminder = gaInitLoginReminder;
