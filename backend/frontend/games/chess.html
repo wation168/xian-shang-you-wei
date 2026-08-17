@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>西洋棋遊戲 - 免費線上單人/雙人西洋棋 | SoftGlow</title>
+<meta name="description" content="免費線上西洋棋遊戲，支援本地雙人對戰（同一台裝置輪流下）跟單人對電腦（三種難度AI對手）。完整規則包含王車易位、吃過路兵、兵升變、將軍/將死判定，純網頁遊戲免下載免安裝。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/chess.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/chess.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/chess.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "西洋棋遊戲", "url": "https://softglow-ai.com/games/chess.html", "description": "免費線上西洋棋遊戲，支援本地雙人對戰跟單人對電腦（三種AI難度），規則完整含王車易位、吃過路兵、升變。", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "這個西洋棋遊戲支援哪些模式？", "acceptedAnswer": {"@type": "Answer", "text": "有兩種模式：雙人對戰（兩個人輪流在同一台裝置上下棋，適合面對面對弈）跟單人對電腦（挑戰內建的AI對手，有簡單、中等、困難三種難度可以選）。"}}, {"@type": "Question", "name": "規則完整嗎？王車易位、吃過路兵這些特殊規則都有嗎？", "acceptedAnswer": {"@type": "Answer", "text": "都有，而且走法產生的正確性有用西洋棋程式設計界公認的perft驗證方法核對過（比對已知的標準測試局面走法總數），包含王車易位（王翼、后翼）、吃過路兵、兵升變成后/車/象/騎士、將軍/將死/逼和判定都有完整實作。"}}, {"@type": "Question", "name": "電腦對手很難打贏嗎？", "acceptedAnswer": {"@type": "Answer", "text": "難度分三級：簡單只看一步、比較容易應付；中等會看三步棋的變化；困難會看到五步棋並限時思考，會下得比較有章法，但這是一個輕量的網頁AI（用棋子價值加位置評估表+極小化極大演算法搜尋），不是專業等級的西洋棋引擎，強度介於初階到中階棋手之間，給一般玩家練習跟消遣是足夠的。"}}, {"@type": "Question", "name": "可以悔棋嗎？", "acceptedAnswer": {"@type": "Answer", "text": "可以，按「悔棋」可以退回上一手。在單人對電腦模式，悔棋會一次退回電腦跟你自己的各一手，讓你重新輪到自己下，方便重新思考剛剛的失誤。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="chess">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="zh-TW">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+.ch-topbar{display:flex;justify-content:center;align-items:center;gap:14px;margin-bottom:16px;font-size:14px;font-weight:700;color:#1e3a5f;flex-wrap:wrap}
+.ch-turn-badge{background:linear-gradient(135deg,#334155,#0f172a);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800}
+.ch-check-badge{background:linear-gradient(135deg,#dc2626,#f97316);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800;display:none}
+.ch-check-badge.show{display:inline-block}
+.ch-mode-select{max-width:420px;margin:0 auto;text-align:center}
+.ch-mode-btn{display:block;width:100%;box-sizing:border-box;background:#fff;border:2px solid var(--game-border);border-radius:14px;padding:16px;margin-bottom:12px;cursor:pointer;text-align:left;font-family:inherit}
+.ch-mode-btn:hover{border-color:var(--game-primary)}
+.ch-mode-btn .ch-mode-title{font-size:16px;font-weight:800;color:#1e3a5f}
+.ch-mode-btn .ch-mode-desc{font-size:12.5px;color:#94a3b8;margin-top:3px}
+.ch-diff-row{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.ch-diff-row button{padding:8px 18px;border-radius:20px;border:2px solid var(--game-border);background:#fff;font-weight:700;font-size:13px;color:#1e3a5f;cursor:pointer}
+.ch-diff-row button.active{background:var(--game-primary);border-color:var(--game-primary);color:#fff}
+.ch-board-wrap{display:none}
+.ch-board-wrap.show{display:block}
+.ch-board{position:relative;width:100%;max-width:420px;aspect-ratio:1/1;margin:0 auto;border-radius:8px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.15);touch-action:none}
+.ch-grid{position:relative;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);width:100%;height:100%}
+.ch-sq{position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.ch-sq.light{background:#f0d9b5}
+.ch-sq.dark{background:#b58863}
+.ch-sq.selected{outline:3px solid #facc15;outline-offset:-3px}
+.ch-sq.last-move{background-color:#cdd26a}
+.ch-sq.in-check{background-color:#ef4444}
+.ch-piece{font-size:clamp(22px,7vw,42px);line-height:1;user-select:none;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
+.ch-piece.white{color:#fff}
+.ch-piece.black{color:#1e293b}
+.ch-dot{position:absolute;width:26%;height:26%;border-radius:50%;background:rgba(30,41,59,.35);pointer-events:none}
+.ch-dot.capture{width:88%;height:88%;background:transparent;border:4px solid rgba(220,38,38,.55);box-sizing:border-box;border-radius:50%}
+.ch-promo{position:absolute;inset:0;background:rgba(15,23,42,.82);display:none;align-items:center;justify-content:center;gap:10px;z-index:5}
+.ch-promo.show{display:flex}
+.ch-promo button{font-size:32px;background:#fff;border:none;border-radius:8px;width:56px;height:56px;cursor:pointer}
+.ch-overlay{position:absolute;inset:0;background:rgba(255,255,255,.94);border-radius:8px;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px;z-index:6}
+.ch-overlay.show{display:flex}
+.ch-overlay .ch-over-title{font-size:20px;font-weight:800;color:#1e3a5f;margin-bottom:8px}
+.ch-overlay .ch-over-sub{font-size:13px;color:#64748b;margin-bottom:14px}
+.ch-thinking{text-align:center;font-size:13px;color:#94a3b8;margin-top:8px;min-height:18px}
+.ch-record{display:flex;justify-content:center;gap:14px;margin-top:10px;font-size:13px;color:#475569}
+.ch-movelist{max-height:120px;overflow-y:auto;background:var(--game-bg);border-radius:10px;padding:10px 14px;margin-top:14px;font-size:12.5px;color:#475569;line-height:1.8}
+@media(max-width:480px){.ch-topbar{font-size:12px;gap:8px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/">工具</a>
+    <a href="/games/">遊戲</a>
+    <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
+    <a href="/">首頁</a>
+  </div>
+  <div class="nav-actions">
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> &gt; <a href="/games/">遊戲</a> &gt; 西洋棋</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>西洋棋遊戲</h1>
+    <p class="game-subtitle">支援本地雙人對戰跟單人對電腦（三種AI難度），規則完整包含王車易位、吃過路兵、兵升變。</p>
+
+    <div class="ch-mode-select" id="chModeSelect">
+      <button class="ch-mode-btn" onclick="chChooseMode('pvp')">
+        <div class="ch-mode-title">👥 雙人對戰</div>
+        <div class="ch-mode-desc">兩個人輪流在同一台裝置上下棋，適合面對面對弈</div>
+      </button>
+      <button class="ch-mode-btn" onclick="chChooseMode('pve')">
+        <div class="ch-mode-title">🤖 單人 vs 電腦</div>
+        <div class="ch-mode-desc">挑戰內建AI對手，可選簡單、中等、困難三種難度</div>
+      </button>
+      <div class="ch-diff-row" id="chDiffRow" style="display:none">
+        <button data-diff="easy" onclick="chSetDifficulty('easy')">簡單</button>
+        <button data-diff="medium" onclick="chSetDifficulty('medium')">中等</button>
+        <button data-diff="hard" onclick="chSetDifficulty('hard')">困難</button>
+      </div>
+    </div>
+
+    <div class="ch-board-wrap" id="chBoardWrap">
+      <div class="ch-topbar">
+        <span class="ch-turn-badge" id="chTurnBadge">白方回合</span>
+        <span class="ch-check-badge" id="chCheckBadge">將軍！</span>
+      </div>
+      <div class="ch-board" id="chBoard">
+        <div class="ch-grid" id="chGrid"></div>
+        <div class="ch-promo" id="chPromo"></div>
+        <div class="ch-overlay" id="chOverlay">
+          <div class="ch-over-title" id="chOverTitle"></div>
+          <div class="ch-over-sub" id="chOverSub"></div>
+          <button class="game-btn" onclick="chBackToMenu()">🔄 再玩一次</button>
+        </div>
+      </div>
+      <div class="ch-thinking" id="chThinking"></div>
+      <div class="ch-record"><span>勝：<span id="chWins">0</span></span><span>敗：<span id="chLosses">0</span></span><span>和：<span id="chDraws">0</span></span></div>
+
+      <div class="game-controls">
+        <button class="game-btn secondary" onclick="chUndo()">↩️ 悔棋</button>
+        <button class="game-btn secondary" onclick="chBackToMenu()">🏳️ 結束這局</button>
+        <button class="game-btn secondary" onclick="chShareResult()">📤 分享</button>
+      </div>
+      <div class="ch-movelist" id="chMoveList"></div>
+    </div>
+  </div>
+
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>關於這個西洋棋遊戲</h2><p>這是一個規則完整的西洋棋遊戲，包含所有標準規則：兵的兩格起步、吃過路兵、王車易位（王翼與后翼）、兵抵達底線升變成后／車／象／騎士、將軍／將死／逼和判定。走法產生的正確性用西洋棋程式設計界公認的perft測試方法核對過標準測試局面的走法總數，確保不會出現漏算或多算合法走法的情況。</p><h2>雙人對戰 vs 單人對電腦</h2><p>雙人對戰模式讓兩個人在同一台裝置上輪流操作，不需要網路連線或帳號，適合面對面對弈。單人對電腦模式內建AI對手，用棋子價值加位置評估表搭配極小化極大演算法（minimax）加alpha-beta剪枝搜尋，分簡單、中等、困難三種難度，困難模式會在時間限制內盡量搜尋更深的變化。</p></article>
+
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article"><h2>怎麼玩</h2><p>點擊想移動的棋子，合法的目的地會用小圓點標示（可以吃子的位置用紅色圓圈標示），再點一下目的地完成移動。兵抵達底線時會跳出升變選單，選擇要換成后、車、象還是騎士。輪到自己被將軍時，畫面上會有明顯提示，這時候只能走能解除將軍的棋步。悔棋按鈕可以退回上一手，單人對電腦模式悔棋會一次退回電腦跟自己的各一手棋。</p><h2>難度怎麼選</h2><p>剛接觸西洋棋建議從「簡單」開始練習基本規則和棋子走法；「中等」會看三步棋的變化，開始需要注意基本戰術；「困難」會搜尋到五步棋並限時思考，下起來會比較有章法，但仍然是輕量的網頁AI，不是職業等級引擎，目標是讓一般玩家有合理的挑戰感，不是不可能戰勝的對手。</p></article>
+
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>常見問題</h2>
+  <div class="faq-item"><div class="faq-q">這個西洋棋遊戲支援哪些模式？</div><div class="faq-a">有兩種模式：雙人對戰（兩個人輪流在同一台裝置上下棋，適合面對面對弈）跟單人對電腦（挑戰內建的AI對手，有簡單、中等、困難三種難度可以選）。</div></div>
+  <div class="faq-item"><div class="faq-q">規則完整嗎？王車易位、吃過路兵這些特殊規則都有嗎？</div><div class="faq-a">都有，而且走法產生的正確性有用西洋棋程式設計界公認的perft驗證方法核對過（比對已知的標準測試局面走法總數），包含王車易位（王翼、后翼）、吃過路兵、兵升變成后/車/象/騎士、將軍/將死/逼和判定都有完整實作。</div></div>
+  <div class="faq-item"><div class="faq-q">電腦對手很難打贏嗎？</div><div class="faq-a">難度分三級：簡單只看一步、比較容易應付；中等會看三步棋的變化；困難會看到五步棋並限時思考，會下得比較有章法，但這是一個輕量的網頁AI（用棋子價值加位置評估表+極小化極大演算法搜尋），不是專業等級的西洋棋引擎，強度介於初階到中階棋手之間，給一般玩家練習跟消遣是足夠的。</div></div>
+  <div class="faq-item"><div class="faq-q">可以悔棋嗎？</div><div class="faq-a">可以，按「悔棋」可以退回上一手。在單人對電腦模式，悔棋會一次退回電腦跟你自己的各一手，讓你重新輪到自己下，方便重新思考剛剛的失誤。</div></div>
+  </section>
+
+  <div class="more-tools"><h3>相關遊戲</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/gomoku.html">五子棋遊戲</a>
+    <a class="tool-pill" href="/games/sudoku.html">數獨遊戲</a>
+    <a class="tool-pill" href="/games/2048.html">2048數字方塊</a>
+    <a class="tool-pill" href="/games/sliding-puzzle.html">數字推盤遊戲</a>
+    <a class="tool-pill" href="/games/halloween-spell-draw.html">萬聖節塗鴉法術</a>
+    <a class="tool-pill" href="/games/">更多遊戲</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>更多遊戲</h3><a class="tool-pill" href="/games/" style="display:block;margin-top:8px">瀏覽全部遊戲 →</a></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/home/zh-TW/privacy.html">Privacy</a><a href="/home/zh-TW/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// 西洋棋核心引擎 — 遵循《新工具規劃守則.md》第七節：
+//   7-2 純函式（走法產生/將軍判定/AI搜尋）跟DOM渲染完全分開，方便單元測試
+//   走法產生正確性已用perft方法核對過起始局面（深度1-4）跟Kiwipete標準測試局面（深度1-3），
+//   完全吻合西洋棋程式設計界公開已知的正確數值
+// board[row][col]：row0=第8列（黑方底線）...row7=第1列（白方底線），col0=a欄...col7=h欄
+// ══════════════════════════════════════════════════════════
+function pieceColor(p) { return p ? p[0] : null; }
+function pieceType(p) { return p ? p[1] : null; }
+function inBounds(r, c) { return r >= 0 && r < 8 && c >= 0 && c < 8; }
+function oppColor(c) { return c === 'w' ? 'b' : 'w'; }
+
+function makeInitialState() {
+  const board = [
+    ['bR','bN','bB','bQ','bK','bB','bN','bR'],
+    ['bP','bP','bP','bP','bP','bP','bP','bP'],
+    [null,null,null,null,null,null,null,null],
+    [null,null,null,null,null,null,null,null],
+    [null,null,null,null,null,null,null,null],
+    [null,null,null,null,null,null,null,null],
+    ['wP','wP','wP','wP','wP','wP','wP','wP'],
+    ['wR','wN','wB','wQ','wK','wB','wN','wR']
+  ];
+  return { board: board, turn: 'w', castling: { wK: true, wQ: true, bK: true, bQ: true }, epTarget: null, halfmove: 0, fullmove: 1 };
+}
+function cloneState(state) {
+  return {
+    board: state.board.map(function (row) { return row.slice(); }),
+    turn: state.turn,
+    castling: { wK: state.castling.wK, wQ: state.castling.wQ, bK: state.castling.bK, bQ: state.castling.bQ },
+    epTarget: state.epTarget ? [state.epTarget[0], state.epTarget[1]] : null,
+    halfmove: state.halfmove,
+    fullmove: state.fullmove
+  };
+}
+
+const BISHOP_DIRS = [[-1,-1],[-1,1],[1,-1],[1,1]];
+const ROOK_DIRS = [[-1,0],[1,0],[0,-1],[0,1]];
+const QUEEN_DIRS = BISHOP_DIRS.concat(ROOK_DIRS);
+const KNIGHT_OFFSETS = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
+
+function isSquareAttacked(board, r, c, byColor) {
+  if (byColor === 'w') {
+    if (inBounds(r+1,c-1) && board[r+1][c-1] === 'wP') return true;
+    if (inBounds(r+1,c+1) && board[r+1][c+1] === 'wP') return true;
+  } else {
+    if (inBounds(r-1,c-1) && board[r-1][c-1] === 'bP') return true;
+    if (inBounds(r-1,c+1) && board[r-1][c+1] === 'bP') return true;
+  }
+  for (let i = 0; i < KNIGHT_OFFSETS.length; i++) {
+    const nr = r + KNIGHT_OFFSETS[i][0], nc = c + KNIGHT_OFFSETS[i][1];
+    if (inBounds(nr,nc) && board[nr][nc] === byColor + 'N') return true;
+  }
+  for (let i = 0; i < BISHOP_DIRS.length; i++) {
+    let nr = r + BISHOP_DIRS[i][0], nc = c + BISHOP_DIRS[i][1];
+    while (inBounds(nr,nc)) {
+      const p = board[nr][nc];
+      if (p) { if (pieceColor(p) === byColor && (pieceType(p)==='B'||pieceType(p)==='Q')) return true; break; }
+      nr += BISHOP_DIRS[i][0]; nc += BISHOP_DIRS[i][1];
+    }
+  }
+  for (let i = 0; i < ROOK_DIRS.length; i++) {
+    let nr = r + ROOK_DIRS[i][0], nc = c + ROOK_DIRS[i][1];
+    while (inBounds(nr,nc)) {
+      const p = board[nr][nc];
+      if (p) { if (pieceColor(p) === byColor && (pieceType(p)==='R'||pieceType(p)==='Q')) return true; break; }
+      nr += ROOK_DIRS[i][0]; nc += ROOK_DIRS[i][1];
+    }
+  }
+  for (let i = 0; i < QUEEN_DIRS.length; i++) {
+    const nr = r + QUEEN_DIRS[i][0], nc = c + QUEEN_DIRS[i][1];
+    if (inBounds(nr,nc) && board[nr][nc] === byColor + 'K') return true;
+  }
+  return false;
+}
+function findKing(board, color) {
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) if (board[r][c] === color + 'K') return [r,c];
+  return null;
+}
+function isKingInCheck(state, color) {
+  const k = findKing(state.board, color);
+  if (!k) return false;
+  return isSquareAttacked(state.board, k[0], k[1], oppColor(color));
+}
+
+function genPseudoMovesForSquare(state, r, c) {
+  const board = state.board;
+  const piece = board[r][c];
+  if (!piece) return [];
+  const color = pieceColor(piece), type = pieceType(piece);
+  const moves = [];
+
+  function pushSlide(dirs) {
+    for (let i = 0; i < dirs.length; i++) {
+      let nr = r + dirs[i][0], nc = c + dirs[i][1];
+      while (inBounds(nr,nc)) {
+        const target = board[nr][nc];
+        if (!target) { moves.push({ from:[r,c], to:[nr,nc], piece:piece, captured:null }); }
+        else { if (pieceColor(target) !== color) moves.push({ from:[r,c], to:[nr,nc], piece:piece, captured:target }); break; }
+        nr += dirs[i][0]; nc += dirs[i][1];
+      }
+    }
+  }
+  function pushStep(offsets) {
+    for (let i = 0; i < offsets.length; i++) {
+      const nr = r + offsets[i][0], nc = c + offsets[i][1];
+      if (!inBounds(nr,nc)) continue;
+      const target = board[nr][nc];
+      if (!target) moves.push({ from:[r,c], to:[nr,nc], piece:piece, captured:null });
+      else if (pieceColor(target) !== color) moves.push({ from:[r,c], to:[nr,nc], piece:piece, captured:target });
+    }
+  }
+
+  if (type === 'P') {
+    const dir = color === 'w' ? -1 : 1;
+    const startRow = color === 'w' ? 6 : 1;
+    const promoRow = color === 'w' ? 0 : 7;
+    const oneR = r + dir;
+    if (inBounds(oneR,c) && !board[oneR][c]) {
+      if (oneR === promoRow) { ['Q','R','B','N'].forEach(function(pr){ moves.push({from:[r,c],to:[oneR,c],piece:piece,captured:null,promotion:pr}); }); }
+      else moves.push({ from:[r,c], to:[oneR,c], piece:piece, captured:null });
+      const twoR = r + 2*dir;
+      if (r === startRow && !board[twoR][c]) moves.push({ from:[r,c], to:[twoR,c], piece:piece, captured:null, isDoubleStep:true });
+    }
+    [-1,1].forEach(function (dc) {
+      const nc = c + dc, nr = oneR;
+      if (!inBounds(nr,nc)) return;
+      const target = board[nr][nc];
+      if (target && pieceColor(target) !== color) {
+        if (nr === promoRow) ['Q','R','B','N'].forEach(function(pr){ moves.push({from:[r,c],to:[nr,nc],piece:piece,captured:target,promotion:pr}); });
+        else moves.push({ from:[r,c], to:[nr,nc], piece:piece, captured:target });
+      } else if (state.epTarget && state.epTarget[0] === nr && state.epTarget[1] === nc) {
+        moves.push({ from:[r,c], to:[nr,nc], piece:piece, captured:board[r][nc], isEnPassant:true });
+      }
+    });
+  } else if (type === 'N') {
+    pushStep(KNIGHT_OFFSETS);
+  } else if (type === 'B') {
+    pushSlide(BISHOP_DIRS);
+  } else if (type === 'R') {
+    pushSlide(ROOK_DIRS);
+  } else if (type === 'Q') {
+    pushSlide(QUEEN_DIRS);
+  } else if (type === 'K') {
+    pushStep(QUEEN_DIRS);
+    const homeRow = color === 'w' ? 7 : 0;
+    if (r === homeRow && c === 4) {
+      const inCheck = isSquareAttacked(board, r, c, oppColor(color));
+      if (!inCheck) {
+        if (state.castling[color+'K'] && !board[homeRow][5] && !board[homeRow][6] && board[homeRow][7] === color+'R'
+            && !isSquareAttacked(board, homeRow, 5, oppColor(color)) && !isSquareAttacked(board, homeRow, 6, oppColor(color))) {
+          moves.push({ from:[r,c], to:[homeRow,6], piece:piece, captured:null, isCastle:'K', castleRookFrom:[homeRow,7], castleRookTo:[homeRow,5] });
+        }
+        if (state.castling[color+'Q'] && !board[homeRow][3] && !board[homeRow][2] && !board[homeRow][1] && board[homeRow][0] === color+'R'
+            && !isSquareAttacked(board, homeRow, 3, oppColor(color)) && !isSquareAttacked(board, homeRow, 2, oppColor(color))) {
+          moves.push({ from:[r,c], to:[homeRow,2], piece:piece, captured:null, isCastle:'Q', castleRookFrom:[homeRow,0], castleRookTo:[homeRow,3] });
+        }
+      }
+    }
+  }
+  return moves;
+}
+function genAllPseudoMoves(state, color) {
+  const out = [];
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+    const p = state.board[r][c];
+    if (p && pieceColor(p) === color) { Array.prototype.push.apply(out, genPseudoMovesForSquare(state, r, c)); }
+  }
+  return out;
+}
+function makeMove(state, move) {
+  const ns = cloneState(state);
+  const board = ns.board;
+  const color = pieceColor(move.piece);
+  const type = pieceType(move.piece);
+
+  if (move.isEnPassant) board[move.from[0]][move.to[1]] = null;
+  board[move.to[0]][move.to[1]] = move.promotion ? (color + move.promotion) : move.piece;
+  board[move.from[0]][move.from[1]] = null;
+
+  if (move.isCastle) {
+    board[move.castleRookTo[0]][move.castleRookTo[1]] = board[move.castleRookFrom[0]][move.castleRookFrom[1]];
+    board[move.castleRookFrom[0]][move.castleRookFrom[1]] = null;
+  }
+
+  if (type === 'K') { ns.castling[color+'K'] = false; ns.castling[color+'Q'] = false; }
+  if (move.from[0] === 7 && move.from[1] === 0) ns.castling.wQ = false;
+  if (move.from[0] === 7 && move.from[1] === 7) ns.castling.wK = false;
+  if (move.from[0] === 0 && move.from[1] === 0) ns.castling.bQ = false;
+  if (move.from[0] === 0 && move.from[1] === 7) ns.castling.bK = false;
+  if (move.to[0] === 7 && move.to[1] === 0) ns.castling.wQ = false;
+  if (move.to[0] === 7 && move.to[1] === 7) ns.castling.wK = false;
+  if (move.to[0] === 0 && move.to[1] === 0) ns.castling.bQ = false;
+  if (move.to[0] === 0 && move.to[1] === 7) ns.castling.bK = false;
+
+  ns.epTarget = (type === 'P' && Math.abs(move.to[0] - move.from[0]) === 2) ? [(move.from[0]+move.to[0])/2, move.from[1]] : null;
+  ns.halfmove = (type === 'P' || move.captured) ? 0 : ns.halfmove + 1;
+  if (color === 'b') ns.fullmove++;
+  ns.turn = oppColor(color);
+  return ns;
+}
+function generateLegalMoves(state, color) {
+  const pseudo = genAllPseudoMoves(state, color);
+  const legal = [];
+  for (let i = 0; i < pseudo.length; i++) {
+    const ns = makeMove(state, pseudo[i]);
+    if (!isKingInCheck(ns, color)) legal.push(pseudo[i]);
+  }
+  return legal;
+}
+function isCheckmate(state) { return isKingInCheck(state, state.turn) && generateLegalMoves(state, state.turn).length === 0; }
+function isStalemate(state) { return !isKingInCheck(state, state.turn) && generateLegalMoves(state, state.turn).length === 0; }
+function isInsufficientMaterial(state) {
+  const pieces = [];
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) { const p = state.board[r][c]; if (p && pieceType(p) !== 'K') pieces.push(p); }
+  if (pieces.length === 0) return true;
+  if (pieces.length === 1 && (pieceType(pieces[0]) === 'B' || pieceType(pieces[0]) === 'N')) return true;
+  return false;
+}
+function isDrawByFiftyMoves(state) { return state.halfmove >= 100; }
+
+// ══════════════════════════════════════════════════════════
+// AI：minimax+alpha-beta剪枝，時間限制式疊代加深
+// ══════════════════════════════════════════════════════════
+const PIECE_VALUE = { P: 100, N: 320, B: 330, R: 500, Q: 900, K: 0 };
+const PAWN_PST=[[0,0,0,0,0,0,0,0],[50,50,50,50,50,50,50,50],[10,10,20,30,30,20,10,10],[5,5,10,25,25,10,5,5],[0,0,0,20,20,0,0,0],[5,-5,-10,0,0,-10,-5,5],[5,10,10,-20,-20,10,10,5],[0,0,0,0,0,0,0,0]];
+const KNIGHT_PST=[[-50,-40,-30,-30,-30,-30,-40,-50],[-40,-20,0,0,0,0,-20,-40],[-30,0,10,15,15,10,0,-30],[-30,5,15,20,20,15,5,-30],[-30,0,15,20,20,15,0,-30],[-30,5,10,15,15,10,5,-30],[-40,-20,0,5,5,0,-20,-40],[-50,-40,-30,-30,-30,-30,-40,-50]];
+const BISHOP_PST=[[-20,-10,-10,-10,-10,-10,-10,-20],[-10,0,0,0,0,0,0,-10],[-10,0,5,10,10,5,0,-10],[-10,5,5,10,10,5,5,-10],[-10,0,10,10,10,10,0,-10],[-10,10,10,10,10,10,10,-10],[-10,5,0,0,0,0,5,-10],[-20,-10,-10,-10,-10,-10,-10,-20]];
+const ROOK_PST=[[0,0,0,0,0,0,0,0],[5,10,10,10,10,10,10,5],[-5,0,0,0,0,0,0,-5],[-5,0,0,0,0,0,0,-5],[-5,0,0,0,0,0,0,-5],[-5,0,0,0,0,0,0,-5],[-5,0,0,0,0,0,0,-5],[0,0,0,5,5,0,0,0]];
+const QUEEN_PST=[[-20,-10,-10,-5,-5,-10,-10,-20],[-10,0,0,0,0,0,0,-10],[-10,0,5,5,5,5,0,-10],[-5,0,5,5,5,5,0,-5],[0,0,5,5,5,5,0,-5],[-10,5,5,5,5,5,0,-10],[-10,0,5,0,0,0,0,-10],[-20,-10,-10,-5,-5,-10,-10,-20]];
+const KING_PST=[[-30,-40,-40,-50,-50,-40,-40,-30],[-30,-40,-40,-50,-50,-40,-40,-30],[-30,-40,-40,-50,-50,-40,-40,-30],[-30,-40,-40,-50,-50,-40,-40,-30],[-20,-30,-30,-40,-40,-30,-30,-20],[-10,-20,-20,-20,-20,-20,-20,-10],[20,20,0,0,0,0,20,20],[20,30,10,0,0,10,30,20]];
+const PST_BY_TYPE = { P: PAWN_PST, N: KNIGHT_PST, B: BISHOP_PST, R: ROOK_PST, Q: QUEEN_PST, K: KING_PST };
+
+function evaluatePosition(state) {
+  let score = 0;
+  const board = state.board;
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+    const p = board[r][c];
+    if (!p) continue;
+    const color = pieceColor(p), type = pieceType(p);
+    const pstRow = color === 'w' ? r : 7 - r;
+    const val = PIECE_VALUE[type] + PST_BY_TYPE[type][pstRow][c];
+    score += (color === 'w' ? val : -val);
+  }
+  return score;
+}
+function orderMoves(moves) {
+  return moves.slice().sort(function (a, b) {
+    const av = a.captured ? PIECE_VALUE[pieceType(a.captured)] : (a.promotion ? 50 : 0);
+    const bv = b.captured ? PIECE_VALUE[pieceType(b.captured)] : (b.promotion ? 50 : 0);
+    return bv - av;
+  });
+}
+const TIME_UP = { __timeUp: true };
+const MATE_SCORE = 100000;
+function negamax(state, depth, ply, alpha, beta, deadline) {
+  if (Date.now() > deadline) throw TIME_UP;
+  const moves = generateLegalMoves(state, state.turn);
+  if (moves.length === 0) { if (isKingInCheck(state, state.turn)) return -(MATE_SCORE - ply); return 0; }
+  if (isInsufficientMaterial(state) || isDrawByFiftyMoves(state)) return 0;
+  if (depth === 0) return (state.turn === 'w' ? 1 : -1) * evaluatePosition(state);
+  const ordered = orderMoves(moves);
+  let best = -Infinity;
+  for (let i = 0; i < ordered.length; i++) {
+    const child = makeMove(state, ordered[i]);
+    const score = -negamax(child, depth - 1, ply + 1, -beta, -alpha, deadline);
+    if (score > best) best = score;
+    if (best > alpha) alpha = best;
+    if (alpha >= beta) break;
+  }
+  return best;
+}
+function findBestMove(state, options) {
+  const opts = options || {};
+  const maxDepth = opts.maxDepth || 3;
+  const deadline = Date.now() + (opts.timeBudgetMs || 800);
+  const legalAtRoot = generateLegalMoves(state, state.turn);
+  if (!legalAtRoot.length) return null;
+  let bestMove = legalAtRoot[0], bestScore = -Infinity;
+  try {
+    for (let depth = 1; depth <= maxDepth; depth++) {
+      const ordered = orderMoves(legalAtRoot);
+      let localBest = null, localBestScore = -Infinity, alpha = -Infinity, beta = Infinity;
+      for (let i = 0; i < ordered.length; i++) {
+        const child = makeMove(state, ordered[i]);
+        const score = -negamax(child, depth - 1, 1, -beta, -alpha, deadline);
+        if (score > localBestScore) { localBestScore = score; localBest = ordered[i]; }
+        if (localBestScore > alpha) alpha = localBestScore;
+      }
+      bestMove = localBest; bestScore = localBestScore;
+      if (Date.now() > deadline) break;
+    }
+  } catch (e) { if (e !== TIME_UP) throw e; }
+  return { move: bestMove, score: bestScore };
+}
+const AI_DIFFICULTY = {
+  easy: { maxDepth: 1, timeBudgetMs: 400, label: '簡單' },
+  medium: { maxDepth: 3, timeBudgetMs: 700, label: '中等' },
+  hard: { maxDepth: 5, timeBudgetMs: 1500, label: '困難' }
+};
+
+// ══════════════════════════════════════════════════════════
+// UI層：DOM渲染、輸入處理、模式切換 —— 7-4 資源清理：固定64格DOM節點重複利用
+// ══════════════════════════════════════════════════════════
+const WHITE_GLYPH = { K:'♔', Q:'♕', R:'♖', B:'♗', N:'♘', P:'♙' };
+const BLACK_GLYPH = { K:'♚', Q:'♛', R:'♜', B:'♝', N:'♞', P:'♟' };
+function squareName(r, c) { return String.fromCharCode(97 + c) + (8 - r); }
+
+(function () {
+  const modeSelectEl = document.getElementById('chModeSelect');
+  const diffRowEl = document.getElementById('chDiffRow');
+  const boardWrapEl = document.getElementById('chBoardWrap');
+  const gridEl = document.getElementById('chGrid');
+  const promoEl = document.getElementById('chPromo');
+  const overlayEl = document.getElementById('chOverlay');
+  const overTitleEl = document.getElementById('chOverTitle');
+  const overSubEl = document.getElementById('chOverSub');
+  const turnBadgeEl = document.getElementById('chTurnBadge');
+  const checkBadgeEl = document.getElementById('chCheckBadge');
+  const thinkingEl = document.getElementById('chThinking');
+  const moveListEl = document.getElementById('chMoveList');
+  const winsEl = document.getElementById('chWins'), lossesEl = document.getElementById('chLosses'), drawsEl = document.getElementById('chDraws');
+
+  let mode = null; // 'pvp' | 'pve'
+  let aiDifficulty = 'medium';
+  let playerColor = 'w'; // PvE模式下人類玩家的顏色（固定白方先手）
+  let state = null;
+  let stateHistory = [];
+  let selected = null;
+  let lastMove = null;
+  let pendingPromotion = null; // {from,to} 等待玩家選擇升變棋子
+  let gameOver = false;
+  let wins = 0, losses = 0, draws = 0;
+
+  window.chChooseMode = function (m) {
+    mode = m;
+    if (m === 'pve') { diffRowEl.style.display = 'flex'; document.querySelector('[data-diff="'+aiDifficulty+'"]').classList.add('active'); }
+    else { startGame(); }
+  };
+  window.chSetDifficulty = function (d) {
+    aiDifficulty = d;
+    Array.prototype.forEach.call(diffRowEl.querySelectorAll('button'), function (b) { b.classList.toggle('active', b.getAttribute('data-diff') === d); });
+    startGame();
+  };
+
+  function startGame() {
+    modeSelectEl.style.display = 'none';
+    boardWrapEl.classList.add('show');
+    state = makeInitialState();
+    stateHistory = [];
+    selected = null; lastMove = null; pendingPromotion = null; gameOver = false;
+    overlayEl.classList.remove('show');
+    moveListEl.innerHTML = '';
+    thinkingEl.textContent = '';
+    render();
+  }
+  window.chBackToMenu = function () {
+    mode = null;
+    boardWrapEl.classList.remove('show');
+    modeSelectEl.style.display = 'block';
+    diffRowEl.style.display = 'none';
+  };
+
+  function squareClasses(r, c) {
+    let cls = 'ch-sq ' + ((r + c) % 2 === 0 ? 'light' : 'dark');
+    if (selected && selected[0] === r && selected[1] === c) cls += ' selected';
+    if (lastMove && ((lastMove.from[0]===r&&lastMove.from[1]===c) || (lastMove.to[0]===r&&lastMove.to[1]===c))) cls += ' last-move';
+    if (!gameOver && isKingInCheck(state, state.turn)) {
+      const k = findKing(state.board, state.turn);
+      if (k && k[0] === r && k[1] === c) cls += ' in-check';
+    }
+    return cls;
+  }
+
+  function legalMovesForSelected() {
+    if (!selected) return [];
+    const all = generateLegalMoves(state, state.turn);
+    return all.filter(function (m) { return m.from[0] === selected[0] && m.from[1] === selected[1]; });
+  }
+
+  function render() {
+    let html = '';
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const p = state.board[r][c];
+        let inner = '';
+        if (p) {
+          const glyph = pieceColor(p) === 'w' ? WHITE_GLYPH[pieceType(p)] : BLACK_GLYPH[pieceType(p)];
+          inner = '<span class="ch-piece ' + (pieceColor(p)==='w'?'white':'black') + '">' + glyph + '</span>';
+        }
+        html += '<div class="' + squareClasses(r,c) + '" data-r="' + r + '" data-c="' + c + '">' + inner + '</div>';
+      }
+    }
+    gridEl.innerHTML = html;
+
+    const legal = legalMovesForSelected();
+    legal.forEach(function (m) {
+      const cellSel = gridEl.querySelector('[data-r="'+m.to[0]+'"][data-c="'+m.to[1]+'"]');
+      if (cellSel) {
+        const dot = document.createElement('div');
+        dot.className = 'ch-dot' + (m.captured ? ' capture' : '');
+        cellSel.appendChild(dot);
+      }
+    });
+
+    Array.prototype.forEach.call(gridEl.querySelectorAll('.ch-sq'), function (sqEl) {
+      sqEl.addEventListener('pointerdown', function () {
+        const r = parseInt(sqEl.getAttribute('data-r'),10), c = parseInt(sqEl.getAttribute('data-c'),10);
+        onSquareClick(r, c);
+      });
+    });
+
+    turnBadgeEl.textContent = (state.turn === 'w' ? '白方回合' : '黑方回合');
+    checkBadgeEl.classList.toggle('show', !gameOver && isKingInCheck(state, state.turn));
+    winsEl.textContent = String(wins); lossesEl.textContent = String(losses); drawsEl.textContent = String(draws);
+  }
+
+  function onSquareClick(r, c) {
+    if (gameOver || pendingPromotion) return;
+    if (mode === 'pve' && state.turn !== playerColor) return; // AI思考中，人類不能亂點
+    const piece = state.board[r][c];
+    if (selected && selected[0] === r && selected[1] === c) { selected = null; render(); return; }
+
+    if (piece && pieceColor(piece) === state.turn) { selected = [r, c]; render(); return; }
+
+    if (selected) {
+      const legal = legalMovesForSelected();
+      const candidates = legal.filter(function (m) { return m.to[0] === r && m.to[1] === c; });
+      if (!candidates.length) { return; } // 7-3 防錯：點到不合法目的地不動作
+      if (candidates.length > 1) { // 多個結果代表是升變（4種棋子可選）
+        pendingPromotion = { from: selected, to: [r,c], candidates: candidates };
+        showPromotionPicker();
+        return;
+      }
+      applyMove(candidates[0]);
+    }
+  }
+
+  function showPromotionPicker() {
+    const color = state.turn;
+    const glyphs = color === 'w' ? WHITE_GLYPH : BLACK_GLYPH;
+    promoEl.innerHTML = ['Q','R','B','N'].map(function (t) {
+      return '<button data-promo="' + t + '">' + glyphs[t] + '</button>';
+    }).join('');
+    promoEl.classList.add('show');
+    Array.prototype.forEach.call(promoEl.querySelectorAll('button'), function (btn) {
+      btn.addEventListener('pointerdown', function () {
+        const t = btn.getAttribute('data-promo');
+        const chosen = pendingPromotion.candidates.find(function (m) { return m.promotion === t; });
+        promoEl.classList.remove('show');
+        pendingPromotion = null;
+        applyMove(chosen);
+      });
+    });
+  }
+
+  function applyMove(move) {
+    stateHistory.push(state);
+    state = makeMove(state, move);
+    lastMove = move;
+    selected = null;
+    moveListEl.innerHTML += (state.turn === 'b' ? (state.fullmove + '. ') : '') + squareName(move.from[0],move.from[1]) + (move.captured?'x':'-') + squareName(move.to[0],move.to[1]) + (move.promotion?('='+move.promotion):'') + ' ';
+    moveListEl.scrollTop = moveListEl.scrollHeight;
+    render();
+    checkGameEnd();
+    if (!gameOver && mode === 'pve' && state.turn !== playerColor) {
+      thinkingEl.textContent = '🤖 電腦思考中…';
+      setTimeout(runAiMove, 60); // 讓「思考中」文字先畫出來，再進行會佔用主執行緒的搜尋運算
+    }
+  }
+
+  function runAiMove() {
+    const diff = AI_DIFFICULTY[aiDifficulty];
+    const result = findBestMove(state, diff);
+    thinkingEl.textContent = '';
+    if (!result || !result.move) return; // 7-3 防錯：理論上checkGameEnd已攔截將死/逼和，這裡多一層保險
+    stateHistory.push(state);
+    state = makeMove(state, result.move);
+    lastMove = result.move;
+    moveListEl.innerHTML += (state.turn === 'w' ? (state.fullmove + '. ') : '') + squareName(result.move.from[0],result.move.from[1]) + (result.move.captured?'x':'-') + squareName(result.move.to[0],result.move.to[1]) + (result.move.promotion?('='+result.move.promotion):'') + ' ';
+    moveListEl.scrollTop = moveListEl.scrollHeight;
+    render();
+    checkGameEnd();
+  }
+
+  function checkGameEnd() {
+    if (isCheckmate(state)) {
+      gameOver = true;
+      const winnerColor = oppColor(state.turn);
+      overTitleEl.textContent = '👑 將死！' + (winnerColor === 'w' ? '白方' : '黑方') + '獲勝';
+      overSubEl.textContent = mode === 'pve' ? (winnerColor === playerColor ? '恭喜你戰勝了電腦！' : '被電腦將死了，再試一次！') : '換人下下看，看誰先找到將死！';
+      overlayEl.classList.add('show');
+      if (mode === 'pve') { if (winnerColor === playerColor) wins++; else losses++; }
+      render();
+    } else if (isStalemate(state)) {
+      gameOver = true;
+      overTitleEl.textContent = '🤝 逼和局';
+      overSubEl.textContent = '輪到走棋的一方沒有合法走法，但國王沒有被將軍，是和棋。';
+      overlayEl.classList.add('show');
+      if (mode === 'pve') draws++;
+      render();
+    } else if (isInsufficientMaterial(state)) {
+      gameOver = true;
+      overTitleEl.textContent = '🤝 和棋';
+      overSubEl.textContent = '雙方剩餘的棋子都不足以逼出將死，判定和棋。';
+      overlayEl.classList.add('show');
+      if (mode === 'pve') draws++;
+      render();
+    } else if (isDrawByFiftyMoves(state)) {
+      gameOver = true;
+      overTitleEl.textContent = '🤝 50手和棋';
+      overSubEl.textContent = '連續50手雙方都沒有吃子或走兵，依規則判定和棋。';
+      overlayEl.classList.add('show');
+      if (mode === 'pve') draws++;
+      render();
+    }
+  }
+
+  window.chUndo = function () {
+    if (gameOver || !stateHistory.length) return;
+    // PvE模式一次悔棋要退回AI跟玩家各一手，才會輪到玩家重新下；PvP模式只退一手
+    const stepsBack = (mode === 'pve' && stateHistory.length >= 2) ? 2 : 1;
+    for (let i = 0; i < stepsBack; i++) { if (stateHistory.length) state = stateHistory.pop(); }
+    selected = null; pendingPromotion = null; promoEl.classList.remove('show');
+    lastMove = stateHistory.length ? null : null;
+    render();
+  };
+
+  window.chShareResult = function () {
+    const text = '我在SoftGlow下西洋棋，來試試你能不能贏我！';
+    if (navigator.share) { navigator.share({ title: document.title, text: text, url: location.href }).catch(function () {}); }
+    else {
+      navigator.clipboard.writeText(text + ' ' + location.href);
+      const b = event.target; const old = b.textContent; b.textContent = '已複製！';
+      setTimeout(function () { b.textContent = old; }, 1500);
+    }
+  };
+})();
+
+document.querySelectorAll('.faq-q').forEach(function (q) {
+  q.addEventListener('click', function () { this.parentElement.classList.toggle('open'); });
+});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},2000);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/games/games-auth.js"></script>
+<script>
+gaInitFullscreenToggle();
+</script>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>數字推盤遊戲 - 免費線上15數字拼圖 | SoftGlow</title>
+<meta name="description" content="免費線上數字推盤遊戲（15-puzzle），把打亂的數字方塊依序推回1到最大值的正確排列。每洗牌一次都保證解得出來，解完自動升級到更大的盤面，難度持續提升。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/sliding-puzzle.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/sliding-puzzle.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/sliding-puzzle.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "數字推盤遊戲", "url": "https://softglow-ai.com/games/sliding-puzzle.html", "description": "免費線上數字推盤遊戲，把打亂的數字方塊依序推回正確排列，保證每次洗牌都解得出來，解完自動升級到更大盤面。", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "數字推盤遊戲怎麼玩？", "acceptedAnswer": {"@type": "Answer", "text": "盤面上有一格是空格，點擊跟空格相鄰（上下左右）的數字方塊，那個方塊就會滑進空格，藉此把打亂的數字一步步移回正確順序：從左上到右下依序排列1、2、3...，空格留在最後（右下角）。"}}, {"@type": "Question", "name": "每次洗牌都一定解得開嗎？", "acceptedAnswer": {"@type": "Answer", "text": "保證解得開。數字推盤並不是每一種隨機排列都有解（大約一半的排列組合實際上無解），這個版本不是單純隨機打亂數字，而是從已經排好的正確狀態出發，用大量隨機但合法的滑動來洗牌，這樣的洗牌方式在數學上保證一定能透過同樣的滑動操作走回正確排列。"}}, {"@type": "Question", "name": "難度會不會越玩越難？", "acceptedAnswer": {"@type": "Answer", "text": "會。從3x3的盤面開始，解完自動升級到4x4（也就是經典的15-puzzle）、5x5、6x6，之後維持在6x6持續出題。盤面越大，需要移動的步數跟規劃複雜度都會明顯增加，是刻意設計成持續往上升級的難度曲線。"}}, {"@type": "Question", "name": "怎麼知道自己解得好不好？", "acceptedAnswer": {"@type": "Answer", "text": "畫面上會即時顯示已經移動的步數跟花費時間，分數會依盤面大小、移動步數、花費時間綜合計算，盤面越大分數基礎越高，但移動步數越多、花費時間越久分數會被扣減，鼓勵用越少步數、越快的速度解開。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="sliding-puzzle">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="zh-TW">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+.sp-topbar{display:flex;justify-content:center;align-items:center;gap:14px;margin-bottom:16px;font-size:14px;font-weight:700;color:#1e3a5f;flex-wrap:wrap}
+.sp-size-badge{background:linear-gradient(135deg,#059669,#0891b2);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800;transition:transform .3s}
+.sp-size-badge.sp-size-up{animation:spSizeUp .5s ease}
+@keyframes spSizeUp{0%{transform:scale(1)}40%{transform:scale(1.3);box-shadow:0 0 14px rgba(8,145,178,.8)}100%{transform:scale(1)}}
+.sp-board{position:relative;width:100%;max-width:380px;aspect-ratio:1/1;margin:0 auto;background:#1e293b;border-radius:12px;padding:4px;box-sizing:border-box}
+.sp-grid{position:relative;width:100%;height:100%}
+.sp-cellbg{position:absolute;background:rgba(255,255,255,.08);border-radius:6px}
+.sp-tile{position:absolute;display:flex;align-items:center;justify-content:center;border-radius:6px;font-weight:800;color:#fff;background:linear-gradient(135deg,#0ea5e9,#6366f1);box-shadow:0 1px 3px rgba(0,0,0,.3);cursor:pointer;transition:left .14s ease,top .14s ease}
+.sp-tile:active{filter:brightness(1.1)}
+.sp-overlay{position:absolute;inset:4px;background:rgba(255,255,255,.94);border-radius:8px;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px}
+.sp-overlay.show{display:flex}
+.sp-overlay .sp-over-title{font-size:20px;font-weight:800;color:#1e3a5f;margin-bottom:8px}
+.sp-overlay .sp-over-sub{font-size:13px;color:#64748b}
+.sp-hint{text-align:center;font-size:12px;color:#94a3b8;margin-top:10px}
+@media(max-width:480px){.sp-topbar{font-size:12px;gap:8px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/">工具</a>
+    <a href="/games/">遊戲</a>
+    <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
+    <a href="/">首頁</a>
+  </div>
+  <div class="nav-actions">
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> &gt; <a href="/games/">遊戲</a> &gt; 數字推盤</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>數字推盤遊戲</h1>
+    <p class="game-subtitle">點擊空格旁邊的數字方塊把它推進空格，把打亂的數字依序排回正確順序。解完自動升級到更大盤面，難度持續提升。</p>
+
+    <div class="sp-topbar">
+      <span>分數：<span id="spScore">0</span></span>
+      <span class="sp-size-badge" id="spSizeBadge">3x3</span>
+      <span>步數：<span id="spMoves">0</span></span>
+      <span>⏱ <span id="spTimer">00:00</span></span>
+    </div>
+
+    <div class="sp-board" id="spBoard">
+      <div class="sp-grid" id="spGrid"></div>
+      <div class="sp-overlay" id="spOverlay">
+        <div class="sp-over-title" id="spOverTitle">🧩 準備好了嗎？</div>
+        <div class="sp-over-sub" id="spOverSub">點擊下方按鈕開始，從3x3盤面出發</div>
+      </div>
+    </div>
+    <div class="sp-hint">點擊空格旁邊的方塊來移動，電腦也可以用方向鍵</div>
+
+    <div class="game-rating" id="spRating"></div>
+
+    <div class="game-score-row">
+      <div class="game-score-tile"><div class="gs-label">最佳成績</div><div class="gs-value" id="spBest">—</div></div>
+      <div class="game-score-tile"><div class="gs-label">最大盤面</div><div class="gs-value" id="spBestSize">—</div></div>
+    </div>
+    <div class="game-history" id="spHistory"></div>
+
+    <div class="game-controls">
+      <button class="game-btn" id="spStartBtn" onclick="spStart()">▶️ 開始遊戲</button>
+      <button class="game-btn secondary" onclick="spShareResult()">📤 分享成績</button>
+    </div>
+
+    <div class="ga-widget" id="gaWidget"></div>
+    <div class="ga-leaderboard"><h3>🏆 數字推盤排行榜</h3><div id="gaLeaderboard"></div></div>
+  </div>
+
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>數字推盤遊戲的由來</h2><p>數字推盤（15-puzzle）是歷史非常悠久的機械益智玩具，1870年代就已經出現實體版本，4x4共15個編號方塊加1個空格的版本最為經典。玩法規則簡單：只能移動跟空格相鄰的方塊，目標是把打亂的順序依序排回1到最大編號、空格留在最後。這個版本額外加入了「越玩盤面越大」的升級設計，從3x3一路玩到6x6。</p><h2>為什麼要特別處理洗牌方式</h2><p>數字推盤有一個數學上的特性：把方塊完全隨機打亂，大約有一半的排列組合是永遠解不開的（這在數學上叫做「奇排列」）。這個版本不是單純隨機打亂，而是從排好的正確狀態出發，做大量隨機但合法的滑動來洗牌，這樣洗出來的排列一定解得開，不會讓玩家卡在一個根本無解的盤面上白費力氣。</p></article>
+
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article"><h2>怎麼玩</h2><p>盤面上有一格是空的（沒有數字），點擊跟空格上下左右相鄰的任何一個數字方塊，那個方塊就會滑動填進空格。透過一連串這樣的移動，把打亂的數字依序排回正確順序：從左上角開始由左到右、由上到下依序是1、2、3...，空格留在最右下角。電腦版也可以用鍵盤方向鍵操作（方向鍵代表空格移動的方向）。全部排對後會自動判定過關，接著自動升級到更大一號的盤面。</p><h2>拿高分的技巧</h2><p>常見的解題策略是「由外而內、由上而下」：先把最上面一整排跟最左邊一整欄排好固定住，之後不再去動它們，再處理剩下範圍縮小後的盤面，一層一層往內收斂。盤面越大用這個策略越明顯有效，可以避免顧此失彼、越調越亂的情況。分數會綜合考慮盤面大小、移動步數、花費時間，步數越少、速度越快分數越高。</p></article>
+
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>常見問題</h2>
+  <div class="faq-item"><div class="faq-q">數字推盤遊戲怎麼玩？</div><div class="faq-a">盤面上有一格是空格，點擊跟空格相鄰（上下左右）的數字方塊，那個方塊就會滑進空格，藉此把打亂的數字一步步移回正確順序：從左上到右下依序排列1、2、3...，空格留在最後（右下角）。</div></div>
+  <div class="faq-item"><div class="faq-q">每次洗牌都一定解得開嗎？</div><div class="faq-a">保證解得開。數字推盤並不是每一種隨機排列都有解（大約一半的排列組合實際上無解），這個版本不是單純隨機打亂數字，而是從已經排好的正確狀態出發，用大量隨機但合法的滑動來洗牌，這樣的洗牌方式在數學上保證一定能透過同樣的滑動操作走回正確排列。</div></div>
+  <div class="faq-item"><div class="faq-q">難度會不會越玩越難？</div><div class="faq-a">會。從3x3的盤面開始，解完自動升級到4x4（也就是經典的15-puzzle）、5x5、6x6，之後維持在6x6持續出題。盤面越大，需要移動的步數跟規劃複雜度都會明顯增加，是刻意設計成持續往上升級的難度曲線。</div></div>
+  <div class="faq-item"><div class="faq-q">怎麼知道自己解得好不好？</div><div class="faq-a">畫面上會即時顯示已經移動的步數跟花費時間，分數會依盤面大小、移動步數、花費時間綜合計算，盤面越大分數基礎越高，但移動步數越多、花費時間越久分數會被扣減，鼓勵用越少步數、越快的速度解開。</div></div>
+  </section>
+
+  <div class="more-tools"><h3>相關遊戲</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/2048.html">2048數字方塊</a>
+    <a class="tool-pill" href="/games/sudoku.html">數獨遊戲</a>
+    <a class="tool-pill" href="/games/gomoku.html">五子棋遊戲</a>
+    <a class="tool-pill" href="/games/memory-match.html">記憶翻牌遊戲</a>
+    <a class="tool-pill" href="/games/halloween-spell-draw.html">萬聖節塗鴉法術</a>
+    <a class="tool-pill" href="/games/">更多遊戲</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>更多遊戲</h3><a class="tool-pill" href="/games/" style="display:block;margin-top:8px">瀏覽全部遊戲 →</a></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/home/zh-TW/privacy.html">Privacy</a><a href="/home/zh-TW/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// 數字推盤 — 遵循《新工具規劃守則.md》第七節：
+//   7-1 CONFIG集中管理盤面大小範圍/計分/洗牌步數等數值
+//   7-2 純函式（isSolvable/countInversions/shuffleViaRandomMoves/moveBlank）跟DOM渲染分開，方便單元測試
+//   7-3 防錯：洗牌用「從解答狀態做合法滑動」保證一定可解，並用逆序數奇偶性公式做獨立驗證雙重把關
+//   7-4 資源清理：固定size*size-1個磚塊DOM節點重複利用，不隨遊戲時間增加而累積；計時器切題/結束時清除
+// ══════════════════════════════════════════════════════════
+const CONFIG = {
+  minSize: 3,
+  maxSize: 6,
+  shuffleMovesPerCell: 25,
+  minShuffleMoves: 80,
+  historyLimit: 5,
+  adLoadDelayMs: 2000,
+  copyRevertMs: 1500,
+  scoreBaseBySize: { 3: 80, 4: 130, 5: 190, 6: 260 },
+  moveScorePenalty: 0.6,
+  timeScorePenaltyPerSec: 0.4,
+  timeScorePenaltyCap: 80,
+  ratings: [
+    { max: 100,  label: '🧩 剛入門，多練習排序策略會更順手' },
+    { max: 300,  label: '🙂 中等水準，開始抓到規劃節奏了' },
+    { max: 600,  label: '👍 不錯的成績，大盤面也難不倒你' },
+    { max: 1000, label: '🏆 高手等級，6x6盤面都能穩穩解開' },
+    { max: Infinity, label: '⚡ 推盤大師，效率高得驚人！' }
+  ]
+};
+
+// ══════════════════════════════════════════════════════════
+// 純函式：可獨立單元測試，不依賴DOM
+// ══════════════════════════════════════════════════════════
+function makeSolvedBoard(size) {
+  const b = Array.from({ length: size }, function () { return Array.from({ length: size }, function () { return 0; }); });
+  let v = 1;
+  for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) { if (r === size - 1 && c === size - 1) b[r][c] = 0; else b[r][c] = v++; }
+  return b;
+}
+function cloneBoard(b) { return b.map(function (r) { return r.slice(); }); }
+function findBlank(board) {
+  for (let r = 0; r < board.length; r++) for (let c = 0; c < board[r].length; c++) if (board[r][c] === 0) return [r, c];
+  return null;
+}
+function isSolved(board) {
+  const size = board.length;
+  const solved = makeSolvedBoard(size);
+  for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) if (board[r][c] !== solved[r][c]) return false;
+  return true;
+}
+const DIR_DELTA = { up: [-1, 0], down: [1, 0], left: [0, -1], right: [0, 1] };
+const OPPOSITE_DIR = { up: 'down', down: 'up', left: 'right', right: 'left' };
+function canMove(board, dir) {
+  const size = board.length;
+  const blank = findBlank(board);
+  const dr = DIR_DELTA[dir][0], dc = DIR_DELTA[dir][1];
+  const tr = blank[0] + dr, tc = blank[1] + dc; // 空格往dir方向移動時，實際被滑動的方塊來自(tr,tc)
+  return tr >= 0 && tr < size && tc >= 0 && tc < size;
+}
+function moveBlank(board, dir) {
+  if (!canMove(board, dir)) return { board: board, moved: false };
+  const size = board.length;
+  const blank = findBlank(board);
+  const dr = DIR_DELTA[dir][0], dc = DIR_DELTA[dir][1];
+  const tr = blank[0] + dr, tc = blank[1] + dc;
+  const nb = cloneBoard(board);
+  nb[blank[0]][blank[1]] = nb[tr][tc];
+  nb[tr][tc] = 0;
+  return { board: nb, moved: true };
+}
+function moveTileAt(board, r, c) {
+  // 點擊(r,c)這個方塊：只有跟空格相鄰時才合法，回傳swap後的盤面
+  const blank = findBlank(board);
+  const size = board.length;
+  const adjacent = (Math.abs(blank[0] - r) + Math.abs(blank[1] - c)) === 1;
+  if (!adjacent) return { board: board, moved: false };
+  const nb = cloneBoard(board);
+  nb[blank[0]][blank[1]] = nb[r][c];
+  nb[r][c] = 0;
+  return { board: nb, moved: true };
+}
+function shuffleViaRandomMoves(size, numMoves) {
+  let board = makeSolvedBoard(size);
+  let lastDir = null;
+  const dirs = ['up', 'down', 'left', 'right'];
+  for (let i = 0; i < numMoves; i++) {
+    const candidates = dirs.filter(function (d) { return canMove(board, d) && d !== (lastDir ? OPPOSITE_DIR[lastDir] : null); });
+    const pool = candidates.length ? candidates : dirs.filter(function (d) { return canMove(board, d); });
+    const dir = pool[Math.floor(Math.random() * pool.length)];
+    const res = moveBlank(board, dir);
+    board = res.board;
+    lastDir = dir;
+  }
+  return board;
+}
+function countInversions(flatTiles) {
+  let inv = 0;
+  for (let i = 0; i < flatTiles.length; i++) for (let j = i + 1; j < flatTiles.length; j++) { if (flatTiles[i] > flatTiles[j]) inv++; }
+  return inv;
+}
+function isSolvable(board) {
+  const size = board.length;
+  const flat = [];
+  let blankRow = 0;
+  for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) { const v = board[r][c]; if (v === 0) blankRow = r; else flat.push(v); }
+  const inv = countInversions(flat);
+  if (size % 2 === 1) return inv % 2 === 0;
+  const rowFromBottom = size - blankRow;
+  if (rowFromBottom % 2 === 0) return inv % 2 === 1;
+  return inv % 2 === 0;
+}
+function computeBoardSize(levelNumber) {
+  return Math.min(CONFIG.maxSize, CONFIG.minSize + (levelNumber - 1));
+}
+function computePuzzleScore(size, moves, seconds) {
+  const base = CONFIG.scoreBaseBySize[size] || 80;
+  const penalty = moves * CONFIG.moveScorePenalty + Math.min(CONFIG.timeScorePenaltyCap, seconds * CONFIG.timeScorePenaltyPerSec);
+  return Math.max(20, Math.round(base - penalty));
+}
+function computeRating(score) {
+  const hit = CONFIG.ratings.find(function (r) { return score <= r.max; });
+  return hit ? hit.label : '';
+}
+
+(function () {
+  const gridEl = document.getElementById('spGrid');
+  const boardEl = document.getElementById('spBoard');
+  const overlay = document.getElementById('spOverlay');
+  const overTitle = document.getElementById('spOverTitle');
+  const overSub = document.getElementById('spOverSub');
+  const scoreEl = document.getElementById('spScore');
+  const sizeBadge = document.getElementById('spSizeBadge');
+  const movesEl = document.getElementById('spMoves');
+  const timerEl = document.getElementById('spTimer');
+  const ratingEl = document.getElementById('spRating');
+  const bestEl = document.getElementById('spBest');
+  const bestSizeEl = document.getElementById('spBestSize');
+  const historyEl = document.getElementById('spHistory');
+  const startBtn = document.getElementById('spStartBtn');
+
+  let board = null, size = CONFIG.minSize;
+  let playing = false, levelNumber = 0;
+  let score = 0, bestScore = 0, bestSize = 0, history = [];
+  let moveCount = 0, timerId = null, secondsElapsed = 0;
+
+  function formatTime(sec) {
+    const m = Math.floor(sec / 60), s = sec % 60;
+    return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  }
+  function startTimer() {
+    stopTimer();
+    secondsElapsed = 0;
+    timerEl.textContent = formatTime(0);
+    timerId = setInterval(function () { secondsElapsed++; timerEl.textContent = formatTime(secondsElapsed); }, 1000);
+  }
+  function stopTimer() { if (timerId) { clearInterval(timerId); timerId = null; } } // 7-4 資源清理
+
+  function render() {
+    const cellPct = 100 / size;
+    let html = '';
+    for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) {
+      html += '<div class="sp-cellbg" style="left:' + (c * cellPct) + '%;top:' + (r * cellPct) + '%;width:' + cellPct + '%;height:' + cellPct + '%"></div>';
+    }
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        const v = board[r][c];
+        if (!v) continue;
+        const fontSize = size >= 6 ? 16 : size >= 5 ? 18 : 22;
+        html += '<div class="sp-tile" data-r="' + r + '" data-c="' + c + '" style="left:' + (c * cellPct) + '%;top:' + (r * cellPct) + '%;width:' + cellPct + '%;height:' + cellPct + '%;font-size:' + fontSize + 'px">' + v + '</div>';
+      }
+    }
+    gridEl.innerHTML = html;
+    Array.prototype.forEach.call(gridEl.querySelectorAll('.sp-tile'), function (tile) {
+      tile.addEventListener('pointerdown', function () {
+        if (!playing) return;
+        const r = parseInt(tile.getAttribute('data-r'), 10), c = parseInt(tile.getAttribute('data-c'), 10);
+        applyMoveTile(r, c);
+      });
+    });
+  }
+
+  function applyMoveTile(r, c) {
+    const res = moveTileAt(board, r, c);
+    if (!res.moved) return; // 7-3 防錯：不合法的移動（沒跟空格相鄰）不消耗步數
+    board = res.board;
+    moveCount++;
+    movesEl.textContent = String(moveCount);
+    render();
+    checkWin();
+  }
+  function applyMoveDir(dir) {
+    const res = moveBlank(board, dir);
+    if (!res.moved) return;
+    board = res.board;
+    moveCount++;
+    movesEl.textContent = String(moveCount);
+    render();
+    checkWin();
+  }
+  window.addEventListener('keydown', function (e) {
+    if (!playing) return;
+    const map = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
+    const dir = map[e.key];
+    if (!dir) return;
+    e.preventDefault();
+    applyMoveDir(dir);
+  });
+
+  function loadLevel(number) {
+    levelNumber = number;
+    size = computeBoardSize(levelNumber);
+    sizeBadge.textContent = size + 'x' + size;
+    sizeBadge.classList.remove('sp-size-up');
+    void sizeBadge.offsetWidth;
+    sizeBadge.classList.add('sp-size-up');
+
+    const shuffleMoves = Math.max(CONFIG.minShuffleMoves, size * size * CONFIG.shuffleMovesPerCell);
+    board = shuffleViaRandomMoves(size, shuffleMoves);
+    // 7-3 防錯：雙重把關，理論上洗牌方式必然可解，這裡再用逆序數公式獨立驗證一次；
+    // 萬一驗證失敗（不應該發生），額外補做隨機合法滑動修正，絕不會出可解性有問題的題目
+    let guard = 0;
+    while (!isSolvable(board) && guard < 20) {
+      const extra = moveBlank(board, ['up', 'down', 'left', 'right'][Math.floor(Math.random() * 4)]);
+      board = extra.board;
+      guard++;
+    }
+    moveCount = 0;
+    movesEl.textContent = '0';
+    startTimer();
+    render();
+  }
+
+  function checkWin() {
+    if (!isSolved(board)) return;
+    stopTimer();
+    const gained = computePuzzleScore(size, moveCount, secondsElapsed);
+    score += gained;
+    scoreEl.textContent = String(score);
+
+    history.unshift(gained);
+    history = history.slice(0, CONFIG.historyLimit);
+    historyEl.innerHTML = history.map(function (v) { return '<span>' + v + '分</span>'; }).join('');
+
+    bestScore = Math.max(bestScore, score);
+    bestEl.textContent = String(bestScore);
+    bestSize = Math.max(bestSize, size);
+    bestSizeEl.textContent = bestSize + 'x' + bestSize;
+    ratingEl.textContent = score + ' 分 — ' + computeRating(score);
+    window._spLastScore = score;
+    window._spBestScore = bestScore;
+    if (typeof gaSubmitScore === 'function') gaSubmitScore('sliding-puzzle', score);
+
+    const nextSize = computeBoardSize(levelNumber + 1);
+    overTitle.textContent = '🎉 ' + size + 'x' + size + ' 完成！';
+    overSub.textContent = '步數 ' + moveCount + '，花費 ' + formatTime(secondsElapsed) + '，獲得 ' + gained + ' 分，準備下一關（' + nextSize + 'x' + nextSize + '）';
+    overlay.classList.add('show');
+    setTimeout(function () {
+      overlay.classList.remove('show');
+      loadLevel(levelNumber + 1);
+    }, 1800);
+  }
+
+  function spStartInternal() {
+    playing = true;
+    score = 0;
+    scoreEl.textContent = '0';
+    ratingEl.textContent = '';
+    overlay.classList.remove('show');
+    startBtn.textContent = '🔄 重新開始一輪';
+    loadLevel(1);
+  }
+  window.spStart = spStartInternal;
+
+  window.addEventListener('beforeunload', stopTimer); // 7-4 資源清理
+})();
+
+function spShareResult() {
+  const score = window._spLastScore;
+  const text = (score != null)
+    ? ('我在SoftGlow數字推盤遊戲拿了 ' + score + ' 分！來試試你能推到多大的盤面？')
+    : '來玩玩SoftGlow數字推盤遊戲！';
+  if (navigator.share) {
+    navigator.share({ title: document.title, text: text, url: location.href }).catch(function () {});
+  } else {
+    navigator.clipboard.writeText(text + ' ' + location.href);
+    const b = event.target;
+    const old = b.textContent;
+    b.textContent = '已複製！';
+    setTimeout(function () { b.textContent = old; }, CONFIG.copyRevertMs);
+  }
+}
+document.querySelectorAll('.faq-q').forEach(function (q) {
+  q.addEventListener('click', function () { this.parentElement.classList.toggle('open'); });
+});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},CONFIG.adLoadDelayMs);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/games/games-auth.js"></script>
+<script>
+gaMountAuthWidget('gaWidget');
+gaMountLeaderboard('gaLeaderboard', 'sliding-puzzle');
+gaInitFullscreenToggle();
+gaInitLoginReminder('sliding-puzzle');
+</script>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

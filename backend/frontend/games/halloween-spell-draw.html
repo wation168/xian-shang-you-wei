@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>萬聖節塗鴉法術遊戲 - 免費線上手繪消除怪物 | SoftGlow</title>
+<meta name="description" content="免費線上萬聖節塗鴉法術遊戲，用手指或滑鼠畫出閃電、星星、圓圈施展法術消滅怪物，畫對怪物的弱點形狀就能一擊消滅。怪物會隨波次越來越多、越來越快，看你能撐到第幾波。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/halloween-spell-draw.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/halloween-spell-draw.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/halloween-spell-draw.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "萬聖節塗鴉法術遊戲", "url": "https://softglow-ai.com/games/halloween-spell-draw.html", "description": "免費線上萬聖節塗鴉法術遊戲，畫出閃電、星星、圓圈施展法術消滅怪物，畫對弱點形狀一擊消滅，難度隨波次持續提升。", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "萬聖節塗鴉法術遊戲怎麼玩？", "acceptedAnswer": {"@type": "Answer", "text": "在畫布上用手指或滑鼠畫出閃電、星星或圓圈的形狀，系統會自動辨識你畫的是哪一種法術，並朝畫面上的怪物發動攻擊。每種怪物都有專屬的弱點形狀，畫對弱點形狀可以一擊消滅，畫其他形狀則要打兩次以上才能消滅。"}}, {"@type": "Question", "name": "要怎麼知道怪物的弱點是哪個形狀？", "acceptedAnswer": {"@type": "Answer", "text": "每隻怪物身邊都有一圈發光的光暈，光暈顏色對應牠的弱點：琥珀色代表怕閃電、紫色代表怕星星、青色代表怕圓圈，光暈上也會顯示對應的小圖示，不需要背數值也能靠顏色直覺判斷。"}}, {"@type": "Question", "name": "為什麼我畫的形狀沒有反應？", "acceptedAnswer": {"@type": "Answer", "text": "辨識系統需要一定的筆畫長度跟形狀完整度才能判斷，畫得太短、太潦草或太快點一下都可能辨識不出來，屬於「施法落空」不會扣分，重新畫一次完整一點的形狀通常就能成功。閃電建議畫出明顯的之字形轉折，星星建議一筆畫完五個角，圓圈則盡量畫成一個完整的圈。"}}, {"@type": "Question", "name": "生命值用完會怎樣？", "acceptedAnswer": {"@type": "Answer", "text": "怪物如果沒有在抵達畫面底部的結界線之前被消滅，就會扣1點生命值，開局有5點生命值，扣完遊戲就結束並顯示這一輪的總分跟撐到第幾波。"}}, {"@type": "Question", "name": "難度會一直變難嗎？", "acceptedAnswer": {"@type": "Answer", "text": "會。隨著消滅的怪物數增加會進入下一波，怪物出現的速度、移動速度都會逐漸提高，同時畫面上最多同時存在的怪物數量也會慢慢增加；第3波開始還會解鎖新的怪物種類跟新的法術形狀，難度是刻意設計成持續往上升級、沒有固定終點的。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="halloween-spell-draw">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="zh-TW">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+.hw-topbar{display:flex;justify-content:center;align-items:center;gap:16px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f;flex-wrap:wrap}
+.hw-wave-badge{background:linear-gradient(135deg,#7c3aed,#ea580c);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800;transition:transform .3s}
+.hw-wave-badge.hw-wave-up{animation:hwWaveUp .5s ease}
+@keyframes hwWaveUp{0%{transform:scale(1)}40%{transform:scale(1.35);box-shadow:0 0 14px rgba(124,58,237,.8)}100%{transform:scale(1)}}
+.hw-lives{letter-spacing:2px}
+.hw-board{position:relative;width:100%;max-width:420px;aspect-ratio:3/4;margin:0 auto;border-radius:16px;overflow:hidden;background:linear-gradient(180deg,#1e1033 0%,#2d1b4e 55%,#0f0a1e 100%);touch-action:none;cursor:crosshair}
+.hw-board canvas{position:absolute;inset:0;width:100%;height:100%}
+.hw-shape-hint{display:flex;justify-content:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+.hw-shape-chip{background:var(--game-bg);border:1px solid var(--game-border);border-radius:14px;padding:6px 12px;font-size:12px;color:#475569;display:flex;align-items:center;gap:5px}
+.hw-shape-chip.hw-locked{opacity:.4}
+.hw-overlay{position:absolute;inset:0;background:rgba(15,10,30,.88);display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:20px}
+.hw-overlay.show{display:flex}
+.hw-overlay .hw-over-title{font-size:20px;font-weight:800;margin-bottom:8px}
+.hw-overlay .hw-over-sub{font-size:13px;color:#cbd5e1;line-height:1.6}
+.hw-miss-flash{position:absolute;padding:2px 8px;border-radius:10px;background:rgba(148,163,184,.35);color:#fff;font-size:12px;font-weight:700;pointer-events:none;transform:translate(-50%,-50%)}
+@media(max-width:480px){.hw-topbar{font-size:13px;gap:10px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/">工具</a>
+    <a href="/games/">遊戲</a>
+    <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
+    <a href="/">首頁</a>
+  </div>
+  <div class="nav-actions">
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> &gt; <a href="/games/">遊戲</a> &gt; 萬聖節塗鴉法術</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>萬聖節塗鴉法術遊戲</h1>
+    <p class="game-subtitle">在畫布上畫出閃電、星星或圓圈施展法術，畫對怪物的弱點形狀就能一擊消滅。怪物會隨波次越來越多、越來越快，沒有終點，看你能撐到第幾波。</p>
+
+    <div class="hw-topbar">
+      <span>分數：<span id="hwScore">0</span></span>
+      <span class="hw-wave-badge" id="hwWaveBadge">第1波</span>
+      <span class="hw-lives">生命：<span id="hwLives">❤️❤️❤️❤️❤️</span></span>
+    </div>
+
+    <div class="hw-board" id="hwBoard">
+      <canvas id="hwCanvas"></canvas>
+      <div class="hw-overlay" id="hwOverlay">
+        <div class="hw-over-title" id="hwOverTitle">🎃 準備好施法了嗎？</div>
+        <div class="hw-over-sub" id="hwOverSub">畫出閃電⚡、星星⭐或圓圈○消滅怪物<br>怪物碰到底部結界線會扣生命值</div>
+      </div>
+    </div>
+
+    <div class="hw-shape-hint" id="hwShapeHint"></div>
+
+    <div class="game-rating" id="hwRating"></div>
+
+    <div class="game-score-row">
+      <div class="game-score-tile"><div class="gs-label">最佳成績</div><div class="gs-value" id="hwBest">—</div></div>
+      <div class="game-score-tile"><div class="gs-label">最高波次</div><div class="gs-value" id="hwBestWave">—</div></div>
+    </div>
+    <div class="game-history" id="hwHistory"></div>
+
+    <div class="game-controls">
+      <button class="game-btn" id="hwStartBtn" onclick="hwStart()">▶️ 開始遊戲</button>
+      <button class="game-btn secondary" id="hwSoundBtn" onclick="hwToggleSound()">🔊 音效</button>
+      <button class="game-btn secondary" onclick="hwShareResult()">📤 分享成績</button>
+    </div>
+
+    <div class="ga-widget" id="gaWidget"></div>
+    <div class="ga-leaderboard"><h3>🏆 萬聖節塗鴉法術排行榜</h3><div id="gaLeaderboard"></div></div>
+  </div>
+
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>什麼是塗鴉施法遊戲？</h2><p>塗鴉施法（用畫圖形代替按鍵來施展魔法）是一種歷史悠久的遊戲機制，玩家不是靠點擊或搖桿操作，而是直接在畫面上畫出特定形狀來觸發對應的攻擊或技能，考驗的是手繪的準確度跟臨場反應。這個版本把這個機制跟萬聖節怪物結合：南瓜怪、幽靈、蝙蝠、女巫幽魂會不斷從畫面上方出現並往下逼近，玩家要即時畫出正確的法術形狀才能有效率地消滅牠們。</p><h2>難度會持續往上升級</h2><p>這款遊戲刻意設計成「沒有終點」的難度曲線：怪物出現的頻率、移動速度會隨波次持續提高，同時存在的怪物數量上限也會慢慢放寬，第3波之後還會出現新的怪物種類跟新的法術形狀。想拿高分，除了畫得準，也要練習快速判斷該優先消滅哪一隻怪物。</p></article>
+
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article"><h2>怎麼玩</h2><p>按下「開始遊戲」後，怪物會不定時從畫面上方出現並緩緩往下方的結界線移動。在畫布任何位置畫出閃電⚡、星星⭐或圓圈○的形狀，系統會自動辨識並朝場上的怪物發動對應法術：畫對某隻怪物的弱點形狀（怪物身邊的光暈顏色就是提示）可以一擊消滅牠；畫其他形狀效果比較弱，通常要打兩次以上。怪物如果抵達底部結界線沒被消滅，會扣1點生命值，5點生命值歸零遊戲結束。</p><h2>畫形狀的小技巧</h2><p>閃電建議畫出明顯的「之」字形轉折，不要畫成一條直線；星星建議一筆畫完五個角、不要中途停頓太久；圓圈盡量畫成一個接近封閉的圈，不用畫得完美，系統有一定的容錯範圍。畫得太短、太潦草會辨識失敗（施法落空），但落空不會扣分，重畫一次即可。</p></article>
+
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>常見問題</h2>
+  <div class="faq-item"><div class="faq-q">萬聖節塗鴉法術遊戲怎麼玩？</div><div class="faq-a">在畫布上用手指或滑鼠畫出閃電、星星或圓圈的形狀，系統會自動辨識你畫的是哪一種法術，並朝畫面上的怪物發動攻擊。每種怪物都有專屬的弱點形狀，畫對弱點形狀可以一擊消滅，畫其他形狀則要打兩次以上才能消滅。</div></div>
+  <div class="faq-item"><div class="faq-q">要怎麼知道怪物的弱點是哪個形狀？</div><div class="faq-a">每隻怪物身邊都有一圈發光的光暈，光暈顏色對應牠的弱點：琥珀色代表怕閃電、紫色代表怕星星、青色代表怕圓圈，光暈上也會顯示對應的小圖示，不需要背數值也能靠顏色直覺判斷。</div></div>
+  <div class="faq-item"><div class="faq-q">為什麼我畫的形狀沒有反應？</div><div class="faq-a">辨識系統需要一定的筆畫長度跟形狀完整度才能判斷，畫得太短、太潦草或太快點一下都可能辨識不出來，屬於「施法落空」不會扣分，重新畫一次完整一點的形狀通常就能成功。閃電建議畫出明顯的之字形轉折，星星建議一筆畫完五個角，圓圈則盡量畫成一個完整的圈。</div></div>
+  <div class="faq-item"><div class="faq-q">生命值用完會怎樣？</div><div class="faq-a">怪物如果沒有在抵達畫面底部的結界線之前被消滅，就會扣1點生命值，開局有5點生命值，扣完遊戲就結束並顯示這一輪的總分跟撐到第幾波。</div></div>
+  <div class="faq-item"><div class="faq-q">難度會一直變難嗎？</div><div class="faq-a">會。隨著消滅的怪物數增加會進入下一波，怪物出現的速度、移動速度都會逐漸提高，同時畫面上最多同時存在的怪物數量也會慢慢增加；第3波開始還會解鎖新的怪物種類跟新的法術形狀，難度是刻意設計成持續往上升級、沒有固定終點的。</div></div>
+  </section>
+
+  <div class="more-tools"><h3>相關遊戲</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/piano-tiles.html">鋼琴塊遊戲</a>
+    <a class="tool-pill" href="/games/whack-a-mole.html">打地鼠遊戲</a>
+    <a class="tool-pill" href="/games/reaction-time-test.html">反應力測試</a>
+    <a class="tool-pill" href="/games/memory-match.html">記憶翻牌遊戲</a>
+    <a class="tool-pill" href="/games/snake.html">貪食蛇遊戲</a>
+    <a class="tool-pill" href="/games/">更多遊戲</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>更多遊戲</h3><a class="tool-pill" href="/games/" style="display:block;margin-top:8px">瀏覽全部遊戲 →</a></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/home/zh-TW/privacy.html">Privacy</a><a href="/home/zh-TW/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// 萬聖節塗鴉法術 — 遵循《新工具規劃守則.md》第七節：
+//   7-1 CONFIG集中管理所有難度/波次/計分數值
+//   7-2 純函式（$1手勢辨識、computeRating、computeWave）跟 rAF遊戲迴圈/DOM分開
+//   7-3 防錯：辨識失敗不扣分、場上無怪物時施法不報錯、遊戲結束後畫布不再回應
+//   7-4 資源清理：rAF/spawn timer統一在clearAll()處理，離開頁面前清除；
+//        全程只用Canvas繪製怪物與特效（不建立DOM節點），同時存在怪物數量有上限，
+//        記憶體用量不會隨遊戲時間拉長而持續增加
+// ══════════════════════════════════════════════════════════
+const CONFIG = {
+  cauldronLineRatio: 0.86,
+  startLives: 5,
+  waveThreshold: 6,
+  spawnIntervalStartMs: 1900,
+  spawnIntervalMinMs: 650,
+  spawnIntervalStepMs: 110,
+  monsterSpeedStartPxPerSec: 34,
+  monsterSpeedMaxPxPerSec: 95,
+  monsterSpeedStepPxPerSec: 5,
+  concurrentCapStart: 4,
+  concurrentCapMax: 8,
+  concurrentCapStepEveryWaves: 2,
+  circleUnlockWave: 3,
+  witchUnlockWave: 3,
+  batUnlockWave: 2,
+  killScoreCorrect: 15,
+  killScoreCorrectWaveBonus: 2,
+  hitScoreGeneric: 4,
+  killScoreGenericBonus: 8,
+  strokeMinPoints: 6,
+  recognitionThreshold: 0.62,
+  historyLimit: 5,
+  adLoadDelayMs: 2000,
+  copyRevertMs: 1500,
+  sound: { enabled: true, volume: 0.16 },
+  ratings: [
+    { max: 40,       label: '🎃 剛入門的小巫師，多練習畫形狀會更順手' },
+    { max: 100,      label: '🙂 中等水準，抓到辨識的訣竅了' },
+    { max: 200,      label: '👍 反應不錯，弱點形狀都抓得很準' },
+    { max: 350,      label: '🏆 高階巫師，波次撐得又深又穩' },
+    { max: Infinity, label: '⚡ 大法師等級，這難度對你來說根本不夠看！' }
+  ]
+};
+
+function computeRating(score) {
+  const hit = CONFIG.ratings.find(r => score <= r.max);
+  return hit ? hit.label : '';
+}
+function computeWave(defeated) {
+  return 1 + Math.floor(defeated / CONFIG.waveThreshold);
+}
+function computeSpawnIntervalMs(wave) {
+  return Math.max(CONFIG.spawnIntervalMinMs, CONFIG.spawnIntervalStartMs - (wave - 1) * CONFIG.spawnIntervalStepMs);
+}
+function computeMonsterSpeed(wave) {
+  return Math.min(CONFIG.monsterSpeedMaxPxPerSec, CONFIG.monsterSpeedStartPxPerSec + (wave - 1) * CONFIG.monsterSpeedStepPxPerSec);
+}
+function computeConcurrentCap(wave) {
+  return Math.min(CONFIG.concurrentCapMax, CONFIG.concurrentCapStart + Math.floor((wave - 1) / CONFIG.concurrentCapStepEveryWaves));
+}
+
+// ══════════════════════════════════════════════════════════
+// $1 Unistroke Recognizer（Wobbrock/Wilson/Li, UIST 2007 提出的公開手勢辨識演算法，
+// 這裡是依演算法步驟自行實作，不依賴任何外部套件/授權）：
+// 重取樣→旋轉至指示角度歸零→縮放到參考正方形→平移到原點，
+// 再用黃金分割搜尋找出候選筆畫與範本之間「旋轉後最小平均距離」作為相似度判斷依據。
+// ══════════════════════════════════════════════════════════
+const RECOG = {
+  N: 64,
+  SIZE: 200,
+  ORIGIN: { x: 0, y: 0 },
+  ANGLE_RANGE: Math.PI / 4,
+  ANGLE_PRECISION: Math.PI / 90
+};
+RECOG.HALF_DIAGONAL = 0.5 * Math.sqrt(RECOG.SIZE * RECOG.SIZE + RECOG.SIZE * RECOG.SIZE);
+
+function ptDist(a, b) { const dx = a.x - b.x, dy = a.y - b.y; return Math.sqrt(dx * dx + dy * dy); }
+function pathLen(points) {
+  let d = 0;
+  for (let i = 1; i < points.length; i++) d += ptDist(points[i - 1], points[i]);
+  return d;
+}
+function resamplePoints(points, n) {
+  if (points.length < 2) return points.slice();
+  const I = pathLen(points) / (n - 1);
+  let D = 0;
+  const src = points.slice();
+  const out = [src[0]];
+  for (let i = 1; i < src.length; i++) {
+    const d = ptDist(src[i - 1], src[i]);
+    if (D + d >= I) {
+      const t = d === 0 ? 0 : (I - D) / d;
+      const q = { x: src[i - 1].x + t * (src[i].x - src[i - 1].x), y: src[i - 1].y + t * (src[i].y - src[i - 1].y) };
+      out.push(q);
+      src.splice(i, 0, q);
+      D = 0;
+    } else {
+      D += d;
+    }
+  }
+  while (out.length < n) out.push(src[src.length - 1]);
+  return out.slice(0, n);
+}
+function centroidOf(points) {
+  let x = 0, y = 0;
+  points.forEach(p => { x += p.x; y += p.y; });
+  return { x: x / points.length, y: y / points.length };
+}
+function indicativeAngle(points) {
+  const c = centroidOf(points);
+  return Math.atan2(c.y - points[0].y, c.x - points[0].x);
+}
+function rotateByAngle(points, angle) {
+  const c = centroidOf(points);
+  const cos = Math.cos(angle), sin = Math.sin(angle);
+  return points.map(p => {
+    const dx = p.x - c.x, dy = p.y - c.y;
+    return { x: dx * cos - dy * sin + c.x, y: dx * sin + dy * cos + c.y };
+  });
+}
+function boundingBoxOf(points) {
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  points.forEach(p => { minX = Math.min(minX, p.x); minY = Math.min(minY, p.y); maxX = Math.max(maxX, p.x); maxY = Math.max(maxY, p.y); });
+  return { minX, minY, width: Math.max(1e-6, maxX - minX), height: Math.max(1e-6, maxY - minY) };
+}
+function scaleToSquare(points, size) {
+  const bb = boundingBoxOf(points);
+  return points.map(p => ({ x: p.x * (size / bb.width), y: p.y * (size / bb.height) }));
+}
+function translateToOrigin(points) {
+  const c = centroidOf(points);
+  return points.map(p => ({ x: p.x - c.x + RECOG.ORIGIN.x, y: p.y - c.y + RECOG.ORIGIN.y }));
+}
+function normalizeGesture(rawPoints) {
+  let pts = resamplePoints(rawPoints, RECOG.N);
+  const angle = indicativeAngle(pts);
+  pts = rotateByAngle(pts, -angle);
+  pts = scaleToSquare(pts, RECOG.SIZE);
+  pts = translateToOrigin(pts);
+  return pts;
+}
+function pathDistance(a, b) {
+  let sum = 0;
+  for (let i = 0; i < a.length; i++) sum += ptDist(a[i], b[i]);
+  return sum / a.length;
+}
+function distanceAtAngle(points, template, angle) {
+  return pathDistance(rotateByAngle(points, angle), template);
+}
+function distanceAtBestAngle(points, template, thetaA, thetaB, thetaDelta) {
+  const phi = 0.5 * (-1 + Math.sqrt(5));
+  let x1 = phi * thetaA + (1 - phi) * thetaB;
+  let f1 = distanceAtAngle(points, template, x1);
+  let x2 = (1 - phi) * thetaA + phi * thetaB;
+  let f2 = distanceAtAngle(points, template, x2);
+  let a = thetaA, b = thetaB;
+  while (Math.abs(b - a) > thetaDelta) {
+    if (f1 < f2) { b = x2; x2 = x1; f2 = f1; x1 = phi * a + (1 - phi) * b; f1 = distanceAtAngle(points, template, x1); }
+    else { a = x1; x1 = x2; f1 = f2; x2 = (1 - phi) * a + phi * b; f2 = distanceAtAngle(points, template, x2); }
+  }
+  return Math.min(f1, f2);
+}
+
+function makeStarPoints() {
+  const cx = 50, cy = 50, r = 45;
+  const outer = [];
+  for (let i = 0; i < 5; i++) {
+    const a = -Math.PI / 2 + i * (2 * Math.PI / 5);
+    outer.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+  }
+  return [0, 2, 4, 1, 3, 0].map(i => outer[i]);
+}
+function makeLightningPoints() {
+  return [{ x: 62, y: 4 }, { x: 28, y: 46 }, { x: 56, y: 46 }, { x: 18, y: 96 }];
+}
+function makeCirclePoints() {
+  const pts = [], cx = 50, cy = 50, r = 45;
+  for (let i = 0; i <= 32; i++) {
+    const a = i * (2 * Math.PI / 32);
+    pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+  }
+  return pts;
+}
+
+const RAW_TEMPLATES = [
+  { name: 'lightning', icon: '⚡', label: '閃電', points: makeLightningPoints() },
+  { name: 'star', icon: '⭐', label: '星星', points: makeStarPoints() },
+  { name: 'circle', icon: '⭕', label: '圓圈', points: makeCirclePoints() }
+];
+const TEMPLATES = RAW_TEMPLATES.map(t => ({ name: t.name, icon: t.icon, label: t.label, points: normalizeGesture(t.points) }));
+
+function recognizeGesture(rawPoints, allowedNames) {
+  if (!rawPoints || rawPoints.length < CONFIG.strokeMinPoints) return null;
+  if (pathLen(rawPoints) < 20) return null; // 防錯：幾乎沒移動的點擊不當成形狀
+  const candidate = normalizeGesture(rawPoints);
+  let best = null, bestDist = Infinity;
+  TEMPLATES.forEach(t => {
+    if (allowedNames && allowedNames.indexOf(t.name) === -1) return;
+    const d = distanceAtBestAngle(candidate, t.points, -RECOG.ANGLE_RANGE, RECOG.ANGLE_RANGE, RECOG.ANGLE_PRECISION);
+    if (d < bestDist) { bestDist = d; best = t; }
+  });
+  if (!best) return null;
+  const score = 1 - bestDist / RECOG.HALF_DIAGONAL;
+  if (score < CONFIG.recognitionThreshold) return null;
+  return { name: best.name, icon: best.icon, label: best.label, score };
+}
+
+// ══════════════════════════════════════════════════════════
+// 怪物種類定義：weakness對應TEMPLATES的name，光暈顏色即弱點提示
+// ══════════════════════════════════════════════════════════
+const MONSTER_TYPES = [
+  { key: 'pumpkin', name: '南瓜怪', weakness: 'lightning', hp: 2, minWave: 1, r: 26, auraColor: '245,158,11', body: ['#ffb15e', '#ea580c'] },
+  { key: 'ghost', name: '幽靈', weakness: 'star', hp: 2, minWave: 1, r: 24, auraColor: '167,139,250', body: ['#f5f3ff', '#c4b5fd'] },
+  { key: 'bat', name: '蝙蝠', weakness: 'star', hp: 2, minWave: CONFIG.batUnlockWave, r: 20, auraColor: '167,139,250', body: ['#6d28d9', '#2e1065'], speedMul: 1.35 },
+  { key: 'witch', name: '女巫幽魂', weakness: 'circle', hp: 3, minWave: CONFIG.witchUnlockWave, r: 27, auraColor: '45,212,191', body: ['#134e4a', '#042f2e'], speedMul: 0.85 }
+];
+const SHAPE_META = { lightning: { icon: '⚡', label: '閃電' }, star: { icon: '⭐', label: '星星' }, circle: { icon: '⭕', label: '圓圈' } };
+
+(function () {
+  const boardWrap = document.getElementById('hwBoard');
+  const canvas = document.getElementById('hwCanvas');
+  const ctx = canvas.getContext('2d');
+  const overlay = document.getElementById('hwOverlay');
+  const overTitle = document.getElementById('hwOverTitle');
+  const overSub = document.getElementById('hwOverSub');
+  const scoreEl = document.getElementById('hwScore');
+  const waveEl = document.getElementById('hwWaveBadge');
+  const livesEl = document.getElementById('hwLives');
+  const ratingEl = document.getElementById('hwRating');
+  const bestEl = document.getElementById('hwBest');
+  const bestWaveEl = document.getElementById('hwBestWave');
+  const historyEl = document.getElementById('hwHistory');
+  const startBtn = document.getElementById('hwStartBtn');
+  const shapeHintEl = document.getElementById('hwShapeHint');
+
+  let playing = false;
+  let score = 0, wave = 1, lives = CONFIG.startLives, defeated = 0;
+  let monsters = [];      // {type, x, y, r, hp, weakness, auraColor, body, speed, id}
+  let effects = [];       // {kind, x, y, tx, ty, startTs, durMs}
+  let monsterSeq = 0;
+  let rafId = null, spawnTimerId = null, lastTs = 0;
+  let history = [], bestScore = 0, bestWave = 0;
+  let cw = 0, ch = 0, dpr = 1;
+  let stroke = null; // {points:[{x,y}], drawing:true}
+
+  function clearAll() {
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+    if (spawnTimerId) { clearTimeout(spawnTimerId); spawnTimerId = null; }
+    monsters = [];
+    effects = [];
+    stroke = null;
+  }
+
+  function resizeCanvas() {
+    const rect = boardWrap.getBoundingClientRect();
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    cw = rect.width; ch = rect.height;
+    canvas.width = Math.round(cw * dpr);
+    canvas.height = Math.round(ch * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  window.addEventListener('resize', resizeCanvas);
+
+  function renderShapeHint() {
+    const unlocked = currentUnlockedShapes();
+    shapeHintEl.innerHTML = RAW_TEMPLATES.map(function (t) {
+      const locked = unlocked.indexOf(t.name) === -1;
+      return '<span class="hw-shape-chip' + (locked ? ' hw-locked' : '') + '">' + t.icon + ' ' + t.label + (locked ? '（第' + CONFIG.circleUnlockWave + '波解鎖）' : '') + '</span>';
+    }).join('');
+  }
+  function currentUnlockedShapes() {
+    const s = ['lightning', 'star'];
+    if (wave >= CONFIG.circleUnlockWave) s.push('circle');
+    return s;
+  }
+  function currentUnlockedMonsterTypes() {
+    return MONSTER_TYPES.filter(function (t) { return t.minWave <= wave; });
+  }
+
+  function updateWave() {
+    const newWave = computeWave(defeated);
+    if (newWave !== wave) {
+      wave = newWave;
+      waveEl.textContent = '第' + wave + '波';
+      waveEl.classList.remove('hw-wave-up');
+      void waveEl.offsetWidth;
+      waveEl.classList.add('hw-wave-up');
+      renderShapeHint();
+    }
+  }
+  function updateLivesDisplay() {
+    let s = '';
+    for (let i = 0; i < CONFIG.startLives; i++) s += (i < lives ? '❤️' : '🖤');
+    livesEl.textContent = s;
+  }
+
+  function spawnMonster() {
+    if (!playing) return;
+    const cap = computeConcurrentCap(wave);
+    if (monsters.length < cap) {
+      const pool = currentUnlockedMonsterTypes();
+      const t = pool[Math.floor(Math.random() * pool.length)];
+      const speed = computeMonsterSpeed(wave) * (t.speedMul || 1);
+      monsters.push({
+        id: monsterSeq++, key: t.key, name: t.name, weakness: t.weakness,
+        hp: t.hp, maxHp: t.hp, r: t.r, auraColor: t.auraColor, body: t.body,
+        x: t.r + Math.random() * (cw - 2 * t.r), y: -t.r, speed: speed
+      });
+    }
+    spawnTimerId = setTimeout(spawnMonster, computeSpawnIntervalMs(wave));
+  }
+
+  function removeMonster(m) {
+    const idx = monsters.indexOf(m);
+    if (idx !== -1) monsters.splice(idx, 1);
+  }
+
+  function addEffect(kind, x, y, tx, ty, durMs) {
+    effects.push({ kind: kind, x: x, y: y, tx: tx, ty: ty, startTs: performance.now(), durMs: durMs });
+    // 7-3/7-4 防錯與清理：特效陣列上限保護，極端情況也不會無限增長
+    if (effects.length > 40) effects.splice(0, effects.length - 40);
+  }
+
+  function findTarget(shapeName) {
+    if (!monsters.length) return null;
+    const weak = monsters.filter(function (m) { return m.weakness === shapeName; });
+    const pool = weak.length ? weak : monsters;
+    return pool.reduce(function (a, b) { return a.y > b.y ? a : b; });
+  }
+
+  function castSpell(shapeName, castX, castY) {
+    const target = findTarget(shapeName);
+    if (!target) { addEffect('fizzle', castX, castY, castX, castY, 300); return; }
+    const isCorrect = target.weakness === shapeName;
+    if (isCorrect) {
+      target.hp = 0;
+      score += CONFIG.killScoreCorrect + (wave - 1) * CONFIG.killScoreCorrectWaveBonus;
+      playChime(true);
+    } else {
+      target.hp -= 1;
+      score += CONFIG.hitScoreGeneric;
+      playChime(false);
+    }
+    addEffect(shapeName, castX, castY, target.x, target.y, isCorrect ? 480 : 320);
+    if (target.hp <= 0) {
+      if (!isCorrect) score += CONFIG.killScoreGenericBonus;
+      removeMonster(target);
+      defeated++;
+      updateWave();
+    }
+    scoreEl.textContent = String(score);
+  }
+
+  function onStrokeEnd() {
+    if (!stroke || !playing) { stroke = null; return; }
+    const pts = stroke.points;
+    const result = recognizeGesture(pts, currentUnlockedShapes());
+    const last = pts[pts.length - 1] || pts[0];
+    if (result) {
+      castSpell(result.name, last.x, last.y);
+    } else {
+      addEffect('miss', last.x, last.y, last.x, last.y, 260);
+    }
+    stroke = null;
+  }
+
+  function localPoint(e) {
+    const rect = canvas.getBoundingClientRect();
+    return { x: (e.clientX - rect.left), y: (e.clientY - rect.top) };
+  }
+  boardWrap.addEventListener('pointerdown', function (e) {
+    if (!playing) return;
+    e.preventDefault();
+    stroke = { points: [localPoint(e)] };
+  });
+  boardWrap.addEventListener('pointermove', function (e) {
+    if (!stroke || !playing) return;
+    stroke.points.push(localPoint(e));
+  });
+  window.addEventListener('pointerup', function () { if (stroke) onStrokeEnd(); });
+  boardWrap.addEventListener('pointerleave', function () { /* 允許畫出邊界仍可放開手指再判定，這裡不中斷 */ });
+
+  // ── 繪製 ──
+  function drawBackground() {
+    ctx.clearRect(0, 0, cw, ch);
+    const cauldronY = ch * CONFIG.cauldronLineRatio;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(239,68,68,.55)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 6]);
+    ctx.beginPath(); ctx.moveTo(0, cauldronY); ctx.lineTo(cw, cauldronY); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+  function triangle(cx0, cy0, size) {
+    ctx.beginPath();
+    ctx.moveTo(cx0, cy0 - size); ctx.lineTo(cx0 - size * 0.85, cy0 + size * 0.7); ctx.lineTo(cx0 + size * 0.85, cy0 + size * 0.7); ctx.closePath(); ctx.fill();
+  }
+  function drawAura(m, t) {
+    const pulse = 0.55 + 0.25 * Math.sin(t / 260 + m.id);
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(m.x, m.y, m.r * 1.55, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(' + m.auraColor + ',' + (pulse * 0.28) + ')';
+    ctx.shadowColor = 'rgba(' + m.auraColor + ',0.9)';
+    ctx.shadowBlur = 14;
+    ctx.fill();
+    ctx.restore();
+    const meta = SHAPE_META[m.weakness];
+    ctx.font = '13px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(meta.icon, m.x, m.y - m.r * 1.7);
+  }
+  function drawMonster(m, t) {
+    drawAura(m, t);
+    const g = ctx.createRadialGradient(m.x - m.r * 0.3, m.y - m.r * 0.3, m.r * 0.1, m.x, m.y, m.r);
+    g.addColorStop(0, m.body[0]); g.addColorStop(1, m.body[1]);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    if (m.key === 'bat') {
+      ctx.ellipse(m.x, m.y, m.r * 0.75, m.r * 0.6, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(m.x - m.r * 0.6, m.y); ctx.lineTo(m.x - m.r * 1.5, m.y - m.r * 0.5); ctx.lineTo(m.x - m.r * 0.5, m.y + m.r * 0.2); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(m.x + m.r * 0.6, m.y); ctx.lineTo(m.x + m.r * 1.5, m.y - m.r * 0.5); ctx.lineTo(m.x + m.r * 0.5, m.y + m.r * 0.2); ctx.closePath(); ctx.fill();
+    } else if (m.key === 'ghost') {
+      ctx.arc(m.x, m.y - m.r * 0.15, m.r * 0.8, Math.PI, 0);
+      ctx.lineTo(m.x + m.r * 0.8, m.y + m.r * 0.7);
+      for (let i = 0; i < 3; i++) { ctx.lineTo(m.x + m.r * 0.53 - i * m.r * 0.53, m.y + (i % 2 === 0 ? m.r * 0.4 : m.r * 0.7)); }
+      ctx.lineTo(m.x - m.r * 0.8, m.y + m.r * 0.7);
+      ctx.closePath(); ctx.fill();
+    } else if (m.key === 'witch') {
+      ctx.arc(m.x, m.y, m.r * 0.75, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(m.x, m.y - m.r * 1.5); ctx.lineTo(m.x - m.r * 0.9, m.y - m.r * 0.35); ctx.lineTo(m.x + m.r * 0.9, m.y - m.r * 0.35); ctx.closePath(); ctx.fill();
+    } else {
+      ctx.ellipse(m.x, m.y, m.r, m.r * 0.85, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = 'rgba(154,52,18,.5)'; ctx.lineWidth = 2;
+      for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.ellipse(m.x + i * m.r * 0.35, m.y, m.r * 0.18, m.r * 0.85, 0, 0, Math.PI * 2); ctx.stroke(); }
+    }
+    ctx.fillStyle = 'rgba(20,10,10,.85)';
+    if (m.key !== 'ghost') { triangle(m.x - m.r * 0.32, m.y - m.r * 0.05, m.r * 0.14); triangle(m.x + m.r * 0.32, m.y - m.r * 0.05, m.r * 0.14); }
+    else { ctx.beginPath(); ctx.arc(m.x - m.r * 0.28, m.y - m.r * 0.1, m.r * 0.09, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.arc(m.x + m.r * 0.28, m.y - m.r * 0.1, m.r * 0.09, 0, Math.PI * 2); ctx.fill(); }
+    if (m.hp < m.maxHp) {
+      ctx.fillStyle = 'rgba(255,255,255,.25)';
+      ctx.fillRect(m.x - m.r, m.y + m.r + 6, m.r * 2, 4);
+      ctx.fillStyle = '#22c55e';
+      ctx.fillRect(m.x - m.r, m.y + m.r + 6, m.r * 2 * (m.hp / m.maxHp), 4);
+    }
+  }
+  function drawStroke() {
+    if (!stroke || stroke.points.length < 2) return;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,.9)';
+    ctx.lineWidth = 3;
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    ctx.shadowColor = 'rgba(255,255,255,.8)'; ctx.shadowBlur = 8;
+    ctx.beginPath();
+    stroke.points.forEach(function (p, i) { if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
+    ctx.stroke();
+    ctx.restore();
+  }
+  function drawEffects(t) {
+    effects = effects.filter(function (fx) { return t - fx.startTs < fx.durMs; });
+    effects.forEach(function (fx) {
+      const p = Math.min(1, (t - fx.startTs) / fx.durMs);
+      ctx.save();
+      if (fx.kind === 'lightning') {
+        ctx.strokeStyle = 'rgba(253,224,71,' + (1 - p) + ')';
+        ctx.lineWidth = 3;
+        ctx.shadowColor = '#fde047'; ctx.shadowBlur = 12;
+        ctx.beginPath(); ctx.moveTo(fx.x, fx.y);
+        const midx = (fx.x + fx.tx) / 2 + (Math.random() - 0.5) * 20;
+        const midy = (fx.y + fx.ty) / 2;
+        ctx.lineTo(midx, midy); ctx.lineTo(fx.tx, fx.ty); ctx.stroke();
+      } else if (fx.kind === 'star') {
+        ctx.fillStyle = 'rgba(216,180,254,' + (1 - p) + ')';
+        ctx.font = (16 + p * 10) + 'px sans-serif';
+        ctx.fillText('⭐', fx.x + (fx.tx - fx.x) * p, fx.y + (fx.ty - fx.y) * p);
+      } else if (fx.kind === 'circle') {
+        ctx.strokeStyle = 'rgba(45,212,191,' + (1 - p) + ')';
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(fx.tx, fx.ty, 10 + p * 26, 0, Math.PI * 2); ctx.stroke();
+      } else if (fx.kind === 'miss' || fx.kind === 'fizzle') {
+        ctx.fillStyle = 'rgba(203,213,225,' + (1 - p) + ')';
+        ctx.font = '12px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('？', fx.x, fx.y);
+      }
+      ctx.restore();
+    });
+  }
+
+  function loop(ts) {
+    if (!playing) return;
+    if (!lastTs) lastTs = ts;
+    const dtSec = (ts - lastTs) / 1000;
+    lastTs = ts;
+    const cauldronY = ch * CONFIG.cauldronLineRatio;
+
+    drawBackground();
+    for (let i = monsters.length - 1; i >= 0; i--) {
+      const m = monsters[i];
+      m.y += m.speed * dtSec;
+      if (m.y - m.r >= cauldronY) {
+        removeMonster(m);
+        lives--;
+        updateLivesDisplay();
+        if (lives <= 0) { endGame(); return; }
+        continue;
+      }
+      drawMonster(m, ts);
+    }
+    drawEffects(ts);
+    drawStroke();
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function endGame() {
+    playing = false;
+    clearAll();
+    startBtn.disabled = false;
+    startBtn.textContent = '▶️ 再玩一次';
+    overTitle.textContent = '💀 結界被攻破了！';
+    overSub.textContent = '得分：' + score + ' 分　撐到第 ' + wave + ' 波';
+    overlay.classList.add('show');
+    ratingEl.textContent = score + ' 分 — ' + computeRating(score);
+
+    history.unshift(score);
+    history = history.slice(0, CONFIG.historyLimit);
+    bestScore = Math.max(bestScore, score);
+    bestWave = Math.max(bestWave, wave);
+    bestEl.textContent = bestScore + ' 分';
+    bestWaveEl.textContent = '第' + bestWave + '波';
+    historyEl.innerHTML = history.map(function (v) { return '<span>' + v + '分</span>'; }).join('');
+    window._hwLastScore = score;
+    window._hwBestScore = bestScore;
+    if (typeof gaSubmitScore === 'function') gaSubmitScore('halloween-spell-draw', score);
+  }
+
+  function hwStartInternal() {
+    resizeCanvas();
+    clearAll();
+    overlay.classList.remove('show');
+    playing = true;
+    score = 0; wave = 1; lives = CONFIG.startLives; defeated = 0; lastTs = 0;
+    scoreEl.textContent = '0';
+    waveEl.textContent = '第1波';
+    updateLivesDisplay();
+    renderShapeHint();
+    ratingEl.textContent = '';
+    startBtn.disabled = true;
+    startBtn.textContent = '遊戲中…';
+
+    spawnTimerId = setTimeout(spawnMonster, 500);
+    rafId = requestAnimationFrame(loop);
+  }
+  window.hwStart = hwStartInternal;
+
+  // ── 音效：Web Audio 合成音，跟鋼琴塊遊戲同一套做法，不需外部音檔（7-3 防錯：播放失敗不影響遊戲）──
+  let audioCtx = null, soundOn = true;
+  function getAudioCtx() {
+    if (!CONFIG.sound.enabled) return null;
+    if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { audioCtx = null; } }
+    if (audioCtx && audioCtx.state === 'suspended') { audioCtx.resume().catch(function () {}); }
+    return audioCtx;
+  }
+  function playChime(isCorrect) {
+    if (!soundOn) return;
+    const ctxA = getAudioCtx();
+    if (!ctxA) return;
+    try {
+      const osc = ctxA.createOscillator(); const gain = ctxA.createGain();
+      osc.type = isCorrect ? 'triangle' : 'sine';
+      osc.frequency.value = isCorrect ? 660 : 340;
+      gain.gain.setValueAtTime(CONFIG.sound.volume, ctxA.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctxA.currentTime + (isCorrect ? 0.28 : 0.14));
+      osc.connect(gain).connect(ctxA.destination);
+      osc.start(); osc.stop(ctxA.currentTime + (isCorrect ? 0.28 : 0.14));
+    } catch (e) { /* 音效失敗不應中斷遊戲 */ }
+  }
+  window.hwToggleSound = function () {
+    soundOn = !soundOn;
+    const btn = document.getElementById('hwSoundBtn');
+    if (btn) btn.textContent = soundOn ? '🔊 音效' : '🔇 靜音';
+    if (soundOn) getAudioCtx();
+  };
+
+  renderShapeHint();
+  updateLivesDisplay();
+  resizeCanvas();
+  window.addEventListener('beforeunload', clearAll); // 7-4 資源清理
+})();
+
+function hwShareResult() {
+  const score = window._hwLastScore;
+  const text = (score != null)
+    ? ('我在SoftGlow萬聖節塗鴉法術遊戲拿了 ' + score + ' 分！來試試你能打敗我嗎？')
+    : '來玩玩萬聖節塗鴉法術遊戲！';
+  if (navigator.share) {
+    navigator.share({ title: document.title, text: text, url: location.href }).catch(function () {});
+  } else {
+    navigator.clipboard.writeText(text + ' ' + location.href);
+    const b = event.target;
+    const old = b.textContent;
+    b.textContent = '已複製！';
+    setTimeout(function () { b.textContent = old; }, CONFIG.copyRevertMs);
+  }
+}
+document.querySelectorAll('.faq-q').forEach(function (q) {
+  q.addEventListener('click', function () { this.parentElement.classList.toggle('open'); });
+});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},CONFIG.adLoadDelayMs);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/games/games-auth.js"></script>
+<script>
+gaMountAuthWidget('gaWidget');
+gaMountLeaderboard('gaLeaderboard', 'halloween-spell-draw');
+gaInitFullscreenToggle();
+gaInitLoginReminder('halloween-spell-draw');
+</script>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>數獨 Sudoku 遊戲 - 免費線上益智邏輯遊戲 | SoftGlow</title>
+<meta name="description" content="免費線上數獨Sudoku遊戲，每一題都是自動產生、唯一解的9x9數獨盤，解完一題自動接下一題且難度持續提升，從簡單一路玩到專家級。純網頁益智遊戲，免下載免安裝。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/sudoku.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/sudoku.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/sudoku.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "數獨 Sudoku 遊戲", "url": "https://softglow-ai.com/games/sudoku.html", "description": "免費線上數獨遊戲，每一題自動產生且保證唯一解，解完自動接下一題並持續提升難度。", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "數獨的規則是什麼？", "acceptedAnswer": {"@type": "Answer", "text": "9x9的盤面被分成9個3x3小宮格，目標是在每一格填入1到9的數字，讓每一列（橫排9格）、每一欄（直排9格）、每一個3x3小宮格裡的數字都不重複，1到9剛好各出現一次。"}}, {"@type": "Question", "name": "每一題數獨都保證解得出來嗎？", "acceptedAnswer": {"@type": "Answer", "text": "保證解得出來，而且保證解法唯一。這個版本的題目是即時用程式產生完整解答後再挖空提示數字，挖空過程會用求解演算法確認剩下的提示數字仍然只對應一種解法，才會正式出題，不會出現無解或多重解的題目。"}}, {"@type": "Question", "name": "難度是怎麼分級的？", "acceptedAnswer": {"@type": "Answer", "text": "難度主要依照盤面上保留的提示數字（已知數字）多寡分級：提示越多通常越簡單、提示越少通常越需要更複雜的推理。這是簡化過的難度估算方式，不是完整的解題技巧分級（例如沒有特別區分需要用到「XY-Wing」之類進階技巧的題目），但已經足以做出從簡單到專家級、循序漸進的難度曲線。"}}, {"@type": "Question", "name": "難度會不會一直變難？", "acceptedAnswer": {"@type": "Answer", "text": "會。解完第一題（簡單）之後會自動接下一題，難度依序是簡單→中等→困難→專家，專家之後維持在專家難度持續出題，不會無限制降低提示數字到題目品質不穩定的程度，讓難度曲線在維持題目穩定可解的前提下盡量往上升級。"}}, {"@type": "Question", "name": "提示按鈕是做什麼的？", "acceptedAnswer": {"@type": "Answer", "text": "按下「提示」會自動幫你正確填入盤面上的其中一格，但會扣一些分數。這一格填入後會用不同顏色標示，跟你自己填的數字做區別，方便你知道是靠提示完成的。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="sudoku">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="zh-TW">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+.sk-topbar{display:flex;justify-content:center;align-items:center;gap:14px;margin-bottom:16px;font-size:14px;font-weight:700;color:#1e3a5f;flex-wrap:wrap}
+.sk-diff-badge{background:linear-gradient(135deg,#0ea5e9,#6366f1);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800;transition:transform .3s}
+.sk-diff-badge.sk-diff-up{animation:skDiffUp .5s ease}
+@keyframes skDiffUp{0%{transform:scale(1)}40%{transform:scale(1.3);box-shadow:0 0 14px rgba(99,102,241,.8)}100%{transform:scale(1)}}
+.sk-board{position:relative;width:100%;max-width:400px;aspect-ratio:1/1;margin:0 auto;background:#1e293b;border-radius:10px;padding:3px;box-sizing:border-box}
+.sk-grid{position:relative;display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr);gap:1px;width:100%;height:100%;background:#1e293b}
+.sk-cell{position:relative;background:#fff;display:flex;align-items:center;justify-content:center;font-size:clamp(12px,3.6vw,18px);font-weight:700;color:#1e3a5f;cursor:pointer;user-select:none}
+.sk-cell.sk-given{background:#eef2f7;color:#334155;cursor:default}
+.sk-cell.sk-selected{background:#bfdbfe}
+.sk-cell.sk-peer{background:#eff6ff}
+.sk-cell.sk-same-value{background:#dbeafe}
+.sk-cell.sk-conflict{color:#dc2626}
+.sk-cell.sk-hinted{color:#0891b2}
+.sk-cell:nth-child(3n){border-right:2px solid #1e293b}
+.sk-cell:nth-child(9n){border-right:none}
+.sk-row3 .sk-cell{border-bottom:2px solid #1e293b}
+.sk-numpad{display:grid;grid-template-columns:repeat(9,1fr);gap:6px;max-width:400px;margin:14px auto 0}
+.sk-numpad button{padding:10px 0;border-radius:8px;border:1px solid var(--game-border);background:#fff;font-size:16px;font-weight:700;color:#1e3a5f;cursor:pointer}
+.sk-numpad button:hover{background:var(--game-bg)}
+.sk-numpad button.sk-clear{grid-column:span 9;background:#fef2f2;color:#dc2626;font-size:13px}
+.sk-overlay{position:absolute;inset:3px;background:rgba(255,255,255,.94);border-radius:8px;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px}
+.sk-overlay.show{display:flex}
+.sk-overlay .sk-over-title{font-size:20px;font-weight:800;color:#1e3a5f;margin-bottom:8px}
+.sk-overlay .sk-over-sub{font-size:13px;color:#64748b;margin-bottom:12px}
+@media(max-width:480px){.sk-topbar{font-size:12px;gap:8px}.sk-numpad button{padding:8px 0;font-size:14px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/">工具</a>
+    <a href="/games/">遊戲</a>
+    <a href="/patterns/index.html">K棒型態</a>
+    <a href="/blog/">教學文章</a>
+    <a href="/">首頁</a>
+  </div>
+  <div class="nav-actions">
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> &gt; <a href="/games/">遊戲</a> &gt; 數獨</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>數獨 Sudoku 遊戲</h1>
+    <p class="game-subtitle">每一題都是即時產生、保證唯一解的9x9數獨盤，解完自動接下一題，難度從簡單一路升級到專家。</p>
+
+    <div class="sk-topbar">
+      <span>分數：<span id="skScore">0</span></span>
+      <span class="sk-diff-badge" id="skDiffBadge">簡單</span>
+      <span>第<span id="skPuzzleNum">1</span>題</span>
+      <span>⏱ <span id="skTimer">00:00</span></span>
+    </div>
+
+    <div class="sk-board" id="skBoard">
+      <div class="sk-grid" id="skGrid"></div>
+      <div class="sk-overlay" id="skOverlay">
+        <div class="sk-over-title" id="skOverTitle">🧩 準備好了嗎？</div>
+        <div class="sk-over-sub" id="skOverSub">點擊下方按鈕開始第一題</div>
+      </div>
+    </div>
+
+    <div class="sk-numpad" id="skNumpad"></div>
+
+    <div class="game-rating" id="skRating"></div>
+
+    <div class="game-score-row">
+      <div class="game-score-tile"><div class="gs-label">最佳成績</div><div class="gs-value" id="skBest">—</div></div>
+      <div class="game-score-tile"><div class="gs-label">最高難度</div><div class="gs-value" id="skBestDiff">—</div></div>
+    </div>
+    <div class="game-history" id="skHistory"></div>
+
+    <div class="game-controls">
+      <button class="game-btn" id="skStartBtn" onclick="skStart()">▶️ 開始遊戲</button>
+      <button class="game-btn secondary" onclick="skHint()">💡 提示</button>
+      <button class="game-btn secondary" onclick="skClearEntries()">🧹 清除我的作答</button>
+      <button class="game-btn secondary" onclick="skShareResult()">📤 分享成績</button>
+    </div>
+
+    <div class="ga-widget" id="gaWidget"></div>
+    <div class="ga-leaderboard"><h3>🏆 數獨排行榜</h3><div id="gaLeaderboard"></div></div>
+  </div>
+
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>數獨是什麼？</h2><p>數獨（Sudoku）是源自瑞士的數學謎題，1980年代由日本出版社發揚光大而成為全球知名的邏輯益智遊戲。9x9的盤面切成9個3x3小宮格，玩家要在空格填入1到9的數字，讓每一列、每一欄、每一個小宮格裡的數字都不重複。這個版本的每一題都是網頁即時自動產生，不是固定題庫，理論上永遠玩不完。</p><h2>難度會持續升級</h2><p>解完一題會自動接下一題，難度依序從「簡單」升到「中等」「困難」，最後到「專家」，之後維持在專家難度持續出題。難度主要依保留的提示數字多寡調整，提示越少通常代表需要更多邏輯推理才能往下推進，是刻意設計成有明確升級曲線、但同時保證每一題都解得出來的漸進式難度。</p></article>
+
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article"><h2>怎麼玩</h2><p>點一下想填入數字的格子選取它，再用鍵盤按1到9（或點畫面下方的數字鍵盤）填入；按Backspace、Delete或數字鍵盤的「清除」可以清空這一格。灰底的數字是題目本身給的提示，不能修改；白底的格子才是你要填的。如果填的數字跟同一列、同一欄或同一個小宮格裡的其他數字重複，那個數字會變成紅色提醒你，但不會強制擋下輸入，你可以自己決定要不要先跳過。全部填對後會自動判定過關，接著自動出下一題。</p><h2>提示與重來</h2><p>卡關的時候可以按「提示」，系統會幫你正確填入盤面上的一格（會扣一些分數，並用不同顏色標示是提示填的），適合真的卡住又不想直接放棄整題時使用。「清除我的作答」會把你自己填的數字全部清空、提示的給定數字保留，方便重新推理一次。</p></article>
+
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>常見問題</h2>
+  <div class="faq-item"><div class="faq-q">數獨的規則是什麼？</div><div class="faq-a">9x9的盤面被分成9個3x3小宮格，目標是在每一格填入1到9的數字，讓每一列（橫排9格）、每一欄（直排9格）、每一個3x3小宮格裡的數字都不重複，1到9剛好各出現一次。</div></div>
+  <div class="faq-item"><div class="faq-q">每一題數獨都保證解得出來嗎？</div><div class="faq-a">保證解得出來，而且保證解法唯一。這個版本的題目是即時用程式產生完整解答後再挖空提示數字，挖空過程會用求解演算法確認剩下的提示數字仍然只對應一種解法，才會正式出題，不會出現無解或多重解的題目。</div></div>
+  <div class="faq-item"><div class="faq-q">難度是怎麼分級的？</div><div class="faq-a">難度主要依照盤面上保留的提示數字（已知數字）多寡分級：提示越多通常越簡單、提示越少通常越需要更複雜的推理。這是簡化過的難度估算方式，不是完整的解題技巧分級（例如沒有特別區分需要用到「XY-Wing」之類進階技巧的題目），但已經足以做出從簡單到專家級、循序漸進的難度曲線。</div></div>
+  <div class="faq-item"><div class="faq-q">難度會不會一直變難？</div><div class="faq-a">會。解完第一題（簡單）之後會自動接下一題，難度依序是簡單→中等→困難→專家，專家之後維持在專家難度持續出題，不會無限制降低提示數字到題目品質不穩定的程度，讓難度曲線在維持題目穩定可解的前提下盡量往上升級。</div></div>
+  <div class="faq-item"><div class="faq-q">提示按鈕是做什麼的？</div><div class="faq-a">按下「提示」會自動幫你正確填入盤面上的其中一格，但會扣一些分數。這一格填入後會用不同顏色標示，跟你自己填的數字做區別，方便你知道是靠提示完成的。</div></div>
+  </section>
+
+  <div class="more-tools"><h3>相關遊戲</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/2048.html">2048數字方塊</a>
+    <a class="tool-pill" href="/games/gomoku.html">五子棋遊戲</a>
+    <a class="tool-pill" href="/games/memory-match.html">記憶翻牌遊戲</a>
+    <a class="tool-pill" href="/games/halloween-spell-draw.html">萬聖節塗鴉法術</a>
+    <a class="tool-pill" href="/games/piano-tiles.html">鋼琴塊遊戲</a>
+    <a class="tool-pill" href="/games/">更多遊戲</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>更多遊戲</h3><a class="tool-pill" href="/games/" style="display:block;margin-top:8px">瀏覽全部遊戲 →</a></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/home/zh-TW/privacy.html">Privacy</a><a href="/home/zh-TW/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// 數獨 — 遵循《新工具規劃守則.md》第七節：
+//   7-1 CONFIG集中管理難度級距/計分/安全上限等數值
+//   7-2 純函式（產生器/求解器/衝突偵測）跟DOM渲染完全分開，方便單元測試
+//   7-3 防錯：求解器有節點數安全上限避免卡死；挖空找不到可移除格就提前結束，不強求剛好命中目標提示數
+//   7-4 資源清理：固定81格DOM節點重複利用，計時器在切題/結束時清除
+// ══════════════════════════════════════════════════════════
+const CONFIG = {
+  difficulties: [
+    { key: 'easy', label: '簡單', clues: 38 },
+    { key: 'medium', label: '中等', clues: 32 },
+    { key: 'hard', label: '困難', clues: 27 },
+    { key: 'expert', label: '專家', clues: 24 }
+  ],
+  solverNodeCap: 60000,
+  historyLimit: 5,
+  adLoadDelayMs: 2000,
+  copyRevertMs: 1500,
+  scorePerPuzzleBase: 100,
+  scoreDifficultyMultiplier: { easy: 1, medium: 1.4, hard: 1.9, expert: 2.5 },
+  scoreTimePenaltyPerSec: 0.25,
+  scoreTimePenaltyCap: 60,
+  hintPenalty: 15,
+  ratings: [
+    { max: 100,  label: '🧩 剛入門，多解幾題會越來越順手' },
+    { max: 300,  label: '🙂 中等水準，邏輯推理抓到訣竅了' },
+    { max: 600,  label: '👍 不錯的成績，困難題也難不倒你' },
+    { max: 1000, label: '🏆 高手等級，專家題都能穩穩解開' },
+    { max: Infinity, label: '⚡ 數獨大師，這難度對你來說輕輕鬆鬆！' }
+  ]
+};
+
+// ══════════════════════════════════════════════════════════
+// 純函式：數獨產生器/求解器/衝突偵測，不依賴DOM，可獨立單元測試
+// ══════════════════════════════════════════════════════════
+function makeGrid9(fillVal) {
+  return Array.from({ length: 9 }, function () { return Array.from({ length: 9 }, function () { return fillVal; }); });
+}
+function cloneGrid9(g) { return g.map(function (r) { return r.slice(); }); }
+function shuffleArr(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function isValidPlacement(grid, row, col, val) {
+  for (let i = 0; i < 9; i++) {
+    if (i !== col && grid[row][i] === val) return false;
+    if (i !== row && grid[i][col] === val) return false;
+  }
+  const br = Math.floor(row / 3) * 3, bc = Math.floor(col / 3) * 3;
+  for (let r = br; r < br + 3; r++) for (let c = bc; c < bc + 3; c++) { if ((r !== row || c !== col) && grid[r][c] === val) return false; }
+  return true;
+}
+function findEmptyCell(grid) {
+  for (let r = 0; r < 9; r++) for (let c = 0; c < 9; c++) if (grid[r][c] === 0) return [r, c];
+  return null;
+}
+function fillDiagonalBoxes(grid) {
+  for (let b = 0; b < 9; b += 3) {
+    const nums = shuffleArr([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    let idx = 0;
+    for (let r = b; r < b + 3; r++) for (let c = b; c < b + 3; c++) grid[r][c] = nums[idx++];
+  }
+}
+function fillGridBacktrack(grid) {
+  const pos = findEmptyCell(grid);
+  if (!pos) return true;
+  const r = pos[0], c = pos[1];
+  const nums = shuffleArr([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  for (let i = 0; i < nums.length; i++) {
+    const v = nums[i];
+    if (isValidPlacement(grid, r, c, v)) {
+      grid[r][c] = v;
+      if (fillGridBacktrack(grid)) return true;
+      grid[r][c] = 0;
+    }
+  }
+  return false;
+}
+function generateFullSolution() {
+  const g = makeGrid9(0);
+  fillDiagonalBoxes(g);
+  fillGridBacktrack(g);
+  return g;
+}
+function countSolutions(grid, cap) {
+  let count = 0, nodes = 0;
+  const g = cloneGrid9(grid);
+  function helper() {
+    if (count >= cap) return;
+    nodes++;
+    if (nodes > CONFIG.solverNodeCap) { count = cap; return; } // 7-3 防錯：超過安全上限視為不安全（保守判定非唯一解）
+    const pos = findEmptyCell(g);
+    if (!pos) { count++; return; }
+    const r = pos[0], c = pos[1];
+    for (let v = 1; v <= 9; v++) {
+      if (count >= cap) return;
+      if (isValidPlacement(g, r, c, v)) {
+        g[r][c] = v;
+        helper();
+        g[r][c] = 0;
+        if (count >= cap) return;
+      }
+    }
+  }
+  helper();
+  return count;
+}
+function generatePuzzle(targetClues) {
+  const solution = generateFullSolution();
+  const puzzle = cloneGrid9(solution);
+  const positions = shuffleArr(Array.from({ length: 81 }, function (_, i) { return i; }));
+  let clueCount = 81;
+  for (let i = 0; i < positions.length; i++) {
+    if (clueCount <= targetClues) break;
+    const r = Math.floor(positions[i] / 9), c = positions[i] % 9;
+    if (puzzle[r][c] === 0) continue;
+    const backup = puzzle[r][c];
+    puzzle[r][c] = 0;
+    const solCount = countSolutions(puzzle, 2);
+    if (solCount !== 1) { puzzle[r][c] = backup; } // 唯一解才允許挖空，否則還原（7-3 防錯：不產生無解/多解題目）
+    else { clueCount--; }
+  }
+  return { puzzle: puzzle, solution: solution, clueCount: clueCount };
+}
+function computeConflictCells(grid) {
+  const conflicts = {};
+  function mark(keys) { if (keys.length > 1) keys.forEach(function (k) { conflicts[k] = true; }); }
+  for (let r = 0; r < 9; r++) {
+    const seen = {};
+    for (let c = 0; c < 9; c++) { const v = grid[r][c]; if (!v) continue; (seen[v] = seen[v] || []).push(r + ',' + c); }
+    Object.keys(seen).forEach(function (k) { mark(seen[k]); });
+  }
+  for (let c = 0; c < 9; c++) {
+    const seen = {};
+    for (let r = 0; r < 9; r++) { const v = grid[r][c]; if (!v) continue; (seen[v] = seen[v] || []).push(r + ',' + c); }
+    Object.keys(seen).forEach(function (k) { mark(seen[k]); });
+  }
+  for (let br = 0; br < 9; br += 3) {
+    for (let bc = 0; bc < 9; bc += 3) {
+      const seen = {};
+      for (let r = br; r < br + 3; r++) for (let c = bc; c < bc + 3; c++) { const v = grid[r][c]; if (!v) continue; (seen[v] = seen[v] || []).push(r + ',' + c); }
+      Object.keys(seen).forEach(function (k) { mark(seen[k]); });
+    }
+  }
+  return conflicts;
+}
+function isGridComplete(grid, solution) {
+  for (let r = 0; r < 9; r++) for (let c = 0; c < 9; c++) if (grid[r][c] !== solution[r][c]) return false;
+  return true;
+}
+function computeDifficultyIndex(puzzleNumber) {
+  return Math.min(CONFIG.difficulties.length - 1, puzzleNumber - 1);
+}
+function computePuzzleScore(diffKey, seconds) {
+  const mult = CONFIG.scoreDifficultyMultiplier[diffKey] || 1;
+  const penalty = Math.min(CONFIG.scoreTimePenaltyCap, seconds * CONFIG.scoreTimePenaltyPerSec);
+  return Math.max(20, Math.round(CONFIG.scorePerPuzzleBase * mult - penalty));
+}
+function computeRating(score) {
+  const hit = CONFIG.ratings.find(function (r) { return score <= r.max; });
+  return hit ? hit.label : '';
+}
+
+(function () {
+  const gridEl = document.getElementById('skGrid');
+  const numpadEl = document.getElementById('skNumpad');
+  const overlay = document.getElementById('skOverlay');
+  const overTitle = document.getElementById('skOverTitle');
+  const overSub = document.getElementById('skOverSub');
+  const scoreEl = document.getElementById('skScore');
+  const diffBadge = document.getElementById('skDiffBadge');
+  const puzzleNumEl = document.getElementById('skPuzzleNum');
+  const timerEl = document.getElementById('skTimer');
+  const ratingEl = document.getElementById('skRating');
+  const bestEl = document.getElementById('skBest');
+  const bestDiffEl = document.getElementById('skBestDiff');
+  const historyEl = document.getElementById('skHistory');
+  const startBtn = document.getElementById('skStartBtn');
+
+  let puzzle = null, solution = null, given = null, hinted = null;
+  let selected = null;
+  let playing = false;
+  let score = 0, bestScore = 0, bestDiffLabel = '', history = [];
+  let puzzleNumber = 0, timerId = null, secondsElapsed = 0;
+
+  function buildNumpad() {
+    let html = '';
+    for (let n = 1; n <= 9; n++) html += '<button onclick="skInputDigit(' + n + ')">' + n + '</button>';
+    html += '<button class="sk-clear" onclick="skInputDigit(0)">清除這一格</button>';
+    numpadEl.innerHTML = html;
+  }
+
+  function render() {
+    const conflicts = computeConflictCells(puzzle);
+    const selVal = selected && puzzle[selected[0]][selected[1]] ? puzzle[selected[0]][selected[1]] : null;
+    let html = '';
+    for (let r = 0; r < 9; r++) {
+      for (let c = 0; c < 9; c++) {
+        const v = puzzle[r][c];
+        const key = r + ',' + c;
+        const isGiven = given[r][c] !== 0;
+        const isSel = selected && selected[0] === r && selected[1] === c;
+        const isPeer = selected && !isSel && (selected[0] === r || selected[1] === c || (Math.floor(selected[0] / 3) === Math.floor(r / 3) && Math.floor(selected[1] / 3) === Math.floor(c / 3)));
+        const isSameVal = selVal && v === selVal && !isSel;
+        let cls = 'sk-cell';
+        if (isGiven) cls += ' sk-given';
+        if (isPeer) cls += ' sk-peer';
+        if (isSameVal) cls += ' sk-same-value';
+        if (isSel) cls += ' sk-selected';
+        if (conflicts[key]) cls += ' sk-conflict';
+        if (hinted[r][c]) cls += ' sk-hinted';
+        html += '<div class="' + cls + '" data-r="' + r + '" data-c="' + c + '">' + (v || '') + '</div>';
+      }
+    }
+    gridEl.innerHTML = html;
+    Array.prototype.forEach.call(gridEl.querySelectorAll('.sk-cell'), function (cell) {
+      cell.addEventListener('pointerdown', function () {
+        const r = parseInt(cell.getAttribute('data-r'), 10), c = parseInt(cell.getAttribute('data-c'), 10);
+        if (given[r][c] !== 0) return; // 7-3 防錯：給定格不可選取修改
+        selected = [r, c];
+        render();
+      });
+    });
+  }
+
+  function formatTime(sec) {
+    const m = Math.floor(sec / 60), s = sec % 60;
+    return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  }
+  function startTimer() {
+    stopTimer();
+    secondsElapsed = 0;
+    timerEl.textContent = formatTime(0);
+    timerId = setInterval(function () { secondsElapsed++; timerEl.textContent = formatTime(secondsElapsed); }, 1000);
+  }
+  function stopTimer() { if (timerId) { clearInterval(timerId); timerId = null; } } // 7-4 資源清理
+
+  function loadPuzzle(number) {
+    puzzleNumber = number;
+    const diffIdx = computeDifficultyIndex(puzzleNumber);
+    const diff = CONFIG.difficulties[diffIdx];
+    diffBadge.textContent = diff.label;
+    diffBadge.classList.remove('sk-diff-up');
+    void diffBadge.offsetWidth;
+    diffBadge.classList.add('sk-diff-up');
+    puzzleNumEl.textContent = String(puzzleNumber);
+
+    const gen = generatePuzzle(diff.clues);
+    puzzle = gen.puzzle;
+    solution = gen.solution;
+    given = cloneGrid9(gen.puzzle);
+    hinted = makeGrid9(0);
+    selected = null;
+    startTimer();
+    render();
+  }
+
+  window.skInputDigit = function (n) {
+    if (!playing || !selected) return;
+    const r = selected[0], c = selected[1];
+    if (given[r][c] !== 0) return; // 7-3 防錯：不可覆蓋給定格
+    puzzle[r][c] = n;
+    hinted[r][c] = 0; // 玩家自己改動這格就不再算提示格
+    render();
+    checkWin();
+  };
+  window.addEventListener('keydown', function (e) {
+    if (!playing || !selected) return;
+    if (e.key >= '1' && e.key <= '9') { window.skInputDigit(parseInt(e.key, 10)); }
+    else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') { window.skInputDigit(0); }
+    else if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      let [r, c] = selected;
+      if (e.key === 'ArrowUp') r = Math.max(0, r - 1);
+      if (e.key === 'ArrowDown') r = Math.min(8, r + 1);
+      if (e.key === 'ArrowLeft') c = Math.max(0, c - 1);
+      if (e.key === 'ArrowRight') c = Math.min(8, c + 1);
+      selected = [r, c];
+      render();
+    }
+  });
+
+  window.skHint = function () {
+    if (!playing) return;
+    const emptyOrWrong = [];
+    for (let r = 0; r < 9; r++) for (let c = 0; c < 9; c++) { if (given[r][c] === 0 && puzzle[r][c] !== solution[r][c]) emptyOrWrong.push([r, c]); }
+    if (!emptyOrWrong.length) return; // 7-3 防錯：沒有可提示的格子就不動作
+    const pick = emptyOrWrong[Math.floor(Math.random() * emptyOrWrong.length)];
+    puzzle[pick[0]][pick[1]] = solution[pick[0]][pick[1]];
+    hinted[pick[0]][pick[1]] = 1;
+    score = Math.max(0, score - CONFIG.hintPenalty);
+    scoreEl.textContent = String(score);
+    render();
+    checkWin();
+  };
+  window.skClearEntries = function () {
+    if (!playing) return;
+    for (let r = 0; r < 9; r++) for (let c = 0; c < 9; c++) { if (given[r][c] === 0) { puzzle[r][c] = 0; hinted[r][c] = 0; } }
+    render();
+  };
+
+  function checkWin() {
+    if (!isGridComplete(puzzle, solution)) return;
+    stopTimer();
+    const diffIdx = computeDifficultyIndex(puzzleNumber);
+    const diff = CONFIG.difficulties[diffIdx];
+    const gained = computePuzzleScore(diff.key, secondsElapsed);
+    score += gained;
+    scoreEl.textContent = String(score);
+
+    // 每一題的得分（不是累積總分）記錄進歷史列表，方便看最近幾題手感
+    history.unshift(gained);
+    history = history.slice(0, CONFIG.historyLimit);
+    historyEl.innerHTML = history.map(function (v) { return '<span>' + v + '分</span>'; }).join('');
+
+    // 最佳成績＝這個瀏覽階段裡任一輪跑出來的最高累積分數；最高難度＝曾經到達過的最高難度層級
+    bestScore = Math.max(bestScore, score);
+    bestEl.textContent = String(bestScore);
+    if (!bestDiffLabel || diffIdx >= CONFIG.difficulties.findIndex(function (d) { return d.label === bestDiffLabel; })) {
+      bestDiffLabel = diff.label;
+    }
+    bestDiffEl.textContent = bestDiffLabel;
+    ratingEl.textContent = score + ' 分 — ' + computeRating(score);
+    window._skLastScore = score;
+    window._skBestScore = bestScore;
+    if (typeof gaSubmitScore === 'function') gaSubmitScore('sudoku', score);
+
+    overTitle.textContent = '🎉 第' + puzzleNumber + '題完成！';
+    overSub.textContent = '花費 ' + formatTime(secondsElapsed) + '，獲得 ' + gained + ' 分，準備下一題（' + (CONFIG.difficulties[computeDifficultyIndex(puzzleNumber + 1)].label) + '）';
+    overlay.classList.add('show');
+    setTimeout(function () {
+      overlay.classList.remove('show');
+      loadPuzzle(puzzleNumber + 1);
+    }, 1800);
+  }
+
+  function skStartInternal() {
+    playing = true;
+    score = 0;
+    scoreEl.textContent = '0';
+    ratingEl.textContent = '';
+    overlay.classList.remove('show');
+    startBtn.textContent = '🔄 重新開始一輪';
+    loadPuzzle(1);
+  }
+  window.skStart = skStartInternal;
+
+  window.addEventListener('beforeunload', stopTimer); // 7-4 資源清理
+
+  buildNumpad();
+})();
+
+function skShareResult() {
+  const score = window._skLastScore;
+  const text = (score != null)
+    ? ('我在SoftGlow數獨遊戲挑戰中拿了 ' + score + ' 分！來試試你能撐到第幾題？')
+    : '來玩玩SoftGlow數獨遊戲！';
+  if (navigator.share) {
+    navigator.share({ title: document.title, text: text, url: location.href }).catch(function () {});
+  } else {
+    navigator.clipboard.writeText(text + ' ' + location.href);
+    const b = event.target;
+    const old = b.textContent;
+    b.textContent = '已複製！';
+    setTimeout(function () { b.textContent = old; }, CONFIG.copyRevertMs);
+  }
+}
+document.querySelectorAll('.faq-q').forEach(function (q) {
+  q.addEventListener('click', function () { this.parentElement.classList.toggle('open'); });
+});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},CONFIG.adLoadDelayMs);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜尋工具、型態、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/games/games-auth.js"></script>
+<script>
+gaMountAuthWidget('gaWidget');
+gaMountLeaderboard('gaLeaderboard', 'sudoku');
+gaInitFullscreenToggle();
+gaInitLoginReminder('sudoku');
+</script>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>
