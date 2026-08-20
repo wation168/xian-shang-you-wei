@@ -235,6 +235,11 @@ function pickAiMove(board, size, aiPlayer, humanPlayer, winLen) {
   function updateTurnUI() {
     if (mode === 'ai' && current === 2) {
       turnText.textContent = ggomokuT('aiThinking');
+    } else if (mode === 'ai' && current === 1) {
+      // 「你」是代名詞，跟「{名字}的回合」這種通用模板套在一起會有文法問題
+      // （英文變成"You's turn"、德文動詞變化錯誤），所以人類對電腦時單獨用一句
+      // 專門翻好的完整句子，不透過 {name} 套版
+      turnText.textContent = ggomokuT('turnOfYou');
     } else {
       turnText.textContent = ggomokuT('turnOf', { name: names()[current] });
     }
@@ -242,7 +247,8 @@ function pickAiMove(board, size, aiPlayer, humanPlayer, winLen) {
   }
 
   function updateLabels() {
-    p1LabelEl.textContent = ggomokuT('winsLabel', { name: names()[1] });
+    // 同樣道理：「你」的勝場標籤不套 {name} 模板，改用整句翻譯避免代名詞文法問題
+    p1LabelEl.textContent = mode === 'ai' ? ggomokuT('winsYouLabel') : ggomokuT('winsLabel', { name: names()[1] });
     p2LabelEl.textContent = ggomokuT('winsLabel', { name: names()[2] });
     p1WinsEl.textContent = String(wins[mode][1]);
     p2WinsEl.textContent = String(wins[mode][2]);
