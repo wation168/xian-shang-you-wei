@@ -7855,27 +7855,39 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
             )
 
     # 合併結論邏輯：優先用 _do_analyze 產出的結論（d["warning"]），避免兩套平行邏輯矛盾
+    # 2026/08/20修正：舊版kbar_action/today_breakout排在_conclusion_op前面，導致上面這行
+    # 註解講的「優先用d["warning"]」形同虛設——只要出現K棒型態（很常見），報告顯示的操作
+    # 建議就完全略過d["warning"]，跟個股解析頁（直接顯示完整的d.warning）兜不起來，同一支
+    # 股票兩邊看到不同結論，帥哥鴻實際使用時發現「常常都是不一樣的解說」。改成真正落實
+    # 「優先用d["warning"]」，kbar_action/today_breakout/雷達分數只在d["warning"]完全沒有
+    # 內容時才當備援，兩邊顯示的核心結論就會一致。
     _conclusion_text = d.get("warning", "")
     # 從結論中提取「操作：」後面的文字
     _conclusion_op = ""
     if "操作：" in _conclusion_text:
         _conclusion_op = _conclusion_text.split("操作：", 1)[1].strip()
 
-    if kbar_action:
-        op_text = kbar_action + _breakout_risk_text
-    elif today_breakout:
-        op_text = (f"今日突破前高 {prev_high}，突破型態確立。可持有，防守位 {stop_loss}，目標壓力 {resistance}，損益比 {rr_ratio:.2f}。"
-                   + _breakout_risk_text)
-    elif _conclusion_op:
-        # 使用結論的操作建議（位置分析更精準），前面加上位置描述
+    if _conclusion_op:
+        # 使用結論的操作建議（位置分析更精準，且與個股解析頁一致），前面加上位置描述
         _conclusion_pos = _conclusion_text.split("操作：")[0].strip().rstrip("。，")
         op_text = f"{_conclusion_pos}。\n\n操作建議：{_conclusion_op}"
+    elif _conclusion_text:
+        # d["warning"]有內容但沒有「操作：」片段（少見情況），整段當op_text，一樣跟解析頁一致
+        op_text = _conclusion_text
+    elif kbar_action:
+        op_text = kbar_action
+    elif today_breakout:
+        op_text = f"今日突破前高 {prev_high}，突破型態確立。可持有，防守位 {stop_loss}，目標壓力 {resistance}，損益比 {rr_ratio:.2f}。"
     elif tp_score == 0:
         op_text = f"多空雷達四格全滅，技術面偏弱，暫不適合進場。等待趨勢翻多、MACD 翻正、量能放大後再評估。"
     elif tp_score <= 1:
         op_text = f"多空雷達訊號不足，觀望為主。防守位 {stop_loss}，待雷達訊號補齊後再考慮進場。"
     else:
         op_text = f"趨勢盤整，等待方向確認。關注能否突破壓力 {resistance}，防守位 {stop_loss}，損益比 {rr_ratio:.2f}。"
+
+    # 突破風險提示（開高走低）是額外補充資訊，跟主結論不衝突，只要today_breakout成立就補上，
+    # 不綁在特定分支（舊版只有kbar_action分支才會補到，容易漏掉）
+    op_text = op_text + _breakout_risk_text
 
     # ── 乖離率進出場提示 ──
     _bias_text = ""

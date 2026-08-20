@@ -132,23 +132,41 @@ def run_filter(candidate_ids: list[str], news_list: list[dict],
 
 
 # ══════════════════════════════════════════════════════════════════════
-# 深度選股（雙重確認＋MACD加分）— 2026/07/27 補回，2026/08/07 改MACD為加分項
+# 深度選股（雙路徑入選＋加分）— 2026/07/27 補回，2026/08/07 改MACD為加分項，
+#                                2026/08/20 加入路徑B（剛突破）
 #
 # 這一段是給 main.py 的 _run_deep_analysis_job() 用的，入口是 run_deep_scan()。
 # 上面的 analyze_stock / run_filter 是「精選股」用的舊流程，兩者互不影響，
 # 舊功能完全沒有更動。
 #
-# 雙重確認（兩個條件必須同時成立才有資格入選）：
-#   ① 月季線金叉：MA20 由下往上穿越 MA60，且金叉後未再翻回空頭
-#   ② 站上月線　：現價站在 MA20 之上
+# 【2026/08/20背景】帥哥鴻反映「深度選股選出來的個股都是已經漲一段才出現」。
+# 根因：原本唯一的入選條件是月季線金叉，這是落後指標——MA20要翻到MA60上方，
+# 代表過去20天均價已經回升超過過去60天均價，這件事發生時股價通常早就漲一段了。
+# 這不是bug，是「趨勢確認型」策略天生的特性，但使用者體感就是「怎麼都追高」。
+# 解法：不是拿掉舊機制，而是新增一條時間點更早的入選路徑，兩條路徑並存，
+# 各自標註清楚是哪一種訊號，讓使用者自己判斷要不要進場，而不是統一包裝成
+# 「深度選股」讓人誤以為每一檔都是同一種訊號：
+#
+#   路徑A（趨勢確認）：月季線金叉＋站上月線，金叉後未再翻回空頭。
+#     訊號穩定可信，但入選時通常已經上漲一段，操作建議是「等拉回再上」，
+#     不建議現價追價。
+#
+#   路徑B（剛突破，2026/08/20新增）：近期（breakout_recent_days內）放量突破
+#     盤整區間高點（用 kbar_indicators.calc_breakout_signals，跟main.py個股
+#     解析同一套函式），且現價還守在突破價之上沒有被打回假突破。
+#     訊號比路徑A早，是這次新增的目的，但相對沒有經過時間驗證、波動風險較高，
+#     操作建議是「停損嚴設在突破當天低點，跌破視為假突破要立刻出場」。
+#
+# 每檔股票只會落在其中一條路徑（路徑A優先判斷，不成立才看路徑B），不會同時算兩次。
 #
 # MACD金叉（DIF 由下往上穿越 DEA，且發生在 3 個交易日內）2026/08/07 改為加分項，
 # 不再是強制門檻——太多波段初升段的股票會因為 MACD 還沒黃金交叉而被誤刪，
-# 改成「有金叉多加分，沒有金叉不淘汰」。
+# 改成「有金叉多加分，沒有金叉不淘汰」，兩條路徑共用這個加分項。
 #
-# 通過雙重確認後再依「MACD金叉、股價位置、量能、法人籌碼」加分，分數愈高訊號愈強。
+# 通過入選後再依「MACD金叉、股價位置/突破強度、量能、法人籌碼」加分，分數愈高訊號愈強。
 # 回傳欄位與 generator.render_deep_card() 及前端 showDeepAnalysisPage()
-# 所需欄位完全一致。
+# 所需欄位完全一致，新增的 entry_path/entry_path_label/entry_path_note 欄位
+# 是額外補充，沒有的話前端會拿不到值但不會壞。
 # ══════════════════════════════════════════════════════════════════════
 
 DEEP_CFG = {
@@ -158,6 +176,8 @@ DEEP_CFG = {
     "macd_cross_days":   3,     # MACD金叉必須發生在幾個交易日內
     "max_results":       30,    # 最多回傳幾檔
     "api_delay":         0.35,  # 每檔之間的間隔秒數（避免打爆 FinMind）
+    "breakout_recent_days": 10, # 路徑B：突破必須發生在幾個交易日內才算「剛」突破
+    "breakout_hold_pct":  0.97, # 路徑B：現價不能跌破突破當天收盤價的這個比例（防假突破被打回還入選）
 }
 
 
@@ -292,25 +312,28 @@ def _classify_position(closes: list[float], ma20_now: float,
     return conds, bonus
 
 
-def _calc_stop_loss(closes: list[float], lows: list[float],
-                    ma20_now: float, lift_off_low: float | None) -> tuple[float, float, str]:
+def _calc_stop_loss(closes: list[float], lows: list[float], ma20_now: float,
+                    key_low: float | None = None,
+                    key_low_label: str = "起漲低點") -> tuple[float, float, str]:
     """
-    停損價：分別算出「起漲低點 / 月線 / 前一根低點」三個候選，
+    停損價：分別算出「路徑關鍵低點 / 月線 / 前一根低點」三個候選，
     取其中「在現價之下且離現價最近」的一個（＝下檔風險最小的那個）。
     回傳 (停損價, 距現價百分比, 依據名稱)
 
     2026/07/27 修正：原本用「近20日低點／近10日低點」不是正確依據，
     改成：
-      起漲低點：月季線金叉那天到現在這段期間的最低價（這波漲勢真正的起點，
-               lift_off_low 由呼叫端傳入，抓不到金叉日期時為 None）
+      路徑關鍵低點：由呼叫端傳入，抓不到時為 None。
+               路徑A（趨勢確認）傳「起漲低點」＝月季線金叉那天到現在這段期間的最低價；
+               路徑B（剛突破，2026/08/20新增）傳「突破量能低點」＝放量突破當天的最低價，
+               跌破代表突破失敗，是路徑B該用的停損依據，不是路徑A的起漲低點。
       月線　　：MA20 現值
       前一根低點：昨天那根K棒的最低價（單日，不是近N日區間低點）
     """
     price = closes[-1]
     candidates: list[tuple[float, str]] = []
 
-    if lift_off_low:
-        candidates.append((lift_off_low, "起漲低點"))
+    if key_low:
+        candidates.append((key_low, key_low_label))
     if ma20_now:
         candidates.append((ma20_now, "月線"))
     if len(lows) >= 2:
@@ -382,24 +405,64 @@ def deep_analyze_stock(stock_id: str, stock_name: str = "") -> dict | None:
         return None
     vol_ratio = round(vol5 / vol20, 2) if vol20 > 0 else 0
 
-    # ── 雙重確認（硬條件）──────────────────────────
-    # ① 月季線金叉（同時取得金叉索引，等下算「起漲低點」停損依據要用）
+    # ── 突破訊號（兩條路徑共用，先算好，路徑B的入選判斷跟後面的K棒敘事都要用）──
+    # 跟main.py個股解析同一套函式，support/resistance參數這支函式內部沒有實際使用
+    # （改用逐根K棒的滾動局部高低點），這裡先傳0，後面算出真正的support/resistance
+    # 純供敘事段落顯示用，不影響這裡的判斷。
+    _breakout_idx, _breakdown_idx, _breakout_stale, _ = calc_breakout_signals(
+        np.array(closes), np.array(highs), np.array(lows), np.array(vols), 0, 0)
+
+    # ── 入選路徑判斷（路徑A優先，不成立才看路徑B，每檔只會落在一條路徑）───
+    entry_path = None
+    lift_off_low = None
+    ma_cross_days_ago = None
+    ma_cross_date = None
+    breakout_days_ago = None
+
+    # 路徑A（趨勢確認）：月季線金叉＋站上月線，金叉後未再翻回空頭
     cross_idx = _find_ma_golden_cross_index(ma20_l, ma60_l, DEEP_CFG["ma_cross_lookback"])
-    if cross_idx is None:
+    if cross_idx is not None and price > ma20:
+        entry_path = "A"
+        lift_off_low = min(lows[cross_idx:])   # 金叉那天到現在這段期間的最低價＝起漲低點
+        ma_cross_days_ago = (len(closes) - 1) - cross_idx   # 幾個交易日前發生金叉，0＝就是今天
+        ma_cross_date = dates[cross_idx]   # 金叉當天的實際日期，供 main.py 選股紀錄表去重用
+
+    # 路徑B（剛突破，2026/08/20新增）：路徑A不成立時才檢查。近期放量突破盤整區間高點，
+    # 且現價還守在突破價的breakout_hold_pct之上（沒有跌破突破價太多，不是假突破被打回）
+    if entry_path is None and _breakout_idx is not None and not _breakout_stale:
+        _days_ago = (len(closes) - 1) - _breakout_idx
+        _breakout_close = closes[_breakout_idx]
+        _still_holds = _breakout_close > 0 and price >= _breakout_close * DEEP_CFG["breakout_hold_pct"]
+        if _days_ago <= DEEP_CFG["breakout_recent_days"] and _still_holds and ma5:
+            entry_path = "B"
+            breakout_days_ago = _days_ago
+
+    if entry_path is None:
         return None
-    lift_off_low = min(lows[cross_idx:])   # 金叉那天到現在這段期間的最低價＝起漲低點
-    ma_cross_days_ago = (len(closes) - 1) - cross_idx   # 幾個交易日前發生金叉，0＝就是今天
-    ma_cross_date = dates[cross_idx]   # 金叉當天的實際日期，供 main.py 選股紀錄表去重用
-    # ② 站上月線
-    if price <= ma20:
-        return None
-    # ③ MACD金叉：不再是硬條件，只作為下面的加分項（發生在 macd_cross_days 天內才給分）
+
+    # MACD金叉：不再是強制門檻，只作為下面的加分項（發生在 macd_cross_days 天內才給分），
+    # 兩條路徑共用同一套加分邏輯。
     dif, dea, hist = _macd(closes)
     macd_cross_idx = _find_macd_golden_cross_index(dif, dea, DEEP_CFG["macd_cross_days"]) if dif else None
     macd_cross_days_ago = (len(dif) - 1) - macd_cross_idx if macd_cross_idx is not None else None
 
-    # ── 通過雙重確認，開始加分 ──────────────────────
-    matched, score = _classify_position(closes, ma20, vol_ratio)
+    # ── 通過入選，開始加分（依路徑給不同的起始matched/score與操作提醒）──────
+    if entry_path == "A":
+        matched, score = _classify_position(closes, ma20, vol_ratio)
+        entry_path_label = "趨勢確認"
+        entry_path_note = (
+            "此訊號來自月季線金叉，屬於「趨勢已確認」的穩定型訊號，但代表股價通常已經"
+            "上漲一段時間，不是起漲點。不建議現價追價，建議等拉回至防守位附近再進場，"
+            "拉回不破再上車，勝率比追高好。"
+        )
+    else:
+        matched, score = ["cond4_剛突破"], 2
+        entry_path_label = "剛突破"
+        entry_path_note = (
+            f"此訊號來自 {breakout_days_ago} 個交易日前放量突破盤整區間，屬於較早期的訊號，"
+            "進場時間點比趨勢確認型早，但還沒經過時間驗證，波動風險較高。"
+            "停損務必嚴設在突破當天的低點，跌破視為假突破，應立即出場、不要留戀。"
+        )
 
     # MACD金叉加分（原本是強制門檻，2026/08/07 改成加分項：有金叉代表動能已確認，額外加分）
     if macd_cross_idx is not None:
@@ -434,7 +497,14 @@ def deep_analyze_stock(stock_id: str, stock_name: str = "") -> dict | None:
         score += 1
 
     # ── 停損 / 支撐壓力 / 風險 ──────────────────────
-    stop_loss, stop_loss_pct, stop_loss_basis = _calc_stop_loss(closes, lows, ma20, lift_off_low)
+    # 路徑A用「起漲低點」（lift_off_low）當關鍵停損依據，路徑B改用「突破量能低點」
+    # （突破當天的低點，跌破代表突破失敗），見_calc_stop_loss()說明。
+    if entry_path == "A":
+        _key_low, _key_low_label = lift_off_low, "起漲低點"
+    else:
+        _key_low, _key_low_label = lows[_breakout_idx], "突破量能低點"
+    stop_loss, stop_loss_pct, stop_loss_basis = _calc_stop_loss(
+        closes, lows, ma20, _key_low, _key_low_label)
     risk_level = _risk_level(stop_loss_pct)
 
     support    = round(min(lows[-20:]), 2) if len(lows) >= 20 else round(min(lows), 2)
@@ -449,10 +519,10 @@ def deep_analyze_stock(stock_id: str, stock_name: str = "") -> dict | None:
     # ── K棒型態（2026/08/13新增）─────────────────────
     # 用main.py個股解析同一套函式（見kbar_indicators.py），純供敘事用，
     # 刻意不接進score/risk_level/matched_conditions，不改變任何選股結果。
+    # _breakout_idx/_breakdown_idx已經在上面「入選路徑判斷」前算過了，這裡直接沿用，
+    # 不重算一次（那次呼叫的support/resistance參數函式內部本來就沒用到，提早算不影響結果）。
     kbar_pattern, _kbar_warning, kbar_dir, _kbar_win_rate = detect_kbar_pattern(
         opens, highs, lows, closes, vols)
-    _breakout_idx, _breakdown_idx, _, _ = calc_breakout_signals(
-        np.array(closes), np.array(highs), np.array(lows), np.array(vols), support, resistance)
 
     # 突破隔日拉回敘事：跟main.py個股解析同一套判斷——「孕線」型態＋前一天已出現突破/跌破，
     # 代表今天的孕線其實是正常拉回整理，不是單純方向不明的整理
@@ -518,11 +588,18 @@ def deep_analyze_stock(stock_id: str, stock_name: str = "") -> dict | None:
         "stop_loss":            stop_loss,
         "stop_loss_pct":        stop_loss_pct,
         "stop_loss_basis":      stop_loss_basis,
-        # 雙重確認＋加分項的具體證據，讓前端能明確列出「為什麼入選」，不用只憑信任
-        "ma_cross_days_ago":    ma_cross_days_ago,   # ①月季線金叉發生在幾個交易日前
-        "ma_cross_date":        ma_cross_date,       # ①月季線金叉發生的實際日期（YYYY-MM-DD）
-        "above_ma20_pct":       above_ma20_pct,      # ②現價高於月線的百分比
-        "macd_cross_days_ago":  macd_cross_days_ago, # ③MACD金叉發生在幾個交易日前
+        # 入選路徑＋加分項的具體證據，讓前端能明確列出「為什麼入選」，不用只憑信任
+        # 2026/08/20新增：entry_path區分這檔是路徑A（趨勢確認）還是路徑B（剛突破），
+        # 兩種訊號的時間點跟風險特性不同，前端/報告一律要用entry_path_label+entry_path_note
+        # 明確標示，不能把兩種訊號混著呈現成同一種「深度選股入選」。
+        "entry_path":           entry_path,           # "A"（趨勢確認）或 "B"（剛突破）
+        "entry_path_label":     entry_path_label,     # "趨勢確認" 或 "剛突破"
+        "entry_path_note":      entry_path_note,      # 對應路徑的操作提醒文字（等拉回／嚴設停損）
+        "ma_cross_days_ago":    ma_cross_days_ago,    # 路徑A：月季線金叉發生在幾個交易日前，路徑B為None
+        "ma_cross_date":        ma_cross_date,        # 路徑A：月季線金叉發生的實際日期（YYYY-MM-DD），路徑B為None
+        "breakout_days_ago":    breakout_days_ago,    # 路徑B：放量突破發生在幾個交易日前，路徑A為None
+        "above_ma20_pct":       above_ma20_pct,       # 現價高於月線的百分比
+        "macd_cross_days_ago":  macd_cross_days_ago,  # MACD金叉發生在幾個交易日前
         "rr_ratio":             rr_ratio,
         "consecutive_buy_days": consecutive_buy_days,
         "inst_5d_total":        inst_5d_total,

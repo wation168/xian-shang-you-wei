@@ -436,10 +436,17 @@ def _deep_condition_label(cond: str) -> str:
         "cond2_高點拉回起漲(買1)":            "高點拉回起漲（買1）",
         "cond3_均線突破(買2)":                "均線突破（買2）",
         "cond3_均線突破(買2)_量能未確認":      "均線突破（買2）⚠量能未確認",
+        "cond4_剛突破":                       "剛突破",   # 2026/08/20新增：路徑B專用
         "MACD金叉":                          "MACD金叉",
         "MACD動能加速中":                     "MACD動能加速",
     }
     return mapping.get(cond, cond)
+
+
+def _deep_entry_path_color(entry_path: str) -> str:
+    """路徑A（趨勢確認）跟路徑B（剛突破，2026/08/20新增）用不同顏色的徽章區分，
+    避免使用者把兩種時間點/風險特性不同的訊號誤當成同一種「深度選股入選」。"""
+    return "#38bdf8" if entry_path == "B" else "#a78bfa"
 
 
 def _deep_conclusion(s: dict) -> str:
@@ -454,33 +461,54 @@ def _deep_conclusion(s: dict) -> str:
     kbar_pattern/breakout_pullback_note，函式來自共用的 kbar_indicators.py），若當日符合
     「孕線＋前一天已突破/跌破」的情境，會附加跟個股解析一致的「突破隔日拉回」判斷。
 
+    2026/08/20新增：現在深度選股有兩條入選路徑（見finmind_filter.py開頭的說明），
+    這裡的開場白跟訊號時間點描述改成依entry_path分流，路徑A維持原本的月季線金叉敘事，
+    路徑B（剛突破）改講突破盤整區間的敘事，結尾統一附加entry_path_note（等拉回／嚴設
+    停損的操作提醒），讓兩條路徑的結論讀起來是同一套邏輯延伸出來的，不是兩套各講各話。
+
     全部欄位都從 s（deep_analyze_stock 的回傳值）動態取值，沒有寫死任何股票代號或數字。
     """
     conds = s.get("matched_conditions") or []
+    entry_path = s.get("entry_path", "A")
 
-    lead = "技術面轉強"
-    for c in conds:
-        if c.startswith("cond1_"):
-            lead = "股價從相對低檔重新轉強"
-            break
-        if c.startswith("cond2_"):
-            lead = "股價從高點拉回整理後再度轉強"
-            break
-        if c.startswith("cond3_"):
-            lead = ("股價持續突破且量能同步放大確認" if "量能未確認" not in c
-                     else "股價持續突破，但量能尚未明確放大，訊號稍弱")
-            break
-
-    days_ago = s.get("ma_cross_days_ago")
-    if days_ago == 0:
-        cross_desc = "月季線金叉發生在今日"
-    elif days_ago:
-        cross_desc = f"月季線金叉發生在{days_ago}個交易日前"
+    if entry_path == "B":
+        days_ago = s.get("breakout_days_ago")
+        if days_ago == 0:
+            lead = "股價今日放量突破盤整區間"
+        elif days_ago:
+            lead = f"股價於{days_ago}個交易日前放量突破盤整區間"
+        else:
+            lead = "股價放量突破盤整區間"
+        cross_desc = "屬於較早期的「剛突破」訊號"
     else:
-        cross_desc = "月季線呈多頭排列"
+        lead = "技術面轉強"
+        for c in conds:
+            if c.startswith("cond1_"):
+                lead = "股價從相對低檔重新轉強"
+                break
+            if c.startswith("cond2_"):
+                lead = "股價從高點拉回整理後再度轉強"
+                break
+            if c.startswith("cond3_"):
+                lead = ("股價持續突破且量能同步放大確認" if "量能未確認" not in c
+                         else "股價持續突破，但量能尚未明確放大，訊號稍弱")
+                break
+
+        days_ago = s.get("ma_cross_days_ago")
+        if days_ago == 0:
+            cross_desc = "月季線金叉發生在今日"
+        elif days_ago:
+            cross_desc = f"月季線金叉發生在{days_ago}個交易日前"
+        else:
+            cross_desc = "月季線呈多頭排列"
 
     above_pct = s.get("above_ma20_pct")
-    above_desc = f"，現價高於月線 {above_pct}%" if above_pct is not None else ""
+    if above_pct is None:
+        above_desc = ""
+    elif above_pct >= 0:
+        above_desc = f"，現價高於月線 {above_pct}%"
+    else:
+        above_desc = f"，現價低於月線 {abs(above_pct)}%"
     macd_desc = "，MACD已同步金叉" if "MACD金叉" in conds else ""
 
     buy_days = s.get("consecutive_buy_days", 0) or 0
@@ -501,12 +529,16 @@ def _deep_conclusion(s: dict) -> str:
     pullback_note = s.get("breakout_pullback_note") or ""
     pullback_sentence = f"K棒觀察：{pullback_note}。" if pullback_note else ""
 
+    entry_note = s.get("entry_path_note") or ""
+    entry_note_sentence = f"{entry_note} " if entry_note else ""
+
     return (
         f"{lead}，{cross_desc}{above_desc}{macd_desc}{inst_desc}，"
         f"綜合評分 {score} 分（{confidence}）。"
         f"操作參考：防守位 {stop_loss}（距現價 -{stop_pct}%，{risk_level}風險），"
         f"損益比約 {rr_ratio}x（以壓力 {s.get('resistance','—')} 為目標估算）。"
         f"{pullback_sentence}"
+        f"{entry_note_sentence}"
         f"實際進出場請以下方個股完整報告的即時分析為準。"
     )
 
@@ -527,6 +559,17 @@ def render_deep_card(s: dict) -> str:
         f'<span style="font-size:10px;padding:2px 10px;border-radius:20px;'
         f'background:#1e293b;color:#a78bfa;font-weight:600">{_deep_condition_label(c)}</span>'
         for c in s.get("matched_conditions", [])
+    )
+
+    # 2026/08/20新增：路徑A（趨勢確認）/路徑B（剛突破）徽章，放在最前面最顯眼的位置，
+    # 讓使用者一眼分辨這檔是哪種時間點/風險特性的訊號，不會誤以為深度選股只有一種訊號。
+    entry_path_label = s.get("entry_path_label", "")
+    entry_path_color = _deep_entry_path_color(s.get("entry_path", "A"))
+    entry_path_badge = (
+        f'<span style="font-size:10px;padding:2px 8px;border-radius:20px;'
+        f'background:{entry_path_color}22;color:{entry_path_color};font-weight:700">'
+        f'🔎 {entry_path_label}</span>'
+        if entry_path_label else ""
     )
 
     vol_ratio = s.get("vol_ratio", 0)
@@ -573,6 +616,7 @@ def render_deep_card(s: dict) -> str:
       <span style="font-size:13px;color:#64748b">{s.get('stock_name', '')}</span>
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      {entry_path_badge}
       <span style="font-size:10px;padding:2px 8px;border-radius:20px;
             background:{conf_color}22;color:{conf_color};font-weight:700">{s.get('confidence','一般')}</span>
       <span style="font-size:10px;padding:2px 8px;border-radius:20px;

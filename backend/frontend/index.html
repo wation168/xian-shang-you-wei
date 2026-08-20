@@ -4989,7 +4989,15 @@ const _DEEP_COND_LABELS = {
   'cond2_高點拉回起漲(買1)':       '高點拉回起漲（買1）',
   'cond3_均線突破(買2)':           '均線突破（買2）',
   'cond3_均線突破(買2)_量能未確認': '均線突破（買2）⚠量能未確認',
+  'cond4_剛突破':                  '剛突破',   // 2026/08/20新增：路徑B專用
   'MACD動能加速中':                'MACD動能加速',
+};
+
+// 2026/08/20新增：深度選股兩條入選路徑（路徑A趨勢確認／路徑B剛突破）各自的顯示色，
+// 跟 generator.py 的 _deep_entry_path_color() 用同一組配色，App跟公開報告頁視覺一致。
+const _DEEP_PATH_META = {
+  'A': { color: '#7C3AED', label: '趨勢確認' },
+  'B': { color: '#3B82F6', label: '剛突破' },
 };
 
 async function showDeepAnalysisPage(){
@@ -5015,7 +5023,7 @@ async function showDeepAnalysisPage(){
 
     const header = `
       <div style="font-size:16px;font-weight:700;padding:10px 0 4px">🎯 深度選股</div>
-      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">篩選條件：月季線金叉＋站上月線＋MACD金叉（三重確認）</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.6">兩條入選路徑並存，每檔只會落在其中一條：<b style="color:#7C3AED">趨勢確認</b>＝月季線金叉＋站上月線（訊號穩，但通常已上漲一段，建議等拉回）；<b style="color:#3B82F6">剛突破</b>＝近期放量突破盤整區間（訊號較早，但停損要嚴設在突破低點）。MACD金叉為兩條路徑共同的加分項。</div>
       <div style="font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.6">📖 名詞說明：<b style="color:var(--text2)">分數／信心</b>＝符合的加分條件越多分數越高（5分以上＝高信心🔥，3～4分＝中信心⭐）；<b style="color:var(--text2)">量比</b>＝近5日均量÷20日均量，數字越高代表近期買氣越熱；<b style="color:var(--text2)">風報比</b>＝潛在漲幅÷潛在跌幅，數字越高代表這筆進場划算</div>
       ${updatedAt}`;
 
@@ -5063,27 +5071,52 @@ async function showDeepAnalysisPage(){
         ? `<span style="font-size:14px;font-weight:700;color:${chgColor};margin-left:6px">${chgSign}${chg.toFixed(2)}%</span>`
         : '';
 
-      // 三重確認清單：明確列出①②③都通過的具體依據，不是只憑信任「有入選就代表符合」。
-      const gate1 = Number.isFinite(s.ma_cross_days_ago)
-        ? (s.ma_cross_days_ago === 0 ? '就在今天發生' : `${s.ma_cross_days_ago} 個交易日前發生`)
-        : null;
-      const gate2 = Number.isFinite(s.above_ma20_pct)
-        ? `現價高於月線 ${s.above_ma20_pct}%` : null;
+      // 2026/08/20：兩條入選路徑各自的確認清單不一樣，不能用同一組「三重確認」硬套。
+      // 路徑A（趨勢確認）：月季線金叉／站上月線／MACD金叉。
+      // 路徑B（剛突破）　：放量突破盤整區間／現價未跌破突破價／MACD金叉。
+      const entryPath  = s.entry_path || 'A';
+      const pathMeta   = _DEEP_PATH_META[entryPath] || _DEEP_PATH_META['A'];
       const gate3 = Number.isFinite(s.macd_cross_days_ago)
         ? (s.macd_cross_days_ago === 0 ? '就在今天發生' : `${s.macd_cross_days_ago} 個交易日前發生`)
         : null;
-      const gates = [
-        ['月季線金叉', gate1], ['站上月線', gate2], ['MACD金叉', gate3],
-      ].filter(([, detail]) => detail);
+
+      let gates, gateTitle;
+      if (entryPath === 'B') {
+        const gateB1 = Number.isFinite(s.breakout_days_ago)
+          ? (s.breakout_days_ago === 0 ? '就在今天發生' : `${s.breakout_days_ago} 個交易日前發生`)
+          : null;
+        gates = [
+          ['放量突破盤整區間', gateB1], ['現價未跌破突破價', gateB1 ? '仍守在突破價之上' : null], ['MACD金叉', gate3],
+        ].filter(([, detail]) => detail);
+        gateTitle = '剛突破・入選依據';
+      } else {
+        const gate1 = Number.isFinite(s.ma_cross_days_ago)
+          ? (s.ma_cross_days_ago === 0 ? '就在今天發生' : `${s.ma_cross_days_ago} 個交易日前發生`)
+          : null;
+        const gate2 = Number.isFinite(s.above_ma20_pct)
+          ? `現價高於月線 ${s.above_ma20_pct}%` : null;
+        gates = [
+          ['月季線金叉', gate1], ['站上月線', gate2], ['MACD金叉', gate3],
+        ].filter(([, detail]) => detail);
+        gateTitle = '趨勢確認・入選依據';
+      }
       const gateHtml = gates.length ? `
-        <div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:10px 12px;margin-bottom:12px">
-          <div style="font-size:10px;color:#3B82F6;font-weight:700;margin-bottom:6px;letter-spacing:.5px">三重確認・全部通過</div>
+        <div style="background:${pathMeta.color}12;border:1px solid ${pathMeta.color}33;border-radius:10px;padding:10px 12px;margin-bottom:12px">
+          <div style="font-size:10px;color:${pathMeta.color};font-weight:700;margin-bottom:6px;letter-spacing:.5px">${gateTitle}</div>
           ${gates.map(([name, detail]) => `
             <div style="display:flex;align-items:baseline;gap:6px;font-size:13px;padding:2px 0">
-              <span style="color:#3B82F6;font-weight:800">✓</span>
+              <span style="color:${pathMeta.color};font-weight:800">✓</span>
               <span style="color:var(--text);font-weight:700">${name}</span>
               <span style="color:var(--text3);font-size:12px">${detail}</span>
             </div>`).join('')}
+        </div>` : '';
+
+      // 對應路徑的操作提醒（等拉回／嚴設停損），跟generator.py的entry_path_note同一份資料，
+      // 文字內容由後端決定，前端只負責用醒目樣式呈現，不要重複寫一份自己的提醒文字。
+      const entryNoteHtml = s.entry_path_note ? `
+        <div style="background:${pathMeta.color}0d;border:1px solid ${pathMeta.color}33;border-radius:10px;
+             padding:9px 11px;margin-bottom:12px;font-size:12px;line-height:1.6;color:var(--text2)">
+          💡 ${s.entry_path_note}
         </div>` : '';
 
       const price = Number(s.price), sl = Number(s.stop_loss), res = Number(s.resistance);
@@ -5155,10 +5188,12 @@ async function showDeepAnalysisPage(){
             <span style="font-size:10px;color:${confColor};font-weight:700;white-space:nowrap">${conf}</span>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:6px;margin-top:10px">
+        <div style="display:flex;align-items:center;gap:6px;margin-top:10px;flex-wrap:wrap">
+          <span style="font-size:12px;font-weight:800;padding:3px 10px;border-radius:20px;background:${pathMeta.color}22;color:${pathMeta.color}">🔎 ${pathMeta.label}</span>
           <span style="font-size:12px;font-weight:800;padding:3px 10px;border-radius:20px;background:${rMeta.bg};color:${rMeta.color}">風險：${rMeta.label.replace('風險','')}</span>
         </div>
         ${gateHtml}
+        ${entryNoteHtml}
         ${rulerHtml}
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
           <span style="font-size:11px;padding:3px 9px;border-radius:20px;background:var(--bg3);color:var(--text2);font-weight:600">量比 ${s.vol_ratio ?? '—'}x</span>
