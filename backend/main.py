@@ -948,6 +948,52 @@ async def serve_games_index():
         return FileResponse(path)
     return JSONResponse({"detail": "Not Found"}, status_code=404)
 
+# ---- Games 遊戲區多語言路由（2026/08/17 新增，沿用 /tools/ 與 /glossary/ 同一套模式）----
+# 遊戲區從單一繁中擴充到10語言。網址結構刻意跟工具頁完全一致：
+#   * 繁中維持在 /games/xxx.html（根目錄、無語言前綴），原有網址完全不變，SEO資產不流失
+#   * 其餘9語言在 /games/{locale}/xxx.html，各語言獨立網址並互相標註 hreflang，
+#     讓 Google 可以個別收錄各語言版本（若用「同一網址靠JS切換語言」則不會被分別收錄）
+#   * 遊戲邏輯本身統一放在 /games/shared/xxx.js，10語言共用同一份檔案 —— 這是這次
+#     多語言化最關鍵的架構決定：邏輯只有一份，修一次bug全部語言同時生效，不會出現
+#     10個語言版本各自帶一份複製的遊戲引擎、之後改東西要改10次的維護地獄。
+#     頁面內的文字則由各語言HTML自帶的 window.GAME_I18N / window.GA_LANG_PACK 字典提供。
+_GAMES_LOCALES = ("en","ja","ko","es","pt","id","de","fr","zh-CN")
+
+@app.get("/games/shared/{filename}.js", include_in_schema=False)
+async def serve_games_shared_js(filename: str):
+    """10語言共用的遊戲邏輯JS。注意本路由要跟既有的 /games/{filename}.js 並存：
+    兩者路徑深度不同（多一層 shared/），FastAPI 不會互相搶匹配。"""
+    from fastapi.responses import FileResponse
+    import os as _os
+    path = _os.path.join(_FRONTEND_DIR, "games", "shared", f"{filename}.js")
+    if _os.path.isfile(path):
+        return FileResponse(path, media_type="application/javascript")
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/games/{locale}/{filename}.html", include_in_schema=False)
+async def serve_games_locale_html(locale: str, filename: str):
+    from fastapi.responses import FileResponse
+    import os as _os
+    if locale not in _GAMES_LOCALES:
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    path = _os.path.join(_FRONTEND_DIR, "games", locale, f"{filename}.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
+
+@app.get("/games/{locale}", include_in_schema=False)
+@app.get("/games/{locale}/", include_in_schema=False)
+async def serve_games_locale_index(locale: str):
+    from fastapi.responses import FileResponse, RedirectResponse
+    import os as _os
+    if locale not in _GAMES_LOCALES:
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    path = _os.path.join(_FRONTEND_DIR, "games", locale, "index.html")
+    if _os.path.isfile(path):
+        return FileResponse(path)
+    # 該語言索引頁還沒建立時，退回繁中總覽而不是丟404（跟 /tools/{locale} 同樣的處理方式）
+    return RedirectResponse(url="/games/", status_code=302)
+
 
 # ---- Lottery 彩票路由 ----
 _LOTTERY_LOCALES = ("en","ja","ko","fr","de","es","pt","id","zh-CN")
@@ -9095,6 +9141,14 @@ def sitemap():
         for _gmf in sorted(os.listdir(_games_base)):
             if _gmf.endswith(".html") and _gmf not in _games_sitemap_exclude:
                 locs.append(f"  <url><loc>{FRONTEND_URL}/games/{_gmf}</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>")
+        # 2026/08/17 新增：各語言版本遊戲頁（shared/ 底下只有共用JS不是頁面，要排除）
+        for _lang_dir in sorted(os.listdir(_games_base)):
+            _lang_path = os.path.join(_games_base, _lang_dir)
+            if os.path.isdir(_lang_path) and _lang_dir not in (".", "..", "shared"):
+                locs.append(f"  <url><loc>{FRONTEND_URL}/games/{_lang_dir}/</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>")
+                for _gmf in sorted(os.listdir(_lang_path)):
+                    if _gmf.endswith(".html") and _gmf not in _games_sitemap_exclude:
+                        locs.append(f"  <url><loc>{FRONTEND_URL}/games/{_lang_dir}/{_gmf}</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>")
 
     # 熱門股優先 priority 0.8，其餘 0.6
     hardcoded_set = set(_SEO_HARDCODED_STOCKS)
