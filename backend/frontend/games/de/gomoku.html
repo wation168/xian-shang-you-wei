@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gomoku - Kostenloses Fünf-Gewinnt online, vs. Computer oder zu zweit | SoftGlow</title>
+<meta name="description" content="Spiele kostenlos online Gomoku (Fünf-Gewinnt) auf einem 15x15-Brett — fordere die Computer-KI heraus oder spiele lokal gegen einen Freund. Wer zuerst 5 Steine in einer Reihe, Spalte oder Diagonale verbindet, gewinnt.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/de/gomoku.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/gomoku.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/games/en/gomoku.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/games/de/gomoku.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/games/es/gomoku.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/games/fr/gomoku.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/games/id/gomoku.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/games/ja/gomoku.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/games/ko/gomoku.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/games/pt/gomoku.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/games/zh-CN/gomoku.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/en/gomoku.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Gomoku", "url": "https://softglow-ai.com/games/de/gomoku.html", "description": "Kostenloses Online-Gomoku auf einem 15x15-Brett — spiele gegen eine Computer-KI oder lokal gegen einen Freund, wer zuerst 5 Steine verbindet, gewinnt.", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "de"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Wie spielt man Gomoku?", "acceptedAnswer": {"@type": "Answer", "text": "Das Brett ist ein 15x15-Raster. Klicke an deinem Zug einfach auf ein beliebiges freies Feld, und dein Stein landet genau dort (anders als bei Vier Gewinnt zieht keine Schwerkraft ihn nach unten). Wer zuerst 5 eigene Steine in einer geraden Linie verbindet — waagerecht, senkrecht oder diagonal — gewinnt."}}, {"@type": "Question", "name": "Kann man das auch allein spielen?", "acceptedAnswer": {"@type": "Answer", "text": "Ja. Der Standardmodus ist „Gegen Computer“, bei dem die KI automatisch zieht, sodass eine Person allein spielen kann. Wenn du lieber persönlich gegen einen Freund spielen möchtest, wechsle in den Modus „2 Spieler“, bei dem ihr abwechselnd auf demselben Bildschirm klickt — keine Anmeldung oder Verbindung nötig."}}, {"@type": "Question", "name": "Ist die Computer-KI schwer zu schlagen?", "acceptedAnswer": {"@type": "Answer", "text": "Die KI bewertet Bedrohungen auf dem Brett in Echtzeit: Sie zieht immer sofort, wenn sie damit gewinnen kann, und blockiert dich immer, wenn du kurz davor bist, fünf zu verbinden. Ansonsten bewertet sie mögliche Züge nach Musterstärke (z. B. eine „offene Drei“ oder eine „Vier mit einem offenen Ende“) und wählt das bedrohlichste Feld. Sie ist ein mittelstarker Gegner — du musst mehrere Richtungen gleichzeitig im Blick behalten, um zu gewinnen."}}, {"@type": "Question", "name": "Warum ist mein Stein nicht dort erschienen, wo ich geklickt habe?", "acceptedAnswer": {"@type": "Answer", "text": "Bei Gomoku landet dein Stein immer genau dort, wo du klickst — es gibt keine Schwerkraft. Wenn nichts erschienen ist, liegt das meist daran, dass das Feld schon besetzt ist (dort kann nicht erneut gesetzt werden), oder das Spiel hat noch nicht begonnen, oder gerade denkt der Computer nach — in all diesen Fällen reagiert ein Klick nicht."}}, {"@type": "Question", "name": "Ist Gomoku dasselbe wie Vier Gewinnt? Was ist der Unterschied?", "acceptedAnswer": {"@type": "Answer", "text": "Nein, sie sind unterschiedlich. Vier Gewinnt nutzt ein 7x6-Brett, bei dem ein eingeworfener Stein durch Schwerkraft in einer Spalte nach unten fällt, und man gewinnt mit 4 in einer Reihe. Gomoku nutzt ein 15x15-Brett, bei dem man direkt auf ein beliebiges freies Feld klickt, ganz ohne Schwerkraft, und man braucht 5 in einer Reihe zum Gewinnen. Regeln und Strategie unterscheiden sich zwischen beiden vollständig."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="gomoku">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="de">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+.gk-mode-row{display:flex;justify-content:center;gap:8px;margin-bottom:14px}
+.gk-mode-btn{border:1px solid var(--game-border);background:#fff;color:#64748b;border-radius:20px;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer}
+.gk-mode-btn.active{background:var(--game-primary);border-color:var(--game-primary);color:#fff}
+.gk-topbar{display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f;min-height:22px}
+.gk-turn-dot{width:16px;height:16px;border-radius:50%;display:inline-block;vertical-align:middle;border:2px solid #94a3b8;box-sizing:border-box}
+.gk-board{display:grid;gap:1px;background:#b9895a;border:3px solid #8b5e34;border-radius:6px;padding:1px;width:100%;max-width:420px;margin:0 auto;aspect-ratio:1/1;transition:opacity .15s}
+.gk-board.thinking{opacity:.7;pointer-events:none}
+.gk-cell{position:relative;aspect-ratio:1/1;background:#deb877;cursor:pointer}
+.gk-stone{position:absolute;left:8%;top:8%;width:84%;height:84%;border-radius:50%;pointer-events:none;opacity:0;transform:scale(.5);transition:opacity .1s,transform .1s}
+.gk-stone.p1{opacity:1;transform:scale(1);background:radial-gradient(circle at 35% 30%,#4b5563,#0f172a);box-shadow:0 2px 3px rgba(0,0,0,.5)}
+.gk-stone.p2{opacity:1;transform:scale(1);background:radial-gradient(circle at 35% 30%,#ffffff,#cbd5e1);box-shadow:0 2px 3px rgba(0,0,0,.4)}
+.gk-stone.win{box-shadow:0 0 0 3px #22c55e,0 2px 4px rgba(0,0,0,.4)}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/de/">Werkzeuge</a>
+    <a href="/games/de/">Spiele</a>
+    <a href="/patterns/de.html">Chartmuster</a>
+    <a href="/blog/de/index.html">Blog</a>
+    <a href="/">Startseite</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/games/gomoku.html">繁中</option><option value="/games/en/gomoku.html">EN</option><option value="/games/ja/gomoku.html">日本語</option><option value="/games/ko/gomoku.html">한국어</option><option value="/games/de/gomoku.html" selected>DE</option><option value="/games/fr/gomoku.html">FR</option><option value="/games/es/gomoku.html">ES</option><option value="/games/pt/gomoku.html">PT</option><option value="/games/id/gomoku.html">ID</option><option value="/games/zh-CN/gomoku.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Startseite</a> &gt; <a href="/games/de/">Spiele</a> &gt; Gomoku</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>Gomoku</h1>
+    <p class="game-subtitle">15x15-Brett — klicke auf ein beliebiges freies Feld, um einen Stein zu setzen. Wer zuerst 5 in einer Reihe verbindet (waagerecht, senkrecht oder diagonal), gewinnt.</p>
+
+    <div class="gk-mode-row">
+      <button class="gk-mode-btn active" id="gkModeAiBtn" onclick="gkSetMode('ai')">🤖 Gegen Computer</button>
+      <button class="gk-mode-btn" id="gkMode2pBtn" onclick="gkSetMode('2p')">🧑‍🤝‍🧑 2 Spieler</button>
+    </div>
+
+    <div class="gk-topbar">
+      <span id="gkTurnText">Spieler 1 ist dran</span>
+      <span class="gk-turn-dot" id="gkTurnDot" style="background:#0f172a"></span>
+    </div>
+
+    <div class="gk-board" id="gkBoard"></div>
+
+    <div class="game-rating" id="gkRating"></div>
+
+    <div class="game-score-row">
+      <div class="game-score-tile"><div class="gs-label" id="gkP1Label">Siege Spieler 1</div><div class="gs-value" id="gkP1Wins">0</div></div>
+      <div class="game-score-tile"><div class="gs-label" id="gkP2Label">Siege Computer</div><div class="gs-value" id="gkP2Wins">0</div></div>
+    </div>
+
+    <div class="game-controls">
+      <button class="game-btn" onclick="gkRestart()">🔄 Runde neu starten</button>
+      <button class="game-btn secondary" onclick="gkShareResult()">📤 Ergebnis teilen</button>
+    </div>
+
+
+
+  </div>
+
+<div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>Was ist Gomoku</h2><p>Gomoku (auch Fünf-Gewinnt genannt) ist ein traditionsreiches Strategiespiel für zwei Spieler, bei dem abwechselnd Steine auf die Schnittpunkte eines 15x15-Rasters (oder größer) gesetzt werden. Wer zuerst fünf eigene Steine in einer Reihe — waagerecht, senkrecht oder diagonal — verbindet, gewinnt. Anders als Go, das ein eigenes Brett und komplexe Regeln braucht, ist Gomoku denkbar einfach zu erlernen, bietet aber trotzdem erstaunlich tiefe Taktik und ist weltweit beliebt.</p><h2>Der Unterschied zu Vier Gewinnt</h2><p>Trotz des ähnlichen Namens spielen sich Gomoku und Vier Gewinnt völlig verschieden. Vier Gewinnt nutzt ein 7x6-Brett, bei dem ein eingeworfener Stein durch die Schwerkraft bis nach unten in die gewählte Spalte fällt — man wählt also nur die Spalte, nicht das genaue Feld. Gomoku nutzt ein 15x15-Brett, bei dem man direkt auf ein beliebiges freies Feld klickt, um einen Stein zu setzen — ganz ohne Schwerkraft, mit deutlich mehr Freiheit bei der Platzierung, und man braucht fünf (nicht vier) in einer Reihe, um zu gewinnen.</p></article>
+
+<div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article"><h2>So wird gespielt</h2><p>Sobald das Spiel beginnt, zeigt der Bildschirm, wer am Zug ist. Klicke einfach auf ein beliebiges freies Feld, und dein Stein erscheint genau dort. Das Spiel geht abwechselnd weiter, bis jemand fünf Steine (in beliebiger Richtung) verbindet und gewinnt, oder das Brett voll ist, ohne dass jemand gewonnen hat — dann ist es unentschieden. Drücke dann „Runde neu starten“ für eine neue Runde; die Siege werden fortlaufend gezählt und angezeigt. Oben kannst du zwischen „Gegen Computer“ und „2 Spieler“ wechseln — allein spielen oder einen Freund herausfordern.</p><h2>Häufige Anfängerstrategien</h2><p>Sichere dir zuerst Felder in der Nähe der Brettmitte, da von dort die meisten Richtungen für eine Linie offenstehen. Achte außerdem darauf, ob dein Gegner bereits eine „offene Drei“ gebildet hat (drei in einer Reihe mit beiden Enden noch offen) — dieses Muster wird beim nächsten Zug leicht zu einer unaufhaltsamen „offenen Vier“ und muss deshalb zuerst blockiert werden. Gleichzeitig Bedrohungen in mehreren Richtungen aufzubauen, sodass der Gegner sich nicht überall verteidigen kann, ist die zentrale Angriffstaktik bei Gomoku.</p></article>
+
+<div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>Häufig gestellte Fragen</h2>
+  <div class="faq-item"><div class="faq-q">Wie spielt man Gomoku?</div><div class="faq-a">Das Brett ist ein 15x15-Raster. Klicke an deinem Zug einfach auf ein beliebiges freies Feld, und dein Stein landet genau dort (anders als bei Vier Gewinnt zieht keine Schwerkraft ihn nach unten). Wer zuerst 5 eigene Steine in einer geraden Linie verbindet — waagerecht, senkrecht oder diagonal — gewinnt.</div></div>
+  <div class="faq-item"><div class="faq-q">Kann man das auch allein spielen?</div><div class="faq-a">Ja. Der Standardmodus ist „Gegen Computer“, bei dem die KI automatisch zieht, sodass eine Person allein spielen kann. Wenn du lieber persönlich gegen einen Freund spielen möchtest, wechsle in den Modus „2 Spieler“, bei dem ihr abwechselnd auf demselben Bildschirm klickt — keine Anmeldung oder Verbindung nötig.</div></div>
+  <div class="faq-item"><div class="faq-q">Ist die Computer-KI schwer zu schlagen?</div><div class="faq-a">Die KI bewertet Bedrohungen auf dem Brett in Echtzeit: Sie zieht immer sofort, wenn sie damit gewinnen kann, und blockiert dich immer, wenn du kurz davor bist, fünf zu verbinden. Ansonsten bewertet sie mögliche Züge nach Musterstärke (z. B. eine „offene Drei“ oder eine „Vier mit einem offenen Ende“) und wählt das bedrohlichste Feld. Sie ist ein mittelstarker Gegner — du musst mehrere Richtungen gleichzeitig im Blick behalten, um zu gewinnen.</div></div>
+  <div class="faq-item"><div class="faq-q">Warum ist mein Stein nicht dort erschienen, wo ich geklickt habe?</div><div class="faq-a">Bei Gomoku landet dein Stein immer genau dort, wo du klickst — es gibt keine Schwerkraft. Wenn nichts erschienen ist, liegt das meist daran, dass das Feld schon besetzt ist (dort kann nicht erneut gesetzt werden), oder das Spiel hat noch nicht begonnen, oder gerade denkt der Computer nach — in all diesen Fällen reagiert ein Klick nicht.</div></div>
+  <div class="faq-item"><div class="faq-q">Ist Gomoku dasselbe wie Vier Gewinnt? Was ist der Unterschied?</div><div class="faq-a">Nein, sie sind unterschiedlich. Vier Gewinnt nutzt ein 7x6-Brett, bei dem ein eingeworfener Stein durch Schwerkraft in einer Spalte nach unten fällt, und man gewinnt mit 4 in einer Reihe. Gomoku nutzt ein 15x15-Brett, bei dem man direkt auf ein beliebiges freies Feld klickt, ganz ohne Schwerkraft, und man braucht 5 in einer Reihe zum Gewinnen. Regeln und Strategie unterscheiden sich zwischen beiden vollständig.</div></div>
+  </section>
+
+  <div class="more-tools"><h3>Ähnliche Spiele</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/de/2048.html">2048</a>
+    <a class="tool-pill" href="/games/de/sudoku.html">Sudoku</a>
+    <a class="tool-pill" href="/games/de/minesweeper.html">Minesweeper</a>
+    <a class="tool-pill" href="/games/de/chess.html">Schach</a>
+    <a class="tool-pill" href="/games/de/snake.html">Snake-Spiel</a>
+    <a class="tool-pill" href="/games/de/">Weitere Spiele</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+<div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Weitere Spiele</h3><a class="tool-pill" href="/games/de/" style="display:block;margin-top:8px">Alle Spiele ansehen →</a></div>
+<div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">Über uns</a><a href="/contact.html">Kontakt</a><a href="/home/de/privacy.html">Datenschutz</a><a href="/home/de/terms.html">AGB</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<!-- Language pack for this page. Game logic lives in /games/shared/gomoku.js and is -->
+<!-- shared by all 10 locales; it contains no user-facing text, only lookups into these dicts. -->
+<script>
+window.GAME_I18N = {"turnOf": "{name} ist dran", "aiThinking": "🤖 Computer denkt nach…", "winsLabel": "Siege {name}", "winMessage": "🎉 {name} gewinnt!", "drawMessage": "🤝 Unentschieden! Das Brett ist voll", "shareWinResult": "{name} hat gewonnen", "shareDrawResult": "unentschieden", "shareWithResult": "Ich habe gerade Gomoku auf SoftGlow gegen einen Freund gespielt — Ergebnis: {r}! Auf zur nächsten Runde", "shareNoResult": "Spiel Gomoku mit einem Freund auf SoftGlow!", "copied": "Kopiert!", "nameYou": "Du", "nameComputer": "Computer", "namePlayer1": "Spieler 1", "namePlayer2": "Spieler 2"};
+window.GA_LANG_PACK = {"loginToRank": "Melde dich an, um dein Ergebnis in die Bestenliste einzutragen 🏆", "newRecord": "🎉 Neue persönliche Bestleistung! Du bist auf Platz {r}", "submitted": "Ergebnis eingetragen — du bist auf Platz {r}", "emptyBoard": "Noch keine Ergebnisse. Melde dich an und sichere dir den ersten Platz!", "loadingBoard": "Bestenliste wird geladen…", "googleFail": "Google-Anmeldung fehlgeschlagen", "connFail": "Verbindung fehlgeschlagen, bitte später erneut versuchen", "loginOk": "Angemeldet!", "logoutOk": "Abgemeldet", "lineLoginOk": "Mit LINE angemeldet!", "lineLoginFail": "LINE-Anmeldung fehlgeschlagen, bitte erneut versuchen", "logoutBtn": "Abmelden", "loadingName": "Wird geladen…", "player": "Spieler", "loginTip": "Melde dich an, um Ergebnisse zu speichern und dich mit Freunden zu messen!", "lineBtn": "💬 Mit LINE anmelden", "fsEnter": "⛶ Vollbild", "fsExit": "✕ Vollbild beenden", "fsAria": "Spiel im Vollbild anzeigen", "fsUnsupported": "Dieser Browser unterstützt kein Vollbild", "reminderTitle": "Melde dich an, um dein {game}-Ergebnis in die Bestenliste einzutragen", "reminderSub": "Du kannst auch ohne Anmeldung spielen — dein Ergebnis wird dann nur nicht gespeichert", "reminderSkip": "Nein danke, einfach spielen", "reminderClose": "Schließen", "badge": "🔒 Anmelden für Bestenliste", "thisGame": "dieses Spiel", "gameNames": {"gomoku": "Gomoku"}};
+</script>
+<script src="/games/shared/gomoku.js"></script>
+
+<script>
+(function(){var AD_DELAY_MS=2000;setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},AD_DELAY_MS);})();
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Werkzeuge, Muster, Artikel suchen…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Meine Favoriten</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Alle löschen</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/games/games-auth.js"></script>
+<script>
+gaInitFullscreenToggle();
+</script>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

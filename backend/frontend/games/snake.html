@@ -10,8 +10,17 @@
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://softglow-ai.com/games/snake.html">
 <link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/snake.html">
-<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/snake.html">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "貪食蛇遊戲", "url": "https://softglow-ai.com/games/snake.html", "description": "免費線上貪食蛇遊戲，吃到食物會變長，撞牆或咬到自己就結束。", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/games/en/snake.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/games/de/snake.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/games/es/snake.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/games/fr/snake.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/games/id/snake.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/games/ja/snake.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/games/ko/snake.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/games/pt/snake.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/games/zh-CN/snake.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/en/snake.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "貪食蛇遊戲", "url": "https://softglow-ai.com/games/snake.html", "description": "免費線上貪食蛇遊戲，控制蛇吃食物變長，撞牆或咬到自己就結束。", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-TW"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "貪食蛇怎麼玩？", "acceptedAnswer": {"@type": "Answer", "text": "用鍵盤方向鍵（或畫面上的方向按鈕）控制蛇移動，吃到食物蛇身會變長並得1分。撞到牆壁或咬到自己的身體遊戲就結束，目標是在不撞到任何東西的情況下盡量吃越多食物越好。"}}, {"@type": "Question", "name": "為什麼蛇的速度會越來越快？", "acceptedAnswer": {"@type": "Answer", "text": "每吃到一個食物，移動速度都會加快一點，這是貪食蛇的經典設計——蛇身越長、速度越快，操作難度也隨之提高，避免遊戲一直維持在同一個難易度而變得無聊。"}}, {"@type": "Question", "name": "手機上要怎麼控制方向？", "acceptedAnswer": {"@type": "Answer", "text": "畫面下方有十字方向按鈕，直接點擊對應方向即可轉向，不需要鍵盤。桌機版則可以直接用鍵盤上的方向鍵（↑↓←→）操作，兩種輸入方式都能隨時切換使用。"}}, {"@type": "Question", "name": "可以馬上轉180度掉頭嗎？", "acceptedAnswer": {"@type": "Answer", "text": "不行，蛇沒辦法直接反方向掉頭（例如正在往右移動時直接按左），這是貪食蛇遊戲的標準規則，因為現實中蛇也無法瞬間對著自己的身體轉向，這個限制反而是遊戲策略性的一部分。"}}, {"@type": "Question", "name": "貪食蛇這個遊戲是怎麼來的？", "acceptedAnswer": {"@type": "Answer", "text": "貪食蛇的概念最早可追溯到1976年的街機遊戲《Blockade》，後來在1990年代因為被內建在Nokia功能手機上而風靡全球，成為許多人第一款接觸的電子遊戲，這個簡單卻耐玩的玩法也一直延續到今天的各種平台。"}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
 <link rel="stylesheet" href="/games/games.css">
@@ -22,10 +31,6 @@
 <link rel="stylesheet" href="/js/cookie-consent.css">
 <script src="https://accounts.google.com/gsi/client" async></script>
 <style>
-/* 2026/08/15 視覺優化：帥哥鴻反饋「貪食蛇太醜了」，
-   原本純色方塊改成：棋盤格底紋、蛇身漸層圓角+尾巴漸淡、
-   蛇頭帶眼睛並依方向旋轉、食物用蘋果emoji+跳動動畫、
-   方向鍵改立體按壓感。 */
 .sn-topbar{display:flex;justify-content:center;align-items:center;gap:18px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f;flex-wrap:wrap}
 .sn-level-badge{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800;transition:transform .3s}
 .sn-level-badge.sn-level-up{animation:snLevelUp .5s ease}
@@ -62,13 +67,14 @@
     <a href="/">首頁</a>
   </div>
   <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/games/snake.html" selected>繁中</option><option value="/games/en/snake.html">EN</option><option value="/games/ja/snake.html">日本語</option><option value="/games/ko/snake.html">한국어</option><option value="/games/de/snake.html">DE</option><option value="/games/fr/snake.html">FR</option><option value="/games/es/snake.html">ES</option><option value="/games/pt/snake.html">PT</option><option value="/games/id/snake.html">ID</option><option value="/games/zh-CN/snake.html">简中</option></select>
     <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
     <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
     <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
   </div>
 </div>
 </nav>
-<div class="breadcrumb"><a href="/">Home</a> &gt; <a href="/games/">遊戲</a> &gt; 貪食蛇</div>
+<div class="breadcrumb"><a href="/">首頁</a> &gt; <a href="/games/">遊戲</a> &gt; 貪食蛇</div>
 <div class="container">
 <div class="layout">
 <div class="main">
@@ -84,10 +90,10 @@
     <div class="sn-board" id="snBoard"></div>
 
     <div class="sn-dpad">
-      <button class="sn-up" onclick="snSetDir('up')">↑</button>
-      <button class="sn-left" onclick="snSetDir('left')">←</button>
-      <button class="sn-right" onclick="snSetDir('right')">→</button>
-      <button class="sn-down" onclick="snSetDir('down')">↓</button>
+      <button class="sn-up" onclick="snSetDir('up')" aria-label="向上">↑</button>
+      <button class="sn-left" onclick="snSetDir('left')" aria-label="向左">←</button>
+      <button class="sn-right" onclick="snSetDir('right')" aria-label="向右">→</button>
+      <button class="sn-down" onclick="snSetDir('down')" aria-label="向下">↓</button>
     </div>
 
     <div class="game-rating" id="snRating"></div>
@@ -99,22 +105,23 @@
 
     <div class="game-controls">
       <button class="game-btn" id="snStartBtn" onclick="snStart()">▶️ 開始遊戲</button>
-      <button class="game-btn secondary" onclick="shareResult()">📤 分享成績</button>
+      <button class="game-btn secondary" onclick="snShareResult()">📤 分享成績</button>
     </div>
+
 
     <div class="ga-widget" id="gaWidget"></div>
     <div class="ga-leaderboard"><h3>🏆 貪食蛇排行榜</h3><div id="gaLeaderboard"></div></div>
   </div>
 
-  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+<div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
 
   <article class="article"><h2>貪食蛇的歷史</h2><p>貪食蛇最早可追溯到1976年的街機遊戲《Blockade》，但真正讓它成為全球現象的是1997年開始內建在Nokia功能手機裡的版本——當時幾乎每一支Nokia手機都有這款遊戲，讓它成為很多人人生中第一款電子遊戲。規則簡單到不用任何說明就能上手：控制一條蛇吃東西、越吃越長、不能撞到自己或牆壁。</p><h2>為什麼這麼耐玩</h2><p>貪食蛇的耐玩性來自「越玩越難」的自然節奏——蛇身越長，可移動的安全空間就越小，加上速度會隨著吃到食物越來越快，玩家必須在有限的反應時間內即時規劃路線，這種漸進式的壓力感是很多經典遊戲共通的成功關鍵。</p></article>
 
+<div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
   <article class="article"><h2>怎麼玩</h2><p>桌機用鍵盤方向鍵（↑↓←→）控制蛇的移動方向，手機或觸控裝置則用畫面下方的十字按鈕。蛇會持續朝目前方向移動，吃到紅色食物會變長1格並得1分，同時速度會加快一點；撞到畫面邊界或咬到自己的身體遊戲就結束。</p><h2>提高分數的技巧</h2><p>盡量沿著畫面邊緣繞圈移動，保留中間空間當作緩衝，不要一開始就往正中間亂衝；轉彎前先想好下一步要往哪個方向，尤其蛇身變長之後，提前規劃路線比臨時反應更重要。</p></article>
 
-  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
-
-  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+<div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
 
   <section class="faq"><h2>常見問題</h2>
   <div class="faq-item"><div class="faq-q">貪食蛇怎麼玩？</div><div class="faq-a">用鍵盤方向鍵（或畫面上的方向按鈕）控制蛇移動，吃到食物蛇身會變長並得1分。撞到牆壁或咬到自己的身體遊戲就結束，目標是在不撞到任何東西的情況下盡量吃越多食物越好。</div></div>
@@ -125,271 +132,33 @@
   </section>
 
   <div class="more-tools"><h3>相關遊戲</h3><div class="tools-grid">
-    <a class="tool-pill" href="/games/reaction-time-test.html">反應力測試</a>
-    <a class="tool-pill" href="/games/whack-a-mole.html">打地鼠遊戲</a>
-    <a class="tool-pill" href="/games/memory-match.html">記憶翻牌遊戲</a>
-    <a class="tool-pill" href="/games/piano-tiles.html">鋼琴塊遊戲</a>
-    <a class="tool-pill" href="/games/gomoku.html">五子棋遊戲</a>
+    <a class="tool-pill" href="/games/2048.html">2048</a>
+    <a class="tool-pill" href="/games/sudoku.html">數獨</a>
+    <a class="tool-pill" href="/games/minesweeper.html">踩地雷</a>
+    <a class="tool-pill" href="/games/chess.html">西洋棋</a>
+    <a class="tool-pill" href="/games/piano-tiles.html">鋼琴塊</a>
     <a class="tool-pill" href="/games/">更多遊戲</a>
   </div></div>
 
 </div>
 <aside class="sidebar">
-  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+<div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
   <div class="related-card"><h3>更多遊戲</h3><a class="tool-pill" href="/games/" style="display:block;margin-top:8px">瀏覽全部遊戲 →</a></div>
-  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+<div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
 </aside>
 </div></div>
-<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/home/zh-TW/privacy.html">Privacy</a><a href="/home/zh-TW/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">關於</a><a href="/contact.html">聯絡我們</a><a href="/home/zh-TW/privacy.html">隱私權</a><a href="/home/zh-TW/terms.html">使用條款</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
 
+<!-- Language pack for this page. Game logic lives in /games/shared/snake.js and is -->
+<!-- shared by all 10 locales; it contains no user-facing text, only lookups into these dicts. -->
 <script>
-// ══════════════════════════════════════════════════════════
-// 貪食蛇 — 遵循《新工具規劃守則.md》第七節：
-//   7-1 CONFIG集中管理格數/初始速度/加速幅度/初始蛇長等所有可調數值
-//   7-2 純函式（nextHead/isCollision）不碰DOM，跟遊戲迴圈/畫面渲染分開
-//   7-3 防錯：禁止直接180度反向、遊戲結束後方向鍵與按鈕都失效
-//   7-4 資源清理：setInterval統一在clearAll()處理，離開頁面前清除，
-//        並移除keydown事件監聽
-// ══════════════════════════════════════════════════════════
-const CONFIG = {
-  gridSize: 15,
-  initialLength: 3,
-  initialTickMs: 220,
-  minTickMs: 80,
-  tickDecreasePerFood: 6,
-  historyLimit: 5,
-  copyRevertMs: 1500,
-  adLoadDelayMs: 2000,
-  scorePerLevel: 5,
-  opposite: { up: 'down', down: 'up', left: 'right', right: 'left' },
-  headRotation: { up: 0, right: 90, down: 180, left: 270 },
-  foodEmoji: '🍎',
-  ratings: [
-    { max: 5,       label: '🐢 先熟悉一下操作，多練幾次會更順' },
-    { max: 12,      label: '🙂 中等水準，掌握到基本節奏了' },
-    { max: 20,      label: '👍 不錯的成績，優於大多數人' },
-    { max: 30,      label: '🏆 高手等級，路線規劃很扎實' },
-    { max: Infinity,label: '⚡ 神級表現，滿版蛇身都能繞得漂亮！' }
-  ]
-};
-
-// ── 純函式：不碰DOM，只操作資料 ──
-function nextHead(head, dir) {
-  const d = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[dir];
-  return { x: head.x + d[0], y: head.y + d[1] };
-}
-function isOutOfBounds(pos) {
-  return pos.x < 0 || pos.x >= CONFIG.gridSize || pos.y < 0 || pos.y >= CONFIG.gridSize;
-}
-function isSelfCollision(pos, body) {
-  return body.some(function (s) { return s.x === pos.x && s.y === pos.y; });
-}
-function computeRating(score) {
-  const hit = CONFIG.ratings.find(r => score <= r.max);
-  return hit ? hit.label : '';
-}
-function computeLevel(score) {
-  return 1 + Math.floor(score / CONFIG.scorePerLevel);
-}
-
-(function () {
-  const boardEl  = document.getElementById('snBoard');
-  const scoreEl  = document.getElementById('snScore');
-  const ratingEl = document.getElementById('snRating');
-  const bestEl   = document.getElementById('snBest');
-  const historyEl= document.getElementById('snHistory');
-  const startBtn = document.getElementById('snStartBtn');
-  const levelEl  = document.getElementById('snLevelBadge');
-
-  boardEl.style.gridTemplateColumns = 'repeat(' + CONFIG.gridSize + ', 1fr)';
-  boardEl.style.gridTemplateRows = 'repeat(' + CONFIG.gridSize + ', 1fr)';
-
-  let cellEls = [];
-  for (let y = 0; y < CONFIG.gridSize; y++) {
-    const row = [];
-    for (let x = 0; x < CONFIG.gridSize; x++) {
-      const el = document.createElement('div');
-      el.className = 'sn-cell' + ((x + y) % 2 === 0 ? ' alt' : '');
-      boardEl.appendChild(el);
-      row.push(el);
-    }
-    cellEls.push(row);
-  }
-
-  let snake = [];
-  let dir = 'right';
-  let pendingDir = 'right';
-  let food = { x: 0, y: 0 };
-  let score = 0;
-  let playing = false;
-  let tickMs = CONFIG.initialTickMs;
-  let tickTimerId = null;
-  let history = [];
-  let level = 1;
-
-  function clearAll() {
-    if (tickTimerId) { clearInterval(tickTimerId); tickTimerId = null; }
-  }
-
-  function randomEmptyCell() {
-    let pos;
-    do {
-      pos = { x: Math.floor(Math.random() * CONFIG.gridSize), y: Math.floor(Math.random() * CONFIG.gridSize) };
-    } while (isSelfCollision(pos, snake));
-    return pos;
-  }
-
-  function render() {
-    for (let y = 0; y < CONFIG.gridSize; y++) {
-      for (let x = 0; x < CONFIG.gridSize; x++) {
-        const cell = cellEls[y][x];
-        cell.className = 'sn-cell' + ((x + y) % 2 === 0 ? ' alt' : '');
-        if (cell.textContent) cell.textContent = '';
-        cell.style.transform = '';
-      }
-    }
-    snake.forEach(function (s, i) {
-      const cell = cellEls[s.y][s.x];
-      cell.className += ' ' + (i === 0 ? 'head' : 'body');
-      if (i === 0) cell.style.transform = 'rotate(' + CONFIG.headRotation[dir] + 'deg)';
-    });
-    const foodCell = cellEls[food.y][food.x];
-    foodCell.className += ' food';
-    foodCell.textContent = CONFIG.foodEmoji;
-  }
-
-  function onKeyDown(e) {
-    const map = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
-    if (map[e.key]) { e.preventDefault(); trySetDir(map[e.key]); }
-  }
-
-  function trySetDir(newDir) {
-    if (!playing) return;
-    if (CONFIG.opposite[newDir] === dir) return; // 7-3 防錯：禁止直接反向
-    pendingDir = newDir;
-  }
-  window.snSetDir = trySetDir;
-
-  function tick() {
-    dir = pendingDir;
-    const head = nextHead(snake[0], dir);
-    if (isOutOfBounds(head) || isSelfCollision(head, snake)) { endGame(); return; }
-
-    snake.unshift(head);
-    if (head.x === food.x && head.y === food.y) {
-      score++;
-      scoreEl.textContent = String(score);
-      const newLevel = computeLevel(score);
-      if (newLevel !== level) {
-        level = newLevel;
-        levelEl.textContent = 'Lv.' + level;
-        levelEl.classList.remove('sn-level-up');
-        void levelEl.offsetWidth; // 重新觸發動畫
-        levelEl.classList.add('sn-level-up');
-      }
-      food = randomEmptyCell();
-      tickMs = Math.max(CONFIG.minTickMs, tickMs - CONFIG.tickDecreasePerFood);
-      clearAll();
-      tickTimerId = setInterval(tick, tickMs);
-    } else {
-      snake.pop();
-    }
-    render();
-  }
-
-  function endGame() {
-    playing = false;
-    clearAll();
-    startBtn.disabled = false;
-    startBtn.textContent = '▶️ 再玩一次';
-    ratingEl.textContent = score + ' 分 — ' + computeRating(score);
-
-    history.unshift(score);
-    history = history.slice(0, CONFIG.historyLimit);
-    const best = Math.max(...history);
-    bestEl.textContent = best + ' 分';
-    historyEl.innerHTML = history.map(function (v) { return '<span>' + v + '分</span>'; }).join('');
-    window._snLastScore = score;
-    window._snBestScore = best;
-    if (typeof gaSubmitScore === 'function') gaSubmitScore('snake', score);
-  }
-
-  function snStartInternal() {
-    clearAll();
-    const mid = Math.floor(CONFIG.gridSize / 2);
-    snake = [];
-    for (let i = 0; i < CONFIG.initialLength; i++) snake.push({ x: mid - i, y: mid });
-    dir = 'right';
-    pendingDir = 'right';
-    score = 0;
-    level = 1;
-    tickMs = CONFIG.initialTickMs;
-    playing = true;
-    scoreEl.textContent = '0';
-    levelEl.textContent = 'Lv.1';
-    ratingEl.textContent = '';
-    startBtn.disabled = true;
-    startBtn.textContent = '遊戲中…';
-    food = randomEmptyCell();
-    render();
-    tickTimerId = setInterval(tick, tickMs);
-  }
-
-  window.snStart = snStartInternal;
-
-  // 2026/08/16新增：帥哥鴻反饋手機希望能直接點/滑畫面控制方向，不只靠下方十字按鈕。
-  // 用滑動手勢（swipe）判斷方向比「點畫面四個象限」更符合手機貪食蛇的操作直覺、
-  // 誤觸機率也更低——記錄手指按下與放開的座標差，取位移較大的軸當作方向。
-  const SWIPE_MIN_PX = 20; // 太小的滑動視為誤觸，忽略
-  let touchStartX = 0, touchStartY = 0;
-  boardEl.addEventListener('touchstart', function (e) {
-    if (!e.touches || !e.touches.length) return;
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-  }, { passive: true });
-  boardEl.addEventListener('touchend', function (e) {
-    if (!e.changedTouches || !e.changedTouches.length) return;
-    const dx = e.changedTouches[0].clientX - touchStartX;
-    const dy = e.changedTouches[0].clientY - touchStartY;
-    if (Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE_MIN_PX) return;
-    if (Math.abs(dx) > Math.abs(dy)) {
-      trySetDir(dx > 0 ? 'right' : 'left');
-    } else {
-      trySetDir(dy > 0 ? 'down' : 'up');
-    }
-  }, { passive: true });
-
-  document.addEventListener('keydown', onKeyDown);
-  // 7-4 資源清理：離開頁面前清掉計時器與鍵盤事件監聽
-  window.addEventListener('beforeunload', function () {
-    clearAll();
-    document.removeEventListener('keydown', onKeyDown);
-  });
-
-  render();
-})();
-
-function shareResult() {
-  const score = window._snLastScore;
-  const text = (score != null)
-    ? ('我在SoftGlow貪食蛇拿了 ' + score + ' 分！來試試你能打敗我嗎？')
-    : '來玩玩經典貪食蛇！';
-  if (navigator.share) {
-    navigator.share({ title: document.title, text: text, url: location.href }).catch(function () {});
-  } else {
-    navigator.clipboard.writeText(text + ' ' + location.href);
-    const b = event.target;
-    const old = b.textContent;
-    b.textContent = '已複製！';
-    setTimeout(function () { b.textContent = old; }, CONFIG.copyRevertMs);
-  }
-}
-document.querySelectorAll('.faq-q').forEach(function (q) {
-  q.addEventListener('click', function () { this.parentElement.classList.toggle('open'); });
-});
+window.GAME_I18N = {"levelBadge": "Lv.{n}", "scoreShort": "{s}分", "playAgainBtn": "▶️ 再玩一次", "playingBtn": "遊戲中…", "shareWithScore": "我在SoftGlow貪食蛇拿了 {s} 分！來試試你能打敗我嗎？", "shareNoScore": "來玩玩經典貪食蛇！", "copied": "已複製！", "ratings": ["🐢 先熟悉一下操作，多練幾次會更順", "🙂 中等水準，掌握到基本節奏了", "👍 不錯的成績，優於大多數人", "🏆 高手等級，路線規劃很扎實", "⚡ 神級表現，滿版蛇身都能繞得漂亮！"]};
+window.GA_LANG_PACK = {"loginToRank": "登入才能把成績送上排行榜 🏆", "newRecord": "🎉 新紀錄！目前排名第 {r} 名", "submitted": "已送上排行榜，目前排名第 {r} 名", "emptyBoard": "還沒有人上榜，登入後第一個玩就能拿下第一名！", "loadingBoard": "載入排行榜中…", "googleFail": "Google 登入失敗", "connFail": "連線失敗，請稍後再試", "loginOk": "登入成功！", "logoutOk": "已登出", "lineLoginOk": "LINE登入成功！", "lineLoginFail": "LINE登入失敗，請再試一次", "logoutBtn": "登出", "loadingName": "載入中…", "player": "玩家", "loginTip": "登入才能把成績存上排行榜，跟朋友比分數！", "lineBtn": "💬 用LINE登入", "fsEnter": "⛶ 全螢幕", "fsExit": "✕ 離開全螢幕", "fsAria": "全螢幕放大遊戲", "fsUnsupported": "這個瀏覽器不支援全螢幕", "reminderTitle": "登入才能把{game}成績存上排行榜", "reminderSub": "不登入也能繼續玩，只是分數不會被記錄下來", "reminderSkip": "先不用，直接玩", "reminderClose": "關閉", "badge": "🔒 登入才能上榜", "thisGame": "這個遊戲", "gameNames": {"snake": "貪食蛇"}, "scoreUnit": {"snake": "分"}};
 </script>
+<script src="/games/shared/snake.js"></script>
+
 <script>
-setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},CONFIG.adLoadDelayMs);
+(function(){var AD_DELAY_MS=2000;setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},AD_DELAY_MS);})();
 </script>
 
 <!-- Search Overlay -->

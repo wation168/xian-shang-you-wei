@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juego de Memoria - Emparejamiento de Cartas Gratis Online | SoftGlow</title>
+<meta name="description" content="Juega al Juego de Memoria gratis online. Encuentra todas las parejas — menos movimientos y menos tiempo dan una puntuación más alta. Un juego de navegador puro, sin descargas, que entrena tu memoria a corto plazo.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/es/memory-match.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/memory-match.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/games/en/memory-match.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/games/de/memory-match.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/games/es/memory-match.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/games/fr/memory-match.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/games/id/memory-match.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/games/ja/memory-match.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/games/ko/memory-match.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/games/pt/memory-match.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/games/zh-CN/memory-match.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/en/memory-match.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Juego de Memoria", "url": "https://softglow-ai.com/games/es/memory-match.html", "description": "Juego de Memoria gratis online — encuentra todas las parejas y entrena tu memoria a corto plazo.", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "es"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "¿Cómo se juega al Juego de Memoria?", "acceptedAnswer": {"@type": "Answer", "text": "Hay 16 cartas boca abajo en pantalla (8 parejas). Haz clic para voltear dos a la vez — si los dibujos coinciden, se quedan boca arriba como pareja lograda; si no, vuelven a voltearse. El objetivo es encontrar las 8 parejas con la menor cantidad de movimientos y en el menor tiempo posible."}}, {"@type": "Question", "name": "¿Qué entrena el Juego de Memoria?", "acceptedAnswer": {"@type": "Answer", "text": "Este juego entrena principalmente la memoria de trabajo y la memoria espacial — necesitas recordar qué posiciones mostraban qué dibujos y recordarlo correctamente en turnos posteriores. En estudios, este tipo de juegos de emparejar se usan a menudo como una actividad sencilla de entrenamiento cognitivo apta para todas las edades."}}, {"@type": "Question", "name": "¿Cómo se cuentan los movimientos?", "acceptedAnswer": {"@type": "Answer", "text": "Voltear un par de dos cartas —coincidan o no— cuenta como un movimiento. Menos movimientos significa que tu memoria fue más precisa y eficiente; los movimientos extra suelen venir de olvidar la posición de las cartas y volver a voltear combinaciones que ya habías visto."}}, {"@type": "Question", "name": "¿Hay alguna estrategia infalible?", "acceptedAnswer": {"@type": "Answer", "text": "Escanea el tablero siempre en el mismo orden (por ejemplo, de izquierda a derecha y de arriba abajo), y repite en silencio la asociación dibujo-posición mientras avanzas. En tu primera ronda, intenta voltear cada posición no vista una vez para crear un mapa mental — tu tasa de aciertos en turnos posteriores subirá notablemente y tus movimientos bajarán de forma clara."}}, {"@type": "Question", "name": "¿Cuál es el mínimo de movimientos para terminar?", "acceptedAnswer": {"@type": "Answer", "text": "En teoría, se pueden completar las 8 parejas en solo 8 movimientos si cada volteo coincide de inmediato, pero eso requiere memoria perfecta de todas las posiciones. En la práctica, la mayoría de la gente se sitúa entre 12 y 20 movimientos — terminar en 10 o menos ya es un resultado realmente bueno."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="memory-match">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="es">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+.mm-board{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:420px;margin:0 auto}
+.mm-card{position:relative;aspect-ratio:1/1;border-radius:10px;cursor:pointer;user-select:none;touch-action:manipulation;perspective:600px}
+.mm-card-inner{position:relative;width:100%;height:100%;transition:transform .3s;transform-style:preserve-3d}
+.mm-card.flipped .mm-card-inner,.mm-card.matched .mm-card-inner{transform:rotateY(180deg)}
+.mm-face{position:absolute;inset:0;border-radius:10px;display:flex;align-items:center;justify-content:center;backface-visibility:hidden;font-size:28px}
+.mm-face-back{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-size:18px;font-weight:800}
+.mm-face-front{background:#f8fafc;border:2px solid #e2e8f0;transform:rotateY(180deg)}
+.mm-card.matched .mm-face-front{background:#dcfce7;border-color:#22c55e}
+.mm-topbar{display:flex;justify-content:center;gap:24px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/es/">Herramientas</a>
+    <a href="/games/es/">Juegos</a>
+    <a href="/patterns/es.html">Patrones</a>
+    <a href="/blog/es/index.html">Blog</a>
+    <a href="/">Inicio</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/games/memory-match.html">繁中</option><option value="/games/en/memory-match.html">EN</option><option value="/games/ja/memory-match.html">日本語</option><option value="/games/ko/memory-match.html">한국어</option><option value="/games/de/memory-match.html">DE</option><option value="/games/fr/memory-match.html">FR</option><option value="/games/es/memory-match.html" selected>ES</option><option value="/games/pt/memory-match.html">PT</option><option value="/games/id/memory-match.html">ID</option><option value="/games/zh-CN/memory-match.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Inicio</a> &gt; <a href="/games/es/">Juegos</a> &gt; Juego de Memoria</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>Juego de Memoria</h1>
+    <p class="game-subtitle">Encuentra todas las parejas — menos movimientos y menos tiempo dan una puntuación más alta</p>
+
+    <div class="mm-topbar">
+      <span>Movimientos: <span id="mmMoves">0</span></span>
+      <span>Tiempo: <span id="mmTime">0</span>s</span>
+      <span>Parejas: <span id="mmPairs">0</span>/8</span>
+    </div>
+
+    <div class="mm-board" id="mmBoard"></div>
+
+    <div class="game-rating" id="mmRating"></div>
+
+    <div class="game-score-row">
+      <div class="game-score-tile"><div class="gs-label">Mejores Movimientos</div><div class="gs-value" id="mmBest">—</div></div>
+    </div>
+    <div class="game-history" id="mmHistory"></div>
+
+    <div class="game-controls">
+      <button class="game-btn" id="mmStartBtn" onclick="mmStart()">🔄 Reiniciar</button>
+      <button class="game-btn secondary" onclick="mmShareResult()">📤 Compartir resultado</button>
+    </div>
+
+
+    <div class="ga-widget" id="gaWidget"></div>
+    <div class="ga-leaderboard"><h3>🏆 Clasificación de Juego de Memoria</h3><div id="gaLeaderboard"></div></div>
+  </div>
+
+<div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>¿Qué es el Juego de Memoria?</h2><p>El Juego de Memoria (también llamado Concentration) es un juego de emparejar cartas con una historia muy larga: todas las cartas se colocan boca abajo, y en cada turno el jugador voltea dos, memorizando su posición y su dibujo para encontrar cada pareja. Este formato se remonta a los juegos de cartas tradicionales, y desde entonces se ha adaptado ampliamente en material educativo, juegos de mesa e innumerables versiones electrónicas y web.</p><h2>Cómo ayuda a nivel cognitivo</h2><p>Los juegos de emparejar cartas se usan a menudo para practicar la memoria de trabajo y la concentración, ya que los jugadores deben retener temporalmente varias asociaciones de posición e imagen en la mente, actualizándolas constantemente a medida que avanza el juego. Es una actividad apta para todas las edades, y se usa habitualmente como ejercicio ligero de entrenamiento cognitivo tanto en educación infantil como en actividades para personas mayores.</p></article>
+
+<div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article"><h2>Cómo jugar</h2><p>Al empezar el juego aparecen 16 cartas boca abajo en pantalla; haz clic para voltear dos a la vez. Si los dibujos coinciden, ambas cartas se quedan boca arriba y se marcan como pareja lograda; si no coinciden, se muestran brevemente y luego se voltean solas de nuevo. Sigue emparejando hasta encontrar las 8 parejas, y el juego registra cuántos movimientos usaste y cuánto tiempo tardaste.</p><h2>Cómo reducir tus movimientos</h2><p>En tu primera ronda, intenta voltear todas las cartas que aún no has visto para crear un mapa mental, en lugar de adivinar desde el principio. Asociar cada volteo con un truco de posicionamiento mental fijo (como nombrar en silencio coordenadas del tablero: «arriba a la izquierda», «centro») es mucho más eficiente que voltear al azar.</p></article>
+
+<div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>Preguntas frecuentes</h2>
+  <div class="faq-item"><div class="faq-q">¿Cómo se juega al Juego de Memoria?</div><div class="faq-a">Hay 16 cartas boca abajo en pantalla (8 parejas). Haz clic para voltear dos a la vez — si los dibujos coinciden, se quedan boca arriba como pareja lograda; si no, vuelven a voltearse. El objetivo es encontrar las 8 parejas con la menor cantidad de movimientos y en el menor tiempo posible.</div></div>
+  <div class="faq-item"><div class="faq-q">¿Qué entrena el Juego de Memoria?</div><div class="faq-a">Este juego entrena principalmente la memoria de trabajo y la memoria espacial — necesitas recordar qué posiciones mostraban qué dibujos y recordarlo correctamente en turnos posteriores. En estudios, este tipo de juegos de emparejar se usan a menudo como una actividad sencilla de entrenamiento cognitivo apta para todas las edades.</div></div>
+  <div class="faq-item"><div class="faq-q">¿Cómo se cuentan los movimientos?</div><div class="faq-a">Voltear un par de dos cartas —coincidan o no— cuenta como un movimiento. Menos movimientos significa que tu memoria fue más precisa y eficiente; los movimientos extra suelen venir de olvidar la posición de las cartas y volver a voltear combinaciones que ya habías visto.</div></div>
+  <div class="faq-item"><div class="faq-q">¿Hay alguna estrategia infalible?</div><div class="faq-a">Escanea el tablero siempre en el mismo orden (por ejemplo, de izquierda a derecha y de arriba abajo), y repite en silencio la asociación dibujo-posición mientras avanzas. En tu primera ronda, intenta voltear cada posición no vista una vez para crear un mapa mental — tu tasa de aciertos en turnos posteriores subirá notablemente y tus movimientos bajarán de forma clara.</div></div>
+  <div class="faq-item"><div class="faq-q">¿Cuál es el mínimo de movimientos para terminar?</div><div class="faq-a">En teoría, se pueden completar las 8 parejas en solo 8 movimientos si cada volteo coincide de inmediato, pero eso requiere memoria perfecta de todas las posiciones. En la práctica, la mayoría de la gente se sitúa entre 12 y 20 movimientos — terminar en 10 o menos ya es un resultado realmente bueno.</div></div>
+  </section>
+
+  <div class="more-tools"><h3>Juegos relacionados</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/es/2048.html">2048</a>
+    <a class="tool-pill" href="/games/es/sudoku.html">Sudoku</a>
+    <a class="tool-pill" href="/games/es/minesweeper.html">Buscaminas</a>
+    <a class="tool-pill" href="/games/es/chess.html">Ajedrez</a>
+    <a class="tool-pill" href="/games/es/snake.html">Juego de la Serpiente</a>
+    <a class="tool-pill" href="/games/es/">Más juegos</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+<div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Más juegos</h3><a class="tool-pill" href="/games/es/" style="display:block;margin-top:8px">Ver todos los juegos →</a></div>
+<div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">Acerca de</a><a href="/contact.html">Contacto</a><a href="/home/es/privacy.html">Privacidad</a><a href="/home/es/terms.html">Términos</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<!-- Language pack for this page. Game logic lives in /games/shared/memory-match.js and is -->
+<!-- shared by all 10 locales; it contains no user-facing text, only lookups into these dicts. -->
+<script>
+window.GAME_I18N = {"doneMsg": "🎉 ¡Completado! {m} movimientos, {t} segundos", "movesShort": "{m} mov.", "shareWithMoves": "¡Completé el Juego de Memoria en SoftGlow con solo {m} movimientos! ¿Crees que puedes superarlo?", "shareNoScore": "¡Ven a jugar al Juego de Memoria!", "copied": "¡Copiado!"};
+window.GA_LANG_PACK = {"loginToRank": "Inicia sesión para subir tu puntuación a la clasificación 🏆", "newRecord": "🎉 ¡Nuevo récord personal! Estás en el puesto {r}", "submitted": "Puntuación enviada — estás en el puesto {r}", "emptyBoard": "Todavía no hay puntuaciones. ¡Inicia sesión y sé el primero en el podio!", "loadingBoard": "Cargando clasificación…", "googleFail": "Error al iniciar sesión con Google", "connFail": "Error de conexión, inténtalo más tarde", "loginOk": "¡Sesión iniciada!", "logoutOk": "Sesión cerrada", "lineLoginOk": "¡Sesión iniciada con LINE!", "lineLoginFail": "Error al iniciar sesión con LINE, inténtalo de nuevo", "logoutBtn": "Cerrar sesión", "loadingName": "Cargando…", "player": "Jugador", "loginTip": "¡Inicia sesión para guardar tus puntuaciones y competir con amigos!", "lineBtn": "💬 Iniciar sesión con LINE", "fsEnter": "⛶ Pantalla completa", "fsExit": "✕ Salir de pantalla completa", "fsAria": "Ampliar el juego a pantalla completa", "fsUnsupported": "Este navegador no admite pantalla completa", "reminderTitle": "Inicia sesión para guardar tu puntuación de {game} en la clasificación", "reminderSub": "Puedes seguir jugando sin iniciar sesión, solo que tu puntuación no se guardará", "reminderSkip": "No, gracias, solo quiero jugar", "reminderClose": "Cerrar", "badge": "🔒 Inicia sesión para clasificar", "thisGame": "este juego", "gameNames": {"memory-match": "Juego de Memoria"}, "scoreUnit": {"memory-match": " mov."}};
+</script>
+<script src="/games/shared/memory-match.js"></script>
+
+<script>
+(function(){var AD_DELAY_MS=2000;setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},AD_DELAY_MS);})();
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Buscar herramientas, patrones, artículos…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Mis favoritos</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Borrar todo</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/games/games-auth.js"></script>
+<script>
+gaMountAuthWidget('gaWidget');
+gaMountLeaderboard('gaLeaderboard', 'memory-match');
+gaInitFullscreenToggle();
+gaInitLoginReminder('memory-match');
+</script>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sudoku - Jeu de Logique Gratuit en Ligne | SoftGlow</title>
+<meta name="description" content="Jouez au Sudoku gratuitement en ligne. Chaque grille 9x9 est générée instantanément avec une solution unique garantie, et la difficulté augmente automatiquement au fil des résolutions — de Facile jusqu'à Expert. Sans téléchargement.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/fr/sudoku.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/sudoku.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/games/en/sudoku.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/games/de/sudoku.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/games/es/sudoku.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/games/fr/sudoku.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/games/id/sudoku.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/games/ja/sudoku.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/games/ko/sudoku.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/games/pt/sudoku.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/games/zh-CN/sudoku.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/en/sudoku.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Jeu de Sudoku", "url": "https://softglow-ai.com/games/fr/sudoku.html", "description": "Sudoku gratuit en ligne avec grilles générées instantanément et solution unique garantie. La grille suivante se charge automatiquement et la difficulté ne cesse d'augmenter.", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "fr"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Quelles sont les règles du Sudoku ?", "acceptedAnswer": {"@type": "Answer", "text": "La grille de 9x9 est divisée en neuf blocs de 3x3. Le but est de remplir les chiffres de 1 à 9 de sorte que chaque ligne (9 cases horizontales), chaque colonne (9 cases verticales) et chaque bloc de 3x3 contienne chaque chiffre exactement une fois, sans répétition."}}, {"@type": "Question", "name": "Chaque grille de Sudoku est-elle garantie résoluble ?", "acceptedAnswer": {"@type": "Answer", "text": "Oui, et la solution est garantie unique. Les grilles de cette version sont générées en construisant d'abord une solution complète, puis en retirant des chiffres pour créer les indices ; un algorithme de résolution vérifie au fur et à mesure que les indices restants correspondent toujours à une seule solution avant que la grille ne soit finalisée, donc vous ne tomberez jamais sur une grille impossible ou ambiguë."}}, {"@type": "Question", "name": "Comment la difficulté est-elle classée ?", "acceptedAnswer": {"@type": "Answer", "text": "La difficulté est principalement classée selon le nombre d'indices de départ (chiffres donnés) qui restent sur la grille — plus d'indices est généralement plus facile, moins d'indices demande généralement une déduction plus complexe. C'est une estimation simplifiée, pas une classification complète par techniques de résolution (elle ne distingue pas spécifiquement, par exemple, les grilles nécessitant une technique avancée comme un XY-Wing), mais elle suffit à produire une courbe claire et progressive de Facile à Expert."}}, {"@type": "Question", "name": "La difficulté continue-t-elle d'augmenter indéfiniment ?", "acceptedAnswer": {"@type": "Answer", "text": "Oui. Après avoir terminé la première grille (Facile), la suivante se charge automatiquement, avec la progression Facile → Moyen → Difficile → Expert, puis reste sur Expert par la suite — le nombre d'indices ne continue pas à baisser au point de rendre les grilles instables, ce qui permet à la courbe de monter tout en gardant chaque grille résoluble de façon fiable."}}, {"@type": "Question", "name": "À quoi sert le bouton Indice ?", "acceptedAnswer": {"@type": "Answer", "text": "Toucher « Indice » remplit automatiquement une case correcte à votre place, au prix de quelques points. Cette case est ensuite marquée d'une couleur différente pour que vous puissiez la distinguer des chiffres que vous avez saisis vous-même."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="sudoku">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="fr">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+.sk-topbar{display:flex;justify-content:center;align-items:center;gap:14px;margin-bottom:16px;font-size:14px;font-weight:700;color:#1e3a5f;flex-wrap:wrap}
+.sk-diff-badge{background:linear-gradient(135deg,#0ea5e9,#6366f1);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800;transition:transform .3s}
+.sk-diff-badge.sk-diff-up{animation:skDiffUp .5s ease}
+@keyframes skDiffUp{0%{transform:scale(1)}40%{transform:scale(1.3);box-shadow:0 0 14px rgba(99,102,241,.8)}100%{transform:scale(1)}}
+.sk-board{position:relative;width:100%;max-width:400px;aspect-ratio:1/1;margin:0 auto;background:#1e293b;border-radius:10px;padding:3px;box-sizing:border-box}
+.sk-grid{position:relative;display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr);gap:1px;width:100%;height:100%;background:#1e293b}
+.sk-cell{position:relative;background:#fff;display:flex;align-items:center;justify-content:center;font-size:clamp(12px,3.6vw,18px);font-weight:700;color:#1e3a5f;cursor:pointer;user-select:none}
+.sk-cell.sk-given{background:#eef2f7;color:#334155;cursor:default}
+.sk-cell.sk-selected{background:#bfdbfe}
+.sk-cell.sk-peer{background:#eff6ff}
+.sk-cell.sk-same-value{background:#dbeafe}
+.sk-cell.sk-conflict{color:#dc2626}
+.sk-cell.sk-hinted{color:#0891b2}
+.sk-cell:nth-child(3n){border-right:2px solid #1e293b}
+.sk-cell:nth-child(9n){border-right:none}
+.sk-row3 .sk-cell{border-bottom:2px solid #1e293b}
+.sk-numpad{display:grid;grid-template-columns:repeat(9,1fr);gap:6px;max-width:400px;margin:14px auto 0}
+.sk-numpad button{padding:10px 0;border-radius:8px;border:1px solid var(--game-border);background:#fff;font-size:16px;font-weight:700;color:#1e3a5f;cursor:pointer}
+.sk-numpad button:hover{background:var(--game-bg)}
+.sk-numpad button.sk-clear{grid-column:span 9;background:#fef2f2;color:#dc2626;font-size:13px}
+.sk-overlay{position:absolute;inset:3px;background:rgba(255,255,255,.94);border-radius:8px;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px}
+.sk-overlay.show{display:flex}
+.sk-overlay .sk-over-title{font-size:20px;font-weight:800;color:#1e3a5f;margin-bottom:8px}
+.sk-overlay .sk-over-sub{font-size:13px;color:#64748b;margin-bottom:12px}
+@media(max-width:480px){.sk-topbar{font-size:12px;gap:8px}.sk-numpad button{padding:8px 0;font-size:14px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/fr/">Outils</a>
+    <a href="/games/fr/">Jeux</a>
+    <a href="/patterns/fr.html">Figures chartistes</a>
+    <a href="/blog/fr/index.html">Blog</a>
+    <a href="/">Accueil</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/games/sudoku.html">繁中</option><option value="/games/en/sudoku.html">EN</option><option value="/games/ja/sudoku.html">日本語</option><option value="/games/ko/sudoku.html">한국어</option><option value="/games/de/sudoku.html">DE</option><option value="/games/fr/sudoku.html" selected>FR</option><option value="/games/es/sudoku.html">ES</option><option value="/games/pt/sudoku.html">PT</option><option value="/games/id/sudoku.html">ID</option><option value="/games/zh-CN/sudoku.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Accueil</a> &gt; <a href="/games/fr/">Jeux</a> &gt; Sudoku</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>Jeu de Sudoku</h1>
+    <p class="game-subtitle">Chaque grille 9x9 est générée instantanément avec une solution unique garantie ; une fois résolue, la suivante se charge automatiquement, de Facile jusqu'à Expert.</p>
+
+    <div class="sk-topbar">
+      <span>Score : <span id="skScore">0</span></span>
+      <span class="sk-diff-badge" id="skDiffBadge">Facile</span>
+      <span>Grille n° <span id="skPuzzleNum">1</span></span>
+      <span>⏱ <span id="skTimer">00:00</span></span>
+    </div>
+
+    <div class="sk-board" id="skBoard">
+      <div class="sk-grid" id="skGrid"></div>
+      <div class="sk-overlay" id="skOverlay">
+        <div class="sk-over-title" id="skOverTitle">🧩 Prêt ?</div>
+        <div class="sk-over-sub" id="skOverSub">Appuyez sur le bouton ci-dessous pour démarrer la première grille</div>
+      </div>
+    </div>
+
+    <div class="sk-numpad" id="skNumpad"></div>
+
+    <div class="game-rating" id="skRating"></div>
+
+    <div class="game-score-row">
+      <div class="game-score-tile"><div class="gs-label">Meilleur Score</div><div class="gs-value" id="skBest">—</div></div>
+      <div class="game-score-tile"><div class="gs-label">Difficulté Maximale</div><div class="gs-value" id="skBestDiff">—</div></div>
+    </div>
+    <div class="game-history" id="skHistory"></div>
+
+    <div class="game-controls">
+      <button class="game-btn" id="skStartBtn" onclick="skStart()">▶️ Commencer</button>
+      <button class="game-btn secondary" onclick="skHint()">💡 Indice</button>
+      <button class="game-btn secondary" onclick="skClearEntries()">🧹 Effacer Mes Réponses</button>
+      <button class="game-btn secondary" onclick="skShareResult()">📤 Partager le score</button>
+    </div>
+
+
+    <div class="ga-widget" id="gaWidget"></div>
+    <div class="ga-leaderboard"><h3>🏆 Classement Sudoku</h3><div id="gaLeaderboard"></div></div>
+  </div>
+
+<div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>Qu'est-ce que le Sudoku ?</h2><p>Le Sudoku est un casse-tête numérique dont les origines remontent à la Suisse, mais qui est devenu un phénomène mondial après avoir été popularisé par un éditeur japonais dans les années 1980. Une grille de 9x9 est divisée en neuf blocs de 3x3, et le but est de remplir les cases vides avec des chiffres de 1 à 9 sans qu'aucun chiffre ne se répète dans une même ligne, colonne ou bloc. Chaque grille de cette version est générée à la volée plutôt que puisée dans un stock fixe, donc en théorie, vous n'en manquerez jamais.</p><h2>La difficulté ne cesse d'augmenter</h2><p>Une fois une grille résolue, la suivante se charge automatiquement, avec une difficulté qui monte de Facile à Moyen puis Difficile et enfin Expert, avant de rester à Expert par la suite. La difficulté est ajustée principalement selon le nombre d'indices de départ conservés — moins d'indices signifie généralement plus de déduction logique nécessaire pour avancer. C'est conçu comme une courbe clairement ascendante, tout en garantissant que chaque grille reste résoluble.</p></article>
+
+<div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article"><h2>Comment jouer</h2><p>Touchez une case pour la sélectionner, puis appuyez sur 1 à 9 sur votre clavier (ou utilisez le pavé numérique à l'écran) pour la remplir ; Retour arrière, Suppr ou le bouton « Effacer » du pavé vident la case. Les chiffres à fond gris sont les indices de départ de la grille et ne peuvent pas être modifiés ; les cases blanches sont celles que vous devez remplir. Si le chiffre saisi entre en conflit avec un autre dans la même ligne, colonne ou bloc, il passe en rouge pour vous avertir, sans bloquer la saisie — à vous de décider si vous le corrigez tout de suite. Une fois toutes les cases correctement remplies, la grille est automatiquement validée et la suivante se charge.</p><h2>Indices et recommencer</h2><p>Bloqué ? Touchez « Indice » et le jeu remplit correctement une case à votre place (au prix de quelques points, et elle est marquée d'une couleur différente pour que vous sachiez que c'est un indice). « Effacer Mes Réponses » supprime tout ce que vous avez rempli vous-même tout en conservant les indices d'origine, pour que vous puissiez repartir de zéro dans votre raisonnement.</p></article>
+
+<div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>Questions fréquentes</h2>
+  <div class="faq-item"><div class="faq-q">Quelles sont les règles du Sudoku ?</div><div class="faq-a">La grille de 9x9 est divisée en neuf blocs de 3x3. Le but est de remplir les chiffres de 1 à 9 de sorte que chaque ligne (9 cases horizontales), chaque colonne (9 cases verticales) et chaque bloc de 3x3 contienne chaque chiffre exactement une fois, sans répétition.</div></div>
+  <div class="faq-item"><div class="faq-q">Chaque grille de Sudoku est-elle garantie résoluble ?</div><div class="faq-a">Oui, et la solution est garantie unique. Les grilles de cette version sont générées en construisant d'abord une solution complète, puis en retirant des chiffres pour créer les indices ; un algorithme de résolution vérifie au fur et à mesure que les indices restants correspondent toujours à une seule solution avant que la grille ne soit finalisée, donc vous ne tomberez jamais sur une grille impossible ou ambiguë.</div></div>
+  <div class="faq-item"><div class="faq-q">Comment la difficulté est-elle classée ?</div><div class="faq-a">La difficulté est principalement classée selon le nombre d'indices de départ (chiffres donnés) qui restent sur la grille — plus d'indices est généralement plus facile, moins d'indices demande généralement une déduction plus complexe. C'est une estimation simplifiée, pas une classification complète par techniques de résolution (elle ne distingue pas spécifiquement, par exemple, les grilles nécessitant une technique avancée comme un XY-Wing), mais elle suffit à produire une courbe claire et progressive de Facile à Expert.</div></div>
+  <div class="faq-item"><div class="faq-q">La difficulté continue-t-elle d'augmenter indéfiniment ?</div><div class="faq-a">Oui. Après avoir terminé la première grille (Facile), la suivante se charge automatiquement, avec la progression Facile → Moyen → Difficile → Expert, puis reste sur Expert par la suite — le nombre d'indices ne continue pas à baisser au point de rendre les grilles instables, ce qui permet à la courbe de monter tout en gardant chaque grille résoluble de façon fiable.</div></div>
+  <div class="faq-item"><div class="faq-q">À quoi sert le bouton Indice ?</div><div class="faq-a">Toucher « Indice » remplit automatiquement une case correcte à votre place, au prix de quelques points. Cette case est ensuite marquée d'une couleur différente pour que vous puissiez la distinguer des chiffres que vous avez saisis vous-même.</div></div>
+  </section>
+
+  <div class="more-tools"><h3>Jeux similaires</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/fr/2048.html">2048</a>
+    <a class="tool-pill" href="/games/fr/minesweeper.html">Démineur</a>
+    <a class="tool-pill" href="/games/fr/chess.html">Échecs</a>
+    <a class="tool-pill" href="/games/fr/snake.html">Jeu du Serpent</a>
+    <a class="tool-pill" href="/games/fr/piano-tiles.html">Piano Tiles</a>
+    <a class="tool-pill" href="/games/fr/">Plus de jeux</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+<div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Plus de jeux</h3><a class="tool-pill" href="/games/fr/" style="display:block;margin-top:8px">Voir tous les jeux →</a></div>
+<div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">À propos</a><a href="/contact.html">Contact</a><a href="/home/fr/privacy.html">Confidentialité</a><a href="/home/fr/terms.html">Conditions</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<!-- Language pack for this page. Game logic lives in /games/shared/sudoku.js and is -->
+<!-- shared by all 10 locales; it contains no user-facing text, only lookups into these dicts. -->
+<script>
+window.GAME_I18N = {"clearCell": "Effacer cette case", "puzzleDone": "🎉 Grille n° {n} terminée !", "nextUp": "Temps : {t}, {g} points gagnés — à suivre : {d}", "scoreShort": "{s} pts", "restartRound": "🔄 Recommencer", "shareWithScore": "J'ai obtenu {s} points au Sudoku sur SoftGlow ! Jusqu'où peux-tu aller ?", "shareNoScore": "Viens jouer au Sudoku sur SoftGlow !", "copied": "Copié !", "difficulties": ["Facile", "Moyen", "Difficile", "Expert"], "ratings": ["🧩 Vous débutez — encore quelques grilles et ça viendra tout seul", "🙂 Solide — vous avez trouvé le rythme de la logique", "👍 Bon score — les grilles difficiles ne vous font plus peur", "🏆 Niveau expert — vous résolvez les grilles Expert en toute confiance", "⚡ Maître du Sudoku — cette difficulté est un jeu d'enfant pour vous !"]};
+window.GA_LANG_PACK = {"loginToRank": "Connectez-vous pour inscrire votre score au classement 🏆", "newRecord": "🎉 Nouveau record personnel ! Vous êtes {r}e", "submitted": "Score enregistré — vous êtes {r}e", "emptyBoard": "Aucun score pour l'instant. Connectez-vous et prenez la première place !", "loadingBoard": "Chargement du classement…", "googleFail": "Échec de la connexion Google", "connFail": "Échec de la connexion, veuillez réessayer plus tard", "loginOk": "Connecté !", "logoutOk": "Déconnecté", "lineLoginOk": "Connecté avec LINE !", "lineLoginFail": "Échec de la connexion LINE, veuillez réessayer", "logoutBtn": "Se déconnecter", "loadingName": "Chargement…", "player": "Joueur", "loginTip": "Connectez-vous pour enregistrer vos scores et vous comparer à vos amis !", "lineBtn": "💬 Se connecter avec LINE", "fsEnter": "⛶ Plein écran", "fsExit": "✕ Quitter le plein écran", "fsAria": "Afficher le jeu en plein écran", "fsUnsupported": "Ce navigateur ne prend pas en charge le plein écran", "reminderTitle": "Connectez-vous pour enregistrer votre score de {game} au classement", "reminderSub": "Vous pouvez jouer sans vous connecter, mais votre score ne sera pas enregistré", "reminderSkip": "Non merci, je veux juste jouer", "reminderClose": "Fermer", "badge": "🔒 Connectez-vous pour être classé", "thisGame": "ce jeu", "gameNames": {"sudoku": "Sudoku"}, "scoreUnit": {"sudoku": " pts"}};
+</script>
+<script src="/games/shared/sudoku.js"></script>
+
+<script>
+(function(){var AD_DELAY_MS=2000;setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},AD_DELAY_MS);})();
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Rechercher outils, figures, articles…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Mes favoris</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Tout effacer</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/games/games-auth.js"></script>
+<script>
+gaMountAuthWidget('gaWidget');
+gaMountLeaderboard('gaLeaderboard', 'sudoku');
+gaInitFullscreenToggle();
+gaInitLoginReminder('sudoku');
+</script>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

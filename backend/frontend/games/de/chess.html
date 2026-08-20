@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schach - Kostenloses Online-Schach für 1 oder 2 Spieler | SoftGlow</title>
+<meta name="description" content="Spiele Schach kostenlos online — lokal zu zweit (abwechselnd an einem Gerät) oder allein gegen eine KI mit 3 Schwierigkeitsstufen. Vollständige Regeln inklusive Rochade, En-passant, Bauernumwandlung und Schach-/Mattprüfung. Kein Download nötig.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/de/chess.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/chess.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/games/en/chess.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/games/de/chess.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/games/es/chess.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/games/fr/chess.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/games/id/chess.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/games/ja/chess.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/games/ko/chess.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/games/pt/chess.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/games/zh-CN/chess.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/en/chess.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Schachspiel", "url": "https://softglow-ai.com/games/de/chess.html", "description": "Kostenloses Online-Schach mit lokalem Zweispieler-Modus und Einzelspieler gegen KI (3 Schwierigkeitsstufen). Vollständige Regeln inklusive Rochade, En-passant und Bauernumwandlung.", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "de"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Welche Modi bietet dieses Schachspiel?", "acceptedAnswer": {"@type": "Answer", "text": "Zwei Modi: lokales Zweispieler-Spiel (zwei Personen wechseln sich am selben Gerät ab, ideal von Angesicht zu Angesicht) und Einzelspieler gegen die eingebaute KI mit den Stufen Leicht, Mittel und Schwer."}}, {"@type": "Question", "name": "Sind die Regeln vollständig — Rochade, En-passant und so weiter?", "acceptedAnswer": {"@type": "Answer", "text": "Ja. Die Korrektheit der Zuggenerierung wurde mit Perft geprüft, der Standardmethode der Schachprogrammierung (Abgleich mit bekannten Knotenzahlen bei Standard-Testpositionen). Rochade (beidseitig), En-passant, Bauernumwandlung in Dame/Turm/Läufer/Springer sowie Schach-/Matt-/Pattprüfung sind vollständig implementiert."}}, {"@type": "Question", "name": "Ist der Computergegner schwer zu schlagen?", "acceptedAnswer": {"@type": "Answer", "text": "Es gibt drei Schwierigkeitsstufen: Leicht schaut nur einen Zug voraus und lässt sich gut handhaben, Mittel schaut drei Züge voraus, und Schwer sucht bis zu fünf Züge tief innerhalb eines Zeitlimits und spielt merklich strukturierter. Trotzdem bleibt es eine schlanke Browser-KI (Figurenwert-plus-Positionsbewertung mit Minimax-Suche), keine professionelle Schach-Engine — ihre Stärke liegt zwischen Anfänger und fortgeschrittenem Amateur, völlig ausreichend zum Üben und für den Spaß."}}, {"@type": "Question", "name": "Kann ich einen Zug zurücknehmen?", "acceptedAnswer": {"@type": "Answer", "text": "Ja — der Zurück-Button macht einen Zug rückgängig. Im Modus gegen den Computer werden Computerzug und eigener Zug mit einem Klick zusammen zurückgenommen, sodass man wieder am Zug ist und den Fehler noch mal überdenken kann."}}, {"@type": "Question", "name": "Muss ich etwas herunterladen oder ein Konto anlegen?", "acceptedAnswer": {"@type": "Answer", "text": "Nein — einfach die Seite öffnen und losspielen. Kein Download, keine Installation und kein Konto nötig, weder für den Zweispieler- noch für den Computer-Modus, sodass jederzeit spontan eine Partie möglich ist."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="chess">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="de">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+.ch-topbar{display:flex;justify-content:center;align-items:center;gap:14px;margin-bottom:16px;font-size:14px;font-weight:700;color:#1e3a5f;flex-wrap:wrap}
+.ch-turn-badge{background:linear-gradient(135deg,#334155,#0f172a);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800}
+.ch-check-badge{background:linear-gradient(135deg,#dc2626,#f97316);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800;display:none}
+.ch-check-badge.show{display:inline-block}
+.ch-mode-select{max-width:420px;margin:0 auto;text-align:center}
+.ch-mode-btn{display:block;width:100%;box-sizing:border-box;background:#fff;border:2px solid var(--game-border);border-radius:14px;padding:16px;margin-bottom:12px;cursor:pointer;text-align:left;font-family:inherit}
+.ch-mode-btn:hover{border-color:var(--game-primary)}
+.ch-mode-btn .ch-mode-title{font-size:16px;font-weight:800;color:#1e3a5f}
+.ch-mode-btn .ch-mode-desc{font-size:12.5px;color:#94a3b8;margin-top:3px}
+.ch-diff-row{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.ch-diff-row button{padding:8px 18px;border-radius:20px;border:2px solid var(--game-border);background:#fff;font-weight:700;font-size:13px;color:#1e3a5f;cursor:pointer}
+.ch-diff-row button.active{background:var(--game-primary);border-color:var(--game-primary);color:#fff}
+.ch-board-wrap{display:none}
+.ch-board-wrap.show{display:block}
+.ch-board{position:relative;width:100%;max-width:420px;aspect-ratio:1/1;margin:0 auto;border-radius:8px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.15);touch-action:none}
+.ch-grid{position:relative;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);width:100%;height:100%}
+.ch-sq{position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.ch-sq.light{background:#f0d9b5}
+.ch-sq.dark{background:#b58863}
+.ch-sq.selected{outline:3px solid #facc15;outline-offset:-3px}
+.ch-sq.last-move{background-color:#cdd26a}
+.ch-sq.in-check{background-color:#ef4444}
+.ch-piece{font-size:clamp(22px,7vw,42px);line-height:1;user-select:none;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
+.ch-piece.white{color:#fff}
+.ch-piece.black{color:#1e293b}
+.ch-dot{position:absolute;width:26%;height:26%;border-radius:50%;background:rgba(30,41,59,.35);pointer-events:none}
+.ch-dot.capture{width:88%;height:88%;background:transparent;border:4px solid rgba(220,38,38,.55);box-sizing:border-box;border-radius:50%}
+.ch-promo{position:absolute;inset:0;background:rgba(15,23,42,.82);display:none;align-items:center;justify-content:center;gap:10px;z-index:5}
+.ch-promo.show{display:flex}
+.ch-promo button{font-size:32px;background:#fff;border:none;border-radius:8px;width:56px;height:56px;cursor:pointer}
+.ch-overlay{position:absolute;inset:0;background:rgba(255,255,255,.94);border-radius:8px;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px;z-index:6}
+.ch-overlay.show{display:flex}
+.ch-overlay .ch-over-title{font-size:20px;font-weight:800;color:#1e3a5f;margin-bottom:8px}
+.ch-overlay .ch-over-sub{font-size:13px;color:#64748b;margin-bottom:14px}
+.ch-thinking{text-align:center;font-size:13px;color:#94a3b8;margin-top:8px;min-height:18px}
+.ch-record{display:flex;justify-content:center;gap:14px;margin-top:10px;font-size:13px;color:#475569}
+.ch-movelist{max-height:120px;overflow-y:auto;background:var(--game-bg);border-radius:10px;padding:10px 14px;margin-top:14px;font-size:12.5px;color:#475569;line-height:1.8}
+@media(max-width:480px){.ch-topbar{font-size:12px;gap:8px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/de/">Werkzeuge</a>
+    <a href="/games/de/">Spiele</a>
+    <a href="/patterns/de.html">Chartmuster</a>
+    <a href="/blog/de/index.html">Blog</a>
+    <a href="/">Startseite</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/games/chess.html">繁中</option><option value="/games/en/chess.html">EN</option><option value="/games/ja/chess.html">日本語</option><option value="/games/ko/chess.html">한국어</option><option value="/games/de/chess.html" selected>DE</option><option value="/games/fr/chess.html">FR</option><option value="/games/es/chess.html">ES</option><option value="/games/pt/chess.html">PT</option><option value="/games/id/chess.html">ID</option><option value="/games/zh-CN/chess.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Startseite</a> &gt; <a href="/games/de/">Spiele</a> &gt; Schach</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>Schachspiel</h1>
+    <p class="game-subtitle">Spiele lokal gegen einen Freund oder fordere die eingebaute KI in 3 Schwierigkeitsstufen heraus — mit vollständigen Regeln inklusive Rochade, En-passant und Bauernumwandlung.</p>
+
+    <div class="ch-mode-select" id="chModeSelect">
+      <button class="ch-mode-btn" onclick="chChooseMode('pvp')">
+        <div class="ch-mode-title">👥 Zwei Spieler</div>
+        <div class="ch-mode-desc">Abwechselnd am selben Gerät spielen — ideal von Angesicht zu Angesicht</div>
+      </button>
+      <button class="ch-mode-btn" onclick="chChooseMode('pve')">
+        <div class="ch-mode-title">🤖 Gegen den Computer</div>
+        <div class="ch-mode-desc">Fordere die eingebaute KI in Leicht, Mittel oder Schwer heraus</div>
+      </button>
+      <div class="ch-diff-row" id="chDiffRow" style="display:none">
+        <button data-diff="easy" onclick="chSetDifficulty('easy')">Leicht</button>
+        <button data-diff="medium" onclick="chSetDifficulty('medium')">Mittel</button>
+        <button data-diff="hard" onclick="chSetDifficulty('hard')">Schwer</button>
+      </div>
+    </div>
+
+    <div class="ch-board-wrap" id="chBoardWrap">
+      <div class="ch-topbar">
+        <span class="ch-turn-badge" id="chTurnBadge"></span>
+        <span class="ch-check-badge" id="chCheckBadge">Schach!</span>
+      </div>
+      <div class="ch-board" id="chBoard">
+        <div class="ch-grid" id="chGrid"></div>
+        <div class="ch-promo" id="chPromo"></div>
+        <div class="ch-overlay" id="chOverlay">
+          <div class="ch-over-title" id="chOverTitle"></div>
+          <div class="ch-over-sub" id="chOverSub"></div>
+          <button class="game-btn" onclick="chBackToMenu()">🔄 Nochmal spielen</button>
+        </div>
+      </div>
+      <div class="ch-thinking" id="chThinking"></div>
+      <div class="ch-record"><span>Siege: <span id="chWins">0</span></span><span>Niederlagen: <span id="chLosses">0</span></span><span>Remis: <span id="chDraws">0</span></span></div>
+
+      <div class="game-controls">
+        <button class="game-btn secondary" onclick="chUndo()">↩️ Zug zurücknehmen</button>
+        <button class="game-btn secondary" onclick="chBackToMenu()">🏳️ Partie beenden</button>
+        <button class="game-btn secondary" onclick="chShareResult()">📤 Teilen</button>
+      </div>
+      <div class="ch-movelist" id="chMoveList"></div>
+    </div>
+
+
+  </div>
+
+<div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>Über dieses Schachspiel</h2><p>Dies ist ein Schachspiel mit vollständigen Regeln: Bauern-Doppelschritt, En-passant, Rochade (kurz und lang), Bauernumwandlung auf der letzten Reihe in Dame, Turm, Läufer oder Springer sowie Schach-, Matt- und Pattprüfung. Die Korrektheit der Zuggenerierung wurde mit Perft verifiziert — der in der Schachprogrammierung anerkannten Standardmethode zum Zählen von Knoten —, sodass keine legalen Züge fehlen oder doppelt gezählt werden.</p><h2>Zwei Spieler vs. gegen den Computer</h2><p>Im Zweispieler-Modus spielen zwei Personen abwechselnd am selben Gerät, ganz ohne Internetverbindung oder Konto — ideal für Partien von Angesicht zu Angesicht. Der Einzelspieler-Modus bringt eine eingebaute KI mit, die Figurenwert-plus-Positionstabellen mit Minimax-Suche und Alpha-Beta-Pruning kombiniert, in den Stufen Leicht, Mittel und Schwer; auf Schwer sucht sie innerhalb des Zeitbudgets so tief wie möglich.</p></article>
+
+<div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article"><h2>So wird gespielt</h2><p>Klicke die Figur an, die du ziehen möchtest — legale Zielfelder werden mit kleinen Punkten markiert (Schlagfelder mit einem roten Ring), dann klicke das Zielfeld an, um den Zug abzuschließen. Erreicht ein Bauer die letzte Reihe, öffnet sich ein Umwandlungsmenü zur Wahl von Dame, Turm, Läufer oder Springer. Steht man im Schach, wird das deutlich angezeigt, und es sind nur noch Züge erlaubt, die das Schach aufheben. Der Zurück-Button macht einen Zug rückgängig; im Modus gegen den Computer werden Computer- und eigener Zug zusammen zurückgenommen, damit man wieder am Zug ist.</p><h2>Die richtige Schwierigkeit wählen</h2><p>Schach-Neulinge sollten mit Leicht starten, um Grundregeln und Zugarten kennenzulernen. Mittel schaut drei Züge voraus, sodass grundlegende Taktik schon eine Rolle spielt. Schwer sucht bis zu fünf Züge tief innerhalb eines Zeitlimits und spielt spürbar strukturierter — bleibt aber eine schlanke Browser-KI, keine professionelle Engine. Ziel ist eine faire Herausforderung für Gelegenheitsspieler, kein unbesiegbarer Gegner.</p></article>
+
+<div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>Häufig gestellte Fragen</h2>
+  <div class="faq-item"><div class="faq-q">Welche Modi bietet dieses Schachspiel?</div><div class="faq-a">Zwei Modi: lokales Zweispieler-Spiel (zwei Personen wechseln sich am selben Gerät ab, ideal von Angesicht zu Angesicht) und Einzelspieler gegen die eingebaute KI mit den Stufen Leicht, Mittel und Schwer.</div></div>
+  <div class="faq-item"><div class="faq-q">Sind die Regeln vollständig — Rochade, En-passant und so weiter?</div><div class="faq-a">Ja. Die Korrektheit der Zuggenerierung wurde mit Perft geprüft, der Standardmethode der Schachprogrammierung (Abgleich mit bekannten Knotenzahlen bei Standard-Testpositionen). Rochade (beidseitig), En-passant, Bauernumwandlung in Dame/Turm/Läufer/Springer sowie Schach-/Matt-/Pattprüfung sind vollständig implementiert.</div></div>
+  <div class="faq-item"><div class="faq-q">Ist der Computergegner schwer zu schlagen?</div><div class="faq-a">Es gibt drei Schwierigkeitsstufen: Leicht schaut nur einen Zug voraus und lässt sich gut handhaben, Mittel schaut drei Züge voraus, und Schwer sucht bis zu fünf Züge tief innerhalb eines Zeitlimits und spielt merklich strukturierter. Trotzdem bleibt es eine schlanke Browser-KI (Figurenwert-plus-Positionsbewertung mit Minimax-Suche), keine professionelle Schach-Engine — ihre Stärke liegt zwischen Anfänger und fortgeschrittenem Amateur, völlig ausreichend zum Üben und für den Spaß.</div></div>
+  <div class="faq-item"><div class="faq-q">Kann ich einen Zug zurücknehmen?</div><div class="faq-a">Ja — der Zurück-Button macht einen Zug rückgängig. Im Modus gegen den Computer werden Computerzug und eigener Zug mit einem Klick zusammen zurückgenommen, sodass man wieder am Zug ist und den Fehler noch mal überdenken kann.</div></div>
+  <div class="faq-item"><div class="faq-q">Muss ich etwas herunterladen oder ein Konto anlegen?</div><div class="faq-a">Nein — einfach die Seite öffnen und losspielen. Kein Download, keine Installation und kein Konto nötig, weder für den Zweispieler- noch für den Computer-Modus, sodass jederzeit spontan eine Partie möglich ist.</div></div>
+  </section>
+
+  <div class="more-tools"><h3>Ähnliche Spiele</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/de/2048.html">2048</a>
+    <a class="tool-pill" href="/games/de/sudoku.html">Sudoku</a>
+    <a class="tool-pill" href="/games/de/minesweeper.html">Minesweeper</a>
+    <a class="tool-pill" href="/games/de/snake.html">Snake-Spiel</a>
+    <a class="tool-pill" href="/games/de/piano-tiles.html">Piano Tiles</a>
+    <a class="tool-pill" href="/games/de/">Weitere Spiele</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+<div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Weitere Spiele</h3><a class="tool-pill" href="/games/de/" style="display:block;margin-top:8px">Alle Spiele ansehen →</a></div>
+<div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">Über uns</a><a href="/contact.html">Kontakt</a><a href="/home/de/privacy.html">Datenschutz</a><a href="/home/de/terms.html">AGB</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<!-- Language pack for this page. Game logic lives in /games/shared/chess.js and is -->
+<!-- shared by all 10 locales; it contains no user-facing text, only lookups into these dicts. -->
+<script>
+window.GAME_I18N = {"turnOf": "{side} am Zug", "sideWhite": "Weiß", "sideBlack": "Schwarz", "aiThinking": "🤖 Computer denkt nach…", "checkmateTitle": "👑 Schachmatt! {side} gewinnt", "checkmateSubWin": "Glückwunsch — du hast den Computer besiegt!", "checkmateSubLose": "Vom Computer schachmatt gesetzt — versuch's noch mal!", "checkmateSubPvp": "Platz tauschen und sehen, wer zuerst das Matt findet!", "stalemateTitle": "🤝 Patt", "stalemateSub": "Die Partei am Zug hat keinen legalen Zug, steht aber nicht im Schach — das Spiel endet remis.", "insufficientTitle": "🤝 Remis", "insufficientSub": "Keine Seite hat noch genug Material für ein Matt — das Spiel endet remis.", "fiftyTitle": "🤝 Remis nach 50-Züge-Regel", "fiftySub": "50 Züge ohne Schlagfall oder Bauernzug — das Spiel endet nach der Regel remis.", "shareText": "Ich spiele Schach auf SoftGlow — glaubst du, du kannst mich schlagen?", "copied": "Kopiert!"};
+window.GA_LANG_PACK = {"loginToRank": "Melde dich an, um dein Ergebnis in die Bestenliste einzutragen 🏆", "newRecord": "🎉 Neue persönliche Bestleistung! Du bist auf Platz {r}", "submitted": "Ergebnis eingetragen — du bist auf Platz {r}", "emptyBoard": "Noch keine Ergebnisse. Melde dich an und sichere dir den ersten Platz!", "loadingBoard": "Bestenliste wird geladen…", "googleFail": "Google-Anmeldung fehlgeschlagen", "connFail": "Verbindung fehlgeschlagen, bitte später erneut versuchen", "loginOk": "Angemeldet!", "logoutOk": "Abgemeldet", "lineLoginOk": "Mit LINE angemeldet!", "lineLoginFail": "LINE-Anmeldung fehlgeschlagen, bitte erneut versuchen", "logoutBtn": "Abmelden", "loadingName": "Wird geladen…", "player": "Spieler", "loginTip": "Melde dich an, um Ergebnisse zu speichern und dich mit Freunden zu messen!", "lineBtn": "💬 Mit LINE anmelden", "fsEnter": "⛶ Vollbild", "fsExit": "✕ Vollbild beenden", "fsAria": "Spiel im Vollbild anzeigen", "fsUnsupported": "Dieser Browser unterstützt kein Vollbild", "reminderTitle": "Melde dich an, um dein {game}-Ergebnis in die Bestenliste einzutragen", "reminderSub": "Du kannst auch ohne Anmeldung spielen — dein Ergebnis wird dann nur nicht gespeichert", "reminderSkip": "Nein danke, einfach spielen", "reminderClose": "Schließen", "badge": "🔒 Anmelden für Bestenliste", "thisGame": "dieses Spiel", "gameNames": {"chess": "Schach"}};
+</script>
+<script src="/games/shared/chess.js"></script>
+
+<script>
+(function(){var AD_DELAY_MS=2000;setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},AD_DELAY_MS);})();
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Werkzeuge, Muster, Artikel suchen…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Meine Favoriten</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Alle löschen</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/games/games-auth.js"></script>
+<script>
+gaInitFullscreenToggle();
+</script>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

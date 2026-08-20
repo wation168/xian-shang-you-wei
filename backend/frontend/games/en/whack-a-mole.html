@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Whack-a-Mole - Free Online Reaction & Hand-Eye Coordination Game | SoftGlow</title>
+<meta name="description" content="Play Whack-a-Mole free online — whack as many moles as you can in 30 seconds. A pure browser game with no download needed, testing your reaction speed and hand-eye coordination.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/en/whack-a-mole.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/whack-a-mole.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/games/en/whack-a-mole.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/games/de/whack-a-mole.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/games/es/whack-a-mole.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/games/fr/whack-a-mole.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/games/id/whack-a-mole.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/games/ja/whack-a-mole.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/games/ko/whack-a-mole.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/games/pt/whack-a-mole.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/games/zh-CN/whack-a-mole.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/en/whack-a-mole.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Whack-a-Mole", "url": "https://softglow-ai.com/games/en/whack-a-mole.html", "description": "Free online Whack-a-Mole — whack as many moles as you can in 30 seconds.", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you play Whack-a-Mole?", "acceptedAnswer": {"@type": "Answer", "text": "After pressing Start, moles pop up randomly from the 9 holes — click one as soon as you see it to score. Moles only stay up for a short moment before ducking back down, so react too slowly and you'll miss. The game runs for 30 seconds and ends automatically, showing your total score."}}, {"@type": "Question", "name": "What skills does this game train?", "acceptedAnswer": {"@type": "Answer", "text": "Whack-a-Mole mainly trains visual search speed, reaction time, and hand-eye coordination — once your eyes spot the target, your hand (mouse or touch) has to move quickly and accurately click the right spot. Unlike a pure reaction-time test, it adds the extra steps of targeting and movement."}}, {"@type": "Question", "name": "Why doesn't a click sometimes score even though I clearly hit a mole?", "acceptedAnswer": {"@type": "Answer", "text": "Moles only stay up for a very short time — if the mole has already ducked back down by the moment you click (even if the animation isn't fully finished on screen), it won't count. This is intentional, to prevent players from gaming the score by clicking wildly all over the screen."}}, {"@type": "Question", "name": "Is there a way to make the moles appear faster and more often?", "acceptedAnswer": {"@type": "Answer", "text": "Yes — once your score crosses certain thresholds, the difficulty automatically levels up: moles stay up for less time, appear more frequently, and more can be active at once. Leveling up also adds bonus seconds to the clock, letting you keep pushing for a higher score."}}, {"@type": "Question", "name": "What score counts as being good at this?", "acceptedAnswer": {"@type": "Answer", "text": "Most people can whack around 15-25 moles in 30 seconds. Scoring above 30 is quite fast reflexes, and over 35 means genuinely sharp speed and reaction time. Try a few rounds and aim to beat your own best score."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="whack-a-mole">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="en">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+.wam-board{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;max-width:420px;margin:0 auto;cursor:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='34' height='34'><text y='27' font-size='28'>%F0%9F%94%A8</text></svg>") 2 28,pointer}
+.wam-hole{position:relative;aspect-ratio:1/1;border-radius:50%;background:#8b5e34;box-shadow:inset 0 6px 10px rgba(0,0,0,.35);overflow:hidden;cursor:pointer;user-select:none;touch-action:manipulation}
+.wam-hole .wam-mole{position:absolute;left:10%;right:10%;bottom:-100%;top:10%;border-radius:50% 50% 45% 45%;background:#6b4a2f;transition:bottom .12s ease-out;display:flex;align-items:center;justify-content:center;font-size:28px}
+.wam-hole.up .wam-mole{bottom:0}
+.wam-topbar{display:flex;justify-content:center;align-items:center;gap:18px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f;flex-wrap:wrap;position:relative}
+.wam-topbar .wam-time{color:#ef4444;transition:transform .25s}
+.wam-topbar .wam-time.wam-bonus{animation:wamTimeBonus .6s ease}
+@keyframes wamTimeBonus{0%{transform:scale(1);color:#ef4444}40%{transform:scale(1.3);color:#16a34a}100%{transform:scale(1);color:#ef4444}}
+.wam-level-badge{background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800;transition:transform .3s}
+.wam-level-badge.wam-level-up{animation:wamLevelUp .5s ease}
+@keyframes wamLevelUp{0%{transform:scale(1)}40%{transform:scale(1.35);box-shadow:0 0 14px rgba(59,130,246,.8)}100%{transform:scale(1)}}
+.wam-toast{position:absolute;top:-26px;left:50%;transform:translateX(-50%);background:#16a34a;color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:12px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .3s,top .3s}
+.wam-toast.show{opacity:1;top:-38px}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/en/">Tools</a>
+    <a href="/games/en/">Games</a>
+    <a href="/patterns/en.html">Patterns</a>
+    <a href="/blog/en/index.html">Blog</a>
+    <a href="/">Home</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/games/whack-a-mole.html">繁中</option><option value="/games/en/whack-a-mole.html" selected>EN</option><option value="/games/ja/whack-a-mole.html">日本語</option><option value="/games/ko/whack-a-mole.html">한국어</option><option value="/games/de/whack-a-mole.html">DE</option><option value="/games/fr/whack-a-mole.html">FR</option><option value="/games/es/whack-a-mole.html">ES</option><option value="/games/pt/whack-a-mole.html">PT</option><option value="/games/id/whack-a-mole.html">ID</option><option value="/games/zh-CN/whack-a-mole.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> &gt; <a href="/games/en/">Games</a> &gt; Whack-a-Mole</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>Whack-a-Mole</h1>
+    <p class="game-subtitle">Whack as many moles as you can in 30 seconds — a test of reaction speed and hand-eye coordination</p>
+
+    <div class="wam-topbar">
+      <span>Score: <span id="wamScore">0</span></span>
+      <span class="wam-time" id="wamTimeWrap">Time left: <span id="wamTime">30</span>s</span>
+      <span class="wam-level-badge" id="wamLevelBadge">Lv.1</span>
+      <span class="wam-toast" id="wamToast"></span>
+    </div>
+
+    <div class="wam-board" id="wamBoard"></div>
+
+    <div class="game-rating" id="wamRating"></div>
+
+    <div class="game-score-row">
+      <div class="game-score-tile"><div class="gs-label">Best Score</div><div class="gs-value" id="wamBest">—</div></div>
+    </div>
+    <div class="game-history" id="wamHistory"></div>
+
+    <div class="game-controls">
+      <button class="game-btn" id="wamStartBtn" onclick="wamStart()">▶️ Start Game</button>
+      <button class="game-btn secondary" onclick="wamShareResult()">📤 Share Score</button>
+    </div>
+
+
+    <div class="ga-widget" id="gaWidget"></div>
+    <div class="ga-leaderboard"><h3>🏆 Whack-a-Mole Leaderboard</h3><div id="gaLeaderboard"></div></div>
+  </div>
+
+<div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>Where Whack-a-Mole comes from</h2><p>Whack-a-Mole traces back to physical arcade cabinets from the 1970s, where players swung a mallet to hit mole toys popping randomly out of holes. The concept was later adapted into countless video games and mobile apps, and even became a common metaphor (“whack-a-mole management” describes problems that keep popping up — solve one and another appears). The online version swaps the mallet for a mouse click or a tap, but the core gameplay is exactly the same.</p><h2>What this game tests</h2><p>Whack-a-Mole looks simple, but it actually exercises several abilities at once: visual search (spotting a target quickly on screen), reaction time (how fast you act once you spot it), and hand-eye coordination (precisely moving your cursor or finger to the right spot to click). Compared to a pure reaction-time test, Whack-a-Mole adds the extra steps of spatial targeting and movement, which makes it closer to real-life situations that call for a fast response.</p></article>
+
+<div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article"><h2>How to play</h2><p>After tapping “Start Game,” moles pop up randomly from the 9 holes over 30 seconds — click one the moment you see it to score. Moles only stay up briefly, so react too slowly or click at the wrong moment and you'll miss. The game ends automatically when time runs out, showing your total score for that round, and it remembers your best score for this session.</p><h2>Tips for a better score</h2><p>Instead of staring at a single hole, keep your eyes near the center of the whole 3x3 grid and use your peripheral vision to catch movement all around it. Keep your cursor near the center of the screen to minimize travel distance; if you're on a touch device, using your index finger rather than your thumb usually gives you better accuracy.</p></article>
+
+<div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>Frequently Asked Questions</h2>
+  <div class="faq-item"><div class="faq-q">How do you play Whack-a-Mole?</div><div class="faq-a">After pressing Start, moles pop up randomly from the 9 holes — click one as soon as you see it to score. Moles only stay up for a short moment before ducking back down, so react too slowly and you'll miss. The game runs for 30 seconds and ends automatically, showing your total score.</div></div>
+  <div class="faq-item"><div class="faq-q">What skills does this game train?</div><div class="faq-a">Whack-a-Mole mainly trains visual search speed, reaction time, and hand-eye coordination — once your eyes spot the target, your hand (mouse or touch) has to move quickly and accurately click the right spot. Unlike a pure reaction-time test, it adds the extra steps of targeting and movement.</div></div>
+  <div class="faq-item"><div class="faq-q">Why doesn't a click sometimes score even though I clearly hit a mole?</div><div class="faq-a">Moles only stay up for a very short time — if the mole has already ducked back down by the moment you click (even if the animation isn't fully finished on screen), it won't count. This is intentional, to prevent players from gaming the score by clicking wildly all over the screen.</div></div>
+  <div class="faq-item"><div class="faq-q">Is there a way to make the moles appear faster and more often?</div><div class="faq-a">Yes — once your score crosses certain thresholds, the difficulty automatically levels up: moles stay up for less time, appear more frequently, and more can be active at once. Leveling up also adds bonus seconds to the clock, letting you keep pushing for a higher score.</div></div>
+  <div class="faq-item"><div class="faq-q">What score counts as being good at this?</div><div class="faq-a">Most people can whack around 15-25 moles in 30 seconds. Scoring above 30 is quite fast reflexes, and over 35 means genuinely sharp speed and reaction time. Try a few rounds and aim to beat your own best score.</div></div>
+  </section>
+
+  <div class="more-tools"><h3>Related Games</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/en/2048.html">2048</a>
+    <a class="tool-pill" href="/games/en/sudoku.html">Sudoku</a>
+    <a class="tool-pill" href="/games/en/minesweeper.html">Minesweeper</a>
+    <a class="tool-pill" href="/games/en/chess.html">Chess</a>
+    <a class="tool-pill" href="/games/en/snake.html">Snake Game</a>
+    <a class="tool-pill" href="/games/en/">More Games</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+<div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>More Games</h3><a class="tool-pill" href="/games/en/" style="display:block;margin-top:8px">Browse all games →</a></div>
+<div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/home/en/privacy.html">Privacy</a><a href="/home/en/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<!-- Language pack for this page. Game logic lives in /games/shared/whack-a-mole.js and is -->
+<!-- shared by all 10 locales; it contains no user-facing text, only lookups into these dicts. -->
+<script>
+window.GAME_I18N = {"levelUpBonus": "🎉 Level up! +{n}s, difficulty increased", "levelUp": "🎉 Level up! Difficulty increased", "playingBtn": "Playing…", "playAgainBtn": "▶️ Play Again", "scoreShort": "{s} pts", "shareWithScore": "I scored {s} points on Whack-a-Mole at SoftGlow! Think you can beat that?", "shareNoScore": "Come play Whack-a-Mole!", "copied": "Copied!", "ratings": ["🐢 Take it slow — a few more rounds and your timing will click", "🙂 Middling — there's still room to improve", "👍 Nice reflexes — better than most players", "🏆 Expert level — great speed and reaction time", "⚡ Superhuman reflexes — you must've played the real arcade machine!"]};
+window.GA_LANG_PACK = {"loginToRank": "Sign in to put your score on the leaderboard 🏆", "newRecord": "🎉 New personal best! You're ranked #{r}", "submitted": "Score submitted — you're ranked #{r}", "emptyBoard": "No scores yet. Sign in and be the first to claim the top spot!", "loadingBoard": "Loading leaderboard…", "googleFail": "Google sign-in failed", "connFail": "Connection failed, please try again later", "loginOk": "Signed in!", "logoutOk": "Signed out", "lineLoginOk": "Signed in with LINE!", "lineLoginFail": "LINE sign-in failed, please try again", "logoutBtn": "Sign out", "loadingName": "Loading…", "player": "Player", "loginTip": "Sign in to save your scores and compare with friends!", "lineBtn": "💬 Sign in with LINE", "fsEnter": "⛶ Fullscreen", "fsExit": "✕ Exit fullscreen", "fsAria": "Expand game to fullscreen", "fsUnsupported": "This browser doesn't support fullscreen", "reminderTitle": "Sign in to save your {game} score to the leaderboard", "reminderSub": "You can keep playing without signing in — your score just won't be recorded", "reminderSkip": "No thanks, just play", "reminderClose": "Close", "badge": "🔒 Sign in to rank", "thisGame": "this game", "gameNames": {"whack-a-mole": "Whack-a-Mole"}, "scoreUnit": {"whack-a-mole": " pts"}};
+</script>
+<script src="/games/shared/whack-a-mole.js"></script>
+
+<script>
+(function(){var AD_DELAY_MS=2000;setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},AD_DELAY_MS);})();
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Search tools, patterns, articles…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>My Bookmarks</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Clear all</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/games/games-auth.js"></script>
+<script>
+gaMountAuthWidget('gaWidget');
+gaMountLeaderboard('gaLeaderboard', 'whack-a-mole');
+gaInitFullscreenToggle();
+gaInitLoginReminder('whack-a-mole');
+</script>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

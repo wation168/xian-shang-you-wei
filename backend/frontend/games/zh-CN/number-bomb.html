@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数字炸弹游戏 - 终极密码猜数字，免费在线小游戏 | SoftGlow</title>
+<meta name="description" content="免费在线数字炸弹游戏（终极密码），电脑说太大或太小，在拆弹次数用完前猜中正确数字。也有双人对战模式，轮流猜数字，猜中秘密数字的人就踩到炸弹。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/zh-CN/number-bomb.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/number-bomb.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/games/en/number-bomb.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/games/de/number-bomb.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/games/es/number-bomb.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/games/fr/number-bomb.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/games/id/number-bomb.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/games/ja/number-bomb.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/games/ko/number-bomb.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/games/pt/number-bomb.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/games/zh-CN/number-bomb.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/en/number-bomb.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "数字炸弹游戏", "url": "https://softglow-ai.com/games/zh-CN/number-bomb.html", "description": "免费在线数字炸弹游戏（终极密码猜数字），根据太大太小的提示缩小范围，在拆弹次数用完前猜中正确答案，也支持双人轮流对战模式。", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "数字炸弹（终极密码）怎么玩？", "acceptedAnswer": {"@type": "Answer", "text": "电脑会在指定范围内偷偷想一个数字，你输入一个猜测后，电脑会告诉你「太大了」或「太小了」，根据提示缩小范围再继续猜，目标是在猜测次数用完前猜中正确答案。次数用完还没猜中，炸弹就会爆炸，游戏结束。"}}, {"@type": "Question", "name": "猜测次数是怎么算出来的？公平吗？", "acceptedAnswer": {"@type": "Answer", "text": "次数是用最佳「二分搜索」策略（每次都猜当前范围正中间的数字）反推出来的最少次数，再多给2次缓冲空间。也就是说只要每次都往范围正中间猜，理论上一定猜得中、不会冤枉爆炸；这个公平性经过大量随机测试验证过。"}}, {"@type": "Question", "name": "范围会越玩越大吗？", "acceptedAnswer": {"@type": "Answer", "text": "会。从1~50开始，过关后依次升级到1~100、1~200、1~500、1~1000，之后维持在1~1000持续出题，范围越大猜测次数上限也会跟着增加，但整体难度是持续往上升级的。"}}, {"@type": "Question", "name": "双人对战模式规则是什么？", "acceptedAnswer": {"@type": "Answer", "text": "这是传统终极密码的经典玩法：系统偷偷想好一个数字（两位玩家都不知道），两位玩家轮流猜，每猜一次范围就会缩小一次，谁猜中那个秘密数字，谁就踩到炸弹算输，换手机或设备轮流猜即可。"}}, {"@type": "Question", "name": "分数是怎么计算的？", "acceptedAnswer": {"@type": "Answer", "text": "每关分数由两部分组成：基础分（依该关范围大小决定，范围越大基础分越高）加上效率奖励（猜测次数用得越少，奖励分数越高）。想拿高分除了要撑到范围更大的后面关卡，也要尽量用最少的猜测次数命中答案。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="number-bomb">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="zh-CN">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+.nb-tabs{display:flex;justify-content:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.nb-tab{background:#e2e8f0;color:#334155;border:none;border-radius:20px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s ease}
+.nb-tab.active{background:linear-gradient(135deg,#dc2626,#ea580c);color:#fff}
+.nb-panel{display:none}
+.nb-panel.active{display:block}
+.nb-topbar{display:flex;justify-content:center;align-items:center;gap:14px;margin-bottom:14px;font-size:14px;font-weight:700;color:#1e3a5f;flex-wrap:wrap}
+.nb-round-badge{background:linear-gradient(135deg,#dc2626,#ea580c);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800;transition:transform .3s}
+.nb-round-badge.nb-round-up{animation:nbRoundUp .5s ease}
+@keyframes nbRoundUp{0%{transform:scale(1)}40%{transform:scale(1.3);box-shadow:0 0 14px rgba(234,88,12,.8)}100%{transform:scale(1)}}
+.nb-stage{background:#1e293b;border-radius:14px;padding:20px;max-width:460px;margin:0 auto;position:relative}
+.nb-range-display{text-align:center;color:#e2e8f0;font-size:15px;font-weight:700;margin-bottom:12px}
+.nb-range-display .nb-range-num{color:#fbbf24;font-size:19px}
+.nb-fuse-wrap{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.nb-fuse-track{flex:1;height:14px;background:#334155;border-radius:8px;overflow:hidden}
+.nb-fuse-fill{height:100%;background:linear-gradient(90deg,#22c55e,#eab308,#dc2626);border-radius:8px;transition:width .3s ease}
+.nb-fuse-bomb{font-size:22px}
+.nb-fuse-text{text-align:center;color:#94a3b8;font-size:12px;margin-bottom:14px}
+.nb-guess-row{display:flex;justify-content:center;gap:8px;margin-bottom:12px}
+.nb-guess-row input{width:120px;padding:10px 12px;border-radius:10px;border:none;font-size:18px;text-align:center;font-weight:800}
+.nb-guess-row button{background:linear-gradient(135deg,#dc2626,#ea580c);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:15px;font-weight:800;cursor:pointer}
+.nb-guess-row button:disabled{opacity:.5;cursor:not-allowed}
+.nb-feedback{text-align:center;font-size:16px;font-weight:800;min-height:24px;margin-bottom:10px;color:#fbbf24}
+.nb-log{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-height:120px;overflow-y:auto}
+.nb-log-item{background:rgba(255,255,255,.08);color:#e2e8f0;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700}
+.nb-log-item.nb-log-hit{background:#16a34a}
+.nb-overlay{position:absolute;inset:8px;background:rgba(15,23,42,.96);border-radius:10px;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px}
+.nb-overlay.show{display:flex}
+.nb-overlay .nb-over-title{font-size:22px;font-weight:800;color:#fff;margin-bottom:8px}
+.nb-overlay .nb-over-sub{font-size:13px;color:#cbd5e1;margin-bottom:14px}
+.nb-hint{text-align:center;font-size:12px;color:#94a3b8;margin-top:10px}
+.nb-duel-setup{text-align:center}
+.nb-range-opts{display:flex;justify-content:center;gap:8px;margin:14px 0}
+.nb-range-opt{background:#e2e8f0;color:#334155;border:none;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer}
+.nb-range-opt.active{background:linear-gradient(135deg,#dc2626,#ea580c);color:#fff}
+.nb-turn-badge{text-align:center;font-size:17px;font-weight:800;margin-bottom:10px;padding:8px;border-radius:10px}
+.nb-turn-badge.nb-turn-a{background:#dbeafe;color:#1e40af}
+.nb-turn-badge.nb-turn-b{background:#fce7f3;color:#9d174d}
+@media(max-width:480px){.nb-topbar{font-size:12px;gap:8px}.nb-guess-row input{width:90px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/zh-CN/">工具</a>
+    <a href="/games/zh-CN/">游戏</a>
+    <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">教学文章</a>
+    <a href="/">首页</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/games/number-bomb.html">繁中</option><option value="/games/en/number-bomb.html">EN</option><option value="/games/ja/number-bomb.html">日本語</option><option value="/games/ko/number-bomb.html">한국어</option><option value="/games/de/number-bomb.html">DE</option><option value="/games/fr/number-bomb.html">FR</option><option value="/games/es/number-bomb.html">ES</option><option value="/games/pt/number-bomb.html">PT</option><option value="/games/id/number-bomb.html">ID</option><option value="/games/zh-CN/number-bomb.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">首页</a> &gt; <a href="/games/zh-CN/">游戏</a> &gt; 数字炸弹</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>数字炸弹游戏</h1>
+    <p class="game-subtitle">经典终极密码玩法：根据「太大了」「太小了」的提示缩小范围，在拆弹次数用完前猜中正确数字。也可以切换双人对战，轮流猜，猜中秘密数字的人就踩到炸弹。</p>
+
+    <div class="nb-tabs">
+      <button class="nb-tab active" id="nbTabSoloBtn" onclick="nbSwitchTab('solo')">💣 拆弹模式（单人）</button>
+      <button class="nb-tab" id="nbTabDuelBtn" onclick="nbSwitchTab('duel')">⚔️ 双人对战</button>
+    </div>
+
+    <!-- ══ 單人拆彈模式 ══ -->
+    <div class="nb-panel active" id="nbSoloPanel">
+      <div class="nb-topbar">
+        <span>总分：<span id="nbScore">0</span></span>
+        <span class="nb-round-badge" id="nbRoundBadge">第1关</span>
+      </div>
+
+      <div class="nb-stage" id="nbSoloStage">
+        <div class="nb-range-display">范围：<span class="nb-range-num" id="nbRangeMin">1</span> ~ <span class="nb-range-num" id="nbRangeMax">50</span></div>
+        <div class="nb-fuse-wrap">
+          <span class="nb-fuse-bomb">💣</span>
+          <div class="nb-fuse-track"><div class="nb-fuse-fill" id="nbFuseFill" style="width:100%"></div></div>
+        </div>
+        <div class="nb-fuse-text" id="nbFuseText">剩余猜测次数：8 / 8</div>
+        <div class="nb-feedback" id="nbFeedback">准备好了吗？点击开始游戏！</div>
+        <div class="nb-guess-row">
+          <input type="number" id="nbGuessInput" placeholder="输入数字" disabled>
+          <button id="nbGuessBtn" onclick="nbSubmitGuess()" disabled>💥 猜！</button>
+        </div>
+        <div class="nb-log" id="nbGuessLog"></div>
+        <div class="nb-overlay" id="nbOverlay">
+          <div class="nb-over-title" id="nbOverTitle">💣 准备好了吗？</div>
+          <div class="nb-over-sub" id="nbOverSub">从1~50开始，猜测次数用完前找出正确答案</div>
+        </div>
+      </div>
+      <div class="nb-hint">每次猜测后会提示「太大了」或「太小了」，善用二分法（每次猜范围正中间）最省次数</div>
+
+      <div class="game-rating" id="nbRating"></div>
+
+      <div class="game-score-row">
+        <div class="game-score-tile"><div class="gs-label">最佳成绩</div><div class="gs-value" id="nbBest">—</div></div>
+        <div class="game-score-tile"><div class="gs-label">最高关卡</div><div class="gs-value" id="nbBestRound">—</div></div>
+      </div>
+      <div class="game-history" id="nbHistory"></div>
+
+      <div class="game-controls">
+        <button class="game-btn" id="nbStartBtn" onclick="nbStart()">▶️ 开始游戏</button>
+        <button class="game-btn secondary" onclick="nbShareResult()">📤 分享成绩</button>
+      </div>
+    </div>
+
+    <!-- ══ 雙人對戰模式 ══ -->
+    <div class="nb-panel" id="nbDuelPanel">
+      <div class="nb-duel-setup" id="nbDuelSetup">
+        <p style="color:#64748b;font-size:14px;margin-bottom:6px">选择范围，系统会偷偷想一个数字（两位玩家都不知道），轮流猜，猜中的人就踩到炸弹算输。</p>
+        <div class="nb-range-opts" id="nbDuelRangeOpts"></div>
+        <button class="game-btn" onclick="nbDuelStart()">⚔️ 开始对战</button>
+      </div>
+      <div class="nb-stage" id="nbDuelStage" style="display:none">
+        <div class="nb-turn-badge nb-turn-a" id="nbTurnBadge">🔴 轮到玩家一</div>
+        <div class="nb-range-display">范围：<span class="nb-range-num" id="nbDuelMin">1</span> ~ <span class="nb-range-num" id="nbDuelMax">100</span></div>
+        <div class="nb-feedback" id="nbDuelFeedback">请猜一个数字</div>
+        <div class="nb-guess-row">
+          <input type="number" id="nbDuelInput" placeholder="输入数字">
+          <button id="nbDuelGuessBtn" onclick="nbDuelSubmitGuess()">💥 猜！</button>
+        </div>
+        <div class="nb-log" id="nbDuelLog"></div>
+        <div class="nb-overlay" id="nbDuelOverlay">
+          <div class="nb-over-title" id="nbDuelOverTitle">💥</div>
+          <div class="nb-over-sub" id="nbDuelOverSub"></div>
+        </div>
+      </div>
+      <div class="nb-hint">双人对战不计分、不上排行榜，单纯比谁不会踩到炸弹</div>
+      <div class="game-controls">
+        <button class="game-btn secondary" onclick="nbDuelReset()">🔄 重新设定</button>
+      </div>
+    </div>
+
+
+
+    <div class="ga-widget" id="gaWidget"></div>
+    <div class="ga-leaderboard"><h3>🏆 数字炸弹排行榜</h3><div id="gaLeaderboard"></div></div>
+  </div>
+
+<div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>数字炸弹（终极密码）的由来</h2><p>数字炸弹又叫「终极密码」，是校园跟聚会场合非常经典的猜数字游戏：一个人心里先想好一个数字，其他人轮流猜，每猜一次就会被告知「太大了」或「太小了」，范围会越缩越小，猜中秘密数字的人就算「踩到炸弹」。这个版本把它做成可以自己一个人拆弹挑战的模式，也保留了双人轮流对战的经典玩法。</p><h2>次数限制是怎么设计的</h2><p>拆弹模式的猜测次数不是随便订的，而是用「二分搜索」这个经典算法反推出来：只要每次都猜当前范围正中间的数字，范围1~50最多6次一定猜得中，1~1000最多10次一定猜得中，这个版本额外多给2次缓冲空间，让次数限制在够公平的前提下也保留一点刺激感。</p></article>
+
+<div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article"><h2>怎么玩</h2><p>拆弹模式：画面会显示目前的数字范围，输入一个猜测后按下「猜！」，系统会告诉你答案比你猜的数字大还是小，根据提示缩小范围再继续猜。猜测次数会显示成一条会燃烧变短的引信，次数用完还没猜中，炸弹就会爆炸，游戏结束并依照最终累积分数计算成绩。猜中的话会自动进入下一关，范围越玩越大，猜测次数上限也会跟着增加。双人对战模式：先选好范围后按下开始，系统会偷偷想好一个数字，两位玩家轮流猜（同一台设备轮流操作即可），每猜一次范围就会缩小一次，直到有人猜中为止，猜中的人就踩到炸弹算输。</p><h2>拿高分的技巧</h2><p>最有效率的策略是每次都猜「目前范围的正中间」，这样每猜一次都能把范围砍半，用最少次数逼近答案。分数会依范围大小（越大基础分越高）跟省下的猜测次数（每省一次额外加分）计算，想拿高分除了要撑到后面范围更大的关卡，也要尽量用最少次数猜中。</p></article>
+
+<div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>常见问题</h2>
+  <div class="faq-item"><div class="faq-q">数字炸弹（终极密码）怎么玩？</div><div class="faq-a">电脑会在指定范围内偷偷想一个数字，你输入一个猜测后，电脑会告诉你「太大了」或「太小了」，根据提示缩小范围再继续猜，目标是在猜测次数用完前猜中正确答案。次数用完还没猜中，炸弹就会爆炸，游戏结束。</div></div>
+  <div class="faq-item"><div class="faq-q">猜测次数是怎么算出来的？公平吗？</div><div class="faq-a">次数是用最佳「二分搜索」策略（每次都猜当前范围正中间的数字）反推出来的最少次数，再多给2次缓冲空间。也就是说只要每次都往范围正中间猜，理论上一定猜得中、不会冤枉爆炸；这个公平性经过大量随机测试验证过。</div></div>
+  <div class="faq-item"><div class="faq-q">范围会越玩越大吗？</div><div class="faq-a">会。从1~50开始，过关后依次升级到1~100、1~200、1~500、1~1000，之后维持在1~1000持续出题，范围越大猜测次数上限也会跟着增加，但整体难度是持续往上升级的。</div></div>
+  <div class="faq-item"><div class="faq-q">双人对战模式规则是什么？</div><div class="faq-a">这是传统终极密码的经典玩法：系统偷偷想好一个数字（两位玩家都不知道），两位玩家轮流猜，每猜一次范围就会缩小一次，谁猜中那个秘密数字，谁就踩到炸弹算输，换手机或设备轮流猜即可。</div></div>
+  <div class="faq-item"><div class="faq-q">分数是怎么计算的？</div><div class="faq-a">每关分数由两部分组成：基础分（依该关范围大小决定，范围越大基础分越高）加上效率奖励（猜测次数用得越少，奖励分数越高）。想拿高分除了要撑到范围更大的后面关卡，也要尽量用最少的猜测次数命中答案。</div></div>
+  </section>
+
+  <div class="more-tools"><h3>相关游戏</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/zh-CN/2048.html">2048</a>
+    <a class="tool-pill" href="/games/zh-CN/sudoku.html">数独</a>
+    <a class="tool-pill" href="/games/zh-CN/minesweeper.html">扫雷</a>
+    <a class="tool-pill" href="/games/zh-CN/chess.html">国际象棋</a>
+    <a class="tool-pill" href="/games/zh-CN/snake.html">贪吃蛇</a>
+    <a class="tool-pill" href="/games/zh-CN/">更多游戏</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+<div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>更多游戏</h3><a class="tool-pill" href="/games/zh-CN/" style="display:block;margin-top:8px">浏览全部游戏 →</a></div>
+<div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">关于</a><a href="/contact.html">联系我们</a><a href="/home/zh-CN/privacy.html">隐私政策</a><a href="/home/zh-CN/terms.html">使用条款</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<!-- Language pack for this page. Game logic lives in /games/shared/number-bomb.js and is -->
+<!-- shared by all 10 locales; it contains no user-facing text, only lookups into these dicts. -->
+<script>
+window.GAME_I18N = {"roundLabel": "第{n}关", "fuseText": "剩余猜测次数：{left} / {allowed}", "rangeReady": "范围 {min}~{max}，开始猜吧！", "invalidGuess": "请输入 {min}~{max} 之间的整数", "logHit": "{g} 命中！", "logHigher": "{g} ⬆️太小", "logLower": "{g} ⬇️太大", "scoreGainShort": "+{v}分", "hitFeedback": "🎉 猜中了！答案是 {s}，获得 {g} 分", "feedbackHigher": "太小了⬆️ 再猜大一点", "feedbackLower": "太大了⬇️ 再猜小一点", "explodeTitle": "💥 爆炸了！", "explodeSub": "第{n}关没能在次数内猜中（正确答案是 {s}），最终得分 {sc} 分", "restartChallengeBtn": "🔄 重新挑战", "scoreShort": "{v} 分", "shareWithScore": "我在SoftGlow数字炸弹游戏拿了 {s} 分！来试试你能拆到第几关？", "shareNoScore": "来玩玩SoftGlow数字炸弹游戏！", "copied": "已复制！", "duelRangeLabel": "1~{r}", "namePlayerA": "玩家一", "namePlayerB": "玩家二", "turnOf": "轮到{name}", "duelSecretReady": "系统已经偷偷想好一个 1~{r} 之间的数字", "duelLogEntry": "{name}:{g}", "duelLoseTitle": "💥 {name}踩到炸弹！", "duelWinSub": "{name}获胜！秘密数字就是 {s}", "duelFeedbackHigher": "太小了⬆️", "duelFeedbackLower": "太大了⬇️", "ratings": ["💣 刚开始拆弹，多练习二分搜索策略会更稳", "🙂 中等拆弹手，抓到缩小范围的节奏了", "👍 熟练拆弹手，大范围也难不倒你", "🏆 拆弹专家，千位数范围都能稳稳解开", "⚡ 拆弹大师，每次都用最少次数精准命中！"]};
+window.GA_LANG_PACK = {"loginToRank": "登录才能把成绩送上排行榜 🏆", "newRecord": "🎉 新纪录！目前排名第 {r} 名", "submitted": "已送上排行榜，目前排名第 {r} 名", "emptyBoard": "还没有人上榜，登录后第一个玩就能拿下第一名！", "loadingBoard": "载入排行榜中…", "googleFail": "Google 登录失败", "connFail": "连接失败，请稍后再试", "loginOk": "登录成功！", "logoutOk": "已登出", "lineLoginOk": "LINE登录成功！", "lineLoginFail": "LINE登录失败，请再试一次", "logoutBtn": "登出", "loadingName": "载入中…", "player": "玩家", "loginTip": "登录才能把成绩存上排行榜，跟朋友比分数！", "lineBtn": "💬 用LINE登录", "fsEnter": "⛶ 全屏", "fsExit": "✕ 退出全屏", "fsAria": "全屏放大游戏", "fsUnsupported": "这个浏览器不支持全屏", "reminderTitle": "登录才能把{game}成绩存上排行榜", "reminderSub": "不登录也能继续玩，只是分数不会被记录下来", "reminderSkip": "先不用，直接玩", "reminderClose": "关闭", "badge": "🔒 登录才能上榜", "thisGame": "这个游戏", "gameNames": {"number-bomb": "数字炸弹"}, "scoreUnit": {"number-bomb": "分"}};
+</script>
+<script src="/games/shared/number-bomb.js"></script>
+
+<script>
+(function(){var AD_DELAY_MS=2000;setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},AD_DELAY_MS);})();
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/games/games-auth.js"></script>
+<script>
+gaMountAuthWidget('gaWidget');
+gaMountLeaderboard('gaLeaderboard', 'number-bomb');
+gaInitFullscreenToggle();
+gaInitLoginReminder('number-bomb');
+</script>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snake Game - Play the Classic Snake Free Online | SoftGlow</title>
+<meta name="description" content="Play the classic Snake game free online. Steer with arrow keys or the on-screen pad, eat to grow longer, and avoid the walls and your own tail. No download needed.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/en/snake.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/snake.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/games/en/snake.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/games/de/snake.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/games/es/snake.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/games/fr/snake.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/games/id/snake.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/games/ja/snake.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/games/ko/snake.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/games/pt/snake.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/games/zh-CN/snake.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/en/snake.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Snake Game", "url": "https://softglow-ai.com/games/en/snake.html", "description": "Free online Snake game. Steer the snake to eat and grow; hitting a wall or your own body ends the run.", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you play Snake?", "acceptedAnswer": {"@type": "Answer", "text": "Steer the snake with the arrow keys or the on-screen direction pad. Eating food makes the snake one segment longer and scores a point. Hitting a wall or your own body ends the run, so the goal is to eat as much as possible without crashing into anything."}}, {"@type": "Question", "name": "Why does the snake keep speeding up?", "acceptedAnswer": {"@type": "Answer", "text": "Every piece of food you eat nudges the movement speed up a little. That's the classic Snake design: the snake gets longer and faster at the same time, so the challenge keeps rising instead of the game sitting at one difficulty and getting dull."}}, {"@type": "Question", "name": "How do I steer on a phone?", "acceptedAnswer": {"@type": "Answer", "text": "There's a D-pad below the board — just tap the direction you want to turn, no keyboard required. On desktop you can use the arrow keys (↑↓←→) instead, and you can switch between the two input methods at any time."}}, {"@type": "Question", "name": "Can I turn 180 degrees on the spot?", "acceptedAnswer": {"@type": "Answer", "text": "No. The snake can't reverse straight back on itself — pressing left while moving right does nothing. That's the standard Snake rule, and it mirrors the fact that a real snake can't instantly turn into its own body. The restriction is part of what makes the game strategic."}}, {"@type": "Question", "name": "Where did Snake come from?", "acceptedAnswer": {"@type": "Answer", "text": "The concept goes back to the 1976 arcade game Blockade. It went global in the 1990s when it shipped built into Nokia feature phones, becoming the first video game many people ever touched, and the simple, endlessly replayable formula has carried across to every platform since."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="snake">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="en">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+.sn-topbar{display:flex;justify-content:center;align-items:center;gap:18px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f;flex-wrap:wrap}
+.sn-level-badge{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800;transition:transform .3s}
+.sn-level-badge.sn-level-up{animation:snLevelUp .5s ease}
+@keyframes snLevelUp{0%{transform:scale(1)}40%{transform:scale(1.35);box-shadow:0 0 14px rgba(34,197,94,.8)}100%{transform:scale(1)}}
+.sn-board{display:grid;width:100%;max-width:360px;aspect-ratio:1/1;margin:0 auto;border-radius:16px;overflow:hidden;background:linear-gradient(160deg,#132a3a,#0c1e2b);box-shadow:0 10px 28px rgba(15,23,42,.35),inset 0 0 0 2px rgba(255,255,255,.06);touch-action:none}
+.sn-cell{background:transparent}
+.sn-cell.alt{background:rgba(255,255,255,.035)}
+.sn-cell.body{border-radius:7px;background:linear-gradient(135deg,#86efac,#16a34a);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.sn-cell.head{border-radius:8px 8px 6px 6px;background:linear-gradient(135deg,#bbf7d0,#22c55e);position:relative;box-shadow:0 0 10px rgba(34,197,94,.65);transition:transform .08s linear}
+.sn-cell.head::before,.sn-cell.head::after{content:'';position:absolute;width:15%;height:15%;background:#0f172a;border-radius:50%;top:24%}
+.sn-cell.head::before{left:18%}
+.sn-cell.head::after{right:18%}
+.sn-cell.food{display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;animation:snPulse 0.9s ease-in-out infinite}
+@keyframes snPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.22)}}
+@media(max-width:420px){.sn-cell.food{font-size:12px}}
+.sn-dpad{display:grid;grid-template-columns:repeat(3,50px);grid-template-rows:repeat(3,50px);gap:6px;justify-content:center;margin:20px auto 0}
+.sn-dpad button{border:none;border-radius:12px;background:linear-gradient(180deg,#ffffff,#e2e8f0);color:#334155;font-size:20px;font-weight:700;cursor:pointer;box-shadow:0 3px 0 #94a3b8,0 5px 10px rgba(0,0,0,.1);transition:transform .08s,box-shadow .08s}
+.sn-dpad button:active{transform:translateY(3px);box-shadow:0 0 0 #94a3b8}
+.sn-dpad .sn-up{grid-column:2;grid-row:1}
+.sn-dpad .sn-left{grid-column:1;grid-row:2}
+.sn-dpad .sn-right{grid-column:3;grid-row:2}
+.sn-dpad .sn-down{grid-column:2;grid-row:3}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/en/">Tools</a>
+    <a href="/games/en/">Games</a>
+    <a href="/patterns/en.html">Patterns</a>
+    <a href="/blog/en/index.html">Blog</a>
+    <a href="/">Home</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/games/snake.html">繁中</option><option value="/games/en/snake.html" selected>EN</option><option value="/games/ja/snake.html">日本語</option><option value="/games/ko/snake.html">한국어</option><option value="/games/de/snake.html">DE</option><option value="/games/fr/snake.html">FR</option><option value="/games/es/snake.html">ES</option><option value="/games/pt/snake.html">PT</option><option value="/games/id/snake.html">ID</option><option value="/games/zh-CN/snake.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> &gt; <a href="/games/en/">Games</a> &gt; Snake Game</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>Snake Game</h1>
+    <p class="game-subtitle">Eat to grow longer and faster — hit a wall or your own tail and it's over</p>
+
+    <div class="sn-topbar">
+      <span>Score: <span id="snScore">0</span></span>
+      <span class="sn-level-badge" id="snLevelBadge">Lv.1</span>
+    </div>
+
+    <div class="sn-board" id="snBoard"></div>
+
+    <div class="sn-dpad">
+      <button class="sn-up" onclick="snSetDir('up')" aria-label="Up">↑</button>
+      <button class="sn-left" onclick="snSetDir('left')" aria-label="Left">←</button>
+      <button class="sn-right" onclick="snSetDir('right')" aria-label="Right">→</button>
+      <button class="sn-down" onclick="snSetDir('down')" aria-label="Down">↓</button>
+    </div>
+
+    <div class="game-rating" id="snRating"></div>
+
+    <div class="game-score-row">
+      <div class="game-score-tile"><div class="gs-label">Best Run</div><div class="gs-value" id="snBest">—</div></div>
+    </div>
+    <div class="game-history" id="snHistory"></div>
+
+    <div class="game-controls">
+      <button class="game-btn" id="snStartBtn" onclick="snStart()">▶️ Start Game</button>
+      <button class="game-btn secondary" onclick="snShareResult()">📤 Share Score</button>
+    </div>
+
+
+    <div class="ga-widget" id="gaWidget"></div>
+    <div class="ga-leaderboard"><h3>🏆 Snake Game Leaderboard</h3><div id="gaLeaderboard"></div></div>
+  </div>
+
+<div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>A short history of Snake</h2><p>Snake traces back to the 1976 arcade game Blockade, but what turned it into a global phenomenon was the version Nokia started shipping on its feature phones in 1997. Almost every Nokia handset of that era had it built in, making Snake the first video game millions of people ever played. The rules need no explanation at all: steer a snake, eat, grow longer, and never hit your own body or the wall.</p><h2>Why it stays fun</h2><p>Snake's staying power comes from a difficulty curve built straight into the mechanics. The longer your snake grows, the less safe space you have to move through, and the speed creeps up with every piece of food you eat. You end up planning routes in real time with a shrinking reaction window — that gradual squeeze is the same thing that makes so many classic arcade games work.</p></article>
+
+<div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article"><h2>How to play</h2><p>On desktop, steer with the arrow keys (↑↓←→); on a phone or tablet, use the D-pad below the board. The snake keeps moving in its current direction on its own. Eating the red food grows you by one segment, adds a point, and nudges the speed up slightly. Running into the edge of the board or into your own body ends the game.</p><h2>Tips for a higher score</h2><p>Circle along the outer edge of the board and keep the middle free as a buffer rather than charging straight through the centre early on. Decide where you're turning next before you get there — once the snake is long, planning your route a few moves ahead matters far more than quick reflexes.</p></article>
+
+<div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>Frequently Asked Questions</h2>
+  <div class="faq-item"><div class="faq-q">How do you play Snake?</div><div class="faq-a">Steer the snake with the arrow keys or the on-screen direction pad. Eating food makes the snake one segment longer and scores a point. Hitting a wall or your own body ends the run, so the goal is to eat as much as possible without crashing into anything.</div></div>
+  <div class="faq-item"><div class="faq-q">Why does the snake keep speeding up?</div><div class="faq-a">Every piece of food you eat nudges the movement speed up a little. That's the classic Snake design: the snake gets longer and faster at the same time, so the challenge keeps rising instead of the game sitting at one difficulty and getting dull.</div></div>
+  <div class="faq-item"><div class="faq-q">How do I steer on a phone?</div><div class="faq-a">There's a D-pad below the board — just tap the direction you want to turn, no keyboard required. On desktop you can use the arrow keys (↑↓←→) instead, and you can switch between the two input methods at any time.</div></div>
+  <div class="faq-item"><div class="faq-q">Can I turn 180 degrees on the spot?</div><div class="faq-a">No. The snake can't reverse straight back on itself — pressing left while moving right does nothing. That's the standard Snake rule, and it mirrors the fact that a real snake can't instantly turn into its own body. The restriction is part of what makes the game strategic.</div></div>
+  <div class="faq-item"><div class="faq-q">Where did Snake come from?</div><div class="faq-a">The concept goes back to the 1976 arcade game Blockade. It went global in the 1990s when it shipped built into Nokia feature phones, becoming the first video game many people ever touched, and the simple, endlessly replayable formula has carried across to every platform since.</div></div>
+  </section>
+
+  <div class="more-tools"><h3>Related Games</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/en/2048.html">2048</a>
+    <a class="tool-pill" href="/games/en/sudoku.html">Sudoku</a>
+    <a class="tool-pill" href="/games/en/minesweeper.html">Minesweeper</a>
+    <a class="tool-pill" href="/games/en/chess.html">Chess</a>
+    <a class="tool-pill" href="/games/en/piano-tiles.html">Piano Tiles</a>
+    <a class="tool-pill" href="/games/en/">More Games</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+<div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>More Games</h3><a class="tool-pill" href="/games/en/" style="display:block;margin-top:8px">Browse all games →</a></div>
+<div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/home/en/privacy.html">Privacy</a><a href="/home/en/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<!-- Language pack for this page. Game logic lives in /games/shared/snake.js and is -->
+<!-- shared by all 10 locales; it contains no user-facing text, only lookups into these dicts. -->
+<script>
+window.GAME_I18N = {"levelBadge": "Lv.{n}", "scoreShort": "{s} pts", "playAgainBtn": "▶️ Play Again", "playingBtn": "Playing…", "shareWithScore": "I scored {s} points on Snake at SoftGlow! Think you can beat that?", "shareNoScore": "Come play the classic Snake game!", "copied": "Copied!", "ratings": ["🐢 Still finding your feet — a few more runs and the controls will click", "🙂 Respectable. You've got the basic rhythm down", "👍 Good score — better than most players manage", "🏆 Expert level. Your route planning is solid", "⚡ Godlike — weaving a full-length snake around the board!"]};
+window.GA_LANG_PACK = {"loginToRank": "Sign in to put your score on the leaderboard 🏆", "newRecord": "🎉 New personal best! You're ranked #{r}", "submitted": "Score submitted — you're ranked #{r}", "emptyBoard": "No scores yet. Sign in and be the first to claim the top spot!", "loadingBoard": "Loading leaderboard…", "googleFail": "Google sign-in failed", "connFail": "Connection failed, please try again later", "loginOk": "Signed in!", "logoutOk": "Signed out", "lineLoginOk": "Signed in with LINE!", "lineLoginFail": "LINE sign-in failed, please try again", "logoutBtn": "Sign out", "loadingName": "Loading…", "player": "Player", "loginTip": "Sign in to save your scores and compare with friends!", "lineBtn": "💬 Sign in with LINE", "fsEnter": "⛶ Fullscreen", "fsExit": "✕ Exit fullscreen", "fsAria": "Expand game to fullscreen", "fsUnsupported": "This browser doesn't support fullscreen", "reminderTitle": "Sign in to save your {game} score to the leaderboard", "reminderSub": "You can keep playing without signing in — your score just won't be recorded", "reminderSkip": "No thanks, just play", "reminderClose": "Close", "badge": "🔒 Sign in to rank", "thisGame": "this game", "gameNames": {"snake": "Snake Game"}, "scoreUnit": {"snake": " pts"}};
+</script>
+<script src="/games/shared/snake.js"></script>
+
+<script>
+(function(){var AD_DELAY_MS=2000;setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},AD_DELAY_MS);})();
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Search tools, patterns, articles…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>My Bookmarks</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Clear all</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/games/games-auth.js"></script>
+<script>
+gaMountAuthWidget('gaWidget');
+gaMountLeaderboard('gaLeaderboard', 'snake');
+gaInitFullscreenToggle();
+gaInitLoginReminder('snake');
+</script>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

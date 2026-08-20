@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2048数字方块游戏 - 免费在线益智消除游戏 | SoftGlow</title>
+<meta name="description" content="免费在线2048数字方块游戏，用方向键或滑动手势合并相同数字，目标凑出2048。纯网页益智游戏，免下载免安装，支持键盘与触控滑动操作。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/zh-CN/2048.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/2048.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/games/en/2048.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/games/de/2048.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/games/es/2048.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/games/fr/2048.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/games/id/2048.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/games/ja/2048.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/games/ko/2048.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/games/pt/2048.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/games/zh-CN/2048.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/en/2048.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "2048数字方块游戏", "url": "https://softglow-ai.com/games/zh-CN/2048.html", "description": "免费在线2048数字方块游戏，用方向键或滑动合并相同数字方块，目标凑出2048。", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "2048怎么玩？", "acceptedAnswer": {"@type": "Answer", "text": "用键盘方向键（或手机滑动）让整个盘面的方块往同一个方向移动，两个数字相同的方块相邻滑在一起会合并成两倍的数字，例如两个2合并成4。每移动一次，盘面上会随机出现一个新的2或4，目标是合并出2048这个数字方块。"}}, {"@type": "Question", "name": "凑到2048之后游戏就结束了吗？", "acceptedAnswer": {"@type": "Answer", "text": "不会，凑到2048会先跳出「达成2048！」的提示，你可以选择继续玩下去挑战更高分数（4096、8192...没有上限），或是直接重新开一局。"}}, {"@type": "Question", "name": "什么时候算输？", "acceptedAnswer": {"@type": "Answer", "text": "当整个4x4盘面16格都被方块填满，而且上下左右四个方向都无法再合并任何相邻的相同数字时，游戏就结束，这时候不管往哪个方向都不会有任何方块移动或合并。"}}, {"@type": "Question", "name": "这款游戏难度会不会越玩越难？", "acceptedAnswer": {"@type": "Answer", "text": "2048的难度是内建在玩法本身的：盘面空格会随着数字变大越来越少，可以移动的空间越来越挤，要合并出更大的数字需要更精准的盘面规划，所以不需要额外的关卡设计，游戏本身就会随着分数提高自然变难。"}}, {"@type": "Question", "name": "有没有拿高分的诀窍？", "acceptedAnswer": {"@type": "Answer", "text": "常见策略是固定把最大的数字方块「钉」在画面某一个角落（例如左下角），尽量避免打乱这个角落的排列，其余操作围绕这个角落展开，可以大幅降低盘面卡死、无路可走的概率。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="2048">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="zh-CN">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+.g2048-topbar{display:flex;justify-content:center;align-items:center;gap:16px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f;flex-wrap:wrap}
+.g2048-best-badge{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800}
+.g2048-board{position:relative;width:100%;max-width:380px;aspect-ratio:1/1;margin:0 auto;background:#c7b9a8;border-radius:12px;padding:10px;box-sizing:border-box;touch-action:none;user-select:none}
+.g2048-grid{position:relative;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:8px;width:100%;height:100%}
+.g2048-cellbg{background:rgba(255,255,255,.35);border-radius:6px}
+.g2048-tile{position:absolute;display:flex;align-items:center;justify-content:center;border-radius:6px;font-weight:800;box-shadow:0 1px 2px rgba(0,0,0,.15);transition:background-color .08s ease}
+.g2048-tile.g2048-pop{animation:g2048Pop .16s ease}
+.g2048-tile.g2048-merge{animation:g2048Merge .14s ease}
+@keyframes g2048Pop{from{transform:scale(.3)}to{transform:scale(1)}}
+@keyframes g2048Merge{0%{transform:scale(1)}45%{transform:scale(1.18)}100%{transform:scale(1)}}
+.g2048-overlay{position:absolute;inset:10px;background:rgba(238,228,218,.82);border-radius:8px;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px}
+.g2048-overlay.show{display:flex}
+.g2048-overlay .g2048-over-title{font-size:22px;font-weight:800;color:#5b4636;margin-bottom:10px}
+.g2048-overlay .g2048-over-sub{font-size:13px;color:#7a6a5a;margin-bottom:14px}
+.g2048-overlay-actions{display:flex;gap:10px}
+.g2048-hint{text-align:center;font-size:12px;color:#94a3b8;margin-top:10px}
+@media(max-width:480px){.g2048-topbar{font-size:13px;gap:10px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/zh-CN/">工具</a>
+    <a href="/games/zh-CN/">游戏</a>
+    <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">教学文章</a>
+    <a href="/">首页</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/games/2048.html">繁中</option><option value="/games/en/2048.html">EN</option><option value="/games/ja/2048.html">日本語</option><option value="/games/ko/2048.html">한국어</option><option value="/games/de/2048.html">DE</option><option value="/games/fr/2048.html">FR</option><option value="/games/es/2048.html">ES</option><option value="/games/pt/2048.html">PT</option><option value="/games/id/2048.html">ID</option><option value="/games/zh-CN/2048.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">首页</a> &gt; <a href="/games/zh-CN/">游戏</a> &gt; 2048</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>2048数字方块游戏</h1>
+    <p class="game-subtitle">用方向键或滑动手势合并相同数字，两个一样的数字碰在一起就合并成两倍，目标凑出2048。</p>
+
+    <div class="g2048-topbar">
+      <span>分数：<span id="g2048Score">0</span></span>
+      <span class="g2048-best-badge">最佳：<span id="g2048BestInline">0</span></span>
+    </div>
+
+    <div class="g2048-board" id="g2048Board">
+      <div class="g2048-grid" id="g2048Grid"></div>
+      <div class="g2048-overlay" id="g2048Overlay">
+        <div class="g2048-over-title" id="g2048OverTitle">游戏结束</div>
+        <div class="g2048-over-sub" id="g2048OverSub">分数：0</div>
+        <div class="g2048-overlay-actions">
+          <button class="game-btn" onclick="g2048Restart()">🔄 再玩一次</button>
+          <button class="game-btn secondary" id="g2048ContinueBtn" onclick="g2048Continue()" style="display:none">继续挑战更高分</button>
+        </div>
+      </div>
+    </div>
+    <div class="g2048-hint">电脑用方向键，手机直接在盘面上滑动</div>
+
+    <div class="game-rating" id="g2048Rating"></div>
+
+    <div class="game-score-row">
+      <div class="game-score-tile"><div class="gs-label">最佳分数</div><div class="gs-value" id="g2048Best">—</div></div>
+      <div class="game-score-tile"><div class="gs-label">最大数字</div><div class="gs-value" id="g2048BestTile">—</div></div>
+    </div>
+    <div class="game-history" id="g2048History"></div>
+
+    <div class="game-controls">
+      <button class="game-btn" id="g2048StartBtn" onclick="g2048Restart()">▶️ 开始游戏</button>
+      <button class="game-btn secondary" onclick="g2048ShareResult()">📤 分享成绩</button>
+    </div>
+
+
+    <div class="ga-widget" id="gaWidget"></div>
+    <div class="ga-leaderboard"><h3>🏆 2048排行榜</h3><div id="gaLeaderboard"></div></div>
+  </div>
+
+<div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>2048是什么游戏？</h2><p>2048是2014年由Gabriele Cirulli开发并爆红的数字合并益智游戏，规则极度简单（同数字相撞就合并成两倍），但盘面空间有限，随着数字越凑越大，可操作的空间会越来越挤，考验的是路线规划跟盘面管理能力，而不是手速。这个版本是SoftGlow自制的规则兼容版本，保留原版的完整合并逻辑与计分方式。</p><h2>难度会怎么变化</h2><p>2048不需要额外设计「关卡」或「波次」，难度已经内建在玩法本身里：16格盘面一开始很空旷，随便移动都安全；但数字越凑越大、格子越来越满，一步走错很容易让盘面卡死。这种「越到后面容错空间越小」的特性，本身就是一种持续递增的难度曲线。</p></article>
+
+<div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article"><h2>怎么玩</h2><p>盘面是4x4共16格，一开始会随机出现2个数字方块（2或4）。按上下左右方向键（手机用手指在盘面上滑动）让所有方块往同一方向靠拢，两个数字相同的方块相邻滑在一起时会合并成一个两倍数字的方块，并加到分数里。每次成功移动之后，空格中会随机出现一个新的2或4（出现4的概率比较低）。当16格全部填满、且上下左右都无法再合并任何相邻的相同数字时，游戏结束。</p><h2>拿高分的技巧</h2><p>最常见也最有效的策略是把目前最大的数字方块固定「钉」在某一个角落（例如左下角），操作时尽量避免打乱那个角落已经排好的数字顺序，其余移动都围绕这个角落展开，这样可以大幅降低盘面卡死的概率，让你有更多机会凑出更大的数字。</p></article>
+
+<div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>常见问题</h2>
+  <div class="faq-item"><div class="faq-q">2048怎么玩？</div><div class="faq-a">用键盘方向键（或手机滑动）让整个盘面的方块往同一个方向移动，两个数字相同的方块相邻滑在一起会合并成两倍的数字，例如两个2合并成4。每移动一次，盘面上会随机出现一个新的2或4，目标是合并出2048这个数字方块。</div></div>
+  <div class="faq-item"><div class="faq-q">凑到2048之后游戏就结束了吗？</div><div class="faq-a">不会，凑到2048会先跳出「达成2048！」的提示，你可以选择继续玩下去挑战更高分数（4096、8192...没有上限），或是直接重新开一局。</div></div>
+  <div class="faq-item"><div class="faq-q">什么时候算输？</div><div class="faq-a">当整个4x4盘面16格都被方块填满，而且上下左右四个方向都无法再合并任何相邻的相同数字时，游戏就结束，这时候不管往哪个方向都不会有任何方块移动或合并。</div></div>
+  <div class="faq-item"><div class="faq-q">这款游戏难度会不会越玩越难？</div><div class="faq-a">2048的难度是内建在玩法本身的：盘面空格会随着数字变大越来越少，可以移动的空间越来越挤，要合并出更大的数字需要更精准的盘面规划，所以不需要额外的关卡设计，游戏本身就会随着分数提高自然变难。</div></div>
+  <div class="faq-item"><div class="faq-q">有没有拿高分的诀窍？</div><div class="faq-a">常见策略是固定把最大的数字方块「钉」在画面某一个角落（例如左下角），尽量避免打乱这个角落的排列，其余操作围绕这个角落展开，可以大幅降低盘面卡死、无路可走的概率。</div></div>
+  </section>
+
+  <div class="more-tools"><h3>相关游戏</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/zh-CN/sudoku.html">数独</a>
+    <a class="tool-pill" href="/games/zh-CN/minesweeper.html">扫雷</a>
+    <a class="tool-pill" href="/games/zh-CN/chess.html">国际象棋</a>
+    <a class="tool-pill" href="/games/zh-CN/snake.html">贪吃蛇</a>
+    <a class="tool-pill" href="/games/zh-CN/piano-tiles.html">钢琴块</a>
+    <a class="tool-pill" href="/games/zh-CN/">更多游戏</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+<div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>更多游戏</h3><a class="tool-pill" href="/games/zh-CN/" style="display:block;margin-top:8px">浏览全部游戏 →</a></div>
+<div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">关于</a><a href="/contact.html">联系我们</a><a href="/home/zh-CN/privacy.html">隐私政策</a><a href="/home/zh-CN/terms.html">使用条款</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<!-- Language pack for this page. Game logic lives in /games/shared/2048.js and is -->
+<!-- shared by all 10 locales; it contains no user-facing text, only lookups into these dicts. -->
+<script>
+window.GAME_I18N = {"gameOver": "💥 游戏结束", "scoreLine": "分数：{s}", "scoreShort": "{s}分", "winTitle": "🎉 达成 {v}！", "restartBtn": "🔄 重新开始", "shareWithScore": "我在SoftGlow玩2048拿了 {s} 分！来试试你能打败我吗？", "shareNoScore": "来玩玩2048数字方块游戏！", "copied": "已复制！", "ratings": ["🎲 刚开始热身，多练习盘面规划会更顺手", "🙂 中等水准，开始抓到合并的节奏了", "👍 不错的成绩，盘面掌控得很稳", "🏆 达成2048！你是真正的数字大师", "⚡ 超越2048的传说级表现！"]};
+window.GA_LANG_PACK = {"loginToRank": "登录才能把成绩送上排行榜 🏆", "newRecord": "🎉 新纪录！目前排名第 {r} 名", "submitted": "已送上排行榜，目前排名第 {r} 名", "emptyBoard": "还没有人上榜，登录后第一个玩就能拿下第一名！", "loadingBoard": "载入排行榜中…", "googleFail": "Google 登录失败", "connFail": "连接失败，请稍后再试", "loginOk": "登录成功！", "logoutOk": "已登出", "lineLoginOk": "LINE登录成功！", "lineLoginFail": "LINE登录失败，请再试一次", "logoutBtn": "登出", "loadingName": "载入中…", "player": "玩家", "loginTip": "登录才能把成绩存上排行榜，跟朋友比分数！", "lineBtn": "💬 用LINE登录", "fsEnter": "⛶ 全屏", "fsExit": "✕ 退出全屏", "fsAria": "全屏放大游戏", "fsUnsupported": "这个浏览器不支持全屏", "reminderTitle": "登录才能把{game}成绩存上排行榜", "reminderSub": "不登录也能继续玩，只是分数不会被记录下来", "reminderSkip": "先不用，直接玩", "reminderClose": "关闭", "badge": "🔒 登录才能上榜", "thisGame": "这个游戏", "gameNames": {"2048": "2048"}, "scoreUnit": {"2048": "分"}};
+</script>
+<script src="/games/shared/2048.js"></script>
+
+<script>
+(function(){var AD_DELAY_MS=2000;setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},AD_DELAY_MS);})();
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/games/games-auth.js"></script>
+<script>
+gaMountAuthWidget('gaWidget');
+gaMountLeaderboard('gaLeaderboard', '2048');
+gaInitFullscreenToggle();
+gaInitLoginReminder('2048');
+</script>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

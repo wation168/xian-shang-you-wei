@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gomoku - Cinco em Linha Grátis Online, vs Computador ou 2 Jogadores | SoftGlow</title>
+<meta name="description" content="Jogue grátis online Gomoku (cinco em linha) num tabuleiro 15x15 — desafie a IA do computador ou jogue localmente contra um amigo. O primeiro a conectar 5 peças (linha, coluna ou diagonal) vence.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/pt/gomoku.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/gomoku.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/games/en/gomoku.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/games/de/gomoku.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/games/es/gomoku.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/games/fr/gomoku.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/games/id/gomoku.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/games/ja/gomoku.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/games/ko/gomoku.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/games/pt/gomoku.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/games/zh-CN/gomoku.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/en/gomoku.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Gomoku", "url": "https://softglow-ai.com/games/pt/gomoku.html", "description": "Jogo grátis de Gomoku online num tabuleiro 15x15 — jogue contra uma IA ou contra um amigo localmente, o primeiro a conectar 5 peças vence.", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "pt"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Como se joga Gomoku?", "acceptedAnswer": {"@type": "Answer", "text": "O tabuleiro é uma grade 15x15. Na sua vez, basta clicar em qualquer casa vazia, e sua peça cai exatamente onde você clicou (diferente do Lig 4, não há gravidade puxando para baixo). O primeiro a conectar 5 peças próprias em linha reta — horizontal, vertical ou diagonal — vence."}}, {"@type": "Question", "name": "Dá para jogar sozinho?", "acceptedAnswer": {"@type": "Answer", "text": "Sim. O modo padrão é \"Contra o Computador\", em que a IA joga automaticamente, permitindo que uma pessoa jogue sozinha. Se preferir jogar cara a cara com um amigo, mude para o modo \"2 Jogadores\", em que vocês se revezam clicando na mesma tela — sem necessidade de cadastro ou conexão."}}, {"@type": "Question", "name": "A IA do computador é difícil de vencer?", "acceptedAnswer": {"@type": "Answer", "text": "A IA avalia as ameaças no tabuleiro em tempo real: sempre joga um movimento que vença imediatamente, se disponível, e sempre bloqueia quando você está prestes a conectar cinco. Fora isso, ela pontua os movimentos possíveis pela força do padrão (como um \"três aberto\" ou um \"quatro com uma ponta aberta\") e escolhe a casa mais ameaçadora. É um adversário de nível médio-alto — é preciso observar várias direções ao mesmo tempo para vencê-la."}}, {"@type": "Question", "name": "Por que minha peça não apareceu onde eu cliquei?", "acceptedAnswer": {"@type": "Answer", "text": "No Gomoku, sua peça sempre aparece exatamente onde você clica — não há efeito de gravidade. Se nada apareceu, geralmente é porque aquela casa já está ocupada (não é possível colocar peça ali de novo), ou a partida ainda não começou, ou é a vez do computador pensar — em todos esses casos o clique não tem efeito."}}, {"@type": "Question", "name": "Gomoku é o mesmo que Lig 4? Qual é a diferença?", "acceptedAnswer": {"@type": "Answer", "text": "Não, são jogos diferentes. O Lig 4 usa um tabuleiro 7x6 em que a peça solta cai por gravidade até o fundo de uma coluna, e vence quem conectar 4. O Gomoku usa um tabuleiro 15x15 em que você clica diretamente em qualquer casa vazia, sem gravidade, e é preciso conectar 5 para vencer. As regras e a estratégia são totalmente diferentes entre os dois."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="gomoku">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="pt">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+.gk-mode-row{display:flex;justify-content:center;gap:8px;margin-bottom:14px}
+.gk-mode-btn{border:1px solid var(--game-border);background:#fff;color:#64748b;border-radius:20px;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer}
+.gk-mode-btn.active{background:var(--game-primary);border-color:var(--game-primary);color:#fff}
+.gk-topbar{display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f;min-height:22px}
+.gk-turn-dot{width:16px;height:16px;border-radius:50%;display:inline-block;vertical-align:middle;border:2px solid #94a3b8;box-sizing:border-box}
+.gk-board{display:grid;gap:1px;background:#b9895a;border:3px solid #8b5e34;border-radius:6px;padding:1px;width:100%;max-width:420px;margin:0 auto;aspect-ratio:1/1;transition:opacity .15s}
+.gk-board.thinking{opacity:.7;pointer-events:none}
+.gk-cell{position:relative;aspect-ratio:1/1;background:#deb877;cursor:pointer}
+.gk-stone{position:absolute;left:8%;top:8%;width:84%;height:84%;border-radius:50%;pointer-events:none;opacity:0;transform:scale(.5);transition:opacity .1s,transform .1s}
+.gk-stone.p1{opacity:1;transform:scale(1);background:radial-gradient(circle at 35% 30%,#4b5563,#0f172a);box-shadow:0 2px 3px rgba(0,0,0,.5)}
+.gk-stone.p2{opacity:1;transform:scale(1);background:radial-gradient(circle at 35% 30%,#ffffff,#cbd5e1);box-shadow:0 2px 3px rgba(0,0,0,.4)}
+.gk-stone.win{box-shadow:0 0 0 3px #22c55e,0 2px 4px rgba(0,0,0,.4)}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/pt/">Ferramentas</a>
+    <a href="/games/pt/">Jogos</a>
+    <a href="/patterns/pt.html">Padrões de Candlestick</a>
+    <a href="/blog/pt/index.html">Blog</a>
+    <a href="/">Início</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/games/gomoku.html">繁中</option><option value="/games/en/gomoku.html">EN</option><option value="/games/ja/gomoku.html">日本語</option><option value="/games/ko/gomoku.html">한국어</option><option value="/games/de/gomoku.html">DE</option><option value="/games/fr/gomoku.html">FR</option><option value="/games/es/gomoku.html">ES</option><option value="/games/pt/gomoku.html" selected>PT</option><option value="/games/id/gomoku.html">ID</option><option value="/games/zh-CN/gomoku.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Início</a> &gt; <a href="/games/pt/">Jogos</a> &gt; Gomoku</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>Gomoku</h1>
+    <p class="game-subtitle">Tabuleiro 15x15 — clique numa casa vazia para colocar uma peça. O primeiro a conectar 5 em linha (horizontal, vertical ou diagonal) vence.</p>
+
+    <div class="gk-mode-row">
+      <button class="gk-mode-btn active" id="gkModeAiBtn" onclick="gkSetMode('ai')">🤖 Contra o Computador</button>
+      <button class="gk-mode-btn" id="gkMode2pBtn" onclick="gkSetMode('2p')">🧑‍🤝‍🧑 2 Jogadores</button>
+    </div>
+
+    <div class="gk-topbar">
+      <span id="gkTurnText">Vez do Jogador 1</span>
+      <span class="gk-turn-dot" id="gkTurnDot" style="background:#0f172a"></span>
+    </div>
+
+    <div class="gk-board" id="gkBoard"></div>
+
+    <div class="game-rating" id="gkRating"></div>
+
+    <div class="game-score-row">
+      <div class="game-score-tile"><div class="gs-label" id="gkP1Label">Vitórias Jogador 1</div><div class="gs-value" id="gkP1Wins">0</div></div>
+      <div class="game-score-tile"><div class="gs-label" id="gkP2Label">Vitórias Computador</div><div class="gs-value" id="gkP2Wins">0</div></div>
+    </div>
+
+    <div class="game-controls">
+      <button class="game-btn" onclick="gkRestart()">🔄 Reiniciar Partida</button>
+      <button class="game-btn secondary" onclick="gkShareResult()">📤 Compartilhar pontuação</button>
+    </div>
+
+
+
+  </div>
+
+<div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>O Que É o Gomoku</h2><p>O Gomoku (também conhecido como cinco em linha) é um jogo de tabuleiro estratégico de longa data para dois jogadores, em que se colocam peças alternadamente nas interseções de um tabuleiro 15x15 (ou maior). O primeiro a conectar cinco peças próprias — na horizontal, vertical ou diagonal — vence. Diferente do Go, que exige um tabuleiro próprio e regras complexas, o Gomoku é simples de aprender quase instantaneamente, mas ainda assim guarda uma tática surpreendentemente profunda, o que o torna um jogo de estratégia muito querido no mundo todo.</p><h2>Como Difere do Lig 4</h2><p>Apesar dos nomes parecidos, Gomoku e Lig 4 (Connect Four) se jogam de forma bem diferente. O Lig 4 usa um tabuleiro 7x6 em que a peça solta cai por gravidade até o fundo da coluna escolhida — você só escolhe a coluna, não a casa exata. O Gomoku usa um tabuleiro 15x15 em que você clica diretamente em qualquer casa vazia para colocar uma peça, sem nenhuma gravidade envolvida, dando muito mais liberdade de posicionamento, e é preciso conectar cinco (não quatro) para vencer.</p></article>
+
+<div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article"><h2>Como Jogar</h2><p>Assim que a partida começa, a tela mostra de quem é a vez. Basta clicar em qualquer casa vazia do tabuleiro, e sua peça aparece exatamente onde você clicou. O jogo continua alternando até que alguém conecte cinco peças (em qualquer direção) e vença, ou o tabuleiro se encha sem vencedor, resultando em empate — nesse momento você pode clicar em "Reiniciar Partida" para jogar de novo, com o placar de vitórias acumulado e exibido. Acima é possível alternar entre os modos "Contra o Computador" e "2 Jogadores" — jogue sozinho ou desafie um amigo.</p><h2>Estratégias Comuns para Iniciantes</h2><p>Priorize ocupar casas perto do centro do tabuleiro, já que o centro oferece o maior número de direções possíveis para formar uma linha. Fique também atento se o adversário já formou um "três aberto" (três peças em linha com ambas as pontas ainda livres) — esse padrão se transforma facilmente num "quatro aberto" imparável na jogada seguinte, por isso deve ser bloqueado primeiro. Criar ameaças em várias direções ao mesmo tempo, para que o adversário não consiga se defender em todos os lados, é a habilidade ofensiva central do Gomoku.</p></article>
+
+<div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>Perguntas frequentes</h2>
+  <div class="faq-item"><div class="faq-q">Como se joga Gomoku?</div><div class="faq-a">O tabuleiro é uma grade 15x15. Na sua vez, basta clicar em qualquer casa vazia, e sua peça cai exatamente onde você clicou (diferente do Lig 4, não há gravidade puxando para baixo). O primeiro a conectar 5 peças próprias em linha reta — horizontal, vertical ou diagonal — vence.</div></div>
+  <div class="faq-item"><div class="faq-q">Dá para jogar sozinho?</div><div class="faq-a">Sim. O modo padrão é "Contra o Computador", em que a IA joga automaticamente, permitindo que uma pessoa jogue sozinha. Se preferir jogar cara a cara com um amigo, mude para o modo "2 Jogadores", em que vocês se revezam clicando na mesma tela — sem necessidade de cadastro ou conexão.</div></div>
+  <div class="faq-item"><div class="faq-q">A IA do computador é difícil de vencer?</div><div class="faq-a">A IA avalia as ameaças no tabuleiro em tempo real: sempre joga um movimento que vença imediatamente, se disponível, e sempre bloqueia quando você está prestes a conectar cinco. Fora isso, ela pontua os movimentos possíveis pela força do padrão (como um "três aberto" ou um "quatro com uma ponta aberta") e escolhe a casa mais ameaçadora. É um adversário de nível médio-alto — é preciso observar várias direções ao mesmo tempo para vencê-la.</div></div>
+  <div class="faq-item"><div class="faq-q">Por que minha peça não apareceu onde eu cliquei?</div><div class="faq-a">No Gomoku, sua peça sempre aparece exatamente onde você clica — não há efeito de gravidade. Se nada apareceu, geralmente é porque aquela casa já está ocupada (não é possível colocar peça ali de novo), ou a partida ainda não começou, ou é a vez do computador pensar — em todos esses casos o clique não tem efeito.</div></div>
+  <div class="faq-item"><div class="faq-q">Gomoku é o mesmo que Lig 4? Qual é a diferença?</div><div class="faq-a">Não, são jogos diferentes. O Lig 4 usa um tabuleiro 7x6 em que a peça solta cai por gravidade até o fundo de uma coluna, e vence quem conectar 4. O Gomoku usa um tabuleiro 15x15 em que você clica diretamente em qualquer casa vazia, sem gravidade, e é preciso conectar 5 para vencer. As regras e a estratégia são totalmente diferentes entre os dois.</div></div>
+  </section>
+
+  <div class="more-tools"><h3>Jogos relacionados</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/pt/2048.html">2048</a>
+    <a class="tool-pill" href="/games/pt/sudoku.html">Sudoku</a>
+    <a class="tool-pill" href="/games/pt/minesweeper.html">Campo Minado</a>
+    <a class="tool-pill" href="/games/pt/chess.html">Xadrez</a>
+    <a class="tool-pill" href="/games/pt/snake.html">Jogo da Cobrinha</a>
+    <a class="tool-pill" href="/games/pt/">Mais jogos</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+<div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Mais jogos</h3><a class="tool-pill" href="/games/pt/" style="display:block;margin-top:8px">Ver todos os jogos →</a></div>
+<div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">Sobre</a><a href="/contact.html">Contato</a><a href="/home/pt/privacy.html">Privacidade</a><a href="/home/pt/terms.html">Termos</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<!-- Language pack for this page. Game logic lives in /games/shared/gomoku.js and is -->
+<!-- shared by all 10 locales; it contains no user-facing text, only lookups into these dicts. -->
+<script>
+window.GAME_I18N = {"turnOf": "Vez de {name}", "aiThinking": "🤖 Computador pensando…", "winsLabel": "Vitórias de {name}", "winMessage": "🎉 {name} venceu!", "drawMessage": "🤝 Empate! O tabuleiro está cheio", "shareWinResult": "{name} venceu", "shareDrawResult": "um empate", "shareWithResult": "Acabei de jogar Gomoku no SoftGlow contra um amigo, resultado: {r}! Venha jogar a próxima partida", "shareNoResult": "Venha jogar Gomoku com um amigo no SoftGlow!", "copied": "Copiado!", "nameYou": "Você", "nameComputer": "Computador", "namePlayer1": "Jogador 1", "namePlayer2": "Jogador 2"};
+window.GA_LANG_PACK = {"loginToRank": "Entre para colocar sua pontuação no ranking 🏆", "newRecord": "🎉 Novo recorde pessoal! Você está em {r}º lugar", "submitted": "Pontuação enviada — você está em {r}º lugar", "emptyBoard": "Ainda não há pontuações. Entre e seja o primeiro no topo!", "loadingBoard": "Carregando ranking…", "googleFail": "Falha ao entrar com o Google", "connFail": "Falha na conexão, tente novamente mais tarde", "loginOk": "Sessão iniciada!", "logoutOk": "Sessão encerrada", "lineLoginOk": "Entrou com o LINE!", "lineLoginFail": "Falha ao entrar com o LINE, tente novamente", "logoutBtn": "Sair", "loadingName": "Carregando…", "player": "Jogador", "loginTip": "Entre para salvar suas pontuações e competir com os amigos!", "lineBtn": "💬 Entrar com o LINE", "fsEnter": "⛶ Tela cheia", "fsExit": "✕ Sair da tela cheia", "fsAria": "Ampliar o jogo para tela cheia", "fsUnsupported": "Este navegador não suporta tela cheia", "reminderTitle": "Entre para salvar sua pontuação de {game} no ranking", "reminderSub": "Você pode continuar jogando sem entrar, só a pontuação não será registrada", "reminderSkip": "Não, obrigado, quero só jogar", "reminderClose": "Fechar", "badge": "🔒 Entre para entrar no ranking", "thisGame": "este jogo", "gameNames": {"gomoku": "Gomoku"}};
+</script>
+<script src="/games/shared/gomoku.js"></script>
+
+<script>
+(function(){var AD_DELAY_MS=2000;setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},AD_DELAY_MS);})();
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Pesquisar ferramentas, padrões, artigos…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Meus favoritos</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Limpar tudo</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/games/games-auth.js"></script>
+<script>
+gaInitFullscreenToggle();
+</script>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

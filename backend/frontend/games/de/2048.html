@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2048 Spiel - Das kostenlose Zahlenpuzzle online spielen | SoftGlow</title>
+<meta name="description" content="2048 kostenlos online spielen. Mit Pfeiltasten oder Wischgesten gleiche Zahlen zusammenschieben und 2048 erreichen. Ohne Download, ohne Installation.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/de/2048.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/2048.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/games/en/2048.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/games/de/2048.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/games/es/2048.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/games/fr/2048.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/games/id/2048.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/games/ja/2048.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/games/ko/2048.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/games/pt/2048.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/games/zh-CN/2048.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/en/2048.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "2048 Spiel", "url": "https://softglow-ai.com/games/de/2048.html", "description": "Kostenloses 2048-Puzzle online. Gleiche Zahlenkacheln per Pfeiltaste oder Wischgeste verschmelzen und die 2048-Kachel erreichen.", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "de"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Wie spielt man 2048?", "acceptedAnswer": {"@type": "Answer", "text": "Mit den Pfeiltasten (oder per Wischgeste am Handy) schiebst du alle Kacheln in eine Richtung. Treffen zwei Kacheln mit derselben Zahl aufeinander, verschmelzen sie zum doppelten Wert — aus zwei 2ern wird eine 4. Nach jedem Zug erscheint eine neue 2 oder 4, und dein Ziel ist die 2048-Kachel."}}, {"@type": "Question", "name": "Ist das Spiel vorbei, wenn ich 2048 erreiche?", "acceptedAnswer": {"@type": "Answer", "text": "Nein. Bei 2048 erscheint der Hinweis „2048 erreicht!\", und du kannst entweder für mehr Punkte weiterspielen (4096, 8192 und weiter — es gibt keine Obergrenze) oder eine neue Runde starten."}}, {"@type": "Question", "name": "Wann habe ich verloren?", "acceptedAnswer": {"@type": "Answer", "text": "Wenn alle 16 Felder belegt sind und in keiner der vier Richtungen mehr gleiche Nachbarkacheln existieren. Dann bewegt und verschmilzt kein Zug mehr etwas."}}, {"@type": "Question", "name": "Wird das Spiel mit der Zeit schwerer?", "acceptedAnswer": {"@type": "Answer", "text": "Die Schwierigkeit liegt in der Mechanik, nicht in zusätzlichen Leveln. Mit wachsenden Zahlen verschwinden die freien Felder, dein Spielraum schrumpft, und größere Kacheln erfordern präzisere Planung. Das Spiel wird also mit steigender Punktzahl von selbst anspruchsvoller."}}, {"@type": "Question", "name": "Gibt es einen Trick für hohe Punktzahlen?", "acceptedAnswer": {"@type": "Answer", "text": "Üblich ist, die größte Kachel in einer Ecke zu halten — zum Beispiel unten links —, die dort sortierten Kacheln nicht zu verschieben und alle übrigen Züge um diese Ecke herum zu planen. Das verringert das Risiko eines festgefahrenen Spielfelds deutlich."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="2048">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="de">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+.g2048-topbar{display:flex;justify-content:center;align-items:center;gap:16px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f;flex-wrap:wrap}
+.g2048-best-badge{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800}
+.g2048-board{position:relative;width:100%;max-width:380px;aspect-ratio:1/1;margin:0 auto;background:#c7b9a8;border-radius:12px;padding:10px;box-sizing:border-box;touch-action:none;user-select:none}
+.g2048-grid{position:relative;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:8px;width:100%;height:100%}
+.g2048-cellbg{background:rgba(255,255,255,.35);border-radius:6px}
+.g2048-tile{position:absolute;display:flex;align-items:center;justify-content:center;border-radius:6px;font-weight:800;box-shadow:0 1px 2px rgba(0,0,0,.15);transition:background-color .08s ease}
+.g2048-tile.g2048-pop{animation:g2048Pop .16s ease}
+.g2048-tile.g2048-merge{animation:g2048Merge .14s ease}
+@keyframes g2048Pop{from{transform:scale(.3)}to{transform:scale(1)}}
+@keyframes g2048Merge{0%{transform:scale(1)}45%{transform:scale(1.18)}100%{transform:scale(1)}}
+.g2048-overlay{position:absolute;inset:10px;background:rgba(238,228,218,.82);border-radius:8px;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px}
+.g2048-overlay.show{display:flex}
+.g2048-overlay .g2048-over-title{font-size:22px;font-weight:800;color:#5b4636;margin-bottom:10px}
+.g2048-overlay .g2048-over-sub{font-size:13px;color:#7a6a5a;margin-bottom:14px}
+.g2048-overlay-actions{display:flex;gap:10px}
+.g2048-hint{text-align:center;font-size:12px;color:#94a3b8;margin-top:10px}
+@media(max-width:480px){.g2048-topbar{font-size:13px;gap:10px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/de/">Werkzeuge</a>
+    <a href="/games/de/">Spiele</a>
+    <a href="/patterns/de.html">Chartmuster</a>
+    <a href="/blog/de/index.html">Blog</a>
+    <a href="/">Startseite</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/games/2048.html">繁中</option><option value="/games/en/2048.html">EN</option><option value="/games/ja/2048.html">日本語</option><option value="/games/ko/2048.html">한국어</option><option value="/games/de/2048.html" selected>DE</option><option value="/games/fr/2048.html">FR</option><option value="/games/es/2048.html">ES</option><option value="/games/pt/2048.html">PT</option><option value="/games/id/2048.html">ID</option><option value="/games/zh-CN/2048.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Startseite</a> &gt; <a href="/games/de/">Spiele</a> &gt; 2048</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>2048 — Das Zahlenpuzzle</h1>
+    <p class="game-subtitle">Verschiebe die Kacheln mit den Pfeiltasten oder per Wischgeste. Zwei gleiche Zahlen verschmelzen zum doppelten Wert — dein Ziel ist 2048.</p>
+
+    <div class="g2048-topbar">
+      <span>Punkte: <span id="g2048Score">0</span></span>
+      <span class="g2048-best-badge">Beste: <span id="g2048BestInline">0</span></span>
+    </div>
+
+    <div class="g2048-board" id="g2048Board">
+      <div class="g2048-grid" id="g2048Grid"></div>
+      <div class="g2048-overlay" id="g2048Overlay">
+        <div class="g2048-over-title" id="g2048OverTitle">Spiel beendet</div>
+        <div class="g2048-over-sub" id="g2048OverSub">Punkte: 0</div>
+        <div class="g2048-overlay-actions">
+          <button class="game-btn" onclick="g2048Restart()">🔄 Nochmal spielen</button>
+          <button class="game-btn secondary" id="g2048ContinueBtn" onclick="g2048Continue()" style="display:none">Weiterspielen für mehr Punkte</button>
+        </div>
+      </div>
+    </div>
+    <div class="g2048-hint">Am Computer mit den Pfeiltasten, am Handy direkt auf dem Spielfeld wischen</div>
+
+    <div class="game-rating" id="g2048Rating"></div>
+
+    <div class="game-score-row">
+      <div class="game-score-tile"><div class="gs-label">Bestergebnis</div><div class="gs-value" id="g2048Best">—</div></div>
+      <div class="game-score-tile"><div class="gs-label">Höchste Kachel</div><div class="gs-value" id="g2048BestTile">—</div></div>
+    </div>
+    <div class="game-history" id="g2048History"></div>
+
+    <div class="game-controls">
+      <button class="game-btn" id="g2048StartBtn" onclick="g2048Restart()">▶️ Spiel starten</button>
+      <button class="game-btn secondary" onclick="g2048ShareResult()">📤 Ergebnis teilen</button>
+    </div>
+
+
+    <div class="ga-widget" id="gaWidget"></div>
+    <div class="ga-leaderboard"><h3>🏆 2048 Bestenliste</h3><div id="gaLeaderboard"></div></div>
+  </div>
+
+<div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>Was ist 2048?</h2><p>2048 ist ein Zahlenpuzzle, das Gabriele Cirulli 2014 veröffentlichte und das zum weltweiten Hit wurde. Die Regel ist denkbar einfach — zwei Kacheln mit derselben Zahl verschmelzen zum doppelten Wert — doch das Spielfeld hat nur 16 Felder. Je größer die Zahlen werden, desto enger wird der Platz. Gefragt sind also Planung und Feldkontrolle, nicht Reaktionsgeschwindigkeit. Diese Version ist ein regelkompatibler Eigenbau von SoftGlow und behält die ursprüngliche Verschmelzungslogik und Punktevergabe bei.</p><h2>Wie der Schwierigkeitsgrad steigt</h2><p>2048 braucht keine Level oder Wellen, denn die Schwierigkeit steckt in der Spielmechanik selbst. Am Anfang ist das 4x4-Feld fast leer und jeder Zug ist unbedenklich. Wachsen die Kacheln und füllt sich das Raster, kann ein einziger unbedachter Zug das Feld blockieren. Genau dieser schrumpfende Spielraum ist die Schwierigkeitskurve.</p></article>
+
+<div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article"><h2>So wird gespielt</h2><p>Das Spielfeld besteht aus 4x4, also 16 Feldern, und startet mit zwei zufälligen Kacheln (einer 2 oder einer 4). Mit den Pfeiltasten — am Handy per Wischgeste über das Feld — schiebst du alle Kacheln in eine Richtung. Treffen zwei Kacheln mit gleicher Zahl aufeinander, verschmelzen sie zu einer Kachel mit dem doppelten Wert, und dieser Wert wird deinen Punkten zugerechnet. Nach jedem gültigen Zug erscheint eine neue 2 oder 4 auf einem freien Feld (4er sind seltener). Das Spiel endet, wenn alle 16 Felder belegt sind und in keiner Richtung mehr gleiche Nachbarn zusammenpassen.</p><h2>Tipps für mehr Punkte</h2><p>Die zuverlässigste Strategie ist, die größte Kachel in einer Ecke zu verankern — etwa unten links — und die dort aufgebaute Reihe nie zu zerstören. Richte alle anderen Züge darauf aus, diese Ecke zu schützen. Das senkt die Gefahr eines blockierten Spielfelds erheblich und verschafft dir viel mehr Gelegenheiten, große Kacheln aufzubauen.</p></article>
+
+<div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>Häufig gestellte Fragen</h2>
+  <div class="faq-item"><div class="faq-q">Wie spielt man 2048?</div><div class="faq-a">Mit den Pfeiltasten (oder per Wischgeste am Handy) schiebst du alle Kacheln in eine Richtung. Treffen zwei Kacheln mit derselben Zahl aufeinander, verschmelzen sie zum doppelten Wert — aus zwei 2ern wird eine 4. Nach jedem Zug erscheint eine neue 2 oder 4, und dein Ziel ist die 2048-Kachel.</div></div>
+  <div class="faq-item"><div class="faq-q">Ist das Spiel vorbei, wenn ich 2048 erreiche?</div><div class="faq-a">Nein. Bei 2048 erscheint der Hinweis „2048 erreicht!", und du kannst entweder für mehr Punkte weiterspielen (4096, 8192 und weiter — es gibt keine Obergrenze) oder eine neue Runde starten.</div></div>
+  <div class="faq-item"><div class="faq-q">Wann habe ich verloren?</div><div class="faq-a">Wenn alle 16 Felder belegt sind und in keiner der vier Richtungen mehr gleiche Nachbarkacheln existieren. Dann bewegt und verschmilzt kein Zug mehr etwas.</div></div>
+  <div class="faq-item"><div class="faq-q">Wird das Spiel mit der Zeit schwerer?</div><div class="faq-a">Die Schwierigkeit liegt in der Mechanik, nicht in zusätzlichen Leveln. Mit wachsenden Zahlen verschwinden die freien Felder, dein Spielraum schrumpft, und größere Kacheln erfordern präzisere Planung. Das Spiel wird also mit steigender Punktzahl von selbst anspruchsvoller.</div></div>
+  <div class="faq-item"><div class="faq-q">Gibt es einen Trick für hohe Punktzahlen?</div><div class="faq-a">Üblich ist, die größte Kachel in einer Ecke zu halten — zum Beispiel unten links —, die dort sortierten Kacheln nicht zu verschieben und alle übrigen Züge um diese Ecke herum zu planen. Das verringert das Risiko eines festgefahrenen Spielfelds deutlich.</div></div>
+  </section>
+
+  <div class="more-tools"><h3>Ähnliche Spiele</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/de/sudoku.html">Sudoku</a>
+    <a class="tool-pill" href="/games/de/minesweeper.html">Minesweeper</a>
+    <a class="tool-pill" href="/games/de/chess.html">Schach</a>
+    <a class="tool-pill" href="/games/de/snake.html">Snake-Spiel</a>
+    <a class="tool-pill" href="/games/de/piano-tiles.html">Piano Tiles</a>
+    <a class="tool-pill" href="/games/de/">Weitere Spiele</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+<div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Weitere Spiele</h3><a class="tool-pill" href="/games/de/" style="display:block;margin-top:8px">Alle Spiele ansehen →</a></div>
+<div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">Über uns</a><a href="/contact.html">Kontakt</a><a href="/home/de/privacy.html">Datenschutz</a><a href="/home/de/terms.html">AGB</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<!-- Language pack for this page. Game logic lives in /games/shared/2048.js and is -->
+<!-- shared by all 10 locales; it contains no user-facing text, only lookups into these dicts. -->
+<script>
+window.GAME_I18N = {"gameOver": "💥 Spiel beendet", "scoreLine": "Punkte: {s}", "scoreShort": "{s} Pkt.", "winTitle": "🎉 {v} erreicht!", "restartBtn": "🔄 Neu starten", "shareWithScore": "Ich habe bei 2048 auf SoftGlow {s} Punkte geholt! Schaffst du mehr?", "shareNoScore": "Spiel doch mal das Zahlenpuzzle 2048!", "copied": "Kopiert!", "ratings": ["🎲 Noch am Aufwärmen — etwas mehr Übung beim Planen hilft", "🙂 Ordentlich. Du bekommst ein Gefühl für die Verschmelzungen", "👍 Schönes Ergebnis. Du hast das Spielfeld gut im Griff", "🏆 2048 erreicht! Ein echter Zahlenmeister", "⚡ Jenseits von 2048 — legendär!"]};
+window.GA_LANG_PACK = {"loginToRank": "Melde dich an, um dein Ergebnis in die Bestenliste einzutragen 🏆", "newRecord": "🎉 Neue persönliche Bestleistung! Du bist auf Platz {r}", "submitted": "Ergebnis eingetragen — du bist auf Platz {r}", "emptyBoard": "Noch keine Ergebnisse. Melde dich an und sichere dir den ersten Platz!", "loadingBoard": "Bestenliste wird geladen…", "googleFail": "Google-Anmeldung fehlgeschlagen", "connFail": "Verbindung fehlgeschlagen, bitte später erneut versuchen", "loginOk": "Angemeldet!", "logoutOk": "Abgemeldet", "lineLoginOk": "Mit LINE angemeldet!", "lineLoginFail": "LINE-Anmeldung fehlgeschlagen, bitte erneut versuchen", "logoutBtn": "Abmelden", "loadingName": "Wird geladen…", "player": "Spieler", "loginTip": "Melde dich an, um Ergebnisse zu speichern und dich mit Freunden zu messen!", "lineBtn": "💬 Mit LINE anmelden", "fsEnter": "⛶ Vollbild", "fsExit": "✕ Vollbild beenden", "fsAria": "Spiel im Vollbild anzeigen", "fsUnsupported": "Dieser Browser unterstützt kein Vollbild", "reminderTitle": "Melde dich an, um dein {game}-Ergebnis in die Bestenliste einzutragen", "reminderSub": "Du kannst auch ohne Anmeldung spielen — dein Ergebnis wird dann nur nicht gespeichert", "reminderSkip": "Nein danke, einfach spielen", "reminderClose": "Schließen", "badge": "🔒 Anmelden für Bestenliste", "thisGame": "dieses Spiel", "gameNames": {"2048": "2048"}, "scoreUnit": {"2048": " Pkt."}};
+</script>
+<script src="/games/shared/2048.js"></script>
+
+<script>
+(function(){var AD_DELAY_MS=2000;setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},AD_DELAY_MS);})();
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Werkzeuge, Muster, Artikel suchen…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Meine Favoriten</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Alle löschen</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/games/games-auth.js"></script>
+<script>
+gaMountAuthWidget('gaWidget');
+gaMountLeaderboard('gaLeaderboard', '2048');
+gaInitFullscreenToggle();
+gaInitLoginReminder('2048');
+</script>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

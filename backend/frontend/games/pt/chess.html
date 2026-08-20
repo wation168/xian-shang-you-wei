@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xadrez - Jogo de Xadrez Online Grátis para 1 ou 2 Jogadores | SoftGlow</title>
+<meta name="description" content="Jogue xadrez grátis online — dois jogadores no mesmo dispositivo (revezando as jogadas) ou sozinho contra uma IA com 3 níveis de dificuldade. Regras completas incluindo roque, en passant, promoção de peão e detecção de xeque/xeque-mate. Sem download.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/pt/chess.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/chess.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/games/en/chess.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/games/de/chess.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/games/es/chess.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/games/fr/chess.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/games/id/chess.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/games/ja/chess.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/games/ko/chess.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/games/pt/chess.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/games/zh-CN/chess.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/en/chess.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Jogo de Xadrez", "url": "https://softglow-ai.com/games/pt/chess.html", "description": "Xadrez online grátis com modo local para dois jogadores e modo um jogador contra a IA (3 dificuldades). Regras completas incluindo roque, en passant e promoção de peão.", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "pt"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Quais modos este jogo de xadrez oferece?", "acceptedAnswer": {"@type": "Answer", "text": "Dois modos: dois jogadores no mesmo dispositivo (duas pessoas se revezam, ótimo para jogar cara a cara) e um jogador contra a IA integrada, com dificuldade Fácil, Médio ou Difícil à escolha."}}, {"@type": "Question", "name": "As regras são completas — roque, en passant, tudo isso?", "acceptedAnswer": {"@type": "Answer", "text": "Sim. A correção do gerador de movimentos foi conferida com perft, o método padrão de verificação na programação de xadrez (comparando com contagens de nós conhecidas em posições de teste padrão). Roque (dos dois lados), en passant, promoção do peão para dama/torre/bispo/cavalo e detecção de xeque/xeque-mate/afogamento estão todos totalmente implementados."}}, {"@type": "Question", "name": "O adversário computador é difícil de vencer?", "acceptedAnswer": {"@type": "Answer", "text": "Há três níveis de dificuldade: Fácil olha apenas uma jogada à frente e é fácil de lidar; Médio olha três jogadas à frente; Difícil busca até cinco jogadas à frente dentro de um tempo limite e joga de forma bem mais estruturada. Mesmo assim continua sendo uma IA leve de navegador (avaliação de valor das peças mais posição com busca minimax), não um motor de xadrez profissional — sua força fica entre iniciante e intermediário, mais que suficiente para praticar e se divertir."}}, {"@type": "Question", "name": "Dá para desfazer um movimento?", "acceptedAnswer": {"@type": "Answer", "text": "Sim — o botão desfazer volta um movimento. No modo contra o computador, desfazer volta o movimento do computador e o seu com um único clique, então é sua vez de novo e dá para repensar o erro."}}, {"@type": "Question", "name": "Preciso baixar algo ou criar uma conta?", "acceptedAnswer": {"@type": "Answer", "text": "Não — basta abrir a página e começar a jogar. Não é preciso baixar, instalar nem criar conta, tanto no modo dois jogadores quanto contra o computador, então dá para jogar uma partida sempre que der vontade."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="chess">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="pt">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+.ch-topbar{display:flex;justify-content:center;align-items:center;gap:14px;margin-bottom:16px;font-size:14px;font-weight:700;color:#1e3a5f;flex-wrap:wrap}
+.ch-turn-badge{background:linear-gradient(135deg,#334155,#0f172a);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800}
+.ch-check-badge{background:linear-gradient(135deg,#dc2626,#f97316);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800;display:none}
+.ch-check-badge.show{display:inline-block}
+.ch-mode-select{max-width:420px;margin:0 auto;text-align:center}
+.ch-mode-btn{display:block;width:100%;box-sizing:border-box;background:#fff;border:2px solid var(--game-border);border-radius:14px;padding:16px;margin-bottom:12px;cursor:pointer;text-align:left;font-family:inherit}
+.ch-mode-btn:hover{border-color:var(--game-primary)}
+.ch-mode-btn .ch-mode-title{font-size:16px;font-weight:800;color:#1e3a5f}
+.ch-mode-btn .ch-mode-desc{font-size:12.5px;color:#94a3b8;margin-top:3px}
+.ch-diff-row{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.ch-diff-row button{padding:8px 18px;border-radius:20px;border:2px solid var(--game-border);background:#fff;font-weight:700;font-size:13px;color:#1e3a5f;cursor:pointer}
+.ch-diff-row button.active{background:var(--game-primary);border-color:var(--game-primary);color:#fff}
+.ch-board-wrap{display:none}
+.ch-board-wrap.show{display:block}
+.ch-board{position:relative;width:100%;max-width:420px;aspect-ratio:1/1;margin:0 auto;border-radius:8px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.15);touch-action:none}
+.ch-grid{position:relative;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);width:100%;height:100%}
+.ch-sq{position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.ch-sq.light{background:#f0d9b5}
+.ch-sq.dark{background:#b58863}
+.ch-sq.selected{outline:3px solid #facc15;outline-offset:-3px}
+.ch-sq.last-move{background-color:#cdd26a}
+.ch-sq.in-check{background-color:#ef4444}
+.ch-piece{font-size:clamp(22px,7vw,42px);line-height:1;user-select:none;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
+.ch-piece.white{color:#fff}
+.ch-piece.black{color:#1e293b}
+.ch-dot{position:absolute;width:26%;height:26%;border-radius:50%;background:rgba(30,41,59,.35);pointer-events:none}
+.ch-dot.capture{width:88%;height:88%;background:transparent;border:4px solid rgba(220,38,38,.55);box-sizing:border-box;border-radius:50%}
+.ch-promo{position:absolute;inset:0;background:rgba(15,23,42,.82);display:none;align-items:center;justify-content:center;gap:10px;z-index:5}
+.ch-promo.show{display:flex}
+.ch-promo button{font-size:32px;background:#fff;border:none;border-radius:8px;width:56px;height:56px;cursor:pointer}
+.ch-overlay{position:absolute;inset:0;background:rgba(255,255,255,.94);border-radius:8px;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px;z-index:6}
+.ch-overlay.show{display:flex}
+.ch-overlay .ch-over-title{font-size:20px;font-weight:800;color:#1e3a5f;margin-bottom:8px}
+.ch-overlay .ch-over-sub{font-size:13px;color:#64748b;margin-bottom:14px}
+.ch-thinking{text-align:center;font-size:13px;color:#94a3b8;margin-top:8px;min-height:18px}
+.ch-record{display:flex;justify-content:center;gap:14px;margin-top:10px;font-size:13px;color:#475569}
+.ch-movelist{max-height:120px;overflow-y:auto;background:var(--game-bg);border-radius:10px;padding:10px 14px;margin-top:14px;font-size:12.5px;color:#475569;line-height:1.8}
+@media(max-width:480px){.ch-topbar{font-size:12px;gap:8px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/pt/">Ferramentas</a>
+    <a href="/games/pt/">Jogos</a>
+    <a href="/patterns/pt.html">Padrões de Candlestick</a>
+    <a href="/blog/pt/index.html">Blog</a>
+    <a href="/">Início</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/games/chess.html">繁中</option><option value="/games/en/chess.html">EN</option><option value="/games/ja/chess.html">日本語</option><option value="/games/ko/chess.html">한국어</option><option value="/games/de/chess.html">DE</option><option value="/games/fr/chess.html">FR</option><option value="/games/es/chess.html">ES</option><option value="/games/pt/chess.html" selected>PT</option><option value="/games/id/chess.html">ID</option><option value="/games/zh-CN/chess.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Início</a> &gt; <a href="/games/pt/">Jogos</a> &gt; Xadrez</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>Jogo de Xadrez</h1>
+    <p class="game-subtitle">Jogue localmente com um amigo ou desafie a IA integrada em 3 níveis de dificuldade, com regras completas: roque, en passant e promoção de peão.</p>
+
+    <div class="ch-mode-select" id="chModeSelect">
+      <button class="ch-mode-btn" onclick="chChooseMode('pvp')">
+        <div class="ch-mode-title">👥 Dois Jogadores</div>
+        <div class="ch-mode-desc">Revezem as jogadas no mesmo dispositivo — ótimo para jogar cara a cara</div>
+      </button>
+      <button class="ch-mode-btn" onclick="chChooseMode('pve')">
+        <div class="ch-mode-title">🤖 Contra o Computador</div>
+        <div class="ch-mode-desc">Desafie a IA integrada em Fácil, Médio ou Difícil</div>
+      </button>
+      <div class="ch-diff-row" id="chDiffRow" style="display:none">
+        <button data-diff="easy" onclick="chSetDifficulty('easy')">Fácil</button>
+        <button data-diff="medium" onclick="chSetDifficulty('medium')">Médio</button>
+        <button data-diff="hard" onclick="chSetDifficulty('hard')">Difícil</button>
+      </div>
+    </div>
+
+    <div class="ch-board-wrap" id="chBoardWrap">
+      <div class="ch-topbar">
+        <span class="ch-turn-badge" id="chTurnBadge"></span>
+        <span class="ch-check-badge" id="chCheckBadge">Xeque!</span>
+      </div>
+      <div class="ch-board" id="chBoard">
+        <div class="ch-grid" id="chGrid"></div>
+        <div class="ch-promo" id="chPromo"></div>
+        <div class="ch-overlay" id="chOverlay">
+          <div class="ch-over-title" id="chOverTitle"></div>
+          <div class="ch-over-sub" id="chOverSub"></div>
+          <button class="game-btn" onclick="chBackToMenu()">🔄 Jogar de novo</button>
+        </div>
+      </div>
+      <div class="ch-thinking" id="chThinking"></div>
+      <div class="ch-record"><span>Vitórias: <span id="chWins">0</span></span><span>Derrotas: <span id="chLosses">0</span></span><span>Empates: <span id="chDraws">0</span></span></div>
+
+      <div class="game-controls">
+        <button class="game-btn secondary" onclick="chUndo()">↩️ Desfazer</button>
+        <button class="game-btn secondary" onclick="chBackToMenu()">🏳️ Encerrar Partida</button>
+        <button class="game-btn secondary" onclick="chShareResult()">📤 Compartilhar</button>
+      </div>
+      <div class="ch-movelist" id="chMoveList"></div>
+    </div>
+
+
+  </div>
+
+<div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>Sobre este jogo de xadrez</h2><p>Este é um jogo de xadrez com regras completas: avanço inicial de duas casas para os peões, en passant, roque (do lado do rei e da dama), promoção do peão para dama, torre, bispo ou cavalo ao chegar na última fileira, e detecção de xeque, xeque-mate e afogamento. A correção do gerador de movimentos foi verificada com perft, o método padrão de contagem de nós reconhecido na programação de xadrez, garantindo que nenhum movimento legal fique de fora ou seja contado em duplicidade.</p><h2>Dois jogadores vs. contra o computador</h2><p>O modo dois jogadores permite que duas pessoas se revezem no mesmo dispositivo, sem precisar de conexão à internet ou conta — ótimo para jogar cara a cara. O modo um jogador traz uma IA embutida que combina valor das peças mais tabelas de posição com busca minimax e poda alfa-beta, nos níveis Fácil, Médio e Difícil; no Difícil, ela busca o mais fundo possível dentro do tempo disponível.</p></article>
+
+<div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article"><h2>Como jogar</h2><p>Clique na peça que deseja mover — os destinos legais são marcados com pontinhos (as casas de captura com um círculo vermelho), depois clique no destino para concluir o movimento. Quando um peão chega à última fileira, um menu de promoção aparece para escolher dama, torre, bispo ou cavalo. Quando você está em xeque, o tabuleiro deixa isso bem claro, e só é possível fazer movimentos que tirem o rei do xeque. O botão desfazer volta um movimento; no modo contra o computador, desfazer volta o movimento do computador e o seu ao mesmo tempo, para que seja sua vez novamente.</p><h2>Como escolher a dificuldade</h2><p>Se você é novo no xadrez, comece pelo Fácil para se familiarizar com as regras e como cada peça se move. O Médio olha três jogadas à frente, então as táticas básicas já começam a importar. O Difícil busca até cinco jogadas à frente dentro de um tempo limite e joga de forma bem mais estruturada — mas continua sendo uma IA leve de navegador, não um motor profissional. O objetivo é oferecer um desafio justo para jogadores casuais, não um adversário imbatível.</p></article>
+
+<div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>Perguntas frequentes</h2>
+  <div class="faq-item"><div class="faq-q">Quais modos este jogo de xadrez oferece?</div><div class="faq-a">Dois modos: dois jogadores no mesmo dispositivo (duas pessoas se revezam, ótimo para jogar cara a cara) e um jogador contra a IA integrada, com dificuldade Fácil, Médio ou Difícil à escolha.</div></div>
+  <div class="faq-item"><div class="faq-q">As regras são completas — roque, en passant, tudo isso?</div><div class="faq-a">Sim. A correção do gerador de movimentos foi conferida com perft, o método padrão de verificação na programação de xadrez (comparando com contagens de nós conhecidas em posições de teste padrão). Roque (dos dois lados), en passant, promoção do peão para dama/torre/bispo/cavalo e detecção de xeque/xeque-mate/afogamento estão todos totalmente implementados.</div></div>
+  <div class="faq-item"><div class="faq-q">O adversário computador é difícil de vencer?</div><div class="faq-a">Há três níveis de dificuldade: Fácil olha apenas uma jogada à frente e é fácil de lidar; Médio olha três jogadas à frente; Difícil busca até cinco jogadas à frente dentro de um tempo limite e joga de forma bem mais estruturada. Mesmo assim continua sendo uma IA leve de navegador (avaliação de valor das peças mais posição com busca minimax), não um motor de xadrez profissional — sua força fica entre iniciante e intermediário, mais que suficiente para praticar e se divertir.</div></div>
+  <div class="faq-item"><div class="faq-q">Dá para desfazer um movimento?</div><div class="faq-a">Sim — o botão desfazer volta um movimento. No modo contra o computador, desfazer volta o movimento do computador e o seu com um único clique, então é sua vez de novo e dá para repensar o erro.</div></div>
+  <div class="faq-item"><div class="faq-q">Preciso baixar algo ou criar uma conta?</div><div class="faq-a">Não — basta abrir a página e começar a jogar. Não é preciso baixar, instalar nem criar conta, tanto no modo dois jogadores quanto contra o computador, então dá para jogar uma partida sempre que der vontade.</div></div>
+  </section>
+
+  <div class="more-tools"><h3>Jogos relacionados</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/pt/2048.html">2048</a>
+    <a class="tool-pill" href="/games/pt/sudoku.html">Sudoku</a>
+    <a class="tool-pill" href="/games/pt/minesweeper.html">Campo Minado</a>
+    <a class="tool-pill" href="/games/pt/snake.html">Jogo da Cobrinha</a>
+    <a class="tool-pill" href="/games/pt/piano-tiles.html">Piano Tiles</a>
+    <a class="tool-pill" href="/games/pt/">Mais jogos</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+<div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Mais jogos</h3><a class="tool-pill" href="/games/pt/" style="display:block;margin-top:8px">Ver todos os jogos →</a></div>
+<div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">Sobre</a><a href="/contact.html">Contato</a><a href="/home/pt/privacy.html">Privacidade</a><a href="/home/pt/terms.html">Termos</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<!-- Language pack for this page. Game logic lives in /games/shared/chess.js and is -->
+<!-- shared by all 10 locales; it contains no user-facing text, only lookups into these dicts. -->
+<script>
+window.GAME_I18N = {"turnOf": "Vez das {side}", "sideWhite": "brancas", "sideBlack": "pretas", "aiThinking": "🤖 O computador está pensando…", "checkmateTitle": "👑 Xeque-mate! Vitória das {side}", "checkmateSubWin": "Parabéns, você venceu o computador!", "checkmateSubLose": "Você levou xeque-mate do computador — tente de novo!", "checkmateSubPvp": "Troquem de lugar e vejam quem encontra o xeque-mate primeiro!", "stalemateTitle": "🤝 Afogamento", "stalemateSub": "Quem tem a vez não tem nenhum movimento legal, mas o rei não está em xeque — a partida termina em empate.", "insufficientTitle": "🤝 Empate", "insufficientSub": "Nenhum dos dois lados tem material suficiente para forçar o xeque-mate — a partida termina em empate.", "fiftyTitle": "🤝 Empate pela regra dos 50 movimentos", "fiftySub": "Passaram-se 50 movimentos sem captura ou avanço de peão, então a partida é declarada empate pela regra.", "shareText": "Estou jogando xadrez no SoftGlow — acha que consegue me vencer?", "copied": "Copiado!"};
+window.GA_LANG_PACK = {"loginToRank": "Entre para colocar sua pontuação no ranking 🏆", "newRecord": "🎉 Novo recorde pessoal! Você está em {r}º lugar", "submitted": "Pontuação enviada — você está em {r}º lugar", "emptyBoard": "Ainda não há pontuações. Entre e seja o primeiro no topo!", "loadingBoard": "Carregando ranking…", "googleFail": "Falha ao entrar com o Google", "connFail": "Falha na conexão, tente novamente mais tarde", "loginOk": "Sessão iniciada!", "logoutOk": "Sessão encerrada", "lineLoginOk": "Entrou com o LINE!", "lineLoginFail": "Falha ao entrar com o LINE, tente novamente", "logoutBtn": "Sair", "loadingName": "Carregando…", "player": "Jogador", "loginTip": "Entre para salvar suas pontuações e competir com os amigos!", "lineBtn": "💬 Entrar com o LINE", "fsEnter": "⛶ Tela cheia", "fsExit": "✕ Sair da tela cheia", "fsAria": "Ampliar o jogo para tela cheia", "fsUnsupported": "Este navegador não suporta tela cheia", "reminderTitle": "Entre para salvar sua pontuação de {game} no ranking", "reminderSub": "Você pode continuar jogando sem entrar, só a pontuação não será registrada", "reminderSkip": "Não, obrigado, quero só jogar", "reminderClose": "Fechar", "badge": "🔒 Entre para entrar no ranking", "thisGame": "este jogo", "gameNames": {"chess": "Xadrez"}};
+</script>
+<script src="/games/shared/chess.js"></script>
+
+<script>
+(function(){var AD_DELAY_MS=2000;setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},AD_DELAY_MS);})();
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Pesquisar ferramentas, padrões, artigos…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Meus favoritos</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Limpar tudo</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/games/games-auth.js"></script>
+<script>
+gaInitFullscreenToggle();
+</script>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

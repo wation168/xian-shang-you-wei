@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>五子棋游戏 - 免费在线五子棋，可对战电脑或双人对战 | SoftGlow</title>
+<meta name="description" content="免费在线五子棋游戏，15x15棋盘，可以单人对战电脑AI，也可以两人轮流对战，先连成5颗棋子（横、直、斜皆可）的人获胜。纯网页小游戏，免下载免安装。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/zh-CN/gomoku.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/gomoku.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/games/en/gomoku.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/games/de/gomoku.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/games/es/gomoku.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/games/fr/gomoku.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/games/id/gomoku.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/games/ja/gomoku.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/games/ko/gomoku.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/games/pt/gomoku.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/games/zh-CN/gomoku.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/en/gomoku.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "五子棋游戏", "url": "https://softglow-ai.com/games/zh-CN/gomoku.html", "description": "免费在线五子棋游戏，15x15棋盘，可对战电脑AI或双人对战，先连成5颗棋子的人获胜。", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "zh-CN"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "五子棋怎么玩？", "acceptedAnswer": {"@type": "Answer", "text": "棋盘是15x15的格子，轮到你时直接点击任一个空格，棋子就会落在你点的那个位置（不会像四子棋一样受重力影响掉到最底端）。谁先让自己的5颗棋子连成一直线（横、直、斜线皆可）就获胜。"}}, {"@type": "Question", "name": "这个版本一个人也能玩吗？", "acceptedAnswer": {"@type": "Answer", "text": "可以。默认是「对战电脑」模式，电脑会自动下棋，一个人就能玩；如果想跟朋友面对面对战，也可以切换成「本机双人」模式，两人轮流点击同一个画面下棋，不需要注册或联网。"}}, {"@type": "Question", "name": "电脑AI很难打赢吗？", "acceptedAnswer": {"@type": "Answer", "text": "电脑会实时判断盘面上的威胁：如果自己能一步获胜一定会下，如果你快要连成5颗一定会挡，其余时候会用棋型评分（例如「活三」「冲四」）来挑选最有威胁性的落点，属于中等偏上的难度，需要同时注意多个方向的连线才有机会获胜。"}}, {"@type": "Question", "name": "为什么我点的位置棋子没有出现在那里？", "acceptedAnswer": {"@type": "Answer", "text": "五子棋是「点哪里、棋子就落在哪里」，不会有重力效果。如果棋子没出现在你点的位置，通常是因为那格已经有棋子了（无法重复下子），或是游戏还没开始、正轮到电脑思考中，这几种情况点击都不会有反应。"}}, {"@type": "Question", "name": "五子棋是四子棋吗？两个有什么不同？", "acceptedAnswer": {"@type": "Answer", "text": "不一样。四子棋（Connect Four）是7x6的棋盘，棋子投进某一栏后会受重力落到最底端，连成4颗获胜；五子棋则是15x15棋盘，可以直接点击任何空格放棋子，不受重力影响，需要连成5颗才算获胜。两者规则跟策略完全不同。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="gomoku">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="zh-CN">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+.gk-mode-row{display:flex;justify-content:center;gap:8px;margin-bottom:14px}
+.gk-mode-btn{border:1px solid var(--game-border);background:#fff;color:#64748b;border-radius:20px;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer}
+.gk-mode-btn.active{background:var(--game-primary);border-color:var(--game-primary);color:#fff}
+.gk-topbar{display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f;min-height:22px}
+.gk-turn-dot{width:16px;height:16px;border-radius:50%;display:inline-block;vertical-align:middle;border:2px solid #94a3b8;box-sizing:border-box}
+.gk-board{display:grid;gap:1px;background:#b9895a;border:3px solid #8b5e34;border-radius:6px;padding:1px;width:100%;max-width:420px;margin:0 auto;aspect-ratio:1/1;transition:opacity .15s}
+.gk-board.thinking{opacity:.7;pointer-events:none}
+.gk-cell{position:relative;aspect-ratio:1/1;background:#deb877;cursor:pointer}
+.gk-stone{position:absolute;left:8%;top:8%;width:84%;height:84%;border-radius:50%;pointer-events:none;opacity:0;transform:scale(.5);transition:opacity .1s,transform .1s}
+.gk-stone.p1{opacity:1;transform:scale(1);background:radial-gradient(circle at 35% 30%,#4b5563,#0f172a);box-shadow:0 2px 3px rgba(0,0,0,.5)}
+.gk-stone.p2{opacity:1;transform:scale(1);background:radial-gradient(circle at 35% 30%,#ffffff,#cbd5e1);box-shadow:0 2px 3px rgba(0,0,0,.4)}
+.gk-stone.win{box-shadow:0 0 0 3px #22c55e,0 2px 4px rgba(0,0,0,.4)}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/zh-CN/">工具</a>
+    <a href="/games/zh-CN/">游戏</a>
+    <a href="/patterns/zh-CN.html">K线形态</a>
+    <a href="/blog/zh-CN/index.html">教学文章</a>
+    <a href="/">首页</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/games/gomoku.html">繁中</option><option value="/games/en/gomoku.html">EN</option><option value="/games/ja/gomoku.html">日本語</option><option value="/games/ko/gomoku.html">한국어</option><option value="/games/de/gomoku.html">DE</option><option value="/games/fr/gomoku.html">FR</option><option value="/games/es/gomoku.html">ES</option><option value="/games/pt/gomoku.html">PT</option><option value="/games/id/gomoku.html">ID</option><option value="/games/zh-CN/gomoku.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">首页</a> &gt; <a href="/games/zh-CN/">游戏</a> &gt; 五子棋</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>五子棋游戏</h1>
+    <p class="game-subtitle">15x15棋盘，点击任一空格即可下子，先连成5颗棋子（横、直、斜皆可）的人获胜</p>
+
+    <div class="gk-mode-row">
+      <button class="gk-mode-btn active" id="gkModeAiBtn" onclick="gkSetMode('ai')">🤖 对战电脑</button>
+      <button class="gk-mode-btn" id="gkMode2pBtn" onclick="gkSetMode('2p')">🧑‍🤝‍🧑 本机双人</button>
+    </div>
+
+    <div class="gk-topbar">
+      <span id="gkTurnText">轮到 玩家1</span>
+      <span class="gk-turn-dot" id="gkTurnDot" style="background:#0f172a"></span>
+    </div>
+
+    <div class="gk-board" id="gkBoard"></div>
+
+    <div class="game-rating" id="gkRating"></div>
+
+    <div class="game-score-row">
+      <div class="game-score-tile"><div class="gs-label" id="gkP1Label">玩家1胜场</div><div class="gs-value" id="gkP1Wins">0</div></div>
+      <div class="game-score-tile"><div class="gs-label" id="gkP2Label">电脑胜场</div><div class="gs-value" id="gkP2Wins">0</div></div>
+    </div>
+
+    <div class="game-controls">
+      <button class="game-btn" onclick="gkRestart()">🔄 重新开始这局</button>
+      <button class="game-btn secondary" onclick="gkShareResult()">📤 分享成绩</button>
+    </div>
+
+
+
+  </div>
+
+<div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>五子棋是什么</h2><p>五子棋（Gomoku）是一款历史悠久的双人策略棋盘游戏，在15x15（或更大）的棋盘格线交叉点上轮流放置棋子，率先让自己的棋子连成横、直或斜的5连线就获胜。跟需要专用棋盘的围棋不同，五子棋规则单纯、上手极快，却同时包含很深的战术思考，是全世界都很受欢迎的益智对战游戏。</p><h2>跟四子棋有什么不同</h2><p>五子棋和四子棋（Connect Four）虽然名字很像，玩法却完全不同：四子棋是7x6棋盘，棋子投进某一栏后会受重力落到最底端，只能决定「栏」不能决定「格」；五子棋则是15x15棋盘，可以直接点击任何空格放棋子，完全不受重力限制，落子位置的自由度大很多，需要连成5颗（不是4颗）才算获胜。</p></article>
+
+<div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article"><h2>怎么玩</h2><p>游戏开始后画面会显示目前轮到哪位玩家，直接点击棋盘上任一个空格，棋子就会准确地出现在你点的那个位置。持续轮流下棋，直到有人连成5颗棋子（各方向皆可）获胜，或棋盘填满仍无人连线则平手，这时可以按「重新开始这局」再来一轮，胜场数会累计显示。上方可以切换「对战电脑」或「本机双人」两种模式，一个人也能玩，想找朋友对战也可以。</p><h2>新手常见策略</h2><p>优先抢占棋盘正中央附近的位置，因为中央能发展的连线方向最多；同时留意对手是否已经形成「活三」（两端都还开放的3颗连线），这种棋型下一步很容易变成必胜的「活四」，一定要优先阻挡。同时在多个方向布局威胁（让对手顾此失彼），是五子棋进攻的核心技巧。</p></article>
+
+<div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>常见问题</h2>
+  <div class="faq-item"><div class="faq-q">五子棋怎么玩？</div><div class="faq-a">棋盘是15x15的格子，轮到你时直接点击任一个空格，棋子就会落在你点的那个位置（不会像四子棋一样受重力影响掉到最底端）。谁先让自己的5颗棋子连成一直线（横、直、斜线皆可）就获胜。</div></div>
+  <div class="faq-item"><div class="faq-q">这个版本一个人也能玩吗？</div><div class="faq-a">可以。默认是「对战电脑」模式，电脑会自动下棋，一个人就能玩；如果想跟朋友面对面对战，也可以切换成「本机双人」模式，两人轮流点击同一个画面下棋，不需要注册或联网。</div></div>
+  <div class="faq-item"><div class="faq-q">电脑AI很难打赢吗？</div><div class="faq-a">电脑会实时判断盘面上的威胁：如果自己能一步获胜一定会下，如果你快要连成5颗一定会挡，其余时候会用棋型评分（例如「活三」「冲四」）来挑选最有威胁性的落点，属于中等偏上的难度，需要同时注意多个方向的连线才有机会获胜。</div></div>
+  <div class="faq-item"><div class="faq-q">为什么我点的位置棋子没有出现在那里？</div><div class="faq-a">五子棋是「点哪里、棋子就落在哪里」，不会有重力效果。如果棋子没出现在你点的位置，通常是因为那格已经有棋子了（无法重复下子），或是游戏还没开始、正轮到电脑思考中，这几种情况点击都不会有反应。</div></div>
+  <div class="faq-item"><div class="faq-q">五子棋是四子棋吗？两个有什么不同？</div><div class="faq-a">不一样。四子棋（Connect Four）是7x6的棋盘，棋子投进某一栏后会受重力落到最底端，连成4颗获胜；五子棋则是15x15棋盘，可以直接点击任何空格放棋子，不受重力影响，需要连成5颗才算获胜。两者规则跟策略完全不同。</div></div>
+  </section>
+
+  <div class="more-tools"><h3>相关游戏</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/zh-CN/2048.html">2048</a>
+    <a class="tool-pill" href="/games/zh-CN/sudoku.html">数独</a>
+    <a class="tool-pill" href="/games/zh-CN/minesweeper.html">扫雷</a>
+    <a class="tool-pill" href="/games/zh-CN/chess.html">国际象棋</a>
+    <a class="tool-pill" href="/games/zh-CN/snake.html">贪吃蛇</a>
+    <a class="tool-pill" href="/games/zh-CN/">更多游戏</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+<div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>更多游戏</h3><a class="tool-pill" href="/games/zh-CN/" style="display:block;margin-top:8px">浏览全部游戏 →</a></div>
+<div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">关于</a><a href="/contact.html">联系我们</a><a href="/home/zh-CN/privacy.html">隐私政策</a><a href="/home/zh-CN/terms.html">使用条款</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<!-- Language pack for this page. Game logic lives in /games/shared/gomoku.js and is -->
+<!-- shared by all 10 locales; it contains no user-facing text, only lookups into these dicts. -->
+<script>
+window.GAME_I18N = {"turnOf": "轮到 {name}", "aiThinking": "🤖 电脑思考中…", "winsLabel": "{name}胜场", "winMessage": "🎉 {name} 获胜！", "drawMessage": "🤝 平手！棋盘已满", "shareWinResult": "{name} 获胜", "shareDrawResult": "平手", "shareWithResult": "我在SoftGlow五子棋跟朋友对战，结果：{r}！来下一局吧", "shareNoResult": "来玩玩五子棋，跟朋友轮流对战！", "copied": "已复制！", "nameYou": "你", "nameComputer": "电脑", "namePlayer1": "玩家1", "namePlayer2": "玩家2"};
+window.GA_LANG_PACK = {"loginToRank": "登录才能把成绩送上排行榜 🏆", "newRecord": "🎉 新纪录！目前排名第 {r} 名", "submitted": "已送上排行榜，目前排名第 {r} 名", "emptyBoard": "还没有人上榜，登录后第一个玩就能拿下第一名！", "loadingBoard": "载入排行榜中…", "googleFail": "Google 登录失败", "connFail": "连接失败，请稍后再试", "loginOk": "登录成功！", "logoutOk": "已登出", "lineLoginOk": "LINE登录成功！", "lineLoginFail": "LINE登录失败，请再试一次", "logoutBtn": "登出", "loadingName": "载入中…", "player": "玩家", "loginTip": "登录才能把成绩存上排行榜，跟朋友比分数！", "lineBtn": "💬 用LINE登录", "fsEnter": "⛶ 全屏", "fsExit": "✕ 退出全屏", "fsAria": "全屏放大游戏", "fsUnsupported": "这个浏览器不支持全屏", "reminderTitle": "登录才能把{game}成绩存上排行榜", "reminderSub": "不登录也能继续玩，只是分数不会被记录下来", "reminderSkip": "先不用，直接玩", "reminderClose": "关闭", "badge": "🔒 登录才能上榜", "thisGame": "这个游戏", "gameNames": {"gomoku": "五子棋"}};
+</script>
+<script src="/games/shared/gomoku.js"></script>
+
+<script>
+(function(){var AD_DELAY_MS=2000;setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},AD_DELAY_MS);})();
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="搜索工具、形态、文章…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>我的收藏</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">全部清除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/games/games-auth.js"></script>
+<script>
+gaInitFullscreenToggle();
+</script>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

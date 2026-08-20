@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Match - Free Online Card Matching Game | SoftGlow</title>
+<meta name="description" content="Play Memory Match free online. Find all the matching pairs — fewer moves and less time means a higher score. A pure browser game, no download needed, that trains your short-term memory.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/en/memory-match.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/memory-match.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/games/en/memory-match.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/games/de/memory-match.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/games/es/memory-match.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/games/fr/memory-match.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/games/id/memory-match.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/games/ja/memory-match.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/games/ko/memory-match.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/games/pt/memory-match.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/games/zh-CN/memory-match.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/en/memory-match.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Memory Match", "url": "https://softglow-ai.com/games/en/memory-match.html", "description": "Free online Memory Match — find all the matching pairs and train your short-term memory.", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you play Memory Match?", "acceptedAnswer": {"@type": "Answer", "text": "There are 16 face-down cards on screen (8 matching pairs). Click to flip two at a time — matching pictures stay face up as a successful pair, non-matching ones flip back down. The goal is to find all 8 pairs in as few moves and as little time as possible."}}, {"@type": "Question", "name": "What does Memory Match train?", "acceptedAnswer": {"@type": "Answer", "text": "This game mainly trains working memory and spatial memory — you need to remember which positions revealed which pictures and recall that correctly on later turns. In research contexts, matching-pairs games like this are often used as a simple cognitive-training activity suitable for all ages."}}, {"@type": "Question", "name": "How are moves counted?", "acceptedAnswer": {"@type": "Answer", "text": "Flipping one pair of two cards — whether it matches or not — counts as one move. Fewer moves means your memory was more accurate and efficient; extra moves usually come from forgetting card positions and re-flipping combinations you've already seen."}}, {"@type": "Question", "name": "Is there a foolproof strategy?", "acceptedAnswer": {"@type": "Answer", "text": "Scan the board in a consistent order (like left-to-right, top-to-bottom) and silently rehearse each picture-to-position pairing as you go. On your first pass, try to flip every unseen position once to build a mental map — your match rate on later turns will jump significantly and your move count will drop noticeably."}}, {"@type": "Question", "name": "What's the minimum number of moves to finish?", "acceptedAnswer": {"@type": "Answer", "text": "In theory, 8 pairs can be finished in as few as 8 moves if every flip matches immediately, but that requires perfect memory of every card's position. In practice, most people land somewhere between 12 and 20 moves — finishing in 10 or fewer is a genuinely strong result."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="memory-match">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="en">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+.mm-board{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:420px;margin:0 auto}
+.mm-card{position:relative;aspect-ratio:1/1;border-radius:10px;cursor:pointer;user-select:none;touch-action:manipulation;perspective:600px}
+.mm-card-inner{position:relative;width:100%;height:100%;transition:transform .3s;transform-style:preserve-3d}
+.mm-card.flipped .mm-card-inner,.mm-card.matched .mm-card-inner{transform:rotateY(180deg)}
+.mm-face{position:absolute;inset:0;border-radius:10px;display:flex;align-items:center;justify-content:center;backface-visibility:hidden;font-size:28px}
+.mm-face-back{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;font-size:18px;font-weight:800}
+.mm-face-front{background:#f8fafc;border:2px solid #e2e8f0;transform:rotateY(180deg)}
+.mm-card.matched .mm-face-front{background:#dcfce7;border-color:#22c55e}
+.mm-topbar{display:flex;justify-content:center;gap:24px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/en/">Tools</a>
+    <a href="/games/en/">Games</a>
+    <a href="/patterns/en.html">Patterns</a>
+    <a href="/blog/en/index.html">Blog</a>
+    <a href="/">Home</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/games/memory-match.html">繁中</option><option value="/games/en/memory-match.html" selected>EN</option><option value="/games/ja/memory-match.html">日本語</option><option value="/games/ko/memory-match.html">한국어</option><option value="/games/de/memory-match.html">DE</option><option value="/games/fr/memory-match.html">FR</option><option value="/games/es/memory-match.html">ES</option><option value="/games/pt/memory-match.html">PT</option><option value="/games/id/memory-match.html">ID</option><option value="/games/zh-CN/memory-match.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> &gt; <a href="/games/en/">Games</a> &gt; Memory Match</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>Memory Match</h1>
+    <p class="game-subtitle">Find all the matching pairs — fewer moves and less time means a higher score</p>
+
+    <div class="mm-topbar">
+      <span>Moves: <span id="mmMoves">0</span></span>
+      <span>Time: <span id="mmTime">0</span>s</span>
+      <span>Pairs: <span id="mmPairs">0</span>/8</span>
+    </div>
+
+    <div class="mm-board" id="mmBoard"></div>
+
+    <div class="game-rating" id="mmRating"></div>
+
+    <div class="game-score-row">
+      <div class="game-score-tile"><div class="gs-label">Best Moves</div><div class="gs-value" id="mmBest">—</div></div>
+    </div>
+    <div class="game-history" id="mmHistory"></div>
+
+    <div class="game-controls">
+      <button class="game-btn" id="mmStartBtn" onclick="mmStart()">🔄 Restart</button>
+      <button class="game-btn secondary" onclick="mmShareResult()">📤 Share Score</button>
+    </div>
+
+
+    <div class="ga-widget" id="gaWidget"></div>
+    <div class="ga-leaderboard"><h3>🏆 Memory Match Leaderboard</h3><div id="gaLeaderboard"></div></div>
+  </div>
+
+<div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>What is Memory Match?</h2><p>Memory Match (also called Concentration) is a long-running matching-pairs game: all cards are laid face down, and on each turn the player flips two, remembering their positions and pictures to find every matching pair. The format traces back to traditional card games and has since been widely adapted into educational toys, board games, and countless electronic and web versions.</p><h2>How it helps cognitively</h2><p>Matching-pairs games are often used to practice working memory and focus, since players have to temporarily hold multiple position-to-picture mappings in mind and keep updating that memory as the game goes on. It's an activity that suits all ages, and it's commonly used as a light cognitive-training exercise in both children's education and activities for older adults.</p></article>
+
+<div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article"><h2>How to play</h2><p>When the game starts, 16 face-down cards appear on screen; click to flip two at a time. If the pictures match, both cards stay face up and are marked as a successful pair; if not, they briefly stay visible before automatically flipping back down. Keep matching until all 8 pairs are found, and the game tracks how many moves it took and how much time you spent.</p><h2>How to reduce your move count</h2><p>On your first pass, try to flip every card you haven't seen yet to build a mental map, rather than guessing early. Pairing each flip with a fixed mental-positioning trick (like silently naming board coordinates — “top-left,” “center”) is a lot more efficient than flipping randomly.</p></article>
+
+<div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>Frequently Asked Questions</h2>
+  <div class="faq-item"><div class="faq-q">How do you play Memory Match?</div><div class="faq-a">There are 16 face-down cards on screen (8 matching pairs). Click to flip two at a time — matching pictures stay face up as a successful pair, non-matching ones flip back down. The goal is to find all 8 pairs in as few moves and as little time as possible.</div></div>
+  <div class="faq-item"><div class="faq-q">What does Memory Match train?</div><div class="faq-a">This game mainly trains working memory and spatial memory — you need to remember which positions revealed which pictures and recall that correctly on later turns. In research contexts, matching-pairs games like this are often used as a simple cognitive-training activity suitable for all ages.</div></div>
+  <div class="faq-item"><div class="faq-q">How are moves counted?</div><div class="faq-a">Flipping one pair of two cards — whether it matches or not — counts as one move. Fewer moves means your memory was more accurate and efficient; extra moves usually come from forgetting card positions and re-flipping combinations you've already seen.</div></div>
+  <div class="faq-item"><div class="faq-q">Is there a foolproof strategy?</div><div class="faq-a">Scan the board in a consistent order (like left-to-right, top-to-bottom) and silently rehearse each picture-to-position pairing as you go. On your first pass, try to flip every unseen position once to build a mental map — your match rate on later turns will jump significantly and your move count will drop noticeably.</div></div>
+  <div class="faq-item"><div class="faq-q">What's the minimum number of moves to finish?</div><div class="faq-a">In theory, 8 pairs can be finished in as few as 8 moves if every flip matches immediately, but that requires perfect memory of every card's position. In practice, most people land somewhere between 12 and 20 moves — finishing in 10 or fewer is a genuinely strong result.</div></div>
+  </section>
+
+  <div class="more-tools"><h3>Related Games</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/en/2048.html">2048</a>
+    <a class="tool-pill" href="/games/en/sudoku.html">Sudoku</a>
+    <a class="tool-pill" href="/games/en/minesweeper.html">Minesweeper</a>
+    <a class="tool-pill" href="/games/en/chess.html">Chess</a>
+    <a class="tool-pill" href="/games/en/snake.html">Snake Game</a>
+    <a class="tool-pill" href="/games/en/">More Games</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+<div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>More Games</h3><a class="tool-pill" href="/games/en/" style="display:block;margin-top:8px">Browse all games →</a></div>
+<div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/home/en/privacy.html">Privacy</a><a href="/home/en/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<!-- Language pack for this page. Game logic lives in /games/shared/memory-match.js and is -->
+<!-- shared by all 10 locales; it contains no user-facing text, only lookups into these dicts. -->
+<script>
+window.GAME_I18N = {"doneMsg": "🎉 Done! {m} moves, {t} seconds", "movesShort": "{m} moves", "shareWithMoves": "I finished Memory Match on SoftGlow in just {m} moves! Think you can beat that?", "shareNoScore": "Come play Memory Match!", "copied": "Copied!"};
+window.GA_LANG_PACK = {"loginToRank": "Sign in to put your score on the leaderboard 🏆", "newRecord": "🎉 New personal best! You're ranked #{r}", "submitted": "Score submitted — you're ranked #{r}", "emptyBoard": "No scores yet. Sign in and be the first to claim the top spot!", "loadingBoard": "Loading leaderboard…", "googleFail": "Google sign-in failed", "connFail": "Connection failed, please try again later", "loginOk": "Signed in!", "logoutOk": "Signed out", "lineLoginOk": "Signed in with LINE!", "lineLoginFail": "LINE sign-in failed, please try again", "logoutBtn": "Sign out", "loadingName": "Loading…", "player": "Player", "loginTip": "Sign in to save your scores and compare with friends!", "lineBtn": "💬 Sign in with LINE", "fsEnter": "⛶ Fullscreen", "fsExit": "✕ Exit fullscreen", "fsAria": "Expand game to fullscreen", "fsUnsupported": "This browser doesn't support fullscreen", "reminderTitle": "Sign in to save your {game} score to the leaderboard", "reminderSub": "You can keep playing without signing in — your score just won't be recorded", "reminderSkip": "No thanks, just play", "reminderClose": "Close", "badge": "🔒 Sign in to rank", "thisGame": "this game", "gameNames": {"memory-match": "Memory Match"}, "scoreUnit": {"memory-match": " moves"}};
+</script>
+<script src="/games/shared/memory-match.js"></script>
+
+<script>
+(function(){var AD_DELAY_MS=2000;setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},AD_DELAY_MS);})();
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Search tools, patterns, articles…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>My Bookmarks</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Clear all</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/games/games-auth.js"></script>
+<script>
+gaMountAuthWidget('gaWidget');
+gaMountLeaderboard('gaLeaderboard', 'memory-match');
+gaInitFullscreenToggle();
+gaInitLoginReminder('memory-match');
+</script>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

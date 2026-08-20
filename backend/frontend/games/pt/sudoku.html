@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sudoku - Jogo de Lógica Grátis Online | SoftGlow</title>
+<meta name="description" content="Jogue Sudoku grátis online. Cada tabuleiro 9x9 é gerado na hora com solução única garantida, e a dificuldade sobe automaticamente conforme você resolve — de Fácil até Especialista. Sem necessidade de download.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/pt/sudoku.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/sudoku.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/games/en/sudoku.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/games/de/sudoku.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/games/es/sudoku.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/games/fr/sudoku.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/games/id/sudoku.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/games/ja/sudoku.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/games/ko/sudoku.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/games/pt/sudoku.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/games/zh-CN/sudoku.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/en/sudoku.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Jogo de Sudoku", "url": "https://softglow-ai.com/games/pt/sudoku.html", "description": "Sudoku grátis online com tabuleiros gerados instantaneamente e solução única garantida. O próximo tabuleiro carrega automaticamente e a dificuldade continua subindo.", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "pt"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Quais são as regras do Sudoku?", "acceptedAnswer": {"@type": "Answer", "text": "O tabuleiro 9x9 é dividido em nove blocos 3x3. O objetivo é preencher os dígitos de 1 a 9 de forma que cada linha (9 células na horizontal), cada coluna (9 células na vertical) e cada bloco 3x3 contenha cada número exatamente uma vez, sem repetição."}}, {"@type": "Question", "name": "Todo tabuleiro de Sudoku tem garantia de solução?", "acceptedAnswer": {"@type": "Answer", "text": "Sim, e a solução é garantidamente única. Os tabuleiros desta versão são gerados criando primeiro uma solução completa e depois removendo dígitos para formar as dicas; um algoritmo de resolução verifica ao longo do processo que as dicas restantes ainda correspondem a exatamente uma solução antes de o tabuleiro ser finalizado, então você nunca vai encontrar um tabuleiro sem solução ou com mais de uma."}}, {"@type": "Question", "name": "Como a dificuldade é classificada?", "acceptedAnswer": {"@type": "Answer", "text": "A dificuldade é classificada principalmente pela quantidade de dicas iniciais (números dados) que permanecem no tabuleiro — mais dicas geralmente é mais fácil, e menos dicas geralmente exige um raciocínio mais complexo. É uma estimativa simplificada, não uma classificação completa por técnicas de resolução (por exemplo, não distingue especificamente tabuleiros que exigem uma técnica avançada como um XY-Wing), mas é suficiente para produzir uma curva clara e progressiva de Fácil a Especialista."}}, {"@type": "Question", "name": "A dificuldade continua subindo para sempre?", "acceptedAnswer": {"@type": "Answer", "text": "Sim. Depois de terminar o primeiro tabuleiro (Fácil), o próximo carrega automaticamente, subindo Fácil → Médio → Difícil → Especialista, e permanece em Especialista a partir daí — o número de dicas não continua caindo a ponto de os tabuleiros ficarem instáveis, então a curva sobe mantendo cada tabuleiro de forma confiável resolúvel."}}, {"@type": "Question", "name": "Para que serve o botão de Dica?", "acceptedAnswer": {"@type": "Answer", "text": "Tocar em 'Dica' preenche automaticamente uma célula correta para você, ao custo de alguns pontos. Essa célula é então marcada com uma cor diferente para você conseguir diferenciá-la dos números que preencheu sozinho."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="sudoku">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="pt">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+.sk-topbar{display:flex;justify-content:center;align-items:center;gap:14px;margin-bottom:16px;font-size:14px;font-weight:700;color:#1e3a5f;flex-wrap:wrap}
+.sk-diff-badge{background:linear-gradient(135deg,#0ea5e9,#6366f1);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800;transition:transform .3s}
+.sk-diff-badge.sk-diff-up{animation:skDiffUp .5s ease}
+@keyframes skDiffUp{0%{transform:scale(1)}40%{transform:scale(1.3);box-shadow:0 0 14px rgba(99,102,241,.8)}100%{transform:scale(1)}}
+.sk-board{position:relative;width:100%;max-width:400px;aspect-ratio:1/1;margin:0 auto;background:#1e293b;border-radius:10px;padding:3px;box-sizing:border-box}
+.sk-grid{position:relative;display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr);gap:1px;width:100%;height:100%;background:#1e293b}
+.sk-cell{position:relative;background:#fff;display:flex;align-items:center;justify-content:center;font-size:clamp(12px,3.6vw,18px);font-weight:700;color:#1e3a5f;cursor:pointer;user-select:none}
+.sk-cell.sk-given{background:#eef2f7;color:#334155;cursor:default}
+.sk-cell.sk-selected{background:#bfdbfe}
+.sk-cell.sk-peer{background:#eff6ff}
+.sk-cell.sk-same-value{background:#dbeafe}
+.sk-cell.sk-conflict{color:#dc2626}
+.sk-cell.sk-hinted{color:#0891b2}
+.sk-cell:nth-child(3n){border-right:2px solid #1e293b}
+.sk-cell:nth-child(9n){border-right:none}
+.sk-row3 .sk-cell{border-bottom:2px solid #1e293b}
+.sk-numpad{display:grid;grid-template-columns:repeat(9,1fr);gap:6px;max-width:400px;margin:14px auto 0}
+.sk-numpad button{padding:10px 0;border-radius:8px;border:1px solid var(--game-border);background:#fff;font-size:16px;font-weight:700;color:#1e3a5f;cursor:pointer}
+.sk-numpad button:hover{background:var(--game-bg)}
+.sk-numpad button.sk-clear{grid-column:span 9;background:#fef2f2;color:#dc2626;font-size:13px}
+.sk-overlay{position:absolute;inset:3px;background:rgba(255,255,255,.94);border-radius:8px;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px}
+.sk-overlay.show{display:flex}
+.sk-overlay .sk-over-title{font-size:20px;font-weight:800;color:#1e3a5f;margin-bottom:8px}
+.sk-overlay .sk-over-sub{font-size:13px;color:#64748b;margin-bottom:12px}
+@media(max-width:480px){.sk-topbar{font-size:12px;gap:8px}.sk-numpad button{padding:8px 0;font-size:14px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/pt/">Ferramentas</a>
+    <a href="/games/pt/">Jogos</a>
+    <a href="/patterns/pt.html">Padrões de Candlestick</a>
+    <a href="/blog/pt/index.html">Blog</a>
+    <a href="/">Início</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/games/sudoku.html">繁中</option><option value="/games/en/sudoku.html">EN</option><option value="/games/ja/sudoku.html">日本語</option><option value="/games/ko/sudoku.html">한국어</option><option value="/games/de/sudoku.html">DE</option><option value="/games/fr/sudoku.html">FR</option><option value="/games/es/sudoku.html">ES</option><option value="/games/pt/sudoku.html" selected>PT</option><option value="/games/id/sudoku.html">ID</option><option value="/games/zh-CN/sudoku.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Início</a> &gt; <a href="/games/pt/">Jogos</a> &gt; Sudoku</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>Jogo de Sudoku</h1>
+    <p class="game-subtitle">Cada tabuleiro 9x9 é gerado instantaneamente com solução única garantida; ao resolver, o próximo carrega automaticamente, subindo de Fácil até Especialista.</p>
+
+    <div class="sk-topbar">
+      <span>Pontos: <span id="skScore">0</span></span>
+      <span class="sk-diff-badge" id="skDiffBadge">Fácil</span>
+      <span>Tabuleiro nº <span id="skPuzzleNum">1</span></span>
+      <span>⏱ <span id="skTimer">00:00</span></span>
+    </div>
+
+    <div class="sk-board" id="skBoard">
+      <div class="sk-grid" id="skGrid"></div>
+      <div class="sk-overlay" id="skOverlay">
+        <div class="sk-over-title" id="skOverTitle">🧩 Pronto?</div>
+        <div class="sk-over-sub" id="skOverSub">Toque no botão abaixo para começar o primeiro tabuleiro</div>
+      </div>
+    </div>
+
+    <div class="sk-numpad" id="skNumpad"></div>
+
+    <div class="game-rating" id="skRating"></div>
+
+    <div class="game-score-row">
+      <div class="game-score-tile"><div class="gs-label">Melhor Pontuação</div><div class="gs-value" id="skBest">—</div></div>
+      <div class="game-score-tile"><div class="gs-label">Dificuldade Máxima</div><div class="gs-value" id="skBestDiff">—</div></div>
+    </div>
+    <div class="game-history" id="skHistory"></div>
+
+    <div class="game-controls">
+      <button class="game-btn" id="skStartBtn" onclick="skStart()">▶️ Começar a jogar</button>
+      <button class="game-btn secondary" onclick="skHint()">💡 Dica</button>
+      <button class="game-btn secondary" onclick="skClearEntries()">🧹 Limpar Minhas Respostas</button>
+      <button class="game-btn secondary" onclick="skShareResult()">📤 Compartilhar pontuação</button>
+    </div>
+
+
+    <div class="ga-widget" id="gaWidget"></div>
+    <div class="ga-leaderboard"><h3>🏆 Ranking de Sudoku</h3><div id="gaLeaderboard"></div></div>
+  </div>
+
+<div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>O que é Sudoku?</h2><p>Sudoku é um quebra-cabeça numérico que remonta à Suíça, mas se tornou um fenômeno mundial depois de ser popularizado por uma editora japonesa nos anos 1980. Um tabuleiro 9x9 é dividido em nove blocos 3x3, e o objetivo é preencher as células vazias com dígitos de 1 a 9 sem repetir nenhum número em nenhuma linha, coluna ou bloco. Cada tabuleiro desta versão é gerado na hora, em vez de vir de um banco fixo de tabuleiros, então, em teoria, você nunca ficará sem opções.</p><h2>A dificuldade continua subindo</h2><p>Ao terminar um tabuleiro, o próximo carrega automaticamente, com a dificuldade subindo de Fácil para Médio, depois Difícil e finalmente Especialista, permanecendo em Especialista dali em diante. A dificuldade é ajustada principalmente pela quantidade de dicas iniciais mantidas — menos dicas geralmente significa mais dedução lógica necessária para avançar. Isso foi pensado como uma curva claramente ascendente, ao mesmo tempo garantindo que todo tabuleiro seja resolúvel.</p></article>
+
+<div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article"><h2>Como jogar</h2><p>Toque em uma célula para selecioná-la e pressione de 1 a 9 no teclado (ou use o teclado numérico na tela) para preenchê-la; Backspace, Delete ou o botão 'Limpar' do teclado numérico esvaziam a célula. Números com fundo cinza são as dicas dadas pelo tabuleiro e não podem ser alterados; as células brancas são as que você precisa preencher. Se o número que você inserir entrar em conflito com outro na mesma linha, coluna ou bloco, ele fica vermelho como aviso, mas isso não bloqueia a entrada — você decide se corrige na hora ou segue em frente. Ao preencher tudo corretamente, o tabuleiro é marcado como concluído automaticamente e o próximo carrega.</p><h2>Dicas e recomeço</h2><p>Travou? Toque em 'Dica' e o jogo preenche corretamente uma célula para você (ao custo de alguns pontos, e ela é marcada com uma cor diferente para você saber que foi uma dica). 'Limpar Minhas Respostas' apaga tudo o que você preencheu, mantendo intactas as dicas originais do tabuleiro, para que você possa raciocinar de novo desde o início.</p></article>
+
+<div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>Perguntas frequentes</h2>
+  <div class="faq-item"><div class="faq-q">Quais são as regras do Sudoku?</div><div class="faq-a">O tabuleiro 9x9 é dividido em nove blocos 3x3. O objetivo é preencher os dígitos de 1 a 9 de forma que cada linha (9 células na horizontal), cada coluna (9 células na vertical) e cada bloco 3x3 contenha cada número exatamente uma vez, sem repetição.</div></div>
+  <div class="faq-item"><div class="faq-q">Todo tabuleiro de Sudoku tem garantia de solução?</div><div class="faq-a">Sim, e a solução é garantidamente única. Os tabuleiros desta versão são gerados criando primeiro uma solução completa e depois removendo dígitos para formar as dicas; um algoritmo de resolução verifica ao longo do processo que as dicas restantes ainda correspondem a exatamente uma solução antes de o tabuleiro ser finalizado, então você nunca vai encontrar um tabuleiro sem solução ou com mais de uma.</div></div>
+  <div class="faq-item"><div class="faq-q">Como a dificuldade é classificada?</div><div class="faq-a">A dificuldade é classificada principalmente pela quantidade de dicas iniciais (números dados) que permanecem no tabuleiro — mais dicas geralmente é mais fácil, e menos dicas geralmente exige um raciocínio mais complexo. É uma estimativa simplificada, não uma classificação completa por técnicas de resolução (por exemplo, não distingue especificamente tabuleiros que exigem uma técnica avançada como um XY-Wing), mas é suficiente para produzir uma curva clara e progressiva de Fácil a Especialista.</div></div>
+  <div class="faq-item"><div class="faq-q">A dificuldade continua subindo para sempre?</div><div class="faq-a">Sim. Depois de terminar o primeiro tabuleiro (Fácil), o próximo carrega automaticamente, subindo Fácil → Médio → Difícil → Especialista, e permanece em Especialista a partir daí — o número de dicas não continua caindo a ponto de os tabuleiros ficarem instáveis, então a curva sobe mantendo cada tabuleiro de forma confiável resolúvel.</div></div>
+  <div class="faq-item"><div class="faq-q">Para que serve o botão de Dica?</div><div class="faq-a">Tocar em 'Dica' preenche automaticamente uma célula correta para você, ao custo de alguns pontos. Essa célula é então marcada com uma cor diferente para você conseguir diferenciá-la dos números que preencheu sozinho.</div></div>
+  </section>
+
+  <div class="more-tools"><h3>Jogos relacionados</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/pt/2048.html">2048</a>
+    <a class="tool-pill" href="/games/pt/minesweeper.html">Campo Minado</a>
+    <a class="tool-pill" href="/games/pt/chess.html">Xadrez</a>
+    <a class="tool-pill" href="/games/pt/snake.html">Jogo da Cobrinha</a>
+    <a class="tool-pill" href="/games/pt/piano-tiles.html">Piano Tiles</a>
+    <a class="tool-pill" href="/games/pt/">Mais jogos</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+<div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Mais jogos</h3><a class="tool-pill" href="/games/pt/" style="display:block;margin-top:8px">Ver todos os jogos →</a></div>
+<div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">Sobre</a><a href="/contact.html">Contato</a><a href="/home/pt/privacy.html">Privacidade</a><a href="/home/pt/terms.html">Termos</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<!-- Language pack for this page. Game logic lives in /games/shared/sudoku.js and is -->
+<!-- shared by all 10 locales; it contains no user-facing text, only lookups into these dicts. -->
+<script>
+window.GAME_I18N = {"clearCell": "Limpar esta célula", "puzzleDone": "🎉 Tabuleiro nº {n} concluído!", "nextUp": "Levou {t}, ganhou {g} pontos — a seguir: {d}", "scoreShort": "{s} pts", "restartRound": "🔄 Reiniciar", "shareWithScore": "Consegui {s} pontos no Sudoku do SoftGlow! Até onde você consegue chegar?", "shareNoScore": "Venha jogar Sudoku no SoftGlow!", "copied": "Copiado!", "difficulties": ["Fácil", "Médio", "Difícil", "Especialista"], "ratings": ["🧩 Começando agora — mais alguns tabuleiros e vai pegar o jeito", "🙂 Sólido — você já pegou o jeito da lógica", "👍 Boa pontuação — tabuleiros difíceis não te assustam mais", "🏆 Nível especialista — você resolve tabuleiros de Especialista com confiança", "⚡ Mestre do Sudoku — essa dificuldade é moleza para você!"]};
+window.GA_LANG_PACK = {"loginToRank": "Entre para colocar sua pontuação no ranking 🏆", "newRecord": "🎉 Novo recorde pessoal! Você está em {r}º lugar", "submitted": "Pontuação enviada — você está em {r}º lugar", "emptyBoard": "Ainda não há pontuações. Entre e seja o primeiro no topo!", "loadingBoard": "Carregando ranking…", "googleFail": "Falha ao entrar com o Google", "connFail": "Falha na conexão, tente novamente mais tarde", "loginOk": "Sessão iniciada!", "logoutOk": "Sessão encerrada", "lineLoginOk": "Entrou com o LINE!", "lineLoginFail": "Falha ao entrar com o LINE, tente novamente", "logoutBtn": "Sair", "loadingName": "Carregando…", "player": "Jogador", "loginTip": "Entre para salvar suas pontuações e competir com os amigos!", "lineBtn": "💬 Entrar com o LINE", "fsEnter": "⛶ Tela cheia", "fsExit": "✕ Sair da tela cheia", "fsAria": "Ampliar o jogo para tela cheia", "fsUnsupported": "Este navegador não suporta tela cheia", "reminderTitle": "Entre para salvar sua pontuação de {game} no ranking", "reminderSub": "Você pode continuar jogando sem entrar, só a pontuação não será registrada", "reminderSkip": "Não, obrigado, quero só jogar", "reminderClose": "Fechar", "badge": "🔒 Entre para entrar no ranking", "thisGame": "este jogo", "gameNames": {"sudoku": "Sudoku"}, "scoreUnit": {"sudoku": " pts"}};
+</script>
+<script src="/games/shared/sudoku.js"></script>
+
+<script>
+(function(){var AD_DELAY_MS=2000;setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},AD_DELAY_MS);})();
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Pesquisar ferramentas, padrões, artigos…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Meus favoritos</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Limpar tudo</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/games/games-auth.js"></script>
+<script>
+gaMountAuthWidget('gaWidget');
+gaMountLeaderboard('gaLeaderboard', 'sudoku');
+gaInitFullscreenToggle();
+gaInitLoginReminder('sudoku');
+</script>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数字爆弾ゲーム - 数当てゲーム（究極のパスワード）、無料オンライン | SoftGlow</title>
+<meta name="description" content="無料で遊べるオンライン数字爆弾ゲーム。「大きい」「小さい」のヒントを頼りに範囲を絞り込み、回数が尽きる前に正解の数字を当てよう。秘密の数字を当てた方が負けとなる二人対戦モードもあり。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/ja/number-bomb.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/number-bomb.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/games/en/number-bomb.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/games/de/number-bomb.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/games/es/number-bomb.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/games/fr/number-bomb.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/games/id/number-bomb.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/games/ja/number-bomb.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/games/ko/number-bomb.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/games/pt/number-bomb.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/games/zh-CN/number-bomb.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/en/number-bomb.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "数字爆弾ゲーム", "url": "https://softglow-ai.com/games/ja/number-bomb.html", "description": "無料オンライン数字爆弾（数当て）ゲーム。大小のヒントで範囲を絞り込み、回数が尽きる前に正解を見つけよう。交互に挑戦する二人対戦モードにも対応。", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "ja"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "数字爆弾（究極のパスワード）の遊び方は？", "acceptedAnswer": {"@type": "Answer", "text": "コンピュータが指定された範囲内でこっそり数字を1つ決める。予想を入力すると「大きすぎ」か「小さすぎ」を教えてくれるので、そのヒントを基に範囲を絞りながら予想を続ける。目標は予想回数が尽きる前に正解を当てること。回数が尽きても当てられなければ爆弾が爆発し、ゲーム終了となる。"}}, {"@type": "Question", "name": "予想回数はどうやって決めているの？公平？", "acceptedAnswer": {"@type": "Answer", "text": "回数は最適な「二分探索」戦略（毎回現在の範囲のちょうど真ん中を予想する）から逆算した最少回数に、さらに2回分の余裕を足したもの。つまり毎回範囲の真ん中を予想し続ければ、理論上は必ず当てられ、理不尽に爆発することはない。この公平性は大量のランダムシミュレーションで検証済み。"}}, {"@type": "Question", "name": "範囲は遊ぶほど大きくなるの？", "acceptedAnswer": {"@type": "Answer", "text": "なる。1~50からスタートし、クリアするたびに1~100、1~200、1~500、1~1000へと順に大きくなり、その後は1~1000のまま出題が続く。範囲が大きくなるほど予想回数の上限も増えるが、全体としては難易度が上がり続ける設計になっている。"}}, {"@type": "Question", "name": "二人対戦モードのルールは？", "acceptedAnswer": {"@type": "Answer", "text": "伝統的な究極のパスワードの遊び方そのもの。システムがこっそり数字を1つ決め（どちらのプレイヤーも知らない）、二人が交互に予想する。予想するたびに範囲がさらに絞られていき、秘密の数字を当ててしまった方が負けとなる。スマホや端末を交代しながら予想すればOK。"}}, {"@type": "Question", "name": "スコアはどうやって計算されるの？", "acceptedAnswer": {"@type": "Answer", "text": "各ラウンドのスコアは2つの要素からなる。基礎点（そのラウンドの範囲の大きさで決まり、範囲が大きいほど基礎点が高い）と、効率ボーナス（使った予想回数が少ないほど高くなる）だ。高得点を狙うには、範囲がより大きい後半のラウンドまで進むことと、できるだけ少ない回数で当てることの両方が重要になる。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="number-bomb">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="ja">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+.nb-tabs{display:flex;justify-content:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.nb-tab{background:#e2e8f0;color:#334155;border:none;border-radius:20px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s ease}
+.nb-tab.active{background:linear-gradient(135deg,#dc2626,#ea580c);color:#fff}
+.nb-panel{display:none}
+.nb-panel.active{display:block}
+.nb-topbar{display:flex;justify-content:center;align-items:center;gap:14px;margin-bottom:14px;font-size:14px;font-weight:700;color:#1e3a5f;flex-wrap:wrap}
+.nb-round-badge{background:linear-gradient(135deg,#dc2626,#ea580c);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800;transition:transform .3s}
+.nb-round-badge.nb-round-up{animation:nbRoundUp .5s ease}
+@keyframes nbRoundUp{0%{transform:scale(1)}40%{transform:scale(1.3);box-shadow:0 0 14px rgba(234,88,12,.8)}100%{transform:scale(1)}}
+.nb-stage{background:#1e293b;border-radius:14px;padding:20px;max-width:460px;margin:0 auto;position:relative}
+.nb-range-display{text-align:center;color:#e2e8f0;font-size:15px;font-weight:700;margin-bottom:12px}
+.nb-range-display .nb-range-num{color:#fbbf24;font-size:19px}
+.nb-fuse-wrap{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.nb-fuse-track{flex:1;height:14px;background:#334155;border-radius:8px;overflow:hidden}
+.nb-fuse-fill{height:100%;background:linear-gradient(90deg,#22c55e,#eab308,#dc2626);border-radius:8px;transition:width .3s ease}
+.nb-fuse-bomb{font-size:22px}
+.nb-fuse-text{text-align:center;color:#94a3b8;font-size:12px;margin-bottom:14px}
+.nb-guess-row{display:flex;justify-content:center;gap:8px;margin-bottom:12px}
+.nb-guess-row input{width:120px;padding:10px 12px;border-radius:10px;border:none;font-size:18px;text-align:center;font-weight:800}
+.nb-guess-row button{background:linear-gradient(135deg,#dc2626,#ea580c);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:15px;font-weight:800;cursor:pointer}
+.nb-guess-row button:disabled{opacity:.5;cursor:not-allowed}
+.nb-feedback{text-align:center;font-size:16px;font-weight:800;min-height:24px;margin-bottom:10px;color:#fbbf24}
+.nb-log{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-height:120px;overflow-y:auto}
+.nb-log-item{background:rgba(255,255,255,.08);color:#e2e8f0;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700}
+.nb-log-item.nb-log-hit{background:#16a34a}
+.nb-overlay{position:absolute;inset:8px;background:rgba(15,23,42,.96);border-radius:10px;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px}
+.nb-overlay.show{display:flex}
+.nb-overlay .nb-over-title{font-size:22px;font-weight:800;color:#fff;margin-bottom:8px}
+.nb-overlay .nb-over-sub{font-size:13px;color:#cbd5e1;margin-bottom:14px}
+.nb-hint{text-align:center;font-size:12px;color:#94a3b8;margin-top:10px}
+.nb-duel-setup{text-align:center}
+.nb-range-opts{display:flex;justify-content:center;gap:8px;margin:14px 0}
+.nb-range-opt{background:#e2e8f0;color:#334155;border:none;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:700;cursor:pointer}
+.nb-range-opt.active{background:linear-gradient(135deg,#dc2626,#ea580c);color:#fff}
+.nb-turn-badge{text-align:center;font-size:17px;font-weight:800;margin-bottom:10px;padding:8px;border-radius:10px}
+.nb-turn-badge.nb-turn-a{background:#dbeafe;color:#1e40af}
+.nb-turn-badge.nb-turn-b{background:#fce7f3;color:#9d174d}
+@media(max-width:480px){.nb-topbar{font-size:12px;gap:8px}.nb-guess-row input{width:90px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/ja/">ツール</a>
+    <a href="/games/ja/">ゲーム</a>
+    <a href="/patterns/ja.html">チャートパターン</a>
+    <a href="/blog/ja/index.html">ブログ</a>
+    <a href="/">ホーム</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/games/number-bomb.html">繁中</option><option value="/games/en/number-bomb.html">EN</option><option value="/games/ja/number-bomb.html" selected>日本語</option><option value="/games/ko/number-bomb.html">한국어</option><option value="/games/de/number-bomb.html">DE</option><option value="/games/fr/number-bomb.html">FR</option><option value="/games/es/number-bomb.html">ES</option><option value="/games/pt/number-bomb.html">PT</option><option value="/games/id/number-bomb.html">ID</option><option value="/games/zh-CN/number-bomb.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">ホーム</a> &gt; <a href="/games/ja/">ゲーム</a> &gt; 数字爆弾</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>数字爆弾ゲーム</h1>
+    <p class="game-subtitle">定番の数当てゲーム。「大きすぎ」「小さすぎ」のヒントで範囲を絞り込み、回数が尽きる前に正解を見つけよう。二人対戦モードに切り替えれば交互に挑戦、秘密の数字を当てた方が負け。</p>
+
+    <div class="nb-tabs">
+      <button class="nb-tab active" id="nbTabSoloBtn" onclick="nbSwitchTab('solo')">💣 解除モード（一人）</button>
+      <button class="nb-tab" id="nbTabDuelBtn" onclick="nbSwitchTab('duel')">⚔️ 二人対戦</button>
+    </div>
+
+    <!-- ══ 單人拆彈模式 ══ -->
+    <div class="nb-panel active" id="nbSoloPanel">
+      <div class="nb-topbar">
+        <span>合計スコア：<span id="nbScore">0</span></span>
+        <span class="nb-round-badge" id="nbRoundBadge">第1ラウンド</span>
+      </div>
+
+      <div class="nb-stage" id="nbSoloStage">
+        <div class="nb-range-display">範囲：<span class="nb-range-num" id="nbRangeMin">1</span> ~ <span class="nb-range-num" id="nbRangeMax">50</span></div>
+        <div class="nb-fuse-wrap">
+          <span class="nb-fuse-bomb">💣</span>
+          <div class="nb-fuse-track"><div class="nb-fuse-fill" id="nbFuseFill" style="width:100%"></div></div>
+        </div>
+        <div class="nb-fuse-text" id="nbFuseText">残り回数：8 / 8</div>
+        <div class="nb-feedback" id="nbFeedback">準備はいい？スタートを押して遊ぼう！</div>
+        <div class="nb-guess-row">
+          <input type="number" id="nbGuessInput" placeholder="数字を入力" disabled>
+          <button id="nbGuessBtn" onclick="nbSubmitGuess()" disabled>💥 予想する！</button>
+        </div>
+        <div class="nb-log" id="nbGuessLog"></div>
+        <div class="nb-overlay" id="nbOverlay">
+          <div class="nb-over-title" id="nbOverTitle">💣 準備はいい？</div>
+          <div class="nb-over-sub" id="nbOverSub">1~50からスタート、回数が尽きる前に正解を見つけよう</div>
+        </div>
+      </div>
+      <div class="nb-hint">予想するたびに「大きすぎ」か「小さすぎ」のヒントがもらえるよ。毎回範囲のちょうど真ん中を狙う（二分探索）のが一番少ない回数で当てられるコツ</div>
+
+      <div class="game-rating" id="nbRating"></div>
+
+      <div class="game-score-row">
+        <div class="game-score-tile"><div class="gs-label">自己ベスト</div><div class="gs-value" id="nbBest">—</div></div>
+        <div class="game-score-tile"><div class="gs-label">最高到達ラウンド</div><div class="gs-value" id="nbBestRound">—</div></div>
+      </div>
+      <div class="game-history" id="nbHistory"></div>
+
+      <div class="game-controls">
+        <button class="game-btn" id="nbStartBtn" onclick="nbStart()">▶️ ゲーム開始</button>
+        <button class="game-btn secondary" onclick="nbShareResult()">📤 スコアをシェア</button>
+      </div>
+    </div>
+
+    <!-- ══ 雙人對戰模式 ══ -->
+    <div class="nb-panel" id="nbDuelPanel">
+      <div class="nb-duel-setup" id="nbDuelSetup">
+        <p style="color:#64748b;font-size:14px;margin-bottom:6px">範囲を選ぶと、システムがこっそり数字を1つ決めるよ（どちらのプレイヤーも知らない）。交互に予想して、当てた方が負け。</p>
+        <div class="nb-range-opts" id="nbDuelRangeOpts"></div>
+        <button class="game-btn" onclick="nbDuelStart()">⚔️ 対戦スタート</button>
+      </div>
+      <div class="nb-stage" id="nbDuelStage" style="display:none">
+        <div class="nb-turn-badge nb-turn-a" id="nbTurnBadge">🔴 プレイヤー1の番</div>
+        <div class="nb-range-display">範囲：<span class="nb-range-num" id="nbDuelMin">1</span> ~ <span class="nb-range-num" id="nbDuelMax">100</span></div>
+        <div class="nb-feedback" id="nbDuelFeedback">数字を予想してみよう</div>
+        <div class="nb-guess-row">
+          <input type="number" id="nbDuelInput" placeholder="数字を入力">
+          <button id="nbDuelGuessBtn" onclick="nbDuelSubmitGuess()">💥 予想する！</button>
+        </div>
+        <div class="nb-log" id="nbDuelLog"></div>
+        <div class="nb-overlay" id="nbDuelOverlay">
+          <div class="nb-over-title" id="nbDuelOverTitle">💥</div>
+          <div class="nb-over-sub" id="nbDuelOverSub"></div>
+        </div>
+      </div>
+      <div class="nb-hint">二人対戦モードはスコアやランキングに関係なし、当ててしまわないように気をつけるだけのシンプル対決</div>
+      <div class="game-controls">
+        <button class="game-btn secondary" onclick="nbDuelReset()">🔄 設定をやり直す</button>
+      </div>
+    </div>
+
+
+
+    <div class="ga-widget" id="gaWidget"></div>
+    <div class="ga-leaderboard"><h3>🏆 数字爆弾ランキング</h3><div id="gaLeaderboard"></div></div>
+  </div>
+
+<div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>数字爆弾（究極のパスワード）の由来</h2><p>数字爆弾は「究極のパスワード」とも呼ばれ、飲み会や教室でとても定番の数当てゲームだ。一人が心の中で数字を決め、他の人が交互に予想し、予想するたびに「大きすぎ」か「小さすぎ」のヒントがもらえて範囲がどんどん絞られていく。秘密の数字を当ててしまった人が「爆弾を踏む」ことになる。このバージョンは一人で楽しめる解除チャレンジモードに仕立てつつ、定番の二人交互対戦もそのまま残している。</p><h2>回数制限の設計について</h2><p>解除モードの予想回数は適当に決めたものではなく、「二分探索」という定番アルゴリズムから逆算されている。毎回現在の範囲のちょうど真ん中を予想すれば、範囲1~50なら最大6回、1~1000なら最大10回で必ず当てられる。このバージョンではさらに2回分の余裕を追加し、公平さを保ちながら少しスリルも残している。</p></article>
+
+<div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article"><h2>遊び方</h2><p>解除モード：画面に現在の数字範囲が表示される。予想を入力して「予想する！」を押すと、システムが答えが予想より大きいか小さいかを教えてくれるので、それに応じて範囲を絞りながら予想を続ける。残り回数は燃えていく導火線として表示され、当てられないまま回数が尽きると爆弾が爆発してゲーム終了、獲得した合計ポイントでスコアが決まる。正解すると自動的に次のラウンドに進み、範囲がどんどん大きくなり、それに合わせて予想回数の上限も増えていく。対戦モード：範囲を選んでスタートを押すと、システムがこっそり数字を1つ決め、二人のプレイヤーが交互に予想する（同じ端末を渡し合えばOK）。予想するたびに範囲がさらに絞られていき、誰かが正解を当てて「爆弾を踏む」までそのラウンドは続く。</p><h2>高得点のコツ</h2><p>最も効率の良い戦略は毎回「現在の範囲のちょうど真ん中」を予想すること。こうすれば予想するたびに範囲が半分になり、最少の回数で答えに近づける。スコアは範囲の大きさ（大きいほど基礎点が高い）と節約できた予想回数（節約するたびにボーナス加点）で決まる。高得点を狙うには、範囲がより大きい後半のラウンドまで進むことと、できるだけ少ない回数で当てることの両方が重要だ。</p></article>
+
+<div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>よくある質問</h2>
+  <div class="faq-item"><div class="faq-q">数字爆弾（究極のパスワード）の遊び方は？</div><div class="faq-a">コンピュータが指定された範囲内でこっそり数字を1つ決める。予想を入力すると「大きすぎ」か「小さすぎ」を教えてくれるので、そのヒントを基に範囲を絞りながら予想を続ける。目標は予想回数が尽きる前に正解を当てること。回数が尽きても当てられなければ爆弾が爆発し、ゲーム終了となる。</div></div>
+  <div class="faq-item"><div class="faq-q">予想回数はどうやって決めているの？公平？</div><div class="faq-a">回数は最適な「二分探索」戦略（毎回現在の範囲のちょうど真ん中を予想する）から逆算した最少回数に、さらに2回分の余裕を足したもの。つまり毎回範囲の真ん中を予想し続ければ、理論上は必ず当てられ、理不尽に爆発することはない。この公平性は大量のランダムシミュレーションで検証済み。</div></div>
+  <div class="faq-item"><div class="faq-q">範囲は遊ぶほど大きくなるの？</div><div class="faq-a">なる。1~50からスタートし、クリアするたびに1~100、1~200、1~500、1~1000へと順に大きくなり、その後は1~1000のまま出題が続く。範囲が大きくなるほど予想回数の上限も増えるが、全体としては難易度が上がり続ける設計になっている。</div></div>
+  <div class="faq-item"><div class="faq-q">二人対戦モードのルールは？</div><div class="faq-a">伝統的な究極のパスワードの遊び方そのもの。システムがこっそり数字を1つ決め（どちらのプレイヤーも知らない）、二人が交互に予想する。予想するたびに範囲がさらに絞られていき、秘密の数字を当ててしまった方が負けとなる。スマホや端末を交代しながら予想すればOK。</div></div>
+  <div class="faq-item"><div class="faq-q">スコアはどうやって計算されるの？</div><div class="faq-a">各ラウンドのスコアは2つの要素からなる。基礎点（そのラウンドの範囲の大きさで決まり、範囲が大きいほど基礎点が高い）と、効率ボーナス（使った予想回数が少ないほど高くなる）だ。高得点を狙うには、範囲がより大きい後半のラウンドまで進むことと、できるだけ少ない回数で当てることの両方が重要になる。</div></div>
+  </section>
+
+  <div class="more-tools"><h3>関連ゲーム</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/ja/2048.html">2048</a>
+    <a class="tool-pill" href="/games/ja/sudoku.html">数独</a>
+    <a class="tool-pill" href="/games/ja/minesweeper.html">マインスイーパ</a>
+    <a class="tool-pill" href="/games/ja/chess.html">チェス</a>
+    <a class="tool-pill" href="/games/ja/snake.html">スネークゲーム</a>
+    <a class="tool-pill" href="/games/ja/">他のゲーム</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+<div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>他のゲーム</h3><a class="tool-pill" href="/games/ja/" style="display:block;margin-top:8px">ゲーム一覧を見る →</a></div>
+<div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">運営者情報</a><a href="/contact.html">お問い合わせ</a><a href="/home/ja/privacy.html">プライバシー</a><a href="/home/ja/terms.html">利用規約</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<!-- Language pack for this page. Game logic lives in /games/shared/number-bomb.js and is -->
+<!-- shared by all 10 locales; it contains no user-facing text, only lookups into these dicts. -->
+<script>
+window.GAME_I18N = {"roundLabel": "第{n}ラウンド", "fuseText": "残り回数：{left} / {allowed}", "rangeReady": "範囲 {min}~{max}、予想スタート！", "invalidGuess": "{min}~{max}の間の整数を入力してね", "logHit": "{g} 命中！", "logHigher": "{g} ⬆️小さすぎ", "logLower": "{g} ⬇️大きすぎ", "scoreGainShort": "+{v}点", "hitFeedback": "🎉 正解！答えは{s}、{g}点獲得", "feedbackHigher": "小さすぎ⬆️ もっと大きく予想してみよう", "feedbackLower": "大きすぎ⬇️ もっと小さく予想してみよう", "explodeTitle": "💥 爆発した！", "explodeSub": "第{n}ラウンドで回数内に当てられなかった（正解は{s}）、最終スコアは{sc}点", "restartChallengeBtn": "🔄 もう一度挑戦", "scoreShort": "{v}点", "shareWithScore": "SoftGlowの数字爆弾ゲームで{s}点獲得したよ！どこまで解除できるか試してみて", "shareNoScore": "SoftGlowの数字爆弾ゲームで遊んでみよう！", "copied": "コピーしました！", "duelRangeLabel": "1~{r}", "namePlayerA": "プレイヤー1", "namePlayerB": "プレイヤー2", "turnOf": "{name}の番", "duelSecretReady": "システムが1~{r}の間の数字をこっそり決めたよ", "duelLogEntry": "{name}：{g}", "duelLoseTitle": "💥 {name}が爆弾を踏んだ！", "duelWinSub": "{name}の勝ち！秘密の数字は{s}だった", "duelFeedbackHigher": "小さすぎ⬆️", "duelFeedbackLower": "大きすぎ⬇️", "ratings": ["💣 始めたばかり、二分探索の戦略をもう少し練習しよう", "🙂 平均的な解除力、範囲を絞るリズムがつかめてきた", "👍 熟練の解除力、大きい範囲でも動じない", "🏆 解除エキスパート、4桁の範囲も安定して解ける", "⚡ 解除マスター、毎回最少回数でピンポイント命中！"]};
+window.GA_LANG_PACK = {"loginToRank": "ログインするとスコアをランキングに登録できます 🏆", "newRecord": "🎉 自己ベスト更新！現在{r}位です", "submitted": "スコアを登録しました — 現在{r}位です", "emptyBoard": "まだスコアがありません。ログインして最初の1位を狙いましょう！", "loadingBoard": "ランキングを読み込み中…", "googleFail": "Googleログインに失敗しました", "connFail": "接続に失敗しました。しばらくしてからお試しください", "loginOk": "ログインしました！", "logoutOk": "ログアウトしました", "lineLoginOk": "LINEでログインしました！", "lineLoginFail": "LINEログインに失敗しました。もう一度お試しください", "logoutBtn": "ログアウト", "loadingName": "読み込み中…", "player": "プレイヤー", "loginTip": "ログインするとスコアが保存され、友達と競えます！", "lineBtn": "💬 LINEでログイン", "fsEnter": "⛶ 全画面", "fsExit": "✕ 全画面を終了", "fsAria": "ゲームを全画面表示にする", "fsUnsupported": "このブラウザは全画面表示に対応していません", "reminderTitle": "ログインすると{game}のスコアをランキングに保存できます", "reminderSub": "ログインしなくても遊べます。スコアが記録されないだけです", "reminderSkip": "今はいい、そのまま遊ぶ", "reminderClose": "閉じる", "badge": "🔒 ログインでランキング参加", "thisGame": "このゲーム", "gameNames": {"number-bomb": "数字爆弾"}, "scoreUnit": {"number-bomb": "点"}};
+</script>
+<script src="/games/shared/number-bomb.js"></script>
+
+<script>
+(function(){var AD_DELAY_MS=2000;setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},AD_DELAY_MS);})();
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="ツール・パターン・記事を検索…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>お気に入り</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">すべて削除</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/games/games-auth.js"></script>
+<script>
+gaMountAuthWidget('gaWidget');
+gaMountLeaderboard('gaLeaderboard', 'number-bomb');
+gaInitFullscreenToggle();
+gaInitLoginReminder('number-bomb');
+</script>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

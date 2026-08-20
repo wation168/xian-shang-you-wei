@@ -1,0 +1,73 @@
+    <div class="nb-tabs">
+      <button class="nb-tab active" id="nbTabSoloBtn" onclick="nbSwitchTab('solo')">{{ui.tabSoloBtn}}</button>
+      <button class="nb-tab" id="nbTabDuelBtn" onclick="nbSwitchTab('duel')">{{ui.tabDuelBtn}}</button>
+    </div>
+
+    <!-- ══ 單人拆彈模式 ══ -->
+    <div class="nb-panel active" id="nbSoloPanel">
+      <div class="nb-topbar">
+        <span>{{ui.scoreLabel}}<span id="nbScore">0</span></span>
+        <span class="nb-round-badge" id="nbRoundBadge">{{ui.initialRoundBadge}}</span>
+      </div>
+
+      <div class="nb-stage" id="nbSoloStage">
+        <div class="nb-range-display">{{ui.rangeLabel}}<span class="nb-range-num" id="nbRangeMin">1</span> ~ <span class="nb-range-num" id="nbRangeMax">50</span></div>
+        <div class="nb-fuse-wrap">
+          <span class="nb-fuse-bomb">💣</span>
+          <div class="nb-fuse-track"><div class="nb-fuse-fill" id="nbFuseFill" style="width:100%"></div></div>
+        </div>
+        <div class="nb-fuse-text" id="nbFuseText">{{ui.initialFuseText}}</div>
+        <div class="nb-feedback" id="nbFeedback">{{ui.initialFeedback}}</div>
+        <div class="nb-guess-row">
+          <input type="number" id="nbGuessInput" placeholder="{{ui.guessPlaceholder}}" disabled>
+          <button id="nbGuessBtn" onclick="nbSubmitGuess()" disabled>{{ui.guessBtn}}</button>
+        </div>
+        <div class="nb-log" id="nbGuessLog"></div>
+        <div class="nb-overlay" id="nbOverlay">
+          <div class="nb-over-title" id="nbOverTitle">{{ui.readyTitle}}</div>
+          <div class="nb-over-sub" id="nbOverSub">{{ui.readySub}}</div>
+        </div>
+      </div>
+      <div class="nb-hint">{{ui.hint}}</div>
+
+      <div class="game-rating" id="nbRating"></div>
+
+      <div class="game-score-row">
+        <div class="game-score-tile"><div class="gs-label">{{ui.bestLabel}}</div><div class="gs-value" id="nbBest">—</div></div>
+        <div class="game-score-tile"><div class="gs-label">{{ui.bestRoundLabel}}</div><div class="gs-value" id="nbBestRound">—</div></div>
+      </div>
+      <div class="game-history" id="nbHistory"></div>
+
+      <div class="game-controls">
+        <button class="game-btn" id="nbStartBtn" onclick="nbStart()">{{chrome.startBtn}}</button>
+        <button class="game-btn secondary" onclick="nbShareResult()">{{chrome.shareBtn}}</button>
+      </div>
+    </div>
+
+    <!-- ══ 雙人對戰模式 ══ -->
+    <div class="nb-panel" id="nbDuelPanel">
+      <div class="nb-duel-setup" id="nbDuelSetup">
+        <p style="color:#64748b;font-size:14px;margin-bottom:6px">{{ui.duelIntro}}</p>
+        <div class="nb-range-opts" id="nbDuelRangeOpts"></div>
+        <button class="game-btn" onclick="nbDuelStart()">{{ui.duelStartBtn}}</button>
+      </div>
+      <div class="nb-stage" id="nbDuelStage" style="display:none">
+        <div class="nb-turn-badge nb-turn-a" id="nbTurnBadge">{{ui.initialTurnBadge}}</div>
+        <div class="nb-range-display">{{ui.rangeLabel}}<span class="nb-range-num" id="nbDuelMin">1</span> ~ <span class="nb-range-num" id="nbDuelMax">100</span></div>
+        <div class="nb-feedback" id="nbDuelFeedback">{{ui.initialDuelFeedback}}</div>
+        <div class="nb-guess-row">
+          <input type="number" id="nbDuelInput" placeholder="{{ui.guessPlaceholder}}">
+          <button id="nbDuelGuessBtn" onclick="nbDuelSubmitGuess()">{{ui.guessBtn}}</button>
+        </div>
+        <div class="nb-log" id="nbDuelLog"></div>
+        <div class="nb-overlay" id="nbDuelOverlay">
+          <div class="nb-over-title" id="nbDuelOverTitle">💥</div>
+          <div class="nb-over-sub" id="nbDuelOverSub"></div>
+        </div>
+      </div>
+      <div class="nb-hint">{{ui.duelHint}}</div>
+      <div class="game-controls">
+        <button class="game-btn secondary" onclick="nbDuelReset()">{{ui.duelResetBtn}}</button>
+      </div>
+    </div>
+

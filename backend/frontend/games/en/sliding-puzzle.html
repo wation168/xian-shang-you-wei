@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sliding Puzzle - Free Online 15-Puzzle Number Game | SoftGlow</title>
+<meta name="description" content="Play the free online sliding puzzle (15-puzzle) — slide numbered tiles back into order from 1 up. Every shuffle is guaranteed solvable, and the board automatically gets bigger after each win.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/en/sliding-puzzle.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/sliding-puzzle.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/games/en/sliding-puzzle.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/games/de/sliding-puzzle.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/games/es/sliding-puzzle.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/games/fr/sliding-puzzle.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/games/id/sliding-puzzle.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/games/ja/sliding-puzzle.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/games/ko/sliding-puzzle.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/games/pt/sliding-puzzle.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/games/zh-CN/sliding-puzzle.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/en/sliding-puzzle.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Sliding Puzzle", "url": "https://softglow-ai.com/games/en/sliding-puzzle.html", "description": "Free online sliding puzzle game — slide the shuffled numbered tiles back into order. Every shuffle is guaranteed solvable, and the board grows bigger after each win.", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do you play the sliding puzzle?", "acceptedAnswer": {"@type": "Answer", "text": "One space on the board is empty. Click a numbered tile that's directly adjacent to it (up, down, left, or right), and it slides into the empty space. Repeat this to move the shuffled numbers back into order: 1, 2, 3... from top-left to bottom-right, with the empty space ending up last, in the bottom-right corner."}}, {"@type": "Question", "name": "Is every shuffle guaranteed to be solvable?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Not every random arrangement of a sliding puzzle can actually be solved — roughly half of all possible arrangements are mathematically impossible. Instead of shuffling purely at random, this version starts from the solved state and performs a large number of random but legal slides, a method that's mathematically guaranteed to always produce a solvable arrangement."}}, {"@type": "Question", "name": "Does the difficulty increase as you play?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. You start on a 3x3 board, and solving it automatically upgrades you to 4x4 (the classic 15-puzzle), then 5x5, then 6x6, after which the board stays at 6x6. Larger boards require noticeably more moves and more planning, and the difficulty curve is deliberately designed to keep climbing."}}, {"@type": "Question", "name": "How can I tell how well I'm doing?", "acceptedAnswer": {"@type": "Answer", "text": "The screen shows your move count and elapsed time in real time. Your score is calculated from board size, move count, and time — bigger boards give a higher base score, but more moves and more time both reduce it, rewarding efficient, fast solving."}}, {"@type": "Question", "name": "Why doesn't anything happen when I click a tile?", "acceptedAnswer": {"@type": "Answer", "text": "Only a tile directly adjacent to the current empty space (up, down, left, or right) can move. Clicking a tile that isn't adjacent to the empty space does nothing and doesn't use up a move. To move a tile that's farther away, first shift the empty space toward it one adjacent move at a time."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="sliding-puzzle">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="en">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+.sp-topbar{display:flex;justify-content:center;align-items:center;gap:14px;margin-bottom:16px;font-size:14px;font-weight:700;color:#1e3a5f;flex-wrap:wrap}
+.sp-size-badge{background:linear-gradient(135deg,#059669,#0891b2);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800;transition:transform .3s}
+.sp-size-badge.sp-size-up{animation:spSizeUp .5s ease}
+@keyframes spSizeUp{0%{transform:scale(1)}40%{transform:scale(1.3);box-shadow:0 0 14px rgba(8,145,178,.8)}100%{transform:scale(1)}}
+.sp-board{position:relative;width:100%;max-width:380px;aspect-ratio:1/1;margin:0 auto;background:#1e293b;border-radius:12px;padding:4px;box-sizing:border-box}
+.sp-grid{position:relative;width:100%;height:100%}
+.sp-cellbg{position:absolute;background:rgba(255,255,255,.08);border-radius:6px}
+.sp-tile{position:absolute;display:flex;align-items:center;justify-content:center;border-radius:6px;font-weight:800;color:#fff;background:linear-gradient(135deg,#0ea5e9,#6366f1);box-shadow:0 1px 3px rgba(0,0,0,.3);cursor:pointer;transition:left .14s ease,top .14s ease}
+.sp-tile:active{filter:brightness(1.1)}
+.sp-overlay{position:absolute;inset:4px;background:rgba(255,255,255,.94);border-radius:8px;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px}
+.sp-overlay.show{display:flex}
+.sp-overlay .sp-over-title{font-size:20px;font-weight:800;color:#1e3a5f;margin-bottom:8px}
+.sp-overlay .sp-over-sub{font-size:13px;color:#64748b}
+.sp-hint{text-align:center;font-size:12px;color:#94a3b8;margin-top:10px}
+@media(max-width:480px){.sp-topbar{font-size:12px;gap:8px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/en/">Tools</a>
+    <a href="/games/en/">Games</a>
+    <a href="/patterns/en.html">Patterns</a>
+    <a href="/blog/en/index.html">Blog</a>
+    <a href="/">Home</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/games/sliding-puzzle.html">繁中</option><option value="/games/en/sliding-puzzle.html" selected>EN</option><option value="/games/ja/sliding-puzzle.html">日本語</option><option value="/games/ko/sliding-puzzle.html">한국어</option><option value="/games/de/sliding-puzzle.html">DE</option><option value="/games/fr/sliding-puzzle.html">FR</option><option value="/games/es/sliding-puzzle.html">ES</option><option value="/games/pt/sliding-puzzle.html">PT</option><option value="/games/id/sliding-puzzle.html">ID</option><option value="/games/zh-CN/sliding-puzzle.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> &gt; <a href="/games/en/">Games</a> &gt; Sliding Puzzle</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>Sliding Puzzle</h1>
+    <p class="game-subtitle">Click a numbered tile next to the empty space to slide it in, putting the shuffled numbers back in order. Solve it and the board automatically grows bigger.</p>
+
+    <div class="sp-topbar">
+      <span>Score: <span id="spScore">0</span></span>
+      <span class="sp-size-badge" id="spSizeBadge">3x3</span>
+      <span>Moves: <span id="spMoves">0</span></span>
+      <span>⏱ <span id="spTimer">00:00</span></span>
+    </div>
+
+    <div class="sp-board" id="spBoard">
+      <div class="sp-grid" id="spGrid"></div>
+      <div class="sp-overlay" id="spOverlay">
+        <div class="sp-over-title" id="spOverTitle">🧩 Ready?</div>
+        <div class="sp-over-sub" id="spOverSub">Tap the button below to start — you'll begin on a 3x3 board</div>
+      </div>
+    </div>
+    <div class="sp-hint">Click a tile next to the empty space to move it. Arrow keys work too.</div>
+
+    <div class="game-rating" id="spRating"></div>
+
+    <div class="game-score-row">
+      <div class="game-score-tile"><div class="gs-label">Best Score</div><div class="gs-value" id="spBest">—</div></div>
+      <div class="game-score-tile"><div class="gs-label">Largest Board</div><div class="gs-value" id="spBestSize">—</div></div>
+    </div>
+    <div class="game-history" id="spHistory"></div>
+
+    <div class="game-controls">
+      <button class="game-btn" id="spStartBtn" onclick="spStart()">▶️ Start Game</button>
+      <button class="game-btn secondary" onclick="spShareResult()">📤 Share Score</button>
+    </div>
+
+
+
+    <div class="ga-widget" id="gaWidget"></div>
+    <div class="ga-leaderboard"><h3>🏆 Sliding Puzzle Leaderboard</h3><div id="gaLeaderboard"></div></div>
+  </div>
+
+<div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>The History of the Sliding Puzzle</h2><p>The sliding puzzle (also known as the 15-puzzle) is one of the oldest mechanical puzzles around, with physical versions dating back to the 1870s. The classic 4x4 version has 15 numbered tiles plus one empty space. The rules are simple: only tiles next to the empty space can move, and the goal is to restore the shuffled order back to 1 through the highest number, with the empty space left last. This version adds a rising-difficulty twist — the board keeps growing from 3x3 all the way up to 6x6.</p><h2>Why the Shuffle Method Matters</h2><p>The sliding puzzle has a mathematical quirk: if you shuffle the tiles completely at random, roughly half of all possible arrangements can never be solved (mathematicians call this an odd permutation). Instead of a pure random shuffle, this version starts from the solved state and makes a large number of random but legal slides. A shuffle produced this way is always solvable, so you'll never get stuck on a board that has no solution at all.</p></article>
+
+<div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article"><h2>How to Play</h2><p>One space on the board is empty. Click any numbered tile directly above, below, left, or right of the empty space, and it slides into that space. Through a sequence of such moves, restore the shuffled numbers back to order: 1, 2, 3... reading left to right, top to bottom, with the empty space ending up in the bottom-right corner. On desktop you can also use the arrow keys (each key moves the empty space in that direction). Once everything lines up, the round ends automatically and you move up to the next, bigger board.</p><h2>Tips for a Higher Score</h2><p>A common strategy is to work from the outside in, top to bottom: lock in the entire top row and the entire left column first and stop touching them, then solve the remaining, smaller board one layer at a time. This approach pays off even more on larger boards, helping you avoid the frustrating situation where fixing one tile keeps knocking others out of place. Your score factors in board size, move count, and time — fewer moves and a faster clock both push your score higher.</p></article>
+
+<div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>Frequently Asked Questions</h2>
+  <div class="faq-item"><div class="faq-q">How do you play the sliding puzzle?</div><div class="faq-a">One space on the board is empty. Click a numbered tile that's directly adjacent to it (up, down, left, or right), and it slides into the empty space. Repeat this to move the shuffled numbers back into order: 1, 2, 3... from top-left to bottom-right, with the empty space ending up last, in the bottom-right corner.</div></div>
+  <div class="faq-item"><div class="faq-q">Is every shuffle guaranteed to be solvable?</div><div class="faq-a">Yes. Not every random arrangement of a sliding puzzle can actually be solved — roughly half of all possible arrangements are mathematically impossible. Instead of shuffling purely at random, this version starts from the solved state and performs a large number of random but legal slides, a method that's mathematically guaranteed to always produce a solvable arrangement.</div></div>
+  <div class="faq-item"><div class="faq-q">Does the difficulty increase as you play?</div><div class="faq-a">Yes. You start on a 3x3 board, and solving it automatically upgrades you to 4x4 (the classic 15-puzzle), then 5x5, then 6x6, after which the board stays at 6x6. Larger boards require noticeably more moves and more planning, and the difficulty curve is deliberately designed to keep climbing.</div></div>
+  <div class="faq-item"><div class="faq-q">How can I tell how well I'm doing?</div><div class="faq-a">The screen shows your move count and elapsed time in real time. Your score is calculated from board size, move count, and time — bigger boards give a higher base score, but more moves and more time both reduce it, rewarding efficient, fast solving.</div></div>
+  <div class="faq-item"><div class="faq-q">Why doesn't anything happen when I click a tile?</div><div class="faq-a">Only a tile directly adjacent to the current empty space (up, down, left, or right) can move. Clicking a tile that isn't adjacent to the empty space does nothing and doesn't use up a move. To move a tile that's farther away, first shift the empty space toward it one adjacent move at a time.</div></div>
+  </section>
+
+  <div class="more-tools"><h3>Related Games</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/en/2048.html">2048</a>
+    <a class="tool-pill" href="/games/en/sudoku.html">Sudoku</a>
+    <a class="tool-pill" href="/games/en/minesweeper.html">Minesweeper</a>
+    <a class="tool-pill" href="/games/en/chess.html">Chess</a>
+    <a class="tool-pill" href="/games/en/snake.html">Snake Game</a>
+    <a class="tool-pill" href="/games/en/">More Games</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+<div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>More Games</h3><a class="tool-pill" href="/games/en/" style="display:block;margin-top:8px">Browse all games →</a></div>
+<div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/home/en/privacy.html">Privacy</a><a href="/home/en/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<!-- Language pack for this page. Game logic lives in /games/shared/sliding-puzzle.js and is -->
+<!-- shared by all 10 locales; it contains no user-facing text, only lookups into these dicts. -->
+<script>
+window.GAME_I18N = {"winTitle": "🎉 {sz}x{sz} Complete!", "winSub": "{m} moves, {t} elapsed, +{g} points. Next up: {next}", "restartRoundBtn": "🔄 Restart Round", "scoreShort": "{s} pts", "shareWithScore": "I scored {s} points in SoftGlow's Sliding Puzzle! Think you can solve an even bigger board?", "shareNoScore": "Come play SoftGlow's Sliding Puzzle game!", "copied": "Copied!", "ratings": ["🧩 Just getting started — keep practicing your ordering strategy", "🙂 Solid pace — you're starting to find your rhythm", "👍 Nice work — even big boards don't slow you down", "🏆 Expert level — you handle 6x6 boards with ease", "⚡ Sliding puzzle master — your efficiency is incredible!"]};
+window.GA_LANG_PACK = {"loginToRank": "Sign in to put your score on the leaderboard 🏆", "newRecord": "🎉 New personal best! You're ranked #{r}", "submitted": "Score submitted — you're ranked #{r}", "emptyBoard": "No scores yet. Sign in and be the first to claim the top spot!", "loadingBoard": "Loading leaderboard…", "googleFail": "Google sign-in failed", "connFail": "Connection failed, please try again later", "loginOk": "Signed in!", "logoutOk": "Signed out", "lineLoginOk": "Signed in with LINE!", "lineLoginFail": "LINE sign-in failed, please try again", "logoutBtn": "Sign out", "loadingName": "Loading…", "player": "Player", "loginTip": "Sign in to save your scores and compare with friends!", "lineBtn": "💬 Sign in with LINE", "fsEnter": "⛶ Fullscreen", "fsExit": "✕ Exit fullscreen", "fsAria": "Expand game to fullscreen", "fsUnsupported": "This browser doesn't support fullscreen", "reminderTitle": "Sign in to save your {game} score to the leaderboard", "reminderSub": "You can keep playing without signing in — your score just won't be recorded", "reminderSkip": "No thanks, just play", "reminderClose": "Close", "badge": "🔒 Sign in to rank", "thisGame": "this game", "gameNames": {"sliding-puzzle": "Sliding Puzzle"}, "scoreUnit": {"sliding-puzzle": " moves"}};
+</script>
+<script src="/games/shared/sliding-puzzle.js"></script>
+
+<script>
+(function(){var AD_DELAY_MS=2000;setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},AD_DELAY_MS);})();
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Search tools, patterns, articles…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>My Bookmarks</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Clear all</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/games/games-auth.js"></script>
+<script>
+gaMountAuthWidget('gaWidget');
+gaMountLeaderboard('gaLeaderboard', 'sliding-puzzle');
+gaInitFullscreenToggle();
+gaInitLoginReminder('sliding-puzzle');
+</script>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jeu 2048 - Jouez gratuitement au puzzle de nombres en ligne | SoftGlow</title>
+<meta name="description" content="Jouez au 2048 gratuitement en ligne. Utilisez les flèches ou balayez l'écran pour fusionner les nombres identiques et atteindre 2048. Sans téléchargement.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/games/fr/2048.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/games/2048.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/games/en/2048.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/games/de/2048.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/games/es/2048.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/games/fr/2048.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/games/id/2048.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/games/ja/2048.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/games/ko/2048.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/games/pt/2048.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/games/zh-CN/2048.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/games/en/2048.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Jeu 2048", "url": "https://softglow-ai.com/games/fr/2048.html", "description": "Puzzle 2048 gratuit en ligne. Fusionnez les tuiles portant le même nombre avec les flèches ou d'un balayage pour atteindre la tuile 2048.", "applicationCategory": "GameApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "fr"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Comment joue-t-on au 2048 ?", "acceptedAnswer": {"@type": "Answer", "text": "Utilisez les flèches du clavier (ou balayez l'écran sur mobile) pour pousser toutes les tuiles du plateau dans une même direction. Quand deux tuiles portant le même nombre se rejoignent, elles fusionnent en doublant de valeur : deux 2 donnent un 4. Une nouvelle tuile 2 ou 4 apparaît après chaque coup, et votre objectif est de former la tuile 2048."}}, {"@type": "Question", "name": "La partie s'arrête-t-elle quand j'atteins 2048 ?", "acceptedAnswer": {"@type": "Answer", "text": "Non. En atteignant 2048, le message « Vous avez atteint 2048 ! » s'affiche et vous pouvez soit continuer pour marquer davantage (4096, 8192 et au-delà, sans limite), soit lancer une nouvelle partie."}}, {"@type": "Question", "name": "Quand est-ce que je perds ?", "acceptedAnswer": {"@type": "Answer", "text": "Vous perdez lorsque les 16 cases sont remplies et qu'il ne reste plus aucune paire de nombres identiques côte à côte dans les quatre directions : à ce moment-là, aucun coup ne déplace ni ne fusionne quoi que ce soit."}}, {"@type": "Question", "name": "Le jeu devient-il plus difficile au fil du temps ?", "acceptedAnswer": {"@type": "Answer", "text": "La difficulté vient de la mécanique et non de niveaux ajoutés. Les cases libres disparaissent à mesure que vos nombres grandissent, votre marge de manœuvre se réduit et former de grandes tuiles exige une planification plus fine. Le jeu se complique donc naturellement quand votre score monte."}}, {"@type": "Question", "name": "Existe-t-il une astuce pour faire un gros score ?", "acceptedAnswer": {"@type": "Answer", "text": "L'approche courante est de garder votre plus grande tuile dans un coin (en bas à gauche par exemple), d'éviter de déranger les tuiles que vous y avez alignées et de construire tous vos autres coups autour de ce coin. Cela réduit nettement le risque de vous retrouver bloqué."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/games/games.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="2048">
+<meta name="sg-type" content="game">
+<meta name="sg-lang" content="fr">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+.g2048-topbar{display:flex;justify-content:center;align-items:center;gap:16px;margin-bottom:16px;font-size:15px;font-weight:700;color:#1e3a5f;flex-wrap:wrap}
+.g2048-best-badge{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;padding:3px 12px;border-radius:20px;font-size:13px;font-weight:800}
+.g2048-board{position:relative;width:100%;max-width:380px;aspect-ratio:1/1;margin:0 auto;background:#c7b9a8;border-radius:12px;padding:10px;box-sizing:border-box;touch-action:none;user-select:none}
+.g2048-grid{position:relative;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);gap:8px;width:100%;height:100%}
+.g2048-cellbg{background:rgba(255,255,255,.35);border-radius:6px}
+.g2048-tile{position:absolute;display:flex;align-items:center;justify-content:center;border-radius:6px;font-weight:800;box-shadow:0 1px 2px rgba(0,0,0,.15);transition:background-color .08s ease}
+.g2048-tile.g2048-pop{animation:g2048Pop .16s ease}
+.g2048-tile.g2048-merge{animation:g2048Merge .14s ease}
+@keyframes g2048Pop{from{transform:scale(.3)}to{transform:scale(1)}}
+@keyframes g2048Merge{0%{transform:scale(1)}45%{transform:scale(1.18)}100%{transform:scale(1)}}
+.g2048-overlay{position:absolute;inset:10px;background:rgba(238,228,218,.82);border-radius:8px;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px}
+.g2048-overlay.show{display:flex}
+.g2048-overlay .g2048-over-title{font-size:22px;font-weight:800;color:#5b4636;margin-bottom:10px}
+.g2048-overlay .g2048-over-sub{font-size:13px;color:#7a6a5a;margin-bottom:14px}
+.g2048-overlay-actions{display:flex;gap:10px}
+.g2048-hint{text-align:center;font-size:12px;color:#94a3b8;margin-top:10px}
+@media(max-width:480px){.g2048-topbar{font-size:13px;gap:10px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/fr/">Outils</a>
+    <a href="/games/fr/">Jeux</a>
+    <a href="/patterns/fr.html">Figures chartistes</a>
+    <a href="/blog/fr/index.html">Blog</a>
+    <a href="/">Accueil</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/games/2048.html">繁中</option><option value="/games/en/2048.html">EN</option><option value="/games/ja/2048.html">日本語</option><option value="/games/ko/2048.html">한국어</option><option value="/games/de/2048.html">DE</option><option value="/games/fr/2048.html" selected>FR</option><option value="/games/es/2048.html">ES</option><option value="/games/pt/2048.html">PT</option><option value="/games/id/2048.html">ID</option><option value="/games/zh-CN/2048.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Accueil</a> &gt; <a href="/games/fr/">Jeux</a> &gt; 2048</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="game-card">
+    <h1>2048 — Le puzzle de nombres</h1>
+    <p class="game-subtitle">Faites glisser les tuiles avec les flèches du clavier ou d'un balayage. Deux nombres identiques fusionnent en doublant de valeur : objectif 2048.</p>
+
+    <div class="g2048-topbar">
+      <span>Score : <span id="g2048Score">0</span></span>
+      <span class="g2048-best-badge">Record : <span id="g2048BestInline">0</span></span>
+    </div>
+
+    <div class="g2048-board" id="g2048Board">
+      <div class="g2048-grid" id="g2048Grid"></div>
+      <div class="g2048-overlay" id="g2048Overlay">
+        <div class="g2048-over-title" id="g2048OverTitle">Partie terminée</div>
+        <div class="g2048-over-sub" id="g2048OverSub">Score : 0</div>
+        <div class="g2048-overlay-actions">
+          <button class="game-btn" onclick="g2048Restart()">🔄 Rejouer</button>
+          <button class="game-btn secondary" id="g2048ContinueBtn" onclick="g2048Continue()" style="display:none">Continuer pour marquer plus</button>
+        </div>
+      </div>
+    </div>
+    <div class="g2048-hint">Sur ordinateur, utilisez les flèches ; sur mobile, balayez directement le plateau</div>
+
+    <div class="game-rating" id="g2048Rating"></div>
+
+    <div class="game-score-row">
+      <div class="game-score-tile"><div class="gs-label">Meilleur score</div><div class="gs-value" id="g2048Best">—</div></div>
+      <div class="game-score-tile"><div class="gs-label">Tuile la plus haute</div><div class="gs-value" id="g2048BestTile">—</div></div>
+    </div>
+    <div class="game-history" id="g2048History"></div>
+
+    <div class="game-controls">
+      <button class="game-btn" id="g2048StartBtn" onclick="g2048Restart()">▶️ Commencer</button>
+      <button class="game-btn secondary" onclick="g2048ShareResult()">📤 Partager le score</button>
+    </div>
+
+
+    <div class="ga-widget" id="gaWidget"></div>
+    <div class="ga-leaderboard"><h3>🏆 Classement 2048</h3><div id="gaLeaderboard"></div></div>
+  </div>
+
+<div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>Qu'est-ce que le 2048 ?</h2><p>Le 2048 est un puzzle de fusion de nombres créé par Gabriele Cirulli en 2014, devenu un succès mondial. La règle est très simple — deux tuiles portant le même nombre se rencontrent et fusionnent en doublant de valeur — mais le plateau ne compte que 16 cases. Plus vos nombres grandissent, moins vous avez de marge de manœuvre : le jeu teste donc la planification et la gestion du plateau plutôt que les réflexes. Cette version est développée par SoftGlow dans le respect des règles d'origine, avec la même logique de fusion et le même calcul de score.</p><h2>Comment la difficulté augmente</h2><p>Le 2048 n'a besoin ni de niveaux ni de vagues, car la difficulté est inscrite dans la mécanique. Au début, le plateau 4x4 est presque vide et tous les coups sont sans risque. À mesure que les tuiles grandissent et que la grille se remplit, un seul coup imprudent peut bloquer le plateau. Cette marge d'erreur qui se réduit constitue la courbe de difficulté.</p></article>
+
+<div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article"><h2>Comment jouer</h2><p>Le plateau est une grille de 4x4, soit 16 cases, et démarre avec deux tuiles aléatoires (un 2 ou un 4). Appuyez sur les flèches du clavier — ou balayez le plateau du doigt sur mobile — pour pousser toutes les tuiles dans une même direction. Lorsque deux tuiles portant le même nombre se rejoignent, elles fusionnent en une tuile de valeur double, ajoutée à votre score. Après chaque coup valide, un nouveau 2 ou 4 apparaît sur une case libre (les 4 sont plus rares). La partie se termine quand les 16 cases sont occupées et qu'aucune paire de nombres identiques ne reste adjacente, dans aucune direction.</p><h2>Conseils pour marquer plus</h2><p>La stratégie la plus fiable consiste à ancrer votre plus grande tuile dans un coin — en bas à gauche par exemple — et à ne jamais déranger la rangée que vous y avez construite. Organisez tous vos autres coups autour de la protection de ce coin. Vous réduisez ainsi fortement le risque de bloquer le plateau et vous vous donnez beaucoup plus d'occasions de construire de grandes tuiles.</p></article>
+
+<div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <section class="faq"><h2>Questions fréquentes</h2>
+  <div class="faq-item"><div class="faq-q">Comment joue-t-on au 2048 ?</div><div class="faq-a">Utilisez les flèches du clavier (ou balayez l'écran sur mobile) pour pousser toutes les tuiles du plateau dans une même direction. Quand deux tuiles portant le même nombre se rejoignent, elles fusionnent en doublant de valeur : deux 2 donnent un 4. Une nouvelle tuile 2 ou 4 apparaît après chaque coup, et votre objectif est de former la tuile 2048.</div></div>
+  <div class="faq-item"><div class="faq-q">La partie s'arrête-t-elle quand j'atteins 2048 ?</div><div class="faq-a">Non. En atteignant 2048, le message « Vous avez atteint 2048 ! » s'affiche et vous pouvez soit continuer pour marquer davantage (4096, 8192 et au-delà, sans limite), soit lancer une nouvelle partie.</div></div>
+  <div class="faq-item"><div class="faq-q">Quand est-ce que je perds ?</div><div class="faq-a">Vous perdez lorsque les 16 cases sont remplies et qu'il ne reste plus aucune paire de nombres identiques côte à côte dans les quatre directions : à ce moment-là, aucun coup ne déplace ni ne fusionne quoi que ce soit.</div></div>
+  <div class="faq-item"><div class="faq-q">Le jeu devient-il plus difficile au fil du temps ?</div><div class="faq-a">La difficulté vient de la mécanique et non de niveaux ajoutés. Les cases libres disparaissent à mesure que vos nombres grandissent, votre marge de manœuvre se réduit et former de grandes tuiles exige une planification plus fine. Le jeu se complique donc naturellement quand votre score monte.</div></div>
+  <div class="faq-item"><div class="faq-q">Existe-t-il une astuce pour faire un gros score ?</div><div class="faq-a">L'approche courante est de garder votre plus grande tuile dans un coin (en bas à gauche par exemple), d'éviter de déranger les tuiles que vous y avez alignées et de construire tous vos autres coups autour de ce coin. Cela réduit nettement le risque de vous retrouver bloqué.</div></div>
+  </section>
+
+  <div class="more-tools"><h3>Jeux similaires</h3><div class="tools-grid">
+    <a class="tool-pill" href="/games/fr/sudoku.html">Sudoku</a>
+    <a class="tool-pill" href="/games/fr/minesweeper.html">Démineur</a>
+    <a class="tool-pill" href="/games/fr/chess.html">Échecs</a>
+    <a class="tool-pill" href="/games/fr/snake.html">Jeu du Serpent</a>
+    <a class="tool-pill" href="/games/fr/piano-tiles.html">Piano Tiles</a>
+    <a class="tool-pill" href="/games/fr/">Plus de jeux</a>
+  </div></div>
+
+</div>
+<aside class="sidebar">
+<div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Plus de jeux</h3><a class="tool-pill" href="/games/fr/" style="display:block;margin-top:8px">Voir tous les jeux →</a></div>
+<div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">À propos</a><a href="/contact.html">Contact</a><a href="/home/fr/privacy.html">Confidentialité</a><a href="/home/fr/terms.html">Conditions</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+
+<!-- Language pack for this page. Game logic lives in /games/shared/2048.js and is -->
+<!-- shared by all 10 locales; it contains no user-facing text, only lookups into these dicts. -->
+<script>
+window.GAME_I18N = {"gameOver": "💥 Partie terminée", "scoreLine": "Score : {s}", "scoreShort": "{s} pts", "winTitle": "🎉 Vous avez atteint {v} !", "restartBtn": "🔄 Recommencer", "shareWithScore": "J'ai marqué {s} points au 2048 sur SoftGlow ! Tu penses pouvoir faire mieux ?", "shareNoScore": "Venez jouer au puzzle de nombres 2048 !", "copied": "Copié !", "ratings": ["🎲 Encore en échauffement : travaillez la planification du plateau", "🙂 Correct. Vous commencez à sentir les fusions", "👍 Joli score. Vous maîtrisez vraiment le plateau", "🏆 2048 atteint ! Un véritable maître des nombres", "⚡ Au-delà de 2048 — une partie légendaire !"]};
+window.GA_LANG_PACK = {"loginToRank": "Connectez-vous pour inscrire votre score au classement 🏆", "newRecord": "🎉 Nouveau record personnel ! Vous êtes {r}e", "submitted": "Score enregistré — vous êtes {r}e", "emptyBoard": "Aucun score pour l'instant. Connectez-vous et prenez la première place !", "loadingBoard": "Chargement du classement…", "googleFail": "Échec de la connexion Google", "connFail": "Échec de la connexion, veuillez réessayer plus tard", "loginOk": "Connecté !", "logoutOk": "Déconnecté", "lineLoginOk": "Connecté avec LINE !", "lineLoginFail": "Échec de la connexion LINE, veuillez réessayer", "logoutBtn": "Se déconnecter", "loadingName": "Chargement…", "player": "Joueur", "loginTip": "Connectez-vous pour enregistrer vos scores et vous comparer à vos amis !", "lineBtn": "💬 Se connecter avec LINE", "fsEnter": "⛶ Plein écran", "fsExit": "✕ Quitter le plein écran", "fsAria": "Afficher le jeu en plein écran", "fsUnsupported": "Ce navigateur ne prend pas en charge le plein écran", "reminderTitle": "Connectez-vous pour enregistrer votre score de {game} au classement", "reminderSub": "Vous pouvez jouer sans vous connecter, mais votre score ne sera pas enregistré", "reminderSkip": "Non merci, je veux juste jouer", "reminderClose": "Fermer", "badge": "🔒 Connectez-vous pour être classé", "thisGame": "ce jeu", "gameNames": {"2048": "2048"}, "scoreUnit": {"2048": " pts"}};
+</script>
+<script src="/games/shared/2048.js"></script>
+
+<script>
+(function(){var AD_DELAY_MS=2000;setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},AD_DELAY_MS);})();
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Rechercher outils, figures, articles…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Mes favoris</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Tout effacer</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/games/games-auth.js"></script>
+<script>
+gaMountAuthWidget('gaWidget');
+gaMountLeaderboard('gaLeaderboard', '2048');
+gaInitFullscreenToggle();
+gaInitLoginReminder('2048');
+</script>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>
