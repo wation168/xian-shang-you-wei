@@ -4184,6 +4184,15 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       (_ap||Promise.resolve()).then(()=>setTimeout(doGenerateReport,800));
     }
   }
+
+  // 2026/08/21新增：若 URL 帶 ?page=deepanalysis，直接開啟深度選股頁。
+  // 修這個bug的原因：LINE推播通知（_line_bot_push_deep_picks_notice）分享連結原本只帶
+  // {FRONTEND_URL}/stock/，沒有任何參數告訴前端「使用者要看的是深度選股」，於是點連結
+  // 進來只會落在預設的個股解析首頁，跟使用者實際想看的內容對不起來。
+  const _pageParam=new URLSearchParams(location.search).get('page');
+  if(_pageParam==='deepanalysis' && !_stockParam){
+    showPage('deepanalysis');
+  }
 });
 
 async function loadHotkeys(){

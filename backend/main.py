@@ -6641,7 +6641,11 @@ def _line_bot_push_deep_picks_notice(pick_count: int):
         return
     text = (
         f"📈 今日深度選股已出爐，共 {pick_count} 檔入選\n"
-        f"完整名單請登入App查看 👉 {FRONTEND_URL}/stock/\n"
+        # 2026/08/21修正：原本只帶{FRONTEND_URL}/stock/，前端沒有對應的參數判斷，
+        # 點進去只會落在預設的個股解析首頁，不是深度選股頁（帥哥鴻回報「點連結出來是跑去
+        # 個股解析」）。改成帶?page=deepanalysis，前端DOMContentLoaded會判斷這個參數
+        # 直接呼叫showPage('deepanalysis')開啟正確頁面。
+        f"完整名單請登入App查看 👉 {FRONTEND_URL}/stock/?page=deepanalysis\n"
         f"僅供參考，不構成投資建議"
     )
     sent = 0
