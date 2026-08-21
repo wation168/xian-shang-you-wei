@@ -130,12 +130,12 @@ function rtComputeStats(history) {
   function recordResult(ms) {
     history.unshift(ms);
     history = history.slice(0, RT_CONFIG.historyLimit);
-    ratingEl.textContent = greactiontimetestT('msValue', { v: ms }) + ' — ' + rtRatingLabel(ms);
+    ratingEl.textContent = greactiontimetestT('msValue', { ms: ms }) + ' — ' + rtRatingLabel(ms);
     const stats = rtComputeStats(history);
-    bestEl.textContent = stats.best != null ? greactiontimetestT('msShort', { v: stats.best }) : '—';
-    avgEl.textContent  = stats.avg  != null ? greactiontimetestT('msShort', { v: stats.avg })  : '—';
+    bestEl.textContent = stats.best != null ? greactiontimetestT('msShort', { ms: stats.best }) : '—';
+    avgEl.textContent  = stats.avg  != null ? greactiontimetestT('msShort', { ms: stats.avg })  : '—';
     historyEl.innerHTML = history.map(function (v) {
-      return '<span>' + greactiontimetestT('msShort', { v: v }) + '</span>';
+      return '<span>' + greactiontimetestT('msShort', { ms: v }) + '</span>';
     }).join('');
     if (typeof gaSubmitScore === 'function') gaSubmitScore('reaction-time-test', ms);
   }
@@ -149,7 +149,7 @@ function rtComputeStats(history) {
   window._rtShareText = function () {
     const stats = rtComputeStats(history);
     return stats.best != null
-      ? greactiontimetestT('shareWithScore', { s: stats.best })
+      ? greactiontimetestT('shareWithScore', { ms: stats.best })
       : greactiontimetestT('shareNoScore');
   };
 })();
