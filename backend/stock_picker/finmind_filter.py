@@ -174,7 +174,12 @@ DEEP_CFG = {
     "min_avg_volume":   500,    # 最低20日均量（張）
     "ma_cross_lookback": 20,    # 月季線金叉往回找幾個交易日
     "macd_cross_days":   3,     # MACD金叉必須發生在幾個交易日內
-    "max_results":       30,    # 最多回傳幾檔
+    "min_score":          3,    # 2026/08/22新增：入選門檻，score<3（＝信心等級「一般」，
+                                 # 沒有MACD金叉/量能/法人籌碼任何一項加分確認）不列入結果。
+                                 # 原本只要符合路徑A/B條件、不論分數高低一律入選，帥哥鴻反映
+                                 # 「一次選出22檔太多」，改成只留至少有一項加分確認的中信心⭐
+                                 # 以上訊號，數量會隨市況自然浮動，不是卡死的筆數上限。
+    "max_results":       30,    # 最多回傳幾檔（安全上限，通常不會卡到這個數字）
     "api_delay":         0.35,  # 每檔之間的間隔秒數（避免打爆 FinMind）
     "breakout_recent_days": 10, # 路徑B：突破必須發生在幾個交易日內才算「剛」突破
     "breakout_hold_pct":  0.97, # 路徑B：現價不能跌破突破當天收盤價的這個比例（防假突破被打回還入選）
@@ -666,7 +671,17 @@ def run_deep_scan(candidate_ids: list[str],
             time.sleep(delay)
 
     passed.sort(key=lambda x: x["score"], reverse=True)
-    print(f"[deep_scan] 掃描完畢，{len(passed)}/{total} 檔通過雙重確認，取前 {max_results} 檔")
+
+    # 2026/08/22新增：入選門檻，只留score>=min_score（中信心⭐以上）的訊號，
+    # 濾掉沒有任何加分確認、純粹踩到路徑A/B最低條件的「一般」信心訊號，
+    # 避免每天入選檔數太多、訊號強弱參差不齊。
+    _min_score = DEEP_CFG["min_score"]
+    _before_threshold = len(passed)
+    passed = [p for p in passed if p["score"] >= _min_score]
+    print(f"[deep_scan] 入選門檻(score>={_min_score})：{_before_threshold}檔通過雙重確認中，"
+          f"{_before_threshold - len(passed)}檔信心等級「一般」被濾掉，剩{len(passed)}檔")
+
+    print(f"[deep_scan] 掃描完畢，{len(passed)}/{total} 檔通過雙重確認+入選門檻，取前 {max_results} 檔")
     return passed[:max_results]
 
 
