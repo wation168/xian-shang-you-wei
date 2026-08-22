@@ -12,17 +12,33 @@ GitHub Actions 用，更新 scripts/lottery_data/results/*.json
   ✅ mega-sena        — caixa.gov.br 官方 API
   ✅ euromillions     — euromillions.api.pedromealha.dev 免費 API
   ✅ lotto-6aus49     — JohannesFriedrich GitHub Archive
-  ⚠️ uk-lotto         — 實際上是 lottolyzer.com 爬蟲（見 fetch_lottolyzer 呼叫），不是這段舊註解寫的magayo。
-                        2026/08/15查證：資料檔（backend/frontend/lottery/data/uk-lotto.json）已停在
-                        2026/07/19沒更新，同一個爬蟲函式抓的oz-lotto/korea-lotto都正常更新，判斷是
-                        en.lottolyzer.com/history/united-kingdom/lotto這個頁面本身的抓取有問題
-                        （頁面改版/路徑失效/被擋等），需要看GitHub Actions實際執行log才能確認根因，
-                        雲端沙盒連不到en.lottolyzer.com無法直接測試，未來排查以此為優先方向
+  ✅ uk-lotto         — 實際上是 lottolyzer.com 爬蟲（見 fetch_lottolyzer 呼叫），不是這段舊註解寫的magayo。
+                        2026/08/15查證：資料檔（backend/frontend/lottery/data/uk-lotto.json）曾停在
+                        2026/07/19沒更新。2026/08/17查出根因：GitHub Actions執行log顯示
+                        「lottolyzer scrape found no data」——不是網路/連線問題，是lottolyzer.com
+                        把這個頁面的網址改名了（原本跟其他國家的「lotto」頁面撞名，改成加國別後綴
+                        區分），舊路徑 united-kingdom/lotto 現在會被導到不相關的頁面（實測導到美國
+                        Powerball頁面）。用WebFetch查證新的正確路徑是 united-kingdom/lotto-uk，
+                        頁面結構（Date/Winning No./Bonus三欄，皆為class="sum-p1"）跟原本解析邏輯
+                        完全吻合，已修正呼叫路徑。
   ✅ oz-lotto         — 實際上是 lottolyzer.com 爬蟲（見 fetch_lottolyzer 呼叫），非magayo，2026/08/15查證資料正常更新
-  ⚠️ lotto-max        — 實際上是 lottolyzer.com 爬蟲（見 fetch_lottolyzer 呼叫），不是magayo。
-                        2026/08/15查證：跟uk-lotto同樣的問題，資料檔停在2026/07/19，
-                        en.lottolyzer.com/history/canada/lotto-max這個頁面的抓取需要進一步排查
-  ✅ korea-lotto      — 實際上是 lottolyzer.com 爬蟲（見 fetch_lottolyzer 呼叫），非官方JSON API，2026/08/15查證資料正常更新
+  ✅ lotto-max        — 實際上是 lottolyzer.com 爬蟲（見 fetch_lottolyzer 呼叫），不是magayo。
+                        2026/08/17查出根因：跟uk-lotto同樣是lottolyzer.com網址改名問題，舊路徑
+                        canada/lotto-max 現在會被導到不相關頁面（實測導到美國Mega Millions頁面），
+                        正確新路徑是 canada/lotto-max-cad，查證最新一筆開獎日期是2026-08-14（資料
+                        本身是新鮮的，只是舊路徑抓不到），已修正呼叫路徑。
+  ✅ korea-lotto      — dhlottery.co.kr 官方 JSON API（fetch_korea_lotto()）。2026/08/22第三十五輪查出根因：
+                        2026/08/15時本來已切成lottolyzer.com爬蟲（見上一版本註解），但資料檔
+                        （scripts/lottery_data/results/korea-lotto.json）比對mtime發現2026/08/17後就沒再更新，
+                        同期間其他彩種都正常更新到08/20~08/21，判斷是lottolyzer爬蟲對這個路徑開始失敗
+                        （呼叫端main()裡原本是fetch_lottolyzer("korea-lotto","south-korea/6_slash_45-lotto",...)，
+                        但這個網址本身查證是對的，猜測是lottolyzer.com對這個頁面偶發性擋爬蟲或改版，
+                        沒有直接證據能100%鎖定，因為雲端沙盒連不到lottolyzer.com做即時測試）。
+                        程式裡其實一直留著`fetch_korea_lotto()`這支用官方dhlottery.co.kr JSON API的函式
+                        （不依賴爬HTML），但main()沒有呼叫它變成死程式碼；已驗證其回合數推算公式
+                        （2002-12-07第1回，每週六開獎）算出來今天2026-08-22對應第1238回，跟lottolyzer
+                        網頁上最新一筆「Draw 1237｜2026-08-15」完全吻合，可信度高。改回main()呼叫
+                        fetch_korea_lotto()取代fetch_lottolyzer()版本，不再依賴第三方網站的HTML結構。
   ✅ japan-loto6      — lottolyzer.com 爬蟲
   ✅ el-gordo         — loteriasyapuestas.es 官網爬蟲
   ✅ superenalotto    — superenalotto.net 爬蟲
@@ -663,18 +679,18 @@ def main():
     print("\n[Europe]")
     fetch_euromillions()
     fetch_lotto_6aus49()
-    fetch_lottolyzer("uk-lotto", "united-kingdom/lotto", 59, 0, expected_nums=6)
+    fetch_lottolyzer("uk-lotto", "united-kingdom/lotto-uk", 59, 0, expected_nums=6)  # 2026/08/17：舊路徑改名後失效已修正
     fetch_el_gordo()
     fetch_superenalotto()
 
     # Americas (working + fixed)
     print("\n[Americas]")
     fetch_mega_sena()
-    fetch_lottolyzer("lotto-max", "canada/lotto-max", 50, 0, expected_nums=7)
+    fetch_lottolyzer("lotto-max", "canada/lotto-max-cad", 50, 0, expected_nums=7)  # 2026/08/17：舊路徑改名後失效已修正
 
     # Asia (fixed)
     print("\n[Asia]")
-    fetch_lottolyzer("korea-lotto", "south-korea/6_slash_45-lotto", 45, 45, expected_nums=6)
+    fetch_korea_lotto()  # 2026/08/22：改回官方dhlottery.co.kr JSON API，lottolyzer爬蟲版自08/17起資料停更
     fetch_japan_loto6()
 
     # Oceania
