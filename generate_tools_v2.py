@@ -61,6 +61,7 @@ CATS={
  "legal":["alimony-calculator","child-support","court-fee","gdpr-fine","late-payment-interest","lawyer-fee","legal-interest","notary-fee","patent-cost","penalty-interest","severance-calculator","statute-of-limitations","trademark-fee"],
  "sizing-converter":["clothing-size","ring-size-converter","shoe-size-converter","wire-gauge"],
  "medical-cost":["fsa-savings-calc","health-deductible-calc","hsa-contribution-calc","ivf-cost-calculator","lasik-cost-calculator","long-term-care","medical-cost-estimator","medical-tourism-saving","medication-cost-compare","nursing-home-cost","oop-maximum-calc","premium-vs-hdhp","rehab-cost-estimator","surgery-cost-estimator","therapy-cost-calc"],
+ "fortune":["feng-shui-bedroom","bazi-calculator"],
 }
 BLOGS={
  "finance":[{"s":"kd-indicator","t":"KD Indicator Guide"},{"s":"macd-indicator","t":"MACD Guide"},{"s":"stop-loss-guide","t":"Stop Loss Strategy"}],
