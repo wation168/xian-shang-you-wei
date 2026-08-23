@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sun Sign Calculator | Free Western Zodiac Sign Finder</title>
+<meta name="description" content="Free sun sign calculator. Enter your birth month and day to find your Western zodiac sign, element, ruling planet, personality traits, and compatible signs.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/tools/en/sun-sign-calculator.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/tools/en/sun-sign-calculator.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/tools/sun-sign-calculator.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/sun-sign-calculator.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Sun Sign Calculator", "url": "https://softglow-ai.com/tools/en/sun-sign-calculator.html", "description": "Free sun sign calculator. Enter your birth month and day to find your Western zodiac sign, element, ruling planet, personality traits, and compatible signs.", "applicationCategory": "LifestyleApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is a sun sign?", "acceptedAnswer": {"@type": "Answer", "text": "Your sun sign (also called your \"star sign\" or \"zodiac sign\") is the constellation the Sun was traditionally considered to be passing through on your birth date. It's the most commonly referenced piece of Western astrology and the basis for daily horoscope columns."}}, {"@type": "Question", "name": "Do I need my birth year or birth time for a sun sign?", "acceptedAnswer": {"@type": "Answer", "text": "No. Your sun sign only depends on your birth month and day — it repeats the same way every year regardless of what year you were born. Birth year and birth time matter for a full natal chart (which also maps your moon sign, rising sign, and planetary positions), but not for a basic sun sign."}}, {"@type": "Question", "name": "What if I was born on a cusp date, right at the boundary between two signs?", "acceptedAnswer": {"@type": "Answer", "text": "The exact moment the Sun moves from one sign to the next shifts slightly from year to year and depends on your time zone, so the commonly published date ranges are approximate. If you were born within a day or two of a boundary date, you may want to check a precise ephemeris for your exact birth year to confirm your sign with certainty."}}, {"@type": "Question", "name": "How is sign compatibility determined here?", "acceptedAnswer": {"@type": "Answer", "text": "This tool uses the standard element-based compatibility convention in Western astrology: signs sharing the same element (Fire, Earth, Air, or Water) and signs of the complementary element (Fire with Air, Earth with Water) are generally considered the most harmonious pairings. This is a simplified, general-interest view — a full compatibility reading considers many more chart factors."}}, {"@type": "Question", "name": "Is sun sign astrology scientifically validated?", "acceptedAnswer": {"@type": "Answer", "text": "No. Sun sign astrology is a popular, simplified form of Western astrology intended for entertainment and self-reflection, not a scientific or predictive instrument. The date ranges and elemental groupings follow long-established astrological convention, but the personality associations are cultural/traditional readings, not empirical claims."}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="sun-sign-calculator">
+<meta name="sg-type" content="tool">
+<meta name="sg-lang" content="en">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+<style>
+.zodiac-result-card{background:var(--card-bg,#fff);border-radius:14px;padding:20px}
+.zodiac-result-title{font-size:22px;margin:0 0 4px}
+.zodiac-symbol-name{font-weight:400;opacity:0.7;font-size:16px}
+.zodiac-date-range{font-size:13px;opacity:0.75;margin:0 0 12px}
+.zodiac-desc{line-height:1.7;margin:0 0 16px}
+.zodiac-meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.zodiac-meta-item{background:rgba(120,120,120,0.08);border-radius:10px;padding:12px}
+.meta-label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;opacity:0.65;margin-bottom:4px}
+.meta-value{display:block;font-size:16px;font-weight:600;margin-bottom:4px}
+.meta-desc{display:block;font-size:12.5px;opacity:0.8;line-height:1.5}
+.zodiac-traits-block{margin-bottom:16px}
+.trait-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.trait-chip{background:linear-gradient(135deg,#5c6bc0 0%,#7e57c2 100%);color:#fff;border-radius:20px;padding:5px 14px;font-size:13px;font-weight:600}
+.trait-chip-accent{background:linear-gradient(135deg,#2e7d32 0%,#43a047 100%)}
+.zodiac-two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.zodiac-two-col ul{margin:6px 0 0;padding-left:18px}
+.zodiac-two-col li{font-size:13.5px;line-height:1.7}
+.zodiac-compatible-block{margin-bottom:14px}
+.compatible-desc{font-size:12.5px;opacity:0.8;margin:4px 0 0}
+.zodiac-disclaimer{font-size:12px;opacity:0.65;line-height:1.6;border-top:1px solid rgba(120,120,120,0.2);padding-top:12px;margin-top:8px}
+.result-error{color:#c62828;font-weight:600;padding:12px 0}
+@media (max-width:520px){.zodiac-two-col{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/tools/en/">Tools</a>
+    <a href="/patterns/en.html">Patterns</a>
+    <a href="/blog/en/index.html">Blog</a>
+    <a href="/">Home</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/tools/sun-sign-calculator.html">繁中</option><option value="/tools/en/sun-sign-calculator.html" selected>EN</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+    <button class="act-btn secondary" onclick="sgShare()" title="Share"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
+    <button class="act-btn secondary" onclick="sgPrint()" title="Print"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">Home</a> > <a href="/tools/en/">Tools</a> > Sun Sign Calculator</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+  <div class="calc-card">
+    <h1>Sun Sign Calculator</h1>
+    <p class="calc-subtitle">Find your Western zodiac sign, element, ruling planet, personality traits, and compatible signs</p>
+    <div id="calcInputs"><div class="input-group">
+  <label for="sunMonth">Birth Month</label>
+  <div class="input-row"><input type="number" id="sunMonth" placeholder="6" value="6" step="1" min="1" max="12"></div>
+</div>
+  <small class="input-help">Enter the month you were born (1–12)</small>
+<div class="input-group">
+  <label for="sunDay">Birth Day</label>
+  <div class="input-row"><input type="number" id="sunDay" placeholder="15" value="15" step="1" min="1" max="31"></div>
+</div>
+  <small class="input-help">Enter the day you were born — your sun sign only depends on month and day, not the year</small></div>
+    <button class="btn-calc" onclick="calculate()">Calculate</button>
+    <div class="results" id="results"></div>
+  </div>
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article"><h2>What Is a Sun Sign?</h2><p>Your sun sign — sometimes called your "star sign" or simply your "zodiac sign" — is the sign of the Western zodiac the Sun was traditionally considered to occupy on the date you were born. It's the single most widely recognized piece of astrology, the basis for daily horoscope columns, and usually the first thing people mean when they ask "what's your sign?" Unlike a full natal chart, your sun sign depends only on your birth month and day — not your birth year or the time of day you were born — because it follows the same 12-sign, ~365-day cycle every single year.</p><h2>Elements and Qualities</h2><p>Each of the 12 signs belongs to one of four elements — Fire, Earth, Air, or Water — which broadly describes its temperament (Fire signs are associated with passion and action, Earth with practicality and stability, Air with intellect and communication, Water with emotion and intuition). Each sign also belongs to one of three qualities, or "modalities" — Cardinal signs are traditionally seen as initiators who start things moving, Fixed signs as stabilizers who see things through, and Mutable signs as adaptable types who embrace change. Together, a sign's element and quality are the traditional shorthand for its overall character.</p></article>
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+  <article class="article"><h2>Sign Compatibility, Simplified</h2><p>Astrological compatibility is a deep and often debated topic, but the most common starting point is elemental harmony: signs that share an element (say, two Fire signs) tend to understand each other's core drives, while signs of complementary elements — Fire with Air, and Earth with Water — are traditionally considered to balance each other well. This calculator uses that standard convention to suggest generally compatible signs for each result. It's a simplified, general-interest lens rather than a full compatibility reading, which would also weigh moon signs, rising signs, and other chart factors.</p><h2>A Note on How This Calculator Works</h2><p>This calculator determines your sun sign using the commonly published Western tropical zodiac date ranges, cross-checked against standard astrology references. Because the Sun's exact sign-to-sign transition shifts by up to a day depending on the year and your time zone, results for birthdays within a day or two of a boundary ("cusp") date are approximate — if precision matters to you, a full ephemeris lookup for your exact birth year and location will confirm it. This tool reflects a popular, simplified tradition intended for entertainment and self-reflection, not a scientific or predictive instrument.</p></article>
+
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <section class="faq"><h2>FAQ</h2><div class="faq-item"><div class="faq-q">What is a sun sign?</div><div class="faq-a">Your sun sign (also called your "star sign" or "zodiac sign") is the constellation the Sun was traditionally considered to be passing through on your birth date. It's the most commonly referenced piece of Western astrology and the basis for daily horoscope columns.</div></div>
+  <div class="faq-item"><div class="faq-q">Do I need my birth year or birth time for a sun sign?</div><div class="faq-a">No. Your sun sign only depends on your birth month and day — it repeats the same way every year regardless of what year you were born. Birth year and birth time matter for a full natal chart (which also maps your moon sign, rising sign, and planetary positions), but not for a basic sun sign.</div></div>
+  <div class="faq-item"><div class="faq-q">What if I was born on a cusp date, right at the boundary between two signs?</div><div class="faq-a">The exact moment the Sun moves from one sign to the next shifts slightly from year to year and depends on your time zone, so the commonly published date ranges are approximate. If you were born within a day or two of a boundary date, you may want to check a precise ephemeris for your exact birth year to confirm your sign with certainty.</div></div>
+  <div class="faq-item"><div class="faq-q">How is sign compatibility determined here?</div><div class="faq-a">This tool uses the standard element-based compatibility convention in Western astrology: signs sharing the same element (Fire, Earth, Air, or Water) and signs of the complementary element (Fire with Air, Earth with Water) are generally considered the most harmonious pairings. This is a simplified, general-interest view — a full compatibility reading considers many more chart factors.</div></div>
+  <div class="faq-item"><div class="faq-q">Is sun sign astrology scientifically validated?</div><div class="faq-a">No. Sun sign astrology is a popular, simplified form of Western astrology intended for entertainment and self-reflection, not a scientific or predictive instrument. The date ranges and elemental groupings follow long-established astrological convention, but the personality associations are cultural/traditional readings, not empirical claims.</div></div></section>
+  <div class="more-tools"><h3>More Tools</h3><div class="tools-grid"><a class="tool-pill" href="/tools/en/chinese-zodiac-calculator.html">Chinese Zodiac Calculator</a>
+      <a class="tool-pill" href="/tools/en/bazi-calculator.html">BaZi Calculator</a>
+      <a class="tool-pill" href="/tools/en/feng-shui-bedroom.html">Feng Shui Bedroom Calculator</a>
+      <a class="tool-pill" href="/tools/en/tarot-card-reader.html">Tarot Card Reader</a>
+      <a class="tool-pill" href="/tools/en/age-calculator.html">Age Calculator</a></div></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>Related Tools</h3><a class="related-link" href="/tools/en/chinese-zodiac-calculator.html">Chinese Zodiac Calculator</a>
+    <a class="related-link" href="/tools/en/bazi-calculator.html">BaZi Calculator</a>
+    <a class="related-link" href="/tools/en/feng-shui-bedroom.html">Feng Shui Bedroom Calculator</a>
+    <a class="related-link" href="/tools/en/tarot-card-reader.html">Tarot Card Reader</a></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
+  </div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/home/en/privacy.html">Privacy</a><a href="/home/en/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+// Sun Sign (太陽星座) calculation core — pure date-range lookup, no external library needed,
+// no year dependency at all (sun sign only depends on month+day), so no hardcoded-year risk.
+var SIGNS = [
+  {key:'aries',       start:[3,21],  end:[4,19],  element:'fire',  quality:'cardinal', planet:'mars'},
+  {key:'taurus',      start:[4,20],  end:[5,20],  element:'earth', quality:'fixed',    planet:'venus'},
+  {key:'gemini',      start:[5,21],  end:[6,20],  element:'air',   quality:'mutable',  planet:'mercury'},
+  {key:'cancer',      start:[6,21],  end:[7,22],  element:'water', quality:'cardinal', planet:'moon'},
+  {key:'leo',         start:[7,23],  end:[8,22],  element:'fire',  quality:'fixed',    planet:'sun'},
+  {key:'virgo',       start:[8,23],  end:[9,22],  element:'earth', quality:'mutable',  planet:'mercury'},
+  {key:'libra',       start:[9,23],  end:[10,22], element:'air',   quality:'cardinal', planet:'venus'},
+  {key:'scorpio',     start:[10,23], end:[11,21], element:'water', quality:'fixed',    planet:'mars_pluto'},
+  {key:'sagittarius', start:[11,22], end:[12,21], element:'fire',  quality:'mutable',  planet:'jupiter'},
+  {key:'capricorn',   start:[12,22], end:[1,19],  element:'earth', quality:'cardinal', planet:'saturn'},
+  {key:'aquarius',    start:[1,20],  end:[2,18],  element:'air',   quality:'fixed',    planet:'saturn_uranus'},
+  {key:'pisces',      start:[2,19],  end:[3,20],  element:'water', quality:'mutable',  planet:'jupiter_neptune'}
+];
+
+// ELEMENT_COMPATIBLE: standard astrology convention — same element and the complementary
+// element (fire<->air, earth<->water) are generally considered the most harmonious pairings.
+var ELEMENT_COMPATIBLE = {
+  fire:  ['fire','air'],
+  air:   ['air','fire'],
+  earth: ['earth','water'],
+  water: ['water','earth']
+};
+
+// Generic days-in-month cap that does NOT depend on a year (sun sign never needs a birth year),
+// so Feb is allowed up to 29 rather than rejecting valid Feb-29 birthdays.
+var MONTH_DAY_CAP = [31,29,31,30,31,30,31,31,30,31,30,31];
+
+function isValidMonthDay(month, day) {
+  if (!Number.isInteger(month) || !Number.isInteger(day)) return false;
+  if (month < 1 || month > 12) return false;
+  if (day < 1 || day > MONTH_DAY_CAP[month-1]) return false;
+  return true;
+}
+
+function getSunSignKey(month, day) {
+  for (var i = 0; i < SIGNS.length; i++) {
+    var s = SIGNS[i];
+    if (s.start[0] === s.end[0]) {
+      if (month === s.start[0] && day >= s.start[1] && day <= s.end[1]) return s.key;
+    } else {
+      // wraps the year boundary (Capricorn: Dec 22 -> Jan 19)
+      if ((month === s.start[0] && day >= s.start[1]) || (month === s.end[0] && day <= s.end[1])) return s.key;
+    }
+  }
+  return null;
+}
+
+function signByKey(key) {
+  for (var i = 0; i < SIGNS.length; i++) if (SIGNS[i].key === key) return SIGNS[i];
+  return null;
+}
+
+function compatibleSigns(key) {
+  var s = signByKey(key);
+  if (!s) return [];
+  var okElements = ELEMENT_COMPATIBLE[s.element] || [s.element];
+  var out = [];
+  for (var i = 0; i < SIGNS.length; i++) {
+    var o = SIGNS[i];
+    if (o.key === key) continue;
+    if (okElements.indexOf(o.element) !== -1) out.push(o.key);
+  }
+  return out;
+}
+
+function computeSunSignData(month, day) {
+  if (!isValidMonthDay(month, day)) return {error: 'invalidDate'};
+  var key = getSunSignKey(month, day);
+  if (!key) return {error: 'invalidDate'};
+  var s = signByKey(key);
+  return {
+    error: null,
+    key: key,
+    element: s.element,
+    quality: s.quality,
+    planet: s.planet,
+    compatible: compatibleSigns(key)
+  };
+}
+
+function renderSunSignResult(data, L) {
+  if (data.error) {
+    return '<div class="result-error">' + (L.ui.errorInvalidDate || 'Invalid date') + '</div>';
+  }
+  var sign = L.signs[data.key];
+  var html = '';
+  html += '<div class="zodiac-result-card">';
+  html += '<h3 class="zodiac-result-title">' + sign.name + ' <span class="zodiac-symbol-name">(' + sign.symbolName + ')</span></h3>';
+  html += '<p class="zodiac-date-range">' + (L.ui.dateRangeLabel || '') + ': ' + sign.dateRange + '</p>';
+  html += '<p class="zodiac-desc">' + sign.desc + '</p>';
+  html += '<div class="zodiac-meta-grid">';
+  html += '<div class="zodiac-meta-item"><span class="meta-label">' + (L.ui.elementLabel||'') + '</span><span class="meta-value">' + L.elementNames[data.element] + '</span><span class="meta-desc">' + L.elementDesc[data.element] + '</span></div>';
+  html += '<div class="zodiac-meta-item"><span class="meta-label">' + (L.ui.qualityLabel||'') + '</span><span class="meta-value">' + L.qualityNames[data.quality] + '</span><span class="meta-desc">' + L.qualityDesc[data.quality] + '</span></div>';
+  html += '<div class="zodiac-meta-item"><span class="meta-label">' + (L.ui.planetLabel||'') + '</span><span class="meta-value">' + L.planetNames[data.planet] + '</span></div>';
+  html += '</div>';
+  html += '<div class="zodiac-traits-block"><span class="meta-label">' + (L.ui.traitsLabel||'') + '</span><div class="trait-chips">';
+  for (var i=0;i<sign.traits.length;i++) html += '<span class="trait-chip">' + sign.traits[i] + '</span>';
+  html += '</div></div>';
+  html += '<div class="zodiac-two-col">';
+  html += '<div><span class="meta-label">' + (L.ui.strengthsLabel||'') + '</span><ul>';
+  for (var j=0;j<sign.strengths.length;j++) html += '<li>' + sign.strengths[j] + '</li>';
+  html += '</ul></div>';
+  html += '<div><span class="meta-label">' + (L.ui.watchOutsLabel||'') + '</span><ul>';
+  for (var k=0;k<sign.watchOuts.length;k++) html += '<li>' + sign.watchOuts[k] + '</li>';
+  html += '</ul></div>';
+  html += '</div>';
+  html += '<div class="zodiac-compatible-block"><span class="meta-label">' + (L.ui.compatibleLabel||'') + '</span><p class="compatible-desc">' + (L.ui.compatibleDesc||'') + '</p><div class="trait-chips">';
+  for (var m=0;m<data.compatible.length;m++) html += '<span class="trait-chip trait-chip-accent">' + L.signs[data.compatible[m]].name + '</span>';
+  html += '</div></div>';
+  html += '<p class="zodiac-disclaimer">' + (L.ui.disclaimerText||'') + '</p>';
+  html += '</div>';
+  return html;
+}
+
+function calculate() {
+  const month = parseInt(document.getElementById('sunMonth').value, 10);
+  const day = parseInt(document.getElementById('sunDay').value, 10);
+  const L = {"signs": {"aries": {"name": "Aries", "dateRange": "March 21 – April 19", "symbolName": "The Ram", "desc": "Aries is commonly associated with boldness and a pioneering spirit, often described as the first to leap into new adventures. Ruled by fiery Mars, this sign is traditionally linked to raw energy, competitiveness, and a refreshingly direct approach to life. Arians are often seen as natural leaders who thrive on challenge and momentum.", "traits": ["Bold", "Energetic", "Competitive", "Impulsive", "Independent"], "strengths": ["Courageous", "Confident", "Natural leader"], "watchOuts": ["Can be impatient", "May act before thinking", "Can be quick-tempered"]}, "taurus": {"name": "Taurus", "dateRange": "April 20 – May 20", "symbolName": "The Bull", "desc": "Taurus is traditionally described as grounded and steady, with a deep appreciation for comfort, beauty, and the good things in life. Ruled by Venus, Taureans are often associated with loyalty, patience, and a determined streak that helps them see things through. They're commonly seen as reliable companions who value stability above all.", "traits": ["Reliable", "Patient", "Sensual", "Stubborn", "Grounded"], "strengths": ["Dependable", "Persistent", "Practical"], "watchOuts": ["Can be stubborn", "May resist change", "Can be possessive"]}, "gemini": {"name": "Gemini", "dateRange": "May 21 – June 20", "symbolName": "The Twins", "desc": "Gemini is commonly associated with curiosity and quick wit, often described as the social butterfly of the zodiac. Ruled by Mercury, Geminis are traditionally linked to versatility, clever conversation, and an ever-active mind that loves exploring new ideas. They're often seen as adaptable communicators who keep life interesting.", "traits": ["Curious", "Witty", "Adaptable", "Communicative", "Playful"], "strengths": ["Quick-witted", "Versatile", "Sociable"], "watchOuts": ["Can be indecisive", "May seem inconsistent", "Can be easily distracted"]}, "cancer": {"name": "Cancer", "dateRange": "June 21 – July 22", "symbolName": "The Crab", "desc": "Cancer is traditionally described as deeply intuitive and nurturing, with strong ties to home, family, and emotional connection. Ruled by the Moon, Cancerians are commonly associated with sensitivity, loyalty, and a protective instinct toward those they love. They're often seen as warm, caring souls with rich inner emotional lives.", "traits": ["Nurturing", "Intuitive", "Loyal", "Sensitive", "Protective"], "strengths": ["Caring", "Empathetic", "Loyal"], "watchOuts": ["Can be moody", "May take things personally", "Can be overly cautious"]}, "leo": {"name": "Leo", "dateRange": "July 23 – August 22", "symbolName": "The Lion", "desc": "Leo is commonly associated with warmth, charisma, and a natural flair for the dramatic, often described as the zodiac's born performer. Ruled by the Sun, Leos are traditionally linked to generosity, confidence, and a big-hearted loyalty toward friends and family. They're often seen as magnetic personalities who light up any room.", "traits": ["Confident", "Charismatic", "Generous", "Dramatic", "Loyal"], "strengths": ["Warm-hearted", "Creative", "Encouraging"], "watchOuts": ["Can be prideful", "May crave attention", "Can be stubborn"]}, "virgo": {"name": "Virgo", "dateRange": "August 23 – September 22", "symbolName": "The Maiden", "desc": "Virgo is traditionally described as thoughtful and detail-oriented, often associated with a practical mind and a genuine desire to be helpful. Ruled by Mercury, Virgos are commonly linked to precision, reliability, and a quiet dedication to doing things well. They're often seen as humble, hardworking perfectionists with big hearts.", "traits": ["Analytical", "Practical", "Diligent", "Modest", "Helpful"], "strengths": ["Detail-oriented", "Reliable", "Resourceful"], "watchOuts": ["Can be overly critical", "May overthink things", "Can be a perfectionist"]}, "libra": {"name": "Libra", "dateRange": "September 23 – October 22", "symbolName": "The Scales", "desc": "Libra is commonly associated with charm, fairness, and a genuine love of harmony, often described as the diplomat of the zodiac. Ruled by Venus, Librans are traditionally linked to a strong aesthetic sense, sociability, and a talent for seeing multiple sides of any situation. They're often seen as gracious peacemakers who value balance.", "traits": ["Diplomatic", "Charming", "Fair-minded", "Social", "Romantic"], "strengths": ["Cooperative", "Tactful", "Fair"], "watchOuts": ["Can be indecisive", "May avoid conflict", "Can people-please"]}, "scorpio": {"name": "Scorpio", "dateRange": "October 23 – November 21", "symbolName": "The Scorpion", "desc": "Scorpio is traditionally described as intense and passionate, often associated with deep emotional insight and a magnetic sense of mystery. Ruled by Mars and Pluto, Scorpios are commonly linked to determination, loyalty, and a fearless willingness to explore what lies beneath the surface. They're often seen as powerful, transformative presences.", "traits": ["Intense", "Passionate", "Determined", "Mysterious", "Loyal"], "strengths": ["Resourceful", "Brave", "Perceptive"], "watchOuts": ["Can be secretive", "May hold grudges", "Can be intensely jealous"]}, "sagittarius": {"name": "Sagittarius", "dateRange": "November 22 – December 21", "symbolName": "The Archer", "desc": "Sagittarius is commonly associated with optimism and wanderlust, often described as the zodiac's eternal adventurer. Ruled by Jupiter, Sagittarians are traditionally linked to a love of freedom, honesty, and big-picture thinking that seeks out new horizons. They're often seen as enthusiastic free spirits with an infectious sense of humor.", "traits": ["Adventurous", "Optimistic", "Honest", "Independent", "Philosophical"], "strengths": ["Open-minded", "Enthusiastic", "Generous"], "watchOuts": ["Can be blunt", "May over-promise", "Can be restless"]}, "capricorn": {"name": "Capricorn", "dateRange": "December 22 – January 19", "symbolName": "The Sea-Goat", "desc": "Capricorn is traditionally described as ambitious and disciplined, often associated with a steady climb toward long-term goals. Ruled by Saturn, Capricorns are commonly linked to responsibility, patience, and a strong work ethic that earns them respect. They're often seen as pragmatic achievers with quiet, dry wit beneath the surface.", "traits": ["Ambitious", "Disciplined", "Responsible", "Patient", "Practical"], "strengths": ["Hardworking", "Determined", "Self-controlled"], "watchOuts": ["Can be a workaholic", "May seem reserved", "Can be overly cautious"]}, "aquarius": {"name": "Aquarius", "dateRange": "January 20 – February 18", "symbolName": "The Water Bearer", "desc": "Aquarius is commonly associated with originality and independent thinking, often described as the visionary of the zodiac. Ruled by Saturn and Uranus, Aquarians are traditionally linked to humanitarian ideals, innovation, and a refreshingly unconventional approach to life. They're often seen as forward-thinking individualists with a strong sense of community.", "traits": ["Original", "Independent", "Humanitarian", "Inventive", "Idealistic"], "strengths": ["Innovative", "Open-minded", "Friendly"], "watchOuts": ["Can seem detached", "May be unpredictable", "Can be stubborn"]}, "pisces": {"name": "Pisces", "dateRange": "February 19 – March 20", "symbolName": "The Fish", "desc": "Pisces is traditionally described as dreamy and compassionate, often associated with deep imagination and a gentle, empathetic heart. Ruled by Jupiter and Neptune, Pisceans are commonly linked to artistic sensitivity, intuition, and a fluid, go-with-the-flow approach to life. They're often seen as kind-hearted romantics with rich inner worlds.", "traits": ["Compassionate", "Imaginative", "Intuitive", "Gentle", "Artistic"], "strengths": ["Empathetic", "Creative", "Selfless"], "watchOuts": ["Can be overly sensitive", "May escape into daydreams", "Can be easily influenced"]}}, "elementNames": {"fire": "Fire", "earth": "Earth", "air": "Air", "water": "Water"}, "qualityNames": {"cardinal": "Cardinal", "fixed": "Fixed", "mutable": "Mutable"}, "planetNames": {"mars": "Mars", "venus": "Venus", "mercury": "Mercury", "moon": "Moon", "sun": "Sun", "jupiter": "Jupiter", "saturn": "Saturn", "mars_pluto": "Mars / Pluto", "saturn_uranus": "Saturn / Uranus", "jupiter_neptune": "Jupiter / Neptune"}, "elementDesc": {"fire": "Fire signs are generally associated with passion, action, and spontaneity — a bold, energetic drive to take initiative and live in the moment.", "earth": "Earth signs are traditionally linked to practicality, stability, and a grounded connection to the material world, valuing security and tangible results.", "air": "Air signs are commonly associated with intellect, communication, and social connection, thriving on ideas, conversation, and the exchange of perspectives.", "water": "Water signs are often linked to emotion, intuition, and depth, navigating life through feeling, empathy, and a rich inner world."}, "qualityDesc": {"cardinal": "Cardinal signs are traditionally seen as initiators and natural leaders, the ones who start new projects and set fresh directions in motion.", "fixed": "Fixed signs are commonly associated with stability and persistence, staying committed to a course and seeing things through once begun.", "mutable": "Mutable signs are often linked to flexibility and adaptability, embracing change easily and adjusting comfortably as circumstances shift."}, "ui": {"title": "Sun Sign Calculator", "subtitle": "Discover your Western zodiac sign and what it traditionally represents", "monthLabel": "Month", "dayLabel": "Day", "submitLabel": "Find My Sign", "resultTitle": "Your Sun Sign", "dateRangeLabel": "Date Range", "elementLabel": "Element", "qualityLabel": "Quality", "planetLabel": "Ruling Planet", "traitsLabel": "Key Traits", "strengthsLabel": "Strengths", "watchOutsLabel": "Watch Out For", "compatibleLabel": "Compatible Signs", "compatibleDesc": "Compatibility here is based on general element harmony between signs — a fun, traditional starting point rather than a precise prediction.", "errorInvalidDate": "Please enter a valid date.", "errorRequired": "Please select both a month and a day.", "disclaimerText": "Sun sign astrology is a simplified, popular form of astrology intended for entertainment and self-reflection; if you were born near a cusp date, consult an exact ephemeris for precise results."}};
+  const data = computeSunSignData(month, day);
+  document.getElementById('results').innerHTML = renderSunSignResult(data, L);
+}
+function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copied!';setTimeout(function(){b.textContent='Share'},1500);}}
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},2000);
+</script>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Search tools, patterns, articles…" autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+
+<!-- Bookmark Panel -->
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header">
+    <h3>Bookmarks</h3>
+    <button class="bm-clear" onclick="window._sgClearBm()">Clear all</button>
+  </div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+<script src="/tools/tools-chart.js" defer></script>
+</body>
+</html>
+
+<!-- gen:v2.1|en|sun-sign-calculator|2026-08-23 -->
