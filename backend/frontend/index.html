@@ -205,6 +205,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
   #desktopMain .hotkeys{padding:8px 20px}
   #desktopMain .status{padding:4px 20px}
   #desktopMain .result{padding:0 20px}
+  #desktopMain #homeDash{padding:8px 20px}
+  /* 電腦版左側已經有常駐自選股側欄可以分組管理，首頁儀表板裡的族群篩選列跟卡片上的族群選單只給手機版看，避免重複 */
+  #desktopMain #homeDash .ws-mobile-bar,
+  #desktopMain #homeDash #wsAddGroupRowM,
+  #desktopMain #homeWatchPreview .ws-item-group{display:none}
 
   /* 電腦版中欄 TAB 列 */
   #desktopTabBar{
@@ -518,6 +523,38 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
 .query-bar{background:var(--bg3);border-radius:6px;height:6px;margin:8px 0 4px;overflow:hidden}
 .query-bar-fill{height:100%;background:var(--green);transition:width .3s}
 .query-bar-fill.full{background:#e05555}
+
+/* ── 首頁儀表板（2026/08/22新增：搜尋前空白狀態改善）── */
+#homeDash{display:none;padding:4px 0 8px}
+#homeDash.show{display:block}
+.hd-sec{margin-bottom:18px}
+.hd-sec-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.hd-sec-h{font-size:13px;font-weight:700;color:var(--text)}
+.hd-sec-more{font-size:11px;color:var(--text3);cursor:pointer}
+.hd-watch-row{display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border-radius:var(--radius);padding:11px 14px;margin-bottom:8px;cursor:pointer;border:.5px solid var(--border)}
+.hd-watch-name{font-weight:700;font-size:14px}
+.hd-watch-id{font-size:11px;color:var(--text3);margin-left:5px}
+.hd-watch-price{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+.hd-watch-chg{font-size:11px;font-weight:600;text-align:right;margin-top:1px}
+.hd-empty{background:var(--bg2);border-radius:var(--radius-lg);padding:18px 16px;text-align:center;font-size:12px;color:var(--text2);line-height:1.6}
+.hd-empty-icon{font-size:26px;margin-bottom:8px}
+
+/* ── 自選股族群（2026/08/22新增）：電腦版側邊欄＋手機版關注頁共用 ── */
+.ws-group-bar{display:flex;gap:6px;padding:8px 12px;align-items:center;border-bottom:.5px solid var(--border)}
+.ws-group-select{flex:1;height:26px;border:.5px solid var(--border2);border-radius:6px;background:var(--bg2);color:var(--text);font-size:11px;padding:0 4px}
+.ws-group-add{width:26px;height:26px;border:.5px solid var(--border2);border-radius:6px;background:var(--bg2);color:var(--text2);font-size:13px;line-height:1;cursor:pointer;flex-shrink:0}
+.ws-add-row{display:flex;gap:6px;padding:0 12px 8px}
+.ws-add-row input{flex:1;height:26px;border:.5px solid var(--border2);border-radius:6px;background:var(--bg2);color:var(--text);font-size:11px;padding:0 8px;outline:none;box-sizing:border-box;font-family:inherit}
+.ws-add-row button{height:26px;padding:0 10px;border:none;border-radius:6px;background:var(--green);color:#fff;font-size:11px;cursor:pointer;flex-shrink:0}
+.ws-item{padding:9px 14px;cursor:pointer;border-bottom:.5px solid var(--border)}
+.ws-item:hover{background:var(--bg2)}
+.ws-item-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ws-item-group{margin-top:6px;width:100%;height:22px;border:.5px solid var(--border);border-radius:5px;background:var(--bg2);color:var(--text3);font-size:10px;padding:0 4px;box-sizing:border-box}
+/* 手機版首頁儀表板的族群篩選列（跟電腦版側邊欄共用同一組class，但拿掉常駐側欄樣式） */
+.ws-mobile-bar{display:flex;gap:6px;align-items:center;margin-bottom:10px}
+.ws-mobile-bar .ws-group-select{flex:1;height:30px;font-size:12px}
+.ws-mobile-bar .ws-group-add{width:30px;height:30px;font-size:14px}
+#wsAddGroupRowM{padding:0}
 </style>
 <script src="https://accounts.google.com/gsi/client" async onload="_initGoogleSignIn()"></script>
 <script>
@@ -630,10 +667,18 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
 <!-- ══ 主容器：手機版為單欄，電腦版為三欄 Grid ══ -->
 <div class="app">
 
-  <!-- 電腦版左欄：精選股側邊欄 -->
+  <!-- 電腦版左欄：我的自選股常駐側邊欄（2026/08/22改版，原本的今日精選股在「精選股」頁自己有完整版面）-->
   <div id="desktopSidebar">
-    <div class="desktop-sidebar-title">🔍 今日精選股</div>
-    <div id="desktopPicksList">
+    <div class="desktop-sidebar-title">🔥 我的自選股</div>
+    <div class="ws-group-bar">
+      <select id="wsGroupFilter" class="ws-group-select" onchange="_onWsGroupFilterChange(this.value)"></select>
+      <button class="ws-group-add" onclick="_wsToggleAddGroup()" title="新增族群">＋</button>
+    </div>
+    <div id="wsAddGroupRow" class="ws-add-row" style="display:none">
+      <input id="wsNewGroupInput" placeholder="族群名稱，如：半導體" onkeydown="if(event.key==='Enter')_wsSubmitAddGroup()">
+      <button onclick="_wsSubmitAddGroup()">新增</button>
+    </div>
+    <div id="dwsList">
       <div style="padding:16px;font-size:12px;color:var(--text3)">載入中…</div>
     </div>
   </div>
@@ -657,6 +702,26 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
   </div>
 
   <div class="status" id="statusBar"></div>
+
+  <!-- 首頁儀表板：搜尋前顯示（2026/08/22新增），有分析結果時自動隱藏 -->
+  <div id="homeDash">
+    <div class="hd-sec">
+      <div class="hd-sec-title">
+        <span class="hd-sec-h">🔥 我的關注</span>
+        <span class="hd-sec-more" onclick="showPage('watch')">查看全部 ›</span>
+      </div>
+      <!-- 自選股族群篩選（2026/08/22新增，改放首頁） -->
+      <div class="ws-mobile-bar">
+        <select id="wsGroupFilterM" class="ws-group-select" onchange="_onWsGroupFilterChangeM(this.value)"></select>
+        <button class="ws-group-add" onclick="_wsToggleAddGroupM()" title="新增族群">＋</button>
+      </div>
+      <div id="wsAddGroupRowM" class="ws-add-row" style="display:none;margin-bottom:10px">
+        <input id="wsNewGroupInputM" placeholder="族群名稱，如：半導體" onkeydown="if(event.key==='Enter')_wsSubmitAddGroupM()">
+        <button onclick="_wsSubmitAddGroupM()">新增</button>
+      </div>
+      <div id="homeWatchPreview"></div>
+    </div>
+  </div>
 
   <div class="result" id="resultEl">
 
@@ -1289,6 +1354,44 @@ let watchList = JSON.parse(localStorage.getItem('watchList')||'[]');
 let historyList = JSON.parse(localStorage.getItem('historyList')||'[]');
 
 // ══════════════════════════════════════
+// 自選股族群（2026/08/22新增）：自訂分類，電腦版左側常駐清單／手機版關注頁都能設定
+// ══════════════════════════════════════
+watchList = watchList.map(s => s.group ? s : {...s, group:'預設'}); // 舊資料補上預設族群
+function _persistWatchList(){ localStorage.setItem('watchList', JSON.stringify(watchList)); }
+function getWatchGroupNames(){
+  let names = JSON.parse(localStorage.getItem('watchGroupNames')||'null');
+  if(!names || !names.length) names = ['預設'];
+  if(!names.includes('預設')) names.unshift('預設');
+  return names;
+}
+function addWatchGroupName(name){
+  name = (name||'').trim();
+  if(!name) return null;
+  const names = getWatchGroupNames();
+  if(!names.includes(name)){ names.push(name); localStorage.setItem('watchGroupNames', JSON.stringify(names)); }
+  return name;
+}
+// 目前正在檢視的族群篩選（電腦版側欄／手機版首頁共用同一個狀態，"全部"＝不篩選）
+let _wsGroupFilter = '全部';
+function _wsFilteredWatchList(){
+  return _wsGroupFilter==='全部' ? watchList : watchList.filter(s=>(s.group||'預設')===_wsGroupFilter);
+}
+function setStockGroup(id, group){
+  const s = watchList.find(x=>x.id===id);
+  if(!s) return;
+  s.group = group || '預設';
+  _persistWatchList();
+  if(typeof _renderDesktopWatchSidebar==='function') _renderDesktopWatchSidebar();
+  if(typeof renderHomeDash==='function') renderHomeDash();
+  if(_watchCache && Object.keys(_watchCache).length && typeof _renderWatchGroups==='function') _renderWatchGroups(_watchCache);
+}
+function _groupOptionsHtml(selected){
+  return getWatchGroupNames().map(g=>
+    `<option value="${g}"${g===selected?' selected':''}>${g}</option>`
+  ).join('');
+}
+
+// ══════════════════════════════════════
 // 均線設定
 // ══════════════════════════════════════
 function buildMABody(){
@@ -1510,33 +1613,15 @@ function _renderWatchSkeleton(el){
 async function _fetchWatchBatch(){
   if(_watchLoading) return;
   _watchLoading=true;
-  const base=getAPI();
   const ids=watchList.map(s=>s.id);
-  
+
   try{
-    // 嘗試批次端點，若不存在則逐一查詢
-    let results={};
-    try{
-      const r=await fetch(`${base}/batch_analyze`,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({ids, tf:'D'}),
-        signal:AbortSignal.timeout(20000)
-      });
-      if(r.ok) results=await r.json();
-    }catch{
-      // fallback：逐一查詢（限制並發5個）
-      const chunks=[];
-      for(let i=0;i<ids.length;i+=5) chunks.push(ids.slice(i,i+5));
-      for(const chunk of chunks){
-        await Promise.all(chunk.map(async id=>{
-          try{
-            const r=await fetch(`${base}/api/analyze/${id}`,{signal:AbortSignal.timeout(8000),headers:_authHeaders?_authHeaders():{}});
-            if(r.ok) results[id]=await r.json();
-          }catch{}
-        }));
-      }
-    }
+    // 2026/08/22修正：原本這裡打/batch_analyze沒帶Authorization header，
+    // 這個端點需要登入才能呼叫，沒帶header一律401，但fetch不會丟例外（ok:false而已），
+    // 導致從來沒有真的fallback到逐一查詢，_watchCache永遠是空的，自選頁的智慧分類
+    // （今日注意/今日強勢…）等於沒在運作，每張卡都只會顯示「點擊查詢」。
+    // 改呼叫共用的_fetchQuoteBatch()，內建正確的auth header，batch失敗才會真的fallback。
+    const results = await _fetchQuoteBatch(ids);
     _watchCache=results;
     _renderWatchGroups(results);
   }catch(e){
@@ -1576,6 +1661,10 @@ function _getRiskBg(level){
 }
 
 function _renderWatchGroups(results){
+  // setStockGroup／切換族群篩選都會呼叫這裡刷新，但當時不一定在「關注」頁
+  // （例如在電腦版側欄改族群），這裡沒有目標元素就安靜跳過，不要噴錯。
+  const watchGroupsEl = document.getElementById('watchGroups');
+  if(!watchGroupsEl) return;
   const groups={
     danger:  {label:'🚨 今日注意',  items:[], color:'var(--up)'},
     strong:  {label:'🚀 今日強勢',  items:[], color:'var(--green)'},
@@ -1613,7 +1702,8 @@ function _renderWatchGroups(results){
   });
 
   const now=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
-  document.getElementById('watchUpdateTime').textContent=`更新 ${now}`;
+  const updateTimeEl = document.getElementById('watchUpdateTime');
+  if(updateTimeEl) updateTimeEl.textContent=`更新 ${now}`;
 
   let html='';
   Object.values(groups).forEach(g=>{
@@ -1624,18 +1714,20 @@ function _renderWatchGroups(results){
     </div>`;
   });
 
-  document.getElementById('watchGroups').innerHTML=html||'<div style="padding:20px 0;text-align:center;color:var(--text3);font-size:13px">資料載入失敗，請稍後再試</div>';
+  watchGroupsEl.innerHTML=html||'<div style="padding:20px 0;text-align:center;color:var(--text3);font-size:13px">資料載入失敗，請稍後再試</div>';
 }
 
 function _watchCard(s){
   const d=s.data;
   if(!d) return `
-    <div onclick="qpAndHome('${s.id}')" style="display:flex;justify-content:space-between;align-items:center;background:var(--bg2);border-radius:12px;padding:14px 16px;margin-bottom:8px;cursor:pointer">
-      <div>
-        <div style="font-weight:600;font-size:14px">${s.id} ${s.name}</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px">點擊查詢</div>
+    <div onclick="qpAndHome('${s.id}')" style="background:var(--bg2);border-radius:12px;padding:14px 16px;margin-bottom:8px;cursor:pointer">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:600;font-size:14px">${s.id} ${s.name}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">點擊查詢</div>
+        </div>
+        <div style="color:var(--text3);font-size:18px">›</div>
       </div>
-      <div style="color:var(--text3);font-size:18px">›</div>
     </div>`;
 
   const riskColor=_getRiskColor(d.risk_level);
@@ -1689,10 +1781,13 @@ function _renderWatchFallback(){
 }
 function addWatch(id,name){
   if(!watchList.find(s=>s.id===id)){
-    watchList.unshift({id,name,date:new Date().toLocaleDateString('zh-TW')});
+    watchList.unshift({id,name,date:new Date().toLocaleDateString('zh-TW'),group:'預設'});
     if(watchList.length>30)watchList=watchList.slice(0,30);
     localStorage.setItem('watchList',JSON.stringify(watchList));
   }
+  if(typeof renderHomeDash==='function') renderHomeDash();
+  if(typeof _renderDesktopWatchSidebar==='function') _renderDesktopWatchSidebar();
+  if(typeof _renderWsGroupFilterSelectM==='function') _renderWsGroupFilterSelectM();
 }
 function removeWatch(id){
   watchList=watchList.filter(s=>s.id!==id);
@@ -1700,6 +1795,9 @@ function removeWatch(id){
   // 更新自選按鈕狀態
   updateWatchBtn(id,false);
   showWatchList();
+  if(typeof renderHomeDash==='function') renderHomeDash();
+  if(typeof _renderDesktopWatchSidebar==='function') _renderDesktopWatchSidebar();
+  if(typeof _renderWsGroupFilterSelectM==='function') _renderWsGroupFilterSelectM();
 }
 function toggleWatch(id,name){
   if(!_authUser){ showLoginModal(); return; }
@@ -2654,10 +2752,121 @@ function _initDesktopLayout(){
   // 顯示電腦版計數器
   const dc = document.getElementById('desktopCounters');
   if(dc) dc.style.display = 'flex';
-  // 載入精選股到左欄
-  _loadDesktopPicks();
+  // 左欄改顯示我的自選股（2026/08/22改版，原本的今日精選股保留在_loadDesktopPicks，
+  // 但改成不在左欄呼叫了——精選股本來就有自己的完整頁面「精選股」tab可以看）
+  _renderDesktopWatchSidebar();
   // 監聽分析結果，顯示分享卡
   _observeDesktopShare();
+}
+
+// ── 電腦版左側自選股常駐清單（2026/08/22新增）── _wsGroupFilter/_wsFilteredWatchList定義在watchList宣告處，跟手機版共用
+
+function _renderWsGroupFilterSelect(){
+  const sel = document.getElementById('wsGroupFilter');
+  if(!sel) return;
+  const names = getWatchGroupNames();
+  sel.innerHTML = `<option value="全部">全部（${watchList.length}）</option>` +
+    names.map(g=>{
+      const cnt = watchList.filter(s=>(s.group||'預設')===g).length;
+      return `<option value="${g}">${g}（${cnt}）</option>`;
+    }).join('');
+  sel.value = _wsGroupFilter;
+}
+function _onWsGroupFilterChange(v){
+  _wsGroupFilter = v;
+  _renderDesktopWatchSidebar();
+}
+function _wsToggleAddGroup(){
+  const row = document.getElementById('wsAddGroupRow');
+  if(!row) return;
+  const showing = row.style.display !== 'none';
+  row.style.display = showing ? 'none' : 'flex';
+  if(!showing) document.getElementById('wsNewGroupInput').focus();
+}
+function _wsSubmitAddGroup(){
+  const inp = document.getElementById('wsNewGroupInput');
+  const name = addWatchGroupName(inp.value);
+  if(name){
+    inp.value = '';
+    document.getElementById('wsAddGroupRow').style.display = 'none';
+    _wsGroupFilter = name;
+    _renderDesktopWatchSidebar();
+  }
+}
+
+// ── 手機版首頁儀表板：同一份族群篩選，控制項id加M尾綴避免跟電腦版側欄id撞名
+// （電腦版側欄一直存在於畫面上，跟手機版首頁的篩選列可能同時出現在同一個DOM裡）
+function _renderWsGroupFilterSelectM(){
+  const sel = document.getElementById('wsGroupFilterM');
+  if(!sel) return;
+  const names = getWatchGroupNames();
+  sel.innerHTML = `<option value="全部">全部（${watchList.length}）</option>` +
+    names.map(g=>{
+      const cnt = watchList.filter(s=>(s.group||'預設')===g).length;
+      return `<option value="${g}">${g}（${cnt}）</option>`;
+    }).join('');
+  sel.value = _wsGroupFilter;
+}
+function _onWsGroupFilterChangeM(v){
+  _wsGroupFilter = v;
+  if(typeof renderHomeDash==='function') renderHomeDash();
+}
+function _wsToggleAddGroupM(){
+  const row = document.getElementById('wsAddGroupRowM');
+  if(!row) return;
+  const showing = row.style.display !== 'none';
+  row.style.display = showing ? 'none' : 'flex';
+  if(!showing) document.getElementById('wsNewGroupInputM').focus();
+}
+function _wsSubmitAddGroupM(){
+  const inp = document.getElementById('wsNewGroupInputM');
+  const name = addWatchGroupName(inp.value);
+  if(name){
+    inp.value = '';
+    document.getElementById('wsAddGroupRowM').style.display = 'none';
+    _wsGroupFilter = name;
+    _renderWsGroupFilterSelectM();
+    if(typeof renderHomeDash==='function') renderHomeDash();
+  }
+}
+
+async function _renderDesktopWatchSidebar(){
+  const el = document.getElementById('dwsList');
+  if(!el) return;
+  _renderWsGroupFilterSelect();
+  const items = _wsFilteredWatchList();
+  if(!items.length){
+    el.innerHTML = watchList.length
+      ? `<div style="padding:20px 16px;font-size:12px;color:var(--text3);text-align:center">這個族群還沒有股票</div>`
+      : `<div style="padding:20px 16px;font-size:12px;color:var(--text3);text-align:center">還沒有自選股<br><span style="font-size:11px">分析股票後按「加入自選」</span></div>`;
+    return;
+  }
+  el.innerHTML = items.map(s=>`
+    <div class="ws-item" onclick="qpAndHome('${s.id}')">
+      <div class="ws-item-top">
+        <div class="dpi-info">
+          <div class="dpi-name">${s.name||s.id}</div>
+          <div class="dpi-id">${s.id}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="dpi-price" id="wsp-${s.id}">—</div>
+          <div class="dpi-chg" id="wsc-${s.id}"></div>
+        </div>
+      </div>
+      <select class="ws-item-group" onclick="event.stopPropagation()" onchange="setStockGroup('${s.id}', this.value)">
+        ${_groupOptionsHtml(s.group||'預設')}
+      </select>
+    </div>`).join('');
+  if(!_authUser) return; // 沒登入不會有自選股資料，這裡防呆跳過報價
+  const results = await _fetchQuoteBatch(items.map(s=>s.id));
+  items.forEach(s=>{
+    const d = results[s.id];
+    if(!d) return;
+    const priceEl = document.getElementById(`wsp-${s.id}`);
+    const chgEl = document.getElementById(`wsc-${s.id}`);
+    if(priceEl && d.price!=null) priceEl.textContent = d.price;
+    if(chgEl && d.pattern) chgEl.textContent = d.pattern;
+  });
 }
 
 async function _loadDesktopPicks(){
@@ -2697,6 +2906,84 @@ async function _loadDesktopPicks(){
   } catch(e){
     el.innerHTML = '<div style="padding:20px 16px;font-size:12px;color:var(--text3);text-align:center">載入失敗</div>';
   }
+}
+
+// ── 首頁儀表板（2026/08/22新增）：搜尋前顯示自選股即時預覽，取代原本空白畫面 ──
+function _observeHomeDash(){
+  const resultEl = document.getElementById('resultEl');
+  const dash = document.getElementById('homeDash');
+  if(!resultEl || !dash) return;
+  const sync = () => { dash.classList.toggle('show', !resultEl.classList.contains('show')); };
+  sync();
+  new MutationObserver(sync).observe(resultEl, {attributes:true, attributeFilter:['class']});
+}
+
+async function renderHomeDash(){
+  const el = document.getElementById('homeWatchPreview');
+  if(!el) return;
+  if(typeof _renderWsGroupFilterSelectM==='function') _renderWsGroupFilterSelectM();
+  if(!watchList.length){
+    el.innerHTML = `<div class="hd-empty"><div class="hd-empty-icon">🔥</div>輸入代號分析股票後按「加入自選」，關注的股票會顯示在這裡</div>`;
+    return;
+  }
+  // 選「全部」時維持原本精簡預覽（只顯示前3檔）；選特定族群時該族群通常本來就不多，全部顯示
+  const filtered = typeof _wsFilteredWatchList==='function' ? _wsFilteredWatchList() : watchList;
+  if(!filtered.length){
+    el.innerHTML = `<div class="hd-empty" style="padding:14px 16px">這個族群還沒有股票</div>`;
+    return;
+  }
+  const preview = (_wsGroupFilter==='全部') ? filtered.slice(0,3) : filtered;
+  el.innerHTML = preview.map(s=>`
+    <div class="hd-watch-row" onclick="qpAndHome('${s.id}')">
+      <div><span class="hd-watch-name">${s.name||s.id}</span><span class="hd-watch-id">${s.id}</span></div>
+      <div style="text-align:right">
+        <div class="hd-watch-price" id="hdp-${s.id}">—</div>
+        <div class="hd-watch-chg" id="hdc-${s.id}"></div>
+        <select class="ws-item-group" style="margin-top:4px;width:auto;height:20px;font-size:9px" onclick="event.stopPropagation()" onchange="setStockGroup('${s.id}', this.value)">${_groupOptionsHtml(s.group||'預設')}</select>
+      </div>
+    </div>`).join('');
+  // 重要：這裡一定要用 /batch_analyze，不能逐檔呼叫 /api/analyze/{id}——
+  // 後者遊客每日限查1次、免費會員限查3次，逐檔打會在使用者還沒手動搜尋前就把當日額度用光。
+  // /batch_analyze 走快取不計入每日查詢額度，但需要登入（沒登入代表watchList也不會有資料，安全跳過）。
+  if(!_authUser) return;
+  try{
+    const results = await _fetchQuoteBatch(preview.map(s=>s.id));
+    preview.forEach(s=>{
+      const d = results[s.id];
+      if(!d) return;
+      const priceEl = document.getElementById(`hdp-${s.id}`);
+      const chgEl = document.getElementById(`hdc-${s.id}`);
+      if(priceEl && d.price!=null) priceEl.textContent = d.price;
+      if(chgEl && d.pattern){ chgEl.textContent = d.pattern; chgEl.className = 'hd-watch-chg'; chgEl.style.color = 'var(--text3)'; }
+    });
+  }catch(e){}
+}
+
+// 共用批次報價：優先走/batch_analyze（不計每日額度、有快取），失敗才退回逐檔查詢
+// （逐檔查詢會計入每日額度，只在batch真的掛掉時當保底）
+async function _fetchQuoteBatch(ids){
+  if(!ids.length) return {};
+  const base = getAPI();
+  try{
+    const r = await fetch(`${base}/batch_analyze`,{
+      method:'POST',
+      headers:_authHeaders(),
+      body:JSON.stringify({ids, tf:'D'}),
+      signal:AbortSignal.timeout(20000)
+    });
+    if(r.ok) return await r.json();
+  }catch(e){}
+  const results = {};
+  for(let i=0;i<ids.length;i+=5){
+    const chunk = ids.slice(i,i+5);
+    await Promise.all(chunk.map(async id=>{
+      try{
+        const r = await fetch(`${base}/api/analyze/${id}`,{signal:AbortSignal.timeout(8000),headers:_authHeaders()});
+        if(r.ok) results[id]=await r.json();
+      }catch(e){}
+    }));
+  }
+  return results;
 }
 
 function _observeDesktopShare(){
@@ -4193,6 +4480,11 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   if(_pageParam==='deepanalysis' && !_stockParam){
     showPage('deepanalysis');
   }
+
+  // 首頁儀表板（2026/08/22新增）：放在?stock=自動分析判斷之後，
+  // 這樣有帶?stock=時resultEl會先進入分析中，觀察者會自動把dash收起來，不會閃一下空清單。
+  _observeHomeDash();
+  renderHomeDash();
 });
 
 async function loadHotkeys(){
