@@ -57,7 +57,7 @@
     <p class="calc-subtitle">算出您的命卦數字，依據傳統八宅風水理論找出臥室與床位擺放的吉方與凶方</p>
     <div id="calcInputs"><div class="input-group">
   <label for="birthYear">出生年</label>
-  <div class="input-row"><input type="number" id="birthYear" placeholder="1990" value="1990" step="1" min="1900" max="2026"></div>
+  <div class="input-row"><input type="number" id="birthYear" placeholder="1990" value="1990" step="1" min="1900"></div>
 </div>
   <small class="input-help">請輸入西曆（國曆）出生年份</small>
 <div class="input-group">
@@ -114,7 +114,10 @@
       <a class="tool-pill" href="/tools/insulation-calculator.html">隔熱材料計算機</a>
       <a class="tool-pill" href="/tools/date-difference.html">日期差異計算機</a>
       <a class="tool-pill" href="/tools/age-calculator.html">年齡計算機</a>
-      <a class="tool-pill" href="/tools/bazi-calculator.html">八字計算機</a></div></div>
+      <a class="tool-pill" href="/tools/bazi-calculator.html">八字計算機</a>
+      <a class="tool-pill" href="/tools/chinese-zodiac-calculator.html">生肖流年運勢計算機</a>
+      <a class="tool-pill" href="/tools/sun-sign-calculator.html">太陽星座計算機</a>
+      <a class="tool-pill" href="/tools/tarot-card-reader.html">塔羅牌線上占卜</a></div></div>
 
 </div>
 <aside class="sidebar">
@@ -122,7 +125,10 @@
   <div class="related-card"><h3>相關工具</h3><a class="related-link" href="/tools/room-area.html">房間面積計算器</a>
     <a class="related-link" href="/tools/home-energy-audit.html">家庭能源審計工具</a>
     <a class="related-link" href="/tools/date-difference.html">日期差異計算機</a>
-    <a class="related-link" href="/tools/bazi-calculator.html">八字計算機</a></div>
+    <a class="related-link" href="/tools/bazi-calculator.html">八字計算機</a>
+    <a class="related-link" href="/tools/chinese-zodiac-calculator.html">生肖流年運勢計算機</a>
+    <a class="related-link" href="/tools/sun-sign-calculator.html">太陽星座計算機</a>
+    <a class="related-link" href="/tools/tarot-card-reader.html">塔羅牌線上占卜</a></div>
   <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
   </div>
 </aside>
@@ -136,7 +142,9 @@ function calculate() {
   const gender = document.getElementById('gender').value;
   const checkDirection = document.getElementById('checkDirection').value;
 
-  if (!birthYear || birthYear < 1900 || birthYear > 2026 || !birthMonth || birthMonth < 1 || birthMonth > 12 || !birthDay || birthDay < 1 || birthDay > 31) {
+  function daysInMonth(y,m){ return new Date(y,m,0).getDate(); }
+  const curYear = new Date().getFullYear();
+  if (!birthYear || birthYear < 1900 || birthYear > curYear || !birthMonth || birthMonth < 1 || birthMonth > 12 || !birthDay || birthDay < 1 || birthDay > daysInMonth(birthYear, birthMonth)) {
     alert('請輸入正確的出生年、月、日。');
     return;
   }
@@ -216,6 +224,7 @@ function calculate() {
 }
 function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
 document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+(function(){var yEl=document.getElementById('birthYear');if(yEl)yEl.max=new Date().getFullYear();})();
 </script>
 <script>
 setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}})};},2000);
