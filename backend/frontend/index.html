@@ -673,6 +673,8 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
     <div class="ws-group-bar">
       <select id="wsGroupFilter" class="ws-group-select" onchange="_onWsGroupFilterChange(this.value)"></select>
       <button class="ws-group-add" onclick="_wsToggleAddGroup()" title="新增族群">＋</button>
+      <button id="wsGroupEdit" class="ws-group-add" onclick="_wsRenameCurrentGroup()" title="重新命名族群" style="display:none">✎</button>
+      <button id="wsGroupDel" class="ws-group-add" onclick="_wsDeleteCurrentGroup()" title="刪除族群" style="display:none">🗑</button>
     </div>
     <div id="wsAddGroupRow" class="ws-add-row" style="display:none">
       <input id="wsNewGroupInput" placeholder="族群名稱，如：半導體" onkeydown="if(event.key==='Enter')_wsSubmitAddGroup()">
@@ -714,6 +716,8 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
       <div class="ws-mobile-bar">
         <select id="wsGroupFilterM" class="ws-group-select" onchange="_onWsGroupFilterChangeM(this.value)"></select>
         <button class="ws-group-add" onclick="_wsToggleAddGroupM()" title="新增族群">＋</button>
+        <button id="wsGroupEditM" class="ws-group-add" onclick="_wsRenameCurrentGroupM()" title="重新命名族群" style="display:none">✎</button>
+        <button id="wsGroupDelM" class="ws-group-add" onclick="_wsDeleteCurrentGroupM()" title="刪除族群" style="display:none">🗑</button>
       </div>
       <div id="wsAddGroupRowM" class="ws-add-row" style="display:none;margin-bottom:10px">
         <input id="wsNewGroupInputM" placeholder="族群名稱，如：半導體" onkeydown="if(event.key==='Enter')_wsSubmitAddGroupM()">
@@ -1370,6 +1374,31 @@ function addWatchGroupName(name){
   const names = getWatchGroupNames();
   if(!names.includes(name)){ names.push(name); localStorage.setItem('watchGroupNames', JSON.stringify(names)); }
   return name;
+}
+// 重新命名族群（2026/08/23新增）：「預設」跟「全部」不可改名，改名後同步更新所有屬於這個族群的自選股
+function renameWatchGroupName(oldName, newName){
+  newName = (newName||'').trim();
+  if(!newName || oldName==='預設' || oldName==='全部') return null;
+  const names = getWatchGroupNames();
+  const idx = names.indexOf(oldName);
+  if(idx===-1) return null;
+  if(newName!==oldName && names.includes(newName)){ alert('已經有相同名稱的族群了'); return null; }
+  names[idx] = newName;
+  localStorage.setItem('watchGroupNames', JSON.stringify(names));
+  watchList.forEach(s=>{ if((s.group||'預設')===oldName) s.group = newName; });
+  _persistWatchList();
+  return newName;
+}
+// 刪除族群（2026/08/23新增）：「預設」跟「全部」不可刪除；被刪除族群內的股票歸回「預設」，股票本身不會被移除
+function deleteWatchGroupName(name){
+  if(!name || name==='預設' || name==='全部') return false;
+  let names = getWatchGroupNames();
+  if(!names.includes(name)) return false;
+  names = names.filter(g=>g!==name);
+  localStorage.setItem('watchGroupNames', JSON.stringify(names));
+  watchList.forEach(s=>{ if((s.group||'預設')===name) s.group = '預設'; });
+  _persistWatchList();
+  return true;
 }
 // 目前正在檢視的族群篩選（電腦版側欄／手機版首頁共用同一個狀態，"全部"＝不篩選）
 let _wsGroupFilter = '全部';
@@ -2761,6 +2790,14 @@ function _initDesktopLayout(){
 
 // ── 電腦版左側自選股常駐清單（2026/08/22新增）── _wsGroupFilter/_wsFilteredWatchList定義在watchList宣告處，跟手機版共用
 
+// 「全部」「預設」不可改名／刪除，只有使用者自建的族群才顯示✎／🗑按鈕（2026/08/23新增）
+function _wsUpdateGroupEditButtons(editId, delId){
+  const canManage = _wsGroupFilter !== '全部' && _wsGroupFilter !== '預設';
+  const editEl = document.getElementById(editId);
+  const delEl = document.getElementById(delId);
+  if(editEl) editEl.style.display = canManage ? '' : 'none';
+  if(delEl) delEl.style.display = canManage ? '' : 'none';
+}
 function _renderWsGroupFilterSelect(){
   const sel = document.getElementById('wsGroupFilter');
   if(!sel) return;
@@ -2771,10 +2808,31 @@ function _renderWsGroupFilterSelect(){
       return `<option value="${g}">${g}（${cnt}）</option>`;
     }).join('');
   sel.value = _wsGroupFilter;
+  _wsUpdateGroupEditButtons('wsGroupEdit', 'wsGroupDel');
 }
 function _onWsGroupFilterChange(v){
   _wsGroupFilter = v;
   _renderDesktopWatchSidebar();
+}
+function _wsRenameCurrentGroup(){
+  if(_wsGroupFilter==='全部' || _wsGroupFilter==='預設') return;
+  const newName = prompt('重新命名族群「'+_wsGroupFilter+'」為：', _wsGroupFilter);
+  if(newName===null) return;
+  const result = renameWatchGroupName(_wsGroupFilter, newName);
+  if(result){
+    _wsGroupFilter = result;
+    _renderDesktopWatchSidebar();
+    if(typeof renderHomeDash==='function') renderHomeDash();
+  }
+}
+function _wsDeleteCurrentGroup(){
+  if(_wsGroupFilter==='全部' || _wsGroupFilter==='預設') return;
+  if(!confirm('確定要刪除族群「'+_wsGroupFilter+'」嗎？此族群內的股票會歸回「預設」，股票本身不會被移除。')) return;
+  if(deleteWatchGroupName(_wsGroupFilter)){
+    _wsGroupFilter = '全部';
+    _renderDesktopWatchSidebar();
+    if(typeof renderHomeDash==='function') renderHomeDash();
+  }
 }
 function _wsToggleAddGroup(){
   const row = document.getElementById('wsAddGroupRow');
@@ -2806,10 +2864,31 @@ function _renderWsGroupFilterSelectM(){
       return `<option value="${g}">${g}（${cnt}）</option>`;
     }).join('');
   sel.value = _wsGroupFilter;
+  _wsUpdateGroupEditButtons('wsGroupEditM', 'wsGroupDelM');
 }
 function _onWsGroupFilterChangeM(v){
   _wsGroupFilter = v;
   if(typeof renderHomeDash==='function') renderHomeDash();
+}
+function _wsRenameCurrentGroupM(){
+  if(_wsGroupFilter==='全部' || _wsGroupFilter==='預設') return;
+  const newName = prompt('重新命名族群「'+_wsGroupFilter+'」為：', _wsGroupFilter);
+  if(newName===null) return;
+  const result = renameWatchGroupName(_wsGroupFilter, newName);
+  if(result){
+    _wsGroupFilter = result;
+    if(typeof _renderDesktopWatchSidebar==='function') _renderDesktopWatchSidebar();
+    if(typeof renderHomeDash==='function') renderHomeDash();
+  }
+}
+function _wsDeleteCurrentGroupM(){
+  if(_wsGroupFilter==='全部' || _wsGroupFilter==='預設') return;
+  if(!confirm('確定要刪除族群「'+_wsGroupFilter+'」嗎？此族群內的股票會歸回「預設」，股票本身不會被移除。')) return;
+  if(deleteWatchGroupName(_wsGroupFilter)){
+    _wsGroupFilter = '全部';
+    if(typeof _renderDesktopWatchSidebar==='function') _renderDesktopWatchSidebar();
+    if(typeof renderHomeDash==='function') renderHomeDash();
+  }
 }
 function _wsToggleAddGroupM(){
   const row = document.getElementById('wsAddGroupRowM');
