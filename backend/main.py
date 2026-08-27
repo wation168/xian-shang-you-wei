@@ -2989,6 +2989,11 @@ def _db_init():
             content     TEXT NOT NULL,
             updated_at  TEXT DEFAULT (datetime('now','+8 hours'))
         );
+        CREATE TABLE IF NOT EXISTS app_settings (
+            key         TEXT PRIMARY KEY,
+            value       TEXT NOT NULL,
+            updated_at  TEXT DEFAULT (datetime('now','+8 hours'))
+        );
         CREATE TABLE IF NOT EXISTS chat_messages (
             id         INTEGER PRIMARY KEY AUTOINCREMENT,
             username   TEXT NOT NULL,
@@ -7156,6 +7161,65 @@ def _get_deep_track_records(conn, limit: int = 20) -> list[dict]:
     return [dict(r) for r in rows]
 
 
+# ══════════════════════════════════════════════════════════
+# 深度選股門檻設定（2026/08/27新增）
+# 原本 DEEP_CFG（min_score等門檻）寫死在 finmind_filter.py 裡，改門檻要
+# 改程式碼+重新部署。帥哥鴻要求改成可透過 /admin/deep-scan-config 動態
+# 調整、存DB，不用改程式碼、不用重新部署。
+# app_settings 只存「有被管理員覆寫」的欄位，沒被覆寫的欄位一律沿用
+# finmind_filter.DEEP_CFG 原本的預設值（不寫死，預設值仍在 finmind_filter.py
+# 單一位置維護）。
+# ══════════════════════════════════════════════════════════
+
+_DEEP_CFG_SETTINGS_KEY = "deep_cfg_overrides"
+
+def _import_finmind_filter():
+    """確保 stock_picker 目錄在 sys.path 上，回傳 finmind_filter 模組物件"""
+    import sys, os as _os_dc
+    _sp_dir = _os_dc.path.join(_os_dc.path.dirname(_os_dc.path.abspath(__file__)), "stock_picker")
+    if _sp_dir not in sys.path:
+        sys.path.insert(0, _sp_dir)
+    import finmind_filter as _ff
+    return _ff
+
+def _get_deep_cfg_overrides(conn) -> dict:
+    """讀取DB裡儲存的DEEP_CFG覆寫值（JSON），沒有或格式錯誤就回傳空dict"""
+    import json as _json_dc
+    row = conn.execute(
+        "SELECT value FROM app_settings WHERE key=?", (_DEEP_CFG_SETTINGS_KEY,)
+    ).fetchone()
+    if not row:
+        return {}
+    try:
+        data = _json_dc.loads(row["value"])
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+def _apply_deep_cfg_overrides(conn=None):
+    """把DB裡的覆寫值套用到 finmind_filter.DEEP_CFG（每次掃描前呼叫一次，
+    以及管理員透過 /admin/deep-scan-config 更新後立即套用，下一次掃描
+    馬上生效，不用等重新部署）"""
+    _ff = _import_finmind_filter()
+    _close = False
+    if conn is None:
+        conn = _db_conn()
+        _close = True
+    try:
+        overrides = _get_deep_cfg_overrides(conn)
+        for k, v in overrides.items():
+            if k in _ff.DEEP_CFG and v is not None:
+                default_val = _ff.DEEP_CFG[k]
+                try:
+                    _ff.DEEP_CFG[k] = type(default_val)(v)
+                except (TypeError, ValueError):
+                    continue
+    finally:
+        if _close:
+            conn.close()
+    return _ff.DEEP_CFG
+
+
 def _run_deep_analysis_job():
     """
     每個交易日 17:00 執行：深度選股掃描
@@ -7177,6 +7241,10 @@ def _run_deep_analysis_job():
         from crawler import fetch_twse_volume_top
         from finmind_filter import run_deep_scan
         from generator import generate_deep_analysis
+
+        # 套用DB裡管理員透過 /admin/deep-scan-config 設定的門檻覆寫值
+        # （沒有覆寫的欄位維持 finmind_filter.py 裡的原始預設值）
+        _apply_deep_cfg_overrides()
 
         # 取成交量前150做候選
         top_ids, name_dict = fetch_twse_volume_top(n=150)
@@ -10242,6 +10310,72 @@ async def admin_run_deep_analysis(key: str = Header(..., alias="X-Admin-Key")):
     t = threading.Thread(target=_run_deep_analysis_job, daemon=True)
     t.start()
     return {"ok": True, "msg": "深度選股已開始執行（背景）"}
+
+
+class _DeepCfgUpdateReq(BaseModel):
+    """深度選股門檻設定（2026/08/27新增）。每個欄位都是可選的，
+    只送要調整的欄位就好，沒送的欄位維持原本的值（覆寫或預設）不變。
+    型別跟 finmind_filter.DEEP_CFG 的預設值對齊。"""
+    min_price: float | None = None
+    min_avg_volume: int | None = None
+    ma_cross_lookback: int | None = None
+    macd_cross_days: int | None = None
+    min_score: int | None = None
+    max_results: int | None = None
+    api_delay: float | None = None
+    breakout_recent_days: int | None = None
+    breakout_hold_pct: float | None = None
+
+
+@app.get("/admin/deep-scan-config")
+def admin_get_deep_scan_config(key: str = Header(default="", alias="X-Admin-Key")):
+    """查詢深度選股目前生效的門檻設定（預設值 + DB覆寫值合併後的結果），
+    以及哪些欄位是被管理員覆寫過的，避免前端要自己寫死一份預設值對照表"""
+    _check_admin(key)
+    _ff = _import_finmind_filter()
+    conn = _db_conn()
+    try:
+        overrides = _get_deep_cfg_overrides(conn)
+    finally:
+        conn.close()
+    effective = dict(_ff.DEEP_CFG)
+    for k, v in overrides.items():
+        if k in effective and v is not None:
+            try:
+                effective[k] = type(effective[k])(v)
+            except (TypeError, ValueError):
+                pass
+    return {
+        "ok": True,
+        "effective": effective,
+        "overridden_keys": [k for k in overrides if k in effective],
+    }
+
+
+@app.post("/admin/deep-scan-config")
+def admin_update_deep_scan_config(req: _DeepCfgUpdateReq, key: str = Header(default="", alias="X-Admin-Key")):
+    """更新深度選股門檻設定（存到 app_settings，並立即套用到 finmind_filter.DEEP_CFG，
+    下一次掃描——不論是排程的17:00或管理員手動觸發——馬上就會用新門檻，
+    不用改程式碼、不用重新部署"""
+    _check_admin(key)
+    import json as _json_dc2
+    conn = _db_conn()
+    try:
+        overrides = _get_deep_cfg_overrides(conn)
+        updates = req.model_dump(exclude_unset=True, exclude_none=True)
+        if not updates:
+            raise HTTPException(status_code=400, detail="沒有帶任何要更新的欄位")
+        overrides.update(updates)
+        conn.execute(
+            """INSERT INTO app_settings(key, value, updated_at) VALUES(?, ?, datetime('now','+8 hours'))
+               ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at""",
+            (_DEEP_CFG_SETTINGS_KEY, _json_dc2.dumps(overrides, ensure_ascii=False)),
+        )
+        conn.commit()
+        effective = _apply_deep_cfg_overrides(conn)
+    finally:
+        conn.close()
+    return {"ok": True, "effective": dict(effective), "overridden_keys": list(overrides.keys())}
 
 
 # ──────────────────────────────────────────
