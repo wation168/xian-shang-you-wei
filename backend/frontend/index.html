@@ -56,6 +56,7 @@
   --green:#1D9E75;--radius:10px;--radius-lg:14px;
   --mono:'SF Mono','Fira Code',monospace;
   --safe-bottom:env(safe-area-inset-bottom,0px);
+  --marquee-h:0px; /* 2026/08/27新增：深度選股跑馬燈實際高度，由JS動態量測設定，桌面版三欄高度計算需扣除此值，避免底部導覽列蓋住內容 */
 }
 :root[data-theme="dark"]{
   --bg:#141412;--bg2:#1e1e1b;--bg3:#282824;
@@ -148,9 +149,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
     display:grid;
     grid-template-columns:240px 1fr 220px;
     grid-template-rows:1fr;
-    height:calc(100vh - 56px - 56px);
-    max-height:calc(100vh - 56px - 56px);
-    margin-top:56px;
+    height:calc(100vh - 56px - 56px - var(--marquee-h));
+    max-height:calc(100vh - 56px - 56px - var(--marquee-h));
+    margin-top:calc(56px + var(--marquee-h));
     overflow:hidden;
     position:relative;
   }
@@ -5358,11 +5359,22 @@ async function _checkDeepAnalysisMarquee(){
     } else {
       bar.style.display = 'none';
     }
+    _syncMarqueeHeightVar();
   }catch(e){
     // 靜默失敗，不影響主流程
     console.warn('deep analysis marquee check failed', e);
   }
 }
+
+// 2026/08/27新增：跑馬燈顯示/隱藏時，即時量測其實際高度寫入 --marquee-h，
+// 讓電腦版三欄版面（.app 高度計算）能動態扣除這段高度，避免底部導覽列蓋住內容。
+// 不寫死高度數字，一律用 offsetHeight 實測。
+function _syncMarqueeHeightVar(){
+  const bar = document.getElementById('deepAnalysisMarquee');
+  const h = (bar && bar.style.display !== 'none') ? bar.offsetHeight : 0;
+  document.documentElement.style.setProperty('--marquee-h', h + 'px');
+}
+window.addEventListener('resize', _syncMarqueeHeightVar);
 
 const _DEEP_COND_LABELS = {
   'cond1_低檔起漲':               '低檔起漲',
