@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>使用說明｜線上有位</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/icon-192.png">
+<style>
+:root{
+  --bg:#ffffff;--bg2:#f2f1ec;--bg3:#e6e5df;
+  --text:#1a1a18;--text2:#4a4948;--text3:#888780;
+  --border:rgba(0,0,0,.1);--border2:rgba(0,0,0,.2);
+  --up:#D63B3B;--up-l:rgba(214,59,59,.1);
+  --dn:#1A8F5E;--dn-l:rgba(26,143,94,.1);
+  --amber:#B07010;--amber-l:rgba(176,112,16,.1);
+  --green:#1D9E75;--radius:10px;--radius-lg:14px;
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme]){
+    --bg:#141412;--bg2:#1e1e1b;--bg3:#282824;
+    --text:#eae9e3;--text2:#a0a099;--text3:#666560;
+    --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.16);
+    --up:#F06060;--up-l:rgba(240,96,96,.12);
+    --dn:#2DC88A;--dn-l:rgba(45,200,138,.12);
+    --amber:#d0973a;--amber-l:rgba(208,151,58,.15);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141412;--bg2:#1e1e1b;--bg3:#282824;
+  --text:#eae9e3;--text2:#a0a099;--text3:#666560;
+  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.16);
+  --up:#F06060;--up-l:rgba(240,96,96,.12);
+  --dn:#2DC88A;--dn-l:rgba(45,200,138,.12);
+  --amber:#d0973a;--amber-l:rgba(208,151,58,.15);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text)}
+body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;-webkit-font-smoothing:antialiased;padding-bottom:calc(40px + var(--safe-bottom))}
+a{color:var(--green)}
+
+.topbar{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:.5px solid var(--border);
+  padding:12px 16px;display:flex;align-items:center;gap:10px}
+.topbar .logo{font-size:16px;font-weight:700;flex:1}
+.topbar .logo em{color:var(--green);font-style:normal}
+.back-btn{font-size:12px;color:var(--text2);text-decoration:none;padding:6px 12px;border:.5px solid var(--border2);border-radius:20px;white-space:nowrap}
+
+.wrap{max-width:720px;margin:0 auto;padding:0 18px}
+
+.hero{padding:28px 0 16px}
+.hero h1{font-size:22px;font-weight:800;margin:0 0 8px}
+.hero p{font-size:13.5px;color:var(--text2);line-height:1.7;margin:0}
+
+.toc{background:var(--bg2);border-radius:var(--radius-lg);padding:14px 16px;margin:18px 0 8px}
+.toc-title{font-size:12px;font-weight:700;color:var(--text3);letter-spacing:.5px;margin-bottom:10px;text-transform:uppercase}
+.toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+@media(max-width:480px){.toc-grid{grid-template-columns:1fr}}
+.toc a{display:block;font-size:13px;color:var(--text);text-decoration:none;padding:7px 8px;border-radius:8px}
+.toc a:active,.toc a:hover{background:var(--bg3)}
+.toc a .n{color:var(--green);font-weight:700;margin-right:6px}
+
+section.sec{padding:30px 0 8px;border-top:.5px solid var(--border);scroll-margin-top:64px}
+section.sec:first-of-type{border-top:none}
+.sec-h{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.sec-icon{font-size:20px;line-height:1}
+.sec h2{font-size:17px;font-weight:800;margin:0}
+.sec-lead{font-size:12.5px;color:var(--text3);margin:0 0 16px;line-height:1.6}
+
+.card{background:var(--bg2);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px}
+.card h3{font-size:14px;font-weight:700;margin:0 0 8px;display:flex;align-items:center;gap:6px}
+.card p{font-size:13px;color:var(--text2);line-height:1.75;margin:0 0 8px}
+.card p:last-child{margin-bottom:0}
+.card ol,.card ul{margin:0 0 8px;padding-left:20px;font-size:13px;color:var(--text2);line-height:1.85}
+.card ol:last-child,.card ul:last-child{margin-bottom:0}
+.card li b{color:var(--text)}
+.card .path{display:inline-flex;align-items:center;gap:4px;background:var(--bg3);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--text);font-weight:600;white-space:nowrap}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.grid2{grid-template-columns:1fr}}
+
+.metric-mini{background:var(--bg3);border-radius:8px;padding:9px 11px}
+.metric-mini .lbl{font-size:11px;color:var(--text3);margin-bottom:3px;font-weight:600}
+.metric-mini .desc{font-size:12px;color:var(--text2);line-height:1.6}
+
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;margin-right:4px;margin-bottom:4px}
+.tag-free{background:var(--bg3);color:var(--text2)}
+.tag-paid{background:var(--green);color:#fff}
+.tag-high{background:var(--up-l);color:var(--up)}
+.tag-mid{background:var(--amber-l);color:var(--amber)}
+.tag-low{background:var(--dn-l);color:var(--dn)}
+
+.risk-strip{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.risk-chip{flex:1;min-width:120px;border-radius:8px;padding:8px 10px;border-left:3px solid var(--border2)}
+.risk-chip b{display:block;font-size:12.5px;margin-bottom:2px}
+.risk-chip span{font-size:11px;color:var(--text3)}
+.risk-chip.rh{border-left-color:var(--up);background:var(--up-l)}
+.risk-chip.rh b{color:var(--up)}
+.risk-chip.rm{border-left-color:var(--amber);background:var(--amber-l)}
+.risk-chip.rm b{color:var(--amber)}
+.risk-chip.rl{border-left-color:var(--dn);background:var(--dn-l)}
+.risk-chip.rl b{color:var(--dn)}
+
+table.cmp{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:4px}
+table.cmp th,table.cmp td{text-align:left;padding:8px 8px;border-bottom:.5px solid var(--border)}
+table.cmp th{color:var(--text3);font-weight:600;font-size:11.5px}
+table.cmp td:not(:first-child),table.cmp th:not(:first-child){text-align:center}
+table.cmp td.y{color:var(--green);font-weight:700}
+table.cmp td.n{color:var(--text3)}
+.cmp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+.faq details{background:var(--bg2);border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.faq summary{font-size:13.5px;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:'+';font-size:18px;color:var(--text3);font-weight:400;flex-shrink:0}
+.faq details[open] summary::after{content:'–'}
+.faq .a{font-size:12.5px;color:var(--text2);line-height:1.75;margin-top:9px;padding-top:9px;border-top:.5px solid var(--border)}
+
+.steps{counter-reset:step}
+.steps li{list-style:none;counter-increment:step;position:relative;padding-left:26px;margin-bottom:9px}
+.steps li::before{content:counter(step);position:absolute;left:0;top:0;width:18px;height:18px;border-radius:50%;background:var(--green);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+.cta{background:linear-gradient(135deg,var(--bg2),var(--bg3));border-radius:var(--radius-lg);padding:18px;text-align:center;margin:26px 0}
+.cta a{display:inline-block;margin-top:10px;background:var(--green);color:#fff;text-decoration:none;font-size:14px;font-weight:700;padding:11px 26px;border-radius:10px}
+
+footer{padding:24px 0;text-align:center;font-size:11.5px;color:var(--text3);line-height:1.8}
+
+.disc{font-size:10.5px;color:var(--text3);line-height:1.7;background:var(--bg2);border-radius:8px;padding:10px 12px;margin-top:20px}
+
+.top-fab{position:fixed;right:16px;bottom:calc(16px + var(--safe-bottom));width:38px;height:38px;border-radius:50%;
+  background:var(--green);color:#fff;display:none;align-items:center;justify-content:center;font-size:16px;
+  text-decoration:none;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:40}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo"><em>線上有位</em> 使用說明</div>
+  <a class="back-btn" href="/stock/">← 回到 App</a>
+</div>
+
+<div class="wrap">
+
+  <div class="hero">
+    <h1>📖 完整使用說明書</h1>
+    <p>「線上有位」是台股技術分析＋每日選股的 App。這份說明帶你從搜尋一檔股票開始，把畫面上每個數字、每個按鈕的意思都講清楚，也整理了免費版跟付費版的差別、常見問題。第一次用不知道從哪開始，直接看「快速開始」就好。</p>
+  </div>
+
+  <div class="toc">
+    <div class="toc-title">目錄</div>
+    <div class="toc-grid">
+      <a href="#start"><span class="n">01</span>快速開始</a>
+      <a href="#result"><span class="n">02</span>看懂分析結果</a>
+      <a href="#chart"><span class="n">03</span>K線圖表操作</a>
+      <a href="#watch"><span class="n">04</span>自選股與關注頁</a>
+      <a href="#picks"><span class="n">05</span>選股（開盤熱門＋深度選股）</a>
+      <a href="#portfolio"><span class="n">06</span>持股健檢</a>
+      <a href="#forum"><span class="n">07</span>討論區</a>
+      <a href="#alert"><span class="n">08</span>到價提醒與通知</a>
+      <a href="#account"><span class="n">09</span>我的帳號與方案</a>
+      <a href="#referral"><span class="n">10</span>邀請好友解鎖</a>
+      <a href="#compare"><span class="n">11</span>免費版 vs 付費版</a>
+      <a href="#faq"><span class="n">12</span>常見問題</a>
+    </div>
+  </div>
+
+  <!-- 01 快速開始 -->
+  <section class="sec" id="start">
+    <div class="sec-h"><span class="sec-icon">🚀</span><h2>快速開始</h2></div>
+    <p class="sec-lead">三步驟看懂一檔股票</p>
+    <div class="card">
+      <ol class="steps">
+        <li>在畫面最上方的搜尋框輸入<b>股票代號或名稱</b>（例如「2330」或「台積電」），輸入時下方會跳出對應股票，點選或直接按右邊的<span class="path">分析</span>按鈕。</li>
+        <li>畫面會出現這檔股票的完整技術分析：現價、趨勢、支撐壓力、K線圖、指標，全部一次看到，不需要再切換頁面。</li>
+        <li>看完想追蹤這檔股票，按分析結果最上方的 <b>☆ 加入自選</b>，之後在底部「關注」分頁就能快速回來查看。</li>
+      </ol>
+      <p>💡 沒有登入也能查詢，但每天限查 <b>3 次</b>；免費註冊會員後可以儲存自選股、記錄查詢歷史，付費會員則不限查詢次數。</p>
+    </div>
+    <div class="card">
+      <h3>🧭 畫面底部的 5 個分頁</h3>
+      <ul>
+        <li><b>📊 分析</b>：首頁，搜尋股票、查看分析結果的地方</li>
+        <li><b>🔥 關注</b>：你的自選股清單、以及查詢歷史（戰績日誌）</li>
+        <li><b>🔍 選股</b>：今日開盤熱門股＋每日深度選股</li>
+        <li><b>💬 討論</b>：全站股票討論區</li>
+        <li><b>👤 我的</b>：帳號資訊、訂閱方案、設定、這份使用說明</li>
+      </ul>
+      <p>電腦版畫面是三欄式版面，最上方多一排分頁籤，並多了「💼 持股健檢」；手機版則從「我的」頁面的捷徑進入持股健檢（見第 06 節）。</p>
+    </div>
+  </section>
+
+  <!-- 02 看懂分析結果 -->
+  <section class="sec" id="result">
+    <div class="sec-h"><span class="sec-icon">📐</span><h2>看懂分析結果</h2></div>
+    <p class="sec-lead">分析完一檔股票後，畫面由上到下會出現這些區塊</p>
+
+    <div class="card">
+      <h3>① 風險等級卡</h3>
+      <p>最上方的顏色卡片，代表系統對這檔股票目前技術面位置的初步判斷：</p>
+      <div class="risk-strip">
+        <div class="risk-chip rh"><b>偏空 / 高風險</b><span>技術面偏弱，靠近壓力或跌破支撐</span></div>
+        <div class="risk-chip rm"><b>中性 / 中風險</b><span>方向不明確，觀望為主</span></div>
+        <div class="risk-chip rl"><b>偏多 / 低風險</b><span>技術面偏強，靠近支撐或站上均線</span></div>
+      </div>
+      <p>卡片右上角的 <b>☆ 加入自選</b> 按鈕點下去會變成 <b>★ 已加入自選</b>，代表加入成功。</p>
+    </div>
+
+    <div class="card">
+      <h3>② 六大指標卡</h3>
+      <div class="grid2">
+        <div class="metric-mini"><div class="lbl">現價</div><div class="desc">盤中為即時報價，收盤後顯示最近兩根收盤價漲跌幅</div></div>
+        <div class="metric-mini"><div class="lbl">趨勢</div><div class="desc">用道氏理論的波峰波谷判斷目前多空方向</div></div>
+        <div class="metric-mini"><div class="lbl">型態</div><div class="desc">現價相對支撐壓力的位置型態</div></div>
+        <div class="metric-mini"><div class="lbl">支撐區</div><div class="desc">股價較不容易跌破的價位，回測支撐可作進場參考</div></div>
+        <div class="metric-mini"><div class="lbl">壓力區</div><div class="desc">股價較不容易站穩突破的價位，是上漲的阻力</div></div>
+        <div class="metric-mini"><div class="lbl">防守位</div><div class="desc">建議停損參考價，跌破代表原本判斷可能失效</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>③ 風險報酬比＋位置風險條</h3>
+      <p><b>風險報酬（損益比）</b> ＝（目標價－現價）÷（現價－防守位），數字越高代表潛在報酬相對風險越划算。下方的<b>位置風險長條</b>用視覺化方式顯示現價落在「支撐 → 壓力」之間的哪個位置。</p>
+    </div>
+
+    <div class="card">
+      <h3>④ 深度分析七欄位</h3>
+      <p>往下捲動會看到更細的技術面拆解：</p>
+      <ul>
+        <li><b>🕯 K棒型態</b>：今日蠟燭圖形狀所隱含的多空意義</li>
+        <li><b>📊 均線排列</b>：多條均線的排列方向，判斷中長期趨勢是否一致</li>
+        <li><b>〽️ KD 指標</b>：短線動能指標，判斷是否超買或超賣</li>
+        <li><b>📈 MACD</b>：判斷多空動能強弱與趨勢轉折</li>
+        <li><b>🔊 量能分析</b>：成交量變化，反映買賣力道強弱</li>
+        <li><b>🏦 法人動向</b>：外資、投信、自營商近期買賣超情況</li>
+        <li><b>⚡ 風險提示</b>：系統偵測到值得留意的風險與注意事項</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>📄 產出今日完整報告</h3>
+      <p>圖表下方有一個「產出今日完整報告」按鈕，點下去會產生更完整的文字版報告，內容包含新聞題材、支撐壓力、操作建議、K棒型態勝率統計，適合想要一次看完整結論的人。</p>
+    </div>
+  </section>
+
+  <!-- 03 K線圖表操作 -->
+  <section class="sec" id="chart">
+    <div class="sec-h"><span class="sec-icon">🕯️</span><h2>K線圖表操作</h2></div>
+    <p class="sec-lead">圖表本身可以互動，不是靜態截圖</p>
+    <div class="card">
+      <h3>基本操作</h3>
+      <ul>
+        <li><b>日／週／月</b>：切換K線的時間週期</li>
+        <li><b>1月／3月／6月／1年／全</b>：切換顯示範圍，也可以直接在旁邊輸入框輸入想看的根數</li>
+        <li>手指或滑鼠在圖上<b>左右滑動</b>可以查看每一根K棒當天的細節數字（十字游標）</li>
+        <li>圖表右下角出現「最新 →」按鈕時，代表你目前看的不是最新的K棒，點一下回到最新</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>指標開關</h3>
+      <p>圖表上方一排按鈕：<b>布林／RSI／MACD／KD／OBV</b>，點一下開啟對應指標副圖，再點一下關閉。「均線設定」可以展開調整要顯示哪幾條均線。</p>
+    </div>
+    <div class="card">
+      <h3>✏️ 畫線工具</h3>
+      <p>點「✏️ 畫線」展開繪圖工具列，可以在圖上畫<b>射線／線段／水平線／平行線／矩形／文字／型態標記</b>，並選擇顏色，方便自己標註支撐壓力或型態。畫錯了用「橡皮擦」局部擦除，或按「清除」整張清空。</p>
+    </div>
+    <div class="card">
+      <h3>籌碼面</h3>
+      <p>展開「籌碼面」可以切換近5日／10日／20日，查看外資、投信、自營商的買賣超明細，跟上方「法人動向」卡片是同一份資料的詳細版。</p>
+    </div>
+  </section>
+
+  <!-- 04 自選股與關注頁 -->
+  <section class="sec" id="watch">
+    <div class="sec-h"><span class="sec-icon">🔥</span><h2>自選股與關注頁</h2></div>
+    <p class="sec-lead">底部「關注」分頁，需要登入才能使用</p>
+    <div class="card">
+      <h3>⭐ 自選股</h3>
+      <ol>
+        <li>分析任何一檔股票後，按 <b>☆ 加入自選</b> 即可加入清單</li>
+        <li>「關注」頁第一個分頁會列出所有自選股的即時報價與漲跌幅，點股票名稱可直接跳回該股分析</li>
+        <li>可以自訂<b>分類（族群）</b>幫自選股分組管理，例如「電子股」「存股名單」，電腦版在左側常駐清單操作，手機版在「關注」頁與首頁儀表板操作</li>
+      </ol>
+      <p><span class="tag tag-free">免費版</span> 最多追蹤 1 支　<span class="tag tag-paid">付費版</span> 無限新增</p>
+    </div>
+    <div class="card">
+      <h3>📈 戰績日誌</h3>
+      <p>「關注」頁第二個分頁，會自動記錄你<b>登入後查詢過</b>的每一檔股票，並統計本月分析次數、多空比例，方便回顧自己的判斷紀錄。訪客與未登入狀態不會記錄。</p>
+    </div>
+  </section>
+
+  <!-- 05 選股 -->
+  <section class="sec" id="picks">
+    <div class="sec-h"><span class="sec-icon">🔍</span><h2>選股</h2></div>
+    <p class="sec-lead">底部「選股」分頁，不用登入也能看基本清單</p>
+    <div class="card">
+      <h3>今日開盤熱門股</h3>
+      <p>每個交易日 <b>09:06</b> 自動更新，依成交量排行列出當天最熱門的股票，點一檔可直接跳到該股的完整分析。</p>
+    </div>
+    <div class="card">
+      <h3>🔬 每日深度選股</h3>
+      <p>選股頁最上方的深綠色卡片，點進去是系統每個交易日 <b>17:00</b> 收盤後自動掃描全市場產出的精選清單，選股邏輯是「月季線金叉＋站上月線＋MACD金叉」等技術面條件，每檔都附<b>停損建議</b>與<b>法人籌碼</b>。</p>
+      <p>每檔入選股會標示信心等級：</p>
+      <p><span class="tag tag-high">🔥 高信心</span><span class="tag tag-mid">⭐ 中信心</span></p>
+      <p>信心等級是依「MACD金叉、股價位置、量能、法人籌碼」等加分項目加總計算，分數愈高代表確認訊號愈多。同時也會標示<b>風險等級（低／中／高風險）</b>，對應停損距現價的百分比遠近。</p>
+      <p>💡 App 內登入後可即時查看今天的完整名單（含股票代號）；公開網頁版顯示的是延遲一個交易日的資料，方便分享但不洩漏當天即時訊號。<span class="tag tag-free">免費版</span> 可看到分析摘要，<span class="tag tag-paid">付費版</span> 才能看到股票代號並直接連到完整技術分析。</p>
+    </div>
+  </section>
+
+  <!-- 06 持股健檢 -->
+  <section class="sec" id="portfolio">
+    <div class="sec-h"><span class="sec-icon">💼</span><h2>持股健檢</h2></div>
+    <p class="sec-lead">追蹤實際持股的損益與技術位置，需要登入</p>
+    <div class="card">
+      <h3>怎麼進入</h3>
+      <p><b>電腦版</b>：畫面上方分頁籤直接點「💼 持股健檢」。</p>
+      <p><b>手機版</b>：底部分頁沒有獨立圖示，請點 <b>👤 我的</b> → <b>💼 持股健檢</b> 進入。</p>
+    </div>
+    <div class="card">
+      <h3>使用方式</h3>
+      <ol>
+        <li>輸入<b>股號</b>與<b>成本價</b>，按「新增」加入持股</li>
+        <li>系統會顯示每檔持股目前的損益、技術面位置，並提醒是否接近停損</li>
+        <li>虧損超過 15% 或技術面轉弱時，會出現提醒文字建議檢視停損</li>
+      </ol>
+      <p><span class="tag tag-free">免費版</span> 最多追蹤 1 檔持股　<span class="tag tag-paid">付費版</span> 無限新增</p>
+    </div>
+  </section>
+
+  <!-- 07 討論區 -->
+  <section class="sec" id="forum">
+    <div class="sec-h"><span class="sec-icon">💬</span><h2>討論區</h2></div>
+    <p class="sec-lead">底部「討論」分頁，全站共用的股票討論區</p>
+    <div class="card">
+      <ol>
+        <li>可以直接瀏覽所有留言，或在上方輸入<b>股票代號</b>篩選只看該檔股票的討論</li>
+        <li>按右上角「＋ 發表」即可張貼新留言，第一次發表需要輸入<b>暱稱</b>（之後會記住，不用每次重打）</li>
+        <li>發表留言不需要登入會員帳號，但需要設定暱稱</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 08 到價提醒 -->
+  <section class="sec" id="alert">
+    <div class="sec-h"><span class="sec-icon">🔔</span><h2>到價提醒與通知設定</h2></div>
+    <p class="sec-lead">「我的」頁面 → 到價提醒（付費會員功能）</p>
+    <div class="card">
+      <h3>新增到價提醒</h3>
+      <p>輸入<b>股票代號</b>、<b>目標價</b>，並選擇「漲至」或「跌至」，按「新增提醒」即可。股價觸及設定價位時，系統會推播通知。</p>
+    </div>
+    <div class="card">
+      <h3>開啟手機／電腦通知</h3>
+      <p>第一次登入或點「我的」頁面的「🔔 通知與聲音設定」，會依裝置顯示對應步驟：</p>
+      <ul>
+        <li><b>iPhone / iPad</b>：點瀏覽器工具列「分享」→「加入主畫面」→ 從主畫面開啟 App → 點「允許通知」（需 iOS 16.4 以上）</li>
+        <li><b>Android</b>：直接點「允許通知」，建議同時「加入主畫面」讓背景推播更穩定</li>
+        <li><b>電腦瀏覽器</b>：點「允許通知」後瀏覽器可以最小化，但不要強制關閉分頁，到價時會彈出通知並發出聲音</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 09 我的帳號 -->
+  <section class="sec" id="account">
+    <div class="sec-h"><span class="sec-icon">👤</span><h2>我的帳號與方案</h2></div>
+    <p class="sec-lead">底部「我的」分頁</p>
+    <div class="card">
+      <h3>登入方式</h3>
+      <p>支援 <b>Email／密碼</b>、<b>Google 登入</b>、<b>LINE 登入</b> 三種方式，第一次使用選「免費註冊」。忘記密碼可在登入畫面點「忘記密碼？」透過 Email 重設。</p>
+    </div>
+    <div class="card">
+      <h3>付費方案</h3>
+      <div class="cmp-wrap">
+        <table class="cmp">
+          <tr><th>方案</th><th>價格</th></tr>
+          <tr><td>月費方案</td><td>$499／月</td></tr>
+          <tr><td>季費方案 ⭐</td><td>$999／季</td></tr>
+          <tr><td>年費方案</td><td>$3,688／年</td></tr>
+        </table>
+      </div>
+      <p>在「我的」頁面點方案卡片即可升級；已訂閱定期定額方案的會員，「帳號設定」內會出現「❌ 取消定期訂閱」按鈕可自行取消。</p>
+    </div>
+    <div class="card">
+      <h3>其他設定</h3>
+      <ul>
+        <li><b>🎨 顯示主題</b>：自動／亮／暗，可依喜好切換</li>
+        <li><b>🔐 更改密碼</b>：帳號設定內操作</li>
+        <li><b>📲 加入主畫面</b>：把 App 安裝到手機桌面，開啟更方便也是收到通知的必要步驟</li>
+        <li><b>✉️ 聯絡我們</b>：頁面最下方，有問題可以直接聯絡</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 10 邀請好友 -->
+  <section class="sec" id="referral">
+    <div class="sec-h"><span class="sec-icon">🎁</span><h2>邀請好友解鎖</h2></div>
+    <p class="sec-lead">「我的」頁面 → 邀請好友解鎖全功能</p>
+    <div class="card">
+      <p>每個會員都有專屬<b>邀請碼</b>與<b>邀請連結</b>，可以直接複製分享。每邀請 <b>3 位好友完成首次查詢</b>，就能解鎖 <b>30 天</b>全功能使用，效果可以累積延長，頁面上會顯示目前進度與解鎖到期日。</p>
+    </div>
+  </section>
+
+  <!-- 11 比較表 -->
+  <section class="sec" id="compare">
+    <div class="sec-h"><span class="sec-icon">⚖️</span><h2>免費版 vs 付費版</h2></div>
+    <p class="sec-lead">一次看懂差在哪</p>
+    <div class="cmp-wrap">
+      <table class="cmp">
+        <tr><th>功能</th><th>免費版</th><th>付費版</th></tr>
+        <tr><td>個股查詢</td><td class="n">每日 3 次</td><td class="y">不限次數</td></tr>
+        <tr><td>自選股數量</td><td class="n">最多 1 檔</td><td class="y">不限數量</td></tr>
+        <tr><td>持股健檢</td><td class="n">最多 1 檔</td><td class="y">不限數量</td></tr>
+        <tr><td>到價提醒</td><td class="n">✕</td><td class="y">✓</td></tr>
+        <tr><td>深度選股股票代號</td><td class="n">看摘要，代號遮蔽</td><td class="y">完整解鎖</td></tr>
+        <tr><td>K線圖表／技術指標</td><td class="y">✓</td><td class="y">✓</td></tr>
+        <tr><td>討論區</td><td class="y">✓</td><td class="y">✓</td></tr>
+      </table>
+    </div>
+    <p class="sec-lead" style="margin-top:10px">不想付費也可以透過「邀請好友」免費解鎖，見第 10 節。</p>
+  </section>
+
+  <!-- 12 FAQ -->
+  <section class="sec" id="faq">
+    <div class="sec-h"><span class="sec-icon">❓</span><h2>常見問題</h2></div>
+    <div class="faq">
+      <details>
+        <summary>今日查詢次數已用完，怎麼辦？</summary>
+        <div class="a">免費版每天可查詢 3 次，隔天會自動重置。想不受限制，可以升級付費方案，或透過「邀請好友」累積解鎖天數（見第 10 節）。</div>
+      </details>
+      <details>
+        <summary>登入後還是顯示「今日查詢次數已用完」？</summary>
+        <div class="a">請確認登入的帳號是不是有效的付費會員，且訂閱沒有過期（「我的」頁面會顯示到期日）。如果確認是付費中卻仍受限，請透過「✉️ 聯絡我們」回報，附上帳號 Email 方便查證。</div>
+      </details>
+      <details>
+        <summary>忘記密碼怎麼辦？</summary>
+        <div class="a">在登入畫面點「忘記密碼？」，輸入註冊時的 Email，系統會寄送重設密碼連結。</div>
+      </details>
+      <details>
+        <summary>手機收不到到價通知？</summary>
+        <div class="a">請先確認已依第 08 節步驟「加入主畫面」並允許通知權限；iPhone 需要 iOS 16.4 以上才支援推播。也請確認 App 沒有被手機系統的省電機制強制關閉背景。</div>
+      </details>
+      <details>
+        <summary>深度選股怎麼看不到股票代號？</summary>
+        <div class="a">公開網頁版與免費會員只會看到分析摘要（信心等級、風險等級、產業趨勢等），股票代號跟完整技術分析是付費會員專屬。App 內登入付費帳號可即時查看含代號的完整名單。</div>
+      </details>
+      <details>
+        <summary>手機版找不到「持股健檢」？</summary>
+        <div class="a">手機版目前收在「👤 我的」頁面裡，點「💼 持股健檢」即可進入，不在底部主選單上。</div>
+      </details>
+      <details>
+        <summary>分析結果只供參考嗎？會不會保證獲利？</summary>
+        <div class="a">會。網站內所有分析、選股、停損建議都是系統依技術面資料自動化計算的輔助工具，不構成投資建議，也不保證獲利，股市有風險，請自行判斷並嚴設停損。</div>
+      </details>
+      <details>
+        <summary>可以取消訂閱嗎？</summary>
+        <div class="a">可以。已訂閱定期定額方案的會員，在「我的」→「帳號設定」內會有「❌ 取消定期訂閱」按鈕，點選即可自行取消，取消後方案會在目前計費週期結束時停止續扣。</div>
+      </details>
+    </div>
+  </section>
+
+  <div class="disc">
+    本頁說明的所有分析、選股、停損建議皆為系統依技術面資料自動化計算的輔助工具，不構成任何投資建議或獲利保證，投資有風險，請自行判斷。資料來源：FinMind / TWSE，盤後更新。
+  </div>
+
+  <div class="cta">
+    <div style="font-size:14px;font-weight:700">還有問題？</div>
+    <div style="font-size:12.5px;color:var(--text3);margin-top:4px">直接聯絡我們，或回到 App 繼續操作</div>
+    <a href="/contact.html">✉️ 聯絡我們</a>
+  </div>
+
+  <footer>線上有位｜台股 AI 技術分析<br>本說明頁會隨功能更新持續調整</footer>
+
+</div>
+
+<a href="#" class="top-fab" id="topFab" onclick="window.scrollTo({top:0,behavior:'smooth'});return false">↑</a>
+
+<script>
+// 套用跟App共用的主題偏好（localStorage 'theme'：auto/light/dark），維持視覺一致
+(function(){
+  try{
+    var th = localStorage.getItem('theme') || 'auto';
+    if(th === 'auto') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', th);
+  }catch(e){}
+})();
+// 回頂部按鈕：捲動超過一屏才顯示
+window.addEventListener('scroll', function(){
+  var fab = document.getElementById('topFab');
+  fab.style.display = window.scrollY > 500 ? 'flex' : 'none';
+}, {passive:true});
+</script>
+
+</body>
+</html>
