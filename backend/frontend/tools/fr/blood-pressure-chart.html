@@ -128,23 +128,27 @@ function calculate() {
   let category = '';
   let recommendation = '';
   
-  if (systolic < 120 && diastolic < 80) {
+  const sysSeverity = systolic > 180 ? 4 : (systolic >= 140 ? 3 : (systolic >= 130 ? 2 : (systolic >= 120 ? 1 : 0)));
+  const diaSeverity = diastolic > 120 ? 4 : (diastolic >= 90 ? 3 : (diastolic >= 80 ? 2 : 0));
+  const severity = Math.max(sysSeverity, diaSeverity);
+
+  if (severity === 0) {
     classification = 'Normale';
     category = 'Votre tension artérielle est dans la plage normale. Continuez à maintenir un mode de vie sain.';
     recommendation = 'Vérifiez régulièrement votre tension et maintenez de bonnes habitudes (alimentation, exercice, gestion du stress).';
-  } else if ((systolic >= 120 && systolic < 130) && diastolic < 80) {
+  } else if (severity === 1) {
     classification = 'Tension Élevée';
     category = 'Votre pression systolique est légèrement élevée. Ce n\'est pas encore de l\'hypertension, mais c\'est un signe avant-coureur.';
     recommendation = 'Adoptez des changements de mode de vie : réduisez votre consommation de sel, faites de l\'exercice régulièrement, gérez votre stress et limitez l\'alcool.';
-  } else if ((systolic >= 130 && systolic < 140) || (diastolic >= 80 && diastolic < 90)) {
+  } else if (severity === 2) {
     classification = 'Hypertension de Stade 1';
     category = 'Votre tension artérielle est élevée et se situe dans la plage de l\'hypertension de stade 1.';
     recommendation = 'Consultez votre médecin. Mettez en place des changements de mode de vie et envisagez éventuellement un traitement médicamenteux.';
-  } else if (systolic >= 140 || diastolic >= 90) {
+  } else if (severity === 3) {
     classification = 'Hypertension de Stade 2';
     category = 'Votre tension artérielle est significativement élevée et nécessite une attention médicale.';
     recommendation = 'Consultez rapidement un médecin. Celui-ci pourra vous prescrire des médicaments en plus de changements de mode de vie.';
-  } else if (systolic > 180 || diastolic > 120) {
+  } else if (severity === 4) {
     classification = 'Crise Hypertensive';
     category = 'Il s\'agit d\'une urgence médicale. Votre tension artérielle est dangereusement élevée.';
     recommendation = 'Appelez immédiatement les secours d\'urgence ou rendez-vous aux urgences. N\'attendez pas.';

@@ -128,23 +128,27 @@ function calculate() {
   let category = '';
   let recommendation = '';
   
-  if (systolic < 120 && diastolic < 80) {
+  const sysSeverity = systolic > 180 ? 4 : (systolic >= 140 ? 3 : (systolic >= 130 ? 2 : (systolic >= 120 ? 1 : 0)));
+  const diaSeverity = diastolic > 120 ? 4 : (diastolic >= 90 ? 3 : (diastolic >= 80 ? 2 : 0));
+  const severity = Math.max(sysSeverity, diaSeverity);
+
+  if (severity === 0) {
     classification = '正常';
     category = '您的血壓在正常範圍內，請持續維持健康的生活習慣。';
     recommendation = '定期測量血壓，並維持健康習慣（飲食、運動、壓力管理）。';
-  } else if ((systolic >= 120 && systolic < 130) && diastolic < 80) {
+  } else if (severity === 1) {
     classification = '血壓升高';
     category = '您的收縮壓略為升高，雖然尚未達到高血壓標準，但已是一個警訊。';
     recommendation = '調整生活方式：減少鈉鹽攝取、規律運動、管理壓力、限制飲酒。';
-  } else if ((systolic >= 130 && systolic < 140) || (diastolic >= 80 && diastolic < 90)) {
+  } else if (severity === 2) {
     classification = '第一階段高血壓';
     category = '您的血壓已升高，落在第一階段高血壓範圍。';
     recommendation = '請諮詢醫療專業人員，並落實生活方式調整，必要時搭配藥物治療。';
-  } else if (systolic >= 140 || diastolic >= 90) {
+  } else if (severity === 3) {
     classification = '第二階段高血壓';
     category = '您的血壓明顯偏高，需要就醫評估。';
     recommendation = '請儘速就醫，醫師可能會開立藥物並搭配生活方式調整。';
-  } else if (systolic > 180 || diastolic > 120) {
+  } else if (severity === 4) {
     classification = '高血壓危象';
     category = '這是醫療緊急狀況，您的血壓已達危險程度。';
     recommendation = '請立即撥打當地緊急救護電話或盡速就醫，切勿延誤。';

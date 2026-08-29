@@ -126,23 +126,27 @@ function calculate() {
   let category = '';
   let recommendation = '';
   
-  if (systolic < 120 && diastolic < 80) {
+  const sysSeverity = systolic > 180 ? 4 : (systolic >= 140 ? 3 : (systolic >= 130 ? 2 : (systolic >= 120 ? 1 : 0)));
+  const diaSeverity = diastolic > 120 ? 4 : (diastolic >= 90 ? 3 : (diastolic >= 80 ? 2 : 0));
+  const severity = Math.max(sysSeverity, diaSeverity);
+
+  if (severity === 0) {
     classification = 'Normal';
     category = 'Ihr Blutdruck liegt im Normalbereich. Setzen Sie Ihren gesunden Lebensstil fort.';
     recommendation = 'Überprüfen Sie Ihren Blutdruck regelmäßig und pflegen Sie gesunde Gewohnheiten (Ernährung, Bewegung, Stressbewältigung).';
-  } else if ((systolic >= 120 && systolic < 130) && diastolic < 80) {
+  } else if (severity === 1) {
     classification = 'Erhöht';
     category = 'Ihr systolischer Blutdruck ist leicht erhöht. Dies ist noch kein Bluthochdruck, aber ein Warnsignal.';
     recommendation = 'Nehmen Sie Änderungen des Lebensstils vor: reduzieren Sie die Salzzufuhr, treiben Sie regelmäßig Sport, bewältigen Sie Stress und schränken Sie den Alkoholkonsum ein.';
-  } else if ((systolic >= 130 && systolic < 140) || (diastolic >= 80 && diastolic < 90)) {
+  } else if (severity === 2) {
     classification = 'Hypertonie Stadium 1';
     category = 'Ihr Blutdruck ist erhöht und fällt in den Bereich der Hypertonie Stadium 1.';
     recommendation = 'Konsultieren Sie Ihren Arzt. Setzen Sie Änderungen des Lebensstils um und ziehen Sie gegebenenfalls eine medikamentöse Behandlung in Betracht.';
-  } else if (systolic >= 140 || diastolic >= 90) {
+  } else if (severity === 3) {
     classification = 'Hypertonie Stadium 2';
     category = 'Ihr Blutdruck ist deutlich erhöht und erfordert ärztliche Aufmerksamkeit.';
     recommendation = 'Suchen Sie umgehend ärztliche Hilfe. Ihr Arzt kann neben Änderungen des Lebensstils auch Medikamente verschreiben.';
-  } else if (systolic > 180 || diastolic > 120) {
+  } else if (severity === 4) {
     classification = 'Hypertensive Krise';
     category = 'Dies ist ein medizinischer Notfall. Ihr Blutdruck ist gefährlich hoch.';
     recommendation = 'Rufen Sie sofort den Notruf an oder suchen Sie umgehend ärztliche Hilfe. Zögern Sie nicht.';

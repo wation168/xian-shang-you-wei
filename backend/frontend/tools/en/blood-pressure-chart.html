@@ -128,23 +128,27 @@ function calculate() {
   let category = '';
   let recommendation = '';
   
-  if (systolic < 120 && diastolic < 80) {
+  const sysSeverity = systolic > 180 ? 4 : (systolic >= 140 ? 3 : (systolic >= 130 ? 2 : (systolic >= 120 ? 1 : 0)));
+  const diaSeverity = diastolic > 120 ? 4 : (diastolic >= 90 ? 3 : (diastolic >= 80 ? 2 : 0));
+  const severity = Math.max(sysSeverity, diaSeverity);
+
+  if (severity === 0) {
     classification = 'Normal';
     category = 'Your blood pressure is in the normal range. Continue maintaining a healthy lifestyle.';
     recommendation = 'Check your BP regularly and maintain healthy habits (diet, exercise, stress management).';
-  } else if ((systolic >= 120 && systolic < 130) && diastolic < 80) {
+  } else if (severity === 1) {
     classification = 'Elevated';
     category = 'Your systolic pressure is slightly elevated. This is not high blood pressure yet but a warning sign.';
     recommendation = 'Make lifestyle changes: reduce salt intake, exercise regularly, manage stress, limit alcohol.';
-  } else if ((systolic >= 130 && systolic < 140) || (diastolic >= 80 && diastolic < 90)) {
+  } else if (severity === 2) {
     classification = 'Stage 1 Hypertension';
     category = 'Your blood pressure is elevated and falls into Stage 1 Hypertension range.';
     recommendation = 'Consult your healthcare provider. Implement lifestyle modifications and possibly medication.';
-  } else if (systolic >= 140 || diastolic >= 90) {
+  } else if (severity === 3) {
     classification = 'Stage 2 Hypertension';
     category = 'Your blood pressure is significantly elevated and requires medical attention.';
     recommendation = 'Seek medical care promptly. Your doctor may prescribe medication along with lifestyle changes.';
-  } else if (systolic > 180 || diastolic > 120) {
+  } else if (severity === 4) {
     classification = 'Hypertensive Crisis';
     category = 'This is a medical emergency. Your blood pressure is dangerously high.';
     recommendation = 'Call your local emergency number immediately or seek immediate medical attention. Do not delay.';

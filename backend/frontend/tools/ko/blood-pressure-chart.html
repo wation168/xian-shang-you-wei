@@ -128,23 +128,27 @@ function calculate() {
   let category = '';
   let recommendation = '';
   
-  if (systolic < 120 && diastolic < 80) {
+  const sysSeverity = systolic > 180 ? 4 : (systolic >= 140 ? 3 : (systolic >= 130 ? 2 : (systolic >= 120 ? 1 : 0)));
+  const diaSeverity = diastolic > 120 ? 4 : (diastolic >= 90 ? 3 : (diastolic >= 80 ? 2 : 0));
+  const severity = Math.max(sysSeverity, diaSeverity);
+
+  if (severity === 0) {
     classification = '정상';
     category = '혈압이 정상 범위에 있습니다. 건강한 생활 습관을 계속 유지하세요.';
     recommendation = '정기적으로 혈압을 확인하고 건강한 습관(식단, 운동, 스트레스 관리)을 유지하세요.';
-  } else if ((systolic >= 120 && systolic < 130) && diastolic < 80) {
+  } else if (severity === 1) {
     classification = '높은 정상';
     category = '수축기 혈압이 약간 높습니다. 아직 고혈압은 아니지만 주의가 필요한 신호입니다.';
     recommendation = '생활 습관을 개선하세요: 나트륨 섭취를 줄이고, 규칙적으로 운동하고, 스트레스를 관리하고, 음주를 제한하세요.';
-  } else if ((systolic >= 130 && systolic < 140) || (diastolic >= 80 && diastolic < 90)) {
+  } else if (severity === 2) {
     classification = '고혈압 단계 1';
     category = '혈압이 상승하여 고혈압 단계 1 범위에 해당합니다.';
     recommendation = '의료 전문가와 상담하세요. 생활 습관 개선을 실천하고 필요시 약물 치료를 고려하세요.';
-  } else if (systolic >= 140 || diastolic >= 90) {
+  } else if (severity === 3) {
     classification = '고혈압 단계 2';
     category = '혈압이 상당히 높아 의료적인 주의가 필요합니다.';
     recommendation = '즉시 의료기관을 방문하세요. 의사가 생활 습관 개선과 함께 약물을 처방할 수 있습니다.';
-  } else if (systolic > 180 || diastolic > 120) {
+  } else if (severity === 4) {
     classification = '고혈압 위기';
     category = '이것은 의료 응급 상황입니다. 혈압이 위험할 정도로 높습니다.';
     recommendation = '즉시 응급 서비스에 연락하거나 응급 진료를 받으세요. 지체하지 마세요.';

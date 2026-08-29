@@ -128,23 +128,27 @@ function calculate() {
   let category = '';
   let recommendation = '';
   
-  if (systolic < 120 && diastolic < 80) {
+  const sysSeverity = systolic > 180 ? 4 : (systolic >= 140 ? 3 : (systolic >= 130 ? 2 : (systolic >= 120 ? 1 : 0)));
+  const diaSeverity = diastolic > 120 ? 4 : (diastolic >= 90 ? 3 : (diastolic >= 80 ? 2 : 0));
+  const severity = Math.max(sysSeverity, diaSeverity);
+
+  if (severity === 0) {
     classification = 'Normal';
     category = 'Tekanan darah Anda berada dalam rentang normal. Teruskan gaya hidup sehat Anda.';
     recommendation = 'Periksa tekanan darah Anda secara rutin dan pertahankan kebiasaan sehat (pola makan, olahraga, manajemen stres).';
-  } else if ((systolic >= 120 && systolic < 130) && diastolic < 80) {
+  } else if (severity === 1) {
     classification = 'Meningkat';
     category = 'Tekanan sistolik Anda sedikit meningkat. Ini belum termasuk hipertensi, tetapi merupakan tanda peringatan.';
     recommendation = 'Lakukan perubahan gaya hidup: kurangi asupan garam, berolahraga secara teratur, kelola stres, dan batasi konsumsi alkohol.';
-  } else if ((systolic >= 130 && systolic < 140) || (diastolic >= 80 && diastolic < 90)) {
+  } else if (severity === 2) {
     classification = 'Hipertensi Tahap 1';
     category = 'Tekanan darah Anda meningkat dan berada dalam rentang Hipertensi Tahap 1.';
     recommendation = 'Konsultasikan dengan dokter Anda. Terapkan perubahan gaya hidup dan pertimbangkan kemungkinan pengobatan.';
-  } else if (systolic >= 140 || diastolic >= 90) {
+  } else if (severity === 3) {
     classification = 'Hipertensi Tahap 2';
     category = 'Tekanan darah Anda meningkat secara signifikan dan memerlukan perhatian medis.';
     recommendation = 'Segera cari perawatan medis. Dokter Anda mungkin akan meresepkan obat bersama dengan perubahan gaya hidup.';
-  } else if (systolic > 180 || diastolic > 120) {
+  } else if (severity === 4) {
     classification = 'Krisis Hipertensi';
     category = 'Ini adalah kondisi darurat medis. Tekanan darah Anda berada pada level yang berbahaya.';
     recommendation = 'Segera hubungi layanan darurat setempat atau cari bantuan medis segera. Jangan menunda.';

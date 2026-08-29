@@ -128,23 +128,27 @@ function calculate() {
   let category = '';
   let recommendation = '';
   
-  if (systolic < 120 && diastolic < 80) {
+  const sysSeverity = systolic > 180 ? 4 : (systolic >= 140 ? 3 : (systolic >= 130 ? 2 : (systolic >= 120 ? 1 : 0)));
+  const diaSeverity = diastolic > 120 ? 4 : (diastolic >= 90 ? 3 : (diastolic >= 80 ? 2 : 0));
+  const severity = Math.max(sysSeverity, diaSeverity);
+
+  if (severity === 0) {
     classification = 'Normal';
     category = 'Su presión arterial está dentro del rango normal. Continúe manteniendo un estilo de vida saludable.';
     recommendation = 'Controle su presión arterial regularmente y mantenga hábitos saludables (dieta, ejercicio, manejo del estrés).';
-  } else if ((systolic >= 120 && systolic < 130) && diastolic < 80) {
+  } else if (severity === 1) {
     classification = 'Elevada';
     category = 'Su presión sistólica está ligeramente elevada. Esto todavía no es hipertensión, pero es una señal de advertencia.';
     recommendation = 'Realice cambios en su estilo de vida: reduzca la ingesta de sal, haga ejercicio regularmente, controle el estrés y limite el consumo de alcohol.';
-  } else if ((systolic >= 130 && systolic < 140) || (diastolic >= 80 && diastolic < 90)) {
+  } else if (severity === 2) {
     classification = 'Hipertensión Etapa 1';
     category = 'Su presión arterial está elevada y se encuentra en el rango de Hipertensión Etapa 1.';
     recommendation = 'Consulte a su médico. Implemente cambios en el estilo de vida y considere la posibilidad de recibir medicación.';
-  } else if (systolic >= 140 || diastolic >= 90) {
+  } else if (severity === 3) {
     classification = 'Hipertensión Etapa 2';
     category = 'Su presión arterial está significativamente elevada y requiere atención médica.';
     recommendation = 'Busque atención médica de inmediato. Su médico puede recetarle medicación junto con cambios en el estilo de vida.';
-  } else if (systolic > 180 || diastolic > 120) {
+  } else if (severity === 4) {
     classification = 'Crisis Hipertensiva';
     category = 'Esta es una emergencia médica. Su presión arterial está peligrosamente alta.';
     recommendation = 'Llame de inmediato a los servicios de emergencia locales o busque atención médica urgente. No espere.';

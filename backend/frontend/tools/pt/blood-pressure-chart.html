@@ -128,23 +128,27 @@ function calculate() {
   let category = '';
   let recommendation = '';
   
-  if (systolic < 120 && diastolic < 80) {
+  const sysSeverity = systolic > 180 ? 4 : (systolic >= 140 ? 3 : (systolic >= 130 ? 2 : (systolic >= 120 ? 1 : 0)));
+  const diaSeverity = diastolic > 120 ? 4 : (diastolic >= 90 ? 3 : (diastolic >= 80 ? 2 : 0));
+  const severity = Math.max(sysSeverity, diaSeverity);
+
+  if (severity === 0) {
     classification = 'Normal';
     category = 'Sua pressão arterial está dentro da faixa normal. Continue mantendo um estilo de vida saudável.';
     recommendation = 'Verifique sua pressão arterial regularmente e mantenha hábitos saudáveis (dieta, exercício, controle do estresse).';
-  } else if ((systolic >= 120 && systolic < 130) && diastolic < 80) {
+  } else if (severity === 1) {
     classification = 'Elevada';
     category = 'Sua pressão sistólica está levemente elevada. Isso ainda não é hipertensão, mas é um sinal de alerta.';
     recommendation = 'Faça mudanças no estilo de vida: reduza a ingestão de sal, exercite-se regularmente, controle o estresse e limite o consumo de álcool.';
-  } else if ((systolic >= 130 && systolic < 140) || (diastolic >= 80 && diastolic < 90)) {
+  } else if (severity === 2) {
     classification = 'Hipertensão Estágio 1';
     category = 'Sua pressão arterial está elevada e se enquadra na faixa de Hipertensão Estágio 1.';
     recommendation = 'Consulte seu médico. Implemente mudanças no estilo de vida e considere a possibilidade de medicação.';
-  } else if (systolic >= 140 || diastolic >= 90) {
+  } else if (severity === 3) {
     classification = 'Hipertensão Estágio 2';
     category = 'Sua pressão arterial está significativamente elevada e requer atenção médica.';
     recommendation = 'Procure atendimento médico prontamente. Seu médico pode prescrever medicação junto com mudanças no estilo de vida.';
-  } else if (systolic > 180 || diastolic > 120) {
+  } else if (severity === 4) {
     classification = 'Crise Hipertensiva';
     category = 'Esta é uma emergência médica. Sua pressão arterial está perigosamente alta.';
     recommendation = 'Ligue imediatamente para o serviço de emergência local ou procure atendimento médico urgente. Não espere.';
