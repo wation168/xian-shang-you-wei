@@ -557,7 +557,7 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
 .ws-mobile-bar .ws-group-add{width:30px;height:30px;font-size:14px}
 #wsAddGroupRowM{padding:0}
 </style>
-<script src="https://accounts.google.com/gsi/client" async onload="_initGoogleSignIn()"></script>
+<script src="https://accounts.google.com/gsi/client" async onload="if(typeof _initGoogleSignIn==='function'){_initGoogleSignIn();}"></script>
 <script>
 setTimeout(function(){var s=document.createElement('script');s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.async=true;s.crossOrigin='anonymous';document.head.appendChild(s);},2000);
 </script>
@@ -1605,7 +1605,10 @@ let _watchCache = {}; // 暫存分析結果
 let _watchLoading = false;
 
 function showWatchList(){
-  const el=document.getElementById('pageContent');
+  // 2026/08/27修正：這支函式同時被「獨立頁面」跟「自選頁分頁籤（_renderWatchInner）」兩種情境呼叫，
+  // 原本寫死渲染到#pageContent，在分頁籤情境下會把_renderWatchInner塞的分頁籤結構(#watchInnerContent)
+  // 整個蓋掉，導致「⭐自選股／📈戰績日誌」分頁籤消失。優先渲染進#watchInnerContent，不存在時才退回#pageContent。
+  const el=document.getElementById('watchInnerContent')||document.getElementById('pageContent');
   if(!watchList.length){
     el.innerHTML=`<div style="padding:60px 0;text-align:center;color:var(--text3)">
       <div style="font-size:36px;margin-bottom:12px">🔥</div>
@@ -1858,7 +1861,9 @@ function qpAndHome(id){
 // 歷史紀錄
 // ══════════════════════════════════════
 function showHistory(){
-  const el=document.getElementById('pageContent');
+  // 2026/08/27修正：同上showWatchList()的理由，同一支函式也被自選頁「📈戰績日誌」分頁籤呼叫，
+  // 優先渲染進#watchInnerContent，避免蓋掉分頁籤結構。
+  const el=document.getElementById('watchInnerContent')||document.getElementById('pageContent');
   if(!_authUser){
     el.innerHTML=`<div style="padding:60px 0;text-align:center;color:var(--text3)">
       <div style="font-size:36px;margin-bottom:12px">📈</div>
@@ -2018,19 +2023,11 @@ function _switchWatchTab(tab){
 function _renderWatchInner(){
   const container = document.getElementById('watchInnerContent');
   if(!container) return;
+  // 2026/08/27修正：以前這裡會先塞一個假的mock元素進_renderWatchSkeleton()（不會真的渲染到畫面上），
+  // 再用一個永遠是false的querySelector條件判斷要不要打_fetchWatchBatch()，是完全沒作用的死代碼；
+  // 真正渲染／抓資料靠的是下面showWatchList()/showHistory()內部自己的邏輯，現在兩者都已改成
+  // 優先渲染進#watchInnerContent，這裡直接呼叫即可，不用重複判斷空清單狀態。
   if(_watchInnerTab === 'watch'){
-    // 把原本 showWatchList 的內容塞進去
-    if(!watchList.length){
-      container.innerHTML=`<div style="padding:60px 0;text-align:center;color:var(--text3)">
-        <div style="font-size:36px;margin-bottom:12px">🔥</div>
-        <div style="font-size:15px;font-weight:600;margin-bottom:6px">關注清單是空的</div>
-        <div style="font-size:13px;margin-bottom:10px">分析股票後按「加入自選」</div>
-      </div>`;
-      return;
-    }
-    _renderWatchSkeleton({innerHTML:'',appendChild:()=>{}});
-    document.getElementById('pageContent').querySelector('#watchGroups') && _fetchWatchBatch();
-    // 直接呼叫原本邏輯
     showWatchList();
   } else {
     showHistory();
