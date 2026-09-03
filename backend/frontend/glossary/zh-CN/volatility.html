@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>波动率是什么？标准差公式、年化方法与VIX恐慌指数解析</title>
+<meta name="description" content="波动率是衡量资产收益率离散程度的统计指标，本文讲解其标准差计算方法、年化换算方式，并比较波动率与Beta（贝塔系数）在风险衡量上的区别，帮助投资者快速理解核心概念。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/glossary/zh-CN/volatility.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/glossary/volatility.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/glossary/en/volatility.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/glossary/de/volatility.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/glossary/es/volatility.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/glossary/fr/volatility.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/glossary/id/volatility.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/glossary/ja/volatility.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/glossary/ko/volatility.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/glossary/pt/volatility.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/glossary/zh-CN/volatility.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/glossary/en/volatility.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "波动率高一定不好吗？", "acceptedAnswer": {"@type": "Answer", "text": "不一定。波动率高只说明资产价格波动幅度较大，但这种波动可能是上涨，也可能是下跌，历史上不少长期表现出色的股票，波动率其实也偏高。真正重要的是投资者的投资期限和风险承受能力，能否承受这种较大的短期波动——长期投资者通常比需要随时变现的投资者，更能承受高波动带来的震荡。"}}, {"@type": "Question", "name": "波动率通常怎么计算？", "acceptedAnswer": {"@type": "Answer", "text": "波动率最常见的算法，是取资产某段历史时期（例如每日或每月）收益率的标准差：计算每期收益与均值的差距、将差距平方后取平均，再开平方根。由于按日或按月计算的波动率不便直接比较，通常会再乘以一年内交易周期数的平方根（日频数据常用252的平方根）进行“年化”，方便跨资产比较。"}}, {"@type": "Question", "name": "VIX恐慌指数到底衡量的是什么？", "acceptedAnswer": {"@type": "Answer", "text": "CBOE波动率指数（VIX）衡量的是市场对S&P 500指数未来30天波动率的预期，其数值是根据S&P 500指数期权的价格反推得出，并非直接衡量过去的价格波动。由于期权价格会在投资者预期后市动荡加剧时上升，因此VIX往往在市场紧张、恐慌情绪升温时大幅飙升，这也是它被称为“恐慌指数”的原因。"}}, {"@type": "Question", "name": "波动率和Beta有什么区别？", "acceptedAnswer": {"@type": "Answer", "text": "波动率衡量的是资产收益率整体的离散程度，不论波动来自何处；Beta则只衡量其中与大盘同步的那部分。一只股票即便总体波动率很高，Beta仍可能偏低，说明它的波动多半来自公司自身因素，而非跟随大盘同步起伏。简单来说，波动率回答“这项资产整体波动有多大”，Beta回答“这些波动有多少与大盘同步”。"}}, {"@type": "Question", "name": "波动率会随时间变化吗？", "acceptedAnswer": {"@type": "Answer", "text": "会。波动率并非资产一成不变的属性，在财报发布、重要经济数据公布，或整体市场承压时，波动率往往会明显上升，等到不确定性消退后再逐渐回落。这种平静期与剧烈波动期各自聚集出现的现象，有时被称为“波动率聚集”，也是分析师倾向使用近期数据而非陈旧数据来评估当前风险的原因之一。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="volatility">
+<meta name="sg-type" content="glossary">
+<meta name="sg-lang" content="zh-CN">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/glossary/zh-CN/">术语百科</a>
+    <a href="/tools/zh-CN/">工具</a>
+    <a href="/blog/">教学文章</a>
+    <a href="/">首页</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/glossary/volatility.html">繁中</option><option value="/glossary/en/volatility.html">EN</option><option value="/glossary/ja/volatility.html">日本語</option><option value="/glossary/ko/volatility.html">한국어</option><option value="/glossary/de/volatility.html">DE</option><option value="/glossary/fr/volatility.html">FR</option><option value="/glossary/es/volatility.html">ES</option><option value="/glossary/pt/volatility.html">PT</option><option value="/glossary/id/volatility.html">ID</option><option value="/glossary/zh-CN/volatility.html" selected>简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">首页</a> &gt; <a href="/glossary/zh-CN/">术语百科</a> &gt; 波动率</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+
+  <div class="calc-card">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+      <span style="background:#EBF5FF;color:#2563EB;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600">投资基础</span>
+    </div>
+    <h1>波动率</h1>
+    <p class="calc-subtitle" style="font-size:16px;line-height:1.7;color:#2D3748;font-weight:500;margin-top:12px">波动率是衡量资产收益率波动幅度的统计指标，通常以收益率的标准差计算，数值越高说明价格波动越剧烈、不确定性也越大。</p>
+  </div>
+
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article">
+    <h2>波动率</h2>
+    
+<svg viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;margin:24px 0;display:block">
+  <rect width="600" height="280" rx="12" fill="#F7FAFC" stroke="#E2E8F0"/>
+  <text x="300" y="28" text-anchor="middle" fill="#2D3748" font-size="14" font-weight="600">Compound vs Simple Growth</text>
+  <!-- Axes -->
+  <line x1="60" y1="245" x2="560" y2="245" stroke="#CBD5E0" stroke-width="1.5"/>
+  <line x1="60" y1="45" x2="60" y2="245" stroke="#CBD5E0" stroke-width="1.5"/>
+  <text x="310" y="270" text-anchor="middle" fill="#718096" font-size="11">Time (Years)</text>
+  <text x="25" y="145" text-anchor="middle" fill="#718096" font-size="11" transform="rotate(-90,25,145)">Value</text>
+  <!-- Grid lines -->
+  <line x1="60" y1="145" x2="560" y2="145" stroke="#EDF2F7" stroke-dasharray="4"/>
+  <line x1="60" y1="95" x2="560" y2="95" stroke="#EDF2F7" stroke-dasharray="4"/>
+  <line x1="60" y1="195" x2="560" y2="195" stroke="#EDF2F7" stroke-dasharray="4"/>
+  <!-- Simple interest (straight line) -->
+  <line x1="60" y1="225" x2="540" y2="125" stroke="#718096" stroke-width="2.5" stroke-dasharray="6,4"/>
+  <!-- Compound interest (curve) -->
+  <path d="M60,225 Q200,210 300,175 Q400,130 460,80 Q500,55 540,40" fill="none" stroke="#2563EB" stroke-width="3"/>
+  <!-- Labels -->
+  <circle cx="430" cy="68" r="4" fill="#2563EB"/>
+  <text x="440" y="72" fill="#2563EB" font-size="12" font-weight="600">Compound</text>
+  <circle cx="430" cy="90" r="4" fill="#718096"/>
+  <text x="440" y="94" fill="#718096" font-size="12">Simple</text>
+  <!-- Year markers -->
+  <text x="60" y="258" fill="#718096" font-size="10">0</text>
+  <text x="180" y="258" fill="#718096" font-size="10">5</text>
+  <text x="300" y="258" fill="#718096" font-size="10">10</text>
+  <text x="420" y="258" fill="#718096" font-size="10">15</text>
+  <text x="535" y="258" fill="#718096" font-size="10">20</text>
+</svg>
+
+<p>波动率是一种统计指标，用来衡量某项资产的收益率在特定时期内的离散程度。实践中最常见的算法，是计算资产在某段时间（例如每日或每月）收益率的标准差：先求出每期收益率与平均收益率的差值，将差值平方后取平均，再开平方根。得到的数值反映了该资产收益率历史上偏离其平均水平的幅度，不论价格是上涨还是下跌，只要波动剧烈，波动率就会偏高。
+
+波动率的解读比较直观：数值越高，说明收益率越分散，资产价格上下摆动的幅度越大，通常被视为风险或不确定性较高的信号；数值越低，说明收益率集中在均值附近，价格走势相对平稳、可预测。由于按日或按月计算的波动率不便直接比较，市场上通常会将其“年化”，即把每期标准差乘以一年内交易周期数（日频数据常用252天）的平方根，从而方便投资者在统一的时间尺度上比较不同资产。
+
+需要注意的是，波动率是一种回溯历史、纯统计性质的指标，它只描述收益率过去的离散程度，并不能预测未来价格的涨跌方向。一只股票即便波动率很高，长期仍可能持续上涨；而波动率很低的资产，也可能缓慢但持续地下跌。此外，波动率同时包含了个股自身因素和整体市场因素带来的波动，仅凭一个波动率数字，并不能判断风险究竟来自何处。</p>
+
+    <h2>计算范例</h2>
+    <p>假设“华芯科技”（假设性公司）过去的日收益率标准差约为1.4%。若要换算成年化数字以便比较，通常乘以252个交易日的平方根（约15.87），因此年化波动率约为1.4% x 15.87 ≈ 22.2%。相比之下，一只较为稳健的公用事业类股票，日标准差可能只有0.5%，年化后约为7.9%，波动幅度明显更小。
+
+以人民币20万元的持仓换算，若把年化波动率大致当作一年收益的“一个标准差”区间，华芯科技22.2%的波动率意味着一年下来，持仓价值可能因正常价格波动而上下震荡约±¥44,400，也就是大致落在¥155,600至¥244,400之间；而稳健类股票7.9%的波动率，对应的合理波动区间只有约±¥15,880，明显窄得多。
+
+需要强调的是，这并不代表华芯科技的价格一定会落在这个区间，也不代表它年底一定上涨或下跌——波动率本身完全不涉及方向。它只是说明：持有波动率较高的股票，投资者应当预期过程中会经历更剧烈的涨跌起伏，即便两只股票最终收益率相同，过程中的震荡程度也可能相差很大。</p>
+
+    <h2>实战应用</h2>
+    <p>波动率是期权定价的核心变量之一，例如Black-Scholes模型就把标的资产的预期波动率作为重要输入，因为波动率越高，期权到期时大幅处于价内或价外的可能性也越高，期权价格也会随之上升。这也是CBOE波动率指数（VIX，俗称“恐慌指数”）的设计思路：VIX根据S&amp;P 500指数期权的价格反推市场对未来30天波动率的预期，VIX一旦飙升，通常意味着市场预期后市将出现剧烈震荡。
+
+资产管理人和投资组合经理会利用波动率来决定仓位大小和风险控制，常见做法是对波动率较高的标的分配较少资金、对波动率较低的标的分配较多资金，避免单一仓位主导整个组合的波动。波动率也是夏普比率等风险调整后收益指标的关键组成部分，通过将超额收益除以波动率，投资者可以比较不同标的“每承担一单位风险能换取多少收益”。
+
+交易者也会观察波动率来把握买卖时机，因为异常低的波动率之后，往往容易出现剧烈的价格变动；而波动率急速攀升，则常伴随恐慌性抛售或大幅回调的尾声。企业财务和风险管理部门同样会跟踪汇率、大宗商品或利率的波动率，作为决定是否通过期权、期货等衍生工具进行对冲的重要依据。</p>
+  </article>
+
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article">
+    <h2>常见错误</h2>
+    <p>常见的误解之一，是把波动率直接等同于“风险”。实际上波动率只是风险的一个维度，它衡量的是收益率波动的幅度，并不能反映资产发生重大、永久性亏损的概率——而这往往才是投资者真正担心的事。有些高波动率的资产最终完全恢复甚至创新高，反而是波动率偏低的资产，偶尔会出现波动率完全没有预先提示的重大亏损。
+
+另一个常见误区，是认为波动率高就代表这是一项不好的投资。实际上波动率不区分方向，一只股票波动率高，可能是因为它经常大幅上涨，也可能经常大幅下跌；长期来看，市场上收益表现最亮眼的股票，往往也位列波动率最高之列。若把“波动”直接等同于“差股票”，反而可能让投资者错过波动较大、但长期收益同样可观的机会。
+
+许多人也常把波动率与Beta（贝塔系数）混淆。波动率衡量的是资产收益率整体的离散程度，不论来源为何；Beta衡量的只是收益变动中，与大盘同步的那一部分。一只股票即便总体波动率很高，Beta却可能很低——如果它的波动主要来自公司自身消息，而非跟随大盘同步涨跌，说明这只股票绝对风险高，但与大盘的关联度并不高。
+
+最后，许多投资者过度依赖历史波动率来预测未来风险。当公司基本面、行业环境或宏观经济形势发生变化时，波动率也可能随之迅速改变，一只过去相对平稳的股票，可能在短时间内变得剧烈震荡，反之亦然。如果只依据过去的波动率数字做判断，而不考虑可能发生的变化，投资者很容易在风险真正转变时措手不及。</p>
+
+    <h2>比较表</h2>
+    <table><thead><tr><th>维度</th><th>波动率</th><th>Beta（贝塔系数）</th></tr></thead><tbody><tr><td>定义</td><td>衡量资产自身收益率随时间的离散程度</td><td>衡量资产收益率相对整体市场变动的敏感程度</td></tr><tr><td>计算方式</td><td>以收益率的标准差计算，通常再年化处理</td><td>将资产收益率对大盘指数（如S&amp;P 500）做统计回归分析</td></tr><tr><td>衡量的风险类型</td><td>总风险，包含个股自身因素与市场整体因素</td><td>仅衡量系统性风险（与大盘同步的部分）</td></tr><tr><td>常见应用</td><td>期权定价、仓位规模设定、衡量整体价格波动</td><td>评估个股相对大盘的走势、投资组合分散配置</td></tr><tr><td>主要局限</td><td>无法显示方向，也无法区分风险来源</td><td>完全忽略个股特有风险，且假设与大盘关系保持稳定</td></tr></tbody></table>
+  </article>
+
+  <div style="margin:20px 0;padding:16px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;text-align:center"><a href="https://lottery.softglow-ai.com/zh-TW/" target="_blank" rel="noopener" style="text-decoration:none;color:#fff"><div style="font-size:16px;font-weight:700;margin-bottom:4px">🎰 Global Lottery Results + Smart Number Picker</div><div style="font-size:12px;opacity:0.9">Powerball · Mega Millions · EuroMillions — 12 ways to pick numbers</div></a></div>
+
+  <section class="faq">
+    <h2>常见问题</h2>
+    <div class="faq-item"><div class="faq-q">波动率高一定不好吗？</div><div class="faq-a">不一定。波动率高只说明资产价格波动幅度较大，但这种波动可能是上涨，也可能是下跌，历史上不少长期表现出色的股票，波动率其实也偏高。真正重要的是投资者的投资期限和风险承受能力，能否承受这种较大的短期波动——长期投资者通常比需要随时变现的投资者，更能承受高波动带来的震荡。</div></div>
+<div class="faq-item"><div class="faq-q">波动率通常怎么计算？</div><div class="faq-a">波动率最常见的算法，是取资产某段历史时期（例如每日或每月）收益率的标准差：计算每期收益与均值的差距、将差距平方后取平均，再开平方根。由于按日或按月计算的波动率不便直接比较，通常会再乘以一年内交易周期数的平方根（日频数据常用252的平方根）进行“年化”，方便跨资产比较。</div></div>
+<div class="faq-item"><div class="faq-q">VIX恐慌指数到底衡量的是什么？</div><div class="faq-a">CBOE波动率指数（VIX）衡量的是市场对S&amp;P 500指数未来30天波动率的预期，其数值是根据S&amp;P 500指数期权的价格反推得出，并非直接衡量过去的价格波动。由于期权价格会在投资者预期后市动荡加剧时上升，因此VIX往往在市场紧张、恐慌情绪升温时大幅飙升，这也是它被称为“恐慌指数”的原因。</div></div>
+<div class="faq-item"><div class="faq-q">波动率和Beta有什么区别？</div><div class="faq-a">波动率衡量的是资产收益率整体的离散程度，不论波动来自何处；Beta则只衡量其中与大盘同步的那部分。一只股票即便总体波动率很高，Beta仍可能偏低，说明它的波动多半来自公司自身因素，而非跟随大盘同步起伏。简单来说，波动率回答“这项资产整体波动有多大”，Beta回答“这些波动有多少与大盘同步”。</div></div>
+<div class="faq-item"><div class="faq-q">波动率会随时间变化吗？</div><div class="faq-a">会。波动率并非资产一成不变的属性，在财报发布、重要经济数据公布，或整体市场承压时，波动率往往会明显上升，等到不确定性消退后再逐渐回落。这种平静期与剧烈波动期各自聚集出现的现象，有时被称为“波动率聚集”，也是分析师倾向使用近期数据而非陈旧数据来评估当前风险的原因之一。</div></div>
+
+  </section>
+
+  <div class="more-tools"><h3>相关工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/zh-CN/standard-deviation.html">标准差计算器</a>
+</div></div>
+  <div class="more-tools"><h3>相关术语</h3><div class="tools-grid"><a class="tool-pill" href="/glossary/zh-CN/risk-tolerance.html">Risk Tolerance</a>
+<a class="tool-pill" href="/glossary/zh-CN/correlation.html">Correlation</a></div></div>
+
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相关术语</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}});};},2000);
+</script>
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Search..." autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header"><h3>Bookmarks</h3><button class="bm-clear" onclick="window._sgClearBm()">Clear All</button></div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>
+
+<!-- glossary-v1.0|zh-CN|volatility|2026-09-03 -->

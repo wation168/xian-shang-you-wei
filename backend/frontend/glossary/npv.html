@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>淨現值（NPV）是什麼？公式、計算方式與應用教學</title>
+<meta name="description" content="淨現值（NPV）是評估投資是否值得的核心指標，將未來現金流折現到今天並加總。本文說明NPV公式、判斷原則，並比較NPV與IRR的差異與實例試算。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/glossary/npv.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/glossary/npv.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/glossary/en/npv.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/glossary/de/npv.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/glossary/es/npv.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/glossary/fr/npv.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/glossary/id/npv.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/glossary/ja/npv.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/glossary/ko/npv.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/glossary/pt/npv.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/glossary/zh-CN/npv.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/glossary/en/npv.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "NPV要多少才算是「好」的投資？", "acceptedAnswer": {"@type": "Answer", "text": "只要NPV大於零，理論上這項投資就值得考慮，因為代表報酬已經超過所要求的折現率。但實務上,金額的大小也很重要——NPV為$10,000和NPV為$1,000,000雖然都是正數，但創造的絕對價值差異很大，通常還要搭配投資規模、風險程度與公司的資源限制一起評估，而不是只看NPV是否為正。"}}, {"@type": "Question", "name": "NPV和IRR應該用哪一個來做決策？", "acceptedAnswer": {"@type": "Answer", "text": "大多數財務教科書都建議以NPV為優先判斷依據，因為NPV直接以金額表示創造的價值，而IRR只是百分比報酬率。當比較規模差異很大的互斥專案時，IRR可能會偏好報酬率高但總價值創造較少的小專案，這時NPV能提供更可靠的判斷。IRR則適合用來快速了解一項投資的報酬率水準，兩者可以互相搭配使用。"}}, {"@type": "Question", "name": "計算NPV時，折現率應該怎麼選擇？", "acceptedAnswer": {"@type": "Answer", "text": "折現率通常會採用投資人要求的最低報酬率，或是公司的加權平均資金成本（WACC）。折現率應該反映這項投資的風險程度：風險愈高的專案，通常需要用愈高的折現率來折現，因為投資人會要求更高的報酬來補償承擔的額外風險。折現率設定不準確，會直接影響NPV計算結果的可靠性。"}}, {"@type": "Question", "name": "NPV可以是負數嗎？負的NPV代表什麼意思？", "acceptedAnswer": {"@type": "Answer", "text": "可以，NPV完全有可能是負數。當計算出來的NPV小於零，代表這項投資預期產生的現金流，折現回今天後的價值，並不足以彌補期初投入的成本與要求的報酬率，也就是說這項投資無法達到原本設定的報酬門檻，理性的決策通常會建議放棄這項投資，除非有其他策略性考量。"}}, {"@type": "Question", "name": "為什麼NPV被認為比回收期法（payback period）等簡單指標更好？", "acceptedAnswer": {"@type": "Answer", "text": "回收期法只計算需要多久能回收投入成本，完全沒有考慮到時間對金錢價值的影響，也不管回收期之後專案還能不能繼續創造現金流。NPV則同時把時間價值與整個投資期間所有的現金流都納入計算，能更完整、更準確地反映一項投資真正創造的價值，因此在學術界與實務界都被視為評估資本支出決策的黃金標準。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="npv">
+<meta name="sg-type" content="glossary">
+<meta name="sg-lang" content="zh-TW">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/glossary/">術語百科</a>
+    <a href="/tools/">工具</a>
+    <a href="/blog/">教學文章</a>
+    <a href="/">首頁</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/glossary/npv.html" selected>繁中</option><option value="/glossary/en/npv.html">EN</option><option value="/glossary/ja/npv.html">日本語</option><option value="/glossary/ko/npv.html">한국어</option><option value="/glossary/de/npv.html">DE</option><option value="/glossary/fr/npv.html">FR</option><option value="/glossary/es/npv.html">ES</option><option value="/glossary/pt/npv.html">PT</option><option value="/glossary/id/npv.html">ID</option><option value="/glossary/zh-CN/npv.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">首頁</a> &gt; <a href="/glossary/">術語百科</a> &gt; 淨現值 (NPV)</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+
+  <div class="calc-card">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+      <span style="background:#EBF5FF;color:#2563EB;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600">投資基礎</span>
+    </div>
+    <h1>淨現值 (NPV)</h1>
+    <p class="calc-subtitle" style="font-size:16px;line-height:1.7;color:#2D3748;font-weight:500;margin-top:12px">淨現值是把一項投資未來所有現金流入與流出，依照特定折現率換算成今日價值後加總所得的數字，用來判斷這項投資是否值得進行。</p>
+  </div>
+
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article">
+    <h2>淨現值 (NPV)</h2>
+    
+<svg viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;margin:24px 0;display:block">
+  <rect width="600" height="280" rx="12" fill="#F7FAFC" stroke="#E2E8F0"/>
+  <text x="300" y="28" text-anchor="middle" fill="#2D3748" font-size="14" font-weight="600">Compound vs Simple Growth</text>
+  <!-- Axes -->
+  <line x1="60" y1="245" x2="560" y2="245" stroke="#CBD5E0" stroke-width="1.5"/>
+  <line x1="60" y1="45" x2="60" y2="245" stroke="#CBD5E0" stroke-width="1.5"/>
+  <text x="310" y="270" text-anchor="middle" fill="#718096" font-size="11">Time (Years)</text>
+  <text x="25" y="145" text-anchor="middle" fill="#718096" font-size="11" transform="rotate(-90,25,145)">Value</text>
+  <!-- Grid lines -->
+  <line x1="60" y1="145" x2="560" y2="145" stroke="#EDF2F7" stroke-dasharray="4"/>
+  <line x1="60" y1="95" x2="560" y2="95" stroke="#EDF2F7" stroke-dasharray="4"/>
+  <line x1="60" y1="195" x2="560" y2="195" stroke="#EDF2F7" stroke-dasharray="4"/>
+  <!-- Simple interest (straight line) -->
+  <line x1="60" y1="225" x2="540" y2="125" stroke="#718096" stroke-width="2.5" stroke-dasharray="6,4"/>
+  <!-- Compound interest (curve) -->
+  <path d="M60,225 Q200,210 300,175 Q400,130 460,80 Q500,55 540,40" fill="none" stroke="#2563EB" stroke-width="3"/>
+  <!-- Labels -->
+  <circle cx="430" cy="68" r="4" fill="#2563EB"/>
+  <text x="440" y="72" fill="#2563EB" font-size="12" font-weight="600">Compound</text>
+  <circle cx="430" cy="90" r="4" fill="#718096"/>
+  <text x="440" y="94" fill="#718096" font-size="12">Simple</text>
+  <!-- Year markers -->
+  <text x="60" y="258" fill="#718096" font-size="10">0</text>
+  <text x="180" y="258" fill="#718096" font-size="10">5</text>
+  <text x="300" y="258" fill="#718096" font-size="10">10</text>
+  <text x="420" y="258" fill="#718096" font-size="10">15</text>
+  <text x="535" y="258" fill="#718096" font-size="10">20</text>
+</svg>
+
+<p>淨現值（Net Present Value，簡稱NPV）的概念，是把一項投資或專案在未來各年度所產生的現金流，依照一個選定的折現率（通常是投資人要求的報酬率，或企業的資金成本，即WACC）換算回「今天的價值」，再全部加總，最後扣除一開始投入的成本。用公式表示就是：NPV = Σ [CF_t / (1+r)^t] － 期初投資，其中CF_t代表第t期的現金流，r則是折現率。因為未來的一塊錢，價值一定比今天的一塊錢低，所以NPV的核心，就是把「時間」這個變數，正確地放進投資評估裡。
+
+判斷NPV的原則很直觀：如果算出來的NPV大於零，代表這項投資預期能為公司或投資人創造超過要求報酬率的額外價值，值得執行；如果NPV小於零，代表投資報酬達不到門檻，應該放棄；如果NPV剛好等於零，代表這項投資恰好符合要求的報酬率，沒有額外創造或損失價值。NPV數字愈大，通常代表這項專案能創造的絕對價值愈高，但要注意NPV是「金額」而非「比率」，比較不同規模的專案時仍需搭配其他指標一起看。
+
+使用NPV時有一個重要提醒：整個計算結果高度仰賴於所選用的折現率，折現率設定過高或過低，都會讓NPV的數字失真，進而影響投資決策；另外NPV也假設未來的現金流預測是可信的，實務上現金流預測本身就存在不確定性，因此NPV比較適合作為決策的重要參考之一，而非唯一依據。</p>
+
+    <h2>計算範例</h2>
+    <p>假設某公司評估一項專案，期初需投入 $1,000,000，預期未來三年每年都能帶來 $400,000 的現金流入，公司要求的折現率（資金成本）為8%。要計算NPV，必須把每一年的現金流分別折現：第一年的 $400,000 折現後約為 $370,370（400,000 ÷ 1.08）；第二年的 $400,000 折現後約為 $343,051（400,000 ÷ 1.08的平方）；第三年的 $400,000 折現後約為 $317,585（400,000 ÷ 1.08的三次方）。
+
+把這三年折現後的現值加總，得到 $370,370 + $343,051 + $317,585 = $1,031,006，這就是這項專案未來現金流的現值總和。接著再扣除期初投入的 $1,000,000，得到NPV = $1,031,006 － $1,000,000 = $31,006。由於NPV是正數，代表這項專案預期能創造超過8%要求報酬率的額外價值，在財務上是值得投資的專案，公司應該考慮接受這項投資案。</p>
+
+    <h2>實戰應用</h2>
+    <p>在企業的資本預算（capital budgeting）決策中，NPV是最常被使用的評估工具之一。當公司要決定是否購買新設備、興建新廠房、投入新產品線，或評估一項併購案時，財務部門通常會先估算未來各年度的現金流，再用公司的資金成本作為折現率，計算出NPV，作為是否投資的主要依據。
+
+在投資銀行、私募股權與企業併購（M&amp;A）領域，NPV也常被用來評估目標公司或專案的價值，是現金流折現法（DCF）估值模型的核心概念。基金經理人與分析師在比較多個投資機會時，也會參考各方案的NPV，優先選擇能創造最多絕對價值的投資組合。
+
+對中小企業主或個人創業者而言，NPV同樣可以用來評估是否該投入一筆資金開創新事業、擴充設備，或進行大型採購：只要能合理估計未來的現金流與適當的折現率，就能用同樣的邏輯，判斷這筆支出長期來看是否划算。</p>
+  </article>
+
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article">
+    <h2>常見錯誤</h2>
+    <p>常見的第一個誤解，是把NPV和單純的「總獲利」或「淨利加總」混為一談，忽略了時間對金錢價值的影響。例如把三年後拿到的100萬和今天拿到的100萬視為等值，這樣的計算方式並沒有真正反映投資的機會成本，得出的結論可能會誤導決策。
+
+第二個常見錯誤，是折現率設定不當。折現率設得太低，會讓專案的NPV被高估，看起來比實際上更值得投資；折現率設得太高，則可能讓原本值得做的專案被誤判為不值得。折現率應該反映投資的風險程度與資金的機會成本，不能隨意設定或直接套用其他專案的數字。
+
+第三個常見盲點，是直接拿不同規模、不同期限專案的NPV數字互相比較，卻沒有考慮到規模效應。舉例來說，一個需要投入1000萬、NPV為50萬的專案，和一個只需投入50萬、NPV也是50萬的專案，兩者創造的相對報酬效率其實差異很大，只看NPV金額本身可能會忽略這個問題。
+
+最後，有些人會過度依賴NPV的搭檔指標IRR（內部報酬率），誤以為IRR比較高的專案一定比較好，卻忽略了當兩個互斥專案規模差異很大時，IRR可能會偏好報酬率較高但總價值創造較低的小型專案，這時候應該以NPV的判斷為優先。</p>
+
+    <h2>比較表</h2>
+    <table><thead><tr><th>比較項目</th><th>淨現值（NPV）</th><th>內部報酬率（IRR）</th></tr></thead><tbody><tr><td>定義</td><td>將所有現金流折現後加總所得到的金額</td><td>讓NPV等於零的那個折現率</td></tr><tr><td>計算方式</td><td>現金流現值總和減去期初投資金額</td><td>反覆嘗試找出使現值總和等於期初投資的折現率</td></tr><tr><td>代表意義</td><td>專案預期能創造的絕對價值（金額）</td><td>專案預期能達到的報酬率（百分比）</td></tr><tr><td>常見應用情境</td><td>比較不同規模或期限專案所創造的絕對價值</td><td>評估與比較投資方案的報酬率高低</td></tr><tr><td>主要限制</td><td>結果高度依賴所選折現率的準確性</td><td>規模差異大的互斥專案比較時可能產生誤導，且現金流型態特殊時可能有多解</td></tr></tbody></table>
+  </article>
+
+  <div style="margin:20px 0;padding:16px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;text-align:center"><a href="https://lottery.softglow-ai.com/zh-TW/" target="_blank" rel="noopener" style="text-decoration:none;color:#fff"><div style="font-size:16px;font-weight:700;margin-bottom:4px">🎰 Global Lottery Results + Smart Number Picker</div><div style="font-size:12px;opacity:0.9">Powerball · Mega Millions · EuroMillions — 12 ways to pick numbers</div></a></div>
+
+  <section class="faq">
+    <h2>常見問題</h2>
+    <div class="faq-item"><div class="faq-q">NPV要多少才算是「好」的投資？</div><div class="faq-a">只要NPV大於零，理論上這項投資就值得考慮，因為代表報酬已經超過所要求的折現率。但實務上,金額的大小也很重要——NPV為$10,000和NPV為$1,000,000雖然都是正數，但創造的絕對價值差異很大，通常還要搭配投資規模、風險程度與公司的資源限制一起評估，而不是只看NPV是否為正。</div></div>
+<div class="faq-item"><div class="faq-q">NPV和IRR應該用哪一個來做決策？</div><div class="faq-a">大多數財務教科書都建議以NPV為優先判斷依據，因為NPV直接以金額表示創造的價值，而IRR只是百分比報酬率。當比較規模差異很大的互斥專案時，IRR可能會偏好報酬率高但總價值創造較少的小專案，這時NPV能提供更可靠的判斷。IRR則適合用來快速了解一項投資的報酬率水準，兩者可以互相搭配使用。</div></div>
+<div class="faq-item"><div class="faq-q">計算NPV時，折現率應該怎麼選擇？</div><div class="faq-a">折現率通常會採用投資人要求的最低報酬率，或是公司的加權平均資金成本（WACC）。折現率應該反映這項投資的風險程度：風險愈高的專案，通常需要用愈高的折現率來折現，因為投資人會要求更高的報酬來補償承擔的額外風險。折現率設定不準確，會直接影響NPV計算結果的可靠性。</div></div>
+<div class="faq-item"><div class="faq-q">NPV可以是負數嗎？負的NPV代表什麼意思？</div><div class="faq-a">可以，NPV完全有可能是負數。當計算出來的NPV小於零，代表這項投資預期產生的現金流，折現回今天後的價值，並不足以彌補期初投入的成本與要求的報酬率，也就是說這項投資無法達到原本設定的報酬門檻，理性的決策通常會建議放棄這項投資，除非有其他策略性考量。</div></div>
+<div class="faq-item"><div class="faq-q">為什麼NPV被認為比回收期法（payback period）等簡單指標更好？</div><div class="faq-a">回收期法只計算需要多久能回收投入成本，完全沒有考慮到時間對金錢價值的影響，也不管回收期之後專案還能不能繼續創造現金流。NPV則同時把時間價值與整個投資期間所有的現金流都納入計算，能更完整、更準確地反映一項投資真正創造的價值，因此在學術界與實務界都被視為評估資本支出決策的黃金標準。</div></div>
+
+  </section>
+
+  <div class="more-tools"><h3>相關工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/irr-calculator.html">內部報酬率(IRR)計算器</a>
+<a class="tool-pill" href="/tools/dcf-calculator.html">DCF 計算器</a>
+</div></div>
+  <div class="more-tools"><h3>相關術語</h3><div class="tools-grid"><a class="tool-pill" href="/glossary/irr.html">Irr</a>
+<a class="tool-pill" href="/glossary/discount-rate.html">Discount Rate</a></div></div>
+
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關術語</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}});};},2000);
+</script>
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Search..." autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header"><h3>Bookmarks</h3><button class="bm-clear" onclick="window._sgClearBm()">Clear All</button></div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>
+
+<!-- glossary-v1.0|zh-TW|npv|2026-09-03 -->

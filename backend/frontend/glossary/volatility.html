@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<link rel="preconnect" href="https://securepubads.g.doubleclick.net">
+<link rel="preconnect" href="https://pagead2.googlesyndication.com">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>波動率是什麼？定義、標準差公式與VIX恐慌指數完整解析</title>
+<meta name="description" content="波動率是衡量資產報酬分散程度的統計指標，本篇說明其標準差計算方式、年化方法，並比較波動率與Beta（貝他係數）在風險衡量上的差異，適合投資新手快速掌握核心觀念。">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://softglow-ai.com/glossary/volatility.html">
+<link rel="alternate" hreflang="zh-TW" href="https://softglow-ai.com/glossary/volatility.html">
+<link rel="alternate" hreflang="en" href="https://softglow-ai.com/glossary/en/volatility.html">
+<link rel="alternate" hreflang="de" href="https://softglow-ai.com/glossary/de/volatility.html">
+<link rel="alternate" hreflang="es" href="https://softglow-ai.com/glossary/es/volatility.html">
+<link rel="alternate" hreflang="fr" href="https://softglow-ai.com/glossary/fr/volatility.html">
+<link rel="alternate" hreflang="id" href="https://softglow-ai.com/glossary/id/volatility.html">
+<link rel="alternate" hreflang="ja" href="https://softglow-ai.com/glossary/ja/volatility.html">
+<link rel="alternate" hreflang="ko" href="https://softglow-ai.com/glossary/ko/volatility.html">
+<link rel="alternate" hreflang="pt" href="https://softglow-ai.com/glossary/pt/volatility.html">
+<link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/glossary/zh-CN/volatility.html">
+<link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/glossary/en/volatility.html">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "波動率高一定不好嗎？", "acceptedAnswer": {"@type": "Answer", "text": "不一定。波動率高只代表資產價格波動幅度較大，但這種波動可能是上漲、也可能是下跌，歷史上不少長期表現亮眼的股票，波動率其實也偏高。真正重要的是投資人的投資期限與風險承受度，能否負擔這種較大的短期波動——長期投資人通常比需要隨時變現的投資人，更能承受高波動帶來的震盪。"}}, {"@type": "Question", "name": "波動率通常怎麼計算？", "acceptedAnswer": {"@type": "Answer", "text": "波動率最常見的計算方式，是取資產某段歷史期間（例如每日或每月）報酬率的標準差：計算每期報酬與平均值的差距、將差距平方後取平均，再開根號。由於日或月的波動率數字不容易直接比較，通常會再乘上一年交易期間數的平方根（每日資料常用252的平方根）進行「年化」，方便跨資產比較。"}}, {"@type": "Question", "name": "VIX恐慌指數到底在衡量什麼？", "acceptedAnswer": {"@type": "Answer", "text": "CBOE波動率指數（VIX）衡量的是市場對S&P 500指數未來30天波動率的預期，其數值是根據S&P 500指數選擇權的價格反推而來，並非直接衡量過去的價格波動。由於選擇權價格會在投資人預期後市動盪加劇時上升，因此VIX往往在市場緊張、恐慌時大幅飆升，這也是它被稱為「恐慌指數」的原因。"}}, {"@type": "Question", "name": "波動率和Beta有什麼不同？", "acceptedAnswer": {"@type": "Answer", "text": "波動率衡量的是資產報酬率整體的分散程度，不論波動來自何處；Beta則只衡量其中與大盤連動的那一部分。一檔股票即使總波動率很高，Beta仍可能偏低，代表它的波動多半來自公司自身因素，而非隨大盤同步起伏。簡單來說，波動率回答「這項資產整體波動有多大」，Beta回答「這些波動有多少與大盤同步」。"}}, {"@type": "Question", "name": "波動率會隨時間改變嗎？", "acceptedAnswer": {"@type": "Answer", "text": "會。波動率並非資產固定不變的特性，在財報公布、重大經濟數據發布，或整體市場承受壓力時，波動率往往會明顯上升，等到不確定性消退後再逐漸回落。這種平靜期與劇烈波動期各自聚集出現的現象，有時被稱為「波動率叢聚」，也是分析師傾向使用近期資料、而非過舊資料來評估目前風險的原因之一。"}}]}</script>
+<link rel="stylesheet" href="/tools/tools.css">
+<link rel="stylesheet" href="/common/softglow-common.css">
+<meta name="sg-slug" content="volatility">
+<meta name="sg-type" content="glossary">
+<meta name="sg-lang" content="zh-TW">
+<link rel="stylesheet" href="/js/cookie-consent.css">
+</head>
+<body>
+<nav class="nav">
+<div class="nav-inner">
+  <a href="/" class="nav-logo">Soft<span>Glow</span></a>
+  <div class="nav-links">
+    <a href="/glossary/">術語百科</a>
+    <a href="/tools/">工具</a>
+    <a href="/blog/">教學文章</a>
+    <a href="/">首頁</a>
+  </div>
+  <div class="nav-actions">
+    <select class="lang-select" onchange="location.href=this.value"><option value="/glossary/volatility.html" selected>繁中</option><option value="/glossary/en/volatility.html">EN</option><option value="/glossary/ja/volatility.html">日本語</option><option value="/glossary/ko/volatility.html">한국어</option><option value="/glossary/de/volatility.html">DE</option><option value="/glossary/fr/volatility.html">FR</option><option value="/glossary/es/volatility.html">ES</option><option value="/glossary/pt/volatility.html">PT</option><option value="/glossary/id/volatility.html">ID</option><option value="/glossary/zh-CN/volatility.html">简中</option></select>
+    <button class="act-btn primary" onclick="sgOpenSearch()" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="act-btn primary" id="sgBmBtn" onclick="sgToggleBookmark()" ondblclick="sgToggleBmPanel()" title="Bookmark"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+  </div>
+</div>
+</nav>
+<div class="breadcrumb"><a href="/">首頁</a> &gt; <a href="/glossary/">術語百科</a> &gt; 波動率</div>
+<div class="container">
+<div class="layout">
+<div class="main">
+
+  <div class="calc-card">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+      <span style="background:#EBF5FF;color:#2563EB;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600">投資基礎</span>
+    </div>
+    <h1>波動率</h1>
+    <p class="calc-subtitle" style="font-size:16px;line-height:1.7;color:#2D3748;font-weight:500;margin-top:12px">波動率是衡量資產報酬率波動幅度的統計指標，以報酬率的標準差計算，數值越高代表價格波動越劇烈、不確定性也越高。</p>
+  </div>
+
+  <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+  <article class="article">
+    <h2>波動率</h2>
+    
+<svg viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg" style="max-width:100%;height:auto;margin:24px 0;display:block">
+  <rect width="600" height="280" rx="12" fill="#F7FAFC" stroke="#E2E8F0"/>
+  <text x="300" y="28" text-anchor="middle" fill="#2D3748" font-size="14" font-weight="600">Compound vs Simple Growth</text>
+  <!-- Axes -->
+  <line x1="60" y1="245" x2="560" y2="245" stroke="#CBD5E0" stroke-width="1.5"/>
+  <line x1="60" y1="45" x2="60" y2="245" stroke="#CBD5E0" stroke-width="1.5"/>
+  <text x="310" y="270" text-anchor="middle" fill="#718096" font-size="11">Time (Years)</text>
+  <text x="25" y="145" text-anchor="middle" fill="#718096" font-size="11" transform="rotate(-90,25,145)">Value</text>
+  <!-- Grid lines -->
+  <line x1="60" y1="145" x2="560" y2="145" stroke="#EDF2F7" stroke-dasharray="4"/>
+  <line x1="60" y1="95" x2="560" y2="95" stroke="#EDF2F7" stroke-dasharray="4"/>
+  <line x1="60" y1="195" x2="560" y2="195" stroke="#EDF2F7" stroke-dasharray="4"/>
+  <!-- Simple interest (straight line) -->
+  <line x1="60" y1="225" x2="540" y2="125" stroke="#718096" stroke-width="2.5" stroke-dasharray="6,4"/>
+  <!-- Compound interest (curve) -->
+  <path d="M60,225 Q200,210 300,175 Q400,130 460,80 Q500,55 540,40" fill="none" stroke="#2563EB" stroke-width="3"/>
+  <!-- Labels -->
+  <circle cx="430" cy="68" r="4" fill="#2563EB"/>
+  <text x="440" y="72" fill="#2563EB" font-size="12" font-weight="600">Compound</text>
+  <circle cx="430" cy="90" r="4" fill="#718096"/>
+  <text x="440" y="94" fill="#718096" font-size="12">Simple</text>
+  <!-- Year markers -->
+  <text x="60" y="258" fill="#718096" font-size="10">0</text>
+  <text x="180" y="258" fill="#718096" font-size="10">5</text>
+  <text x="300" y="258" fill="#718096" font-size="10">10</text>
+  <text x="420" y="258" fill="#718096" font-size="10">15</text>
+  <text x="535" y="258" fill="#718096" font-size="10">20</text>
+</svg>
+
+<p>波動率是一種統計指標，用來衡量某項資產的報酬率在特定期間內的分散程度。實務上最常見的計算方式，是取資產某段期間（例如每日或每月）報酬率的標準差：先計算每期報酬與平均報酬的差距，將差距平方後取平均，再開根號，得到的數字就代表這項資產的報酬率過去偏離平均值的幅度，不論價格是上漲還是下跌，只要波動劇烈，波動率就會偏高。
+
+波動率的解讀相對直覺：數值越高，代表報酬率越分散，資產價格上下擺動的幅度越大，通常被視為風險或不確定性較高的訊號；數值越低，則代表報酬率集中在平均值附近，價格走勢相對穩定、可預期。由於日或月的波動率數字不容易直接比較，市場上通常會將其「年化」，也就是把每日標準差乘上一年交易天數（一般以252天計）的平方根，方便投資人在同一個時間尺度上比較不同資產。
+
+值得留意的是，波動率是一種回顧過去、純統計性質的指標，它只描述報酬率過去分散的幅度，並不能預測未來價格的漲跌方向。一檔股票即使波動率很高，長期仍可能持續上漲；而波動率很低的資產，也可能緩慢但持續地虧損。此外，波動率同時涵蓋了個股自身的因素與整體市場的因素，單看一個波動率數字，並無法判斷風險真正的來源是什麼。</p>
+
+    <h2>計算範例</h2>
+    <p>假設「台科電子」（假設性公司）過去的每日報酬率標準差約為1.5%。若要換算成年化數字以便比較，通常會乘上252個交易日的平方根（約15.87），因此年化波動率約為1.5% x 15.87 ≈ 23.8%。相較之下，一檔較為穩健的公用事業類股，每日標準差可能僅0.5%，年化後約為7.9%，波動幅度明顯較小。
+
+以100萬元（本文以通用「$」符號表示）的部位換算，若以年化波動率概略代表一年報酬的「一個標準差」範圍，台科電子23.8%的波動率意味著一年下來，帳面價值可能因正常價格波動而上下震盪約±$238,100，也就是介於約$761,900至$1,238,100之間；而穩健類股7.9%的波動率，對應的合理波動範圍僅約±$79,400，明顯窄了許多。
+
+必須強調的是，這並不代表台科電子的價格一定會落在這個區間，也不代表它年底會上漲或下跌——波動率本身完全不涉及方向。它只是說明：若持有波動率較高的股票，投資人應預期過程中會經歷更劇烈的漲跌起伏，即使兩檔股票最終的報酬率相同，過程的震盪程度也可能天差地遠。</p>
+
+    <h2>實戰應用</h2>
+    <p>波動率是選擇權定價的核心變數之一，例如Black-Scholes模型就將標的資產的預期波動率當作重要輸入值，因為波動率越高，選擇權到期時大幅價內或價外的機率也越高，選擇權價格也會因此上升。這也是CBOE波動率指數（VIX，俗稱「恐慌指數」）的設計概念：VIX根據S&amp;P 500指數選擇權的價格反推市場對未來30天波動率的預期，VIX一旦飆升，通常代表市場預期後市將出現劇烈震盪。
+
+資產配置與投資組合經理人會運用波動率來決定部位大小與風險控管，常見做法是對波動率較高的標的配置較少資金、對波動率較低的標的配置較多資金，避免單一部位主導整體投資組合的波動。波動率也是夏普比率（Sharpe Ratio）等風險調整後報酬指標的關鍵組成，透過將超額報酬除以波動率，投資人可以比較不同投資標的「每承擔一單位風險，能換取多少報酬」。
+
+交易者也會觀察波動率來判斷進出場時機，因為異常低的波動率之後，往往容易出現劇烈的價格變動；而波動率急速飆升，則常伴隨恐慌性賣壓或大幅回檔的尾聲。企業財務與風險管理部門，同樣會追蹤匯率、原物料或利率的波動率，作為決定是否透過選擇權、期貨等衍生性商品進行避險的重要依據。</p>
+  </article>
+
+  <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+
+  <article class="article">
+    <h2>常見錯誤</h2>
+    <p>常見的誤解之一，是把波動率直接等同於「風險」。事實上波動率只是風險的其中一個面向，它衡量的是報酬率波動的幅度，並無法反映資產發生重大、永久性虧損的機率——而這往往才是投資人真正害怕的事。有些高波動率的資產最終完全回穩甚至創新高，反而是波動率偏低的資產，偶爾會出現波動率完全沒有預先示警的重大虧損。
+
+另一個常見錯誤，是認為波動率高就代表這是一項不好的投資。事實上波動率不分方向，一檔股票之所以波動率高，可能是因為它經常大幅上漲，也可能經常大幅下跌；長期來看，市場上報酬表現最亮眼的股票，往往也名列波動率最高的一群。若把「波動」直接與「爛股票」畫上等號，反而可能讓投資人錯過波動較大、但長期報酬同樣可觀的機會。
+
+許多人也常把波動率與Beta（貝他係數）混為一談。波動率衡量的是資產報酬率整體的分散程度，不論來源為何；Beta衡量的則只是報酬變動中，與大盤連動的那一部分。一檔股票即使總波動率很高，Beta卻可能很低——如果它的波動主要來自公司個別消息，而非隨大盤同步漲跌，代表這檔股票絕對風險高，但與大盤的關聯性卻不高。
+
+最後，許多投資人過度依賴歷史波動率來預測未來風險。當公司基本面、產業環境或總體經濟情勢出現變化時，波動率也可能隨之快速改變，一檔過去相對平穩的股票，可能在短時間內轉趨劇烈震盪，反之亦然。若只根據過去的波動率數字做判斷，而未考慮可能發生的變化，投資人很容易在風險真正轉變時措手不及。</p>
+
+    <h2>比較表</h2>
+    <table><thead><tr><th>比較項目</th><th>波動率</th><th>Beta（貝他係數）</th></tr></thead><tbody><tr><td>定義</td><td>衡量資產自身報酬率隨時間的分散程度</td><td>衡量資產報酬率相對於整體市場變動的敏感程度</td></tr><tr><td>計算方式</td><td>以報酬率的標準差計算，通常再年化</td><td>將資產報酬率對大盤指數（如S&amp;P 500）進行統計迴歸分析</td></tr><tr><td>衡量的風險類型</td><td>總風險，包含個股自身與市場整體因素</td><td>僅衡量系統性風險（與大盤連動的部分）</td></tr><tr><td>常見應用</td><td>選擇權定價、部位規模設定、衡量整體價格波動</td><td>評估個股相對大盤的走勢、投資組合分散配置</td></tr><tr><td>主要限制</td><td>無法顯示方向，也無法區分風險來源</td><td>完全忽略個股特有風險，且假設與大盤關係穩定</td></tr></tbody></table>
+  </article>
+
+  <div style="margin:20px 0;padding:16px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;text-align:center"><a href="https://lottery.softglow-ai.com/zh-TW/" target="_blank" rel="noopener" style="text-decoration:none;color:#fff"><div style="font-size:16px;font-weight:700;margin-bottom:4px">🎰 Global Lottery Results + Smart Number Picker</div><div style="font-size:12px;opacity:0.9">Powerball · Mega Millions · EuroMillions — 12 ways to pick numbers</div></a></div>
+
+  <section class="faq">
+    <h2>常見問題</h2>
+    <div class="faq-item"><div class="faq-q">波動率高一定不好嗎？</div><div class="faq-a">不一定。波動率高只代表資產價格波動幅度較大，但這種波動可能是上漲、也可能是下跌，歷史上不少長期表現亮眼的股票，波動率其實也偏高。真正重要的是投資人的投資期限與風險承受度，能否負擔這種較大的短期波動——長期投資人通常比需要隨時變現的投資人，更能承受高波動帶來的震盪。</div></div>
+<div class="faq-item"><div class="faq-q">波動率通常怎麼計算？</div><div class="faq-a">波動率最常見的計算方式，是取資產某段歷史期間（例如每日或每月）報酬率的標準差：計算每期報酬與平均值的差距、將差距平方後取平均，再開根號。由於日或月的波動率數字不容易直接比較，通常會再乘上一年交易期間數的平方根（每日資料常用252的平方根）進行「年化」，方便跨資產比較。</div></div>
+<div class="faq-item"><div class="faq-q">VIX恐慌指數到底在衡量什麼？</div><div class="faq-a">CBOE波動率指數（VIX）衡量的是市場對S&amp;P 500指數未來30天波動率的預期，其數值是根據S&amp;P 500指數選擇權的價格反推而來，並非直接衡量過去的價格波動。由於選擇權價格會在投資人預期後市動盪加劇時上升，因此VIX往往在市場緊張、恐慌時大幅飆升，這也是它被稱為「恐慌指數」的原因。</div></div>
+<div class="faq-item"><div class="faq-q">波動率和Beta有什麼不同？</div><div class="faq-a">波動率衡量的是資產報酬率整體的分散程度，不論波動來自何處；Beta則只衡量其中與大盤連動的那一部分。一檔股票即使總波動率很高，Beta仍可能偏低，代表它的波動多半來自公司自身因素，而非隨大盤同步起伏。簡單來說，波動率回答「這項資產整體波動有多大」，Beta回答「這些波動有多少與大盤同步」。</div></div>
+<div class="faq-item"><div class="faq-q">波動率會隨時間改變嗎？</div><div class="faq-a">會。波動率並非資產固定不變的特性，在財報公布、重大經濟數據發布，或整體市場承受壓力時，波動率往往會明顯上升，等到不確定性消退後再逐漸回落。這種平靜期與劇烈波動期各自聚集出現的現象，有時被稱為「波動率叢聚」，也是分析師傾向使用近期資料、而非過舊資料來評估目前風險的原因之一。</div></div>
+
+  </section>
+
+  <div class="more-tools"><h3>相關工具</h3><div class="tools-grid"><a class="tool-pill" href="/tools/standard-deviation.html">標準差計算機</a>
+</div></div>
+  <div class="more-tools"><h3>相關術語</h3><div class="tools-grid"><a class="tool-pill" href="/glossary/risk-tolerance.html">Risk Tolerance</a>
+<a class="tool-pill" href="/glossary/correlation.html">Correlation</a></div></div>
+
+  <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+
+</div>
+<aside class="sidebar">
+  <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div class="related-card"><h3>相關術語</h3></div>
+  <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
+</aside>
+</div></div>
+<footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
+<script>
+document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
+</script>
+<script>
+setTimeout(function(){var s=document.createElement('script');s.async=true;s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.crossOrigin='anonymous';document.head.appendChild(s);s.onload=function(){document.querySelectorAll('ins.adsbygoogle').forEach(function(ad){if(ad.offsetWidth>0){try{(adsbygoogle=window.adsbygoogle||[]).push({})}catch(e){}}});};},2000);
+</script>
+<div class="search-overlay" id="sgSearchOverlay">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="sgSearchInput" type="text" placeholder="Search..." autocomplete="off">
+    </div>
+    <div class="search-results" id="sgSearchResults"></div>
+  </div>
+</div>
+<div class="bm-panel" id="sgBmPanel">
+  <div class="bm-header"><h3>Bookmarks</h3><button class="bm-clear" onclick="window._sgClearBm()">Clear All</button></div>
+  <div class="bm-list" id="sgBmList"></div>
+</div>
+<script src="/common/softglow-common.js"></script>
+<script src="/js/softglow-cookies.js" defer></script>
+</body>
+</html>
+
+<!-- glossary-v1.0|zh-TW|volatility|2026-09-03 -->
