@@ -57,12 +57,12 @@
     <p class="calc-subtitle">Berechnen Sie geschätzte monatliche Kinderunterhaltszahlungen basierend auf dem Einkommen der Eltern</p>
     <div id="calcInputs"><div class="input-group">
   <label for="payor_gross_income">Bruttojahreseinkommen des Zahlers</label>
-  <div class="input-row"><span class="input-prefix">€</span><input type="number" id="payor_gross_income" placeholder="65000"  value="65000" step="1000"></div>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="payor_gross_income" placeholder="65000"  value="65000" step="1000"></div>
 </div>
   <small class="input-help">Geben Sie das jährliche Bruttoeinkommen des zahlungspflichtigen Elternteils ein</small>
 <div class="input-group">
   <label for="payee_gross_income">Bruttojahreseinkommen des Empfängers</label>
-  <div class="input-row"><span class="input-prefix">€</span><input type="number" id="payee_gross_income" placeholder="45000"  value="45000" step="1000"></div>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="payee_gross_income" placeholder="45000"  value="45000" step="1000"></div>
 </div>
   <small class="input-help">Geben Sie das jährliche Bruttoeinkommen des empfangenden Elternteils ein</small>
 <div class="input-group">
@@ -72,22 +72,22 @@
   <small class="input-help">Geben Sie die Gesamtzahl der Kinder ein, für die Unterhalt gezahlt wird</small>
 <div class="input-group">
   <label for="custody_arrangement">Sorgerechtsregelung</label>
-  <div class="input-row"><input type="text" id="custody_arrangement" value="none"></div>
+  <div class="input-row"><select id="custody_arrangement"><option value="none">Standard (kein Sorgerechtszuschlag)</option><option value="sole_payor">Alleiniges Sorgerecht beim Zahler</option><option value="sole_payee">Alleiniges Sorgerecht beim Empfänger</option><option value="shared">Gemeinsames Sorgerecht</option></select></div>
 </div>
   <small class="input-help">Wählen Sie die aktuelle Sorgerechtsregelung aus</small>
 <div class="input-group">
   <label for="state_selection">Bundesstaat (für Richtlinienprozentsätze)</label>
-  <div class="input-row"><input type="text" id="state_selection" value="federaldefault"></div>
+  <div class="input-row"><select id="state_selection"><option value="federaldefault">Bundesweiter Standardsatz (20%)</option><option value="california">Kalifornien</option><option value="texas">Texas</option><option value="florida">Florida</option><option value="newyork">New York</option><option value="illinois">Illinois</option></select></div>
 </div>
   <small class="input-help">Wählen Sie Ihren Bundesstaat aus, um die entsprechenden Richtlinienprozentsätze zu erhalten</small>
 <div class="input-group">
   <label for="annual_childcare_costs">Jährliche Kinderbetreuungskosten</label>
-  <div class="input-row"><span class="input-prefix">€</span><input type="number" id="annual_childcare_costs" placeholder="0"  value="0" step="500"></div>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="annual_childcare_costs" placeholder="0"  value="0" step="500"></div>
 </div>
   <small class="input-help">Geben Sie die jährlichen Kinderbetreuungskosten ein</small>
 <div class="input-group">
   <label for="health_insurance_costs">Jährliche Krankenversicherungskosten für Kinder</label>
-  <div class="input-row"><span class="input-prefix">€</span><input type="number" id="health_insurance_costs" placeholder="0"  value="0" step="500"></div>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="health_insurance_costs" placeholder="0"  value="0" step="500"></div>
 </div>
   <small class="input-help">Geben Sie die jährlichen Krankenversicherungskosten für die Kinder ein</small>
 <div class="input-group">
@@ -161,7 +161,7 @@ function calculate() {
   const overnightPercentage = parseFloat(document.getElementById('overnight_percentage').value) || 0;
 
   if (payorIncome <= 0 || payeeIncome <= 0 || numChildren <= 0) {
-    alert('Please enter valid positive amounts for income and number of children');
+    alert('Bitte geben Sie gültige positive Werte für Einkommen und Kinderzahl ein');
     return;
   }
 
@@ -210,15 +210,15 @@ function calculate() {
 
   const estimatedSupport = payorPortionBasic + payorPortionExpenses + overnightAdjustment;
 
-  document.getElementById('combined_parental_income').textContent = '€' + (combinedIncome).toLocaleString('de-DE', {maximumFractionDigits: 0});
+  document.getElementById('combined_parental_income').textContent = '$' + (combinedIncome).toLocaleString('de-DE', {maximumFractionDigits: 0});
   document.getElementById('payor_income_share').textContent = (payorShare * 100).toFixed(1);
   document.getElementById('guideline_percentage').textContent = (guidelinePercentage * 100).toFixed(0);
-  document.getElementById('basic_support_obligation').textContent = '€' + (basicObligation).toLocaleString('de-DE', {maximumFractionDigits: 2});
-  document.getElementById('payor_portion_basic').textContent = '€' + (payorPortionBasic).toLocaleString('de-DE', {maximumFractionDigits: 2});
-  document.getElementById('additional_expenses').textContent = '€' + (additionalExpensesMonthly).toLocaleString('de-DE', {maximumFractionDigits: 2});
-  document.getElementById('payor_portion_expenses').textContent = '€' + (payorPortionExpenses).toLocaleString('de-DE', {maximumFractionDigits: 2});
-  document.getElementById('custody_adjustment').textContent = '€' + (overnightAdjustment).toLocaleString('de-DE', {maximumFractionDigits: 2});
-  document.getElementById('estimated_monthly_support').textContent = '€' + (Math.max(0, estimatedSupport)).toLocaleString('de-DE', {maximumFractionDigits: 2});
+  document.getElementById('basic_support_obligation').textContent = '$' + (basicObligation).toLocaleString('de-DE', {maximumFractionDigits: 2});
+  document.getElementById('payor_portion_basic').textContent = '$' + (payorPortionBasic).toLocaleString('de-DE', {maximumFractionDigits: 2});
+  document.getElementById('additional_expenses').textContent = '$' + (additionalExpensesMonthly).toLocaleString('de-DE', {maximumFractionDigits: 2});
+  document.getElementById('payor_portion_expenses').textContent = '$' + (payorPortionExpenses).toLocaleString('de-DE', {maximumFractionDigits: 2});
+  document.getElementById('custody_adjustment').textContent = '$' + (overnightAdjustment).toLocaleString('de-DE', {maximumFractionDigits: 2});
+  document.getElementById('estimated_monthly_support').textContent = '$' + (Math.max(0, estimatedSupport)).toLocaleString('de-DE', {maximumFractionDigits: 2});
 
   document.getElementById('results').classList.add('show');
 }

@@ -62,9 +62,9 @@
   <small class="input-help">Geben Sie Ihren geschätzten jährlichen Gesamtumsatz in Euro ein</small>
 <div class="input-group">
   <label for="violation_tier">Schweregrad der Verletzung</label>
-  <div class="input-row"><input type="text" id="violation_tier" value="1"></div>
+  <div class="input-row"><select id="violation_tier"><option value="lower" selected>Niedrigere Kategorie — Art. 83 Abs. 4 (z. B. Art. 8, 11, 25-39, 42, 43: Dokumentation, DSFA, Sicherheitsmaßnahmen)</option><option value="higher">Höhere Kategorie — Art. 83 Abs. 5 (z. B. Art. 5, 6, 7, 9, 12-22, 44-49: Grundsätze, Rechtmäßigkeit, Betroffenenrechte)</option></select></div>
 </div>
-  <small class="input-help">Wählen Sie den Schweregrad der Datenschutzverletzung aus</small></div>
+  <small class="input-help">Die GDPR kennt zwei gesetzliche Bußgeldkategorien (Art. 83 Abs. 4 und Abs. 5), keine feinere Abstufung</small></div>
     <button class="btn-calc" onclick="calculate()">Berechnen</button>
     <div class="results" id="results">
       <div class="result-highlight"><span class="result-label">Maximales potenzielles Bußgeld</span><span class="result-value" id="maximum_fine">—</span></div>
@@ -117,33 +117,30 @@
 function calculate() {
   const revenueInput = document.getElementById('annual_revenue').value;
   const tierInput = document.getElementById('violation_tier').value;
-  
-  if (!revenueInput || revenueInput <= 0) {
-    alert('Please enter a valid annual revenue');
+
+  const revenue = parseFloat(revenueInput);
+  if (isNaN(revenue) || revenue <= 0) {
+    alert('Bitte geben Sie einen gültigen Jahresumsatz ein');
     return;
   }
-  
-  const revenue = parseFloat(revenueInput);
+
   let penaltyRate = 0;
   let explanation = '';
-  
-  if (tierInput === '1') {
+
+  if (tierInput === 'lower') {
     penaltyRate = 2;
-    explanation = 'Article 5 violations: principles violation';
-  } else if (tierInput === '2') {
-    penaltyRate = 3;
-    explanation = 'Article 6-9 violations: lawfulness, consent, data subject rights';
-  } else if (tierInput === '3') {
+    explanation = 'Art. 83 Abs. 4 — z. B. Art. 8, 11, 25-39, 42, 43 (Dokumentationspflichten, DSFA, Sicherheitsmaßnahmen)';
+  } else if (tierInput === 'higher') {
     penaltyRate = 4;
-    explanation = 'Article 32+ violations: security, privacy by design, data breach';
+    explanation = 'Art. 83 Abs. 5 — z. B. Art. 5, 6, 7, 9, 12-22, 44-49 (Grundsätze, Rechtmäßigkeit, Einwilligung, Betroffenenrechte)';
   }
-  
+
   const maxFine = revenue * (penaltyRate / 100);
-  
-  document.getElementById('maximum_fine').textContent = maxFine.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  document.getElementById('penalty_rate').textContent = penaltyRate;
+
+  document.getElementById('maximum_fine').textContent = '€' + maxFine.toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('penalty_rate').textContent = penaltyRate + '%';
   document.getElementById('severity_explanation').textContent = explanation;
-  
+
   document.getElementById('results').classList.add('show');
 }
 function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Kopiert!';setTimeout(function(){b.textContent='Teilen'},1500);}}
