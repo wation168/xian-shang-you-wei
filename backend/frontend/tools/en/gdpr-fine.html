@@ -62,7 +62,7 @@
   <small class="input-help">Enter your company's total annual revenue in euros</small>
 <div class="input-group">
   <label for="violation_tier">Violation Severity</label>
-  <div class="input-row"><input type="text" id="violation_tier" value="1"></div>
+  <div class="input-row"><select id="violation_tier"><option value="low" selected>Low — minor administrative oversight</option><option value="medium">Medium — inadequate safeguards / processing records</option><option value="high">High — unlawful processing, inadequate consent</option><option value="critical">Critical — systematic or intentional violation</option></select></div>
 </div>
   <small class="input-help">Select the severity level of the GDPR violation (low, medium, high, or critical)</small></div>
     <button class="btn-calc" onclick="calculate()">Calculate</button>
@@ -126,22 +126,25 @@ function calculate() {
   const revenue = parseFloat(revenueInput);
   let penaltyRate = 0;
   let explanation = '';
-  
-  if (tierInput === '1') {
+
+  if (tierInput === 'low') {
     penaltyRate = 2;
-    explanation = 'Article 5 violations: principles violation';
-  } else if (tierInput === '2') {
-    penaltyRate = 3;
-    explanation = 'Article 6-9 violations: lawfulness, consent, data subject rights';
-  } else if (tierInput === '3') {
+    explanation = 'Art. 83(4) tier — e.g. Articles 8, 11, 25-39, 42, 43 (records, DPIAs, security measures)';
+  } else if (tierInput === 'medium') {
+    penaltyRate = 2;
+    explanation = 'Art. 83(4) tier — e.g. Articles 8, 11, 25-39, 42, 43 (records, DPIAs, security measures)';
+  } else if (tierInput === 'high') {
     penaltyRate = 4;
-    explanation = 'Article 32+ violations: security, privacy by design, data breach';
+    explanation = 'Art. 83(5) tier — e.g. Articles 5, 6, 7, 9, 12-22, 44-49 (lawfulness, consent, data subject rights)';
+  } else if (tierInput === 'critical') {
+    penaltyRate = 4;
+    explanation = 'Art. 83(5) tier — e.g. Articles 5, 6, 7, 9, 12-22, 44-49 (lawfulness, consent, data subject rights)';
   }
-  
+
   const maxFine = revenue * (penaltyRate / 100);
-  
-  document.getElementById('maximum_fine').textContent = maxFine.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  document.getElementById('penalty_rate').textContent = penaltyRate;
+
+  document.getElementById('maximum_fine').textContent = '€' + maxFine.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('penalty_rate').textContent = penaltyRate + '%';
   document.getElementById('severity_explanation').textContent = explanation;
   
   document.getElementById('results').classList.add('show');

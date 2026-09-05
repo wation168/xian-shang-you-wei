@@ -21,7 +21,7 @@
 <link rel="alternate" hreflang="zh-CN" href="https://softglow-ai.com/tools/zh-CN/severance-calculator.html">
 <link rel="alternate" hreflang="x-default" href="https://softglow-ai.com/tools/en/severance-calculator.html">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Severance Pay Calculator", "url": "https://softglow-ai.com/tools/en/severance-calculator.html", "description": "Calculate your severance pay entitlements under Taiwan Labor Standards Act. Get accurate benefits based on salary, years of service, and termination reason.", "applicationCategory": "FinanceApplication", "operatingSystem": "Web", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "inLanguage": "en"}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is severance pay under Taiwan labor law?", "acceptedAnswer": {"@type": "Answer", "text": "Severance pay is compensation provided to employees when their employment is terminated. Under Taiwan's Labor Standards Act, it is calculated based on monthly salary and years of service, with different amounts depending on whether the employer or employee initiated the termination."}}, {"@type": "Question", "name": "How is the severance calculation different for employer layoffs versus resignation?", "acceptedAnswer": {"@type": "Answer", "text": "Employer layoffs typically provide the highest severance (up to 2 months per year for the first year, plus more for additional years). Contract expiration provides 1 month per year. Employee resignations generally do not qualify for severance unless the employer violated labor laws or the employee can prove constructive dismissal."}}, {"@type": "Question", "name": "Are annual bonuses included in severance pay calculations?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, annual bonuses and performance incentives are typically included in the calculation of average salary for severance purposes. This can increase your final severance amount, so it's important to include them when using this calculator."}}, {"@type": "Question", "name": "How many years of service do I need to qualify for severance?", "acceptedAnswer": {"@type": "Answer", "text": "Generally, you must have completed at least 3 months of continuous service to qualify for severance under Taiwan labor law. However, the amount increases with longer tenure, with different multipliers applied for each year of service."}}, {"@type": "Question", "name": "What should I do if my employer disputes my severance calculation?", "acceptedAnswer": {"@type": "Answer", "text": "If there is a dispute, consult with a labor attorney or contact Taiwan's labor authority for clarification. Keep all employment records, salary slips, bonus documentation, and termination notices. This calculator provides an estimate based on standard formulas but should be verified with official sources for accuracy."}}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What is severance pay under Taiwan labor law?", "acceptedAnswer": {"@type": "Answer", "text": "Severance pay (\"資遣費\") is compensation paid when an employer terminates an employee, or when an employee terminates the contract under LSA Article 14 due to an employer violation. Under Taiwan's Labor Standards Act and Labor Pension Act, it is calculated from your average wage and years of service, using either the new or old pension system."}}, {"@type": "Question", "name": "What is the difference between the new and old pension systems?", "acceptedAnswer": {"@type": "Answer", "text": "Under the new pension system (effective July 1, 2005), severance is 0.5 month of average wage per year of service, capped at a maximum of 6 months total. Under the old system, which only applies to workers who retained pre-2005 seniority, severance is 1 month of average wage per year of service with no cap. Employee resignations generally do not qualify for severance under either system."}}, {"@type": "Question", "name": "Are annual bonuses included in severance pay calculations?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Annual bonuses and performance incentives are averaged over 12 months and added to your monthly base salary to form your \"average wage,\" which is the base figure multiplied by your months of entitlement. This can increase your final severance amount, so it's important to include them when using this calculator."}}, {"@type": "Question", "name": "Is there a cap on how much severance I can receive?", "acceptedAnswer": {"@type": "Answer", "text": "Only under the new pension system, where total severance is capped at 6 months' average wage regardless of how many years you have worked. Workers who retained old-system seniority have no cap — severance keeps accruing at 1 month per year for their entire length of service."}}, {"@type": "Question", "name": "What should I do if my employer disputes my severance calculation?", "acceptedAnswer": {"@type": "Answer", "text": "If there is a dispute, consult with a labor attorney or contact Taiwan's Ministry of Labor for clarification. Keep all employment records, salary slips, bonus documentation, and termination notices. This calculator provides an estimate based on the statutory formulas but should be verified with official sources for accuracy."}}]}</script>
 <link rel="stylesheet" href="/tools/tools.css">
 <link rel="stylesheet" href="/common/softglow-common.css">
 <meta name="sg-slug" content="severance-calculator">
@@ -67,14 +67,19 @@
   <small class="input-help">Enter the total number of years you have worked for the company</small>
 <div class="input-group">
   <label for="terminationReason">Reason for Termination</label>
-  <div class="input-row"><input type="text" id="terminationReason" value="employer"></div>
+  <div class="input-row"><select id="terminationReason"><option value="employer" selected>Employer layoff (business downturn, losses, etc. — Labor Standards Act Art. 11)</option><option value="article14">Employee terminates under Art. 14 (employer violation — treated as a layoff)</option><option value="employee">Voluntary resignation (generally not eligible for severance)</option></select></div>
 </div>
-  <small class="input-help">Select whether termination is due to employer layoff, contract expiration, or employee resignation</small>
+  <small class="input-help">Select the reason for termination (e.g. company layoff, voluntary resignation)</small>
+<div class="input-group">
+  <label for="pensionSystem">Applicable Pension System</label>
+  <div class="input-row"><select id="pensionSystem"><option value="new" selected>New pension system (hired after July 1, 2005 — severance capped at 6 months' average wage)</option><option value="old">Old Labor Standards Act system (retained pre-July 2005 seniority — no cap on severance)</option></select></div>
+</div>
+  <small class="input-help">Most workers are covered by the new system; the old system applies only if you were hired before July 2005 and elected to keep your old-system seniority</small>
 <div class="input-group">
   <label for="bonusesAnnual">Annual Bonuses/Incentives</label>
   <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="bonusesAnnual" placeholder="0"  value="0" step="1000"></div>
 </div>
-  <small class="input-help">Enter any annual bonuses, performance incentives, or additional compensation received</small></div>
+  <small class="input-help">Enter the yearly total of bonuses or performance incentives — this is averaged into the "average wage" used in the calculation</small></div>
     <button class="btn-calc" onclick="calculate()">Calculate</button>
     <div class="results" id="results">
       <div class="result-highlight"><span class="result-label">Total Severance Pay</span><span class="result-value" id="severanceAmount">—</span></div>
@@ -90,16 +95,16 @@
   <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
 <div style="margin:20px 0;padding:16px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;text-align:center"><a href="https://lottery.softglow-ai.com/en/" target="_blank" rel="noopener" style="text-decoration:none;color:#fff"><div style="font-size:16px;font-weight:700;margin-bottom:4px">🎰 15 Global Lotteries + 12 Smart Number Pickers</div><div style="font-size:12px;opacity:0.9">Powerball · Mega Millions · EuroMillions — Zodiac, Birthday, Dream, AI & more</div></a></div>
 
-  <article class="article"><h2>Understanding Taiwan Severance Pay</h2><p>Under Taiwan's Labor Standards Act, employees who are terminated are entitled to severance compensation based on their length of service and the reason for termination. This calculator helps you determine your potential severance benefits according to current legal requirements. Severance pay is an important financial safety net designed to support workers during job transitions.</p><h2>Severance Payment Rules in Taiwan</h2><p>Taiwan's labor law provides different severance calculations depending on the circumstances of termination. For employer-initiated layoffs without just cause, workers typically receive two months of salary for the first year of service, four months for the second year, and continuing increments for additional years. When employment contracts expire and are not renewed, employees receive one month of salary per year of service. Employee resignations generally do not qualify for severance unless specific conditions are met.</p><h2>Calculating Your Severance Amount</h2><p>To calculate severance pay, start with your monthly base salary and multiply it by the appropriate factor based on years of service and termination type. Annual bonuses and incentives are often included in the calculation of average salary, which can increase your final severance amount. The calculator automatically applies the correct multipliers according to Taiwan Labor Standards Act provisions, ensuring accuracy in determining what you are legally entitled to receive.</p></article>
+  <article class="article"><h2>Understanding Taiwan Severance Pay</h2><p>Under Taiwan's Labor Standards Act (LSA), employees whose employment is terminated by the employer — or who terminate the contract themselves under LSA Article 14 due to an employer violation — are entitled to severance pay ("資遣費") based on their length of service and average wage. This calculator helps you estimate your severance benefits under the two pension systems that apply in Taiwan today. Severance pay is an important financial safety net designed to support workers during job transitions.</p><h2>Severance Payment Rules in Taiwan</h2><p>Since the Labor Pension Act took effect on July 1, 2005, most employees are covered by the "new system": severance is calculated at half a month's average wage for each full year of service, capped at a maximum of six months' average wage, no matter how many years the employee has worked. Employees who chose to retain their pre-2005 seniority under the old Labor Standards Act system instead receive one full month's average wage per year of service, with no cap. In both systems, an employee who resigns voluntarily is generally not entitled to severance pay.</p><h2>Calculating Your Severance Amount</h2><p>To calculate severance pay, the calculator first determines your "average wage" — your monthly base salary plus one-twelfth of your annual bonuses or incentives (a simplified version of the average-wage concept in LSA Article 2). It then multiplies that average wage by the number of months owed under your applicable pension system (new system: 0.5 month per year, capped at 6 months; old system: 1 month per year, uncapped). This mirrors the calculation Taiwan's labor authorities use to determine statutory severance entitlements.</p></article>
   <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
-  <article class="article"><h2>Factors Affecting Severance Compensation</h2><p>Several factors influence your final severance amount, including your monthly base salary, total years of continuous service, the official reason for employment termination, and any performance bonuses or incentive payments you received during employment. Employees with longer tenures generally receive higher severance packages. Additionally, the nature of termination—whether initiated by the employer, due to contract expiration, or by employee choice—significantly impacts the amount you are entitled to receive under Taiwan law.</p><h2>How to Use This Calculator</h2><p>Enter your monthly base salary in the first field, which should reflect your regular wages excluding bonuses. Input your total years of service with your current employer. Select the reason for termination from the dropdown menu to ensure the correct legal formula is applied. Include any annual bonuses or incentive payments you received, as these may be factored into severance calculations. The calculator will instantly display your estimated severance pay and break down how it was calculated.</p><h2>Important Considerations</h2><p>This calculator provides estimates based on standard Taiwan Labor Standards Act provisions and should not be considered legal advice. Actual severance amounts may vary depending on company policies, collective agreements, and specific circumstances of your employment. For precise calculations or disputes regarding severance pay, consult with a labor attorney or contact Taiwan's labor authority. Keep all employment records and correspondence to support your severance claim if needed.</p></article>
+  <article class="article"><h2>Factors Affecting Severance Compensation</h2><p>Several factors influence your final severance amount: your monthly base salary, total years of continuous service, the reason for termination, which pension system applies to you, and any performance bonuses or incentive payments you received during employment. Employees with longer tenures generally receive higher severance amounts, though the new pension system caps total severance at six months' average wage. The nature of termination — an employer-initiated layoff, an employee-initiated termination for cause under Article 14, or a voluntary resignation — significantly affects whether severance is owed at all.</p><h2>How to Use This Calculator</h2><p>Enter your monthly base salary in the first field, which should reflect your regular wages excluding bonuses. Input your total years of service with your current employer. Select the reason for termination, then select which pension system applies to you — most workers hired after July 2005 are on the new system. Include any annual bonuses or incentive payments you received, as these are averaged into your "average wage" for the calculation. The calculator will instantly display your estimated severance pay and break down how it was calculated.</p><h2>Important Considerations</h2><p>This calculator provides estimates based on the Labor Standards Act and the Labor Pension Act and should not be considered legal advice. Actual severance amounts may vary depending on company policies, collective agreements, and the specific circumstances of your employment or termination. For precise calculations or disputes regarding severance pay, consult with a labor attorney or contact Taiwan's Ministry of Labor. Keep all employment records and correspondence to support your severance claim if needed.</p></article>
   
   <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
-  <section class="faq"><h2>FAQ</h2><div class="faq-item"><div class="faq-q">What is severance pay under Taiwan labor law?</div><div class="faq-a">Severance pay is compensation provided to employees when their employment is terminated. Under Taiwan's Labor Standards Act, it is calculated based on monthly salary and years of service, with different amounts depending on whether the employer or employee initiated the termination.</div></div>
-  <div class="faq-item"><div class="faq-q">How is the severance calculation different for employer layoffs versus resignation?</div><div class="faq-a">Employer layoffs typically provide the highest severance (up to 2 months per year for the first year, plus more for additional years). Contract expiration provides 1 month per year. Employee resignations generally do not qualify for severance unless the employer violated labor laws or the employee can prove constructive dismissal.</div></div>
-  <div class="faq-item"><div class="faq-q">Are annual bonuses included in severance pay calculations?</div><div class="faq-a">Yes, annual bonuses and performance incentives are typically included in the calculation of average salary for severance purposes. This can increase your final severance amount, so it's important to include them when using this calculator.</div></div>
-  <div class="faq-item"><div class="faq-q">How many years of service do I need to qualify for severance?</div><div class="faq-a">Generally, you must have completed at least 3 months of continuous service to qualify for severance under Taiwan labor law. However, the amount increases with longer tenure, with different multipliers applied for each year of service.</div></div>
-  <div class="faq-item"><div class="faq-q">What should I do if my employer disputes my severance calculation?</div><div class="faq-a">If there is a dispute, consult with a labor attorney or contact Taiwan's labor authority for clarification. Keep all employment records, salary slips, bonus documentation, and termination notices. This calculator provides an estimate based on standard formulas but should be verified with official sources for accuracy.</div></div></section>
+  <section class="faq"><h2>FAQ</h2><div class="faq-item"><div class="faq-q">What is severance pay under Taiwan labor law?</div><div class="faq-a">Severance pay ("資遣費") is compensation paid when an employer terminates an employee, or when an employee terminates the contract under LSA Article 14 due to an employer violation. Under Taiwan's Labor Standards Act and Labor Pension Act, it is calculated from your average wage and years of service, using either the new or old pension system.</div></div>
+  <div class="faq-item"><div class="faq-q">What is the difference between the new and old pension systems?</div><div class="faq-a">Under the new pension system (effective July 1, 2005), severance is 0.5 month of average wage per year of service, capped at a maximum of 6 months total. Under the old system, which only applies to workers who retained pre-2005 seniority, severance is 1 month of average wage per year of service with no cap. Employee resignations generally do not qualify for severance under either system.</div></div>
+  <div class="faq-item"><div class="faq-q">Are annual bonuses included in severance pay calculations?</div><div class="faq-a">Yes. Annual bonuses and performance incentives are averaged over 12 months and added to your monthly base salary to form your "average wage," which is the base figure multiplied by your months of entitlement. This can increase your final severance amount, so it's important to include them when using this calculator.</div></div>
+  <div class="faq-item"><div class="faq-q">Is there a cap on how much severance I can receive?</div><div class="faq-a">Only under the new pension system, where total severance is capped at 6 months' average wage regardless of how many years you have worked. Workers who retained old-system seniority have no cap — severance keeps accruing at 1 month per year for their entire length of service.</div></div>
+  <div class="faq-item"><div class="faq-q">What should I do if my employer disputes my severance calculation?</div><div class="faq-a">If there is a dispute, consult with a labor attorney or contact Taiwan's Ministry of Labor for clarification. Keep all employment records, salary slips, bonus documentation, and termination notices. This calculator provides an estimate based on the statutory formulas but should be verified with official sources for accuracy.</div></div></section>
   <div class="more-tools"><h3>More Tools</h3><div class="tools-grid"><a class="tool-pill" href="/tools/en/alimony-calculator.html">Alimony Estimator</a>
       <a class="tool-pill" href="/tools/en/child-support.html">Child Support Estimator</a>
       <a class="tool-pill" href="/tools/en/court-fee.html">Court Filing Fee Calculator</a>
@@ -128,67 +133,46 @@ function calculate() {
   const monthlySalary = parseFloat(document.getElementById('monthlyBaseSalary').value);
   const yearsOfService = parseFloat(document.getElementById('yearsOfService').value);
   const terminationReason = document.getElementById('terminationReason').value;
-  const bonuses = parseFloat(document.getElementById('bonusesAnnual').value) || 0;
-  
-  if (!monthlySalary || monthlySalary <= 0) {
+  const pensionSystem = document.getElementById('pensionSystem').value;
+  const bonuses = parseFloat(document.getElementById('bonusesAnnual').value);
+
+  if (isNaN(monthlySalary) || monthlySalary <= 0) {
     alert('Please enter a valid monthly base salary');
     return;
   }
-  if (!yearsOfService || yearsOfService < 0) {
+  if (isNaN(yearsOfService) || yearsOfService < 0) {
     alert('Please enter valid years of service');
     return;
   }
-  
+  const bonusesSafe = isNaN(bonuses) ? 0 : bonuses;
+
+  // Average wage: monthly base salary + monthly-averaged year-end/performance bonus (a simplified version of the "average wage" concept in LSA Art. 2)
+  const averageWage = monthlySalary + (bonusesSafe / 12);
+
   let monthsOfCompensation = 0;
   let calculationDetails = '';
-  
-  if (terminationReason === 'employer') {
-    if (yearsOfService < 1) {
-      monthsOfCompensation = 0;
-      calculationDetails = 'Less than 1 year: No severance required';
-    } else if (yearsOfService >= 1 && yearsOfService < 5) {
-      monthsOfCompensation = yearsOfService;
-      calculationDetails = `Service: ${yearsOfService} years = ${monthsOfCompensation} months compensation`;
-    } else if (yearsOfService >= 5 && yearsOfService < 10) {
-      monthsOfCompensation = 5 + ((yearsOfService - 5) * 2);
-      calculationDetails = `Service: ${yearsOfService} years = 5 months + (${yearsOfService - 5} years × 2) = ${monthsOfCompensation} months`;
-    } else if (yearsOfService >= 10) {
-      monthsOfCompensation = 15 + ((yearsOfService - 10) * 1);
-      calculationDetails = `Service: ${yearsOfService} years = 15 months + (${yearsOfService - 10} years × 1) = ${monthsOfCompensation} months`;
-    }
-  } else if (terminationReason === 'economic') {
-    if (yearsOfService >= 1) {
-      monthsOfCompensation = Math.min(2, yearsOfService);
-      calculationDetails = `Economic termination: Maximum 2 months severance granted`;
-    } else {
-      monthsOfCompensation = 0;
-      calculationDetails = 'Less than 1 year: No severance for economic reasons';
-    }
-  } else if (terminationReason === 'employee') {
+
+  if (terminationReason === 'employee') {
     monthsOfCompensation = 0;
-    calculationDetails = 'Voluntary resignation: No severance obligation';
-  } else if (terminationReason === 'retirement') {
-    if (yearsOfService >= 1 && yearsOfService < 5) {
-      monthsOfCompensation = yearsOfService;
-      calculationDetails = `Service: ${yearsOfService} years = ${monthsOfCompensation} months retirement pay`;
-    } else if (yearsOfService >= 5 && yearsOfService < 10) {
-      monthsOfCompensation = 5 + ((yearsOfService - 5) * 2);
-      calculationDetails = `Service: ${yearsOfService} years = 5 months + (${yearsOfService - 5} years × 2) = ${monthsOfCompensation} months`;
-    } else if (yearsOfService >= 10) {
-      monthsOfCompensation = 15 + ((yearsOfService - 10) * 1);
-      calculationDetails = `Service: ${yearsOfService} years = 15 months + (${yearsOfService - 10} years × 1) = ${monthsOfCompensation} months`;
+    calculationDetails = 'Voluntary resignation: not eligible for severance in principle (severance is only payable for an employer-initiated layoff, or when the employee terminates under Article 14)';
+  } else {
+    // Employer layoff (LSA Art. 11/13) and employee termination under Art. 14 are both treated as a layoff and use the same severance formula
+    if (pensionSystem === 'new') {
+      const rawMonths = yearsOfService * 0.5;
+      monthsOfCompensation = Math.min(6, rawMonths);
+      calculationDetails = `New system: ${yearsOfService} years × 0.5 month per full year = ${rawMonths.toFixed(2)} months` + (rawMonths > 6 ? ', capped by law at 6 months, so 6 months is used' : '');
     } else {
-      monthsOfCompensation = 0;
-      calculationDetails = 'Less than 1 year: No retirement pay';
+      monthsOfCompensation = yearsOfService * 1;
+      calculationDetails = `Old system: ${yearsOfService} years × 1 month per full year = ${monthsOfCompensation.toFixed(2)} months (no cap under the old system)`;
     }
   }
-  
-  const totalSeverance = monthsOfCompensation * monthlySalary;
-  
-  document.getElementById('severanceAmount').textContent = totalSeverance.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-  document.getElementById('monthsCompensation').textContent = monthsOfCompensation.toFixed(2);
+
+  const totalSeverance = monthsOfCompensation * averageWage;
+
+  document.getElementById('severanceAmount').textContent = 'NT$' + totalSeverance.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+  document.getElementById('monthsCompensation').textContent = monthsOfCompensation.toFixed(2) + ' months (average wage NT$' + averageWage.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0}) + '/month)';
   document.getElementById('breakdownDetails').textContent = calculationDetails;
-  
+
   document.getElementById('results').classList.add('show');
 }
 function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='Copied!';setTimeout(function(){b.textContent='Share'},1500);}}
