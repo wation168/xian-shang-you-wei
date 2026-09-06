@@ -57,14 +57,14 @@
     <p class="calc-subtitle">精確計算您的數據分散度和變異性</p>
     <div id="calcInputs"><div class="input-group">
   <label for="dataInput">輸入數據值</label>
-  <div class="input-row"><input type="text" id="dataInput" placeholder="例如：10, 20, 30, 40, 50"  step="1"></div>
+  <div class="input-row"><input type="text" id="dataInput" placeholder="例如：10, 20, 30, 40, 50" value="10, 20, 30, 40, 50" step="1"></div>
 </div>
   <small class="input-help">輸入您的數值，以逗號分隔</small>
 <div class="input-group">
   <label for="samplePopulation">數據集類型</label>
-  <div class="input-row"><input type="text" id="samplePopulation" placeholder="樣本或母體"  value="sample" step="1"></div>
+  <div class="input-row"><select id="samplePopulation"><option value="sample" selected>樣本（除以 n-1）</option><option value="population">母體（除以 n）</option></select></div>
 </div>
-  <small class="input-help">選擇樣本或母體數據集</small></div>
+  <small class="input-help">若數據只是從大群體中抽取的一部分，選擇「樣本」；若數據代表整個群體，選擇「母體」</small></div>
     <button class="btn-calc" onclick="calculate()">計算</button>
     <div class="results" id="results">
       <div class="result-item"><span class="result-label">平均值（均值）</span><span class="result-value" id="meanResult">—</span></div>
@@ -96,6 +96,7 @@
 <p>在常態分佈下，68% 的數據落在平均值 ±1 個標準差內，95% 落在 ±2 個標準差內，99.7% 落在 ±3 個標準差內。例如台股年化報酬率平均 8%、標準差 20%，代表有 68% 的機率年報酬落在 -12% 到 +28% 之間。超過 ±3σ（-52% 到 +68%）的機率只有 0.3%。</p>
 <h2>Excel 快速計算</h2>
 <p>在 Excel 中，母體標準差用 =STDEV.P()，樣本標準差用 =STDEV.S()。多數情況下應該用樣本標準差（STDEV.S），因為我們通常是從部分資料推估整體。兩者差異在分母：母體用 N，樣本用 N-1。</p>
+<h2>實際計算範例</h2><p>以本頁預設的數據「10, 20, 30, 40, 50」為例：平均值 = (10+20+30+40+50) ÷ 5 = 30。各數值與平均值的差平方和 = (-20)²+(-10)²+0²+10²+20² = 400+100+0+100+400 = 1000。若選擇「樣本」（除以 n-1 = 4）：變異數 = 1000÷4 = 250，標準差 = √250 ≈ 15.81。若選擇「母體」（除以 n = 5）：變異數 = 1000÷5 = 200，標準差 = √200 ≈ 14.14。可以看到同一組數據，樣本與母體標準差的結果並不相同，這也是為什麼選對數據集類型很重要。</p>
 </article>
   
   <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
@@ -120,7 +121,7 @@
 </div>
 <aside class="sidebar">
   <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
-  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="related-card"><h3>相關工具</h3><a class="related-link" href="/tools/asset-allocation.html">資產配置計算器</a><a class="related-link" href="/tools/average-down.html">平均成本計算機</a><a class="related-link" href="/tools/bond-yield.html">債券殖利率計算機</a><a class="related-link" href="/tools/break-even.html">損益平衡點計算機</a><a class="related-link" href="/tools/break-even-units.html">損益平衡點單位計算機</a><a class="related-link" href="/tools/cagr.html">年複合成長率計算器</a></div>
   <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
     
   </div>
@@ -133,22 +134,22 @@ function calculate() {
   const samplePopulation = document.getElementById('samplePopulation').value.toLowerCase().trim();
   
   if (!dataInput) {
-    alert('Please enter at least one data value');
+    alert('請至少輸入一個數據值');
     return;
   }
-  
+
   const values = dataInput.split(',').map(v => {
     const num = parseFloat(v.trim());
     return isNaN(num) ? null : num;
   }).filter(v => v !== null);
-  
+
   if (values.length === 0) {
-    alert('No valid numbers found. Please enter numeric values separated by commas.');
+    alert('找不到有效數字，請輸入以逗號分隔的數值。');
     return;
   }
-  
-  if (values.length === 1) {
-    alert('Please enter at least 2 values to calculate standard deviation');
+
+  if (values.length === 1 && (samplePopulation === 'sample' || samplePopulation === 's')) {
+    alert('計算樣本標準差至少需要 2 個數值（母體標準差則至少需要 1 個）');
     return;
   }
   

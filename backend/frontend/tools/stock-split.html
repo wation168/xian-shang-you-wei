@@ -57,12 +57,12 @@
     <p class="calc-subtitle">計算公司股票分割後您的新股份數量</p>
     <div id="calcInputs"><div class="input-group">
   <label for="oldShares">原始股份數</label>
-  <div class="input-row"><input type="number" id="oldShares" placeholder="1000"  step="1"><span class="input-suffix">股</span></div>
+  <div class="input-row"><input type="number" id="oldShares" placeholder="1000" value="1000" step="1"><span class="input-suffix">股</span></div>
 </div>
   <small class="input-help">輸入您目前持有的股份總數</small>
 <div class="input-group">
   <label for="splitRatio">股票分割比例</label>
-  <div class="input-row"><input type="number" id="splitRatio" placeholder="2"  step="0.01"><span class="input-suffix">:1</span></div>
+  <div class="input-row"><input type="number" id="splitRatio" placeholder="2" value="2" step="0.01"><span class="input-suffix">:1</span></div>
 </div>
   <small class="input-help">輸入股票分割比例，例如2:1表示一股分成兩股</small></div>
     <button class="btn-calc" onclick="calculate()">計算</button>
@@ -106,7 +106,7 @@
 </div>
 <aside class="sidebar">
   <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
-  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="related-card"><h3>相關工具</h3><a class="related-link" href="/tools/atr-calculator.html">ATR計算器</a><a class="related-link" href="/tools/bollinger-bands.html">布林帶計算器</a><a class="related-link" href="/tools/candlestick-identifier.html">K線型態識別器</a><a class="related-link" href="/tools/fibonacci-retracement.html">斐波那契回調計算器</a><a class="related-link" href="/tools/forex-profit.html">外匯獲利計算器</a><a class="related-link" href="/tools/kelly-criterion.html">凱利公式計算器</a></div>
   <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
     
   </div>
@@ -119,15 +119,15 @@ function calculate() {
   const splitRatioInput = document.getElementById('splitRatio');
   
   if (!oldSharesInput.value || !splitRatioInput.value) {
-    alert('Please enter both the original shares and split ratio');
+    alert('請輸入原始股份數與分割比例');
     return;
   }
-  
+
   const oldShares = parseFloat(oldSharesInput.value);
   const splitRatio = parseFloat(splitRatioInput.value);
-  
-  if (oldShares <= 0 || splitRatio <= 0) {
-    alert('Please enter positive numbers only');
+
+  if (isNaN(oldShares) || isNaN(splitRatio) || oldShares <= 0 || splitRatio <= 0) {
+    alert('請只輸入正數');
     return;
   }
   

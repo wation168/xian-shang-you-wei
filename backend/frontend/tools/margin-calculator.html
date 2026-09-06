@@ -57,17 +57,17 @@
     <p class="calc-subtitle">計算槓桿交易頭寸的保證金要求</p>
     <div id="calcInputs"><div class="input-group">
   <label for="positionSize">頭寸規模</label>
-  <div class="input-row"><input type="number" id="positionSize" placeholder="1000"  step="0.01"><span class="input-suffix">單位</span></div>
+  <div class="input-row"><input type="number" id="positionSize" placeholder="1000" value="1000" step="0.01"><span class="input-suffix">單位</span></div>
 </div>
   <small class="input-help">輸入您要交易的合約或股票數量</small>
 <div class="input-group">
   <label for="assetPrice">資產價格</label>
-  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="assetPrice" placeholder="50.00"  step="0.01"></div>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="assetPrice" placeholder="50.00" value="50.00" step="0.01"></div>
 </div>
   <small class="input-help">輸入每單位資產的當前市場價格</small>
 <div class="input-group">
   <label for="leverageRatio">槓桿比例</label>
-  <div class="input-row"><input type="number" id="leverageRatio" placeholder="10"  step="0.1"><span class="input-suffix">:1</span></div>
+  <div class="input-row"><input type="number" id="leverageRatio" placeholder="10" value="10" step="0.1"><span class="input-suffix">:1</span></div>
 </div>
   <small class="input-help">輸入您使用的槓桿倍數（例如10:1）</small></div>
     <button class="btn-calc" onclick="calculate()">計算</button>
@@ -111,7 +111,7 @@
 </div>
 <aside class="sidebar">
   <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
-  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="related-card"><h3>相關工具</h3><a class="related-link" href="/tools/asset-allocation.html">資產配置計算器</a><a class="related-link" href="/tools/average-down.html">平均成本計算機</a><a class="related-link" href="/tools/bond-yield.html">債券殖利率計算機</a><a class="related-link" href="/tools/break-even.html">損益平衡點計算機</a><a class="related-link" href="/tools/break-even-units.html">損益平衡點單位計算機</a><a class="related-link" href="/tools/cagr.html">年複合成長率計算器</a></div>
   <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
     
   </div>
@@ -124,13 +124,13 @@ function calculate() {
   const assetPrice = parseFloat(document.getElementById('assetPrice').value);
   const leverageRatio = parseFloat(document.getElementById('leverageRatio').value);
 
-  if (!positionSize || !assetPrice || !leverageRatio) {
-    alert('Please fill in all fields with valid numbers');
+  if (isNaN(positionSize) || isNaN(assetPrice) || isNaN(leverageRatio)) {
+    alert('請為所有欄位輸入有效的數值');
     return;
   }
 
   if (positionSize <= 0 || assetPrice <= 0 || leverageRatio <= 0) {
-    alert('All values must be greater than zero');
+    alert('所有數值都必須大於零');
     return;
   }
 
@@ -138,9 +138,9 @@ function calculate() {
   const marginRequired = totalNotionalValue / leverageRatio;
   const effectiveLeverage = leverageRatio;
 
-  document.getElementById('marginRequired').textContent = marginRequired.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  document.getElementById('totalNotionalValue').textContent = totalNotionalValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  document.getElementById('leverageMultiplier').textContent = effectiveLeverage.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+  document.getElementById('marginRequired').textContent = '$' + marginRequired.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('totalNotionalValue').textContent = '$' + totalNotionalValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('leverageMultiplier').textContent = effectiveLeverage.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ':1';
 
   document.getElementById('results').classList.add('show');
 }

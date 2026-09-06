@@ -57,19 +57,24 @@
     <p class="calc-subtitle">計算技術分析的上、中、下軌道</p>
     <div id="calcInputs"><div class="input-group">
   <label for="smaValue">簡單移動平均線 (SMA)</label>
-  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="smaValue" placeholder="50.25"  step="0.01"></div>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="smaValue" placeholder="50.25" value="50.25" step="0.01"></div>
 </div>
   <small class="input-help">輸入計算期間的簡單移動平均值</small>
 <div class="input-group">
   <label for="standardDeviation">標準差 (σ)</label>
-  <div class="input-row"><input type="number" id="standardDeviation" placeholder="2.50"  step="0.01"></div>
+  <div class="input-row"><input type="number" id="standardDeviation" placeholder="2.50" value="2.50" step="0.01"></div>
 </div>
   <small class="input-help">輸入價格數據的標準差</small>
 <div class="input-group">
   <label for="numDeviation">標準差倍數</label>
   <div class="input-row"><input type="number" id="numDeviation" placeholder="2"  value="2" step="0.1"></div>
 </div>
-  <small class="input-help">輸入用於計算上下軌的標準差倍數，通常為2</small></div>
+  <small class="input-help">輸入用於計算上下軌的標準差倍數，通常為2</small>
+<div class="input-group">
+  <label for="currentPrice">目前股價</label>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="currentPrice" placeholder="53.00" value="53.00" step="0.01"></div>
+</div>
+  <small class="input-help">輸入目前股價，用於計算帶位置百分比（%B）</small></div>
     <button class="btn-calc" onclick="calculate()">計算</button>
     <div class="results" id="results">
       <div class="result-highlight"><span class="result-label">上軌</span><span class="result-value" id="upperBand">—</span></div>
@@ -87,7 +92,7 @@
   <div class="ad-container ad-container-lg" id="ad-calc"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
 <div style="margin:20px 0;padding:16px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;text-align:center"><a href="https://lottery.softglow-ai.com/zh-TW/" target="_blank" rel="noopener" style="text-decoration:none;color:#fff"><div style="font-size:16px;font-weight:700;margin-bottom:4px">🎰 15國彩票開獎＋12種智慧選號工具</div><div style="font-size:12px;opacity:0.9">威力彩・大樂透・Powerball・Mega Millions — 星座、生日、夢境、AI 等選號方式</div></a></div>
 
-  <article class="article"><h2>布林帶指標介紹</h2><p>布林帶（Bollinger Bands）是由美國技術分析師約翰·布林傑（John Bollinger）發明的技術指標。它由一條簡單移動平均線（中軌）以及位於其上下方的兩條標準差線組成。布林帶能幫助交易者識別超買、超賣現象和價格波動性。</p><h2>計算公式說明</h2><p>中軌 = N日簡單移動平均線（SMA）；上軌 = 中軌 + (標準差 × 倍數)；下軌 = 中軌 - (標準差 × 倍數)；帶寬 = 上軌 - 下軌。其中標準差倍數通常設為2，代表價格在正常波動範圍內的可能性約為95%。</p></article>
+  <article class="article"><h2>布林帶指標介紹</h2><p>布林帶（Bollinger Bands）是由美國技術分析師約翰·布林傑（John Bollinger）發明的技術指標。它由一條簡單移動平均線（中軌）以及位於其上下方的兩條標準差線組成。布林帶能幫助交易者識別超買、超賣現象和價格波動性。</p><h2>計算公式說明</h2><p>中軌 = N日簡單移動平均線（SMA）；上軌 = 中軌 + (標準差 × 倍數)；下軌 = 中軌 - (標準差 × 倍數)；帶寬 = 上軌 - 下軌；帶位置百分比（%B） = (目前股價 − 下軌) ÷ 帶寬 × 100%。其中標準差倍數通常設為2，代表價格在正常波動範圍內的可能性約為95%。</p><h2>實際計算範例</h2><p>假設20日SMA為$50.25、標準差為$2.50、倍數設為2，目前股價為$53.00。上軌 = 50.25 + 2×2.50 = $55.25；下軌 = 50.25 − 2×2.50 = $45.25；帶寬 = 55.25 − 45.25 = $10.00；帶位置百分比 = (53.00 − 45.25) ÷ 10.00 × 100% = 77.5%，表示目前股價偏向上軌、接近相對強勢的區域。這正是本工具預設數值所呈現的計算結果，您可以直接對照上方欄位查看。</p></article>
   <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
   <article class="article"><h2>使用場景與交易策略</h2><p>當價格觸及上軌時，可能表示市場超買；當價格觸及下軌時，可能表示市場超賣。帶寬變化反映市場波動性——帶寬擴大表示波動性增加，帶寬收縮表示波動性減少。交易者常利用布林帶突破、回歸均值等策略進行交易決策。</p><h2>帶位置百分比的應用</h2><p>帶位置百分比（%B）顯示價格在布林帶內的相對位置。當%B大於100%時，價格在上軌上方，表示強勢上升；當%B小於0%時，價格在下軌下方，表示強勢下跌。%B介於0-100%之間表示價格在正常波動範圍內。</p><h2>風險提示與注意事項</h2><p>布林帶僅為技術分析工具，不應單獨作為交易決策的唯一依據。應結合其他指標、市場基本面和風險管理策略使用。不同的市場環境和標準差倍數設定會影響布林帶的有效性，需根據個人交易風格進行調整。</p></article>
   <div class="blog-section"><h3>&#x1f4da; 延伸閱讀</h3><div class="blog-grid"><a class="blog-card" href="/blog/candlestick-patterns.html">Candlestick Patterns<span>→ Blog</span></a>
@@ -115,7 +120,7 @@
 </div>
 <aside class="sidebar">
   <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
-  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="related-card"><h3>相關工具</h3><a class="related-link" href="/tools/atr-calculator.html">ATR計算器</a><a class="related-link" href="/tools/candlestick-identifier.html">K線型態識別器</a><a class="related-link" href="/tools/fibonacci-retracement.html">斐波那契回調計算器</a><a class="related-link" href="/tools/forex-profit.html">外匯獲利計算器</a><a class="related-link" href="/tools/kelly-criterion.html">凱利公式計算器</a><a class="related-link" href="/tools/ma-crossover.html">移動平均線交叉計算器</a></div>
   <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
     
   </div>
@@ -127,31 +132,33 @@ function calculate() {
   const smaInput = document.getElementById('smaValue');
   const stdDevInput = document.getElementById('standardDeviation');
   const numDevInput = document.getElementById('numDeviation');
-  
-  if (!smaInput.value || !stdDevInput.value || !numDevInput.value) {
-    alert('Please fill in all fields');
+  const currentPriceInput = document.getElementById('currentPrice');
+
+  if (!smaInput.value || !stdDevInput.value || !numDevInput.value || !currentPriceInput.value) {
+    alert('請填寫所有欄位');
     return;
   }
-  
+
   const sma = parseFloat(smaInput.value);
   const stdDev = parseFloat(stdDevInput.value);
   const numDev = parseFloat(numDevInput.value);
-  
-  if (sma <= 0 || stdDev < 0 || numDev <= 0) {
-    alert('Please enter valid positive numbers');
+  const currentPrice = parseFloat(currentPriceInput.value);
+
+  if (isNaN(sma) || isNaN(stdDev) || isNaN(numDev) || isNaN(currentPrice) || sma <= 0 || stdDev < 0 || numDev <= 0 || currentPrice <= 0) {
+    alert('請輸入有效的正數');
     return;
   }
-  
+
   const upperBand = sma + (numDev * stdDev);
   const middleBand = sma;
   const lowerBand = sma - (numDev * stdDev);
   const bandWidth = upperBand - lowerBand;
-  
+
   let bandPercent = 0;
   if (bandWidth > 0) {
-    bandPercent = ((sma - lowerBand) / bandWidth) * 100;
+    bandPercent = ((currentPrice - lowerBand) / bandWidth) * 100;
   }
-  
+
   document.getElementById('upperBand').textContent = '$' + upperBand.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   document.getElementById('middleBand').textContent = '$' + middleBand.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   document.getElementById('lowerBand').textContent = '$' + lowerBand.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});

@@ -148,7 +148,7 @@
 </div>
 <aside class="sidebar">
   <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
-  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="related-card"><h3>相關工具</h3><a class="related-link" href="/tools/asset-allocation.html">資產配置計算器</a><a class="related-link" href="/tools/average-down.html">平均成本計算機</a><a class="related-link" href="/tools/bond-yield.html">債券殖利率計算機</a><a class="related-link" href="/tools/break-even.html">損益平衡點計算機</a><a class="related-link" href="/tools/break-even-units.html">損益平衡點單位計算機</a><a class="related-link" href="/tools/cagr.html">年複合成長率計算器</a></div>
   <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
     
   </div>
@@ -163,18 +163,26 @@ function calculate() {
   const y4 = parseFloat(document.getElementById('yearFour').value);
   const y5 = parseFloat(document.getElementById('yearFive').value);
   const discountRate = parseFloat(document.getElementById('discountRate').value) / 100;
-  const terminalGrowth = parseFloat(document.getElementById('terminalGrowth').value) / 100;
-  const terminalValueInput = parseFloat(document.getElementById('terminalValue').value);
-  const netDebt = parseFloat(document.getElementById('netDebt').value);
+  const terminalGrowthRaw = parseFloat(document.getElementById('terminalGrowth').value);
+  const terminalGrowth = terminalGrowthRaw / 100;
+  const terminalValueInputRaw = parseFloat(document.getElementById('terminalValue').value);
+  const terminalValueInput = isNaN(terminalValueInputRaw) ? 0 : terminalValueInputRaw;
+  const netDebtRaw = parseFloat(document.getElementById('netDebt').value);
+  const netDebt = isNaN(netDebtRaw) ? 0 : netDebtRaw;
   const shares = parseFloat(document.getElementById('sharesOutstanding').value) * 1000000;
 
-  if (isNaN(y1) || isNaN(y2) || isNaN(y3) || isNaN(y4) || isNaN(y5) || isNaN(discountRate) || isNaN(shares)) {
-    alert('Please fill in all required fields with valid numbers');
+  if (isNaN(y1) || isNaN(y2) || isNaN(y3) || isNaN(y4) || isNaN(y5) || isNaN(discountRate) || isNaN(shares) || shares <= 0) {
+    alert('請填寫所有必填欄位的有效數值');
     return;
   }
 
   if (discountRate <= 0 || discountRate > 1) {
-    alert('Discount rate must be between 0 and 100%');
+    alert('折現率必須介於0%至100%之間');
+    return;
+  }
+
+  if (terminalValueInput <= 0 && (isNaN(terminalGrowth) || terminalGrowth >= discountRate)) {
+    alert('終端增長率必須是有效數值且小於折現率（或請直接輸入終端價值）');
     return;
   }
 
@@ -198,11 +206,11 @@ function calculate() {
   const equityValue = enterpriseValue - netDebt;
   const valuePerShare = equityValue / shares;
 
-  document.getElementById('pvCashFlows').textContent = 'NT$' + pvCashFlows.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
-  document.getElementById('pvTerminal').textContent = 'NT$' + pvTerminal.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
-  document.getElementById('enterpriseValue').textContent = 'NT$' + enterpriseValue.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
-  document.getElementById('equityValue').textContent = 'NT$' + equityValue.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
-  document.getElementById('valuePerShare').textContent = 'NT$' + valuePerShare.toLocaleString('en-GB', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('pvCashFlows').textContent = 'NT$' + pvCashFlows.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('pvTerminal').textContent = 'NT$' + pvTerminal.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('enterpriseValue').textContent = 'NT$' + enterpriseValue.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('equityValue').textContent = 'NT$' + equityValue.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
+  document.getElementById('valuePerShare').textContent = 'NT$' + valuePerShare.toLocaleString('en-US', {maximumFractionDigits: 2, minimumFractionDigits: 2});
 
   document.getElementById('results').classList.add('show');
 }

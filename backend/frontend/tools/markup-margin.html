@@ -57,7 +57,7 @@
     <p class="calc-subtitle">即時轉換毛利率百分比和利潤率</p>
     <div id="calcInputs"><div class="input-group">
   <label for="markupInput">毛利率百分比</label>
-  <div class="input-row"><input type="number" id="markupInput" placeholder="50"  step="0.01"><span class="input-suffix">%</span></div>
+  <div class="input-row"><input type="number" id="markupInput" placeholder="50" value="50" step="0.01"><span class="input-suffix">%</span></div>
 </div>
   <small class="input-help">輸入商品的毛利率百分比，系統將自動計算對應的利潤率</small>
 <div class="input-group">
@@ -105,7 +105,7 @@
 </div>
 <aside class="sidebar">
   <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
-  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="related-card"><h3>相關工具</h3><a class="related-link" href="/tools/amazon-profit.html">Amazon 利潤計算器</a><a class="related-link" href="/tools/burn-rate-calculator.html">燒錢速率計算器</a><a class="related-link" href="/tools/business-exit-value.html">業務退出價值計算器</a><a class="related-link" href="/tools/cbm-calculator.html">CBM計算機</a><a class="related-link" href="/tools/churn-rate.html">客戶流失率計算機</a><a class="related-link" href="/tools/company-registration.html">公司設立成本計算機</a></div>
   <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
     
   </div>
@@ -124,13 +124,13 @@ function calculate() {
   const marginValue = parseFloat(marginInput.value);
 
   if (isNaN(markupValue) && isNaN(marginValue)) {
-    alert('Please enter either a markup percentage or a profit margin percentage');
+    alert('請輸入毛利率百分比或利潤率百分比其中一項');
     return;
   }
 
   if (!isNaN(markupValue) && isNaN(marginValue)) {
     if (markupValue < 0) {
-      alert('Markup percentage cannot be negative');
+      alert('毛利率百分比不可為負數');
       return;
     }
     const markup = markupValue / 100;
@@ -140,7 +140,7 @@ function calculate() {
     markupResult.textContent = markupValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   } else if (isNaN(markupValue) && !isNaN(marginValue)) {
     if (marginValue < 0 || marginValue >= 100) {
-      alert('Profit margin must be between 0 and 100 percent');
+      alert('利潤率必須介於0到100之間');
       return;
     }
     const margin = marginValue / 100;
@@ -149,7 +149,7 @@ function calculate() {
     marginResult.textContent = marginValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     markupResult.textContent = markupPercent.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   } else {
-    alert('Please enter only one value (either markup or margin)');
+    alert('請只輸入一個數值（毛利率或利潤率擇一）');
     return;
   }
 

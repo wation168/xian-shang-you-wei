@@ -131,7 +131,7 @@
 </div>
 <aside class="sidebar">
   <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
-  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="related-card"><h3>相關工具</h3><a class="related-link" href="/tools/cap-rate.html">資本化率計算器</a><a class="related-link" href="/tools/cash-on-cash.html">現金收益率計算器</a><a class="related-link" href="/tools/down-payment.html">頭期款計算機</a><a class="related-link" href="/tools/home-affordability.html">房屋購買力計算機</a><a class="related-link" href="/tools/home-equity.html">房屋淨值計算器</a><a class="related-link" href="/tools/home-mortgage.html">房屋貸款計算機</a></div>
   <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
     
   </div>
@@ -147,8 +147,13 @@ function calculate() {
   const newLoanTermYears = parseFloat(document.getElementById('newLoanTermYears').value);
   const refinancingCosts = parseFloat(document.getElementById('refinancingCosts').value);
 
-  if (!currentLoanAmount || !currentInterestRate || !currentLoanTermYears || !newInterestRate || !newLoanTermYears) {
-    alert('Please fill in all required fields.');
+  if (isNaN(currentLoanAmount) || isNaN(currentInterestRate) || isNaN(currentLoanTermYears) || isNaN(newInterestRate) || isNaN(newLoanTermYears) || isNaN(refinancingCosts)) {
+    alert('請填寫所有必填欄位的有效數值');
+    return;
+  }
+
+  if (currentLoanAmount <= 0 || currentInterestRate < 0 || currentLoanTermYears <= 0 || newInterestRate < 0 || newLoanTermYears <= 0 || refinancingCosts < 0) {
+    alert('金額與年數必須為正數，利率不可為負數');
     return;
   }
 
@@ -185,7 +190,7 @@ function calculate() {
   document.getElementById('newTotalInterest').textContent = 'NT$' + newTotalInterest.toLocaleString('zh-TW', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   document.getElementById('totalSavings').textContent = 'NT$' + totalSavings.toLocaleString('zh-TW', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   document.getElementById('netSavings').textContent = 'NT$' + netSavings.toLocaleString('zh-TW', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  document.getElementById('breakEvenMonths').textContent = breakEvenMonths > 0 ? breakEvenMonths.toString() : 'Never (negative savings)';
+  document.getElementById('breakEvenMonths').textContent = breakEvenMonths > 0 ? breakEvenMonths.toString() + ' 個月' : '無法回本（月付額未減少）';
 
   document.getElementById('results').classList.add('show');
 }

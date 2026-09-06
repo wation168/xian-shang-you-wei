@@ -57,32 +57,35 @@
     <p class="calc-subtitle">使用營收倍數法或折現現金流分析估算您的企業價值</p>
     <div id="calcInputs"><div class="input-group">
   <label for="annualRevenue">年度營收</label>
-  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="annualRevenue" placeholder="500000"  step="1"></div>
+  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="annualRevenue" placeholder="500000" value="500000" step="1"></div>
 </div>
   <small class="input-help">輸入企業過去12個月的總營收</small>
 <div class="input-group">
   <label for="valuationMethod">估值方法</label>
-  <div class="input-row"><input type="text" id="valuationMethod" value="multiple"></div>
+  <div class="input-row"><select id="valuationMethod">
+    <option value="multiple" selected>營收倍數法</option>
+    <option value="dcf">折現現金流法（DCF）</option>
+  </select></div>
 </div>
   <small class="input-help">選擇營收倍數法或折現現金流法進行估值</small>
 <div class="input-group">
   <label for="revenueMultiple">營收倍數（倍數法）</label>
-  <div class="input-row"><input type="number" id="revenueMultiple" placeholder="3.5"  step="0.1"><span class="input-suffix">倍</span></div>
+  <div class="input-row"><input type="number" id="revenueMultiple" placeholder="3.5" value="3.5" step="0.1"><span class="input-suffix">倍</span></div>
 </div>
   <small class="input-help">輸入適用於您行業的營收倍數</small>
 <div class="input-group">
   <label for="netIncome">年度淨收入（折現現金流法）</label>
-  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="netIncome" placeholder="100000"  step="1"></div>
+  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="netIncome" placeholder="100000" value="100000" step="1"></div>
 </div>
   <small class="input-help">輸入企業的年度稅後淨利潤</small>
 <div class="input-group">
   <label for="growthRate">預期年增長率</label>
-  <div class="input-row"><input type="number" id="growthRate" placeholder="10"  step="0.1"><span class="input-suffix">%</span></div>
+  <div class="input-row"><input type="number" id="growthRate" placeholder="15" value="15" step="0.1"><span class="input-suffix">%</span></div>
 </div>
   <small class="input-help">輸入企業預期的年均增長百分比</small>
 <div class="input-group">
   <label for="discountRate">折現率（加權平均資本成本）</label>
-  <div class="input-row"><input type="number" id="discountRate" placeholder="10"  step="0.1"><span class="input-suffix">%</span></div>
+  <div class="input-row"><input type="number" id="discountRate" placeholder="10" value="10" step="0.1"><span class="input-suffix">%</span></div>
 </div>
   <small class="input-help">輸入公司的加權平均資本成本（通常為8-12%）</small>
 <div class="input-group">
@@ -98,7 +101,7 @@
     <button class="btn-calc" onclick="calculate()">計算</button>
     <div class="results" id="results">
       <div class="result-highlight"><span class="result-label">估計企業估值</span><span class="result-value" id="businessValuation">—</span></div>
-<div class="result-item"><span class="result-label">使用的估值方法</span><span class="result-value" id="valuationMethod">—</span></div>
+<div class="result-item"><span class="result-label">使用的估值方法</span><span class="result-value" id="valuationMethodResult">—</span></div>
 <div class="result-item"><span class="result-label">折現現金流分量</span><span class="result-value" id="dcfBreakdown">—</span></div>
       <div class="result-interpret show" id="resultInterpret"><strong>這代表什麼？</strong> 估計企業估值顯示您企業的預計價值。選定的估值方法決定了計算方式。折現現金流分量詳細說明了未來現金流的現值及終端價值如何組成總估值。</div>
       <div class="action-bar">
@@ -112,7 +115,7 @@
 
   <article class="article"><h2>什麼是企業估值？</h2><p>企業估值是確定一家公司價值的過程。這對於投資決策、融資、併購和稅務規劃至關重要。準確的估值能幫助企業主了解其企業的真實價值，並在商業交易中做出明智決策。</p><h2>營收倍數法</h2><p>營收倍數法是一種相對簡單的估值方法，通過將年度營收乘以行業適用的倍數來計算企業價值。這個倍數通常根據行業類型、企業規模和市場狀況而定。例如，科技公司的倍數通常為5-10倍，而傳統零售業可能為0.5-2倍。此方法適合快速估值和與同行業企業比較。</p><h2>折現現金流法（DCF）</h2><p>折現現金流法是一種更詳細的估值方法，基於企業未來產生的現金流。該方法考慮預期的增長率、折現率和終端增長率，計算所有未來現金流的現值。DCF方法更加全面，能反映企業長期的盈利能力，適合成熟企業和有明確增長預測的企業。</p></article>
   <div class="ad-container" id="ad-mid"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins></div>
-  <article class="article"><h2>關鍵估值因素</h2><p>折現率（WACC）反映了投資的風險和機會成本，通常在8-15%之間。年增長率應基於歷史表現和市場前景。終端增長率通常設定為2-3%，代表企業長期穩定增長的預期。這些參數的準確設定對估值結果有重大影響。</p><h2>如何選擇估值方法</h2><p>對於初創企業或高增長企業，折現現金流法更為合適，因為它能充分考慮未來的增長潛力。對於成熟企業和可比公司較多的行業，營收倍數法則更加實用。許多專業人士會使用兩種方法進行交叉驗證，以獲得更可靠的估值結果。</p><h2>使用估值結果</h2><p>估值結果應作為決策的參考，而非絕對值。建議定期重新評估企業價值，特別是在重大業務變化、市場條件變化或融資需求時。與財務顧問或估值專家合作可以確保估值的準確性和專業性。</p></article>
+  <article class="article"><h2>關鍵估值因素</h2><p>折現率（WACC）反映了投資的風險和機會成本，通常在8-15%之間。年增長率應基於歷史表現和市場前景。終端增長率通常設定為2-3%，代表企業長期穩定增長的預期。這些參數的準確設定對估值結果有重大影響。</p><h2>如何選擇估值方法</h2><p>對於初創企業或高增長企業，折現現金流法更為合適，因為它能充分考慮未來的增長潛力。對於成熟企業和可比公司較多的行業，營收倍數法則更加實用。許多專業人士會使用兩種方法進行交叉驗證，以獲得更可靠的估值結果。</p><h2>使用估值結果</h2><p>估值結果應作為決策的參考，而非絕對值。建議定期重新評估企業價值，特別是在重大業務變化、市場條件變化或融資需求時。與財務顧問或估值專家合作可以確保估值的準確性和專業性。</p><h2>實際計算範例</h2><p>營收倍數法：年度營收NT$500,000，適用倍數3.5倍，估值 = 500,000 × 3.5 = NT$1,750,000。折現現金流法：年度淨收入NT$100,000、預期年增長率15%、折現率10%、預測5年、終端增長率2%，計算出未來5年折現現金流總和約為NT$572,458，加上折現後終端價值約NT$1,592,341，總估值約為NT$2,164,798。這正是本工具預設數值所呈現的計算結果，您可以直接對照上方欄位查看（切換估值方法即可看到對應結果）。</p></article>
   
   <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
   <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">營收倍數應該如何選擇？</div><div class="faq-a">營收倍數因行業而異。科技和軟體公司通常為5-10倍，製造業為1-3倍，零售業為0.5-2倍。您可以研究同行業上市公司的倍數作為參考基準。</div></div>
@@ -136,7 +139,7 @@
 </div>
 <aside class="sidebar">
   <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
-  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="related-card"><h3>相關工具</h3><a class="related-link" href="/tools/amazon-profit.html">Amazon 利潤計算器</a><a class="related-link" href="/tools/burn-rate-calculator.html">燒錢速率計算器</a><a class="related-link" href="/tools/business-exit-value.html">業務退出價值計算器</a><a class="related-link" href="/tools/cbm-calculator.html">CBM計算機</a><a class="related-link" href="/tools/churn-rate.html">客戶流失率計算機</a><a class="related-link" href="/tools/company-registration.html">公司設立成本計算機</a></div>
   <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
     
   </div>
@@ -154,8 +157,12 @@ function calculate() {
   const projectionYears = parseInt(document.getElementById('projectionYears').value);
   const terminalGrowth = parseFloat(document.getElementById('terminalGrowth').value) / 100;
 
+  function fmtNT(v) {
+    return 'NT$' + Math.round(v).toLocaleString('en-US');
+  }
+
   if (!annualRevenue || annualRevenue <= 0) {
-    alert('Please enter a valid annual revenue');
+    alert('請輸入有效的年度營收');
     return;
   }
 
@@ -165,15 +172,23 @@ function calculate() {
 
   if (method === 'multiple') {
     if (!revenueMultiple || revenueMultiple <= 0) {
-      alert('Please enter a valid revenue multiple for this method');
+      alert('請輸入此方法所需的有效營收倍數');
       return;
     }
     valuation = annualRevenue * revenueMultiple;
-    methodLabel = 'Revenue Multiple Method';
-    breakdown = 'Revenue: ' + annualRevenue.toLocaleString('en-US', {style: 'currency', currency: 'USD'}) + ' × Multiple: ' + revenueMultiple.toFixed(1) + 'x';
+    methodLabel = '營收倍數法';
+    breakdown = '營收：' + fmtNT(annualRevenue) + ' × 倍數：' + revenueMultiple.toFixed(1) + '倍';
   } else if (method === 'dcf') {
     if (!netIncome || netIncome <= 0) {
-      alert('Please enter valid net income for DCF calculation');
+      alert('請輸入折現現金流法所需的有效淨收入');
+      return;
+    }
+    if (isNaN(growthRate) || isNaN(discountRate) || isNaN(projectionYears) || isNaN(terminalGrowth) || projectionYears <= 0 || discountRate <= 0) {
+      alert('請輸入有效的增長率、折現率、預測年數與終端增長率');
+      return;
+    }
+    if (discountRate <= terminalGrowth) {
+      alert('折現率必須大於終端增長率，否則終端價值無法計算');
       return;
     }
 
@@ -184,19 +199,19 @@ function calculate() {
       const projectedCashFlow = netIncome * Math.pow(1 + growthRate, year);
       const discountedCashFlow = projectedCashFlow / Math.pow(1 + discountRate, year);
       presentValue += discountedCashFlow;
-      yearDetails.push('Year ' + year + ': ' + discountedCashFlow.toLocaleString('en-US', {style: 'currency', currency: 'USD', maximumFractionDigits: 0}));
+      yearDetails.push('第' + year + '年：' + fmtNT(discountedCashFlow));
     }
 
     const terminalValue = (netIncome * Math.pow(1 + growthRate, projectionYears) * (1 + terminalGrowth)) / (discountRate - terminalGrowth);
     const discountedTerminalValue = terminalValue / Math.pow(1 + discountRate, projectionYears);
 
     valuation = presentValue + discountedTerminalValue;
-    methodLabel = 'Discounted Cash Flow (DCF) Method';
-    breakdown = yearDetails.slice(0, 3).join(' | ') + (projectionYears > 3 ? '...' : '') + ' | Terminal Value: ' + discountedTerminalValue.toLocaleString('en-US', {style: 'currency', currency: 'USD', maximumFractionDigits: 0});
+    methodLabel = '折現現金流法（DCF）';
+    breakdown = yearDetails.slice(0, 3).join(' | ') + (projectionYears > 3 ? '…' : '') + ' | 終端價值：' + fmtNT(discountedTerminalValue);
   }
 
-  document.getElementById('businessValuation').textContent = valuation.toLocaleString('en-US', {style: 'currency', currency: 'USD', maximumFractionDigits: 0});
-  document.getElementById('valuationMethod').textContent = methodLabel;
+  document.getElementById('businessValuation').textContent = fmtNT(valuation);
+  document.getElementById('valuationMethodResult').textContent = methodLabel;
   document.getElementById('dcfBreakdown').textContent = breakdown;
 
   document.getElementById('results').classList.add('show');

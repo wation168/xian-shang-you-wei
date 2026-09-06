@@ -57,12 +57,12 @@
     <p class="calc-subtitle">計算您的出租物業投資年度回報率</p>
     <div id="calcInputs"><div class="input-group">
   <label for="annualRent">年度租賃收入</label>
-  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="annualRent" placeholder="24000"  step="100"></div>
+  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="annualRent" placeholder="24000" value="24000" step="100"></div>
 </div>
   <small class="input-help">輸入全年從租賃物業獲得的總收入</small>
 <div class="input-group">
   <label for="propertyPrice">物業價格或價值</label>
-  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="propertyPrice" placeholder="300000"  step="1000"></div>
+  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="propertyPrice" placeholder="300000" value="300000" step="1000"></div>
 </div>
   <small class="input-help">輸入物業的當前市場價值或購買價格</small></div>
     <button class="btn-calc" onclick="calculate()">計算</button>
@@ -105,7 +105,7 @@
 </div>
 <aside class="sidebar">
   <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
-  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="related-card"><h3>相關工具</h3><a class="related-link" href="/tools/cap-rate.html">資本化率計算器</a><a class="related-link" href="/tools/cash-on-cash.html">現金收益率計算器</a><a class="related-link" href="/tools/down-payment.html">頭期款計算機</a><a class="related-link" href="/tools/home-affordability.html">房屋購買力計算機</a><a class="related-link" href="/tools/home-equity.html">房屋淨值計算器</a><a class="related-link" href="/tools/home-mortgage.html">房屋貸款計算機</a></div>
   <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
     
   </div>
@@ -124,20 +124,25 @@ function calculate() {
   const propertyPrice = parseFloat(propertyPriceInput.value);
 
   if (!annualRentInput.value || !propertyPriceInput.value) {
-    alert('Please enter both annual rental income and property price');
+    alert('請輸入年度租賃收入與物業價格兩個欄位的數值');
+    return;
+  }
+
+  if (isNaN(annualRent) || isNaN(propertyPrice)) {
+    alert('請輸入有效的數值');
     return;
   }
 
   if (annualRent <= 0 || propertyPrice <= 0) {
-    alert('Please enter positive values for both fields');
+    alert('兩個欄位都必須輸入大於零的數值');
     return;
   }
 
   const yield_percentage = (annualRent / propertyPrice) * 100;
   const monthlyRent = annualRent / 12;
 
-  yieldResultDiv.textContent = yield_percentage.toFixed(2);
-  monthlyRentDiv.textContent = monthlyRent.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  yieldResultDiv.textContent = yield_percentage.toFixed(2) + '%';
+  monthlyRentDiv.textContent = 'NT$' + monthlyRent.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   resultsContainer.classList.add('show');
 }

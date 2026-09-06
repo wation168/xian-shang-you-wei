@@ -140,7 +140,7 @@
 </div>
 <aside class="sidebar">
   <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
-  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="related-card"><h3>相關工具</h3><a class="related-link" href="/tools/401k-contribution.html">401k 退休金供款計算機</a><a class="related-link" href="/tools/annuity-calculator.html">年金計算器</a><a class="related-link" href="/tools/annuity-income.html">年金收入計算機</a><a class="related-link" href="/tools/catch-up-contribution.html">補繳貢獻計算機</a><a class="related-link" href="/tools/coast-fire-calc.html">Coast FIRE 計算機</a><a class="related-link" href="/tools/fire-number-calc.html">財務自由提前退休目標計算機</a></div>
   <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
     
   </div>
@@ -158,8 +158,8 @@ function calculate() {
   const inflationRate = parseFloat(document.getElementById('inflationRate').value) / 100;
   const currentAge = parseFloat(document.getElementById('currentAge').value);
 
-  if (!pensionMonthly || !lumpSumAmount || !lifeExpectancy || !currentAge) {
-    alert('Please fill in all required fields');
+  if (isNaN(pensionMonthly) || isNaN(lumpSumAmount) || isNaN(lifeExpectancy) || isNaN(currentAge) || pensionMonthly <= 0 || lumpSumAmount <= 0 || lifeExpectancy <= 0 || currentAge <= 0) {
+    alert('請填寫所有必填欄位，且金額與年數需為正數');
     return;
   }
 
@@ -180,23 +180,18 @@ function calculate() {
     }
   }
 
-  const lumpSumAfterTax = lumpSumAmount * (1 - taxRate * 0.25);
+  /* 稅款需以使用者輸入的完整邊際稅率計算，不能再乘以額外的0.25（原本會讓實際扣稅只剩1/4，例如20%稅率被誤算成5%） */
+  const lumpSumAfterTax = lumpSumAmount * (1 - taxRate);
   let lumpSumFinal = lumpSumAfterTax;
-  let lumpSumNPV = lumpSumAfterTax;
 
   for (let year = 1; year <= lifeExpectancy; year++) {
     lumpSumFinal = lumpSumFinal * (1 + investmentReturn);
   }
 
-  for (let year = 1; year <= lifeExpectancy; year++) {
-    const annualValue = lumpSumAfterTax * Math.pow(1 + investmentReturn, year);
-    const discountedValue = annualValue / Math.pow(1 + discountRate, year);
-    if (year === 1) {
-      lumpSumNPV = lumpSumAfterTax + discountedValue;
-    } else {
-      lumpSumNPV += discountedValue;
-    }
-  }
+  /* 一次性提取是單筆金額，其現值應為「投資成長至退休期滿的終值，再依折扣率折現回今天」的單一數值，
+     不能像年金一樣逐年加總（原本的迴圈把同一筆錢在每一年的終值都當成獨立現金流疊加，
+     導致現值被放大了將近lifeExpectancy倍，例如30年期會把現值誇大近30倍） */
+  const lumpSumNPV = lumpSumFinal / Math.pow(1 + discountRate, lifeExpectancy);
 
   const difference = pensionNPV - lumpSumNPV;
   const breakEvenAge = currentAge + (breakEvenMonths / 12);
@@ -204,18 +199,18 @@ function calculate() {
   let recommendation = '';
 
   if (difference > 0) {
-    recommendation = 'Pension is better: Higher NPV by NT$' + Math.abs(difference).toLocaleString('en-GB', {maximumFractionDigits: 0});
+    recommendation = '年金較有利：現值高出NT$' + Math.abs(difference).toLocaleString('en-US', {maximumFractionDigits: 0});
   } else {
-    recommendation = 'Lump Sum is better: Higher NPV by NT$' + Math.abs(difference).toLocaleString('en-GB', {maximumFractionDigits: 0});
+    recommendation = '一次性提取較有利：現值高出NT$' + Math.abs(difference).toLocaleString('en-US', {maximumFractionDigits: 0});
   }
 
-  document.getElementById('pensionNPV').textContent = 'NT$' + pensionNPV.toLocaleString('en-GB', {maximumFractionDigits: 0});
-  document.getElementById('lumpSumNPV').textContent = 'NT$' + lumpSumNPV.toLocaleString('en-GB', {maximumFractionDigits: 0});
-  document.getElementById('difference').textContent = 'NT$' + difference.toLocaleString('en-GB', {maximumFractionDigits: 0});
+  document.getElementById('pensionNPV').textContent = 'NT$' + pensionNPV.toLocaleString('en-US', {maximumFractionDigits: 0});
+  document.getElementById('lumpSumNPV').textContent = 'NT$' + lumpSumNPV.toLocaleString('en-US', {maximumFractionDigits: 0});
+  document.getElementById('difference').textContent = 'NT$' + difference.toLocaleString('en-US', {maximumFractionDigits: 0});
   document.getElementById('recommendation').textContent = recommendation;
-  document.getElementById('pensionTotal').textContent = 'NT$' + pensionTotal.toLocaleString('en-GB', {maximumFractionDigits: 0});
-  document.getElementById('lumpSumFinal').textContent = 'NT$' + lumpSumFinal.toLocaleString('en-GB', {maximumFractionDigits: 0});
-  document.getElementById('breakeven').textContent = breakEvenAge.toLocaleString('en-GB', {maximumFractionDigits: 1});
+  document.getElementById('pensionTotal').textContent = 'NT$' + pensionTotal.toLocaleString('en-US', {maximumFractionDigits: 0});
+  document.getElementById('lumpSumFinal').textContent = 'NT$' + lumpSumFinal.toLocaleString('en-US', {maximumFractionDigits: 0});
+  document.getElementById('breakeven').textContent = breakEvenAge.toLocaleString('en-US', {maximumFractionDigits: 1});
 
   document.getElementById('results').classList.add('show');
 }

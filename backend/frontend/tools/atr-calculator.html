@@ -57,17 +57,17 @@
     <p class="calc-subtitle">計算平均真實波幅，用於波動性分析和交易策略</p>
     <div id="calcInputs"><div class="input-group">
   <label for="highPrice">最高價</label>
-  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="highPrice" placeholder="150.75"  step="0.01"></div>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="highPrice" placeholder="150.75" value="150.75" step="0.01"></div>
 </div>
   <small class="input-help">輸入當期的最高交易價格</small>
 <div class="input-group">
   <label for="lowPrice">最低價</label>
-  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="lowPrice" placeholder="148.50"  step="0.01"></div>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="lowPrice" placeholder="148.50" value="148.50" step="0.01"></div>
 </div>
   <small class="input-help">輸入當期的最低交易價格</small>
 <div class="input-group">
   <label for="closePrice">前期收盤價</label>
-  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="closePrice" placeholder="149.25"  step="0.01"></div>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="closePrice" placeholder="149.25" value="149.25" step="0.01"></div>
 </div>
   <small class="input-help">輸入前一個交易週期的收盤價</small>
 <div class="input-group">
@@ -77,7 +77,7 @@
   <small class="input-help">輸入計算ATR的週期天數，通常為14天</small>
 <div class="input-group">
   <label for="historicalTR">歷史TR值（逗號分隔）</label>
-  <div class="input-row"><input type="text" id="historicalTR" placeholder="2.50,2.75,2.10,2.90,1.85"  step="1"></div>
+  <div class="input-row"><input type="text" id="historicalTR" placeholder="2.50,2.75,2.10,2.90,1.85" value="2.50,2.75,2.10,2.90,1.85" step="1"></div>
 </div>
   <small class="input-help">輸入歷史真實波幅數據，各值之間用逗號分隔</small></div>
     <button class="btn-calc" onclick="calculate()">計算</button>
@@ -123,7 +123,7 @@
 </div>
 <aside class="sidebar">
   <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
-  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="related-card"><h3>相關工具</h3><a class="related-link" href="/tools/bollinger-bands.html">布林帶計算器</a><a class="related-link" href="/tools/candlestick-identifier.html">K線型態識別器</a><a class="related-link" href="/tools/fibonacci-retracement.html">斐波那契回調計算器</a><a class="related-link" href="/tools/forex-profit.html">外匯獲利計算器</a><a class="related-link" href="/tools/kelly-criterion.html">凱利公式計算器</a><a class="related-link" href="/tools/ma-crossover.html">移動平均線交叉計算器</a></div>
   <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
     
   </div>
@@ -139,17 +139,17 @@ function calculate() {
   const historicalTRInput = document.getElementById('historicalTR').value.trim();
 
   if (isNaN(highPrice) || isNaN(lowPrice) || isNaN(closePrice) || isNaN(period)) {
-    alert('Please enter valid values for High Price, Low Price, Close Price, and Period.');
+    alert('請輸入有效的最高價、最低價、前期收盤價與週期天數');
     return;
   }
 
   if (highPrice < lowPrice) {
-    alert('High Price must be greater than or equal to Low Price.');
+    alert('最高價必須大於或等於最低價');
     return;
   }
 
   if (period < 1) {
-    alert('Period must be at least 1.');
+    alert('週期天數至少為1');
     return;
   }
 
@@ -166,7 +166,7 @@ function calculate() {
     const trValues = historicalTRInput.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
     
     if (trValues.length === 0) {
-      alert('Please provide valid comma-separated TR values or leave the field empty.');
+      alert('請輸入以逗號分隔的有效TR數值，或將此欄位留空');
       return;
     }
 
@@ -185,7 +185,7 @@ function calculate() {
   const atrPercent = (atr / highPrice * 100);
 
   document.getElementById('atrResult').textContent = '$' + atr.toFixed(2);
-  document.getElementById('atrPercent').textContent = atrPercent.toFixed(2);
+  document.getElementById('atrPercent').textContent = atrPercent.toFixed(2) + '%';
 
   document.getElementById('results').classList.add('show');
 }

@@ -57,12 +57,12 @@
     <p class="calc-subtitle">計算您的電動車在一次充電下能行駛的距離</p>
     <div id="calcInputs"><div class="input-group">
   <label for="batteryCapacity">電池容量</label>
-  <div class="input-row"><input type="number" id="batteryCapacity" placeholder="60"  step="0.1"><span class="input-suffix">kWh</span></div>
+  <div class="input-row"><input type="number" id="batteryCapacity" placeholder="60" value="60" step="0.1"><span class="input-suffix">kWh</span></div>
 </div>
   <small class="input-help">輸入您電動車電池的總容量（單位：kWh）</small>
 <div class="input-group">
   <label for="consumptionPerKm">能耗效率</label>
-  <div class="input-row"><input type="number" id="consumptionPerKm" placeholder="0.15"  step="0.01"><span class="input-suffix">kWh/km</span></div>
+  <div class="input-row"><input type="number" id="consumptionPerKm" placeholder="0.15" value="0.15" step="0.01"><span class="input-suffix">kWh/km</span></div>
 </div>
   <small class="input-help">輸入您電動車每公里的能耗量（單位：kWh/km）</small></div>
     <button class="btn-calc" onclick="calculate()">計算</button>
@@ -104,7 +104,7 @@
 </div>
 <aside class="sidebar">
   <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
-  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="related-card"><h3>相關工具</h3><a class="related-link" href="/tools/bike-gear-ratio.html">自行車齒輪比計算器</a><a class="related-link" href="/tools/car-depreciation.html">汽車折舊計算器</a><a class="related-link" href="/tools/car-insurance-calc.html">汽車保險估算工具</a><a class="related-link" href="/tools/car-insurance-estimate.html">汽車保險費估算器</a><a class="related-link" href="/tools/car-lease-vs-buy.html">車貸 vs 購買計算機</a><a class="related-link" href="/tools/car-loan.html">汽車貸款計算機</a></div>
   <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
     
   </div>
@@ -112,7 +112,7 @@
 </div></div>
 <footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/home/zh-TW/privacy.html">Privacy</a><a href="/home/zh-TW/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
 <script>
-function calculate() { const batteryCapacityInput = document.getElementById('batteryCapacity'); const consumptionPerKmInput = document.getElementById('consumptionPerKm'); const evRangeResult = document.getElementById('evRange'); if (!batteryCapacityInput.value || !consumptionPerKmInput.value) { alert('Please fill in all fields'); return; } const batteryCapacity = parseFloat(batteryCapacityInput.value); const consumptionPerKm = parseFloat(consumptionPerKmInput.value); if (batteryCapacity <= 0 || consumptionPerKm <= 0) { alert('Please enter positive values'); return; } const range = batteryCapacity / consumptionPerKm; evRangeResult.textContent = range.toLocaleString('en-GB', { maximumFractionDigits: 1, minimumFractionDigits: 1 }); document.getElementById('results').classList.add('show'); }
+function calculate() { const batteryCapacityInput = document.getElementById('batteryCapacity'); const consumptionPerKmInput = document.getElementById('consumptionPerKm'); const evRangeResult = document.getElementById('evRange'); if (!batteryCapacityInput.value || !consumptionPerKmInput.value) { alert('請填寫所有欄位'); return; } const batteryCapacity = parseFloat(batteryCapacityInput.value); const consumptionPerKm = parseFloat(consumptionPerKmInput.value); if (isNaN(batteryCapacity) || isNaN(consumptionPerKm) || batteryCapacity <= 0 || consumptionPerKm <= 0) { alert('請輸入正數數值'); return; } const range = batteryCapacity / consumptionPerKm; evRangeResult.textContent = range.toLocaleString('en-GB', { maximumFractionDigits: 1, minimumFractionDigits: 1 }); document.getElementById('results').classList.add('show'); }
 function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
 document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
 </script>

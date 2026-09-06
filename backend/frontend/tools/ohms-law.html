@@ -57,7 +57,7 @@
     <p class="calc-subtitle">使用歐姆定律公式計算電壓、電流、電阻和功率</p>
     <div id="calcInputs"><div class="input-group">
   <label for="voltage">電壓 (V)</label>
-  <div class="input-row"><input type="number" id="voltage" placeholder="輸入電壓值（伏特）"  step="0.1"><span class="input-suffix">V</span></div>
+  <div class="input-row"><input type="number" id="voltage" placeholder="輸入電壓值（伏特）" value="12" step="0.1"><span class="input-suffix">V</span></div>
 </div>
   <small class="input-help">輸入電路中的電壓值，單位為伏特</small>
 <div class="input-group">
@@ -67,7 +67,7 @@
   <small class="input-help">輸入電路中的電流值，單位為安培</small>
 <div class="input-group">
   <label for="resistance">電阻 (R)</label>
-  <div class="input-row"><input type="number" id="resistance" placeholder="輸入電阻值（歐姆）"  step="0.1"><span class="input-suffix">Ω</span></div>
+  <div class="input-row"><input type="number" id="resistance" placeholder="輸入電阻值（歐姆）" value="4" step="0.1"><span class="input-suffix">Ω</span></div>
 </div>
   <small class="input-help">輸入電路中的電阻值，單位為歐姆</small>
 <div class="input-group">
@@ -133,7 +133,7 @@
 </div>
 <aside class="sidebar">
   <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
-  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="related-card"><h3>相關工具</h3><a class="related-link" href="/tools/age-calculator.html">年齡計算機</a><a class="related-link" href="/tools/air-conditioner-size.html">冷氣噸數計算機</a><a class="related-link" href="/tools/appliance-energy.html">家電能源成本計算機</a><a class="related-link" href="/tools/battery-calculator.html">電池壽命計算器</a><a class="related-link" href="/tools/bolt-torque.html">螺栓扭矩計算器</a><a class="related-link" href="/tools/carbon-footprint.html">碳足跡計算器</a></div>
   <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
     
   </div>
@@ -147,10 +147,16 @@ function calculate() {
   const resistanceInput = document.getElementById('resistance').value;
   const powerInput = document.getElementById('power').value;
 
-  const voltage = parseFloat(voltageInput) || null;
-  const current = parseFloat(currentInput) || null;
-  const resistance = parseFloat(resistanceInput) || null;
-  const power = parseFloat(powerInput) || null;
+  function parseInput(str) {
+    if (str === '' || str === null || str === undefined) return null;
+    const n = parseFloat(str);
+    return isNaN(n) ? null : n;
+  }
+
+  const voltage = parseInput(voltageInput);
+  const current = parseInput(currentInput);
+  const resistance = parseInput(resistanceInput);
+  const power = parseInput(powerInput);
 
   let calculatedVoltage = null;
   let calculatedCurrent = null;
@@ -162,14 +168,14 @@ function calculate() {
     calculatedPower = voltage * current;
   } else if (voltage !== null && resistance !== null) {
     if (resistance === 0) {
-      alert('Resistance cannot be zero');
+      alert('電阻不可為零');
       return;
     }
     calculatedCurrent = voltage / resistance;
-    calculatedPower = voltage * current;
+    calculatedPower = voltage * calculatedCurrent;
   } else if (voltage !== null && power !== null) {
     if (voltage === 0) {
-      alert('Voltage cannot be zero for this calculation');
+      alert('此計算方式電壓不可為零');
       return;
     }
     calculatedCurrent = power / voltage;
@@ -179,20 +185,20 @@ function calculate() {
     calculatedPower = (current * current) * resistance;
   } else if (current !== null && power !== null) {
     if (current === 0) {
-      alert('Current cannot be zero for this calculation');
+      alert('此計算方式電流不可為零');
       return;
     }
     calculatedResistance = power / (current * current);
     calculatedVoltage = power / current;
   } else if (resistance !== null && power !== null) {
     if (resistance === 0) {
-      alert('Resistance cannot be zero');
+      alert('電阻不可為零');
       return;
     }
     calculatedCurrent = Math.sqrt(power / resistance);
     calculatedVoltage = Math.sqrt(power * resistance);
   } else {
-    alert('Please enter at least two values to calculate');
+    alert('請至少輸入兩個數值才能計算');
     return;
   }
 

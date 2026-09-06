@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>學測評量 · 測驗設定</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBF7EE;
+    --ink:#2B2620;
+    --line:#E4DBC8;
+
+    --c-chinese:#D94F4F;
+    --c-math:#2E6BE0;
+    --c-english:#2F9E5B;
+    --c-science:#0FA3A3;
+    --c-social:#E08A2B;
+    --c-life:#B15FD1;
+
+    --accent: var(--c-chinese);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    background-image:linear-gradient(var(--line) 1px, transparent 1px);
+    background-size: 100% 2.1rem;
+    color:var(--ink);
+    font-family:'Noto Sans TC', sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:2.5rem 1.2rem 4rem;
+    transition:background 0.4s ease;
+  }
+
+  .sheet{ width:100%; max-width:520px; }
+
+  .eyebrow{
+    font-size:0.78rem; letter-spacing:0.18em; color:#8A8171;
+    font-weight:700; margin:0 0 0.3rem 2px;
+  }
+
+  h1{
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-size:1.9rem; font-weight:700; margin:0 0 0.8rem; color:var(--ink);
+  }
+
+  .mode-switch{
+    display:flex; gap:0.5rem; margin-bottom:1.6rem;
+  }
+  .mode-switch a{
+    flex:1; text-align:center; text-decoration:none;
+    padding:0.7rem; border-radius:10px; font-weight:700; font-size:0.92rem;
+    border:1.5px solid var(--line); color:#6B6355; background:#fff;
+  }
+  .mode-switch a.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+
+  .card{
+    position:relative; background:#fff; border-radius:14px;
+    box-shadow:0 1px 0 rgba(0,0,0,0.04), 0 8px 24px -12px rgba(43,38,32,0.18);
+    padding:1.6rem 1.5rem 1.6rem 1.9rem; margin-bottom:1.4rem;
+    border-left:10px solid var(--accent); transition:border-color 0.35s ease;
+  }
+
+  .field{ margin-bottom:1.15rem; }
+  .field:last-child{margin-bottom:0;}
+
+  label{
+    display:block; font-size:0.82rem; font-weight:700; color:#6B6355;
+    margin-bottom:0.4rem; letter-spacing:0.02em;
+  }
+
+  .select-wrap{ position:relative; }
+  select{
+    appearance:none; -webkit-appearance:none; width:100%;
+    font-family:'Noto Sans TC', sans-serif; font-size:1.02rem; font-weight:500;
+    color:var(--ink); background:var(--paper); border:1.5px solid var(--line);
+    border-radius:9px; padding:0.72rem 2.4rem 0.72rem 0.9rem; cursor:pointer;
+    transition:border-color 0.2s ease, background 0.2s ease;
+  }
+  select:hover{border-color:#C9BDA0;}
+  select:focus{
+    outline:none; border-color:var(--accent);
+    box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+  .select-wrap::after{
+    content:""; position:absolute; right:0.95rem; top:50%;
+    width:9px; height:9px; border-right:2px solid #8A8171; border-bottom:2px solid #8A8171;
+    transform:translateY(-70%) rotate(45deg); pointer-events:none;
+  }
+
+  .tabs{ display:flex; gap:0.5rem; flex-wrap:wrap; }
+  .tab{
+    --tab-color:#999; border:1.5px solid var(--line); background:#fff; color:#6B6355;
+    font-family:'Noto Sans TC', sans-serif; font-size:0.92rem; font-weight:700;
+    padding:0.5rem 0.85rem; border-radius:8px; cursor:pointer;
+    display:flex; align-items:center; gap:0.45rem; transition:all 0.18s ease;
+  }
+  .tab .dot{ width:9px;height:9px;border-radius:50%; background:var(--tab-color); flex:none; }
+  .tab.active{
+    border-color:var(--tab-color);
+    background:color-mix(in srgb, var(--tab-color) 10%, white);
+    color:var(--tab-color);
+  }
+  .tab:hover{border-color:var(--tab-color);}
+
+  .summary{
+    display:flex; align-items:center; gap:0.7rem; background:#fff; border-radius:14px;
+    padding:1.1rem 1.3rem; margin-bottom:1.6rem;
+    box-shadow:0 1px 0 rgba(0,0,0,0.04), 0 8px 24px -12px rgba(43,38,32,0.18);
+  }
+  .summary .tag{
+    width:38px;height:38px;border-radius:10px; background:var(--accent); flex:none;
+    display:flex;align-items:center;justify-content:center; color:#fff;font-weight:900;
+    font-size:1.05rem; font-family:'Zen Maru Gothic', sans-serif; transition:background 0.35s ease;
+  }
+  .summary-text{ font-size:0.98rem; line-height:1.5; }
+  .summary-text .label{
+    display:block; font-size:0.72rem; color:#8A8171; font-weight:700;
+    letter-spacing:0.08em; margin-bottom:0.15rem;
+  }
+  .summary-text strong{ font-weight:700; color:var(--ink); }
+
+  .start-btn{
+    width:100%; border:none; border-radius:12px; padding:1rem;
+    font-family:'Noto Sans TC', sans-serif; font-size:1.05rem; font-weight:700;
+    color:#fff; background:var(--accent); cursor:pointer;
+    transition:background 0.35s ease, transform 0.1s ease;
+  }
+  .start-btn:active{transform:scale(0.98);}
+  .start-btn:disabled{ opacity:0.5; cursor:not-allowed; }
+
+  .hint{ text-align:center; font-size:0.8rem; color:#9C9382; margin-top:0.9rem; }
+  .error-box{
+    background:#FDECEC; border:1.5px solid #E8A0A0; color:#A33; border-radius:10px;
+    padding:0.9rem 1rem; margin-bottom:1.2rem; font-size:0.9rem; display:none;
+  }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+  <p class="eyebrow">測驗設定</p>
+  <h1>選擇你的課本範圍</h1>
+
+  <div class="mode-switch">
+    <a href="quiz-selector.html" class="active">課本練習</a>
+    <a href="exam-practice.html">會考考古題</a>
+  </div>
+
+  <div class="error-box" id="errorBox"></div>
+
+  <div class="card" id="subjectCard">
+    <div class="field">
+      <label>科目</label>
+      <div class="tabs" id="subjectTabs"><span style="color:#9C9382;font-size:0.9rem;">載入中...</span></div>
+    </div>
+  </div>
+
+  <div class="card" id="detailCard">
+    <div class="field">
+      <label for="grade">年級</label>
+      <div class="select-wrap"><select id="grade"></select></div>
+    </div>
+    <div class="field">
+      <label for="semester">學期</label>
+      <div class="select-wrap">
+        <select id="semester">
+          <option value="上">上學期</option>
+          <option value="下">下學期</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label for="publisher">出版社</label>
+      <div class="select-wrap">
+        <select id="publisher">
+          <option>南一</option>
+          <option>康軒</option>
+          <option>翰林</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>課次範圍</label>
+      <div style="display:flex; align-items:center; gap:0.6rem;">
+        <div class="select-wrap" style="flex:1;"><select id="lessonFrom"></select></div>
+        <span style="color:#9C9382; font-weight:700;">至</span>
+        <div class="select-wrap" style="flex:1;"><select id="lessonTo"></select></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary">
+    <div class="tag" id="summaryTag">-</div>
+    <div class="summary-text">
+      <span class="label">目前選擇</span>
+      <span id="summaryLine">請先選擇科目</span>
+    </div>
+  </div>
+
+  <button class="start-btn" id="startBtn" disabled>開始出題</button>
+  <p class="hint" id="hintText">選好範圍後，題目會依照對應課次自動出題</p>
+</div>
+
+<script>
+  // API base：跟這支HTML部署在同一個網域下，走 /quiz-api 前綴
+  // （main.py用 app.mount("/quiz-api", quiz_app) 掛載的路徑）
+  const API_BASE = '/quiz-api';
+  const SCHOOL_LEVEL_ID = 1; // 1=國小；這頁目前只做國小課本練習
+
+  const SUBJECT_COLOR = {
+    chinese:'var(--c-chinese)', math:'var(--c-math)', english:'var(--c-english)',
+    science:'var(--c-science)', social:'var(--c-social)', life:'var(--c-life)',
+    health:'#C2410C', art:'#7C3AED', integrative:'#059669',
+  };
+  const SUBJECT_SHORT = {
+    chinese:'國', math:'數', english:'英', science:'自', social:'社', life:'生',
+    health:'健', art:'藝', integrative:'綜',
+  };
+
+  let subjectsData = [];   // 從API拿到的科目清單
+  let curriculumRows = []; // 目前科目/年級/學期/出版社對應的課次清單
+  let state = { subject: null, grade: 2, semester: '上', publisher: '南一' };
+
+  const subjectTabs = document.getElementById('subjectTabs');
+  const gradeSel = document.getElementById('grade');
+  const lessonFrom = document.getElementById('lessonFrom');
+  const lessonTo = document.getElementById('lessonTo');
+  const summaryTag = document.getElementById('summaryTag');
+  const summaryLine = document.getElementById('summaryLine');
+  const semesterSel = document.getElementById('semester');
+  const publisherSel = document.getElementById('publisher');
+  const startBtn = document.getElementById('startBtn');
+  const errorBox = document.getElementById('errorBox');
+  const hintText = document.getElementById('hintText');
+
+  function showError(msg){
+    errorBox.textContent = msg;
+    errorBox.style.display = 'block';
+  }
+  function clearError(){ errorBox.style.display = 'none'; }
+
+  for(let g=1; g<=6; g++){
+    const opt = document.createElement('option');
+    opt.value = g; opt.textContent = `${['一','二','三','四','五','六'][g-1]}年級`;
+    if(g===2) opt.selected = true;
+    gradeSel.appendChild(opt);
+  }
+
+  async function loadSubjects(){
+    try{
+      const res = await fetch(`${API_BASE}/api/subjects?school_level_id=${SCHOOL_LEVEL_ID}`);
+      if(!res.ok) throw new Error(`科目清單載入失敗（${res.status}）`);
+      subjectsData = await res.json();
+      if(subjectsData.length === 0){
+        showError('目前還沒有科目資料，請確認後端資料庫是否已建立。');
+        return;
+      }
+      state.subject = subjectsData[0];
+      renderSubjectTabs();
+      await loadCurriculumAndRefresh();
+    }catch(e){
+      showError(`無法連上題庫伺服器：${e.message}`);
+    }
+  }
+
+  function renderSubjectTabs(){
+    subjectTabs.innerHTML = '';
+    subjectsData.forEach(s=>{
+      const color = SUBJECT_COLOR[s.code] || '#999';
+      const btn = document.createElement('button');
+      btn.className = 'tab' + (s.id === state.subject.id ? ' active' : '');
+      btn.style.setProperty('--tab-color', color);
+      btn.innerHTML = `<span class="dot"></span>${s.name}`;
+      btn.addEventListener('click', async ()=>{
+        state.subject = s;
+        renderSubjectTabs();
+        applyTheme();
+        await loadCurriculumAndRefresh();
+      });
+      subjectTabs.appendChild(btn);
+    });
+  }
+
+  function applyTheme(){
+    const color = SUBJECT_COLOR[state.subject.code] || '#999';
+    document.documentElement.style.setProperty('--accent', color);
+    summaryTag.textContent = SUBJECT_SHORT[state.subject.code] || state.subject.name[0];
+  }
+
+  async function loadCurriculumAndRefresh(){
+    clearError();
+    startBtn.disabled = true;
+    try{
+      const params = new URLSearchParams({
+        subject_id: state.subject.id,
+        grade: state.grade,
+        semester: state.semester,
+        publisher: state.publisher,
+      });
+      const res = await fetch(`${API_BASE}/api/curriculum?${params}`);
+      if(!res.ok) throw new Error(`課次載入失敗（${res.status}）`);
+      curriculumRows = await res.json();
+      renderLessonOptions();
+      applyTheme();
+      renderSummary();
+    }catch(e){
+      showError(`無法載入課次資料：${e.message}`);
+      lessonFrom.innerHTML = '';
+      lessonTo.innerHTML = '';
+    }
+  }
+
+  function renderLessonOptions(){
+    lessonFrom.innerHTML = '';
+    lessonTo.innerHTML = '';
+    if(curriculumRows.length === 0){
+      const o = document.createElement('option');
+      o.textContent = '（這個範圍還沒有課次資料）';
+      lessonFrom.appendChild(o.cloneNode(true));
+      lessonTo.appendChild(o);
+      startBtn.disabled = true;
+      hintText.textContent = '這個年級／學期／出版社組合目前沒有課次資料，換一個試試看';
+      return;
+    }
+    curriculumRows.forEach(c=>{
+      const o1 = document.createElement('option');
+      o1.value = c.lesson_number; o1.textContent = `第${c.lesson_number}課 ${c.lesson_name || ''}`;
+      lessonFrom.appendChild(o1);
+      const o2 = document.createElement('option');
+      o2.value = c.lesson_number; o2.textContent = `第${c.lesson_number}課 ${c.lesson_name || ''}`;
+      lessonTo.appendChild(o2);
+    });
+    lessonTo.selectedIndex = lessonTo.options.length - 1;
+    startBtn.disabled = false;
+    hintText.textContent = '選好範圍後，題目會依照對應課次自動出題';
+  }
+
+  function renderSummary(){
+    if(!state.subject || curriculumRows.length === 0){
+      summaryLine.textContent = '請先選擇有課次資料的範圍';
+      return;
+    }
+    const gradeName = ['一','二','三','四','五','六'][state.grade-1];
+    const from = lessonFrom.value, to = lessonTo.value;
+    summaryLine.innerHTML =
+      `${gradeName}年級${state.semester}學期 · <strong>${state.subject.name}</strong> · ${state.publisher}版 · 第${from}課至第${to}課`;
+  }
+
+  gradeSel.addEventListener('change', async e=>{ state.grade = parseInt(e.target.value); await loadCurriculumAndRefresh(); });
+  semesterSel.addEventListener('change', async e=>{ state.semester = e.target.value; await loadCurriculumAndRefresh(); });
+  publisherSel.addEventListener('change', async e=>{ state.publisher = e.target.value; await loadCurriculumAndRefresh(); });
+  lessonFrom.addEventListener('change', renderSummary);
+  lessonTo.addEventListener('change', renderSummary);
+
+  startBtn.addEventListener('click', async ()=>{
+    clearError();
+    startBtn.disabled = true;
+    startBtn.textContent = '出題中...';
+    try{
+      const body = {
+        subject_id: state.subject.id,
+        grade: state.grade,
+        semester: state.semester,
+        publisher: state.publisher,
+        lesson_from: parseInt(lessonFrom.value),
+        lesson_to: parseInt(lessonTo.value),
+      };
+      const res = await fetch(`${API_BASE}/api/exam-sessions`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(body),
+      });
+      if(!res.ok){
+        const err = await res.json().catch(()=>({detail:'未知錯誤'}));
+        throw new Error(err.detail || `建立測驗失敗（${res.status}）`);
+      }
+      const data = await res.json();
+      // 導向答題頁，帶著 session_id
+      window.location.href = `quiz-answer.html?session_id=${data.exam_session_id}`;
+    }catch(e){
+      showError(e.message);
+      startBtn.disabled = false;
+      startBtn.textContent = '開始出題';
+    }
+  });
+
+  loadSubjects();
+</script>
+
+</body>
+</html>

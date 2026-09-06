@@ -57,17 +57,17 @@
     <p class="calc-subtitle">立即計算您投資的年複合成長率</p>
     <div id="calcInputs"><div class="input-group">
   <label for="beginning_value">初始價值(BV)</label>
-  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="beginning_value" placeholder="10000"  step="0.01"></div>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="beginning_value" placeholder="10000"  value="10000" step="0.01"></div>
 </div>
   <small class="input-help">輸入投資開始時的金額</small>
 <div class="input-group">
   <label for="ending_value">最終價值(EV)</label>
-  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="ending_value" placeholder="25000"  step="0.01"></div>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="ending_value" placeholder="25000"  value="25000" step="0.01"></div>
 </div>
   <small class="input-help">輸入投資結束時的金額</small>
 <div class="input-group">
   <label for="number_of_years">投資年數(n)</label>
-  <div class="input-row"><input type="number" id="number_of_years" placeholder="5"  step="0.1"><span class="input-suffix">years</span></div>
+  <div class="input-row"><input type="number" id="number_of_years" placeholder="5"  value="5" step="0.1"><span class="input-suffix">年</span></div>
 </div>
   <small class="input-help">輸入投資持有的年數</small></div>
     <button class="btn-calc" onclick="calculate()">計算</button>
@@ -111,7 +111,7 @@
 </div>
 <aside class="sidebar">
   <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
-  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="related-card"><h3>相關工具</h3><a class="related-link" href="/tools/asset-allocation.html">資產配置計算器</a><a class="related-link" href="/tools/average-down.html">平均成本計算機</a><a class="related-link" href="/tools/bond-yield.html">債券殖利率計算機</a><a class="related-link" href="/tools/break-even.html">損益平衡點計算機</a><a class="related-link" href="/tools/break-even-units.html">損益平衡點單位計算機</a><a class="related-link" href="/tools/compound-interest.html">複利計算機</a></div>
   <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
     
   </div>
@@ -124,18 +124,23 @@ function calculate() {
   const ev = parseFloat(document.getElementById('ending_value').value);
   const years = parseFloat(document.getElementById('number_of_years').value);
   
-  if (!bv || !ev || !years) {
-    alert('Please enter all required values');
+  if (isNaN(bv) || isNaN(ev) || isNaN(years)) {
+    alert('請輸入所有必填數值');
     return;
   }
-  
+
   if (bv <= 0) {
-    alert('Beginning value must be greater than 0');
+    alert('初始價值必須大於0');
     return;
   }
-  
+
+  if (ev < 0) {
+    alert('最終價值不能為負數');
+    return;
+  }
+
   if (years <= 0) {
-    alert('Number of years must be greater than 0');
+    alert('投資年數必須大於0');
     return;
   }
   

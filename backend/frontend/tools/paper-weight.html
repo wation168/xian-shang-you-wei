@@ -57,19 +57,19 @@
     <p class="calc-subtitle">立即在GSM和磅數單位之間轉換</p>
     <div id="calcInputs"><div class="input-group">
   <label for="gsmInput">每平方米克數（GSM）</label>
-  <div class="input-row"><input type="number" id="gsmInput" placeholder="輸入GSM值"  step="0.1"><span class="input-suffix">g/m²</span></div>
+  <div class="input-row"><input type="number" id="gsmInput" placeholder="80" value="80" step="0.1"><span class="input-suffix">g/m²</span></div>
 </div>
-  <small class="input-help">輸入紙張的克重值（每平方米克數）</small>
+  <small class="input-help">輸入紙張的克重值（每平方米克數），與下方磅數欄位擇一輸入即可</small>
 <div class="input-group">
-  <label for="basisWeightInput">磅數（20磅債券紙當量）</label>
-  <div class="input-row"><input type="number" id="basisWeightInput" placeholder="輸入磅數值"  step="0.1"><span class="input-suffix">lbs</span></div>
+  <label for="basisWeightInput">磅數（依所選紙張類型的基本尺寸換算）</label>
+  <div class="input-row"><input type="number" id="basisWeightInput" placeholder="輸入磅數值" step="0.1"><span class="input-suffix">lbs</span></div>
 </div>
-  <small class="input-help">輸入紙張的磅數當量</small>
+  <small class="input-help">輸入紙張的磅數當量；若已填GSM可留空</small>
 <div class="input-group">
   <label for="paperTypeSelect">紙張類型</label>
-  <div class="input-row"><input type="text" id="paperTypeSelect" value="bond"></div>
+  <div class="input-row"><select id="paperTypeSelect"><option value="bond" selected>影印紙／債券紙（Bond，17×22吋基準）</option><option value="book">書籍內頁紙（Book/Text，25×38吋基準）</option><option value="cover">封面卡紙（Cover，20×26吋基準）</option><option value="newsprint">新聞紙（Newsprint）</option></select></div>
 </div>
-  <small class="input-help">選擇或輸入紙張的類型</small></div>
+  <small class="input-help">不同紙張類型的「基本尺寸」不同，磅數換算係數也不同，請務必選對類型</small></div>
     <button class="btn-calc" onclick="calculate()">計算</button>
     <div class="results" id="results">
       <div class="result-highlight"><span class="result-label">GSM結果</span><span class="result-value" id="gsmResult">—</span></div>
@@ -97,21 +97,22 @@
 <tr><td>A3 影印紙 (80g)</td><td>9.97g</td><td>4.99kg</td><td>海報、圖表</td></tr>
 <tr><td>B5 筆記紙 (70g)</td><td>3.13g</td><td>1.57kg</td><td>筆記本</td></tr>
 </table>
-<h3>郵寄重量與郵資對照（中華郵政 2026年）</h3>
+<h3>郵寄重量與郵資對照（中華郵政）</h3>
 <table>
 <tr><th>重量</th><th>國內平信</th><th>國內掛號</th><th>備註</th></tr>
-<tr><td>20g以內</td><td>8元</td><td>33元</td><td>約4張A4</td></tr>
-<tr><td>50g以內</td><td>8元</td><td>33元</td><td>約10張A4</td></tr>
-<tr><td>100g以內</td><td>12元</td><td>37元</td><td>約20張A4</td></tr>
-<tr><td>250g以內</td><td>20元</td><td>45元</td><td>約50張A4</td></tr>
-<tr><td>500g以內</td><td>32元</td><td>57元</td><td>約100張A4</td></tr>
+<tr><td>20g以內</td><td>8元</td><td>28元</td><td>約4張A4（80g紙）</td></tr>
+<tr><td>21-50g</td><td>16元</td><td>36元</td><td>約10張A4</td></tr>
+<tr><td>51-100g</td><td>24元</td><td>44元</td><td>約20張A4</td></tr>
+<tr><td>101-250g</td><td>40元</td><td>60元</td><td>約50張A4</td></tr>
+<tr><td>251-500g</td><td>72元</td><td>92元</td><td>約100張A4</td></tr>
 </table>
 <h2>紙張基重（磅重）怎麼算</h2>
 <p>台灣常用的紙張規格是「基重」，單位是 g/㎡（GSM）。一張 A4 的面積是 0.21 × 0.297 = 0.06237 ㎡，所以基重 80g/㎡ 的 A4 紙，單張重量 = 80 × 0.06237 = 約 4.99g。知道這個公式，任何尺寸的紙都能快速算出重量。</p>
 <h2>大量郵寄的成本控制</h2>
-<p>如果要寄 DM 或宣傳單，選 70g 比 80g 的紙每張省 0.63g。寄 1000 封的話，就省了 630g，可能從「100g以內」降到「50g以內」的郵資級距，每封省 4 元，1000 封就省 4000 元。</p>
+<p>如果要寄 DM 或宣傳單，選 70g 比 80g 的紙每張省約 0.63g。若原本整封信（含信封與內頁）的總重量落在 51-100g 級距，減少用紙克重有機會讓總重降到 21-50g 級距：以中華郵政掛號信為例，51-100g 級距為 44 元，21-50g 級距為 36 元，每封可省 8 元；寄 1000 封就能省下 8,000 元的郵資。實際能否降級距，仍須以整封郵件（含信封）過磅後的實際總重為準。</p>
 </article>
   
+  <article class="article"><h2>換算範例</h2><p>以80 GSM的影印紙（Bond類型，換算係數3.76）為例：磅數 = 80 ÷ 3.76 ≈ 21.28磅，業界通常標示為「20磅債券紙」（此為業界慣用的四捨五入名目值，非精確相等）。若同樣80 GSM但選擇的是書籍內頁紙（Book/Text類型，換算係數1.48）：磅數 = 80 ÷ 1.48 ≈ 54.05磅。可以看到同一個GSM數值，因紙張類型（基本尺寸標準）不同，換算出的磅數差異非常大，這也是為什麼選對紙張類型至關重要。</p><h2>資料來源與方法說明</h2><p>GSM與磅數的換算係數依紙張類型的「基本尺寸」（basic sheet size）而異：Bond／債券紙（17×22吋基準）係數約3.76、Book/Text／書籍內頁紙（25×38吋基準）係數約1.48、Cover／封面卡紙（20×26吋基準）係數約2.708、Newsprint／新聞紙係數約1.64；以上數字引用自Solo Printing與Paper Sizes等印刷業界的紙張磅數換算對照資料。中華郵政國內函件資費表（平信與掛號各重量級距）引用自中華郵政官網公告的「簡明國內函件資費表」（現行資費自民國108年11月1日起實施）。以上資料查核日期：2026年9月，實際資費請以中華郵政官網公告為準。</p></article>
   <div class="ad-container ad-container-lg" id="ad-bottom"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="4182262477" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
   <section class="faq"><h2>常見問題</h2><div class="faq-item"><div class="faq-q">GSM和磅數有什麼區別？</div><div class="faq-a">GSM（克/平方米）是按紙張面積計算的克重，而磅數（lbs）是按紙張標準尺寸的重量計算。GSM是國際標準，更容易在不同紙張類型間進行比較。磅數則因紙張基重標準尺寸不同而有所差異。</div></div>
   <div class="faq-item"><div class="faq-q">80 GSM的紙張相當於多少磅？</div><div class="faq-a">80 GSM的紙張通常相當於20磅的標準影印紙或債券紙。這是最常用的辦公用紙規格，適合日常影印和列印。</div></div>
@@ -134,7 +135,7 @@
 </div>
 <aside class="sidebar">
   <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
-  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="related-card"><h3>相關工具</h3><a class="related-link" href="/tools/age-calculator.html">年齡計算機</a><a class="related-link" href="/tools/air-conditioner-size.html">冷氣噸數計算機</a><a class="related-link" href="/tools/appliance-energy.html">家電能源成本計算機</a><a class="related-link" href="/tools/battery-calculator.html">電池壽命計算器</a><a class="related-link" href="/tools/bolt-torque.html">螺栓扭矩計算器</a><a class="related-link" href="/tools/carbon-footprint.html">碳足跡計算器</a></div>
   <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
     
   </div>
@@ -142,7 +143,7 @@
 </div></div>
 <footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/home/zh-TW/privacy.html">Privacy</a><a href="/home/zh-TW/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
 <script>
-function calculate() { const gsmInput = document.getElementById('gsmInput'); const basisWeightInput = document.getElementById('basisWeightInput'); const paperTypeSelect = document.getElementById('paperTypeSelect'); const gsmResult = document.getElementById('gsmResult'); const basisWeightResult = document.getElementById('basisWeightResult'); const paperTypeInfo = document.getElementById('paperTypeInfo'); const resultsDiv = document.getElementById('results'); const gsm = parseFloat(gsmInput.value); const basisWeight = parseFloat(basisWeightInput.value); const paperType = paperTypeSelect.value; const conversionFactors = { bond: 1.48, book: 1.48, cover: 1.48, newsprint: 1.48 }; const factor = conversionFactors[paperType]; const paperInfo = { bond: 'Used for letters, forms, and writing papers. Professional and office documents.', book: 'Suitable for interior pages of books, magazines, and brochures.', cover: 'Ideal for book covers, postcards, and heavy-duty cardstock.', newsprint: 'Designed for newspaper printing and lightweight publications.' }; if (!isNaN(gsm) && gsm > 0) { const calculatedBasis = gsm / factor; basisWeightResult.textContent = calculatedBasis.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); } else if (!isNaN(basisWeight) && basisWeight > 0) { const calculatedGsm = basisWeight * factor; gsmResult.textContent = calculatedGsm.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); } else { alert('Please enter a valid GSM or basis weight value.'); return; } if (!isNaN(gsm) && gsm > 0) { gsmResult.textContent = gsm.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); } if (!isNaN(basisWeight) && basisWeight > 0) { basisWeightResult.textContent = basisWeight.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); } paperTypeInfo.textContent = paperInfo[paperType]; resultsDiv.classList.add('show'); }
+function calculate() { const gsmInput = document.getElementById('gsmInput'); const basisWeightInput = document.getElementById('basisWeightInput'); const paperTypeSelect = document.getElementById('paperTypeSelect'); const gsmResult = document.getElementById('gsmResult'); const basisWeightResult = document.getElementById('basisWeightResult'); const paperTypeInfo = document.getElementById('paperTypeInfo'); const resultsDiv = document.getElementById('results'); const gsm = parseFloat(gsmInput.value); const basisWeight = parseFloat(basisWeightInput.value); const paperType = paperTypeSelect.value; const conversionFactors = { bond: 3.76, book: 1.48, cover: 2.708, newsprint: 1.64 }; const factor = conversionFactors[paperType]; const paperInfo = { bond: '影印紙、書信、表單與債券紙等商務辦公文件用紙。', book: '適合書籍、雜誌、型錄等內頁印刷。', cover: '適合書籍封面、明信片與需要較高硬度的卡片。', newsprint: '用於報紙印刷與輕量出版品。' }; const fmt = n => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); if (!isNaN(gsm) && gsm > 0) { gsmResult.textContent = fmt(gsm); basisWeightResult.textContent = fmt(gsm / factor); } else if (!isNaN(basisWeight) && basisWeight > 0) { basisWeightResult.textContent = fmt(basisWeight); gsmResult.textContent = fmt(basisWeight * factor); } else { alert('請輸入有效的GSM或磅數數值。'); return; } paperTypeInfo.textContent = paperInfo[paperType]; resultsDiv.classList.add('show'); }
 function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
 document.querySelectorAll('.faq-q').forEach(function(q){q.addEventListener('click',function(){this.parentElement.classList.toggle('open');});});
 </script>

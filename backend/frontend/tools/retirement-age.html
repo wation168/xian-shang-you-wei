@@ -113,7 +113,7 @@
 </div>
 <aside class="sidebar">
   <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
-  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="related-card"><h3>相關工具</h3><a class="related-link" href="/tools/401k-contribution.html">401k 退休金供款計算機</a><a class="related-link" href="/tools/annuity-calculator.html">年金計算器</a><a class="related-link" href="/tools/annuity-income.html">年金收入計算機</a><a class="related-link" href="/tools/catch-up-contribution.html">補繳貢獻計算機</a><a class="related-link" href="/tools/coast-fire-calc.html">Coast FIRE 計算機</a><a class="related-link" href="/tools/fire-number-calc.html">財務自由提前退休目標計算機</a></div>
   <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
     
   </div>
@@ -127,7 +127,7 @@ function calculate() {
   const earlyRetirementAgeInput = document.getElementById('early_retirement_age').value;
 
   if (!birthDateInput || !retirementAgeInput) {
-    alert('Please enter your birth date and legal retirement age.');
+    alert('請輸入您的出生日期與法定退休年齡。');
     return;
   }
 
@@ -136,13 +136,18 @@ function calculate() {
   const retirementAge = parseInt(retirementAgeInput);
   const earlyRetirementAge = earlyRetirementAgeInput ? parseInt(earlyRetirementAgeInput) : null;
 
-  if (birthDate > today) {
-    alert('Birth date cannot be in the future.');
+  if (isNaN(birthDate.getTime())) {
+    alert('請輸入有效的出生日期。');
     return;
   }
 
-  if (retirementAge < 50 || retirementAge > 90) {
-    alert('Please enter a valid retirement age between 50 and 90.');
+  if (birthDate > today) {
+    alert('出生日期不能是未來日期。');
+    return;
+  }
+
+  if (isNaN(retirementAge) || retirementAge < 50 || retirementAge > 90) {
+    alert('請輸入介於50至90之間的有效退休年齡。');
     return;
   }
 
@@ -165,8 +170,7 @@ function calculate() {
     finalYearsUntil--;
   }
 
-  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  const formattedRetirementDate = monthNames[retirementDate.getMonth()] + ' ' + retirementDate.getDate() + ', ' + retirementDate.getFullYear();
+  const formattedRetirementDate = retirementDate.getFullYear() + '年' + (retirementDate.getMonth() + 1) + '月' + retirementDate.getDate() + '日';
 
   document.getElementById('retirement_date').textContent = formattedRetirementDate;
   document.getElementById('retirement_age_display').textContent = Math.max(0, finalYearsUntil).toString();
@@ -185,7 +189,7 @@ function calculate() {
       finalEarlyYearsUntil--;
     }
 
-    const formattedEarlyRetirementDate = monthNames[earlyRetirementDate.getMonth()] + ' ' + earlyRetirementDate.getDate() + ', ' + earlyRetirementDate.getFullYear();
+    const formattedEarlyRetirementDate = earlyRetirementDate.getFullYear() + '年' + (earlyRetirementDate.getMonth() + 1) + '月' + earlyRetirementDate.getDate() + '日';
     document.getElementById('early_retirement_date').textContent = formattedEarlyRetirementDate;
     document.getElementById('early_retirement_years').textContent = Math.max(0, finalEarlyYearsUntil).toString();
   }

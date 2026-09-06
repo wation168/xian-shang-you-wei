@@ -57,12 +57,12 @@
     <p class="calc-subtitle">計算收入中有多少百分比在扣除所有費用後成為利潤</p>
     <div id="calcInputs"><div class="input-group">
   <label for="netIncome">淨收入</label>
-  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="netIncome" placeholder="50000"  step="0.01"></div>
+  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="netIncome" placeholder="50000" value="50000" step="0.01"></div>
 </div>
   <small class="input-help">輸入扣除所有費用、稅款和利息後的淨收入金額</small>
 <div class="input-group">
   <label for="revenue">總收入</label>
-  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="revenue" placeholder="250000"  step="0.01"></div>
+  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="revenue" placeholder="250000" value="250000" step="0.01"></div>
 </div>
   <small class="input-help">輸入業務產生的總收入或銷售額</small></div>
     <button class="btn-calc" onclick="calculate()">計算</button>
@@ -104,7 +104,7 @@
 </div>
 <aside class="sidebar">
   <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
-  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="related-card"><h3>相關工具</h3><a class="related-link" href="/tools/amazon-profit.html">Amazon 利潤計算器</a><a class="related-link" href="/tools/burn-rate-calculator.html">燒錢速率計算器</a><a class="related-link" href="/tools/business-exit-value.html">業務退出價值計算器</a><a class="related-link" href="/tools/cbm-calculator.html">CBM計算機</a><a class="related-link" href="/tools/churn-rate.html">客戶流失率計算機</a><a class="related-link" href="/tools/company-registration.html">公司設立成本計算機</a></div>
   <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
     
   </div>
@@ -122,23 +122,23 @@ function calculate() {
   const revenue = parseFloat(revenueInput.value);
 
   if (!netIncomeInput.value || !revenueInput.value) {
-    alert('Please enter both Net Income and Total Revenue.');
+    alert('請輸入淨收入與總收入兩個欄位的數值。');
     return;
   }
 
   if (isNaN(netIncome) || isNaN(revenue)) {
-    alert('Please enter valid numbers.');
+    alert('請輸入有效的數值。');
     return;
   }
 
   if (revenue <= 0) {
-    alert('Total Revenue must be greater than zero.');
+    alert('總收入必須大於零。');
     return;
   }
 
   const npm = (netIncome / revenue) * 100;
 
-  npmResultDiv.textContent = npm.toFixed(2);
+  npmResultDiv.textContent = npm.toFixed(2) + '%';
   resultsDiv.classList.add('show');
 }
 function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}

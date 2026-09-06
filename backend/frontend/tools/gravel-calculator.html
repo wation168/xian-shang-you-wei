@@ -57,7 +57,7 @@
     <p class="calc-subtitle">計算建築項目所需碎石和沙子的重量（以噸為單位）</p>
     <div id="calcInputs"><div class="input-group">
   <label for="volumeInput">體積</label>
-  <div class="input-row"><input type="number" id="volumeInput" placeholder="100"  step="0.1"><span class="input-suffix">立方米</span></div>
+  <div class="input-row"><input type="number" id="volumeInput" placeholder="100" value="100" step="0.1"><span class="input-suffix">立方米</span></div>
 </div>
   <small class="input-help">輸入碎石或沙子的體積（立方米）</small>
 <div class="input-group">
@@ -118,7 +118,7 @@
 </div>
 <aside class="sidebar">
   <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
-  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="related-card"><h3>相關工具</h3><a class="related-link" href="/tools/asphalt-calculator.html">瀝青計算機</a><a class="related-link" href="/tools/brick-calculator.html">磚塊計算機</a><a class="related-link" href="/tools/concrete-calculator.html">混凝土體積計算器</a><a class="related-link" href="/tools/deck-calculator.html">甲板計算機</a><a class="related-link" href="/tools/drywall-calculator.html">石膏板計算機</a><a class="related-link" href="/tools/fence-calculator.html">柵欄計算機</a></div>
   <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
     
   </div>
@@ -138,22 +138,22 @@ function calculate() {
   const density = parseFloat(densityInput.value);
 
   if (isNaN(volume) || volume <= 0) {
-    alert('Please enter a valid volume greater than 0');
+    alert('請輸入大於0的有效體積數值');
     return;
   }
 
   if (isNaN(density) || density <= 0) {
-    alert('Please enter a valid density greater than 0');
+    alert('請輸入大於0的有效密度數值');
     return;
   }
 
   const tons = (volume * density) / 1000;
-  const pounds = tons * 2000;
+  const pounds = tons * 2204.62;
   const cubicYards = volume / 0.7646;
 
-  tonsResult.textContent = tons.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  poundsResult.textContent = pounds.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  cubicYardsResult.textContent = cubicYards.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  tonsResult.textContent = tons.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  poundsResult.textContent = pounds.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  cubicYardsResult.textContent = cubicYards.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   resultsDiv.classList.add('show');
 }

@@ -57,12 +57,12 @@
     <p class="calc-subtitle">即時計算房地產投資物業的資本化率</p>
     <div id="calcInputs"><div class="input-group">
   <label for="netOperatingIncome">淨營運收入（NOI）</label>
-  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="netOperatingIncome" placeholder="50000"  step="1"></div>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="netOperatingIncome" placeholder="50000" value="50000" step="1"></div>
 </div>
   <small class="input-help">輸入該物業每年的淨營運收入（租金收入減去營運成本）</small>
 <div class="input-group">
   <label for="propertyValue">物業價值</label>
-  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="propertyValue" placeholder="500000"  step="1"></div>
+  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="propertyValue" placeholder="500000" value="500000" step="1"></div>
 </div>
   <small class="input-help">輸入該物業的總購買價格或市場價值</small></div>
     <button class="btn-calc" onclick="calculate()">計算</button>
@@ -104,7 +104,7 @@
 </div>
 <aside class="sidebar">
   <div class="ad-container ad-container-lg" id="ad-side"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;min-height:250px;" data-ad-client="ca-pub-1768270548115739" data-ad-slot="1655301946" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
-  <div class="related-card"><h3>相關工具</h3></div>
+  <div class="related-card"><h3>相關工具</h3><a class="related-link" href="/tools/cash-on-cash.html">現金收益率計算器</a><a class="related-link" href="/tools/down-payment.html">頭期款計算機</a><a class="related-link" href="/tools/home-affordability.html">房屋購買力計算機</a><a class="related-link" href="/tools/home-equity.html">房屋淨值計算器</a><a class="related-link" href="/tools/home-mortgage.html">房屋貸款計算機</a><a class="related-link" href="/tools/mortgage.html">抵押貸款計算機</a></div>
   <div class="ad-container" id="ad-side2"><ins class="adsbygoogle" style="min-width:160px;min-height:250px;display:block;text-align:center;min-height:100px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-1768270548115739" data-ad-slot="2793159185"></ins>
     
   </div>
@@ -120,20 +120,20 @@ function calculate() {
   
   const noi = parseFloat(noiInput.value);
   const propertyValue = parseFloat(propertyValueInput.value);
-  
-  if (!noiInput.value || !propertyValueInput.value) {
-    alert('Please enter both Net Operating Income and Property Value');
+
+  if (isNaN(noi) || isNaN(propertyValue)) {
+    alert('請輸入淨營運收入與物業價值');
     return;
   }
-  
+
   if (noi < 0 || propertyValue <= 0) {
-    alert('Please enter valid positive numbers');
+    alert('請輸入有效的正數數值');
     return;
   }
-  
+
   const capRate = (noi / propertyValue) * 100;
-  
-  capRateResult.textContent = capRate.toFixed(2);
+
+  capRateResult.textContent = capRate.toFixed(2) + '%';
   resultsDiv.classList.add('show');
 }
 function shareResult(){if(navigator.share){navigator.share({title:document.title,url:location.href}).catch(function(){});}else{navigator.clipboard.writeText(location.href);var b=event.target;b.textContent='已複製！';setTimeout(function(){b.textContent='分享'},1500);}}
