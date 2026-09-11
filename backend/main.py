@@ -42,10 +42,14 @@ if not FINMIND_TOKEN:
     raise RuntimeError("❌ 請設定環境變數 FINMIND_TOKEN")
 
 # JWT 密鑰（請在 Zeabur 設定環境變數 JWT_SECRET；每次重啟值相同，不影響 token 有效性）
-JWT_SECRET = os.environ.get("JWT_SECRET", "change-me-in-production-please")
-JWT_EXPIRE_DAYS = 15   # token 有效期（15 天）
-if JWT_SECRET == "change-me-in-production-please":
-    print("⚠️  [JWT] 使用預設 JWT_SECRET，正式環境請設定 JWT_SECRET 環境變數！")
+_INSECURE_JWT_DEFAULT = "change-me-in-production-please"
+_JWT_MIN_LEN = 32
+JWT_SECRET = os.environ.get("JWT_SECRET", "").strip()
+JWT_EXPIRE_DAYS = 15   # token 有效天數（15 天）
+# P0 fail-closed: missing, insecure default, or too-short secret must not sign tokens
+if (not JWT_SECRET) or (JWT_SECRET == _INSECURE_JWT_DEFAULT) or (len(JWT_SECRET) < _JWT_MIN_LEN):
+    print("[JWT] FATAL: JWT_SECRET missing, insecure default, or shorter than 32 chars; refusing to start. Set JWT_SECRET env.")
+    raise SystemExit(1)
 
 # 管理後台金鑰（安全性修正 2026/07/26：原本共用 JWT_SECRET 前16碼，已改成獨立金鑰）
 # 請在 Zeabur 設定環境變數 ADMIN_API_KEY（建議用一長串隨機字串）
@@ -9506,6 +9510,12 @@ async def create_order_recurring(request: Request):
         raise HTTPException(status_code=400, detail="無效方案")
 
     info = plan_info[plan]
+    # P0 fail-closed: do not emit checkout without ECPay secrets
+    if not ECPAY_HASH_KEY or not ECPAY_HASH_IV:
+        raise HTTPException(status_code=400, detail="Payment gateway not configured")
+    if not ECPAY_MERCHANT_ID:
+        raise HTTPException(status_code=400, detail="Payment merchant not configured")
+
     trade_no = f"XYWR{int(_t.time())}{secrets.token_hex(3).upper()}"
 
     # 首次扣款日期（今天）
@@ -9533,15 +9543,16 @@ async def create_order_recurring(request: Request):
     }
 
     # 暫存密碼
-    if password and len(password) >= 6:
-        _po_conn = _db_conn()
-        _po_conn.execute(
-            "INSERT OR REPLACE INTO pending_orders "
-            "(merchant_trade_no, email, hashed_password, plan, invoice_type, invoice_carrier) VALUES (?, ?, ?, ?, ?, ?)",
-            (trade_no, email, _hash_pw(password), plan, "", "")
-        )
-        _po_conn.commit()
-        _po_conn.close()
+    # P0: always record pending for upgrades (password optional for logged-in App flow)
+    _po_conn = _db_conn()
+    _hashed = _hash_pw(password) if password and len(password) >= 6 else ""
+    _po_conn.execute(
+        "INSERT OR REPLACE INTO pending_orders "
+        "(merchant_trade_no, email, hashed_password, plan, invoice_type, invoice_carrier) VALUES (?, ?, ?, ?, ?, ?)",
+        (trade_no, email, _hashed, plan, "", "")
+    )
+    _po_conn.commit()
+    _po_conn.close()
 
     # CheckMacValue
     sorted_params = sorted(params.items(), key=lambda x: x[0].lower())
@@ -9574,12 +9585,15 @@ async def webhook_ecpay_recurring(request: Request):
     params = dict(body)
     print(f"[定期定額 Webhook] {params}")
 
-    # 驗證 CheckMacValue 簽章（邏輯全在 ecpay_verify.py，預設為觀察模式不阻擋）
-    if _ecpay_verify_mod is not None:
-        if not _ecpay_verify_mod.check_webhook(
-            params, ECPAY_HASH_KEY, ECPAY_HASH_IV, DB_PATH, "ecpay_recurring"
-        ):
-            return PlainTextResponse(content="0|Error")
+    # 驗證 CheckMacValue 簽章（邏輯全在 ecpay_verify.py；缺模組／驗簽失敗一律拒）
+    # P0: verification module required; empty secrets / bad sig handled inside check_webhook (fail-closed)
+    if _ecpay_verify_mod is None:
+        print("[定期定額] FATAL: ecpay_verify module missing; refusing webhook")
+        return PlainTextResponse(content="0|Error")
+    if not _ecpay_verify_mod.check_webhook(
+        params, ECPAY_HASH_KEY, ECPAY_HASH_IV, DB_PATH, "ecpay_recurring"
+    ):
+        return PlainTextResponse(content="0|Error")
 
     if params.get("MerchantID") != ECPAY_MERCHANT_ID:
         print(f"[定期定額] ❌ MerchantID 不符")
@@ -9676,7 +9690,9 @@ async def webhook_ecpay_recurring(request: Request):
         )
     else:
         # 首次授權成功（第一期）：建立帳號
-        hashed_password = _po["hashed_password"] if _po else _hash_pw(secrets.token_urlsafe(8))
+        # P0 follow-up: empty pending password must not become empty members.password
+        _pending_hash = (_po["hashed_password"] if _po else "") or ""
+        hashed_password = _pending_hash if _pending_hash else _hash_pw(secrets.token_urlsafe(8))
         new_expire = (datetime.now(ZoneInfo("Asia/Taipei")) + timedelta(days=days)).strftime("%Y-%m-%d")
         try:
             conn.execute(

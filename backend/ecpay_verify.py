@@ -217,14 +217,13 @@ def is_enforcing(db_path: str = None, source: str = "ecpay") -> bool:
 
     設計重點：成功次數只增不減，偽造請求無法把它拉回觀察模式。
     """
+    # P0: default enforce everywhere; observation only with explicit ECPAY_VERIFY_ENFORCE=0/false/no
     manual = os.environ.get("ECPAY_VERIFY_ENFORCE", "").strip()
-    if manual in ("1", "true", "True", "yes"):
-        return True
     if manual in ("0", "false", "False", "no"):
         return False
-    if not db_path:
-        return False
-    return _matched_count(db_path, source) >= _auto_threshold()
+    if manual in ("1", "true", "True", "yes"):
+        return True
+    return True
 
 
 # ---------------------------------------------------------------------------
@@ -245,11 +244,11 @@ def check_webhook(params: dict, hash_key: str, hash_iv: str,
     try:
         enforcing = is_enforcing(db_path, source)
     except Exception:
-        enforcing = False
+        enforcing = True  # P0: detect failure => treat as enforce (fail-closed)
     try:
         if not hash_key or not hash_iv:
-            print("[ecpay_verify] ⚠️ HashKey/HashIV 未設定，略過驗證")
-            return True
+            print("[ecpay_verify] HashKey/HashIV missing; rejecting webhook (fail-closed)")
+            return False  # P0 fail-closed: empty HashKey/IV must not skip verification
 
         variants = compute_variants(params, hash_key, hash_iv)
         matched, variant = verify(params, hash_key, hash_iv)
@@ -276,8 +275,8 @@ def check_webhook(params: dict, hash_key: str, hash_iv: str,
         return True
 
     except Exception as e:
-        print(f"[ecpay_verify] ⚠️ 驗證過程發生錯誤，一律放行（不影響付款）：{e}")
-        return True
+        print(f"[ecpay_verify] verify error; rejecting webhook (fail-closed): {e}")
+        return False  # P0 fail-closed: verify errors must not silently allow
 
 
 # ---------------------------------------------------------------------------
