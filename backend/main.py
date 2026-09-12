@@ -116,8 +116,8 @@ except ImportError:
     _WEBPUSH_AVAILABLE = False
 
 # 免費用戶每日查詢次數
-FREE_DAILY_LIMIT = 3   # 免費會員每日查詢次數
-GUEST_DAILY_LIMIT = 10  # 遊客（未登入）每日查詢次數
+FREE_DAILY_LIMIT = 5   # 免費會員：完整分析＋健檢共用 daily_credit
+GUEST_DAILY_LIMIT = 3   # 遊客：個股查詢／完整分析 daily_credit
 
 # CORS：允許的前端來源
 # 本機開發時設 ALLOWED_ORIGINS=* 或留空
@@ -3402,7 +3402,102 @@ def _is_referral_active(user: dict) -> bool:
     exp = user.get("referral_expire_date")
     if not exp:
         return True  # 舊資料無過期日，向下相容視為有效
-    return exp >= _date_cls.today().isoformat()
+    return exp >= _taipei_today()
+
+
+def _is_premium(user: dict | None) -> bool:
+    """付費或邀請解鎖（未過期）。與深度選股／論壇寫入同一套。"""
+    if not user:
+        return False
+    if _is_referral_active(user):
+        return True
+    if user.get("plan") == "free":
+        return False
+    exp = user.get("expire_at")
+    if exp and exp < _taipei_today():
+        return False
+    return True
+
+
+def _client_ip(request) -> str:
+    if request is None:
+        return "unknown"
+    try:
+        return request.client.host if request.client else "unknown"
+    except Exception:
+        return "unknown"
+
+
+def _daily_credit_key(request, user) -> tuple[int, str, int]:
+    if user is None:
+        return 0, _client_ip(request), GUEST_DAILY_LIMIT
+    return int(user["id"]), "", FREE_DAILY_LIMIT
+
+
+def _check_daily_credit(request, user) -> tuple[bool, int, int]:
+    """daily_credit：(allowed, used, limit)。paid／referral 不消耗。"""
+    if _is_premium(user):
+        return True, 0, 999
+    member_id, ip, limit = _daily_credit_key(request, user)
+    today = _taipei_today()
+    conn = _db_conn()
+    row = conn.execute(
+        "SELECT count FROM query_log WHERE member_id=? AND date=? AND ip=?",
+        (member_id, today, ip),
+    ).fetchone()
+    used = row["count"] if row else 0
+    conn.close()
+    return used < limit, used, limit
+
+
+def _consume_daily_credit(request, user) -> None:
+    """成功後扣 1。SELECT 再 UPDATE／INSERT，不依賴 ON CONFLICT。"""
+    if _is_premium(user):
+        return
+    member_id, ip, _limit = _daily_credit_key(request, user)
+    today = _taipei_today()
+    conn = _db_conn()
+    row = conn.execute(
+        "SELECT id, count FROM query_log WHERE member_id=? AND date=? AND ip=?",
+        (member_id, today, ip),
+    ).fetchone()
+    if row:
+        conn.execute("UPDATE query_log SET count=count+1 WHERE id=?", (row["id"],))
+    else:
+        conn.execute(
+            "INSERT INTO query_log (member_id, date, ip, count) VALUES (?, ?, ?, 1)",
+            (member_id, today, ip),
+        )
+    conn.commit()
+    conn.close()
+
+
+_PORTFOLIO_CREDIT_DEDUP: dict[str, float] = {}
+_PORTFOLIO_DEDUP_SEC = 45.0
+
+
+def _consume_portfolio_daily_credit(request, user) -> None:
+    if _is_premium(user) or not user:
+        return
+    key = f"{user['id']}:{_taipei_today()}"
+    now = _time_mod.time()
+    last = _PORTFOLIO_CREDIT_DEDUP.get(key, 0.0)
+    if now - last < _PORTFOLIO_DEDUP_SEC:
+        return
+    _PORTFOLIO_CREDIT_DEDUP[key] = now
+    _consume_daily_credit(request, user)
+
+
+def _credit_dict(used: int, limit: int) -> dict:
+    return {"used": used, "limit": limit, "remaining": max(0, limit - used)}
+
+
+def _quota_429(code: str, msg: str, used: int, limit: int):
+    """429 + credit，給 FE modal／_syncCreditFromPayload。"""
+    return JSONResponse(
+        status_code=429,
+        content={"detail": f"{code}|{msg}", "credit": _credit_dict(used, limit)},
+    )
 
 def _check_query_limit(member_id: int, plan: str) -> tuple[bool, int, int]:
     """回傳 (允許查詢, 今日已用次數, 上限)"""
@@ -3498,7 +3593,7 @@ def debug_stock(stock_id: str):
 
 
 @app.get("/api/kline/{stock_id}")
-def get_kline(stock_id: str, tf: str = "D", user: dict = Depends(require_user)):
+def get_kline(stock_id: str, tf: str = "D", user: dict | None = Depends(get_current_user)):
     period, interval = PERIOD_MAP.get(tf.upper(), ("3y", "1d"))
     try:
         symbol, df = try_fetch(stock_id, period, interval)
@@ -4646,10 +4741,7 @@ def _do_analyze(stock_id: str, tf: str = "D",
         result["price_note"] = "現價更新中，暫以收盤價顯示（分析不受影響）"
     _cache_set(_cache_key, result)
 
-    # 計入查詢次數（免費用戶）
-    if user and user["plan"] == "free":
-        _inc_query_count(user["id"])
-
+    # Wave1：扣次改在 HTTP handler 成功後，此處不扣
     return result
 
 
@@ -4658,7 +4750,7 @@ def analyze(stock_id: str, tf: str = "D",
             ma1: int = 5, ma2: int = 10, ma3: int = 20, ma4: int = 60, ma5: int = 120,
             request: Request = None,
             user: dict | None = Depends(get_current_user)):
-    """API 端點：遊客可查 1 次，免費會員 3 次，付費無限"""
+    """API 端點：遊客 daily_credit 3、免費完整分析 5（與健檢共用）、付費無限"""
     # 股名轉代號：非純數字視為股票名稱，在對照表搜尋
     sid_clean = stock_id.strip()
     if not sid_clean.replace(".", "").isdigit():
@@ -4674,58 +4766,37 @@ def analyze(stock_id: str, tf: str = "D",
 
     if user:
         plan = user["plan"]
-        is_referral_unlocked = _is_referral_active(user)
-        # 付費狀態驗證
-        if plan != "free" and user["expire_at"] and user["expire_at"] < today:
+        if plan != "free" and user.get("expire_at") and user["expire_at"] < today and not _is_referral_active(user):
             raise HTTPException(status_code=403, detail="訂閱已到期，請續費後繼續使用")
-        # 免費用戶次數限制（邀請解鎖視為付費）
-        if plan == "free" and not is_referral_unlocked:
-            allowed, used, limit = _check_query_limit(user["id"], plan)
-            if not allowed:
-                raise HTTPException(
-                    status_code=429,
-                    detail=f"today_limit|今日免費查詢次數已用完（{limit} 次），升級付費方案即可無限查詢"
-                )
-    else:
-        # 遊客：用 IP 追蹤次數
-        client_ip = request.client.host if request else "unknown"
-        conn = _db_conn()
-        row = conn.execute(
-            "SELECT count FROM query_log WHERE member_id=0 AND date=? AND ip=?",
-            (today, client_ip)
-        ).fetchone()
-        used = row["count"] if row else 0
-        if used >= GUEST_DAILY_LIMIT:
-            raise HTTPException(
-                status_code=429,
-                detail=f"guest_limit|免費試用已達上限（{GUEST_DAILY_LIMIT} 次），登入後每日可查 {FREE_DAILY_LIMIT} 次"
-            )
-        # 記錄遊客查詢（改用 SELECT 再 UPDATE/INSERT，不依賴 ON CONFLICT，
-        # 避免正式環境舊表的 UNIQUE 限制跟程式碼schema對不上時整個報500）
-        if row:
-            conn.execute(
-                "UPDATE query_log SET count=count+1 WHERE member_id=0 AND date=? AND ip=?",
-                (today, client_ip)
-            )
-        else:
-            conn.execute(
-                "INSERT INTO query_log (member_id, date, ip, count) VALUES (0, ?, ?, 1)",
-                (today, client_ip)
-            )
-        conn.commit()
-        conn.close()
 
-    # 累計分析次數
+    allowed, used, limit = _check_daily_credit(request, user)
+    if not allowed:
+        if user:
+            return _quota_429(
+                "today_limit",
+                f"今日完整分析／健檢次數已用完（{limit} 次），升級即可無限使用",
+                used, limit,
+            )
+        return _quota_429(
+            "guest_limit",
+            f"免費試用已達上限（{limit} 次），登入後完整分析與健檢共用每日額度",
+            used, limit,
+        )
+
     _inc_counter("analyze_count")
 
-    # 完成邀請制（首次查詢觸發）
     if user:
         try:
             _complete_referral_if_pending(user["email"])
         except Exception as _ref_e:
             print(f"[REFERRAL] complete_referral_if_pending 失敗 {user['email']}：{_ref_e}")
 
-    return _do_analyze(stock_id, tf, ma1, ma2, ma3, ma4, ma5, user=user)
+    result = _do_analyze(stock_id, tf, ma1, ma2, ma3, ma4, ma5, user=user)
+    _consume_daily_credit(request, user)
+    _ok, used2, limit2 = _check_daily_credit(request, user)
+    if isinstance(result, dict):
+        result["credit"] = _credit_dict(used2, limit2)
+    return result
 
 
 @app.get("/api/top_gainers")
@@ -6106,7 +6177,7 @@ def _finmind_get(dataset: str, stock_id: str, start_date: str, end_date: str) ->
 
 
 @app.get("/api/chips/{stock_id}")
-def get_chips(stock_id: str, days: int = 30, user: dict = Depends(require_user)):
+def get_chips(stock_id: str, days: int = 30, user: dict | None = Depends(get_current_user)):
     """
     籌碼面：三大法人買賣超 + 融資融券
     回傳最近 N 天資料 + 統計摘要
@@ -6732,10 +6803,10 @@ async def line_bot_webhook(request: Request):
 
 @app.get("/auth/me")
 def auth_me(user: dict = Depends(require_user)):
-    today = _date_cls.today().isoformat()
+    today = _taipei_today()
     conn = _db_conn()
     row = conn.execute(
-        "SELECT count FROM query_log WHERE member_id=? AND date=?",
+        "SELECT count FROM query_log WHERE member_id=? AND date=? AND ip=''",
         (user["id"], today)
     ).fetchone()
     # 判斷是否為定期定額會員（pending_orders 或 processed_orders 有 XYWR% 訂單）
@@ -6778,7 +6849,7 @@ def auth_me(user: dict = Depends(require_user)):
         "is_recurring": is_recurring,
         "expire_at": user["expire_at"],
         "queries_used": used,
-        "queries_limit": FREE_DAILY_LIMIT if plan == "free" else 999,
+        "queries_limit": 999 if _is_premium(user) else FREE_DAILY_LIMIT,
         "days_left": days_left,
         "is_expiring_soon": is_expiring_soon,
         "referral_unlocked": user.get("referral_unlocked", 0),
@@ -7362,8 +7433,26 @@ def _run_opening_scan_job():
 
 
 @app.get("/api/picks/opening")
-def get_opening_picks():
-    """開盤熱門股（成交量前20，無需登入）
+
+def _picks_payload(rows, updated_at, user):
+    st = _taipei_now_str("%Y-%m-%d %H:%M")
+    if _is_premium(user):
+        return {"data": rows, "updated_at": updated_at, "server_time": st,
+                "tier": "paid", "masked": False, "preview": False}
+    if user:
+        masked = [_deep_mask_item(dict(x)) if isinstance(x, dict) else x for x in rows]
+        return {"data": masked, "updated_at": updated_at, "server_time": st,
+                "tier": "free", "masked": True, "preview": False}
+    n = len(rows or [])
+    placeholders = [{
+        "stock_id": "＊＊＊＊", "stock_name": "＊＊＊＊",
+        "masked": True, "preview": True,
+    } for _ in range(min(3, n) if n else 2)]
+    return {"data": placeholders, "updated_at": updated_at, "server_time": st,
+            "approx_count": n, "tier": "guest", "masked": True, "preview": True}
+
+def get_opening_picks(user: dict | None = Depends(get_current_user)):
+    """開盤熱門股（成交量前20；遊客弱預覽／免費藏名／付費全開）
     盤中補即時報價，盤後補當日收盤價，都用 MIS API。
     """
     import urllib.request as _urq, json as _jq
@@ -7371,9 +7460,7 @@ def get_opening_picks():
     updated_at = _OPENING_TOP20.get("updated_at")
 
     if not base_data:
-        # 2026/07/27：沒資料時也帶上查詢時間，前端才能一律顯示時間那一行
-        return {"data": base_data, "updated_at": updated_at,
-                "server_time": _taipei_now_str("%Y-%m-%d %H:%M")}
+        return _picks_payload(base_data, updated_at, user)
 
     enriched = []
     for item in base_data:
@@ -7393,8 +7480,7 @@ def get_opening_picks():
             pass
         enriched.append(new_item)
 
-    return {"data": enriched, "updated_at": updated_at,
-            "server_time": _taipei_now_str("%Y-%m-%d %H:%M")}
+    return _picks_payload(enriched, updated_at, user)
 
 
 # ══════════════════════════════════════════════════════════
@@ -7669,6 +7755,381 @@ def _complete_referral_if_pending(user_email: str):
               f"earned={earned_rewards} rewarded={rewarded_so_far} new_cycles={new_cycles}")
     finally:
         conn.close()
+
+
+
+# ── Data-1 市場列／產業／新聞（公開源；失敗回空；禁止假數）──
+_MARKET_CACHE: dict = {
+    "overview": {"data": None, "expires": 0.0},
+    "industries": {"data": None, "expires": 0.0},
+    "news": {"data": None, "expires": 0.0},
+    "mi_index": {"data": None, "expires": 0.0},
+    "taifex": {"data": None, "expires": 0.0},
+}
+_MARKET_UA = {
+    "User-Agent": "Mozilla/5.0",
+    "Accept": "application/json,text/javascript,*/*;q=0.8",
+    "Referer": "https://www.twse.com.tw/",
+}
+
+def _market_parse_num(val):
+    if val is None:
+        return None
+    s = str(val).strip()
+    if s in ("", "-", "--", "NULL", "null", "N/A", "-"):
+        return None
+    s = s.replace(",", "").replace("%", "").replace("+", "")
+    try:
+        return float(s)
+    except Exception:
+        return None
+
+
+def _market_http_json(url: str, timeout: float = 10, ssl_ctx=None):
+    import urllib.request as _ur
+    import json as _json
+    req = _ur.Request(url, headers=_MARKET_UA)
+    with _ur.urlopen(req, timeout=timeout, context=(ssl_ctx or _TWSE_SSL_CTX)) as resp:
+        raw = resp.read()
+    if not raw:
+        return None
+    return _json.loads(raw.decode("utf-8-sig"))
+
+
+def _market_cache_get(key: str):
+    slot = _MARKET_CACHE.get(key) or {}
+    data = slot.get("data")
+    exp = float(slot.get("expires") or 0)
+    if data is not None and exp > _time_mod.time():
+        return data
+    return None
+
+
+def _market_cache_set(key: str, data, ttl: float):
+    _MARKET_CACHE[key] = {"data": data, "expires": _time_mod.time() + ttl}
+
+
+def _fetch_mi_index_latest(max_back: int = 10):
+    """證交所盤後價格指數。往回找最近有 data 的交易日。"""
+    hit = _market_cache_get("mi_index")
+    if hit is not None:
+        return hit
+    from datetime import timedelta
+    from zoneinfo import ZoneInfo
+    day = datetime.now(ZoneInfo("Asia/Taipei")).date()
+    last_err = None
+    for i in range(max_back):
+        ymd = (day - timedelta(days=i)).strftime("%Y%m%d")
+        url = (
+            "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX"
+            f"?response=json&date={ymd}&type=IND"
+        )
+        try:
+            j = _market_http_json(url, timeout=12)
+        except Exception as e:
+            last_err = e
+            continue
+        tables = (j or {}).get("tables") or []
+        first = tables[0] if tables else {}
+        if (j or {}).get("stat") == "OK" and first.get("data"):
+            payload = {"date": ymd, "tables": tables}
+            _market_cache_set("mi_index", payload, 900)
+            return payload
+    print(f"[MARKET] MI_INDEX 無資料 last_err={last_err}")
+    _market_cache_set("mi_index", None, 45)
+    return None
+
+
+def _mi_index_rows(mi: dict, want_names: set[str] | None = None, category_only: bool = False) -> list[dict]:
+    tables = (mi or {}).get("tables") or []
+    if not tables:
+        return []
+    rows_out = []
+    exclude = ("兩倍", "反向", "日報酬", "槓桿")
+    for row in tables[0].get("data") or []:
+        if not row:
+            continue
+        name = str(row[0] or "").strip()
+        if not name:
+            continue
+        if any(x in name for x in exclude):
+            continue
+        if category_only:
+            if not name.endswith("類指數"):
+                continue
+        elif want_names is not None and name not in want_names:
+            continue
+        value = _market_parse_num(row[1] if len(row) > 1 else None)
+        pts = _market_parse_num(row[3] if len(row) > 3 else None)
+        pct = _market_parse_num(row[4] if len(row) > 4 else None)
+        if value is None or pct is None:
+            continue
+        if pts is not None:
+            pts = abs(pts) if pct >= 0 else -abs(pts)
+        rows_out.append({
+            "name": name,
+            "value": value,
+            "change": pts,
+            "change_pct": pct,
+        })
+    return rows_out
+
+
+def _fetch_mis_indices() -> list[dict]:
+    url = (
+        "https://mis.twse.com.tw/stock/api/getStockInfo.jsp"
+        "?ex_ch=tse_t00.tw|otc_o00.tw|tse_t13.tw|tse_t17.tw&json=1&delay=0"
+    )
+    try:
+        j = _market_http_json(url, timeout=8, ssl_ctx=_TWSE_SSL_CTX)
+    except Exception as e:
+        print(f"[MARKET] MIS 失敗：{e}")
+        return []
+    items = []
+    id_map = {
+        "t00": "taiex",
+        "o00": "otc",
+        "t13": "elec",
+        "t17": "finance",
+    }
+    for x in (j or {}).get("msgArray") or []:
+        code = str(x.get("c") or "")
+        z = _market_parse_num(x.get("z"))
+        y = _market_parse_num(x.get("y"))
+        if z is None or y is None or y == 0:
+            continue
+        chg = round(z - y, 2)
+        pct = round(chg / y * 100, 2)
+        items.append({
+            "id": id_map.get(code, code),
+            "code": code,
+            "name": str(x.get("n") or code),
+            "value": z,
+            "prev": y,
+            "change": chg,
+            "change_pct": pct,
+            "time": x.get("t") or x.get("%") or "",
+            "trade_date": x.get("d") or "",
+            "volume": _market_parse_num(x.get("r")),
+            "amount": _market_parse_num(x.get("m")),
+            "source": "TWSE MIS",
+        })
+    return items
+
+
+def _fetch_tx_near() -> dict | None:
+    hit = _market_cache_get("taifex")
+    if hit is not None:
+        return hit or None
+    url = "https://openapi.taifex.com.tw/v1/DailyMarketReportFut"
+    try:
+        j = _market_http_json(url, timeout=15)
+    except Exception as e:
+        print(f"[MARKET] TAIFEX 失敗：{e}")
+        _market_cache_set("taifex", None, 60)
+        return None
+    if not isinstance(j, list):
+        _market_cache_set("taifex", None, 60)
+        return None
+    rows = [
+        r for r in j
+        if r.get("Contract") == "TX" and r.get("TradingSession") == "一般"
+    ]
+    if not rows:
+        _market_cache_set("taifex", None, 60)
+        return None
+    rows.sort(key=lambda r: str(r.get("ContractMonth(Week)") or ""))
+    r = rows[0]
+    last = _market_parse_num(r.get("Last"))
+    if last is None:
+        _market_cache_set("taifex", None, 60)
+        return None
+    item = {
+        "id": "txf",
+        "code": "TX",
+        "name": "臺股期貨近月",
+        "value": last,
+        "change": _market_parse_num(r.get("Change")),
+        "change_pct": _market_parse_num(r.get("%")),
+        "volume": _market_parse_num(r.get("Volume")),
+        "trade_date": str(r.get("Date") or ""),
+        "contract_month": str(r.get("ContractMonth(Week)") or ""),
+        "session": "一般",
+        "source": "TAIFEX OpenAPI",
+    }
+    _market_cache_set("taifex", item, 900)
+    return item
+
+
+def _overview_from_mi(mi: dict) -> list[dict]:
+    want = {
+        "發行量加權股價指數": ("taiex", "t00"),
+        "電子工業類指數": ("elec", "t13"),
+        "金融保險類指數": ("finance", "t17"),
+    }
+    out = []
+    for row in _mi_index_rows(mi, want_names=set(want)):
+        iid, code = want[row["name"]]
+        out.append({
+            "id": iid,
+            "code": code,
+            "name": row["name"],
+            "value": row["value"],
+            "change": row["change"],
+            "change_pct": row["change_pct"],
+            "trade_date": mi.get("date") or "",
+            "source": "TWSE MI_INDEX",
+        })
+    return out
+
+
+@app.get("/api/market/overview")
+def api_market_overview():
+    """加權／櫃買／電子／金融／台指期近月。無資料不填假數。"""
+    hit = _market_cache_get("overview")
+    if hit is not None:
+        return hit
+    items: list[dict] = []
+    source_bits = []
+    label = "最後交易日收盤"
+    mis = _fetch_mis_indices()
+    if mis:
+        items.extend(mis)
+        source_bits.append("TWSE MIS")
+        if any(x.get("time") for x in mis):
+            label = "證交所揭示（可能為最後交易日）"
+    have_ids = {x.get("id") for x in items}
+    if "taiex" not in have_ids or "elec" not in have_ids or "finance" not in have_ids:
+        mi = _fetch_mi_index_latest()
+        if mi:
+            for row in _overview_from_mi(mi):
+                if row["id"] not in have_ids:
+                    items.append(row)
+                    have_ids.add(row["id"])
+            source_bits.append("TWSE MI_INDEX")
+    tx = _fetch_tx_near()
+    if tx:
+        items.append(tx)
+        source_bits.append("TAIFEX OpenAPI")
+    # 穩定順序
+    order = {"taiex": 0, "otc": 1, "txf": 2, "elec": 3, "finance": 4}
+    items.sort(key=lambda x: order.get(x.get("id"), 9))
+    as_of = _taipei_now_str()
+    kept = []
+    for itx in items:
+        if itx.get("value") is None or not itx.get("source") or not itx.get("name"):
+            continue
+        itx = dict(itx)
+        itx["as_of"] = as_of
+        itx["timezone"] = "Asia/Taipei"
+        kept.append(itx)
+    items = kept
+    trade_dates = [x.get("trade_date") for x in items if x.get("trade_date")]
+    payload = {
+        "ok": bool(items),
+        "as_of": as_of if items else "",
+        "timezone": "Asia/Taipei",
+        "source": " / ".join(dict.fromkeys(source_bits)) if items else "",
+        "label": label if items else "",
+        "trade_date": trade_dates[0] if trade_dates else "",
+        "items": items,
+    }
+    _market_cache_set("overview", payload, 90 if payload["ok"] else 30)
+    return payload
+
+
+@app.get("/api/market/industries")
+def api_market_industries():
+    """證交所官方類股指數強弱（最後交易日收盤）。"""
+    hit = _market_cache_get("industries")
+    if hit is not None:
+        return hit
+    mi = _fetch_mi_index_latest()
+    rows = _mi_index_rows(mi, category_only=True) if mi else []
+    rows.sort(key=lambda x: (x.get("change_pct") is None, -(x.get("change_pct") or 0)))
+    as_of = _taipei_now_str()
+    src = "TWSE MI_INDEX 類股指數"
+    td = (mi or {}).get("date") or ""
+    stamped = []
+    for r in rows:
+        if r.get("change_pct") is None or r.get("value") is None or not r.get("name"):
+            continue
+        stamped.append({
+            "name": r["name"],
+            "value": r["value"],
+            "change": r.get("change"),
+            "change_pct": r["change_pct"],
+            "source": src,
+            "as_of": as_of,
+            "timezone": "Asia/Taipei",
+            "trade_date": td,
+        })
+    payload = {
+        "ok": bool(stamped),
+        "as_of": as_of if stamped else "",
+        "timezone": "Asia/Taipei",
+        "source": src if stamped else "",
+        "label": "證交所類股指數・最後交易日收盤" if stamped else "",
+        "trade_date": td if stamped else "",
+        "items": stamped,
+        "gainers": stamped[:8] if stamped else [],
+        "losers": list(reversed(stamped[-8:])) if stamped else [],
+    }
+    _market_cache_set("industries", payload, 900 if payload["ok"] else 30)
+    return payload
+
+
+@app.get("/api/market/news")
+def api_market_news(limit: int = 12):
+    """鉅亨 RSS 原標題。失敗回空，不發明標題。"""
+    hit = _market_cache_get("news")
+    if hit is not None:
+        return hit
+    try:
+        n = int(limit)
+    except Exception:
+        n = 12
+    n = max(1, min(n, 30))
+    items = []
+    try:
+        import sys as _sys
+        _picker_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "stock_picker")
+        if _picker_path not in _sys.path:
+            _sys.path.insert(0, _picker_path)
+        from crawler import fetch_cnyes_news
+        raw = fetch_cnyes_news(80, days=3) or []
+        seen = set()
+        for rec in raw:
+            title = str((rec or {}).get("title") or "").strip()
+            link = str((rec or {}).get("link") or "").strip()
+            if not title or not link or title in seen:
+                continue
+            if not (link.startswith("http://") or link.startswith("https://")):
+                continue
+            seen.add(title)
+            items.append({
+                "title": title,
+                "link": link,
+                "pub_date": str((rec or {}).get("pub_date") or ""),
+                "source": "鉅亨",
+                "as_of": _taipei_now_str(),
+                "timezone": "Asia/Taipei",
+            })
+            if len(items) >= n:
+                break
+    except Exception as e:
+        print(f"[MARKET] news 失敗：{e}")
+        items = []
+    payload = {
+        "ok": bool(items),
+        "as_of": _taipei_now_str(),
+        "timezone": "Asia/Taipei",
+        "source": "鉅亨 RSS" if items else "",
+        "label": "來源：鉅亨" if items else "",
+        "items": items,
+    }
+    _market_cache_set("news", payload, 600 if payload["ok"] else 45)
+    return payload
 
 
 def _fetch_stock_news(stock_id: str, max_results: int = 3) -> list:
@@ -8718,16 +9179,12 @@ class ReportReq(BaseModel):
 
 
 @app.post("/api/report/generate")
-def report_generate(req: ReportReq, user: dict = Depends(require_user)):
-    plan = user["plan"]
-    is_referral_unlocked = _is_referral_active(user)
-    if not is_referral_unlocked and user.get("expire_at") and user["expire_at"] < _taipei_today():
+def report_generate(req: ReportReq, request: Request, user: dict = Depends(require_user)):
+    if user.get("expire_at") and user["expire_at"] < _taipei_today() and not _is_referral_active(user) and user.get("plan") != "free":
         raise HTTPException(status_code=403, detail="訂閱已到期，請續費後繼續使用")
-    is_free = plan == "free" and not is_referral_unlocked
-    if is_free:
-        allowed, _, _ = _check_query_limit(user["id"], plan)
-        if not allowed:
-            raise HTTPException(status_code=403, detail="完整報告為付費功能，升級或邀請3位好友即可使用")
+    allowed, used, limit = _check_daily_credit(request, user)
+    if not allowed:
+        raise HTTPException(status_code=403, detail=f"今日完整分析／健檢／報告次數已用完（{limit} 次）")
 
     stock_id = req.stock_id.strip().upper()
     report_date = _taipei_today()
@@ -8742,6 +9199,7 @@ def report_generate(req: ReportReq, user: dict = Depends(require_user)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"分析失敗：{e}")
     current_basis = d.get("price_basis_date")
+    _consume_daily_credit(request, user)
 
     conn = _db_conn()
     cached = conn.execute(
@@ -9949,8 +10407,15 @@ def delete_portfolio(stock_id: str, current_user: dict = Depends(get_current_use
 
 
 @app.get("/portfolio/analysis")
-async def portfolio_analysis(current_user: dict = Depends(get_current_user)):
-    """批次分析持股：損益、技術位置、技術訊號、近5日漲幅"""
+async def portfolio_analysis(request: Request, current_user: dict = Depends(require_user)):
+    """批次分析持股。免費與分析共用 daily_credit，每次載入扣1（45秒去重）。"""
+    allowed, used, limit = _check_daily_credit(request, current_user)
+    if not allowed:
+        return _quota_429(
+            "today_limit",
+            f"今日完整分析／健檢次數已用完（{limit} 次）",
+            used, limit,
+        )
     import sys as _sys
     _picker_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "stock_picker")
     if _picker_path not in _sys.path:
@@ -10144,6 +10609,7 @@ async def portfolio_analysis(current_user: dict = Depends(get_current_user)):
     for i, r in enumerate(results):
         r["rank"] = i + 1
 
+    _consume_portfolio_daily_credit(request, current_user)
     return {"ok": True, "data": results}
 
 
@@ -10188,23 +10654,8 @@ def deep_analysis_page():
 
 
 def _deep_is_premium(user: dict | None) -> bool:
-    """
-    深度選股專用：判斷此使用者是否有權看到完整股票代號/名稱。
-
-    判斷條件與 require_paid_user() 完全一致（邀請制解鎖 > 付費方案 > 到期日），
-    差別只在這裡不拋 403，而是回傳 True/False——因為深度選股要讓免費會員與
-    未登入者也能看到遮罩版預覽（導流用），不是整個擋掉。
-    """
-    if not user:
-        return False
-    if _is_referral_active(user):
-        return True
-    if user.get("plan") == "free":
-        return False
-    exp = user.get("expire_at")
-    if exp and exp < _date_cls.today().isoformat():
-        return False
-    return True
+    """深度選股完整代號：與 _is_premium 同一套。"""
+    return _is_premium(user)
 
 
 def _deep_mask_item(item: dict) -> dict:
@@ -10270,21 +10721,26 @@ def api_deep_analysis(user: dict | None = Depends(get_current_user)):
     _is_premium = _deep_is_premium(user)
 
     if not _row or not _row["content"]:
-        return {"data": [], "updated_at": None,
-                "server_time": _server_time, "masked": not _is_premium}
+        empty = _picks_payload([], None, user)
+        empty["server_time"] = _server_time
+        return empty
     import json as _json_api
     try:
         _data = _json_api.loads(_row["content"])
     except Exception:
         _data = []
 
-    if not _is_premium:
+    if _is_premium:
+        return {"data": _data, "updated_at": _row["updated_at"],
+                "server_time": _server_time, "masked": False, "tier": "paid", "preview": False}
+    if user:
         _data = [_deep_mask_item(_it) for _it in _data]
         return {"data": _data, "updated_at": _row["updated_at"],
-                "server_time": _server_time, "masked": True}
-
-    return {"data": _data, "updated_at": _row["updated_at"],
-            "server_time": _server_time, "masked": False}
+                "server_time": _server_time, "masked": True, "tier": "free", "preview": False}
+    # 遊客弱預覽：不可全空白
+    payload = _picks_payload(_data, _row["updated_at"], user)
+    payload["server_time"] = _server_time
+    return payload
 
 
 @app.get("/deep-analysis-status")
@@ -10578,7 +11034,7 @@ async def forum_get_posts(
             "created_at": r[5][:16] if r[5] else "",
             "comment_count": r[6],
         }
-        if is_paid:
+        if user:
             post["content"] = r[3]
         posts.append(post)
 
@@ -10620,14 +11076,10 @@ async def forum_get_post(post_id: int, user: dict | None = Depends(get_current_u
         conn.close()
         raise HTTPException(status_code=404, detail="找不到此主題")
 
-    is_paid = False
-    if user:
-        today = _date_cls.today().isoformat()
-        is_paid = (user.get("plan") != "free" and user.get("expire_at", "") >= today) or _is_referral_active(user)
-
-    if not is_paid:
+    if not user:
         conn.close()
-        raise HTTPException(status_code=403, detail="需付費會員才能查看內容")
+        raise HTTPException(status_code=403, detail="請先登入後查看討論內容")
+    # 免費可看；留言／發文仍 require_paid_user
 
     comments = conn.execute(
         "SELECT id, nickname, content, created_at FROM forum_comments WHERE post_id=? ORDER BY id ASC",
