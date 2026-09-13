@@ -5791,6 +5791,10 @@ def batch_analyze(req: BatchRequest, user: dict = Depends(require_user)):
             "near_bot":     d.get("near_bot"),
             "kbar_dir":     d.get("kbar_dir"),
             "volume_ratio": volume_ratio,
+            # 2026/09/13 首頁IA-Home-3新增：今日異動%。優先用即時報價換算的change_pct
+            # （盤中快取更新時寫入），沒有的話退回收盤價算出的price_change_pct
+            # （近兩根收盤價比較），兩者都是真實計算值，不是另外造的假欄位。
+            "change_pct":   d.get("change_pct") if d.get("change_pct") is not None else d.get("price_change_pct"),
         }
 
     results = {}
