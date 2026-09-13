@@ -98,6 +98,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 @media(max-width:1023px){
   #topNavLinks{display:none!important}
   #themeToggleBtn{display:none!important}
+  /* 2026/09/13修正：#desktopSidebar本來就沒有任何規則在窄螢幕隱藏它，只是靠
+     @media(min-width:1024px)裡的grid排版讓它「看起來」只在電腦版出現；一旦
+     watchList有資料，_renderDesktopWatchSidebar()（addWatch/removeWatch/setStockGroup
+     等地方都會無條件呼叫）就會把它填滿內容，在手機版直接以一般區塊的方式插在頁面最上方。
+     這是既有問題（這次新增的「＋新增股票」按鈕只是讓它更明顯），這裡順手補上真正的隱藏規則。 */
+  #desktopSidebar{display:none!important}
   /* 2026/08/03新增：手機版關鍵數字/文字字級放大，原本跟桌面版用同一套尺寸太小難閱讀 */
   .xhair{font-size:12px}
   .leg{font-size:12px}
@@ -972,6 +978,14 @@ html[data-theme="dark"] body,html:not([data-theme]) body{background:transparent}
 .sector-flow,.news-panel{background:var(--surface);border:1px solid var(--border);border-radius:18px;
   padding:18px;box-shadow:var(--hd2-e1)}
 .sector-flow h2,.news-panel h2{font-size:15px;margin:0 0 4px;color:var(--text)}
+/* 2026/09/13修正：news-panel內容是JS動態插入的.v5-news系列class（沿用IA-Home-1
+   舊版），--v5-text/--v5-sub是寫死的淺色模式色碼、從未有暗色模式覆寫，導致容器背景
+   跟著主題正常換色但文字顏色沒跟著換，暗色模式下新聞標題幾乎看不到。改用全站真正
+   跟著主題走的 var(--text)/var(--muted)/var(--border)，不動 .v5-* 原本的定義。 */
+.news-panel .v5-sub{color:var(--muted)}
+.news-panel .v5-news a{color:var(--text)}
+.news-panel .v5-news-item{border-bottom:1px solid var(--border)}
+.news-panel .v5-news-item:last-child{border-bottom:none}
 .sector-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
 .sector-node{border-radius:14px;cursor:pointer;border:1px solid var(--border2);background:var(--surface-raised);
   transition:transform .15s,box-shadow .15s;flex:0 0 auto;display:flex;flex-direction:column;justify-content:center}
@@ -981,15 +995,15 @@ html[data-theme="dark"] body,html:not([data-theme]) body{background:transparent}
 .sector-node .sn-chg{font-weight:800}
 .sector-node .sn-chg.up{color:var(--up)}
 .sector-node .sn-chg.dn{color:var(--down)}
-.sector-node.sn-lg{padding:16px 20px;min-width:150px}
-.sector-node.sn-lg .sn-name{font-size:13px;margin-bottom:4px}
-.sector-node.sn-lg .sn-chg{font-size:22px}
-.sector-node.sn-md{padding:12px 16px;min-width:118px}
+.sector-node.sn-lg{padding:18px 24px;min-width:184px}
+.sector-node.sn-lg .sn-name{font-size:14px;margin-bottom:4px}
+.sector-node.sn-lg .sn-chg{font-size:25px}
+.sector-node.sn-md{padding:12px 16px;min-width:114px}
 .sector-node.sn-md .sn-name{font-size:12px;margin-bottom:3px}
 .sector-node.sn-md .sn-chg{font-size:16px}
-.sector-node.sn-sm{padding:9px 12px;min-width:92px;opacity:.88}
-.sector-node.sn-sm .sn-name{font-size:11px;margin-bottom:2px}
-.sector-node.sn-sm .sn-chg{font-size:13px}
+.sector-node.sn-sm{padding:8px 11px;min-width:76px;opacity:.85}
+.sector-node.sn-sm .sn-name{font-size:10px;margin-bottom:2px}
+.sector-node.sn-sm .sn-chg{font-size:12px}
 
 /* ── 3. 今天看什麼：紅／藍／綠三張可點卡片 ── */
 .pick-zone h2{font-size:15px;margin:0 0 4px;color:var(--text)}
@@ -1051,7 +1065,176 @@ html[data-theme="dark"] body,html:not([data-theme]) body{background:transparent}
   .state-orb{animation:none}
   .sector-node,.stock-tile{transition:none}
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   IA-Home-4（2026/09/13 三輪：2.5D空間層次強化）
+   目的：把上面IA-Home-3的平面卡片（白底＋灰框＋圓角＋陰影）升級成有前後
+   層次的空間感——背景層／環境光層／主要卡片層／浮動節點層／互動元件層，
+   hover時往前浮起。全部用CSS perspective/transform/translateZ/box-shadow
+   /backdrop-filter做，不用WebGL。只新增規則、只用既有class當掛勾，
+   不改動、不刪除上面任何一行CSS，也不改HTML結構或JS函式。
+   ══════════════════════════════════════════════════════════════════ */
+
+/* 0. 修正：#homeFlow本身在IA-Home-1時代寫死background:var(--v5-bg)（淺色
+   #f5f7fa），從未有暗色覆寫，暗色模式下卡片間縫隙會透出一塊錯誤的淺灰色。
+   這裡改成跟主題走，同時把它變成整個首頁的「背景層」──疊上環境光暈＋
+   極淡的網點紋理，讓背景層跟卡片的「表面層」看起來明顯是不同深度。 */
+#homeDash.home-v2, #homeFlow.home-v2{
+  position:relative;
+  /* 2026/09/13追加修正：#homeFlow本身（IA-Home-1時代）還寫死了
+     color:var(--v5-text)（同一個沒有暗色覆寫的舊token），會被子孫元素
+     繼承。這就是為什麼「想看得更深？」等沒有另外指定color的標題，在
+     暗色模式下也幾乎看不到——不是個案，是同一個根因的另一個受害者。
+     這裡直接把整個首頁區塊的文字顏色改成正確跟著主題走的var(--text)，
+     從源頭修掉，不用每個子元素都補一行。 */
+  color:var(--text);
+  background:var(--surface-soft);
+  background-image:
+    radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 45%),
+    radial-gradient(circle at 88% 28%, color-mix(in srgb, var(--hd2-blue, #3B82F6) 20%, transparent), transparent 48%),
+    radial-gradient(circle at 50% 98%, color-mix(in srgb, var(--down) 16%, transparent), transparent 42%),
+    radial-gradient(color-mix(in srgb, var(--text) 11%, transparent) 1.4px, transparent 1.4px);
+  background-size:auto,auto,auto,24px 24px;
+  background-position:0 0,0 0,0 0,0 0;
+  perspective:1400px;
+  perspective-origin:50% 10%;
+  isolation:isolate;
+}
+#homeDash.home-v2 .home-section, #homeFlow.home-v2 .home-section{
+  position:relative;
+  z-index:1;
+  transform-style:preserve-3d;
+}
+
+/* 1. 今日台股駕駛艙：環境光暈＋主卡浮起＋state-orb做出真的球體感＋儀表環 */
+.market-hero{
+  transform:translateZ(0);
+  box-shadow:var(--shadow), 0 1px 0 color-mix(in srgb, var(--text) 4%, transparent) inset;
+}
+.market-hero::after{
+  content:"";position:absolute;top:-30%;left:-10%;width:60%;height:160%;
+  background:radial-gradient(circle, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%);
+  filter:blur(30px);pointer-events:none;z-index:0;opacity:.8;
+}
+.market-hero-head,.market-main,.market-breadth,.market-hero-meta{position:relative;z-index:1}
+.market-state{position:relative}
+.state-orb{
+  transform:perspective(600px) rotateX(6deg);
+  box-shadow:0 0 calc(6px + var(--orb-mag) * 1.6px) calc(1px + var(--orb-mag) * 0.6px) color-mix(in srgb,var(--orb-c) 45%,transparent),
+             inset 0 2px 6px rgba(0,0,0,.08),
+             0 14px 22px -10px color-mix(in srgb, var(--orb-c) 55%, transparent);
+}
+.state-orb::before{
+  content:"";position:absolute;top:14%;left:22%;width:32%;height:22%;border-radius:50%;
+  background:radial-gradient(ellipse, rgba(255,255,255,.55), transparent 70%);
+  pointer-events:none;
+}
+.market-state::after{
+  content:"";position:absolute;top:50%;left:50%;width:132px;height:132px;
+  transform:translate(-50%,-50%);border-radius:50%;
+  border:1px dashed color-mix(in srgb, var(--orb-c, var(--muted)) 35%, transparent);
+  animation:hvOrbitSpin 18s linear infinite;pointer-events:none;
+}
+@keyframes hvOrbitSpin{from{transform:translate(-50%,-50%) rotate(0deg)}to{transform:translate(-50%,-50%) rotate(360deg)}}
+
+/* 2. 資金雷達：sector-node改成浮動色塊──大塊＝離你近／小塊＝離你遠，
+   用translateY＋陰影深淺模擬前後層次，hover時整個往前浮出並放大 */
+.sector-flow, .news-panel{transform:translateZ(0)}
+.sector-grid{padding-top:6px}
+.sector-node{
+  box-shadow:0 1px 2px color-mix(in srgb, var(--text) 6%, transparent);
+  transition:transform .22s cubic-bezier(.2,.8,.3,1.3), box-shadow .22s;
+  will-change:transform;
+}
+.sector-node.sn-lg{transform:translateY(0) scale(1.04) translateZ(0);box-shadow:0 10px 20px -8px color-mix(in srgb, var(--text) 20%, transparent)}
+.sector-node.sn-md{transform:translateY(7px) scale(1) translateZ(0)}
+.sector-node.sn-sm{transform:translateY(15px) scale(.93) translateZ(0);filter:saturate(.85)}
+.sector-node:hover{
+  transform:translateY(-6px) scale(1.055) !important;
+  box-shadow:0 18px 30px -12px color-mix(in srgb, var(--text) 22%, transparent);
+  z-index:5;
+}
+.sector-node .sn-chg.up{text-shadow:0 0 14px color-mix(in srgb, var(--up) 35%, transparent)}
+.sector-node .sn-chg.dn{text-shadow:0 0 14px color-mix(in srgb, var(--down) 35%, transparent)}
+
+/* 3. 今天看什麼：卡片hover時像往前傾、往上浮出，加一層對角光澤 */
+.stock-tile{position:relative;overflow:hidden;transform:translateZ(0)}
+.stock-tile::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(135deg, color-mix(in srgb, var(--text) 5%, transparent), transparent 55%);
+}
+.stock-tile:hover{
+  transform:perspective(800px) rotateX(2deg) translateY(-6px) scale(1.015);
+  box-shadow:0 22px 34px -14px color-mix(in srgb, var(--text) 25%, transparent);
+}
+
+/* 4. 找股票：刻意做成「內凹」的次要層，跟上面浮起的卡片形成前後對比 */
+.stock-search{
+  box-shadow:inset 0 2px 6px color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+/* 5. 我的投資：統計小方塊做輕量浮起層 */
+.invest-stat{
+  box-shadow:0 1px 2px color-mix(in srgb, var(--text) 5%, transparent);
+  transition:transform .15s, box-shadow .15s;
+}
+.invest-stat:hover{
+  transform:translateY(-3px);
+  box-shadow:0 10px 18px -8px color-mix(in srgb, var(--text) 18%, transparent);
+}
+
+/* 6. DEEP：局部暗化「窗口」＋金色高亮層，維持整站明亮基調，只有這塊卡片
+   刻意做出「往裡看得更深」的視覺──呼應GitHub開源專案tw-stock-radar的
+   HUD式深色資訊層語言，但不整頁變暗 */
+.deep-panel{transform:translateZ(0);overflow:hidden}
+.deep-panel::before{
+  content:"";position:absolute;top:-40%;right:-15%;width:70%;height:180%;
+  background:radial-gradient(circle, color-mix(in srgb, var(--amber) 30%, transparent), transparent 68%);
+  filter:blur(26px);pointer-events:none;z-index:0;
+}
+.deep-panel > *{position:relative;z-index:1}
+.deep-funnel .df-step{
+  box-shadow:0 1px 2px color-mix(in srgb, var(--text) 6%, transparent);
+  transition:transform .15s;
+}
+.deep-funnel .df-step:hover{transform:translateY(-2px)}
+.hd2-deep-btn-primary{
+  box-shadow:0 8px 18px -8px color-mix(in srgb, var(--amber) 55%, transparent);
+  transition:transform .15s, box-shadow .15s;
+}
+.hd2-deep-btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 22px -8px color-mix(in srgb, var(--amber) 65%, transparent)}
+
+/* 7. Phase 4追加：state-orb量表／市場氣氛柱狀圖／資金雷達橫條圖 三個ECharts
+   容器的版面搭配，沿用上面同一套translateZ／box-shadow語言，只新增規則，
+   不重複宣告一套新系統、不動任何既有選取器。圖表本身的顏色（gradient/
+   shadowColor）在JS用getComputedStyle即時讀取--up/--dn等真正的hex值，
+   這裡的CSS只負責容器尺寸與間距，全部用CSS變數，暗色模式不用另外處理。 */
+#homeFlow.home-v2 #stateOrbGauge{position:absolute;inset:0;pointer-events:none}
+#homeFlow.home-v2 .state-orb.has-gauge > span{opacity:0}
+#homeFlow.home-v2 #breadthColChart{margin-top:8px;transform:translateZ(0);max-width:100%}
+#homeFlow.home-v2 #sectorBarChart{margin-top:4px;transform:translateZ(0);max-width:100%;cursor:pointer}
+#homeFlow.home-v2 #sectorBarChart canvas,
+#homeFlow.home-v2 #breadthColChart canvas,
+#homeFlow.home-v2 #stateOrbGauge canvas{max-width:100%}
+
+/* 手機／效能／無障礙：縮小或關閉較重的3D效果，維持可用性與效能 */
+@media(max-width:640px){
+  #homeDash.home-v2, #homeFlow.home-v2{perspective:none;background-size:auto,auto,auto,16px 16px}
+  .state-orb{transform:none}
+  .market-state::after{display:none}
+  .stock-tile:hover{transform:translateY(-4px) scale(1.01)}
+  .sector-node.sn-md,.sector-node.sn-sm{transform:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .market-state::after{animation:none}
+  .sector-node,.stock-tile,.invest-stat,.deep-funnel .df-step,.hd2-deep-btn-primary{transition:none}
+  .sector-node:hover,.stock-tile:hover{transform:none}
+}
 </style>
+<!-- Phase 4（首頁真實資料3D-style圖表）：state-orb量表／市場氣氛柱狀／資金雷達橫條，
+     全部用ECharts Canvas 2D linear-gradient＋shadowBlur畫，不用WebGL/three.js。
+     只渲染_loadHomeMarket()既有fetch抓到的真實資料，不新增任何API呼叫。 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async onload="if(typeof _initGoogleSignIn==='function'){_initGoogleSignIn();}"></script>
 <script>
 setTimeout(function(){var s=document.createElement('script');s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739';s.async=true;s.crossOrigin='anonymous';document.head.appendChild(s);},2000);
@@ -1177,6 +1360,10 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
       <input id="wsNewGroupInput" placeholder="族群名稱，如：半導體" onkeydown="if(event.key==='Enter')_wsSubmitAddGroup()">
       <button onclick="_wsSubmitAddGroup()">新增</button>
     </div>
+    <!-- 2026/09/13新增：直接把股票加進目前篩選中的族群，不用先跑去個股頁面加成「預設」再手動搬 -->
+    <div style="padding:0 12px 8px">
+      <button onclick="_openAddStockModal(_wsGroupFilter)" style="width:100%;height:28px;border:.5px solid var(--border2);border-radius:6px;background:var(--bg2);color:var(--text2);font-size:11px;cursor:pointer">＋新增股票</button>
+    </div>
     <div id="dwsList">
       <div style="padding:16px;font-size:12px;color:var(--text3)">載入中…</div>
     </div>
@@ -1190,7 +1377,7 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
     <button class="desktop-tab-btn active" onclick="showPage('home')" data-page="home">首頁</button>
     <button class="desktop-tab-btn" onclick="_homeGo('picks')" data-page="picks">發現機會</button>
     <button class="desktop-tab-btn" onclick="_homeGo('analyze')" data-page="home">個股分析</button>
-    <button class="desktop-tab-btn" onclick="_homeGo('deep')" data-page="home">深度分析</button>
+    <button class="desktop-tab-btn" onclick="_homeGo('deepanalysis')" data-page="home">深度分析</button>
     <button class="desktop-tab-btn" onclick="showPage('watch')" data-page="watch">我的投資</button>
     <button class="desktop-tab-btn" onclick="showPage('forum')" data-page="forum">社群</button>
   </div>
@@ -1214,7 +1401,7 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
         </div>
         <div class="market-main">
           <div class="market-state">
-            <div class="state-orb" id="stateOrb"><span id="stateOrbPct">—</span></div>
+            <div class="state-orb" id="stateOrb"><div id="stateOrbGauge" style="width:100%;height:100%"></div><span id="stateOrbPct">—</span></div>
             <div class="state-label" id="stateLabel">載入中…</div>
           </div>
           <div class="market-idx" id="homeMktChips"></div>
@@ -1289,6 +1476,8 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
           <input id="wsNewGroupInputM" placeholder="族群名稱，如：半導體" onkeydown="if(event.key==='Enter')_wsSubmitAddGroupM()">
           <button onclick="_wsSubmitAddGroupM()">新增</button>
         </div>
+        <!-- 2026/09/13新增：跟桌面側欄同一顆「＋新增股票」，直接加進目前篩選中的族群 -->
+        <button onclick="_openAddStockModal(_wsGroupFilter)" style="width:100%;height:30px;margin-bottom:10px;border:.5px solid var(--border2);border-radius:6px;background:var(--bg2);color:var(--text2);font-size:12px;cursor:pointer">＋新增股票</button>
         <div id="homeWatchPreview"></div>
         <div class="hv-cta">
           <button type="button" class="hv-btn-secondary" onclick="showPage('watch')">查看我的投資</button>
@@ -1309,7 +1498,7 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
         </div>
         <div id="homeDeepLockBox"></div>
         <div class="hv-cta">
-          <button type="button" class="hd2-deep-btn-primary" onclick="_homeGo('deep')">進入深度分析</button>
+          <button type="button" class="hd2-deep-btn-primary" onclick="_homeGo('deepanalysis')">進入深度分析</button>
           <button type="button" class="hd2-deep-btn-secondary" id="homeIaUpgrade" onclick="_homeGo('upgrade')">升級付費會員</button>
         </div>
       </section>
@@ -1880,6 +2069,60 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
   </div>
 </div>
 
+<!-- 自選股：新增股票（搜尋＋多選）Modal（2026/09/13新增）：桌面側欄／手機首頁預覽／自選股分頁三個入口共用同一個modal -->
+<div id="addStockModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)_closeAddStockModal()">
+  <div class="modal-box" style="max-width:400px">
+    <div class="modal-title">＋ 新增股票</div>
+    <div class="modal-sub">搜尋股票並加入指定族群</div>
+    <div class="modal-field">
+      <label>加入族群</label>
+      <select id="addStockGroupSelect" style="width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:14px;outline:none"></select>
+    </div>
+    <div class="modal-field">
+      <label>搜尋股票（代號或名稱）</label>
+      <input type="text" id="addStockSearchInput" placeholder="如：2330 或 台積電" autocomplete="off" oninput="_onAddStockSearchInput()">
+    </div>
+    <div id="addStockResults" style="max-height:260px;overflow-y:auto;margin-bottom:14px"></div>
+    <button class="modal-btn" onclick="_submitAddStockModal()">加入</button>
+    <div style="text-align:center;margin-top:12px">
+      <span class="modal-link" onclick="_closeAddStockModal()">取消</span>
+    </div>
+  </div>
+</div>
+
+<!-- 個股分析頁：第一次加入自選時選族群 Modal（2026/09/13新增）-->
+<div id="watchGroupPickModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)_closeWatchGroupPickModal()">
+  <div class="modal-box" style="max-width:320px">
+    <div class="modal-title">加入自選族群</div>
+    <div class="modal-sub" id="watchGroupPickSub"></div>
+    <div id="watchGroupPickList" style="margin-bottom:12px"></div>
+    <div style="display:flex;gap:6px;margin-bottom:14px">
+      <input id="watchGroupPickNewInput" placeholder="+ 新增族群" style="flex:1;padding:8px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px;outline:none" onkeydown="if(event.key==='Enter'){event.preventDefault();_watchGroupPickAddGroup()}">
+      <button onclick="_watchGroupPickAddGroup()" style="padding:0 14px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text2);font-size:13px;cursor:pointer">新增</button>
+    </div>
+    <button class="modal-btn" onclick="_confirmWatchGroupPick()">加入</button>
+    <div style="text-align:center;margin-top:12px">
+      <span class="modal-link" onclick="_closeWatchGroupPickModal()">取消</span>
+    </div>
+  </div>
+</div>
+
+<!-- 個股分析頁：已在自選時的移動／移除 Modal（2026/09/13新增）-->
+<div id="watchMoveModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)_closeWatchMoveModal()">
+  <div class="modal-box" style="max-width:300px">
+    <div class="modal-title">★ 已加入自選</div>
+    <div class="modal-sub" id="watchMoveSub"></div>
+    <div class="modal-field">
+      <label>移動到族群</label>
+      <select id="watchMoveGroupSelect" style="width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text);font-size:14px;outline:none" onchange="_watchMoveGroupChange(this.value)"></select>
+    </div>
+    <button class="modal-btn" style="background:var(--up)" onclick="_watchMoveRemove()">移除自選</button>
+    <div style="text-align:center;margin-top:12px">
+      <span class="modal-link" onclick="_closeWatchMoveModal()">關閉</span>
+    </div>
+  </div>
+</div>
+
 <!-- 底部導航 -->
 <div class="bottom-nav">
   <button class="nav-btn active" onclick="showPage('home')">
@@ -1961,7 +2204,16 @@ function addWatchGroupName(name){
   name = (name||'').trim();
   if(!name) return null;
   const names = getWatchGroupNames();
-  if(!names.includes(name)){ names.push(name); localStorage.setItem('watchGroupNames', JSON.stringify(names)); }
+  if(!names.includes(name)){
+    names.push(name); localStorage.setItem('watchGroupNames', JSON.stringify(names));
+    // 2026/09/13新增：自選股改為跟帳號綁定後，族群異動也要同步到後端，否則換裝置登入
+    // 這個族群就消失了。fire-and-forget：不擋UI，失敗只console.warn，下次登入merge會補回來。
+    if(_authUser){
+      fetch(`${getAPI()}/api/watchlist/group/add`,{method:'POST',headers:_authHeaders(),body:JSON.stringify({name})})
+        .then(r=>{ if(!r.ok) console.warn('[watchlist] 新增族群同步失敗', r.status); })
+        .catch(e=>console.warn('[watchlist] 新增族群同步失敗', e));
+    }
+  }
   return name;
 }
 // 重新命名族群（2026/08/23新增）：「預設」跟「全部」不可改名，改名後同步更新所有屬於這個族群的自選股
@@ -1976,6 +2228,12 @@ function renameWatchGroupName(oldName, newName){
   localStorage.setItem('watchGroupNames', JSON.stringify(names));
   watchList.forEach(s=>{ if((s.group||'預設')===oldName) s.group = newName; });
   _persistWatchList();
+  // 2026/09/13新增：同步到後端（見addWatchGroupName註解，同樣的fire-and-forget原則）
+  if(_authUser){
+    fetch(`${getAPI()}/api/watchlist/group/rename`,{method:'POST',headers:_authHeaders(),body:JSON.stringify({old_name:oldName,new_name:newName})})
+      .then(r=>{ if(!r.ok) console.warn('[watchlist] 族群改名同步失敗', r.status); })
+      .catch(e=>console.warn('[watchlist] 族群改名同步失敗', e));
+  }
   return newName;
 }
 // 刪除族群（2026/08/23新增）：「預設」跟「全部」不可刪除；被刪除族群內的股票歸回「預設」，股票本身不會被移除
@@ -1987,6 +2245,12 @@ function deleteWatchGroupName(name){
   localStorage.setItem('watchGroupNames', JSON.stringify(names));
   watchList.forEach(s=>{ if((s.group||'預設')===name) s.group = '預設'; });
   _persistWatchList();
+  // 2026/09/13新增：同步到後端（見addWatchGroupName註解，同樣的fire-and-forget原則）
+  if(_authUser){
+    fetch(`${getAPI()}/api/watchlist/group/delete`,{method:'POST',headers:_authHeaders(),body:JSON.stringify({name})})
+      .then(r=>{ if(!r.ok) console.warn('[watchlist] 族群刪除同步失敗', r.status); })
+      .catch(e=>console.warn('[watchlist] 族群刪除同步失敗', e));
+  }
   return true;
 }
 // 目前正在檢視的族群篩選（電腦版側欄／手機版首頁共用同一個狀態，"全部"＝不篩選）
@@ -2002,11 +2266,48 @@ function setStockGroup(id, group){
   if(typeof _renderDesktopWatchSidebar==='function') _renderDesktopWatchSidebar();
   if(typeof renderHomeDash==='function') renderHomeDash();
   if(_watchCache && Object.keys(_watchCache).length && typeof _renderWatchGroups==='function') _renderWatchGroups(_watchCache);
+  // 2026/09/13新增：同步到後端（見addWatchGroupName註解，同樣的fire-and-forget原則）
+  if(_authUser){
+    fetch(`${getAPI()}/api/watchlist/group`,{method:'POST',headers:_authHeaders(),body:JSON.stringify({stock_id:id,group:s.group})})
+      .then(r=>{ if(!r.ok) console.warn('[watchlist] 更新股票族群同步失敗', r.status); })
+      .catch(e=>console.warn('[watchlist] 更新股票族群同步失敗', e));
+  }
 }
 function _groupOptionsHtml(selected){
   return getWatchGroupNames().map(g=>
     `<option value="${g}"${g===selected?' selected':''}>${g}</option>`
   ).join('');
+}
+
+// 自選股伺服器同步（2026/09/13新增）：登入後把伺服器上的自選股資料拉回來，取代純本地的假象。
+// 同時把當下localStorage裡可能還留著的舊資料（這個修正上線前累積的、或離線時沒同步到的）
+// 一併送給後端 /api/watchlist/merge，由後端決定怎麼合併（伺服器資料優先，不被過時的本地
+// 資料蓋掉），回傳合併後的「正本」直接取代記憶體狀態，不用再多打一次GET。
+// 失敗時（斷線／後端出錯）維持目前記憶體內的watchList不變，只console.warn，不讓頁面壞掉。
+async function _syncWatchListFromServer(){
+  if(!_authUser) return;
+  try{
+    const r = await fetch(`${getAPI()}/api/watchlist/merge`,{
+      method:'POST',
+      headers:_authHeaders(),
+      body:JSON.stringify({items:watchList, group_names:getWatchGroupNames()})
+    });
+    if(!r.ok){ console.warn('[watchlist] 伺服器同步失敗，暫時沿用本地資料', r.status); return; }
+    const d = await r.json();
+    if(!d || !d.ok || !Array.isArray(d.data)){ console.warn('[watchlist] 伺服器同步回傳格式異常，暫時沿用本地資料', d); return; }
+    watchList = d.data;
+    localStorage.setItem('watchList', JSON.stringify(watchList));
+    const names = (Array.isArray(d.group_names) && d.group_names.length) ? d.group_names : ['預設'];
+    localStorage.setItem('watchGroupNames', JSON.stringify(names));
+    if(typeof renderHomeDash==='function') renderHomeDash();
+    if(typeof _renderDesktopWatchSidebar==='function') _renderDesktopWatchSidebar();
+    if(typeof _renderWsGroupFilterSelectM==='function') _renderWsGroupFilterSelectM();
+    // 只有目前真的停留在「自選」分頁時才刷新（watchInnerContent元素存在代表頁面結構已建好），
+    // 避免showWatchList()的fallback邏輯在使用者身處其他頁面時，把#pageContent誤蓋掉。
+    if(document.getElementById('watchInnerContent') && typeof _renderWatchInner==='function') _renderWatchInner();
+  }catch(e){
+    console.warn('[watchlist] 伺服器同步失敗（可能斷線），暫時沿用本地資料', e);
+  }
 }
 
 // ══════════════════════════════════════
@@ -2201,9 +2502,10 @@ function showWatchList(){
       <div style="font-size:36px;margin-bottom:12px">🔥</div>
       <div style="font-size:15px;font-weight:600;margin-bottom:6px">關注清單是空的</div>
       <div style="font-size:13px;margin-bottom:10px">分析股票後按「加入自選」</div>
-      <div style="font-size:11px;color:var(--text3);background:var(--bg2);border-radius:8px;padding:10px 14px;text-align:left;max-width:280px;margin:0 auto">
+      <div style="font-size:11px;color:var(--text3);background:var(--bg2);border-radius:8px;padding:10px 14px;text-align:left;max-width:280px;margin:0 auto 14px">
         💡 加入自選後可在此快速查看，支援批次分析
       </div>
+      <button onclick="_openAddStockModal('預設')" style="padding:8px 18px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">＋新增股票</button>
     </div>`;
     return;
   }
@@ -2221,6 +2523,18 @@ function _renderWatchSkeleton(el){
       <div style="font-size:16px;font-weight:700">🔥 今日關注</div>
       <div style="font-size:11px;color:var(--text3)" id="watchUpdateTime">更新中...</div>
     </div>
+    <!-- 自訂族群篩選（2026/09/13新增）：跟桌面側欄／手機首頁預覽共用同一套_wsGroupFilter狀態與函式家族（W尾綴） -->
+    <div class="ws-group-bar" style="padding:0 0 8px;border-bottom:none">
+      <select id="wsGroupFilterW" class="ws-group-select" onchange="_onWsGroupFilterChangeW(this.value)"></select>
+      <button class="ws-group-add" onclick="_wsToggleAddGroup('W')" title="新增族群">＋</button>
+      <button id="wsGroupEditW" class="ws-group-add" onclick="_wsRenameCurrentGroup('W')" title="重新命名族群" style="display:none">✎</button>
+      <button id="wsGroupDelW" class="ws-group-add" onclick="_wsDeleteCurrentGroup('W')" title="刪除族群" style="display:none">🗑</button>
+      <button class="ws-group-add" style="width:auto;padding:0 10px;white-space:nowrap" onclick="_openAddStockModal(_wsGroupFilter)" title="新增股票">＋新增股票</button>
+    </div>
+    <div id="wsAddGroupRowW" class="ws-add-row" style="display:none;padding:0 0 10px">
+      <input id="wsNewGroupInputW" placeholder="族群名稱，如：半導體" onkeydown="if(event.key==='Enter')_wsSubmitAddGroup('W')">
+      <button onclick="_wsSubmitAddGroup('W')">新增</button>
+    </div>
     <!-- U4: 排序按鈕 -->
     <div style="display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap">
       <button onclick="_sortWatch('group')" class="watch-sort-btn" style="padding:3px 10px;border-radius:12px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:10px;cursor:pointer">分組</button>
@@ -2229,6 +2543,7 @@ function _renderWatchSkeleton(el){
       <button onclick="_sortWatch('sup')" class="watch-sort-btn" style="padding:3px 10px;border-radius:12px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:10px;cursor:pointer">距支撐↓</button>
     </div>
     <div id="watchGroups">${skeletonCard.repeat(Math.min(watchList.length,4))}</div>`;
+  _renderWsGroupFilterSelect('W');
 }
 
 async function _fetchWatchBatch(){
@@ -2286,6 +2601,18 @@ function _renderWatchGroups(results){
   // （例如在電腦版側欄改族群），這裡沒有目標元素就安靜跳過，不要噴錯。
   const watchGroupsEl = document.getElementById('watchGroups');
   if(!watchGroupsEl) return;
+  // 2026/09/13修正：以前這裡固定跑全部watchList，完全無視_wsGroupFilter，導致自選股分頁的
+  // 族群篩選select形同虛設。改用_wsFilteredWatchList()，跟桌面側欄／手機首頁預覽行為一致。
+  const listForGroups = _wsFilteredWatchList();
+  if(!listForGroups.length){
+    watchGroupsEl.innerHTML = watchList.length
+      ? `<div style="padding:40px 0;text-align:center;color:var(--text3)">
+          <div style="font-size:13px;margin-bottom:14px">這個族群還沒有股票</div>
+          <button onclick="_openAddStockModal(_wsGroupFilter)" style="padding:8px 18px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">＋新增股票</button>
+        </div>`
+      : '<div style="padding:20px 0;text-align:center;color:var(--text3);font-size:13px">還沒有自選股</div>';
+    return;
+  }
   const groups={
     danger:  {label:'🚨 今日注意',  items:[], color:'var(--up)'},
     strong:  {label:'🚀 今日強勢',  items:[], color:'var(--green)'},
@@ -2295,7 +2622,7 @@ function _renderWatchGroups(results){
     normal:  {label:'😴 無特殊訊號',items:[], color:'var(--text3)'},
   };
 
-  watchList.forEach(s=>{
+  listForGroups.forEach(s=>{
     const d=results[s.id];
     if(!d){
       groups.normal.items.push({...s, data:null});
@@ -2340,6 +2667,14 @@ function _renderWatchGroups(results){
 
 function _watchCard(s){
   const d=s.data;
+  // 2026/09/13新增：自選股分頁本來完全沒有移動族群／移除的入口，這裡補上跟桌面側欄
+  // （lines ~3830-3832）同一套的族群select，加上一個移除按鈕（比照_renderWatchFallback既有的
+  // 移除按鈕寫法）。onclick都要stopPropagation，避免誤觸卡片本身的qpAndHome()導航。
+  const controls = `
+    <div style="display:flex;align-items:center;gap:8px;margin-top:8px" onclick="event.stopPropagation()">
+      <select class="ws-item-group" style="margin-top:0;flex:1" onclick="event.stopPropagation()" onchange="setStockGroup('${s.id}', this.value)">${_groupOptionsHtml(s.group||'預設')}</select>
+      <button onclick="event.stopPropagation();removeWatch('${s.id}')" style="border:none;background:none;color:var(--up);font-size:12px;cursor:pointer;padding:4px 6px;flex-shrink:0">🗑 移除</button>
+    </div>`;
   if(!d) return `
     <div onclick="qpAndHome('${s.id}')" style="background:var(--bg2);border-radius:12px;padding:14px 16px;margin-bottom:8px;cursor:pointer">
       <div style="display:flex;justify-content:space-between;align-items:center">
@@ -2349,6 +2684,7 @@ function _watchCard(s){
         </div>
         <div style="color:var(--text3);font-size:18px">›</div>
       </div>
+      ${controls}
     </div>`;
 
   const riskColor=_getRiskColor(d.risk_level);
@@ -2379,36 +2715,61 @@ function _watchCard(s){
         ${d.today_breakout?`<span style="font-size:10px;color:#a78bfa;background:rgba(167,139,250,0.1);padding:2px 7px;border-radius:4px">🚀今日突破</span>`:''}
         ${d.near_bot?`<span style="font-size:10px;color:var(--green);background:rgba(0,201,122,0.1);padding:2px 7px;border-radius:4px">📍接近底部</span>`:''}
       </div>
-      <div style="position:absolute;right:16px;bottom:14px;color:var(--text3);font-size:16px">›</div>
+      ${controls}
     </div>`;
 }
 
 function _renderWatchFallback(){
-  // API 失敗時降級顯示純清單
+  // API 失敗時降級顯示純清單。2026/09/13修正：一併套用_wsGroupFilter＋補上族群select，
+  // 跟正常渲染路徑（_renderWatchGroups/_watchCard）行為一致，不會因為batch API掛掉
+  // 就讓這頁的族群篩選/管理整個失效。
   const el=document.getElementById('watchGroups');
   if(!el) return;
+  const list = _wsFilteredWatchList();
+  if(!list.length){
+    el.innerHTML = `<div style="margin-bottom:8px;font-size:12px;color:var(--text3)">⚠️ 無法取得即時資料，顯示基本清單</div>` +
+      (watchList.length
+        ? `<div style="padding:20px 0;text-align:center;color:var(--text3);font-size:13px">這個族群還沒有股票</div>`
+        : `<div style="padding:20px 0;text-align:center;color:var(--text3);font-size:13px">還沒有自選股</div>`);
+    return;
+  }
   el.innerHTML=`<div style="margin-bottom:8px;font-size:12px;color:var(--text3)">⚠️ 無法取得即時資料，顯示基本清單</div>`+
-    watchList.map(s=>`
-    <div onclick="qpAndHome('${s.id}')" style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:.5px solid var(--border);cursor:pointer">
-      <div>
-        <div style="font-weight:500">${s.id} ${s.name}</div>
-        <div style="font-size:11px;color:var(--text3)">${s.date}</div>
+    list.map(s=>`
+    <div onclick="qpAndHome('${s.id}')" style="padding:12px 0;border-bottom:.5px solid var(--border);cursor:pointer">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:500">${s.id} ${s.name}</div>
+          <div style="font-size:11px;color:var(--text3)">${s.date}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button onclick="event.stopPropagation();removeWatch('${s.id}')" style="border:none;background:none;color:var(--up);font-size:12px;cursor:pointer;padding:4px">移除</button>
+          <span style="color:var(--text3)">›</span>
+        </div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <button onclick="event.stopPropagation();removeWatch('${s.id}')" style="border:none;background:none;color:var(--up);font-size:12px;cursor:pointer;padding:4px">移除</button>
-        <span style="color:var(--text3)">›</span>
-      </div>
+      <select class="ws-item-group" onclick="event.stopPropagation()" onchange="setStockGroup('${s.id}', this.value)">${_groupOptionsHtml(s.group||'預設')}</select>
     </div>`).join('');
 }
-function addWatch(id,name){
+function addWatch(id,name,group){
+  group = group || '預設';
+  let isNew=false;
   if(!watchList.find(s=>s.id===id)){
-    watchList.unshift({id,name,date:new Date().toLocaleDateString('zh-TW'),group:'預設'});
+    isNew=true;
+    watchList.unshift({id,name,date:new Date().toLocaleDateString('zh-TW'),group});
     if(watchList.length>30)watchList=watchList.slice(0,30);
     localStorage.setItem('watchList',JSON.stringify(watchList));
   }
   if(typeof renderHomeDash==='function') renderHomeDash();
   if(typeof _renderDesktopWatchSidebar==='function') _renderDesktopWatchSidebar();
   if(typeof _renderWsGroupFilterSelectM==='function') _renderWsGroupFilterSelectM();
+  if(_watchCache && Object.keys(_watchCache).length && typeof _renderWatchGroups==='function') _renderWatchGroups(_watchCache);
+  // 2026/09/13新增：自選股改為跟帳號綁定，加入時同步寫回後端。toggleWatch()已經擋過
+  // 未登入不能呼叫addWatch()，這裡理論上一定是登入狀態，但還是判斷一次比較保險。
+  // fire-and-forget：不擋UI，失敗只console.warn，不回滾樂觀更新的畫面（下次登入merge會補回）。
+  if(isNew && _authUser){
+    fetch(`${getAPI()}/api/watchlist/add`,{method:'POST',headers:_authHeaders(),body:JSON.stringify({id,name,group})})
+      .then(r=>{ if(!r.ok) console.warn('[watchlist] 加入自選同步失敗', r.status); })
+      .catch(e=>console.warn('[watchlist] 加入自選同步失敗', e));
+  }
 }
 function removeWatch(id){
   watchList=watchList.filter(s=>s.id!==id);
@@ -2419,14 +2780,23 @@ function removeWatch(id){
   if(typeof renderHomeDash==='function') renderHomeDash();
   if(typeof _renderDesktopWatchSidebar==='function') _renderDesktopWatchSidebar();
   if(typeof _renderWsGroupFilterSelectM==='function') _renderWsGroupFilterSelectM();
+  // 2026/09/13新增：同步到後端（見addWatch()註解，同樣的fire-and-forget原則）
+  if(_authUser){
+    fetch(`${getAPI()}/api/watchlist/${encodeURIComponent(id)}`,{method:'DELETE',headers:_authHeaders()})
+      .then(r=>{ if(!r.ok) console.warn('[watchlist] 移除自選同步失敗', r.status); })
+      .catch(e=>console.warn('[watchlist] 移除自選同步失敗', e));
+  }
 }
+// 2026/09/13修正：以前這裡登入後就直接「無聲」加入預設族群／移除，使用者完全沒有機會選族群，
+// 也是本次修正的主因之一——加入後只能跑去側欄的小select硬改族群。改為：還沒加入時彈出族群選擇
+// Modal，已經加入時彈出移動／移除選單，兩個Modal都是純前端operates on watchList/localStorage，
+// 遊客（!_authUser）維持原本showLoginModal()的擋法，不受影響。
 function toggleWatch(id,name){
   if(!_authUser){ showLoginModal(); return; }
   if(watchList.find(s=>s.id===id)){
-    removeWatch(id);
+    _openWatchMoveMenu(id);
   }else{
-    addWatch(id,name);
-    updateWatchBtn(id,true);
+    _openWatchGroupPickerModal(id,name);
   }
 }
 function updateWatchBtn(id,inWatch){
@@ -2436,6 +2806,138 @@ function updateWatchBtn(id,inWatch){
   btn.style.background=inWatch?'var(--dn-l)':'var(--bg2)';
   btn.style.color=inWatch?'var(--dn)':'var(--text2)';
   btn.style.border=inWatch?'.5px solid var(--dn)':'.5px solid var(--border2)';
+}
+
+// ── 個股分析頁：首次加入自選的族群選擇Modal（2026/09/13新增）──
+let _watchGroupPickTarget = {id:'',name:''};
+function _openWatchGroupPickerModal(id,name){
+  _watchGroupPickTarget = {id,name};
+  const subEl = document.getElementById('watchGroupPickSub');
+  if(subEl) subEl.textContent = `${id} ${name||''}`;
+  _renderWatchGroupPickList('預設');
+  const modal = document.getElementById('watchGroupPickModal');
+  if(modal) modal.style.display = 'flex';
+}
+function _renderWatchGroupPickList(selected){
+  const names = getWatchGroupNames();
+  const sel = (selected && names.includes(selected)) ? selected : '預設';
+  const el = document.getElementById('watchGroupPickList');
+  if(!el) return;
+  el.innerHTML = names.map(g=>`
+    <label style="display:flex;align-items:center;gap:8px;padding:6px 2px;cursor:pointer;font-size:13px">
+      <input type="radio" name="watchGroupPickRadio" value="${g}" ${g===sel?'checked':''}>
+      <span>${g}</span>
+    </label>`).join('');
+}
+function _watchGroupPickAddGroup(){
+  const inp = document.getElementById('watchGroupPickNewInput');
+  const name = addWatchGroupName(inp.value);
+  if(name){
+    inp.value = '';
+    _renderWatchGroupPickList(name);
+  }
+}
+function _confirmWatchGroupPick(){
+  const checked = document.querySelector('input[name="watchGroupPickRadio"]:checked');
+  const group = checked ? checked.value : '預設';
+  const {id,name} = _watchGroupPickTarget;
+  if(!id) return;
+  addWatch(id,name,group);
+  updateWatchBtn(id,true);
+  _closeWatchGroupPickModal();
+}
+function _closeWatchGroupPickModal(){
+  const modal = document.getElementById('watchGroupPickModal');
+  if(modal) modal.style.display = 'none';
+}
+
+// ── 個股分析頁：已在自選時的移動／移除選單（2026/09/13新增）──
+let _watchMoveTargetId = '';
+function _openWatchMoveMenu(id){
+  _watchMoveTargetId = id;
+  const s = watchList.find(x=>x.id===id);
+  const subEl = document.getElementById('watchMoveSub');
+  if(subEl) subEl.textContent = s ? `${s.id} ${s.name||''}` : id;
+  const sel = document.getElementById('watchMoveGroupSelect');
+  if(sel) sel.innerHTML = _groupOptionsHtml(s ? (s.group||'預設') : '預設');
+  const modal = document.getElementById('watchMoveModal');
+  if(modal) modal.style.display = 'flex';
+}
+function _watchMoveGroupChange(v){
+  setStockGroup(_watchMoveTargetId, v);
+}
+function _watchMoveRemove(){
+  removeWatch(_watchMoveTargetId);
+  updateWatchBtn(_watchMoveTargetId,false);
+  _closeWatchMoveModal();
+}
+function _closeWatchMoveModal(){
+  const modal = document.getElementById('watchMoveModal');
+  if(modal) modal.style.display = 'none';
+}
+
+// ── 共用「＋新增股票」搜尋Modal（2026/09/13新增）：桌面側欄／手機首頁預覽／自選股分頁三處入口共用 ──
+function _openAddStockModal(targetGroup){
+  if(!_authUser){ showLoginModal(); return; } // /api/search需要登入，遊客直接導去登入，跟其餘自選股功能一致
+  let group = (targetGroup && targetGroup!=='全部') ? targetGroup : '';
+  if(!group) group = (_wsGroupFilter && _wsGroupFilter!=='全部') ? _wsGroupFilter : '預設';
+  const groupSel = document.getElementById('addStockGroupSelect');
+  if(groupSel) groupSel.innerHTML = _groupOptionsHtml(group);
+  const input = document.getElementById('addStockSearchInput');
+  if(input) input.value = '';
+  _renderAddStockResults([]);
+  const modal = document.getElementById('addStockModal');
+  if(modal) modal.style.display = 'flex';
+  setTimeout(()=>{ const i=document.getElementById('addStockSearchInput'); if(i) i.focus(); }, 100);
+}
+function _closeAddStockModal(){
+  const modal = document.getElementById('addStockModal');
+  if(modal) modal.style.display = 'none';
+}
+let _addStockSearchTimer = null;
+function _onAddStockSearchInput(){
+  clearTimeout(_addStockSearchTimer);
+  const q = (document.getElementById('addStockSearchInput')?.value || '').trim();
+  if(!q){ _renderAddStockResults([]); return; }
+  // 跟首頁stockInput同一套280ms debounce + /api/search模式（見本檔案「搜尋自動補全」段落）
+  _addStockSearchTimer = setTimeout(async()=>{
+    try{
+      const r = await fetch(`${getAPI()}/api/search?q=${encodeURIComponent(q)}&limit=8`,{headers:_authHeaders()});
+      const d = await r.json();
+      _renderAddStockResults(d.results||[]);
+    }catch(e){
+      _renderAddStockResults([]);
+    }
+  },280);
+}
+function _renderAddStockResults(list){
+  const el = document.getElementById('addStockResults');
+  if(!el) return;
+  if(!list.length){
+    el.innerHTML = '<div style="padding:14px 4px;text-align:center;color:var(--text3);font-size:12px">輸入代號或名稱搜尋股票</div>';
+    return;
+  }
+  el.innerHTML = list.map(s=>{
+    const already = watchList.some(w=>w.id===s.stock_id);
+    return `<label style="display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:.5px solid var(--border);${already?'opacity:.5' : 'cursor:pointer'}">
+      <input type="checkbox" class="add-stock-chk" value="${s.stock_id}" data-name="${(s.stock_name||'').replace(/"/g,'&quot;')}" ${already?'disabled':''}>
+      <span style="font-weight:700;font-size:13px">${s.stock_id}</span>
+      <span style="font-size:12px;color:var(--text2);flex:1">${s.stock_name||''}</span>
+      <span style="font-size:11px;color:var(--text3)">${already?'已在清單':(s.type||'')}</span>
+    </label>`;
+  }).join('');
+}
+function _submitAddStockModal(){
+  const group = document.getElementById('addStockGroupSelect')?.value || '預設';
+  const checks = document.querySelectorAll('#addStockResults .add-stock-chk:checked');
+  if(!checks.length){ alert('請至少勾選一檔股票'); return; }
+  checks.forEach(chk=>{ addWatch(chk.value, chk.dataset.name||chk.value, group); });
+  _closeAddStockModal();
+  // 三個渲染自選股的畫面都可能正在顯示，一律防呆刷新一次（各函式本身都會判斷目標元素是否存在）
+  if(typeof _renderDesktopWatchSidebar==='function') _renderDesktopWatchSidebar();
+  if(typeof renderHomeDash==='function') renderHomeDash();
+  if(typeof _renderWsGroupFilterSelectM==='function') _renderWsGroupFilterSelectM();
+  if(document.getElementById('watchInnerContent') && typeof _renderWatchInner==='function') _renderWatchInner();
 }
 function qpAndHome(id){
   showPage('home');
@@ -3366,8 +3868,14 @@ function _wsUpdateGroupEditButtons(editId, delId){
   if(editEl) editEl.style.display = canManage ? '' : 'none';
   if(delEl) delEl.style.display = canManage ? '' : 'none';
 }
-function _renderWsGroupFilterSelect(){
-  const sel = document.getElementById('wsGroupFilter');
+// 2026/09/13重構：桌面側欄（無尾綴）／手機首頁（M尾綴）原本各自維護一份幾乎一模一樣的
+// 「族群篩選select＋新增/改名/刪除族群」邏輯，這次要新增第三份（自選股分頁，W尾綴）之前
+// 先合併成一組吃suffix參數的共用函式，三處呼叫時分別帶''／'M'／'W'。無尾綴／M尾綴的舊呼叫
+// 名稱（_renderWsGroupFilterSelectM()等）保留成薄包裝，行為跟重構前逐字對照過完全一致，
+// 舊的HTML onclick屬性完全不用改。
+function _renderWsGroupFilterSelect(suffix){
+  suffix = suffix || '';
+  const sel = document.getElementById('wsGroupFilter'+suffix);
   if(!sel) return;
   const names = getWatchGroupNames();
   sel.innerHTML = `<option value="全部">全部（${watchList.length}）</option>` +
@@ -3376,105 +3884,90 @@ function _renderWsGroupFilterSelect(){
       return `<option value="${g}">${g}（${cnt}）</option>`;
     }).join('');
   sel.value = _wsGroupFilter;
-  _wsUpdateGroupEditButtons('wsGroupEdit', 'wsGroupDel');
+  _wsUpdateGroupEditButtons('wsGroupEdit'+suffix, 'wsGroupDel'+suffix);
 }
 function _onWsGroupFilterChange(v){
   _wsGroupFilter = v;
   _renderDesktopWatchSidebar();
 }
-function _wsRenameCurrentGroup(){
+function _wsRenameCurrentGroup(suffix){
+  suffix = suffix || '';
   if(_wsGroupFilter==='全部' || _wsGroupFilter==='預設') return;
   const newName = prompt('重新命名族群「'+_wsGroupFilter+'」為：', _wsGroupFilter);
   if(newName===null) return;
   const result = renameWatchGroupName(_wsGroupFilter, newName);
   if(result){
     _wsGroupFilter = result;
-    _renderDesktopWatchSidebar();
+    if(typeof _renderDesktopWatchSidebar==='function') _renderDesktopWatchSidebar();
     if(typeof renderHomeDash==='function') renderHomeDash();
+    if(suffix==='W'){
+      _renderWsGroupFilterSelect('W');
+      if(_watchCache && typeof _renderWatchGroups==='function') _renderWatchGroups(_watchCache);
+    }
   }
 }
-function _wsDeleteCurrentGroup(){
+function _wsDeleteCurrentGroup(suffix){
+  suffix = suffix || '';
   if(_wsGroupFilter==='全部' || _wsGroupFilter==='預設') return;
   if(!confirm('確定要刪除族群「'+_wsGroupFilter+'」嗎？此族群內的股票會歸回「預設」，股票本身不會被移除。')) return;
   if(deleteWatchGroupName(_wsGroupFilter)){
     _wsGroupFilter = '全部';
-    _renderDesktopWatchSidebar();
+    if(typeof _renderDesktopWatchSidebar==='function') _renderDesktopWatchSidebar();
     if(typeof renderHomeDash==='function') renderHomeDash();
+    if(suffix==='W'){
+      _renderWsGroupFilterSelect('W');
+      if(_watchCache && typeof _renderWatchGroups==='function') _renderWatchGroups(_watchCache);
+    }
   }
 }
-function _wsToggleAddGroup(){
-  const row = document.getElementById('wsAddGroupRow');
+function _wsToggleAddGroup(suffix){
+  suffix = suffix || '';
+  const row = document.getElementById('wsAddGroupRow'+suffix);
   if(!row) return;
   const showing = row.style.display !== 'none';
   row.style.display = showing ? 'none' : 'flex';
-  if(!showing) document.getElementById('wsNewGroupInput').focus();
+  if(!showing) document.getElementById('wsNewGroupInput'+suffix).focus();
 }
-function _wsSubmitAddGroup(){
-  const inp = document.getElementById('wsNewGroupInput');
+function _wsSubmitAddGroup(suffix){
+  suffix = suffix || '';
+  const inp = document.getElementById('wsNewGroupInput'+suffix);
   const name = addWatchGroupName(inp.value);
-  if(name){
-    inp.value = '';
-    document.getElementById('wsAddGroupRow').style.display = 'none';
-    _wsGroupFilter = name;
+  if(!name) return;
+  inp.value = '';
+  document.getElementById('wsAddGroupRow'+suffix).style.display = 'none';
+  _wsGroupFilter = name;
+  if(suffix===''){
     _renderDesktopWatchSidebar();
+  }else if(suffix==='M'){
+    _renderWsGroupFilterSelectM();
+    if(typeof renderHomeDash==='function') renderHomeDash();
+  }else{
+    _renderWsGroupFilterSelect(suffix);
+    if(_watchCache && typeof _renderWatchGroups==='function') _renderWatchGroups(_watchCache);
+    if(typeof _renderDesktopWatchSidebar==='function') _renderDesktopWatchSidebar();
+    if(typeof renderHomeDash==='function') renderHomeDash();
   }
 }
 
 // ── 手機版首頁儀表板：同一份族群篩選，控制項id加M尾綴避免跟電腦版側欄id撞名
 // （電腦版側欄一直存在於畫面上，跟手機版首頁的篩選列可能同時出現在同一個DOM裡）
-function _renderWsGroupFilterSelectM(){
-  const sel = document.getElementById('wsGroupFilterM');
-  if(!sel) return;
-  const names = getWatchGroupNames();
-  sel.innerHTML = `<option value="全部">全部（${watchList.length}）</option>` +
-    names.map(g=>{
-      const cnt = watchList.filter(s=>(s.group||'預設')===g).length;
-      return `<option value="${g}">${g}（${cnt}）</option>`;
-    }).join('');
-  sel.value = _wsGroupFilter;
-  _wsUpdateGroupEditButtons('wsGroupEditM', 'wsGroupDelM');
-}
+function _renderWsGroupFilterSelectM(){ _renderWsGroupFilterSelect('M'); }
 function _onWsGroupFilterChangeM(v){
   _wsGroupFilter = v;
   if(typeof renderHomeDash==='function') renderHomeDash();
 }
-function _wsRenameCurrentGroupM(){
-  if(_wsGroupFilter==='全部' || _wsGroupFilter==='預設') return;
-  const newName = prompt('重新命名族群「'+_wsGroupFilter+'」為：', _wsGroupFilter);
-  if(newName===null) return;
-  const result = renameWatchGroupName(_wsGroupFilter, newName);
-  if(result){
-    _wsGroupFilter = result;
-    if(typeof _renderDesktopWatchSidebar==='function') _renderDesktopWatchSidebar();
-    if(typeof renderHomeDash==='function') renderHomeDash();
-  }
-}
-function _wsDeleteCurrentGroupM(){
-  if(_wsGroupFilter==='全部' || _wsGroupFilter==='預設') return;
-  if(!confirm('確定要刪除族群「'+_wsGroupFilter+'」嗎？此族群內的股票會歸回「預設」，股票本身不會被移除。')) return;
-  if(deleteWatchGroupName(_wsGroupFilter)){
-    _wsGroupFilter = '全部';
-    if(typeof _renderDesktopWatchSidebar==='function') _renderDesktopWatchSidebar();
-    if(typeof renderHomeDash==='function') renderHomeDash();
-  }
-}
-function _wsToggleAddGroupM(){
-  const row = document.getElementById('wsAddGroupRowM');
-  if(!row) return;
-  const showing = row.style.display !== 'none';
-  row.style.display = showing ? 'none' : 'flex';
-  if(!showing) document.getElementById('wsNewGroupInputM').focus();
-}
-function _wsSubmitAddGroupM(){
-  const inp = document.getElementById('wsNewGroupInputM');
-  const name = addWatchGroupName(inp.value);
-  if(name){
-    inp.value = '';
-    document.getElementById('wsAddGroupRowM').style.display = 'none';
-    _wsGroupFilter = name;
-    _renderWsGroupFilterSelectM();
-    if(typeof renderHomeDash==='function') renderHomeDash();
-  }
+function _wsRenameCurrentGroupM(){ _wsRenameCurrentGroup('M'); }
+function _wsDeleteCurrentGroupM(){ _wsDeleteCurrentGroup('M'); }
+function _wsToggleAddGroupM(){ _wsToggleAddGroup('M'); }
+function _wsSubmitAddGroupM(){ _wsSubmitAddGroup('M'); }
+
+// ── 自選股分頁（⭐自選股tab）：第三份共用族群篩選，控制項id加W尾綴（2026/09/13新增）──
+function _onWsGroupFilterChangeW(v){
+  _wsGroupFilter = v;
+  _renderWsGroupFilterSelect('W');
+  if(_watchCache && typeof _renderWatchGroups==='function') _renderWatchGroups(_watchCache);
+  if(typeof _renderDesktopWatchSidebar==='function') _renderDesktopWatchSidebar();
+  if(typeof renderHomeDash==='function') renderHomeDash();
 }
 
 async function _renderDesktopWatchSidebar(){
@@ -5281,6 +5774,184 @@ function _mktShow(id){
   const el = document.getElementById(id);
   if(el){ el.classList.add('show'); el.style.display='block'; }
 }
+
+// ══════════════════════════════════════════════════════════════════
+// Phase 4（首頁真實資料3D-style圖表）：state-orb量表／市場氣氛柱狀圖／
+// 資金雷達橫條圖，共用小工具＋三個渲染函式。全部畫在_loadHomeMarket()
+// 既有fetch抓回來的真實資料上，不新增任何API呼叫、不編造任何數字。
+// 「3D-style」＝Canvas 2D linear-gradient（淺→深模擬光源）＋shadowBlur，
+// 不用WebGL/three.js。顏色一律用getComputedStyle即時讀取真正的
+// --up/--dn/--text3等CSS變數（canvas fillStyle不支援var()字串本身），
+// 深色模式會自動跟著切換，不用另外寫一份深色對照表。
+// ══════════════════════════════════════════════════════════════════
+function _mktCssVar(name, fallback){
+  try{
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return v || fallback;
+  }catch(e){ return fallback; }
+}
+// 把一個#rrggbb往黑（amt>0）或往白（amt<0）混，做gradient的深/淺兩端。
+// 只吃純hex（本站--up/--dn/--text3/--bg3在明暗兩套主題下都是純hex，見<style>開頭），
+// 遇到非hex（例如rgba(...)）就原樣退回，不會畫出NaN顏色。
+function _mktShade(hex, amt){
+  try{
+    let h = String(hex).trim().replace('#','');
+    if(h.length===3) h = h.split('').map(c=>c+c).join('');
+    if(!/^[0-9a-fA-F]{6}$/.test(h)) return hex;
+    const num = parseInt(h,16);
+    let r=(num>>16)&255, g=(num>>8)&255, b=num&255;
+    if(amt>=0){ r=r*(1-amt); g=g*(1-amt); b=b*(1-amt); }
+    else{ const t=-amt; r=r+(255-r)*t; g=g+(255-g)*t; b=b+(255-b)*t; }
+    r=Math.max(0,Math.min(255,Math.round(r))); g=Math.max(0,Math.min(255,Math.round(g))); b=Math.max(0,Math.min(255,Math.round(b)));
+    return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+  }catch(e){ return hex; }
+}
+function _mktDisposeChart(id){
+  try{
+    if(typeof echarts==='undefined') return;
+    const el = document.getElementById(id);
+    if(el){ const inst = echarts.getInstanceByDom(el); if(inst) inst.dispose(); }
+  }catch(e){}
+}
+// 版面寬度變動（例如手機轉向）時讓既有的圖表實例重新量測尺寸，
+// 不是輪詢也不是重新fetch，純粹是既有canvas的resize。
+window.addEventListener('resize', function(){
+  if(typeof echarts==='undefined') return;
+  ['stateOrbGauge','breadthColChart','sectorBarChart'].forEach(function(id){
+    const el = document.getElementById(id);
+    if(!el) return;
+    const inst = echarts.getInstanceByDom(el);
+    if(inst) inst.resize();
+  });
+});
+
+// 1. state-orb → 加權指數漲跌%量表（半圓進度環，真實change_pct驅動）
+function _renderStateOrbGauge(p){
+  if(typeof echarts==='undefined') return;
+  const el = document.getElementById('stateOrbGauge');
+  if(!el) return;
+  const up = p>0, dn = p<0;
+  const upHex = _mktCssVar('--up','#D63B3B');
+  const dnHex = _mktCssVar('--dn','#1A8F5E');
+  const neutralHex = _mktCssVar('--text3','#888780');
+  const trackHex = _mktCssVar('--bg3','#e6e5df');
+  const mainHex = up?upHex:(dn?dnHex:neutralHex);
+  const val = Math.max(0, Math.min(100, 50 + p*10));
+  let chart = echarts.getInstanceByDom(el);
+  if(!chart) chart = echarts.init(el, null, {renderer:'canvas'});
+  chart.setOption({
+    series:[{
+      type:'gauge',
+      startAngle:210, endAngle:-30,
+      min:0, max:100,
+      radius:'96%',
+      pointer:{show:false},
+      progress:{
+        show:true, width:10, roundCap:true,
+        itemStyle:{
+          color:new echarts.graphic.LinearGradient(0,1,0,0,[{offset:0,color:_mktShade(mainHex,0.3)},{offset:1,color:_mktShade(mainHex,-0.15)}]),
+          shadowBlur:12, shadowColor:mainHex
+        }
+      },
+      axisLine:{lineStyle:{width:10,color:[[1,trackHex]]}},
+      axisTick:{show:false}, splitLine:{show:false}, axisLabel:{show:false},
+      anchor:{show:false},
+      detail:{
+        valueAnimation:false, offsetCenter:[0,0],
+        formatter:function(){ return (up?'+':'')+_mktFmt(p,2)+'%'; },
+        fontSize:16, fontWeight:800, color:mainHex
+      },
+      data:[{value:val}]
+    }]
+  }, true);
+}
+
+// 2. 市場氣氛 → 上漲/平盤/下跌 三根真實家數的立體柱狀圖
+function _renderBreadthColChart(up, flat, down){
+  if(typeof echarts==='undefined') return;
+  const el = document.getElementById('breadthColChart');
+  if(!el) return;
+  const upHex = _mktCssVar('--up','#D63B3B');
+  const dnHex = _mktCssVar('--dn','#1A8F5E');
+  const neutralHex = _mktCssVar('--text3','#888780');
+  const textHex = _mktCssVar('--text','#1a1a18');
+  const text2Hex = _mktCssVar('--text2','#4a4948');
+  const borderHex = _mktCssVar('--border2','#cccccc');
+  const grad = (hex)=> new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:_mktShade(hex,-0.25)},{offset:1,color:_mktShade(hex,0.3)}]);
+  const bars = [
+    {label:'上漲', v:up, hex:upHex},
+    {label:'平盤', v:flat, hex:neutralHex},
+    {label:'下跌', v:down, hex:dnHex}
+  ];
+  let chart = echarts.getInstanceByDom(el);
+  if(!chart) chart = echarts.init(el, null, {renderer:'canvas'});
+  chart.setOption({
+    grid:{left:6,right:6,top:26,bottom:22,containLabel:false},
+    xAxis:{
+      type:'category', data:bars.map(b=>b.label),
+      axisLine:{lineStyle:{color:borderHex}}, axisTick:{show:false},
+      axisLabel:{color:text2Hex, fontSize:11}
+    },
+    yAxis:{show:false},
+    series:[{
+      type:'bar', barWidth:'44%',
+      data:bars.map(b=>({
+        value:b.v,
+        itemStyle:{color:grad(b.hex), shadowBlur:8, shadowColor:b.hex}
+      })),
+      label:{
+        show:true, position:'top', color:textHex, fontWeight:800, fontSize:12,
+        formatter:(p)=> _mktFmt(p.value,0)
+      }
+    }]
+  }, true);
+}
+
+// 3. 資金雷達 → 產業漲跌幅橫條圖（真實change_pct，依|change_pct|由大到小排序）
+function _renderSectorBarChart(items){
+  if(typeof echarts==='undefined') return;
+  const el = document.getElementById('sectorBarChart');
+  if(!el) return;
+  const upHex = _mktCssVar('--up','#D63B3B');
+  const dnHex = _mktCssVar('--dn','#1A8F5E');
+  const neutralHex = _mktCssVar('--text3','#888780');
+  const textHex = _mktCssVar('--text','#1a1a18');
+  const text2Hex = _mktCssVar('--text2','#4a4948');
+  const names = items.map(it=>String(it.name||it.full_name||''));
+  const data = items.map(it=>{
+    const p = Number(it.change_pct);
+    const base = p>0?upHex:(p<0?dnHex:neutralHex);
+    return {
+      value:p,
+      itemStyle:{
+        color:new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:_mktShade(base,-0.3)},{offset:1,color:_mktShade(base,0.3)}]),
+        shadowBlur:8, shadowColor:base
+      }
+    };
+  });
+  let chart = echarts.getInstanceByDom(el);
+  if(!chart) chart = echarts.init(el, null, {renderer:'canvas'});
+  chart.setOption({
+    grid:{left:8,right:56,top:6,bottom:6,containLabel:true},
+    xAxis:{type:'value', show:false},
+    yAxis:{
+      type:'category', data:names, inverse:true,
+      axisLine:{show:false}, axisTick:{show:false},
+      axisLabel:{color:text2Hex, fontSize:11}
+    },
+    series:[{
+      type:'bar', barWidth:'56%',
+      data:data,
+      label:{
+        show:true, position:'right', color:textHex, fontWeight:700, fontSize:11,
+        formatter:(p)=> (p.value>0?'+':'')+_mktFmt(p.value,2)+'%'
+      }
+    }]
+  }, true);
+  chart.off('click');
+  chart.on('click', function(){ _homeGo('picks'); });
+}
+
 async function _loadHomeMarket(){
   const api = getAPI();
   let _mktRowHasContent = false;
@@ -5296,8 +5967,10 @@ async function _loadHomeMarket(){
     const _setOrbEmpty = ()=>{
       if(orb) orb.style.setProperty('--orb-c','var(--text3)');
       if(orb) orb.style.setProperty('--orb-mag','0');
+      if(orb) orb.classList.remove('has-gauge');
       if(orbPct) orbPct.textContent='—';
       if(orbLabel) orbLabel.textContent='大盤資料暫缺';
+      _mktDisposeChart('stateOrbGauge');
     };
     if(chips){
       if(!j || !j.ok || !Array.isArray(j.items) || !j.items.length){
@@ -5337,6 +6010,15 @@ async function _loadHomeMarket(){
             if(orb) orb.style.setProperty('--orb-mag', String(Math.max(0, Math.min(10, Math.abs(p)*3))));
             if(orbPct) orbPct.textContent = (up?'+':'')+_mktFmt(p,2)+'%';
             if(orbLabel) orbLabel.textContent = '加權指數 '+(up?'上漲':(dn?'下跌':'平盤'));
+            if(orb) orb.classList.add('has-gauge');
+            // 2026/09/13 Phase4修正：#homeMktRow預設display:none，要等兩個
+            // try區塊都跑完才由下面統一的_mktShow('homeMktRow')顯示；但ECharts
+            // 在容器還是display:none時init()量到的寬度是0，畫出來的圖表會整個
+            // 跑版。這裡的_mktShow在_mktRowHasContent已經是true時提前顯示
+            // homeMktRow（最後統一那行還是會再執行一次，行為不變，只是提前讓
+            // 容器有真實寬度可以量測），圖表本身不受影響。
+            _mktShow('homeMktRow');
+            _renderStateOrbGauge(p);
           } else { _setOrbEmpty(); }
         }
       }
@@ -5351,23 +6033,22 @@ async function _loadHomeMarket(){
     const box = document.getElementById('homeBreadthBox');
     if(box){
       if(!j || !j.ok || j.total==null){
+        _mktDisposeChart('breadthColChart');
         box.innerHTML=''; box.style.display='none';
       } else {
         _mktRowHasContent = true;
-        const upPct = Math.max(0, Math.min(100, Number(j.up_pct)||0));
-        const dnPct = Math.max(0, Math.min(100, Number(j.down_pct)||0));
-        const flatPct = Math.max(0, 100-upPct-dnPct);
         const moodColor = j.mood==='偏多' ? 'var(--up)' : (j.mood==='偏空' ? 'var(--dn)' : 'var(--text3)');
         box.style.display='block';
         box.innerHTML = '<div class="hd2-breadth-head"><span class="hd2-breadth-label">市場氣氛（'+_mktEsc(j.label||'上市')+'）</span>'
           +'<span class="hd2-breadth-mood" style="color:'+moodColor+'">'+_mktEsc(j.mood||'')+'</span></div>'
-          +'<div class="hd2-breadth-bar"><i style="width:'+upPct+'%;background:var(--up)"></i>'
-          +'<i style="width:'+flatPct+'%;background:var(--text3);opacity:.35"></i>'
-          +'<i style="width:'+dnPct+'%;background:var(--dn)"></i></div>'
+          +'<div id="breadthColChart" style="width:100%;height:110px"></div>'
           +'<div class="hd2-breadth-nums"><span>上漲 '+_mktEsc(j.up)+'</span><span>平盤 '+_mktEsc(j.flat)+'</span><span>下跌 '+_mktEsc(j.down)+'</span></div>';
+        // 同上，homeMktRow這時可能還是display:none，提前顯示讓ECharts量到正確寬度。
+        _mktShow('homeMktRow');
+        _renderBreadthColChart(Number(j.up)||0, Number(j.flat)||0, Number(j.down)||0);
       }
     }
-  }catch(e){ const box=document.getElementById('homeBreadthBox'); if(box){ box.innerHTML=''; box.style.display='none'; } }
+  }catch(e){ _mktDisposeChart('breadthColChart'); const box=document.getElementById('homeBreadthBox'); if(box){ box.innerHTML=''; box.style.display='none'; } }
 
   if(_mktRowHasContent) _mktShow('homeMktRow'); else _mktHide('homeMktRow');
 
@@ -5377,37 +6058,29 @@ async function _loadHomeMarket(){
     const box = document.getElementById('homeIndBox');
     if(!box) {}
     else if(!j || !j.ok || !((j.gainers&&j.gainers.length)||(j.losers&&j.losers.length))){
-      _mktHide('homeIndBox'); box.innerHTML='';
+      _mktDisposeChart('sectorBarChart'); _mktHide('homeIndBox'); box.innerHTML='';
     } else {
       const valid = (it)=> it && it.source && it.as_of && it.change_pct!=null && isFinite(Number(it.change_pct));
       const all = [].concat((j.gainers||[]).filter(valid), (j.losers||[]).filter(valid));
-      if(!all.length){ _mktHide('homeIndBox'); box.innerHTML=''; }
+      if(!all.length){ _mktDisposeChart('sectorBarChart'); _mktHide('homeIndBox'); box.innerHTML=''; }
       else {
-        // 資金雷達：方塊大小＝|change_pct|排名（真實漲跌幅排序決定視覺大小，不是另外造一個「強度分數」）。
+        // 資金雷達：橫條長度＝|change_pct|排名（真實漲跌幅排序決定視覺長度，不是另外造一個「強度分數」）。
         // 目前沒有對應的「族群個股清單」頁面，點擊先導去「異常訊號」頁（現有最相關的可操作入口），
         // 避免做一個假的族群詳情頁。
         const ranked = all.slice().sort((a,b)=>Math.abs(Number(b.change_pct))-Math.abs(Number(a.change_pct)));
-        const tiles = ranked.map((it,idx)=>{
-          const p = Number(it.change_pct);
-          const cls = p>0?'up':(p<0?'dn':'');
-          const sign = p>0?'+':'';
-          const tier = idx===0 ? 'sn-lg' : (idx<4 ? 'sn-md' : 'sn-sm');
-          return '<div class="sector-node '+tier+'" onclick="_homeGo(\'picks\')" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\')this.click()" title="'+_mktEsc(it.name||it.full_name||'')+'　點擊查看今天的機會">'
-            +'<div class="sn-name">'+_mktEsc(it.name||it.full_name||'')+'</div>'
-            +'<div class="sn-chg '+cls+'">'+_mktEsc(sign+_mktFmt(p,2)+'%')+'</div>'
-            +'</div>';
-        }).join('');
         const meta = [];
         if(j.label) meta.push(j.label);
         if(j.trade_date) meta.push('交易日 '+j.trade_date);
         if(j.source) meta.push('來源：'+j.source);
         if(j.as_of) meta.push('台北 '+j.as_of);
-        box.innerHTML = '<h2>資金雷達</h2><div class="hv-sub">'+_mktEsc(meta.join(' · '))+'　方塊越大代表今天變動越劇烈</div>'
-          +'<div class="sector-grid">'+tiles+'</div>';
+        box.innerHTML = '<h2>資金雷達</h2><div class="hv-sub">'+_mktEsc(meta.join(' · '))+'　長條越長代表今天變動越劇烈，點擊查看今天的機會</div>'
+          +'<div id="sectorBarChart" style="width:100%;height:220px"></div>';
+        // 同上，homeIndBox預設display:none，要先顯示容器ECharts才能量到正確寬度。
         _mktShow('homeIndBox');
+        _renderSectorBarChart(ranked);
       }
     }
-  }catch(e){ _mktHide('homeIndBox'); }
+  }catch(e){ _mktDisposeChart('sectorBarChart'); _mktHide('homeIndBox'); }
 
   try{
     const r = await fetch(api+'/api/market/news', {signal: AbortSignal.timeout(15000)});
@@ -5442,32 +6115,35 @@ async function _loadHomeMarket(){
 // IA-Home-2（2026/09/13）：首頁「今天看什麼」3張卡的預覽內容——
 // 開盤精選／深度選股走既有 /api/picks/opening、/api/deep-analysis，
 // preview/masked 由後端依會員權限決定，前端原樣顯示，不另外加一套遮罩邏輯。
-// 市場熱門目前沒有對應的公開即時報價API，改用既有熱鍵清單（真實資料，只是不含漲跌%，不編數字）。
+// 2026/09/13硬規則修正：市場熱門原本在使用者沒有個人瀏覽紀錄時，會fallback顯示
+// 寫死的3檔固定股票（台積電/鴻海/聯發科），違反「不能寫死任何檔案及程式」硬規則
+// ——這張卡片文案明確寫著「現在市場正在關注的股票」，不能用固定清單頂替。改成：
+// 有個人瀏覽紀錄就用真實瀏覽紀錄（不變）；沒有的話，改用/api/picks/opening（開盤
+// 成交量前20，真實資料）裡「異常訊號」卡沒用到的另外幾筆，不再編任何股票清單。
 async function _loadHomeDiscover(){
   const api = getAPI();
 
   // 判斷是否為真的股票代號（後端遮罩時回傳的是「＊＊＊＊」全形星號，不是真代號，不能拿去點開分析）
   const _isRealId = (id)=> !!id && /^[0-9A-Za-z.]+$/.test(id);
 
-  try{
-    const hotBox = document.getElementById('discHotList');
-    if(hotBox){
-      const DEFAULT=[{id:'2330',name:'台積電'},{id:'2317',name:'鴻海'},{id:'2454',name:'聯發科'}];
-      const list = (typeof historyList!=='undefined' && historyList.length) ? historyList.slice(0,3).map(s=>({id:s.id,name:s.name})) : DEFAULT;
-      hotBox.innerHTML = list.map(s=>'<div class="hd2-disc-item" onclick="event.stopPropagation();qpAndHome(\''+_mktEsc(s.id)+'\')" style="cursor:pointer"><b>'+_mktEsc(s.name||s.id)+'</b><span style="color:var(--muted)">'+_mktEsc(s.id)+'</span></div>').join('');
-    }
-  }catch(e){}
+  const hotBox = document.getElementById('discHotList');
+  const _hasHistory = typeof historyList!=='undefined' && historyList.length;
+  if(hotBox && _hasHistory){
+    const list = historyList.slice(0,3).map(s=>({id:s.id,name:s.name}));
+    hotBox.innerHTML = list.map(s=>'<div class="hd2-disc-item" onclick="event.stopPropagation();qpAndHome(\''+_mktEsc(s.id)+'\')" style="cursor:pointer"><b>'+_mktEsc(s.name||s.id)+'</b><span style="color:var(--muted)">'+_mktEsc(s.id)+'</span></div>').join('');
+  }
 
+  let _openingItems = [];
   try{
     const r = await fetch(api+'/api/picks/opening', {headers:_authHeaders(), signal:AbortSignal.timeout(12000)});
     const j = r.ok ? await r.json() : null;
+    _openingItems = (j && j.data) || [];
     const box = document.getElementById('discPickList');
     if(box){
-      const items = (j && j.data) || [];
-      if(!items.length){
+      if(!_openingItems.length){
         box.innerHTML = '<div class="hd2-disc-item" style="color:var(--muted);border:none">今日尚無資料</div>';
       } else {
-        box.innerHTML = items.slice(0,3).map(s=>{
+        box.innerHTML = _openingItems.slice(0,3).map(s=>{
           const id = s.stock_id || s.code || '';
           const nm = s.name || s.stock_name || id;
           const chg = s.change_pct!=null ? (s.change_pct>=0?'<span style="color:var(--up)">+'+s.change_pct.toFixed(2)+'%</span>':'<span style="color:var(--down)">'+s.change_pct.toFixed(2)+'%</span>') : '';
@@ -5480,6 +6156,22 @@ async function _loadHomeDiscover(){
   }catch(e){
     const box = document.getElementById('discPickList');
     if(box) box.innerHTML = '<div class="hd2-disc-item" style="color:var(--muted);border:none">載入失敗</div>';
+  }
+
+  if(hotBox && !_hasHistory){
+    // 跟「異常訊號」卡（用items.slice(0,3)）錯開，避免兩張卡顯示一模一樣的股票；
+    // 剩下不夠3筆就用全部真代號的項目，全部都是遮罩／完全沒有資料才誠實顯示空狀態。
+    const realItems = _openingItems.filter(s=>_isRealId(s.stock_id||s.code||''));
+    const pick = realItems.length>3 ? realItems.slice(3,6) : realItems.slice(0,3);
+    if(!pick.length){
+      hotBox.innerHTML = '<div class="hd2-disc-item" style="color:var(--muted);border:none">今日尚無資料</div>';
+    } else {
+      hotBox.innerHTML = pick.map(s=>{
+        const id = s.stock_id || s.code || '';
+        const nm = s.name || s.stock_name || id;
+        return '<div class="hd2-disc-item" onclick="event.stopPropagation();qpAndHome(\''+id.replace(/'/g,'')+'\')" style="cursor:pointer"><b>'+_mktEsc(nm)+'</b><span style="color:var(--muted)">'+_mktEsc(id)+'</span></div>';
+      }).join('');
+    }
   }
 
   try{
@@ -5513,21 +6205,45 @@ async function _loadHomeDiscover(){
   _loadHomeDiscover();
 });
 
+// 2026/09/13硬規則修正：「強勢股快捷列」原本在沒有個人瀏覽紀錄時，fallback顯示
+// 寫死的7檔固定股票，違反「不能寫死任何檔案及程式」硬規則——列名本身就叫「強勢股」，
+// 不能用固定清單頂替。改成：有個人瀏覽紀錄就直接同步顯示（不用等API，維持原本速度）；
+// 沒有的話非同步抓/api/picks/opening（開盤成交量前20，真實資料）當作真正的「強勢股」，
+// 抓取期間或失敗時都誠實顯示狀態文字，不再編任何股票清單。
 async function loadHotkeys(){
   renderHotkeys();
+  if(historyList.length) return; // 已有真實個人紀錄可用，不需要再打API
+  try{
+    const r = await fetch(getAPI()+'/api/picks/opening', {headers:_authHeaders(), signal:AbortSignal.timeout(12000)});
+    const j = r.ok ? await r.json() : null;
+    const items = (j && j.data) || [];
+    const _isRealId = (id)=> !!id && /^[0-9A-Za-z.]+$/.test(id);
+    const real = items.filter(s=>_isRealId(s.stock_id||s.code||''));
+    if(historyList.length) return; // 這段等待期間使用者可能已經自己分析過股票，真實個人紀錄優先，不要覆蓋掉
+    const el = document.getElementById('hotkeysEl');
+    if(!el) return;
+    if(!real.length){
+      el.innerHTML = '<div class="hk" style="color:var(--text3);pointer-events:none">今日尚無強勢股資料</div>';
+      return;
+    }
+    const list = real.slice(0,10).map(s=>({id:s.stock_id||s.code, name:s.name||s.stock_name||s.stock_id||s.code}));
+    el.innerHTML = list.map(s=>
+      `<div class="hk" onclick="qp('${s.id}')">${s.name||s.id}</div>`
+    ).join('');
+  }catch(e){
+    if(historyList.length) return;
+    const el = document.getElementById('hotkeysEl');
+    if(el) el.innerHTML = '<div class="hk" style="color:var(--text3);pointer-events:none">載入失敗</div>';
+  }
 }
 
 function renderHotkeys(){
   const el=document.getElementById('hotkeysEl');
-  const DEFAULT=[
-    {id:'2330',name:'台積電'},{id:'2317',name:'鴻海'},
-    {id:'2454',name:'聯發科'},{id:'2308',name:'台達電'},
-    {id:'2412',name:'中華電'},{id:'2882',name:'國泰金'},
-    {id:'3008',name:'大立光'},
-  ];
-  const list=historyList.length
-    ? historyList.slice(0,10).map(s=>({id:s.id,name:s.name}))
-    : DEFAULT;
+  if(!historyList.length){
+    el.innerHTML = '<div class="hk" style="color:var(--text3);pointer-events:none">載入強勢股...</div>';
+    return;
+  }
+  const list = historyList.slice(0,10).map(s=>({id:s.id,name:s.name}));
   el.innerHTML=list.map(s=>
     `<div class="hk" onclick="qp('${s.id}')">${s.name||s.id}</div>`
   ).join('');
@@ -6059,6 +6775,10 @@ function _onLoginSuccess(){
     setTimeout(showPushGuideModal, 800);
   }
   _applyResultMasks();
+  // 2026/09/13新增：所有登入路徑（Google登入／帳密登入／註冊後自動登入／重啟頁面時
+  // 用既有token驗證成功）都會走到這裡，是拉自選股伺服器資料＋合併本地舊資料的唯一入口。
+  // 不await：不擋登入流程的UI，同步在背景進行，完成後自己刷新畫面。
+  _syncWatchListFromServer();
 }
 
 // ── 通知說明 Modal ──
@@ -6146,6 +6866,16 @@ async function doLogout(){
   } catch(e){}
   _clearToken();
   _authUser = null;
+  // 2026/09/13新增：自選股改為跟帳號綁定後，登出時要把上一個帳號的自選股/族群從記憶體
+  // 跟localStorage一併清乾淨。不然共用電腦的情境下，下一個人登入時_syncWatchListFromServer()
+  // 送出merge請求，會把上一個帳號的localStorage殘留資料錯誤併進下一個帳號的伺服器資料。
+  watchList = [];
+  localStorage.removeItem('watchList');
+  localStorage.removeItem('watchGroupNames');
+  if(typeof renderHomeDash==='function') renderHomeDash();
+  if(typeof _renderDesktopWatchSidebar==='function') _renderDesktopWatchSidebar();
+  if(typeof _renderWsGroupFilterSelectM==='function') _renderWsGroupFilterSelectM();
+  if(document.getElementById('watchInnerContent') && typeof _renderWatchInner==='function') _renderWatchInner();
   _updateGuestUI();
   showPage('home');
 }

@@ -2988,6 +2988,27 @@ def _db_init():
             created_at  TEXT DEFAULT (datetime('now','+8 hours')),
             UNIQUE(user_email, stock_id)
         );
+        -- 自選股（2026/09/13新增：修正自選股原本只存localStorage、從未跟帳號綁定的問題，
+        -- 換裝置/瀏覽器登入同一帳號自選股會整組消失。以下改存DB，跟portfolios同一套風格）
+        CREATE TABLE IF NOT EXISTS watchlist_items (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_email  TEXT NOT NULL,
+            stock_id    TEXT NOT NULL,
+            stock_name  TEXT DEFAULT '',
+            group_name  TEXT NOT NULL DEFAULT '預設',
+            added_date  TEXT DEFAULT '',
+            created_at  TEXT DEFAULT (datetime('now','+8 hours')),
+            UNIQUE(user_email, stock_id)
+        );
+        CREATE TABLE IF NOT EXISTS watchlist_groups (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_email  TEXT NOT NULL,
+            group_name  TEXT NOT NULL,
+            created_at  TEXT DEFAULT (datetime('now','+8 hours')),
+            UNIQUE(user_email, group_name)
+        );
+        CREATE INDEX IF NOT EXISTS idx_watchlist_items_user ON watchlist_items(user_email);
+        CREATE INDEX IF NOT EXISTS idx_watchlist_groups_user ON watchlist_groups(user_email);
         CREATE TABLE IF NOT EXISTS html_pages (
             key         TEXT PRIMARY KEY,
             content     TEXT NOT NULL,
@@ -7436,8 +7457,6 @@ def _run_opening_scan_job():
         traceback.print_exc()
 
 
-@app.get("/api/picks/opening")
-
 def _picks_payload(rows, updated_at, user):
     st = _taipei_now_str("%Y-%m-%d %H:%M")
     if _is_premium(user):
@@ -7455,6 +7474,12 @@ def _picks_payload(rows, updated_at, user):
     return {"data": placeholders, "updated_at": updated_at, "server_time": st,
             "approx_count": n, "tier": "guest", "masked": True, "preview": True}
 
+# 2026/09/13修正：這個 @app.get 裝饰器先前誤掛在上面的 _picks_payload（純輔助函式，
+# 三個參數都沒有型別／預設值）身上，導致 FastAPI 把 rows/updated_at/user 當成
+# 三個必填的 query 參數，正式站呼叫這支API時一律回傳422（Field required）。
+# 資金雷達色塊點擊「載入失敗」、首頁異常訊號卡靜默顯示假的「今日尚無資料」都是這個bug造成。
+# 裝饰器改掛回真正處理請求的 get_opening_picks，_picks_payload 只當內部輔助函式使用。
+@app.get("/api/picks/opening")
 def get_opening_picks(user: dict | None = Depends(get_current_user)):
     """開盤熱門股（成交量前20；遊客弱預覽／免費藏名／付費全開）
     盤中補即時報價，盤後補當日收盤價，都用 MIS API。
@@ -10715,6 +10740,294 @@ async def portfolio_analysis(request: Request, current_user: dict = Depends(requ
 
     _consume_portfolio_daily_credit(request, current_user)
     return {"ok": True, "data": results}
+
+
+# ══════════════════════════════════════════════════════════════
+# 自選股 API（2026/09/13新增）
+# 背景：自選股功能明明要求登入才能加入/移除，卻從頭到尾只存在瀏覽器localStorage，
+# 從未真正跟帳號綁定——同一個人在別的裝置或瀏覽器登入，自選股清單就整組消失。
+# 帥哥鴻反饋後決定「全部修正」：已登入用戶一律走這裡的DB，不再是純前端假象。
+# 沿用/portfolio*系列端點同樣的require_user（未登入直接401，不像get_current_user
+# 那樣可能回傳None讓呼叫端誤用而炸500）、_db_conn()、try/except→HTTPException(500)風格。
+# ══════════════════════════════════════════════════════════════
+
+WATCHLIST_MAX = 30  # 比照前端watchList.length>30的舊上限，伺服器端也要擋，不能只信任前端
+
+
+def _ws_group_names(conn, email: str) -> list:
+    """族群名稱清單：「預設」永遠排最前面，即使該用戶在watchlist_groups裡還沒有任何紀錄
+    （比照前端getWatchGroupNames()的預設補值邏輯，兩邊行為要一致）。"""
+    rows = conn.execute(
+        "SELECT group_name FROM watchlist_groups WHERE user_email=? ORDER BY created_at, id",
+        (email,)
+    ).fetchall()
+    return ["預設"] + [r["group_name"] for r in rows if r["group_name"] != "預設"]
+
+
+def _ws_list_data(conn, email: str) -> list:
+    """自選股清單，新到舊排序（比照前端addWatch()用unshift塞在最前面的慣例）"""
+    rows = conn.execute(
+        "SELECT stock_id, stock_name, group_name, added_date FROM watchlist_items "
+        "WHERE user_email=? ORDER BY id DESC",
+        (email,)
+    ).fetchall()
+    return [
+        {"id": r["stock_id"], "name": r["stock_name"], "group": r["group_name"], "date": r["added_date"]}
+        for r in rows
+    ]
+
+
+@app.get("/api/watchlist")
+def get_watchlist(current_user: dict = Depends(require_user)):
+    """取得目前登入用戶的自選股清單與族群名稱"""
+    email = current_user["email"]
+    conn = _db_conn()
+    data = _ws_list_data(conn, email)
+    group_names = _ws_group_names(conn, email)
+    conn.close()
+    return {"ok": True, "data": data, "group_names": group_names}
+
+
+@app.post("/api/watchlist/add")
+async def add_watchlist(request: Request, current_user: dict = Depends(require_user)):
+    """新增一檔自選股（對應前端addWatch()）"""
+    email = current_user["email"]
+    body = await request.json()
+    stock_id = str(body.get("id", "")).strip().upper()
+    stock_name = str(body.get("name", "")).strip()
+    added_date = str(body.get("date", "")).strip() or _taipei_today()
+    group = str(body.get("group", "")).strip() or "預設"
+    if not stock_id:
+        raise HTTPException(status_code=400, detail="缺少股票代號")
+
+    conn = _db_conn()
+    existing = conn.execute(
+        "SELECT id FROM watchlist_items WHERE user_email=? AND stock_id=?",
+        (email, stock_id)
+    ).fetchone()
+    if not existing:
+        count = conn.execute(
+            "SELECT COUNT(*) FROM watchlist_items WHERE user_email=?", (email,)
+        ).fetchone()[0]
+        if count >= WATCHLIST_MAX:
+            conn.close()
+            raise HTTPException(status_code=400, detail=f"自選股最多 {WATCHLIST_MAX} 檔，請先移除幾檔再新增")
+    try:
+        # INSERT OR IGNORE：已存在的股票不覆蓋既有的族群設定，只是單純確保這檔在清單裡
+        conn.execute(
+            "INSERT OR IGNORE INTO watchlist_items (user_email, stock_id, stock_name, group_name, added_date) "
+            "VALUES (?,?,?,?,?)",
+            (email, stock_id, stock_name, group, added_date)
+        )
+        if group not in ("預設", "全部"):
+            conn.execute(
+                "INSERT OR IGNORE INTO watchlist_groups (user_email, group_name) VALUES (?,?)",
+                (email, group)
+            )
+        conn.commit()
+    except Exception as e:
+        conn.close()
+        raise HTTPException(status_code=500, detail=str(e))
+    conn.close()
+    return {"ok": True, "msg": f"已加入 {stock_id}"}
+
+
+@app.delete("/api/watchlist/{stock_id}")
+def delete_watchlist(stock_id: str, current_user: dict = Depends(require_user)):
+    """移除一檔自選股（對應前端removeWatch()）"""
+    email = current_user["email"]
+    conn = _db_conn()
+    conn.execute(
+        "DELETE FROM watchlist_items WHERE user_email=? AND stock_id=?",
+        (email, stock_id.strip().upper())
+    )
+    conn.commit()
+    conn.close()
+    return {"ok": True, "msg": f"已移除 {stock_id}"}
+
+
+@app.post("/api/watchlist/group")
+async def set_watchlist_group(request: Request, current_user: dict = Depends(require_user)):
+    """更新單一自選股所屬族群（對應前端setStockGroup()）。若指定的族群是還沒建立過的
+    自訂族群，這裡順便補建，讓「只靠改股票族群、沒特別去建立族群」建出來的空族群也能留存。"""
+    email = current_user["email"]
+    body = await request.json()
+    stock_id = str(body.get("stock_id", "")).strip().upper()
+    group = str(body.get("group", "")).strip() or "預設"
+    if not stock_id:
+        raise HTTPException(status_code=400, detail="缺少股票代號")
+
+    conn = _db_conn()
+    try:
+        conn.execute(
+            "UPDATE watchlist_items SET group_name=? WHERE user_email=? AND stock_id=?",
+            (group, email, stock_id)
+        )
+        if group not in ("預設", "全部"):
+            conn.execute(
+                "INSERT OR IGNORE INTO watchlist_groups (user_email, group_name) VALUES (?,?)",
+                (email, group)
+            )
+        conn.commit()
+    except Exception as e:
+        conn.close()
+        raise HTTPException(status_code=500, detail=str(e))
+    conn.close()
+    return {"ok": True}
+
+
+@app.post("/api/watchlist/group/add")
+async def add_watchlist_group(request: Request, current_user: dict = Depends(require_user)):
+    """新增一個尚未指派任何股票的空族群（對應前端addWatchGroupName()）"""
+    email = current_user["email"]
+    body = await request.json()
+    name = str(body.get("name", "")).strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="請輸入族群名稱")
+    if name in ("預設", "全部"):
+        # 這兩個名稱本來就永遠存在（見_ws_group_names），視同已建立成功
+        return {"ok": True}
+    conn = _db_conn()
+    try:
+        conn.execute(
+            "INSERT OR IGNORE INTO watchlist_groups (user_email, group_name) VALUES (?,?)",
+            (email, name)
+        )
+        conn.commit()
+    except Exception as e:
+        conn.close()
+        raise HTTPException(status_code=500, detail=str(e))
+    conn.close()
+    return {"ok": True}
+
+
+@app.post("/api/watchlist/group/rename")
+async def rename_watchlist_group(request: Request, current_user: dict = Depends(require_user)):
+    """族群改名（對應前端renameWatchGroupName()）：「預設」「全部」不可改名，
+    改名後同步更新所有屬於這個族群的自選股，整段包在同一個connection裡一起commit。"""
+    email = current_user["email"]
+    body = await request.json()
+    old_name = str(body.get("old_name", "")).strip()
+    new_name = str(body.get("new_name", "")).strip()
+    if not old_name or not new_name:
+        raise HTTPException(status_code=400, detail="缺少族群名稱")
+    if old_name in ("預設", "全部"):
+        raise HTTPException(status_code=400, detail="「預設」與「全部」不可改名")
+
+    conn = _db_conn()
+    try:
+        conn.execute(
+            "UPDATE watchlist_groups SET group_name=? WHERE user_email=? AND group_name=?",
+            (new_name, email, old_name)
+        )
+        conn.execute(
+            "UPDATE watchlist_items SET group_name=? WHERE user_email=? AND group_name=?",
+            (new_name, email, old_name)
+        )
+        conn.commit()
+    except sqlite3.IntegrityError:
+        conn.rollback()
+        conn.close()
+        raise HTTPException(status_code=400, detail="已經有相同名稱的族群了")
+    except Exception as e:
+        conn.close()
+        raise HTTPException(status_code=500, detail=str(e))
+    conn.close()
+    return {"ok": True}
+
+
+@app.post("/api/watchlist/group/delete")
+async def delete_watchlist_group(request: Request, current_user: dict = Depends(require_user)):
+    """刪除族群（對應前端deleteWatchGroupName()）：「預設」「全部」不可刪除；
+    被刪除族群內的股票歸回「預設」，股票本身不會被移除，整段包在同一個connection裡一起commit。"""
+    email = current_user["email"]
+    body = await request.json()
+    name = str(body.get("name", "")).strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="缺少族群名稱")
+    if name in ("預設", "全部"):
+        raise HTTPException(status_code=400, detail="「預設」與「全部」不可刪除")
+
+    conn = _db_conn()
+    try:
+        conn.execute(
+            "UPDATE watchlist_items SET group_name='預設' WHERE user_email=? AND group_name=?",
+            (email, name)
+        )
+        conn.execute(
+            "DELETE FROM watchlist_groups WHERE user_email=? AND group_name=?",
+            (email, name)
+        )
+        conn.commit()
+    except Exception as e:
+        conn.close()
+        raise HTTPException(status_code=500, detail=str(e))
+    conn.close()
+    return {"ok": True}
+
+
+@app.post("/api/watchlist/merge")
+async def merge_watchlist(request: Request, current_user: dict = Depends(require_user)):
+    """登入後一次性把瀏覽器localStorage裡（此功能修正前留下、或離線時沒同步到）的自選股／
+    族群併入伺服器帳號資料。原則：伺服器已有的資料優先（INSERT OR IGNORE，不讓過時的本地
+    資料蓋掉其他裝置已經做的族群調整或刪除），local端超過30檔上限的部分不併入。
+    完成後直接回傳跟GET /api/watchlist一樣的合併後結果，前端可以直接拿來取代記憶體狀態，
+    不用再多打一次GET。"""
+    email = current_user["email"]
+    body = await request.json()
+    items = body.get("items") or []
+    group_names = body.get("group_names") or []
+    if not isinstance(items, list):
+        items = []
+    if not isinstance(group_names, list):
+        group_names = []
+
+    conn = _db_conn()
+    try:
+        for g in group_names:
+            g = str(g or "").strip()
+            if not g or g in ("預設", "全部"):
+                continue
+            conn.execute(
+                "INSERT OR IGNORE INTO watchlist_groups (user_email, group_name) VALUES (?,?)",
+                (email, g)
+            )
+
+        existing_count = conn.execute(
+            "SELECT COUNT(*) FROM watchlist_items WHERE user_email=?", (email,)
+        ).fetchone()[0]
+        for it in items:
+            if existing_count >= WATCHLIST_MAX:
+                break  # 伺服器端上限：local端多出來的部分不併入，不能只信任前端
+            if not isinstance(it, dict):
+                continue
+            stock_id = str(it.get("id", "")).strip().upper()
+            if not stock_id:
+                continue
+            stock_name = str(it.get("name", "")).strip()
+            group = str(it.get("group", "")).strip() or "預設"
+            added_date = str(it.get("date", "")).strip() or _taipei_today()
+            cur = conn.execute(
+                "INSERT OR IGNORE INTO watchlist_items "
+                "(user_email, stock_id, stock_name, group_name, added_date) VALUES (?,?,?,?,?)",
+                (email, stock_id, stock_name, group, added_date)
+            )
+            if cur.rowcount:
+                existing_count += 1
+            if group not in ("預設", "全部"):
+                conn.execute(
+                    "INSERT OR IGNORE INTO watchlist_groups (user_email, group_name) VALUES (?,?)",
+                    (email, group)
+                )
+        conn.commit()
+    except Exception as e:
+        conn.close()
+        raise HTTPException(status_code=500, detail=str(e))
+
+    data = _ws_list_data(conn, email)
+    names = _ws_group_names(conn, email)
+    conn.close()
+    return {"ok": True, "data": data, "group_names": names}
 
 
 # ══════════════════════════════════════════════════════════════
