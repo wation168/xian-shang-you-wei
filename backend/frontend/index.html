@@ -766,6 +766,151 @@ html[data-theme="dark"] body,html:not([data-theme]) body{background:transparent}
 .ws-mobile-bar .ws-group-select{flex:1;height:30px;font-size:12px}
 .ws-mobile-bar .ws-group-add{width:30px;height:30px;font-size:14px}
 #wsAddGroupRowM{padding:0}
+
+/* ══════════════════════════════════════════════════════════════════
+   IA-Home-2（2026/09/13）：首頁儀表板 #homeDash 重新設計
+   範圍只在 #homeDash 內部，所有既有 API／函式／會員權限判斷不變，
+   只換外觀與版面。舊的 v5-*／ind-*／mkt-* 規則保留不刪，降低風險。
+   ══════════════════════════════════════════════════════════════════ */
+#homeDash{
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","Microsoft JhengHei",sans-serif;
+  --hd2-e1:0 1px 2px rgba(20,30,40,.05),0 1px 1px rgba(20,30,40,.03);
+  --hd2-e2:0 4px 14px rgba(20,30,40,.08),0 1px 3px rgba(20,30,40,.05);
+  --hd2-e3:0 10px 30px rgba(20,30,40,.12),0 2px 8px rgba(20,30,40,.06);
+  --hd2-shine:rgba(255,255,255,.5);
+  --hd2-blue:#3B82F6;
+}
+:root[data-theme="dark"] #homeDash{
+  --hd2-e1:0 1px 2px rgba(0,0,0,.5),0 1px 1px rgba(0,0,0,.3);
+  --hd2-e2:0 4px 16px rgba(0,0,0,.45),0 1px 4px rgba(0,0,0,.3);
+  --hd2-e3:0 14px 36px rgba(0,0,0,.55),0 2px 10px rgba(0,0,0,.35);
+  --hd2-shine:rgba(255,255,255,.07);
+  --hd2-blue:#5B9BFF;
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme]) #homeDash{
+    --hd2-e1:0 1px 2px rgba(0,0,0,.5),0 1px 1px rgba(0,0,0,.3);
+    --hd2-e2:0 4px 16px rgba(0,0,0,.45),0 1px 4px rgba(0,0,0,.3);
+    --hd2-e3:0 14px 36px rgba(0,0,0,.55),0 2px 10px rgba(0,0,0,.35);
+    --hd2-shine:rgba(255,255,255,.07);
+    --hd2-blue:#5B9BFF;
+  }
+}
+
+/* 主視覺＋搜尋（合併，最重要的操作入口） */
+.hd2-hero{position:relative;overflow:hidden;background:linear-gradient(165deg,var(--bg2),var(--bg));
+  border:1px solid var(--border);border-radius:20px;padding:22px 22px 18px;margin-bottom:14px;box-shadow:var(--hd2-e2)}
+.hd2-hero::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--hd2-shine),transparent)}
+.hd2-eyebrow{font-size:12px;color:var(--text3);font-weight:700;letter-spacing:.5px}
+.hd2-hero h1{font-size:23px;margin:6px 0 4px;color:var(--text);letter-spacing:-.3px}
+.hd2-hero-sub{font-size:13px;color:var(--text2);margin:0 0 14px}
+.hd2-hero-search{display:flex;gap:8px}
+.hd2-hero-search input{flex:1;height:46px;border-radius:14px;border:1.5px solid var(--border2);
+  background:var(--bg);color:var(--text);font-size:15px;padding:0 16px;outline:none;box-sizing:border-box;min-width:0}
+.hd2-hero-search input:focus{border-color:var(--green)}
+.hd2-hero-btn{height:46px;padding:0 20px;border:none;border-radius:14px;background:var(--green);color:#fff;
+  font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 4px 14px rgba(29,158,117,.3);
+  transition:transform .15s,box-shadow .15s;flex-shrink:0;white-space:nowrap}
+.hd2-hero-btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(29,158,117,.4)}
+.hd2-hero-btn:active{transform:translateY(0)}
+.hd2-hero-updated{font-size:11px;color:var(--text3);margin-top:10px}
+
+.hd2-grid{display:grid;gap:14px}
+.hd2-top{grid-template-columns:1.5fr 1fr}
+.hd2-mid{grid-template-columns:1fr 1fr;margin-top:14px}
+.hd2-bottom{grid-template-columns:1fr;margin-top:14px}
+.hd2-card{background:var(--bg);border:1px solid var(--border);border-radius:18px;padding:18px;
+  box-shadow:var(--hd2-e1);transition:transform .15s,box-shadow .15s}
+.hd2-card:hover{box-shadow:var(--hd2-e2);transform:translateY(-1px)}
+.hd2-card h2{font-size:15px;margin:0 0 4px;color:var(--text)}
+.hd2-sub{font-size:12px;color:var(--text3);margin-bottom:12px}
+.hd2-cta{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.hd2-primary,.hd2-secondary{border-radius:10px;padding:10px 14px;cursor:pointer;font-size:13px;font-weight:700}
+.hd2-primary{border:0;background:var(--green);color:#fff}
+.hd2-secondary{border:1px solid var(--border2);background:transparent;color:var(--text)}
+
+/* 今天市場（指數＋市場氣氛漲跌家數） */
+.hd2-markets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:2px}
+.hd2-market{padding:12px;border-radius:14px;background:var(--bg2);border:.5px solid var(--border2)}
+.hd2-market span{font-size:11px;color:var(--text3)}
+.hd2-market b{display:block;font-size:18px;margin:5px 0;color:var(--text)}
+.hd2-breadth{margin-top:14px;padding-top:12px;border-top:.5px solid var(--border)}
+.hd2-breadth-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;gap:8px}
+.hd2-breadth-label{font-size:12px;color:var(--text2);font-weight:700}
+.hd2-breadth-mood{font-size:12px;font-weight:700;flex-shrink:0}
+.hd2-breadth-bar{display:flex;height:10px;border-radius:6px;overflow:hidden;background:var(--bg3)}
+.hd2-breadth-bar i{display:block;height:100%}
+.hd2-breadth-nums{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:6px}
+@media(max-width:640px){.hd2-markets{grid-template-columns:repeat(2,1fr)}}
+
+/* 錢往哪去（產業強弱卡） */
+.hd2-sector-grid{display:grid;gap:9px}
+.hd2-sector-row{display:grid;grid-template-columns:70px 1fr 54px;gap:10px;align-items:center;font-size:12px}
+.hd2-sector-name{color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hd2-sector-bar{height:8px;border-radius:6px;background:var(--bg3);overflow:hidden}
+.hd2-sector-bar i{display:block;height:100%;border-radius:6px;transition:width .6s ease}
+.hd2-sector-bar i.up{background:var(--up)}
+.hd2-sector-bar i.dn{background:var(--dn)}
+.hd2-sector-chg{text-align:right;font-weight:700}
+.hd2-sector-chg.up{color:var(--up)}
+.hd2-sector-chg.dn{color:var(--dn)}
+
+/* 今天看什麼（3張紅／藍／綠卡，點入才提示鎖定，靜止時不整卡變灰） */
+.hd2-discover-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.hd2-disc{border-radius:14px;padding:14px;cursor:pointer;border:1px solid var(--border);background:var(--bg2);
+  border-top:3px solid var(--border2);transition:transform .18s,box-shadow .18s}
+.hd2-disc:hover{transform:translateY(-3px);box-shadow:var(--hd2-e3)}
+.hd2-disc:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.hd2-disc-red{border-top-color:var(--up)}
+.hd2-disc-blue{border-top-color:var(--hd2-blue)}
+.hd2-disc-green{border-top-color:var(--green)}
+.hd2-disc-ico{font-size:19px;margin-bottom:6px}
+.hd2-disc-ttl{font-weight:700;font-size:13px;color:var(--text);margin-bottom:2px}
+.hd2-disc-sub{font-size:11px;color:var(--text3);margin-bottom:10px}
+.hd2-disc-list{min-height:60px}
+.hd2-disc-item{display:flex;justify-content:space-between;gap:6px;font-size:12px;padding:4px 0;border-bottom:.5px solid var(--border)}
+.hd2-disc-item:last-child{border-bottom:none}
+.hd2-disc-item b{font-weight:600;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hd2-disc-tag{display:inline-block;font-size:10px;padding:3px 8px;border-radius:6px;margin-top:9px;background:var(--bg3);color:var(--text3)}
+@media(max-width:640px){.hd2-discover-grid{grid-template-columns:1fr}}
+
+/* 我的投資 */
+.hd2-invest-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:2px}
+.hd2-invest-count{font-size:11px;color:var(--text2);background:var(--bg2);padding:3px 10px;border-radius:20px;flex-shrink:0}
+
+/* DEEP／會員升級：金色系維持既有品牌，明確鎖定文字＋堆疊卡縱深感 */
+.hd2-deep{position:relative;margin-top:14px;border-radius:20px;padding:22px;
+  background:linear-gradient(150deg,var(--amber-l),var(--bg));border:1px solid var(--amber)}
+.hd2-deep::before{content:"";position:absolute;inset:9px -7px -7px 9px;border-radius:20px;
+  border:1px solid var(--amber);opacity:.22;z-index:-1;pointer-events:none}
+.hd2-deep-chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--amber);
+  background:var(--amber-l);padding:5px 10px;border-radius:20px;margin-bottom:10px}
+.hd2-deep-chip .dot{width:6px;height:6px;border-radius:50%;background:var(--amber);animation:hd2Pulse 1.8s infinite}
+@keyframes hd2Pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.hd2-deep h2{font-size:18px;margin:0 0 4px}
+.hd2-deep-lock{font-size:13px;color:var(--text2);font-weight:600;margin:10px 0 4px;
+  padding:10px 12px;background:var(--bg2);border-radius:10px;border-left:3px solid var(--amber)}
+.hd2-deep-ok{font-size:13px;color:var(--text2);font-weight:600;margin:10px 0 4px;
+  padding:10px 12px;background:var(--dn-l);border-radius:10px;border-left:3px solid var(--dn)}
+.hd2-deep-btn-primary{border:0;border-radius:12px;padding:11px 18px;background:var(--amber);color:#fff;
+  font-weight:700;font-size:14px;cursor:pointer}
+.hd2-deep-btn-secondary{border:1.5px solid var(--amber);border-radius:12px;padding:11px 18px;background:transparent;
+  color:var(--amber);font-weight:700;font-size:14px;cursor:pointer}
+
+@media(max-width:900px){
+  .hd2-top,.hd2-mid{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .hd2-hero h1{font-size:19px}
+  .hd2-hero-search{flex-direction:column}
+  .hd2-hero-btn{width:100%}
+  .hd2-card:hover{transform:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .hd2-card,.hd2-disc,.hd2-hero-btn,.hd2-card:hover{transition:none;transform:none}
+  .hd2-deep-chip .dot{animation:none}
+}
 </style>
 <script src="https://accounts.google.com/gsi/client" async onload="if(typeof _initGoogleSignIn==='function'){_initGoogleSignIn();}"></script>
 <script>
@@ -917,46 +1062,74 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
 
   <div class="status" id="statusBar"></div>
 
-  <!-- 首頁儀表板：搜尋前顯示（2026/08/22新增），有分析結果時自動隱藏 -->
+  <!-- 首頁儀表板：搜尋前顯示（2026/08/22新增，2026/09/13 IA-Home-2重新設計外觀與版面），有分析結果時自動隱藏跟我有關卡片 -->
   <div id="homeDash">
     <div id="homeFlow">
-      <section class="v5-hero">
-        <div>
-          <div class="v5-eyebrow">台股每日入口</div>
-          <h1>今天市場，先看這裡</h1>
-          <p>先掌握市場 → 找到值得注意的股票 → 再進一步分析</p>
+
+      <!-- 主視覺＋搜尋：想分析一檔股票，是首頁最重要的操作入口 -->
+      <section class="hd2-hero">
+        <div class="hd2-eyebrow">台股每日入口</div>
+        <h1>想分析一檔股票？</h1>
+        <div class="hd2-hero-sub">輸入代號或名稱，直接開始——下面先看市場，也可以直接搜尋</div>
+        <div class="hd2-hero-search">
+          <input type="text" id="homeHeroSearch" placeholder="輸入股票代號或名稱，如：2330 或 台積電" inputmode="text" autocomplete="off" onkeydown="if(event.key==='Enter')_homeHeroAnalyze()">
+          <button type="button" class="hd2-hero-btn" onclick="_homeHeroAnalyze()">開始分析</button>
         </div>
-        <div class="v5-updated" id="homeHeroUpdated">資料更新後顯示台北時間</div>
+        <div class="hd2-hero-updated" id="homeHeroUpdated">資料更新後顯示台北時間</div>
       </section>
 
-      <section class="v5-grid v5-top">
-        <div class="v5-card" id="homeMktRow">
-          <h2>今天市場發生什麼事</h2>
-          <div class="v5-sub" id="homeMktMeta"></div>
-          <div class="v5-markets" id="homeMktChips"></div>
+      <!-- 今天市場：指數 + 市場氣氛(漲跌家數，新增) -->
+      <section class="hd2-grid hd2-top">
+        <div class="hd2-card" id="homeMktRow">
+          <h2>今天台股怎麼了</h2>
+          <div class="hd2-sub" id="homeMktMeta"></div>
+          <div class="hd2-markets" id="homeMktChips"></div>
+          <div class="hd2-breadth" id="homeBreadthBox"></div>
         </div>
-        <div class="v5-card" id="homeNewsBox"></div>
+        <div class="hd2-card" id="homeNewsBox"></div>
       </section>
 
-      <section class="v5-grid v5-mid">
-        <div class="v5-card" id="homeIndBox"></div>
-        <div class="v5-card">
+      <!-- 錢往哪去（產業強弱） + 今天看什麼（3張紅/藍/綠卡） -->
+      <section class="hd2-grid hd2-mid">
+        <div class="hd2-card" id="homeIndBox"></div>
+        <div class="hd2-card">
           <h2>今天看什麼</h2>
-          <div class="v5-sub">把既有的精選與深度選股放到同一個入口</div>
-          <div class="v5-pickGrid">
-            <button type="button" class="v5-pick" onclick="_homeGo('picks')"><span class="v5-tag">開盤精選</span><b>今日精選標的</b><span class="v5-lock">依會員權限顯示</span></button>
-            <button type="button" class="v5-pick" onclick="_homeGo('quotes')"><span class="v5-tag">常用</span><b>最近看過的標的</b><span class="v5-lock">常用／熱鍵</span></button>
-            <button type="button" class="v5-pick" onclick="_homeGo('deepanalysis')"><span class="v5-tag">深度選股</span><b>深入篩選結果</b><span class="v5-lock">付費會員完整開放</span></button>
-            <button type="button" class="v5-pick" onclick="_homeGo('analyze')"><span class="v5-tag">個股分析</span><b>輸入股票直接分析</b><span class="v5-lock">依會員權限顯示</span></button>
+          <div class="hd2-sub">同樣的資料，不同的問題——你今天想看哪一個？</div>
+          <div class="hd2-discover-grid">
+            <div class="hd2-disc hd2-disc-red" onclick="_homeGo('quotes')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')this.click()">
+              <div class="hd2-disc-ico">🔥</div>
+              <div class="hd2-disc-ttl">市場熱門</div>
+              <div class="hd2-disc-sub">現在市場正在關注的股票</div>
+              <div class="hd2-disc-list" id="discHotList"><div class="hd2-disc-item" style="color:var(--text3);border:none">載入中…</div></div>
+              <div class="hd2-disc-tag">常用／熱鍵</div>
+            </div>
+            <div class="hd2-disc hd2-disc-blue" onclick="_homeGo('picks')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')this.click()">
+              <div class="hd2-disc-ico">🎯</div>
+              <div class="hd2-disc-ttl">開盤精選</div>
+              <div class="hd2-disc-sub">今天值得優先注意的標的</div>
+              <div class="hd2-disc-list" id="discPickList"><div class="hd2-disc-item" style="color:var(--text3);border:none">載入中…</div></div>
+              <div class="hd2-disc-tag">依會員權限顯示</div>
+            </div>
+            <div class="hd2-disc hd2-disc-green" onclick="_homeGo('deepanalysis')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')this.click()">
+              <div class="hd2-disc-ico">🔬</div>
+              <div class="hd2-disc-ttl">深度選股</div>
+              <div class="hd2-disc-sub">三重確認條件篩選結果</div>
+              <div class="hd2-disc-list" id="discDeepList"><div class="hd2-disc-item" style="color:var(--text3);border:none">載入中…</div></div>
+              <div class="hd2-disc-tag">付費會員完整開放</div>
+            </div>
           </div>
-          <div class="v5-cta"><button type="button" class="v5-primary" onclick="_homeGo('picks')">查看全部機會</button></div>
+          <div class="hd2-cta"><button type="button" class="hd2-primary" onclick="_homeGo('picks')">查看全部機會</button></div>
         </div>
       </section>
 
-      <section class="v5-grid v5-bottom">
-        <div class="v5-card hd-sec">
-          <h2>跟我有關</h2>
-          <div class="v5-sub">自選股與持股健檢，成為每天回來的理由</div>
+      <!-- 我的投資：自選股預覽(免額度) + 持股健檢入口(點擊才載入，不自動燒額度) -->
+      <section class="hd2-grid hd2-bottom">
+        <div class="hd2-card hd-sec">
+          <div class="hd2-invest-head">
+            <h2 style="margin:0">跟我有關</h2>
+            <span class="hd2-invest-count" id="homeInvestCount"></span>
+          </div>
+          <div class="hd2-sub">自選股與持股健檢，成為每天回來的理由</div>
           <div class="ws-mobile-bar">
             <select id="wsGroupFilterM" class="ws-group-select" onchange="_onWsGroupFilterChangeM(this.value)"></select>
             <button class="ws-group-add" onclick="_wsToggleAddGroupM()" title="新增族群">＋</button>
@@ -968,26 +1141,22 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
             <button onclick="_wsSubmitAddGroupM()">新增</button>
           </div>
           <div id="homeWatchPreview"></div>
-          <div class="v5-cta">
-            <button type="button" class="v5-secondary" onclick="showPage('watch')">查看我的投資</button>
-            <button type="button" class="v5-primary" onclick="showPage('portfolio')">持股健檢</button>
+          <div class="hd2-cta">
+            <button type="button" class="hd2-secondary" onclick="showPage('watch')">查看我的投資</button>
+            <button type="button" class="hd2-primary" onclick="showPage('portfolio')">持股健檢</button>
           </div>
-        </div>
-        <div class="v5-card v5-analyze" id="flowAnalyze">
-          <h2>想深入看一檔股票？</h2>
-          <div class="v5-sub">直接搜尋，進入核心個股分析</div>
-          <div class="v5-cta"><button type="button" class="v5-primary" onclick="_homeGo('analyze')">開始分析</button></div>
         </div>
       </section>
 
-      <section class="v5-card v5-deep">
+      <!-- DEEP／會員升級：金色系維持既有品牌，訊號先勾住好奇心，鎖定訊息用明確文字而非只靠模糊 -->
+      <section class="hd2-card hd2-deep">
+        <div class="hd2-deep-chip" id="homeDeepChip"><span class="dot"></span>訊號已觸發</div>
         <h2>想看得更深？</h2>
-        <div class="v5-sub">DEEP／完整深度分析</div>
-        <b>把「資料」變成「解讀」</b>
-        <p class="v5-lock">付費會員完整開放。這裡是會員價值的主要入口。</p>
-        <div class="v5-cta">
-          <button type="button" class="v5-upgrade" onclick="_homeGo('deep')">進入深度分析</button>
-          <button type="button" class="v5-secondary" id="homeIaUpgrade" onclick="_homeGo('upgrade')">升級付費會員</button>
+        <div class="hd2-sub" style="margin-bottom:2px">把「資料」變成「解讀」——趨勢、支撐壓力、法人籌碼的完整判讀</div>
+        <div id="homeDeepLockBox"></div>
+        <div class="hd2-cta">
+          <button type="button" class="hd2-deep-btn-primary" onclick="_homeGo('deep')">進入深度分析</button>
+          <button type="button" class="hd2-deep-btn-secondary" id="homeIaUpgrade" onclick="_homeGo('upgrade')">升級付費會員</button>
         </div>
       </section>
     </div>
@@ -3244,6 +3413,17 @@ function _homeFocusSearch(hint){
   if(inp){ inp.focus(); try{ inp.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){} }
   if(hint && typeof setSt==='function') setSt(hint, false);
 }
+// IA-Home-2（2026/09/13）：首頁主視覺內的搜尋框是既有 #stockInput 的輕量代理，
+// 按下後把值同步過去再呼叫真正的 analyzeStock()，不是另外一套假邏輯。
+function _homeHeroAnalyze(){
+  const src = document.getElementById('homeHeroSearch');
+  const v = src ? src.value.trim() : '';
+  if(!v){ if(src) src.focus(); return; }
+  const real = document.getElementById('stockInput');
+  if(real) real.value = v;
+  showPage('home');
+  if(typeof analyzeStock==='function') analyzeStock();
+}
 function _homeNeedStockThen(fn, hint){
   const id = (window.C && C._currentId) ? C._currentId : '';
   if(!id){ _homeFocusSearch(hint || '請先輸入股票代號再分析'); return; }
@@ -3305,9 +3485,12 @@ function _observeHomeDash(){
 }
 
 async function renderHomeDash(){
+  _renderHomeMemberState();
   const el = document.getElementById('homeWatchPreview');
   if(!el) return;
   if(typeof _renderWsGroupFilterSelectM==='function') _renderWsGroupFilterSelectM();
+  const cntEl = document.getElementById('homeInvestCount');
+  if(cntEl) cntEl.textContent = watchList.length ? `已追蹤 ${watchList.length} 檔` : '';
   if(!watchList.length){
     el.innerHTML = `<div class="hd-empty"><div class="hd-empty-icon">🔥</div>輸入代號分析股票後按「加入自選」，關注的股票會顯示在這裡</div>`;
     return;
@@ -4900,42 +5083,72 @@ function _mktShow(id){
 }
 async function _loadHomeMarket(){
   const api = getAPI();
+  let _mktRowHasContent = false;
+
   try{
     const r = await fetch(api+'/api/market/overview', {signal: AbortSignal.timeout(12000)});
     const j = r.ok ? await r.json() : null;
-    const box = document.getElementById('homeMktRow');
     const chips = document.getElementById('homeMktChips');
     const meta = document.getElementById('homeMktMeta');
-    if(!box || !chips) return;
-    if(!j || !j.ok || !Array.isArray(j.items) || !j.items.length){
-      _mktHide('homeMktRow'); chips.innerHTML=''; if(meta) meta.textContent='';
-    } else {
-      const ovItems = j.items.filter(it => it && it.source && it.as_of && it.value!=null);
-      if(!ovItems.length){ _mktHide('homeMktRow'); chips.innerHTML=''; if(meta) meta.textContent=''; }
-      else {
-      chips.innerHTML = ovItems.map(it => {
-        const up = Number(it.change_pct)>0; const dn = Number(it.change_pct)<0;
-        const cls = up?'v5-up':(dn?'v5-dn':'v5-flat');
-        const sign = up?'+':'';
-        return '<div class="v5-market">'
-          +'<span>'+_mktEsc(it.name||'')+'</span>'
-          +'<b>'+_mktEsc(_mktFmt(it.value,2))+'</b>'
-          +'<span class="'+cls+'">'+_mktEsc(sign+_mktFmt(it.change_pct,2)+'%')+'</span>'
-          +'<div class="v5-src">'+_mktEsc((it.source||'')+' · 台北 '+(it.as_of||''))+'</div>'
-          +'</div>';
-      }).join('');
-      const bits = [];
-      if(j.label) bits.push(j.label);
-      if(j.trade_date) bits.push('交易日 '+j.trade_date);
-      if(j.source) bits.push('來源：'+j.source);
-      if(j.as_of) bits.push('台北 '+j.as_of);
-      if(meta) meta.textContent = bits.join(' · ');
-      const hu=document.getElementById('homeHeroUpdated');
-      if(hu && j.as_of) hu.textContent='上次更新：台北時間 '+j.as_of;
-      _mktShow('homeMktRow');
+    if(chips){
+      if(!j || !j.ok || !Array.isArray(j.items) || !j.items.length){
+        chips.innerHTML=''; if(meta) meta.textContent='';
+      } else {
+        const ovItems = j.items.filter(it => it && it.source && it.as_of && it.value!=null);
+        if(!ovItems.length){ chips.innerHTML=''; if(meta) meta.textContent=''; }
+        else {
+          _mktRowHasContent = true;
+          chips.innerHTML = ovItems.map(it => {
+            const up = Number(it.change_pct)>0; const dn = Number(it.change_pct)<0;
+            const color = up?'var(--up)':(dn?'var(--dn)':'var(--text3)');
+            const sign = up?'+':'';
+            return '<div class="hd2-market">'
+              +'<span>'+_mktEsc(it.name||'')+'</span>'
+              +'<b>'+_mktEsc(_mktFmt(it.value,2))+'</b>'
+              +'<span style="font-size:12px;font-weight:700;color:'+color+'">'+_mktEsc(sign+_mktFmt(it.change_pct,2)+'%')+'</span>'
+              +'<div class="mkt-src">'+_mktEsc((it.source||'')+' · 台北 '+(it.as_of||''))+'</div>'
+              +'</div>';
+          }).join('');
+          const bits = [];
+          if(j.label) bits.push(j.label);
+          if(j.trade_date) bits.push('交易日 '+j.trade_date);
+          if(j.source) bits.push('來源：'+j.source);
+          if(j.as_of) bits.push('台北 '+j.as_of);
+          if(meta) meta.textContent = bits.join(' · ');
+          const hu=document.getElementById('homeHeroUpdated');
+          if(hu && j.as_of) hu.textContent='上次更新：台北時間 '+j.as_of;
+        }
       }
     }
-  }catch(e){ _mktHide('homeMktRow'); }
+  }catch(e){}
+
+  // 市場氣氛／漲跌家數（2026/09/13新增，後端 /api/market/breadth，僅統計上市股票——
+  // 上櫃OpenAPI收盤/漲跌欄位未經驗證過，故不混入，避免用猜的欄位算出錯誤統計）
+  try{
+    const r = await fetch(api+'/api/market/breadth', {signal: AbortSignal.timeout(12000)});
+    const j = r.ok ? await r.json() : null;
+    const box = document.getElementById('homeBreadthBox');
+    if(box){
+      if(!j || !j.ok || j.total==null){
+        box.innerHTML=''; box.style.display='none';
+      } else {
+        _mktRowHasContent = true;
+        const upPct = Math.max(0, Math.min(100, Number(j.up_pct)||0));
+        const dnPct = Math.max(0, Math.min(100, Number(j.down_pct)||0));
+        const flatPct = Math.max(0, 100-upPct-dnPct);
+        const moodColor = j.mood==='偏多' ? 'var(--up)' : (j.mood==='偏空' ? 'var(--dn)' : 'var(--text3)');
+        box.style.display='block';
+        box.innerHTML = '<div class="hd2-breadth-head"><span class="hd2-breadth-label">市場氣氛（'+_mktEsc(j.label||'上市')+'）</span>'
+          +'<span class="hd2-breadth-mood" style="color:'+moodColor+'">'+_mktEsc(j.mood||'')+'</span></div>'
+          +'<div class="hd2-breadth-bar"><i style="width:'+upPct+'%;background:var(--up)"></i>'
+          +'<i style="width:'+flatPct+'%;background:var(--text3);opacity:.35"></i>'
+          +'<i style="width:'+dnPct+'%;background:var(--dn)"></i></div>'
+          +'<div class="hd2-breadth-nums"><span>上漲 '+_mktEsc(j.up)+'</span><span>平盤 '+_mktEsc(j.flat)+'</span><span>下跌 '+_mktEsc(j.down)+'</span></div>';
+      }
+    }
+  }catch(e){ const box=document.getElementById('homeBreadthBox'); if(box){ box.innerHTML=''; box.style.display='none'; } }
+
+  if(_mktRowHasContent) _mktShow('homeMktRow'); else _mktHide('homeMktRow');
 
   try{
     const r = await fetch(api+'/api/market/industries', {signal: AbortSignal.timeout(12000)});
@@ -4949,11 +5162,14 @@ async function _loadHomeMarket(){
         if(!it || !it.source || !it.as_of || it.change_pct==null) return '';
         const p = Number(it.change_pct);
         if(!isFinite(p)) return '';
-        const cls = p>0?'up':(p<0?'dn':'flat');
+        const cls = p>0?'up':(p<0?'dn':'');
         const sign = p>0?'+':'';
-        return '<div class="ind-row"><div><div>'+_mktEsc(it.name||it.full_name||'')+'</div>'
-          +'<div class="mkt-src">'+_mktEsc(it.source+' \u00b7 \u53f0\u5317 '+it.as_of)+'</div></div>'
-          +'<span class="mkt-chg '+cls+'">'+_mktEsc(sign+_mktFmt(p,2)+'%')+'</span></div>';
+        const barW = Math.max(4, Math.min(100, Math.abs(p)/5*100));
+        return '<div class="hd2-sector-row">'
+          +'<div class="hd2-sector-name">'+_mktEsc(it.name||it.full_name||'')+'</div>'
+          +'<div class="hd2-sector-bar"><i class="'+cls+'" style="width:'+barW+'%"></i></div>'
+          +'<div class="hd2-sector-chg '+cls+'">'+_mktEsc(sign+_mktFmt(p,2)+'%')+'</div>'
+          +'</div>';
       };
       const g = (j.gainers||[]).map(row).filter(Boolean);
       const l = (j.losers||[]).map(row).filter(Boolean);
@@ -4964,10 +5180,10 @@ async function _loadHomeMarket(){
       if(j.trade_date) meta.push('交易日 '+j.trade_date);
       if(j.source) meta.push('來源：'+j.source);
       if(j.as_of) meta.push('台北 '+j.as_of);
-      box.innerHTML = '<h2>錢往哪</h2><div class="v5-sub">'+_mktEsc(meta.join(' · '))+'</div>'
-        +'<div class="ind-wrap">'
-        +'<div class="ind-col"><div class="ind-h">相對強</div>'+g.join('')+'</div>'
-        +'<div class="ind-col"><div class="ind-h">相對弱</div>'+l.join('')+'</div>'
+      box.innerHTML = '<h2>錢往哪去</h2><div class="hd2-sub">'+_mktEsc(meta.join(' · '))+'</div>'
+        +'<div class="hd2-sector-grid">'
+        +(g.length ? '<div style="font-size:11px;color:var(--text3);font-weight:700;margin-bottom:4px">相對強</div>'+g.join('') : '')
+        +(l.length ? '<div style="font-size:11px;color:var(--text3);font-weight:700;margin:10px 0 4px">相對弱</div>'+l.join('') : '')
         +'</div>';
       _mktShow('homeIndBox');
       }
@@ -5004,9 +5220,70 @@ async function _loadHomeMarket(){
   }catch(e){ _mktHide('homeNewsBox'); }
 }
 
+// IA-Home-2（2026/09/13）：首頁「今天看什麼」3張卡的預覽內容——
+// 開盤精選／深度選股走既有 /api/picks/opening、/api/deep-analysis，
+// preview/masked 由後端依會員權限決定，前端原樣顯示，不另外加一套遮罩邏輯。
+// 市場熱門目前沒有對應的公開即時報價API，改用既有熱鍵清單（真實資料，只是不含漲跌%，不編數字）。
+async function _loadHomeDiscover(){
+  const api = getAPI();
+
+  try{
+    const hotBox = document.getElementById('discHotList');
+    if(hotBox){
+      const DEFAULT=[{id:'2330',name:'台積電'},{id:'2317',name:'鴻海'},{id:'2454',name:'聯發科'}];
+      const list = (typeof historyList!=='undefined' && historyList.length) ? historyList.slice(0,3).map(s=>({id:s.id,name:s.name})) : DEFAULT;
+      hotBox.innerHTML = list.map(s=>'<div class="hd2-disc-item"><b>'+_mktEsc(s.name||s.id)+'</b><span style="color:var(--text3)">'+_mktEsc(s.id)+'</span></div>').join('');
+    }
+  }catch(e){}
+
+  try{
+    const r = await fetch(api+'/api/picks/opening', {headers:_authHeaders(), signal:AbortSignal.timeout(12000)});
+    const j = r.ok ? await r.json() : null;
+    const box = document.getElementById('discPickList');
+    if(box){
+      const items = (j && j.data) || [];
+      if(!items.length){
+        box.innerHTML = '<div class="hd2-disc-item" style="color:var(--text3);border:none">今日尚無資料</div>';
+      } else {
+        box.innerHTML = items.slice(0,3).map(s=>{
+          const id = s.stock_id || s.code || '';
+          const nm = s.name || s.stock_name || id;
+          const chg = s.change_pct!=null ? (s.change_pct>=0?'<span style="color:var(--up)">+'+s.change_pct.toFixed(2)+'%</span>':'<span style="color:var(--dn)">'+s.change_pct.toFixed(2)+'%</span>') : '';
+          return '<div class="hd2-disc-item"><b>'+_mktEsc(nm)+'</b>'+chg+'</div>';
+        }).join('');
+      }
+    }
+  }catch(e){
+    const box = document.getElementById('discPickList');
+    if(box) box.innerHTML = '<div class="hd2-disc-item" style="color:var(--text3);border:none">載入失敗</div>';
+  }
+
+  try{
+    const r = await fetch(api+'/api/deep-analysis', {headers:_authHeaders(), signal:AbortSignal.timeout(12000)});
+    const j = r.ok ? await r.json() : null;
+    const box = document.getElementById('discDeepList');
+    if(box){
+      const items = (j && j.data) || [];
+      if(!items.length){
+        box.innerHTML = '<div class="hd2-disc-item" style="color:var(--text3);border:none">今日尚無資料</div>';
+      } else {
+        box.innerHTML = items.slice(0,3).map(s=>{
+          const nm = s.name || s.stock_name || s.stock_id || s.code || '';
+          const conf = s.confidence || '';
+          return '<div class="hd2-disc-item"><b>'+_mktEsc(nm)+'</b><span style="color:var(--text3)">'+_mktEsc(conf)+'</span></div>';
+        }).join('');
+      }
+    }
+  }catch(e){
+    const box = document.getElementById('discDeepList');
+    if(box) box.innerHTML = '<div class="hd2-disc-item" style="color:var(--text3);border:none">載入失敗</div>';
+  }
+}
+
   _observeHomeDash();
   renderHomeDash();
   _loadHomeMarket();
+  _loadHomeDiscover();
 });
 
 async function loadHotkeys(){
@@ -5338,6 +5615,28 @@ function _hasPremium(){
     return exp >= new Date().toISOString().slice(0,10);
   }
   return false;
+}
+
+// IA-Home-2（2026/09/13）：首頁 DEEP 區塊的鎖定文字，依真實會員狀態切換——
+// 不是整卡在靜止時打碼/變灰，卡片本身一直可見，只有文字＋按鈕依權限不同。
+// 真正的存取控制仍在 /api/deep-analysis 後端（未登入/免費會員拿到遮罩資料），
+// 這裡只是誠實標示目前狀態，不是額外的一套前端門禁。
+function _renderHomeMemberState(){
+  const box = document.getElementById('homeDeepLockBox');
+  const upgradeBtn = document.getElementById('homeIaUpgrade');
+  if(box){
+    if(_hasPremium()){
+      box.innerHTML = `<div class="hd2-deep-ok">✓ 您是付費會員，深度分析已完整開放</div>`;
+      if(upgradeBtn) upgradeBtn.style.display = 'none';
+    } else {
+      box.innerHTML = `<div class="hd2-deep-lock">🔒 這裡有完整分析，目前需要付費會員才能查看</div>`;
+      if(upgradeBtn) upgradeBtn.style.display = '';
+    }
+  }
+  const pickTag = document.querySelector('#discPickList')?.closest('.hd2-disc')?.querySelector('.hd2-disc-tag');
+  if(pickTag) pickTag.textContent = _authUser ? '已登入，點擊查看' : '登入免費會員即可看';
+  const deepTag = document.querySelector('#discDeepList')?.closest('.hd2-disc')?.querySelector('.hd2-disc-tag');
+  if(deepTag) deepTag.textContent = _hasPremium() ? '付費會員已解鎖' : '付費會員完整開放';
 }
 
 function _freeQueryKey(){

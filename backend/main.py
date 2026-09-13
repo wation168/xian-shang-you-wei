@@ -8132,6 +8132,106 @@ def api_market_news(limit: int = 12):
     return payload
 
 
+def _fetch_market_breadth_twse() -> dict | None:
+    """上市個股（TWSE STOCK_DAY_ALL）當日漲跌家數統計。
+
+    2026/09/13 新增（線上有位首頁改版：市場氣氛／漲跌家數，帥哥鴻+GPT已確認要做）。
+    範圍刻意只算「上市」，跟首頁「加權指數」同一個母體，口徑一致。
+    上櫃（TPEx tpex_mainboard_daily_close_quotes）目前只核實過
+    SecuritiesCompanyCode／CompanyName／TradingShares／Date 這幾個欄位
+    （見 stock_picker/crawler.py 的 _fetch_volume_top_from_tpex 註解），
+    沒有實際核對過「收盤」「漲跌」欄位名稱，寧可先不混進來，
+    也不要用猜的欄位名稱算出可能是錯的上櫃漲跌方向。之後要補上櫃，
+    先用瀏覽器或curl實際打一次那支API確認欄位再動工。
+
+    CSV欄位與 _fetch_opening_volume_top20() 同一份資料源：
+    日期(0) 代號(1) 名稱(2) 成交股數(3) 成交金額(4) 開盤(5) 最高(6) 最低(7) 收盤(8) 漲跌(9)
+    """
+    import urllib.request as _ur3, csv as _csv3, io as _io3
+
+    try:
+        url = "https://www.twse.com.tw/rwd/zh/afterTrading/STOCK_DAY_ALL"
+        req = _ur3.Request(url, headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+            "Referer":    "https://www.twse.com.tw/",
+        })
+        with _ur3.urlopen(req, timeout=15, context=_TWSE_SSL_CTX) as r:
+            raw_text = r.read().decode("utf-8-sig", errors="replace")
+        reader = _csv3.reader(_io3.StringIO(raw_text))
+        up = down = flat = 0
+        trade_date = ""
+        for row in reader:
+            try:
+                if len(row) < 10:
+                    continue
+                code = str(row[1]).strip().strip('="')
+                if not code.isdigit() or len(code) != 4:
+                    continue
+                close_str  = str(row[8]).strip().strip('="').replace(",", "")
+                change_str = str(row[9]).strip().strip('="').replace(",", "")
+                if close_str in ("", "--", "X") or change_str in ("", "--", "X"):
+                    continue
+                change = float(change_str)
+                if not trade_date:
+                    trade_date = str(row[0]).strip().strip('="')
+                if change > 0:
+                    up += 1
+                elif change < 0:
+                    down += 1
+                else:
+                    flat += 1
+            except Exception:
+                continue
+        total = up + down + flat
+        # 上市普通股實際約 1000+ 檔，抓到的數量明顯過少代表這次抓取本身有問題，
+        # 寧可整支API回傳「無資料」讓前端隱藏這塊，也不要顯示一個算錯的家數統計。
+        if total < 500:
+            print(f"[BREADTH] 有效筆數過少（{total}），視為抓取失敗")
+            return None
+        return {"up": up, "down": down, "flat": flat, "total": total, "trade_date": trade_date}
+    except Exception as e:
+        print(f"[BREADTH] TWSE STOCK_DAY_ALL 失敗：{e}")
+        return None
+
+
+@app.get("/api/market/breadth")
+def api_market_breadth():
+    """上市個股當日漲跌家數／市場氣氛（僅上市，與加權指數同母體，見上方函式註解）。
+    2026/09/13 新增。"""
+    hit = _market_cache_get("breadth")
+    if hit is not None:
+        return hit
+    b = _fetch_market_breadth_twse()
+    as_of = _taipei_now_str()
+    if not b:
+        payload = {"ok": False, "as_of": "", "source": "", "label": "",
+                   "up": 0, "down": 0, "flat": 0, "total": 0, "mood": ""}
+        _market_cache_set("breadth", payload, 60)
+        return payload
+    up, down, flat, total = b["up"], b["down"], b["flat"], b["total"]
+    if up > down * 1.15:
+        mood = "偏多"
+    elif down > up * 1.15:
+        mood = "偏空"
+    else:
+        mood = "多空拉鋸"
+    payload = {
+        "ok": True,
+        "as_of": as_of,
+        "timezone": "Asia/Taipei",
+        "source": "TWSE STOCK_DAY_ALL（僅上市，與加權指數同母體）",
+        "label": "上市個股漲跌家數",
+        "trade_date": b.get("trade_date") or "",
+        "up": up, "down": down, "flat": flat, "total": total,
+        "up_pct": round(up / total * 100, 1) if total else 0,
+        "down_pct": round(down / total * 100, 1) if total else 0,
+        "flat_pct": round(flat / total * 100, 1) if total else 0,
+        "mood": mood,
+    }
+    _market_cache_set("breadth", payload, 900)
+    return payload
+
+
 def _fetch_stock_news(stock_id: str, max_results: int = 3) -> list:
     """從鉅亨 RSS 抓與該股票相關的新聞（代號精確比對 + 中文股名比對）"""
     try:
