@@ -4729,6 +4729,9 @@ function attachInteractions(){
       }).join('')}`;
 
     drawChart();
+    // 2026/09/14修正：十字線原本只重繪K線圖／量圖，副圖（RSI/MACD/KD/OBV）維持舊畫面，
+    // 之後才疊上十字虛線去覆蓋，副圖沒有跟著清除重畫，等一下疊線的邏輯才有乾淨畫布可畫。
+    drawAllIndicators();
 
     const allH=bars.map(b=>b.high),allL=bars.map(b=>b.low);
     C.maArrays.forEach(m=>{for(let i=offset;i<offset+n;i++){const v=m.data[i];if(v){allH.push(v);allL.push(v);}}});
@@ -4785,6 +4788,22 @@ function attachInteractions(){
     vCtx.setLineDash([4,3]);vCtx.strokeStyle=lineColor;vCtx.lineWidth=1;
     vCtx.beginPath();vCtx.moveTo(x,0);vCtx.lineTo(x,60);vCtx.stroke();
     vCtx.setLineDash([]);vCtx.restore();
+
+    // 2026/09/14修正：十字線原本只畫在K線圖／量圖，RSI、MACD、KD、OBV等副圖完全沒有
+    // 十字線可對齊（帥哥鴻回饋「量能跟其它指數標不到」）。這裡改成在每個目前有顯示的
+    // 指標canvas上，用同一個x（跟kChart共用同一套PL/PR座標系統，見drawIndicator的
+    // 修正）也畫一樣的十字虛線，同一根K棒在所有圖表上才會對齊在同一條垂直線。
+    Object.keys(_activeInds).forEach(ind=>{
+      if(!_activeInds[ind] || ind==='bb') return;
+      const indCv=document.getElementById(`ind-${ind}-canvas`);
+      if(!indCv || indCv.style.display==='none') return;
+      const indCtx=indCv.getContext('2d');
+      const indH=indCv.clientHeight||80;
+      indCtx.save();
+      indCtx.setLineDash([4,3]);indCtx.strokeStyle=lineColor;indCtx.lineWidth=1;
+      indCtx.beginPath();indCtx.moveTo(x,0);indCtx.lineTo(x,indH);indCtx.stroke();
+      indCtx.setLineDash([]);indCtx.restore();
+    });
   }
   kCv.addEventListener('mousemove',e=>{
     if(C.isDragging||!C.bars.length)return;
@@ -5232,12 +5251,19 @@ function drawIndicator(ind){
   const gridCol = dark?'rgba(255,255,255,.06)':'rgba(0,0,0,.06)';
   const textCol = dark?'rgba(255,255,255,.4)':'rgba(0,0,0,.4)';
 
-  const px = i => (i+0.5)*(W/n);
+  // 2026/09/14修正：原本px=i=>(i+0.5)*(W/n)用整個canvas寬度算x座標，跟主圖K線／量圖
+  // px=i=>PL+(i+0.5)*((W-PL-PR)/n)（PL=4,PR=52，右邊52px留給價格軸標籤，見drawChart／
+  // _drawCrosshair）座標系統不一樣，導致同一根K棒在主圖跟RSI/MACD/KD/OBV副圖上的x位置
+  // 對不齊（帥哥鴻回饋「K線技術指標還沒有對齊」）。這裡改用跟主圖完全相同的PL/PR，
+  // 兩邊座標系統統一，同一根K棒在所有圖表上才會畫在同一條垂直線上。
+  const PL=4, PR=52;
+  const cW = W-PL-PR;
+  const px = i => PL+(i+0.5)*(cW/n);
   const slice = (arr) => arr ? arr.slice(offset, offset+n) : [];
 
   if(ind==='rsi'){
     const vals = slice(_indicators.rsi);
-    drawSubLine(ctx,W,H,vals,30,70,gridCol,textCol,[
+    drawSubLine(ctx,W,H,PL,PR,vals,30,70,gridCol,textCol,[
       {vals,color:'#e8a030',label:'RSI'}
     ],[30,50,70]);
     const last = vals.filter(v=>v!=null).pop();
@@ -5253,7 +5279,7 @@ function drawIndicator(ind){
     const midY  = H/2;
     // 零軸
     ctx.strokeStyle = gridCol; ctx.lineWidth=.5;
-    ctx.beginPath(); ctx.moveTo(0,midY); ctx.lineTo(W,midY); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(PL,midY); ctx.lineTo(W-PR,midY); ctx.stroke();
     // Histogram
     histV.forEach((v,i)=>{
       if(v==null) return;
@@ -5271,7 +5297,7 @@ function drawIndicator(ind){
   } else if(ind==='kd'){
     const kV = slice(_indicators.k);
     const dV = slice(_indicators.d);
-    drawSubLine(ctx,W,H,kV,20,80,gridCol,textCol,[
+    drawSubLine(ctx,W,H,PL,PR,kV,20,80,gridCol,textCol,[
       {vals:kV, color:'#e8a030', label:'K'},
       {vals:dV, color:'#8060e0', label:'D'}
     ],[20,50,80]);
@@ -5300,18 +5326,21 @@ function drawIndicator(ind){
   }
 }
 
-function drawSubLine(ctx,W,H,refVals,low,high,gridCol,textCol,lines,gridLines){
-  // 格線
+function drawSubLine(ctx,W,H,PL,PR,refVals,low,high,gridCol,textCol,lines,gridLines){
+  // 2026/09/14修正：格線／格線數字改畫在跟主圖一樣的繪圖區（PL~W-PR），數字移到右邊
+  // PR margin裡（跟主圖支撐/壓力標籤同一種擺法），避免蓋到線本身，範圍也才會跟主圖
+  // K線/量圖一致，見上面drawIndicator對px座標系統的說明。
+  const cW = W-PL-PR;
   gridLines.forEach(v=>{
     const y = H-4-(v-0)/(100)*(H-8);
     ctx.strokeStyle=gridCol; ctx.lineWidth=.5;
-    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
-    ctx.fillStyle=textCol; ctx.font='8px sans-serif'; ctx.textAlign='right';
-    ctx.fillText(v, W-3, y-1);
+    ctx.beginPath(); ctx.moveTo(PL,y); ctx.lineTo(W-PR,y); ctx.stroke();
+    ctx.fillStyle=textCol; ctx.font='8px sans-serif'; ctx.textAlign='left';
+    ctx.fillText(v, W-PR+4, y-1);
   });
   lines.forEach(({vals,color})=>{
     const n = vals.length;
-    const px = i => (i+0.5)*(W/n);
+    const px = i => PL+(i+0.5)*(cW/n);
     drawLine(ctx,vals,px,H,50,color,0,100);
   });
 }
@@ -6019,7 +6048,12 @@ function _renderSectorBarChart(items){
     yAxis:{
       type:'category', data:names, inverse:true,
       axisLine:{show:false}, axisTick:{show:false},
-      axisLabel:{color:text2Hex, fontSize:11}
+      // 2026/09/14修正：原本沒設interval，類股一多（漲8+跌8＝16檔）塞進固定220px高度，
+      // ECharts會自動略過畫不下的類股名稱（category軸預設interval:'auto'），導致「只看到
+      // 8個產業名稱、卻有16條%數長條」——長條/數值label本身不受影響，只有軸名稱被吃掉，
+      // 看起來像是資料重複或錯位。這裡改成interval:0強制每一條都顯示名稱，並在下面呼叫處
+      // 依實際筆數動態給高度，兩者搭配才不會擠成一團。
+      axisLabel:{color:text2Hex, fontSize:11, interval:0}
     },
     series:[{
       type:'bar', barWidth:'56%',
@@ -6188,8 +6222,12 @@ async function _loadHomeMarket(){
         if(j.trade_date) meta.push('交易日 '+j.trade_date);
         if(j.source) meta.push('來源：'+j.source);
         if(j.as_of) meta.push('台北 '+j.as_of);
+        // 2026/09/14修正：高度改依實際類股筆數動態計算（每檔約26px＋上下留白），
+        // 不再固定220px——16檔（漲跌各8）塞進220px會讓ECharts自動吃掉一半類股名稱，
+        // 詳見上面_renderSectorBarChart的interval:0註解。
+        const _sectorChartH = Math.max(220, ranked.length * 26 + 20);
         box.innerHTML = '<h2>資金雷達</h2><div class="hv-sub">'+_mktEsc(meta.join(' · '))+'　長條越長代表今天變動越劇烈，點擊查看今天的機會</div>'
-          +'<div id="sectorBarChart" style="width:100%;height:220px"></div>';
+          +'<div id="sectorBarChart" style="width:100%;height:'+_sectorChartH+'px"></div>';
         // 同上，homeIndBox預設display:none，要先顯示容器ECharts才能量到正確寬度。
         _mktShow('homeIndBox');
         _renderSectorBarChart(ranked);

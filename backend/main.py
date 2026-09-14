@@ -1410,29 +1410,23 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
 
         if in_or_just_after:
             try:
-                snap_url = (f"https://api.finmindtrade.com/api/v4/taiwan_stock_tick_snapshot"
-                            f"?data_id={code}&token={FINMIND_TOKEN}")
-                snap_req = _ur.Request(snap_url, headers={"User-Agent": "Mozilla/5.0"})
-                with _ur.urlopen(snap_req, timeout=6) as sr:
-                    snap = _j.loads(sr.read())
-                snap_rows = snap.get("data", [])
-                if snap_rows:
-                    r = snap_rows[0]
-                    cp  = float(r.get("close") or r.get("price") or 0)
-                    op  = float(r.get("open") or cp)
-                    hi  = float(r.get("high") or cp)
-                    lo  = float(r.get("low") or cp)
-                    vol = float(r.get("total_volume") or r.get("volume") or 0)
-                    # 2026/09/14修正：原本改用_QUOTE_CACHE[code]["in_session"]判斷是否真的
-                    # 在盤中才敢採信這筆tick_snapshot報價。問題是這個快取要等本次_do_analyze()
-                    # 呼叫「更後面」才會由_get_live_quote_data()寫入（流程是先try_fetch()
-                    # 抓K棒，之後才抓即時報價來補display_price），所以這裡永遠讀到「這支股票
-                    # 這次還沒查過即時報價」的空值或上一輪時間點對不上的舊快取，導致tick_snapshot
-                    # 明明有抓到今日報價，也會被cp=0直接丟掉——這正是「K線圖已經有今天的K棒，
-                    # 但分析基準價/現價日期卻還停在上一交易日」的根因（同時影響多檔股票，
-                    # 且不會隨時間自動恢復，因為每次補棒都會重新踩到同一個時序問題）。
-                    # 這裡其實不需要繞去查那個時序對不上的外部快取，本函式一開始就用
-                    # now_tw/is_weekday算好「現在是不是盤中」了，直接判斷即可。
+                # 2026/09/14修正（二）：原本這裡「只」直接打FinMind tick_snapshot，完全沒有
+                # 備援——一旦FinMind這支API本身出問題（額度用完/被限流/回傳400等），今日K棒
+                # 就完全補不進去，即使上面的時機判斷已經修好也沒用，因為根本拿不到原始資料。
+                # 這正是2026/09/14發現「/api/kline能正確顯示今天K棒、但分析基準價卻卡在
+                # 上一交易日」的深層原因：/api/kline補今日K棒用的是_get_live_quote_data()，
+                # 這個共用函式會先試TWSE官方即時揭示（twse_mid），只有TWSE MIS失敗（例如冷門股
+                # 沒有買賣報價）才會退回FinMind tick_snapshot當備援，對熱門股幾乎不會用到FinMind
+                # 這條路，穩定得多；而這裡（分析基準價）原本卻是唯一、沒有備援地直接依賴FinMind，
+                # FinMind一出狀況全部股票都會中招。現在改成呼叫同一個共用函式，跟kline統一資料源，
+                # 不再自己重複維護一套更脆弱的邏輯，之後同一種bug只需要修一處。
+                _qd = _get_live_quote_data(code)
+                if _qd and _qd.get("price"):
+                    cp  = float(_qd.get("price") or 0)
+                    op  = float(_qd.get("open") or cp)
+                    hi  = float(_qd.get("high") or cp)
+                    lo  = float(_qd.get("low") or cp)
+                    vol = float(_qd.get("volume") or 0)
                     if not (is_weekday and _dtime(9, 0) <= now_tw.time() <= _dtime(13, 30)):
                         cp = 0
                     if cp > 0:
@@ -1443,10 +1437,9 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
                         )
                         df = df[df.index != today_ts]
                         df = pd.concat([df, today_bar])
-                        print(f"   tick_snapshot 補今日 K 棒：{code} close={cp}")
+                        print(f"   即時報價補今日 K 棒：{code} close={cp}")
             except Exception as _e:
-                if not (hasattr(_e, 'code') and _e.code == 400):
-                    print(f"   tick_snapshot 補棒失敗 {code}：{_e}")
+                print(f"   即時報價補棒失敗 {code}：{_e}")
 
         # ── TWSE/TPEX 月報補今日 K 棒（上述來源均無資料時的最終 fallback）──
         # 2026/07/30：上市/上櫃兩段原本各自複製貼上一份幾乎一樣的抓取/解析邏輯，
