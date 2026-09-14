@@ -8753,7 +8753,14 @@ body{{background:var(--bg);color:var(--text);font-family:-apple-system,'Noto San
 .stat{{background:var(--stat-bg);border-radius:10px;padding:12px;flex:1;min-width:90px}}
 .stat-label{{font-size:11px;color:var(--text3);margin-bottom:4px}}
 .stat-value{{font-size:18px;font-weight:700}}
-.stat-hint{{font-size:10px;font-style:italic;color:var(--blue,#3b82f6);opacity:.8;margin-top:3px;line-height:1.3}}
+/* 2026/09/14修正：帥哥鴻反饋「個股報告字體真的不好觀看，尤其是各解說下方」——
+   算了一下WCAG對比度，原本10px斜體＋var(--blue)藍字再疊opacity:.8，在淺色卡片背景
+   (--stat-bg:#f0ebe2)下實際對比度只有約2.6:1，遠低於小字必須達到的4.5:1標準，
+   14個解說欄位全部受影響（支撐/壓力/停損/多空雷達四燈號/K棒型態/KD-MACD等每一段
+   說明文字下方）。改用--text2（同背景下約8.9:1，遠超標準）、拿掉斜體（中文字用
+   斜體瀏覽器只會做假斜體，中文字型本來就沒有斜體字重，效果是變醜不是變好讀）、
+   拿掉opacity（避免疊加又把顏色洗淡）、字級10px→12px。 */
+.stat-hint{{font-size:12px;color:var(--text2);margin-top:4px;line-height:1.45}}
 .irow{{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--irow-border)}}
 .idot{{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}}
 h2{{font-size:15px;font-weight:700;margin-bottom:14px;color:var(--h2)}}

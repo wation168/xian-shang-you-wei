@@ -78,6 +78,11 @@
 .theme-seg{display:flex;border:.5px solid var(--border2);border-radius:20px;overflow:hidden}
 .theme-seg button{padding:0 12px;height:32px;border:none;background:transparent;color:var(--text2);font-size:12px;cursor:pointer}
 .theme-seg button.active{background:var(--green);color:#fff}
+/* 2026/09/14修正：「我的」頁面的手機版主題切換鈕(.theme-my-btn)一直沒有active樣式，
+   setTheme()裡也只更新了#themeSeg（設定抽屜用，該抽屜實際上沒有任何按鈕會呼叫openDrawer()
+   把它打開，等於是死程式碼），導致使用者點了自動/亮/暗其實主題有真的切換成功，但畫面上
+   完全看不出目前選的是哪一個。這裡補上對應的active樣式，setTheme()一併更新（見下方）。 */
+.theme-my-btn.active{background:var(--green);color:#fff}
 .chip-filter-btn{padding:0 12px;height:30px;border:none;background:transparent;color:var(--text2);font-size:11px;cursor:pointer;transition:all .15s}
 .chip-filter-btn.active{background:var(--green);color:#fff}
 @media(prefers-color-scheme:dark){
@@ -336,6 +341,28 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 
 /* ── 結果 ── */
 .result{display:none;padding:0 16px}.result.show{display:block}
+/* 2026/09/14修正：帥哥鴻看完「分析完自動捲動到結果」的版本後回饋「我覺得用彈出比較好」。
+   改成手機版(<1024px)把分析結果用全螢幕彈出（modal）方式呈現，蓋在首頁儀表板上方，
+   右上角提供✕關閉鈕收起、回到首頁；不用另外重寫整個結果區塊的HTML結構，直接讓既有
+   #resultEl在手機版加上.show時变成position:fixed的全螢幕層即可，renderResult()等既有
+   函式完全不用改。電腦版三欄版面不受影響（結果本來就顯示在中間欄，維持原樣）。*/
+@media(max-width:1023px){
+  .result.show{
+    position:fixed;inset:0;z-index:150;
+    background:var(--bg);
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:16px 16px calc(70px + var(--safe-bottom));
+    margin:0;
+    animation:resultSlideUp .22s ease-out;
+  }
+  #resultCloseBtn{display:inline-flex!important}
+}
+@keyframes resultSlideUp{
+  from{transform:translateY(16px);opacity:0}
+  to{transform:translateY(0);opacity:1}
+}
+#resultCloseBtn{display:none;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;border:.5px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:15px;cursor:pointer;flex-shrink:0}
 
 /* ── 風險大卡 ── */
 .risk-card{border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:12px;border-left:4px solid var(--green)}
@@ -551,7 +578,20 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
 
 /* Wave3 輕量 2.5D：不碰 chart／K線 JS；reduced-motion／窄螢幕降特效 */
 .topbar{box-shadow:0 8px 24px rgba(15,23,42,.06)}
-#desktopMain{perspective:1200px}
+/* 2026/09/14修正：實作「分析結果改用手機版全螢幕彈出」時發現的附帶bug——
+   #desktopMain{{perspective:1200px}}原本沒有限定在電腦版生效，但CSS規範裡perspective
+   （跟transform一樣）只要不是none，就會讓該元素變成子孫元素position:fixed的
+   新containing block，等於全站在#desktopMain底下的任何position:fixed元素，不論
+   手機或電腦，都不是真的相對「瀏覽器視窗」定位，而是相對#desktopMain這個包住整頁內容、
+   會隨頁面捲動的容器定位——用claude-in-chrome實測重現：分析結果彈出層在頁面往下捲動
+   一段後開啟，整個彈出層被畫到畫面外近3000px的地方，完全看不到。這個2.5D立體效果本來
+   就只有電腦版三欄版面在用（下面`.home-ia-card`等元素的hover立體效果也只在電腦版才會
+   觸發，手機版720px以下的media query早就關掉hover transform了），只是這行漏了加上
+   電腦版限定，這裡補上，同時修正了resultEl全螢幕彈出層跟未來任何手機版position:fixed
+   元件都會遇到的這顆共通bug。 */
+@media(min-width:1024px){
+  #desktopMain{perspective:1200px}
+}
 .home-ia-card,.risk-card,.metric,.deep-card,.rr-card{
   box-shadow:0 6px 16px rgba(15,23,42,.07),0 1px 0 rgba(255,255,255,.04) inset;
   transform:translateZ(0);
@@ -582,6 +622,18 @@ html[data-theme="dark"],html:not([data-theme]){
   background:radial-gradient(circle at 65% 8%,#123457 0,#07111f 38%,#050b14 100%);
 }
 html[data-theme="dark"] body,html:not([data-theme]) body{background:transparent}
+/* 2026/09/14修正：上面這條規則讓body在「auto且系統偏好深色」時透出html的深色漸層背景，
+   但它的選擇器html:not([data-theme])沒有搭配@media(prefers-color-scheme:dark)，導致「主題=
+   自動且系統其實是淺色」時body一樣被清成透明，露出html永遠寫死的深色漸層背景，而--text等
+   CSS變數卻正確地走淺色（因為:root的深色只在@media(prefers-color-scheme:dark)時生效）——
+   造成「深色背景＋淺色主題該有的深色文字」同時出現，文字幾乎融進背景看不清楚。手機版
+   #homeFlow有自己寫死的淺色background蓋住首頁，掩蓋了這個問題，但分析結果區(#resultEl)
+   在#homeFlow旁邊、沒有自己的不透明背景，一分析個股就整個露餡。這裡只在「真的沒開深色
+   偏好」時把body背景修回var(--bg)，不影響本來就该維持沉浸式深色漸層效果的情境（明確選
+   深色、或auto+系統本身就是深色）。 */
+@media not (prefers-color-scheme:dark){
+  html:not([data-theme]) body{background:var(--bg)}
+}
 .topbar{
   background:#071321dd !important;
   backdrop-filter:blur(10px);
@@ -986,6 +1038,19 @@ html[data-theme="dark"] body,html:not([data-theme]) body{background:transparent}
 .news-panel .v5-news a{color:var(--text)}
 .news-panel .v5-news-item{border-bottom:1px solid var(--border)}
 .news-panel .v5-news-item:last-child{border-bottom:none}
+/* 2026/09/14修正：資金雷達／今天要聞是同一個CSS Grid row的左右兩欄
+   （.home-row-flow{grid-template-columns:1.6fr 1fr}）。Grid的規則是同一row的
+   軌道高度＝該row最高的item，今天要聞新聞則數一多（常態10幾則）會把整個row撐
+   得很高，資金雷達卡片本身雖然靠align-items:start正確地沒被拉伸、貼齊頂端，
+   但它右邊那塊「屬於grid row、資金雷達沒用到」的空間就會變成一大塊視覺空白。
+   只在資金雷達／今天要聞會並排的寬度（>900px，見900px媒體查詢讓兩者改單欄堆疊）
+   限制今天要聞清單高度＋內部捲動，讓row高度不再被新聞則數牽著走，空白隨之消失；
+   手機單欄模式不受影響，維持原本整頁捲動的閱讀方式。 */
+@media(min-width:901px){
+  .news-panel .v5-news{max-height:420px;overflow-y:auto;padding-right:4px}
+  .news-panel .v5-news::-webkit-scrollbar{width:4px}
+  .news-panel .v5-news::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+}
 .sector-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
 .sector-node{border-radius:14px;cursor:pointer;border:1px solid var(--border2);background:var(--surface-raised);
   transition:transform .15s,box-shadow .15s;flex:0 0 auto;display:flex;flex-direction:column;justify-content:center}
@@ -1518,6 +1583,7 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
             ☆ 加入自選
           </button>
           <div class="risk-badge" id="riskBadge">—</div>
+          <button id="resultCloseBtn" onclick="closeAnalysisResult()" title="關閉" aria-label="關閉">✕</button>
         </div>
       </div>
       <div id="summaryWrap" style="position:relative"><ul class="summary-list" id="summaryList"></ul></div>
@@ -3472,6 +3538,15 @@ async function analyzeStock(){
   setTimeout(startTour, 800);
 }
 
+// 2026/09/14新增：回應帥哥鴻的UX反饋——原本想用「分析完自動捲動到結果」解決手機版
+// 「分析結果放最下面，體感不好」的問題，帥哥鴻看過後表示「用彈出比較好」，改成手機版
+// (<1024px)把#resultEl用CSS變成全螢幕彈出層（見上方.result.show的手機版media query），
+// 這裡補上對應的關閉函式，讓使用者按右上角✕能收起結果、回到首頁儀表板。
+function closeAnalysisResult(){
+  const el = document.getElementById('resultEl');
+  if(el) el.classList.remove('show');
+}
+
 // ══════════════════════════════════════
 // 渲染
 // ══════════════════════════════════════
@@ -4731,11 +4806,8 @@ function qp(id){document.getElementById('stockInput').value=id;analyzeStock();}
 // ══════════════════════════════════════
 // 主題切換
 // ══════════════════════════════════════
-function cycleTheme(){
-  const cur = localStorage.getItem('theme') || 'auto';
-  const next = cur === 'auto' ? 'light' : cur === 'light' ? 'dark' : 'auto';
-  setTheme(next);
-}
+// 2026/09/14修正：cycleTheme()原本重複定義了兩次（內容完全相同），第二份會把第一份
+// 直接蓋掉，雖然沒有造成功能錯誤，但屬於多餘的死程式碼，這裡合併成一份。
 function cycleTheme(){
   const cur = localStorage.getItem('theme') || 'auto';
   const next = cur === 'auto' ? 'light' : cur === 'light' ? 'dark' : 'auto';
@@ -4745,13 +4817,23 @@ function setTheme(th){
   localStorage.setItem('theme',th);
   if(th==='auto') document.documentElement.removeAttribute('data-theme');
   else document.documentElement.setAttribute('data-theme',th);
-  document.querySelectorAll('#themeSeg button').forEach(b=>b.classList.toggle('active',b.dataset.th===th));
+  // 2026/09/14修正：一併更新「我的」頁面手機版主題按鈕(.theme-my-btn)的active樣式，
+  // 原本只更新#themeSeg（設定抽屜，實際沒有入口能打開，見上方CSS註解）。
+  document.querySelectorAll('#themeSeg button, .theme-my-btn').forEach(b=>b.classList.toggle('active',b.dataset.th===th));
   // 重繪圖表以更新顏色
   if(C.bars.length) drawChart();
 }
 function applyStoredTheme(){
   const th=localStorage.getItem('theme')||'auto';
   setTheme(th);
+}
+// 2026/09/14新增：「我的」頁面每次showMyPage()都會用innerHTML整段重建畫面，
+// 新建出來的.theme-my-btn按鈕不會自動帶有active樣式（active是setTheme()呼叫當下才會
+// 加上去的class，重建畫面並不會重新呼叫setTheme），所以畫面重繪後要手動同步一次目前
+// 主題的選中樣式，而不是重新呼叫setTheme(th)（那樣會不必要地重繪一次K線圖）。
+function _syncThemeBtnActive(){
+  const th = localStorage.getItem('theme') || 'auto';
+  document.querySelectorAll('.theme-my-btn').forEach(b=>b.classList.toggle('active', b.dataset.th===th));
 }
 
 // 通用摺疊
@@ -5956,6 +6038,13 @@ async function _loadHomeMarket(){
   const api = getAPI();
   let _mktRowHasContent = false;
 
+  // 2026/09/14修正：帥哥鴻反饋「現在使用明顯感覺載入延遲變長了」——查了一下，原本這裡
+  // 4支/api/market/*（大盤總覽／市場氣氛／資金雷達／今天要聞）彼此完全獨立、互不依賴，
+  // 卻用循序await一個接一個發送，等於把4段各~100ms的等待時間疊加成一段近500ms的總等待，
+  // 這是今天新增首頁功能時引入的（之前首頁沒有這麼多區塊）。改成4個都各自包成獨立的
+  // async IIFE、用Promise.all同時發出，各自維持原本獨立的try/catch（一個失敗不影響其他
+  // 三個，行為不變），總等待時間從「四段相加」變成「取決於最慢的那一段」。
+  const _pOverview = (async()=>{
   try{
     const r = await fetch(api+'/api/market/overview', {signal: AbortSignal.timeout(12000)});
     const j = r.ok ? await r.json() : null;
@@ -6024,9 +6113,11 @@ async function _loadHomeMarket(){
       }
     }
   }catch(e){}
+  })();
 
   // 市場氣氛／漲跌家數（2026/09/13新增，後端 /api/market/breadth，僅統計上市股票——
   // 上櫃OpenAPI收盤/漲跌欄位未經驗證過，故不混入，避免用猜的欄位算出錯誤統計）
+  const _pBreadth = (async()=>{
   try{
     const r = await fetch(api+'/api/market/breadth', {signal: AbortSignal.timeout(12000)});
     const j = r.ok ? await r.json() : null;
@@ -6049,9 +6140,9 @@ async function _loadHomeMarket(){
       }
     }
   }catch(e){ _mktDisposeChart('breadthColChart'); const box=document.getElementById('homeBreadthBox'); if(box){ box.innerHTML=''; box.style.display='none'; } }
+  })();
 
-  if(_mktRowHasContent) _mktShow('homeMktRow'); else _mktHide('homeMktRow');
-
+  const _pIndustries = (async()=>{
   try{
     const r = await fetch(api+'/api/market/industries', {signal: AbortSignal.timeout(12000)});
     const j = r.ok ? await r.json() : null;
@@ -6081,7 +6172,9 @@ async function _loadHomeMarket(){
       }
     }
   }catch(e){ _mktDisposeChart('sectorBarChart'); _mktHide('homeIndBox'); }
+  })();
 
+  const _pNews = (async()=>{
   try{
     const r = await fetch(api+'/api/market/news', {signal: AbortSignal.timeout(15000)});
     const j = r.ok ? await r.json() : null;
@@ -6110,6 +6203,10 @@ async function _loadHomeMarket(){
       }
     }
   }catch(e){ _mktHide('homeNewsBox'); }
+  })();
+
+  await Promise.all([_pOverview, _pBreadth, _pIndustries, _pNews]);
+  if(_mktRowHasContent) _mktShow('homeMktRow'); else _mktHide('homeMktRow');
 }
 
 // IA-Home-2（2026/09/13）：首頁「今天看什麼」3張卡的預覽內容——
@@ -7696,8 +7793,23 @@ async function showMyPage(){
 
   if(!_authUser){
     // 遊客點「我的」→ 顯示登入/註冊提示
+    // 2026/09/14修正：手機版(<1024px)頂部主題按鈕(#themeToggleBtn)是刻意隱藏的（見CSS
+    // 註解，為了讓搜尋列有空間），原本設計是靠「我的」頁面的主題切換取代，但那組按鈕只在
+    // 已登入分支（isPaid判斷那段）才有渲染，遊客分支完全沒有——導致手機版遊客使用者
+    // 「完全沒有深淺色切換」。桌面版不受影響，因為#themeToggleBtn只在<1024px才隱藏。
+    // 這裡把同一組主題按鈕也加到遊客分支，不需要_authUser/u，setTheme()本身跟登入狀態無關。
     el.innerHTML = `
-      <div style="padding:60px 0;text-align:center">
+      <div class="member-card" style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 0">
+          <span style="font-size:13px;color:var(--text)">🎨 顯示主題</span>
+          <div style="display:flex;border:1px solid var(--border2);border-radius:20px;overflow:hidden">
+            <button onclick="setTheme('auto')" class="theme-my-btn" data-th="auto" style="padding:4px 10px;border:none;background:transparent;color:var(--text2);font-size:11px;cursor:pointer">自動</button>
+            <button onclick="setTheme('light')" class="theme-my-btn" data-th="light" style="padding:4px 10px;border:none;background:transparent;color:var(--text2);font-size:11px;cursor:pointer">亮</button>
+            <button onclick="setTheme('dark')" class="theme-my-btn" data-th="dark" style="padding:4px 10px;border:none;background:transparent;color:var(--text2);font-size:11px;cursor:pointer">暗</button>
+          </div>
+        </div>
+      </div>
+      <div style="padding:40px 0 60px;text-align:center">
         <div style="font-size:48px;margin-bottom:16px">👤</div>
         <div style="font-size:16px;font-weight:700;margin-bottom:8px">登入後查看帳號資訊</div>
         <div style="font-size:13px;color:var(--text3);margin-bottom:24px;line-height:1.6">
@@ -7717,6 +7829,7 @@ async function showMyPage(){
           📖 不知道怎麼用？看使用說明
         </button>
       </div>`;
+    _syncThemeBtnActive();
     return;
   }
 
@@ -7882,6 +7995,7 @@ async function showMyPage(){
         <button onclick="location.href='/contact.html'" style="width:100%;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left">✉️ 聯絡我們</button>
       </div>
     </div>`;
+  _syncThemeBtnActive();
 
   if(isPaid) _loadAlerts();
   _loadReferralStatus();
