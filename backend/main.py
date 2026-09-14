@@ -8340,7 +8340,16 @@ def _inject_report_ads(html: str) -> str:
 # report_generate 靠這個標記判斷 stock_reports 裡的快取是不是舊模板產生的，
 # 是的話強制重新產生，不然光改版面/文案，使用者會一直看到卡住的舊快取（直到當天
 # 收盤基準換了才會被上面的 price_basis_date 檢查順便救回來，不夠即時）。
-_REPORT_TPL_VERSION = "v2026-08-07-hint"
+_REPORT_TPL_VERSION = "v2026-09-14-hintfix"
+# 2026/09/14修正（案件003驗收時發現）：上面這個版本標記在08/07之後就沒再更新過，但
+# 09/14這輪其實已經改了.stat-hint解說文字的CSS（字級/顏色/拿掉斜體，見_build_report_html
+# 內文字說明），忘記同步把版本標記跟著往前推——結果部署後、當天已經被瀏覽過而快取進
+# stock_reports的舊報告，因為快取裡嵌的report_tpl標記字串跟目前程式碼設定的_REPORT_TPL_VERSION
+# 剛好還是同一個字串，被上面的快取有效性檢查誤判成「模板沒變」，繼續原封不動吐出改版前的
+# 舊HTML（真人實測/report/2317時發現字體樣式仍是修正前的10px斜體藍字，查code才抓到這個
+# 根因）。這裡把版本字串往前推一版，讓所有今天以前產生的舊快取全部視為過期，下次任何人
+# 造訪都會強制重新產生、套用新CSS，之後這個標記務必跟著每次_build_report_html的HTML/CSS
+# 改動一起更新，不能漏掉。
 
 def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict,
                        news_items: list = None) -> str:
