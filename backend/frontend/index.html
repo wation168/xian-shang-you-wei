@@ -2838,6 +2838,7 @@ function addWatch(id,name,group){
   }
 }
 function removeWatch(id){
+  const _removedItem = watchList.find(s=>s.id===id);
   watchList=watchList.filter(s=>s.id!==id);
   localStorage.setItem('watchList',JSON.stringify(watchList));
   // 更新自選按鈕狀態
@@ -2846,12 +2847,40 @@ function removeWatch(id){
   if(typeof renderHomeDash==='function') renderHomeDash();
   if(typeof _renderDesktopWatchSidebar==='function') _renderDesktopWatchSidebar();
   if(typeof _renderWsGroupFilterSelectM==='function') _renderWsGroupFilterSelectM();
-  // 2026/09/13新增：同步到後端（見addWatch()註解，同樣的fire-and-forget原則）
+  // 2026/09/14修正（案件004測試發現）：原本是純fire-and-forget，失敗只console.warn，
+  // 畫面已經顯示「移除成功」，但後端實際上沒刪掉——使用者完全不會發現，直到換裝置/
+  // 重新登入merge時那支股票又冒出來，看起來像bug復發。改成：失敗時先重試一次（多半是
+  // 網路暫時性問題，重試就過了）；重試後還是失敗，才真的判定為失敗，這時要把畫面上
+  // 剛剛樂觀移除的股票加回來（回滾），並用alert明確告知使用者，不能讓畫面顯示的狀態
+  // 跟後端實際資料兜不起來卻完全沒有任何提示。
   if(_authUser){
-    fetch(`${getAPI()}/api/watchlist/${encodeURIComponent(id)}`,{method:'DELETE',headers:_authHeaders()})
-      .then(r=>{ if(!r.ok) console.warn('[watchlist] 移除自選同步失敗', r.status); })
-      .catch(e=>console.warn('[watchlist] 移除自選同步失敗', e));
+    const _doRemoveSync = (isRetry) => fetch(`${getAPI()}/api/watchlist/${encodeURIComponent(id)}`,{method:'DELETE',headers:_authHeaders()})
+      .then(r=>{
+        if(!r.ok){
+          if(!isRetry) return _doRemoveSync(true);
+          _rollbackRemoveWatch(_removedItem, id, `HTTP ${r.status}`);
+        }
+      })
+      .catch(e=>{
+        if(!isRetry) return _doRemoveSync(true);
+        _rollbackRemoveWatch(_removedItem, id, e);
+      });
+    _doRemoveSync(false);
   }
+}
+function _rollbackRemoveWatch(item, id, errInfo){
+  console.warn('[watchlist] 移除自選同步失敗（已重試一次仍失敗），回滾畫面顯示', errInfo);
+  if(item && !watchList.find(s=>s.id===id)){
+    watchList.unshift(item);
+    if(watchList.length>30) watchList=watchList.slice(0,30);
+    localStorage.setItem('watchList',JSON.stringify(watchList));
+  }
+  updateWatchBtn(id,true);
+  showWatchList();
+  if(typeof renderHomeDash==='function') renderHomeDash();
+  if(typeof _renderDesktopWatchSidebar==='function') _renderDesktopWatchSidebar();
+  if(typeof _renderWsGroupFilterSelectM==='function') _renderWsGroupFilterSelectM();
+  alert('移除失敗，請檢查網路連線後再試一次（此股票已恢復顯示在自選股清單中）');
 }
 // 2026/09/13修正：以前這裡登入後就直接「無聲」加入預設族群／移除，使用者完全沒有機會選族群，
 // 也是本次修正的主因之一——加入後只能跑去側欄的小select硬改族群。改為：還沒加入時彈出族群選擇
@@ -3455,11 +3484,34 @@ function getAPI(){
   if(isLocal) return 'http://localhost:8000';
   return 'https://api.softglow-ai.com';
 }
-function setSt(msg,err){const el=document.getElementById('statusBar');el.innerHTML=msg;el.className='status'+(err?' err':'');}
+function setSt(msg,err){
+  const el=document.getElementById('statusBar');
+  el.innerHTML=msg;
+  el.className='status'+(err?' err':'');
+  // 2026/09/14修正（案件004測試發現，這是統一畫面卡在舊股票狀態列文字的真正主因）：
+  // updateQuoteUI()（即時報價輪詢）會把「第一次看到的statusBar內容」快取進
+  // el.dataset.base，之後每次輪詢都固定在這個base後面補「· 即時 HH:MM:SS」。
+  // 但换股票分析時，這裡只有更新innerHTML，從來沒清掉dataset.base——導致換到
+  // 第二檔股票之後，下一次報價輪詢一來，畫面又會被蓋回「第一檔股票」的確認文字
+  // （只是即時時間會一直跳），使用者看到的股票代號跟實際分析結果對不上。
+  // 修法：這裡主動清掉dataset.base，讓updateQuoteUI()下次執行時，把「這次剛設定
+  // 好的msg」重新當成新的base，才不會用舊股票的文字蓋過來。
+  delete el.dataset.base;
+}
+
+// 2026/09/14修正（案件004測試發現）：原本analyzeStock()完全沒有防止「舊請求晚回覆蓋新請求」
+// 的機制——連續查詢多檔股票（例如快速點擊首頁的股票代號chips）時，若前一檔的API回應比
+// 後一檔慢，前一檔的資料會在後一檔畫面都渲染完之後才回來，把畫面蓋回錯誤的舊股票（曾實測
+// 重現：畫面卡在舊股票的狀態列文字，跟已經渲染好的風險卡股票對不上）。
+// 修法：仿照 _animateNumber() 裡 _priceAnimVer 的作法，用一個遞增版本號標記「目前這通才是
+// 最新的查詢」，每次真的要更新畫面（狀態列／歷史紀錄／分析結果）之前都先確認自己還是最新的
+// 那一通，不是就直接跳過，讓真正最新的查詢結果留在畫面上。
+let _analyzeGen = 0;
 
 async function analyzeStock(){
   const raw=document.getElementById('stockInput').value.trim();
   if(!raw)return;
+  const _myGen = ++_analyzeGen;
   _lastReportUrl = null;
   const shareBtn = document.getElementById('shareBtn');
   if (shareBtn) shareBtn.style.display = 'none';
@@ -3485,6 +3537,9 @@ async function analyzeStock(){
       signal:AbortSignal.timeout(30000),
       headers: _authHeaders ? _authHeaders() : {}
     });
+    // 2026/09/14修正：這通fetch回來時，如果使用者已經又查了別的股票（_analyzeGen變了），
+    // 代表這通已經過期，不管成功或失敗都不該再更新畫面（含下面的401/403/429分支）
+    if(_myGen !== _analyzeGen) return;
     if(!r.ok){
       const txt=await r.text().catch(()=>'');
       let detail=`HTTP ${r.status}`;
@@ -3518,6 +3573,8 @@ async function analyzeStock(){
     });
     if(kr.ok){const kd=await kr.json();data.bars=kd.bars;data.tf=currentTF;data.chart_note=kd.chart_note||null;}
   }catch(_ke){}
+  // 2026/09/14修正：K線這通比較久，等它回來時也要重新確認自己還是不是最新查詢
+  if(_myGen !== _analyzeGen) return;
   const _now=new Date(Date.now()+8*3600000); // 固定 UTC+8 台灣時間，不依賴瀏覽器時區
   const _pad=n=>String(n).padStart(2,'0');
   const _dtStr=`${_now.getUTCFullYear()}/${_pad(_now.getUTCMonth()+1)}/${_pad(_now.getUTCDate())} ${_pad(_now.getUTCHours())}:${_pad(_now.getUTCMinutes())}`;
