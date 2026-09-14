@@ -6034,6 +6034,30 @@ function _renderSectorBarChart(items){
   chart.on('click', function(){ _homeGo('picks'); });
 }
 
+// 2026/09/14修正：資金雷達／今天要聞左右並排時（>900px），兩者是同一個CSS Grid row
+// 的左右兩欄。Grid的規則是同一row的軌道高度＝該row最高的item，今天要聞新聞則數一多
+// 就會把整個row撐得很高；資金雷達卡片本身雖然靠align-items:start正確地沒被拉伸、
+// 貼齊頂端，但它下面那塊「屬於grid row、資金雷達沒用到」的空間就會變成一大塊視覺
+// 空白（帥哥鴻回饋「這一塊空白也是沒有解決」）。先前用固定max-height:420px限制今天
+// 要聞清單高度，但420px本身就比資金雷達卡片實際高度還高，落差依然存在、空白沒消失。
+// 改成執行期直接量「資金雷達卡片」實際高度，動態算出「今天要聞」清單該留多少高度，
+// 兩張卡片就會一樣高，空白才會真的消失；只在兩者並排的寬度（>900px）套用，手機
+// 單欄堆疊模式維持原本整頁捲動，不受影響。
+function _syncHomeMktCardHeights(){
+  if(window.innerWidth < 901) return;
+  const indBox   = document.getElementById('homeIndBox');
+  const newsBox  = document.getElementById('homeNewsBox');
+  const newsList = newsBox ? newsBox.querySelector('.v5-news') : null;
+  if(!indBox || !newsBox || !newsList) return;
+  if(!indBox.classList.contains('show') || !newsBox.classList.contains('show')) return;
+  // 先清掉舊的高度限制，才能量出「今天要聞」清單本身需要多少高度（header+padding）
+  newsList.style.maxHeight = '';
+  const targetH = indBox.offsetHeight;
+  const headerH = newsBox.offsetHeight - newsList.offsetHeight;
+  const listH   = Math.max(120, targetH - headerH);
+  newsList.style.maxHeight = listH + 'px';
+}
+
 async function _loadHomeMarket(){
   const api = getAPI();
   let _mktRowHasContent = false;
@@ -6207,6 +6231,12 @@ async function _loadHomeMarket(){
 
   await Promise.all([_pOverview, _pBreadth, _pIndustries, _pNews]);
   if(_mktRowHasContent) _mktShow('homeMktRow'); else _mktHide('homeMktRow');
+  // 兩張卡都渲染完成才量得到正確高度，故放在Promise.all之後
+  _syncHomeMktCardHeights();
+  if(!window._homeMktResizeBound){
+    window._homeMktResizeBound = true;
+    window.addEventListener('resize', _syncHomeMktCardHeights);
+  }
 }
 
 // IA-Home-2（2026/09/13）：首頁「今天看什麼」3張卡的預覽內容——

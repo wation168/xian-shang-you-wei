@@ -1404,8 +1404,6 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
 
         # 盤前（09:00 以前）才刪今日那筆，避免補入假資料
         # 盤中或盤後保留 FinMind 原始收盤價，不刪除
-        _qt = _QUOTE_CACHE.get(code)
-        _in_session = bool(_qt and (_qt.get("data") or {}).get("in_session"))
         _is_pre_market = now_tw.time() < _dtime(9, 0)
         if _is_pre_market:
             df = df[df.index != today_ts]
@@ -1425,8 +1423,17 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
                     hi  = float(r.get("high") or cp)
                     lo  = float(r.get("low") or cp)
                     vol = float(r.get("total_volume") or r.get("volume") or 0)
-                    _qt = _QUOTE_CACHE.get(code)
-                    if not _qt or not (_qt.get("data") or {}).get("in_session"):
+                    # 2026/09/14修正：原本改用_QUOTE_CACHE[code]["in_session"]判斷是否真的
+                    # 在盤中才敢採信這筆tick_snapshot報價。問題是這個快取要等本次_do_analyze()
+                    # 呼叫「更後面」才會由_get_live_quote_data()寫入（流程是先try_fetch()
+                    # 抓K棒，之後才抓即時報價來補display_price），所以這裡永遠讀到「這支股票
+                    # 這次還沒查過即時報價」的空值或上一輪時間點對不上的舊快取，導致tick_snapshot
+                    # 明明有抓到今日報價，也會被cp=0直接丟掉——這正是「K線圖已經有今天的K棒，
+                    # 但分析基準價/現價日期卻還停在上一交易日」的根因（同時影響多檔股票，
+                    # 且不會隨時間自動恢復，因為每次補棒都會重新踩到同一個時序問題）。
+                    # 這裡其實不需要繞去查那個時序對不上的外部快取，本函式一開始就用
+                    # now_tw/is_weekday算好「現在是不是盤中」了，直接判斷即可。
+                    if not (is_weekday and _dtime(9, 0) <= now_tw.time() <= _dtime(13, 30)):
                         cp = 0
                     if cp > 0:
                         today_bar = pd.DataFrame(
