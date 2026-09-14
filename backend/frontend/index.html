@@ -2535,7 +2535,6 @@ function showPage(page){
     }
     overlay.style.display='block';
     if(page==='watch') showWatchListWithTabs();
-    else if(page==='history') showHistory();
     else if(page==='picks') showPicksPage();
     else if(page==='portfolio') showPortfolioPage();
     else if(page==='forum') showForumPage();
@@ -2559,9 +2558,12 @@ let _watchCache = {}; // 暫存分析結果
 let _watchLoading = false;
 
 function showWatchList(){
-  // 2026/08/27修正：這支函式同時被「獨立頁面」跟「自選頁分頁籤（_renderWatchInner）」兩種情境呼叫，
-  // 原本寫死渲染到#pageContent，在分頁籤情境下會把_renderWatchInner塞的分頁籤結構(#watchInnerContent)
-  // 整個蓋掉，導致「⭐自選股／📈戰績日誌」分頁籤消失。優先渲染進#watchInnerContent，不存在時才退回#pageContent。
+  // 2026/08/27修正：這支函式同時被「獨立頁面」跟「自選頁內層（_renderWatchInner）」兩種情境呼叫，
+  // 原本寫死渲染到#pageContent，在後者情境下會把_renderWatchInner塞的#watchInnerContent包裝
+  // 整個蓋掉。優先渲染進#watchInnerContent，不存在時才退回#pageContent。
+  // （2026/09/14補充：#watchInnerContent這層包裝原本是給「⭐自選股／📈戰績日誌」分頁籤用的，
+  // 戰績日誌拿掉後改單一畫面，但這層包裝仍保留——其他多處addWatch()等成功後的畫面刷新邏輯，
+  // 靠的就是「#watchInnerContent存不存在」判斷使用者現在在不在自選頁，拿掉會連帶壞掉。）
   const el=document.getElementById('watchInnerContent')||document.getElementById('pageContent');
   if(!watchList.length){
     el.innerHTML=`<div style="padding:60px 0;text-align:center;color:var(--text3)">
@@ -2828,6 +2830,14 @@ function addWatch(id,name,group){
   if(typeof _renderDesktopWatchSidebar==='function') _renderDesktopWatchSidebar();
   if(typeof _renderWsGroupFilterSelectM==='function') _renderWsGroupFilterSelectM();
   if(_watchCache && Object.keys(_watchCache).length && typeof _renderWatchGroups==='function') _renderWatchGroups(_watchCache);
+  // 2026/09/14新增（已知問題清單第1項，帥哥鴻要求本輪發現的問題一併處理）：removeWatch()
+  // 早就會呼叫showWatchList()刷新已開啟的自選頁，但addWatch()這裡漏掉了，導致「使用者正
+  // 停留在自選頁時，透過個股分析頁的族群選擇彈窗把股票加進自選」這種情境下，自選頁畫面不會
+  // 自動更新，要手動切換分頁才看得到剛加的股票。修法比照_submitAddStockModal()（3037行）
+  // 已經在用的同一套安全寫法：先判斷#watchInnerContent這個容器存不存在（存在＝使用者目前
+  // 正停留在自選頁），存在才呼叫_renderWatchInner()刷新，不存在（在其他頁面呼叫addWatch）
+  // 就不動作，避免誤刷新到使用者當下沒在看的頁面。
+  if(document.getElementById('watchInnerContent') && typeof _renderWatchInner==='function') _renderWatchInner();
   // 2026/09/13新增：自選股改為跟帳號綁定，加入時同步寫回後端。toggleWatch()已經擋過
   // 未登入不能呼叫addWatch()，這裡理論上一定是登入狀態，但還是判斷一次比較保險。
   // fire-and-forget：不擋UI，失敗只console.warn，不回滾樂觀更新的畫面（下次登入merge會補回）。
@@ -3042,113 +3052,14 @@ function qpAndHome(id){
 }
 
 // ══════════════════════════════════════
-// 歷史紀錄
+// 歷史紀錄（2026/09/14帥哥鴻決定拿掉「📈戰績日誌」這個獨立頁面/分頁籤——
+// 跟DEEP深度選股頁自己的每日選股記錄功能重複、容易讓人搞混。
+// 但historyList本身不能整個刪掉：它同時也是「首頁快速代號chips」
+// （renderHotkeys）、搜尋框focus時的「最近查詢」下拉、首頁「今天看什麼」
+// 卡片（_loadHomeDiscover）的資料來源，這三個都已經測過是正常運作中的
+// 功能，只拿掉戰績日誌這個「顯示畫面」，底層historyList/addHistory()
+// 照樣記錄、照樣供這三個功能使用。
 // ══════════════════════════════════════
-function showHistory(){
-  // 2026/08/27修正：同上showWatchList()的理由，同一支函式也被自選頁「📈戰績日誌」分頁籤呼叫，
-  // 優先渲染進#watchInnerContent，避免蓋掉分頁籤結構。
-  const el=document.getElementById('watchInnerContent')||document.getElementById('pageContent');
-  if(!_authUser){
-    el.innerHTML=`<div style="padding:60px 0;text-align:center;color:var(--text3)">
-      <div style="font-size:36px;margin-bottom:12px">📈</div>
-      <div style="font-size:15px;font-weight:600;margin-bottom:6px;color:var(--text)">登入後查看歷史紀錄</div>
-      <div style="font-size:13px;margin-bottom:20px">分析紀錄需登入才能同步保存</div>
-      <button onclick="showLoginModal()" style="padding:10px 24px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">登入 / 加入會員</button>
-    </div>`;
-    return;
-  }
-  if(!historyList.length){
-    el.innerHTML=`<div style="padding:60px 0;text-align:center;color:var(--text3)">
-      <div style="font-size:36px;margin-bottom:12px">📈</div>
-      <div style="font-size:15px;font-weight:600;margin-bottom:6px">還沒有分析紀錄</div>
-      <div style="font-size:13px">分析股票後自動記錄</div>
-    </div>`;
-    return;
-  }
-
-  // 本月統計
-  const now=new Date();
-  const thisMonth=`${now.getFullYear()}/${now.getMonth()+1}`;
-  const monthList=historyList.filter(s=>{
-    if(!s.date) return false;
-    return s.date.startsWith(thisMonth.replace('/','/'));
-  });
-
-  // 多頭/空頭比例（依風險等級）
-  let bullCount=0, bearCount=0;
-  historyList.forEach(s=>{
-    if(s.risk==='low') bullCount++;
-    else if(s.risk==='high') bearCount++;
-  });
-  const total=historyList.length;
-  const bullPct=total>0?Math.round(bullCount/total*100):0;
-  const bearPct=total>0?Math.round(bearCount/total*100):0;
-
-  // 統計卡
-  const statsHtml=`
-  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px">
-    <div style="background:var(--bg2);border-radius:10px;padding:12px;text-align:center">
-      <div style="font-size:20px;font-weight:700;color:var(--text)">${historyList.length}</div>
-      <div style="font-size:10px;color:var(--text3);margin-top:2px">累計分析</div>
-    </div>
-    <div style="background:var(--bg2);border-radius:10px;padding:12px;text-align:center">
-      <div style="font-size:20px;font-weight:700;color:var(--text)">${monthList.length}</div>
-      <div style="font-size:10px;color:var(--text3);margin-top:2px">本月分析</div>
-    </div>
-  </div>
-  <div style="background:var(--bg2);border-radius:10px;padding:12px;margin-bottom:16px">
-    <div style="font-size:11px;color:var(--text3);margin-bottom:8px">多空分布（依風險等級）</div>
-    <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px">
-      <span style="color:var(--dn)">多頭 ${bullPct}%</span>
-      <span style="color:var(--up)">空頭 ${bearPct}%</span>
-    </div>
-    <div style="height:6px;border-radius:4px;background:var(--border);overflow:hidden">
-      <div style="height:100%;width:${bullPct}%;background:var(--dn);border-radius:4px;transition:width .6s ease"></div>
-    </div>
-    <div style="font-size:10px;color:var(--text3);margin-top:6px">低風險 ${bullCount} 筆・高風險 ${bearCount} 筆・中性 ${total-bullCount-bearCount} 筆</div>
-  </div>`;
-
-  // 日誌清單
-  const logHtml=historyList.map(s=>{
-    const snap=parseFloat(s.snapPrice||s.price||0);
-    const curr=parseFloat(s.price||0);
-    const chg=snap&&curr?((curr-snap)/snap*100):null;
-    const chgStr=chg!==null?(chg>=0?`+${chg.toFixed(1)}%`:`${chg.toFixed(1)}%`):null;
-    const chgColor=chg===null?'var(--text3)':chg>=0?'var(--green)':'var(--up)';
-    const riskColor=s.risk==='high'?'var(--up)':s.risk==='low'?'var(--dn)':'#f59e0b';
-    const conclusionShort=(s.conclusion||'').replace(/^→\s*/,'').slice(0,35)+(s.conclusion&&s.conclusion.length>35?'…':'');
-
-    return `<div onclick="qpAndHome('${s.id}')" style="background:var(--bg2);border-radius:12px;padding:14px 16px;margin-bottom:8px;cursor:pointer">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-        <div>
-          <span style="font-weight:700;font-size:14px">${s.id}</span>
-          <span style="font-size:13px;color:var(--text2);margin-left:6px">${s.name}</span>
-          ${s.pattern?`<span style="font-size:10px;background:var(--border);color:var(--text3);padding:1px 6px;border-radius:4px;margin-left:4px">${s.pattern}</span>`:''}
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:14px;font-weight:700">${s.price||'--'}</div>
-          ${chgStr?`<div style="font-size:10px;color:${chgColor}">${chgStr}</div>`:''}
-        </div>
-      </div>
-      ${conclusionShort?`<div style="font-size:11px;color:var(--text3);margin-bottom:6px">${conclusionShort}</div>`:''}
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="font-size:10px;color:var(--text3)">${s.snapDate||s.date} 記錄</div>
-        <span style="font-size:10px;color:${riskColor};font-weight:600">${s.riskLabel||''}</span>
-      </div>
-    </div>`;
-  }).join('');
-
-  el.innerHTML=`
-    <div style="padding:4px 0 16px;display:flex;justify-content:space-between;align-items:center">
-      <div style="font-size:16px;font-weight:700">📈 戰績日誌</div>
-      <button onclick="if(confirm('確定清除所有紀錄？')){historyList=[];localStorage.removeItem('historyList');showHistory()}"
-        style="font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;padding:4px 8px">清除</button>
-    </div>
-    ${statsHtml}
-    <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px">📋 分析紀錄（${historyList.length}）</div>
-    ${logHtml}
-    <div style="height:20px"></div>`;
-}
 function addHistory(id,name,price,risk,riskLabel,extra){
   // extra: {conclusion, pattern, rr_ratio, support, resistance}
   const existing = historyList.find(s=>s.id===id);
@@ -3171,51 +3082,23 @@ function addHistory(id,name,price,risk,riskLabel,extra){
 }
 
 // ══════════════════════════════════════
-// 自選頁內頁 tab（自選 / 戰績）
+// 自選頁內頁
 // ══════════════════════════════════════
-let _watchInnerTab = 'watch'; // 'watch' | 'history'
-
+// 2026/09/14修正：原本這裡是「⭐自選股／📈戰績日誌」兩個分頁籤，帥哥鴻決定拿掉戰績日誌
+// （見上方「歷史紀錄」區塊註解），改回單一畫面。保留#watchInnerContent這層包裝＋
+// _renderWatchInner()這個間接呼叫，是因為addWatch()等多處成功後的畫面刷新邏輯
+// （搜尋`watchInnerContent`就知道），都是用「#watchInnerContent這個元素存不存在」來判斷
+// 使用者目前是否正停留在自選頁、該不該自動刷新——拿掉這層包裝會連帶讓那些刷新邏輯失效。
 function showWatchListWithTabs(){
   const el = document.getElementById('pageContent');
-  el.innerHTML = `
-    <div style="display:flex;border-bottom:.5px solid var(--border);margin-bottom:12px">
-      <button onclick="_switchWatchTab('watch')" id="wtab-watch"
-        style="flex:1;padding:8px;font-size:13px;border:none;background:none;cursor:pointer;border-bottom:2px solid var(--green);color:var(--green);font-weight:600">
-        ⭐ 自選股
-      </button>
-      <button onclick="_switchWatchTab('history')" id="wtab-history"
-        style="flex:1;padding:8px;font-size:13px;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;color:var(--text3)">
-        📈 戰績日誌
-      </button>
-    </div>
-    <div id="watchInnerContent"></div>`;
-  _watchInnerTab = 'watch';
-  _renderWatchInner();
-}
-
-function _switchWatchTab(tab){
-  _watchInnerTab = tab;
-  document.getElementById('wtab-watch').style.borderBottomColor = tab==='watch' ? 'var(--green)' : 'transparent';
-  document.getElementById('wtab-watch').style.color = tab==='watch' ? 'var(--green)' : 'var(--text3)';
-  document.getElementById('wtab-watch').style.fontWeight = tab==='watch' ? '600' : '400';
-  document.getElementById('wtab-history').style.borderBottomColor = tab==='history' ? 'var(--green)' : 'transparent';
-  document.getElementById('wtab-history').style.color = tab==='history' ? 'var(--green)' : 'var(--text3)';
-  document.getElementById('wtab-history').style.fontWeight = tab==='history' ? '600' : '400';
+  el.innerHTML = `<div id="watchInnerContent"></div>`;
   _renderWatchInner();
 }
 
 function _renderWatchInner(){
   const container = document.getElementById('watchInnerContent');
   if(!container) return;
-  // 2026/08/27修正：以前這裡會先塞一個假的mock元素進_renderWatchSkeleton()（不會真的渲染到畫面上），
-  // 再用一個永遠是false的querySelector條件判斷要不要打_fetchWatchBatch()，是完全沒作用的死代碼；
-  // 真正渲染／抓資料靠的是下面showWatchList()/showHistory()內部自己的邏輯，現在兩者都已改成
-  // 優先渲染進#watchInnerContent，這裡直接呼叫即可，不用重複判斷空清單狀態。
-  if(_watchInnerTab === 'watch'){
-    showWatchList();
-  } else {
-    showHistory();
-  }
+  showWatchList();
 }
 
 // ══════════════════════════════════════
@@ -3581,7 +3464,15 @@ async function analyzeStock(){
   const _twMin=_now.getUTCHours()*60+_now.getUTCMinutes();
   const _mktLabel=(_twMin>=9*60 && _twMin<13*60+30)?'盤中資料':'盤後資料';
   setSt(`✓ ${data.symbol}${data.stock_name?' '+data.stock_name:''} · ${_dtStr} ${_mktLabel}`,false);
-  addHistory(id,data.stock_name||'',data.price,data.risk_level,data.risk_label,{
+  // 2026/09/14修正（案件004測試發現）：這裡原本直接用analyzeStock()一開始的原始輸入id
+  // （使用者在搜尋框打的文字，例如公司名「雷虎」）記錄歷史、查詢討論區，但後端/api/analyze
+  // 其實支援用名稱查詢並在data.stock_id/data.symbol回傳「已解析好的正確股票代號」（如8033）。
+  // 造成的問題：(1)戰績日誌會把「雷虎」同時記成代號跟名稱兩欄，跟其他紀錄的「數字代號＋中文
+  // 名稱」格式不一致；(2)討論區熱度提示_checkForumDiscussion是用代號去比對留言板股票代號，
+  // 傳中文名稱進去等於永遠比對不到，就算那檔股票討論區真的有留言也不會顯示提示。
+  // 修法：優先用data.stock_id（後端解析後的純數字代號，找不到才退回原始輸入id）。
+  const _resolvedId = data.stock_id || id;
+  addHistory(_resolvedId,data.stock_name||'',data.price,data.risk_level,data.risk_label,{
     conclusion: data.warning,
     pattern:    data.pattern,
     rr_ratio:   data.risk_reward,
@@ -3590,7 +3481,7 @@ async function analyzeStock(){
   });
   renderHotkeys();
   renderResult(data,enabled);
-  _checkForumDiscussion(id);
+  _checkForumDiscussion(_resolvedId);
   // 第一次分析完才顯示新手導覽
   setTimeout(startTour, 800);
 }
@@ -7873,17 +7764,17 @@ async function _pfAdd(){
   }
   msg.style.color = 'var(--text3)';
   msg.textContent = '新增中...';
-  // 先抓股票名稱
-  let stockName = '';
-  try{
-    const qr = await fetch(`${getAPI()}/api/quote/${sid}`);
-    if(qr.ok){ const qd = await qr.json(); stockName = qd.stock_name || qd.name || ''; }
-  } catch(e){}
+  // 2026/09/14移除（案件004持股健檢範圍測試時發現，帥哥鴻要求本輪發現的問題一併處理）：
+  // 這裡原本先呼叫/api/quote/{代號}想抓股票中文名稱，但查main.py的get_quote()實際回傳
+  // 欄位後確認：那支API根本沒有stock_name／name這兩個key，這段預先抓名稱的邏輯形同虛設、
+  // 永遠只拿到空字串，白白多花一次網路請求。不影響顯示——因為/portfolio/analysis本身
+  // 每次載入時都會用後端_name_cache把正確中文名稱補回DB，有效股票下次讀取時名稱就會自動
+  // 修正。直接移除這段死code，stock_name一律留空交給後端補。
   try{
     const r = await fetch(`${getAPI()}/portfolio/add`, {
       method: 'POST',
       headers: { ...{'Content-Type':'application/json'}, ..._authHeaders() },
-      body: JSON.stringify({ stock_id: sid, cost_price: cost, stock_name: stockName })
+      body: JSON.stringify({ stock_id: sid, cost_price: cost, stock_name: '' })
     });
     const j = await r.json();
     if(!r.ok) throw new Error(j.detail || '新增失敗');

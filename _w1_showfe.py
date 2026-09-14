@@ -1,0 +1,15 @@
+﻿# -*- coding: utf-8 -*-
+from pathlib import Path
+t = Path(r"D:\xian-shang-you-wei\backend\frontend\index.html").read_text(encoding="utf-8")
+i = t.find("async function showPicksPage")
+print("===PICKS===")
+print(t[i:i+2200])
+print("====")
+i = t.find("async function showDeepAnalysisPage")
+print("===DEEP===")
+print(t[i:i+1800] if i>=0 else "no showDeep")
+i = t.find("is_paid")
+print("is_paid count", t.count("is_paid"), t.count("isPaid"))
+i = t.find("guestLimitModal")
+print("===MODAL snippet===")
+print(t[t.find("id=\"guestLimitModal\""):t.find("id=\"guestLimitModal\"")+800])

@@ -57,12 +57,12 @@
     <p class="calc-subtitle">計算您的流動資產與流動負債之間的差額</p>
     <div id="calcInputs"><div class="input-group">
   <label for="currentAssets">流動資產</label>
-  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="currentAssets" placeholder="100000"  step="0.01"></div>
+  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="currentAssets" placeholder="100000"  value="100000" step="0.01"></div>
 </div>
   <small class="input-help">輸入您企業的流動資產總額，包括現金、應收帳款和存貨</small>
 <div class="input-group">
   <label for="currentLiabilities">流動負債</label>
-  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="currentLiabilities" placeholder="50000"  step="0.01"></div>
+  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="currentLiabilities" placeholder="50000"  value="50000" step="0.01"></div>
 </div>
   <small class="input-help">輸入您企業的流動負債總額，包括應付帳款和短期借款</small></div>
     <button class="btn-calc" onclick="calculate()">計算</button>
@@ -124,26 +124,26 @@ function calculate() {
   const currentLiabilities = parseFloat(currentLiabilitiesInput.value);
 
   if (isNaN(currentAssets) || isNaN(currentLiabilities)) {
-    alert('Please enter valid numbers for both current assets and current liabilities');
+    alert('請為流動資產與流動負債輸入有效的數值');
     return;
   }
 
   if (currentAssets < 0 || currentLiabilities < 0) {
-    alert('Values cannot be negative');
+    alert('數值不可為負數');
     return;
   }
 
   const workingCapital = currentAssets - currentLiabilities;
 
-  workingCapitalResult.textContent = 'NT$' + workingCapital.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  workingCapitalResult.textContent = 'NT$' + workingCapital.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   let status = '';
   if (workingCapital > 0) {
-    status = 'Positive - Good liquidity position';
+    status = '正數－流動性良好';
   } else if (workingCapital === 0) {
-    status = 'Neutral - Assets equal liabilities';
+    status = '中性－資產與負債相等';
   } else {
-    status = 'Negative - Potential liquidity concern';
+    status = '負數－潛在流動性風險';
   }
 
   workingCapitalStatus.textContent = status;

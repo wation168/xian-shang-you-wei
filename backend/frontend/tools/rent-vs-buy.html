@@ -87,7 +87,7 @@
   <small class="input-help">租金每年預期增長的百分比</small>
 <div class="input-group">
   <label for="propertyTaxRate">地稅與保險 (年度)</label>
-  <div class="input-row"><span class="input-prefix">%</span><input type="number" id="propertyTaxRate" placeholder="1500"  value="1500" step="100"></div>
+  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="propertyTaxRate" placeholder="1500"  value="1500" step="100"></div>
 </div>
   <small class="input-help">每年需支付的地稅、房產稅及保險費用</small>
 <div class="input-group">
@@ -183,8 +183,18 @@ function calculate() {
   const analysisYears = parseFloat(document.getElementById('analysisYears').value);
   const sellingCosts = parseFloat(document.getElementById('sellingCosts').value);
 
-  if (!propertyPrice || !mortgageRate || !monthlyRent || !analysisYears) {
-    alert('Please fill in all required fields');
+  if (isNaN(propertyPrice) || isNaN(downPaymentPercent) || isNaN(mortgageRate) || isNaN(mortgageTerm) || isNaN(monthlyRent) || isNaN(rentIncreaseRate) || isNaN(propertyTaxRate) || isNaN(maintenanceRate) || isNaN(propertyAppreciationRate) || isNaN(investmentReturn) || isNaN(analysisYears) || isNaN(sellingCosts)) {
+    alert('請為所有欄位輸入有效的數值');
+    return;
+  }
+
+  if (propertyPrice <= 0 || downPaymentPercent < 0 || downPaymentPercent > 100 || mortgageRate < 0 || mortgageTerm <= 0 || monthlyRent <= 0 || propertyTaxRate < 0 || maintenanceRate < 0 || analysisYears <= 0 || sellingCosts < 0) {
+    alert('請確認：金額與年限必須大於零，首付百分比須介於0%至100%之間，利率與費用不可為負數');
+    return;
+  }
+
+  if (investmentReturn <= -100) {
+    alert('替代投資回報率必須大於-100%');
     return;
   }
 
@@ -194,7 +204,9 @@ function calculate() {
   const numberOfPayments = mortgageTerm * 12;
 
   let monthlyMortgage = 0;
-  if (monthlyRate > 0) {
+  if (loanAmount <= 0) {
+    monthlyMortgage = 0;
+  } else if (monthlyRate > 0) {
     monthlyMortgage = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
   } else {
     monthlyMortgage = loanAmount / numberOfPayments;
@@ -202,28 +214,33 @@ function calculate() {
 
   let totalRentCost = 0;
   let totalBuyCost = downPayment;
+  let totalRentCostPV = 0;
+  let totalBuyCostPV = downPayment;
   let totalMortgagePayment = 0;
-  let currentPropertyValue = propertyPrice;
   let currentRent = monthlyRent;
   const discountRate = investmentReturn / 100 / 12;
   let breakEvenYear = null;
 
   for (let month = 1; month <= analysisYears * 12; month++) {
     const year = Math.ceil(month / 12);
+    let buyCostThisMonth = 0;
 
     if (month <= numberOfPayments) {
-      const interestPayment = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments - month + 1) / (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
-      const principalPayment = monthlyMortgage - interestPayment;
       totalMortgagePayment += monthlyMortgage;
-      totalBuyCost += monthlyMortgage;
+      buyCostThisMonth += monthlyMortgage;
     }
 
-    totalBuyCost += (propertyTaxRate / 12) + (propertyPrice * (maintenanceRate / 100) / 12);
+    buyCostThisMonth += (propertyTaxRate / 12) + (propertyPrice * (maintenanceRate / 100) / 12);
+    totalBuyCost += buyCostThisMonth;
     totalRentCost += currentRent;
+
+    // 淨現值(NPV)分析：用「替代投資回報率」把每月現金流折現回現值，
+    // 才能真正反映FAQ所描述的「首付款用於其他投資的機會成本」
+    totalBuyCostPV += buyCostThisMonth / Math.pow(1 + discountRate, month);
+    totalRentCostPV += currentRent / Math.pow(1 + discountRate, month);
 
     if (month % 12 === 0) {
       currentRent *= (1 + rentIncreaseRate / 100);
-      currentPropertyValue *= (1 + propertyAppreciationRate / 100);
     }
 
     if (breakEvenYear === null && totalBuyCost < totalRentCost) {
@@ -231,7 +248,7 @@ function calculate() {
     }
   }
 
-  currentPropertyValue = propertyPrice * Math.pow(1 + propertyAppreciationRate / 100, analysisYears);
+  const currentPropertyValue = propertyPrice * Math.pow(1 + propertyAppreciationRate / 100, analysisYears);
   const sellingCostAmount = currentPropertyValue * (sellingCosts / 100);
   let remainingMortgage = loanAmount;
   for (let i = 0; i < Math.min(analysisYears * 12, numberOfPayments); i++) {
@@ -242,20 +259,24 @@ function calculate() {
   remainingMortgage = Math.max(0, remainingMortgage);
 
   const netPropertyValue = currentPropertyValue - sellingCostAmount - remainingMortgage;
-  const effectiveBuyCost = totalBuyCost - netPropertyValue;
-  const npvDifference = effectiveBuyCost - totalRentCost;
+  const netPropertyValuePV = netPropertyValue / Math.pow(1 + discountRate, analysisYears * 12);
+  const effectiveBuyCostPV = totalBuyCostPV - netPropertyValuePV;
+  const npvDifference = effectiveBuyCostPV - totalRentCostPV;
 
-  const totalInterestPaid = (monthlyMortgage * Math.min(analysisYears * 12, numberOfPayments)) - loanAmount;
+  // 已付利息＝已付總額－已還本金（而非用「全部貸款金額」去扣，
+  // 因為分析年限常常短於貸款年限，貸款尚未全部還清）
+  const principalPaidSoFar = loanAmount - remainingMortgage;
+  const totalInterestPaid = totalMortgagePayment - principalPaidSoFar;
 
   let recommendation = '';
   if (npvDifference < -5000) {
-    recommendation = 'BUYING is significantly better financially';
+    recommendation = '購房在財務上明顯較划算';
   } else if (npvDifference < 0) {
-    recommendation = 'BUYING is slightly better financially';
+    recommendation = '購房在財務上略為划算';
   } else if (npvDifference < 5000) {
-    recommendation = 'RENTING is slightly better financially';
+    recommendation = '租房在財務上略為划算';
   } else {
-    recommendation = 'RENTING is significantly better financially';
+    recommendation = '租房在財務上明顯較划算';
   }
 
   document.getElementById('totalCostRent').textContent = totalRentCost.toLocaleString('en-GB', { style: 'currency', currency: 'TWD', maximumFractionDigits: 0 });
@@ -263,7 +284,7 @@ function calculate() {
   document.getElementById('netPropertyValue').textContent = netPropertyValue.toLocaleString('en-GB', { style: 'currency', currency: 'TWD', maximumFractionDigits: 0 });
   document.getElementById('npvComparison').textContent = npvDifference.toLocaleString('en-GB', { style: 'currency', currency: 'TWD', maximumFractionDigits: 0 });
   document.getElementById('recommendation').textContent = recommendation;
-  document.getElementById('breakEvenYear').textContent = breakEvenYear ? breakEvenYear.toString() : 'Beyond analysis period';
+  document.getElementById('breakEvenYear').textContent = breakEvenYear ? breakEvenYear.toString() : '超過分析期限';
   document.getElementById('totalMortgagePayment').textContent = totalMortgagePayment.toLocaleString('en-GB', { style: 'currency', currency: 'TWD', maximumFractionDigits: 0 });
   document.getElementById('totalInterestPaid').textContent = totalInterestPaid.toLocaleString('en-GB', { style: 'currency', currency: 'TWD', maximumFractionDigits: 0 });
 

@@ -57,17 +57,17 @@
     <p class="calc-subtitle">計算每次下注的最佳資金比例</p>
     <div id="calcInputs"><div class="input-group">
   <label for="winProbability">勝率（小數格式）</label>
-  <div class="input-row"><input type="number" id="winProbability" placeholder="0.55"  step="0.01"></div>
+  <div class="input-row"><input type="number" id="winProbability" placeholder="0.55" value="0.55" step="0.01"></div>
 </div>
   <small class="input-help">輸入勝率作為0到1之間的小數（例如0.55表示55%）</small>
 <div class="input-group">
   <label for="oddsDecimal">賠率（小數格式）</label>
-  <div class="input-row"><input type="number" id="oddsDecimal" placeholder="2.5"  step="0.01"></div>
+  <div class="input-row"><input type="number" id="oddsDecimal" placeholder="2.5" value="2.5" step="0.01"></div>
 </div>
   <small class="input-help">輸入小數格式的賠率（例如2.5表示贏得時獲得2.5倍賭注）</small>
 <div class="input-group">
   <label for="bankroll">初始資金</label>
-  <div class="input-row"><span class="input-prefix">$</span><input type="number" id="bankroll" placeholder="1000"  step="1"></div>
+  <div class="input-row"><span class="input-prefix">NT$</span><input type="number" id="bankroll" placeholder="1000" value="1000" step="1"></div>
 </div>
   <small class="input-help">輸入您的總可用投注資金</small></div>
     <button class="btn-calc" onclick="calculate()">計算</button>
@@ -125,49 +125,51 @@ function calculate() {
   const odds = parseFloat(document.getElementById('oddsDecimal').value);
   const bankroll = parseFloat(document.getElementById('bankroll').value);
 
-  if (!winProb || !odds || !bankroll) {
-    alert('Please fill in all fields with valid numbers');
+  if (isNaN(winProb) || isNaN(odds) || isNaN(bankroll)) {
+    alert('請為所有欄位輸入有效的數值');
     return;
   }
 
   if (winProb <= 0 || winProb > 1) {
-    alert('Probability must be between 0 and 1 (0.01 to 0.99)');
+    alert('勝率必須介於0與1之間（例如0.55代表55%）');
     return;
   }
 
   if (odds < 1) {
-    alert('Odds must be greater than or equal to 1');
+    alert('賠率必須大於或等於1');
     return;
   }
 
   if (bankroll <= 0) {
-    alert('Bankroll must be a positive number');
+    alert('初始資金必須為正數');
     return;
   }
 
   const lossProb = 1 - winProb;
   const b = odds - 1;
-  const kellyCriterion = (b * winProb - lossProb) / b;
+  // 四捨五入到小數點後6位，避免浮點數誤差（例如0.55/2.5的組合理論上恰好等於0.25，
+  // 但未修正前會算出0.250000000000000067，導致風險等級邊界判斷錯誤地被歸類為較高風險）
+  const kellyCriterion = Math.round(((b * winProb - lossProb) / b) * 1e6) / 1e6;
 
-  let riskAssessment = 'Moderate';
+  let riskAssessment = '中等';
   let displayKelly = kellyCriterion;
 
   if (kellyCriterion < 0) {
-    riskAssessment = 'Avoid bet (negative edge)';
+    riskAssessment = '不建議下注（負期望值）';
     displayKelly = 0;
   } else if (kellyCriterion > 0.25) {
-    riskAssessment = 'High volatility risk';
+    riskAssessment = '波動風險較高';
   } else if (kellyCriterion < 0.01) {
-    riskAssessment = 'Very conservative';
+    riskAssessment = '非常保守';
   }
 
   const optimalBet = bankroll * displayKelly;
   const expectedValue = optimalBet * (winProb * (odds - 1) - lossProb);
 
-  document.getElementById('kellyCriterion').textContent = (displayKelly * 100).toLocaleString('en-US', {maximumFractionDigits: 2});
-  document.getElementById('optimalBetAmount').textContent = optimalBet.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('kellyCriterion').textContent = (displayKelly * 100).toLocaleString('en-US', {maximumFractionDigits: 2}) + '%';
+  document.getElementById('optimalBetAmount').textContent = 'NT$' + optimalBet.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   document.getElementById('riskLevel').textContent = riskAssessment;
-  document.getElementById('expectedValue').textContent = expectedValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('expectedValue').textContent = 'NT$' + expectedValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
   document.getElementById('results').classList.add('show');
 }

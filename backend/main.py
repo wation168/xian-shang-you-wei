@@ -10506,6 +10506,21 @@ async def add_portfolio(request: Request, current_user: dict = Depends(get_curre
             raise HTTPException(status_code=404, detail=f"找不到股票：{stock_id}")
     stock_id = stock_id.upper()
 
+    # 2026/09/14修正（案件004持股健檢範圍測試發現，帥哥鴻真實帳號實測輸入不存在的代號
+    # 「99999」也能成功新增）：上面只檢查輸入格式是否為純數字／能否從公司名稱對照表解析，
+    # 從未確認這個代號「實際存在且查得到資料」——純數字但根本不是真實股票代號（如打錯字）
+    # 會直接跳過驗證，寫進DB後永久卡在持股清單裡，/portfolio/analysis每次都查不到報價／
+    # K線，畫面上現價、支撐壓力、KD、MACD全部顯示「—」，使用者也無法從畫面判斷是自己打錯
+    # 代號還是系統故障。修法：比照portfolio_analysis自己判斷「這檔股票查不查得到資料」的
+    # 方式（fetch_df_finmind近3個月K線，空dataframe＝查無此股），新增前先驗證一次，
+    # 查無資料就直接回404，理由訊息比照/api/analyze既有的「找不到股票」措辭，行為保持一致。
+    try:
+        _add_check_df = fetch_df_finmind(stock_id, "3mo", "D")
+    except Exception:
+        _add_check_df = None
+    if _add_check_df is None or _add_check_df.empty:
+        raise HTTPException(status_code=404, detail=f"找不到股票：{stock_id}，請確認代號是否正確")
+
     conn = _db_conn()
     # 免費會員限 1 支
     if not is_paid:
@@ -10579,6 +10594,7 @@ async def portfolio_analysis(request: Request, current_user: dict = Depends(requ
 
         # 取即時報價：優先走 get_quote（TWSE MIS → FinMind 備援），比 get_quote_live 更可靠
         # 2026/07/30 改用共用函式，get_quote_live 備援邏輯保留不動
+        _qd = None
         try:
             def _safe_price(v):
                 try:
@@ -10712,12 +10728,23 @@ async def portfolio_analysis(request: Request, current_user: dict = Depends(requ
                 pass
 
         # 今日漲跌幅（現價 vs 昨收）
+        # 2026/09/14修正（案件004持股健檢範圍測試發現，帥哥鴻真實帳號實測台積電change_pct
+        # 顯示0導致前端「今日漲跌」那行整個消失）：這裡原本完全沒用上面第10589行已經呼叫過
+        # 的_get_live_quote_data()結果（_qd，裡面本來就含TWSE優先/FinMind備援抓到的
+        # change_pct），而是另外重新查一次_QUOTE_CACHE原始快取——_qd是None時（代表上面已經
+        # 退回get_quote_live()這條備援路徑）_QUOTE_CACHE根本不會有這檔的資料，就算_qd有值，
+        # 也可能在兩次查詢之間快取剛好過期，兩種情況都會讓change_pct靜默變回0.0。
+        # 修法：優先直接用_qd裡已經抓到的change_pct，那是跟上面price同一次抓到、保證新鮮的
+        # 資料；只有_qd整個沒拿到時，才退回原本用_QUOTE_CACHE手動算的邏輯當最後手段。
         change_pct = 0.0
         try:
-            _qd2 = (_QUOTE_CACHE.get(sid.upper()) or {}).get("data") or {}
-            _y = float(_qd2.get("y") or 0)
-            if _y > 0 and price > 0:
-                change_pct = round((price - _y) / _y * 100, 2)
+            if _qd and _qd.get("change_pct") is not None:
+                change_pct = float(_qd.get("change_pct"))
+            else:
+                _qd2 = (_QUOTE_CACHE.get(sid.upper()) or {}).get("data") or {}
+                _y = float(_qd2.get("y") or 0)
+                if _y > 0 and price > 0:
+                    change_pct = round((price - _y) / _y * 100, 2)
         except Exception:
             pass
 
@@ -11421,7 +11448,11 @@ async def forum_get_posts(
     page: int = 1,
     user: dict | None = Depends(get_current_user)
 ):
-    """取得主題列表（非會員可看標題，付費會員看全文）"""
+    """取得主題列表（訪客只看標題，登入即可看全文，發文／留言才需要付費會員——
+    2026/09/14修正：這行docstring原本誤寫成「付費會員看全文」，跟下面第11488行
+    `if user:`（只檢查有沒有登入，沒有檢查是否付費）的實際邏輯不符，也跟前端UI提示文字
+    「🔒登入後可看內文，留言需付費」矛盾。案件004論壇範圍測試時發現這個文件與實際行為
+    不一致，查證後確認程式邏輯本身是對的、只是說明文字寫錯，這裡只更新文字，不改邏輯）"""
     limit = 20
     offset = (page - 1) * limit
     conn = _db_conn()

@@ -1,0 +1,17 @@
+﻿# -*- coding: utf-8 -*-
+import sys, re
+sys.stdout.reconfigure(encoding="utf-8")
+t = open(r"D:/xian-shang-you-wei/backend/frontend/index.html", encoding="utf-8").read()
+print("STATIC")
+print("A no #edf6ff on search", ".search-box input{color:#edf6ff}" not in t)
+print("B dark text on white", "color:#1a1a18;background:#fff" in t)
+print("C placeholder", ".search-box input::placeholder{color:#6b7280;opacity:1}" in t)
+print("D hint 12/text2", ".m-hint{font-size:12px" in t and "opacity:1" in t[t.find(".m-hint"):t.find(".m-hint")+120])
+print("E no hint 9px", ".m-hint{font-size:9px" not in t)
+print("F ia-ttl no edf6ff", ".home-ia-ttl{font-size:16px;color:#edf6ff}" not in t)
+print("G status 13 text2", ".status{font-size:13px;color:var(--text2)" in t)
+print("H homeFlow kept", 'id="homeFlow"' in t and "#homeFlow{display:none}" not in t)
+print("I no --text on search override")
+print(t[t.find(".search-box input{color:#1a1a18"):t.find(".search-box input{color:#1a1a18")+180])
+print("HINT", t[t.find(".m-hint{"):t.find(".m-hint{")+140])
+print("STATUS", t[t.find(".status{font-size:13"):t.find(".status{font-size:13")+90])

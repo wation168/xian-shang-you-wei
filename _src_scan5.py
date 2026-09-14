@@ -1,0 +1,15 @@
+﻿# -*- coding: utf-8 -*-
+from pathlib import Path
+main = Path(r"D:\xian-shang-you-wei\backend\main.py").read_text(encoding="utf-8")
+print("=== quote/live header ===")
+i=main.find("def get_quote_live")
+if i<0: i=main.find("/api/quote/live")
+print(main[i:i+500])
+print("=== rankings ===")
+i=main.find("@app.get(\"/rankings\")")
+print(main[i:i+350])
+print("=== scan/latest ===")
+i=main.find("def ")
+j=main.find("@app.get(\"/api/scan/latest\")")
+print(main[j:j+400])
+print("FINMIND_TOKEN used", "FINMIND_TOKEN" in main)

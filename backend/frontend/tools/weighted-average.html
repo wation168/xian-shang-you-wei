@@ -56,15 +56,38 @@
     <h1>加權平均計算機</h1>
     <p class="calc-subtitle">計算成績、投資和統計分析的精確加權平均值</p>
     <div id="calcInputs"><div class="input-group">
-  <label for="valueInput">數值</label>
-  <div class="input-row"><input type="number" id="valueInput" placeholder="輸入數值"  step="0.01"></div>
+  <label for="value1">數值 1</label>
+  <div class="input-row"><input type="number" id="value1" placeholder="85" value="85" step="0.01"></div>
 </div>
-  <small class="input-help">輸入要計算的數值（如成績分數或投資金額）</small>
 <div class="input-group">
-  <label for="weightInput">權重</label>
-  <div class="input-row"><input type="number" id="weightInput" placeholder="輸入權重"  step="0.01"></div>
+  <label for="weight1">權重 1</label>
+  <div class="input-row"><input type="number" id="weight1" placeholder="30" value="30" step="0.01"></div>
 </div>
-  <small class="input-help">輸入該數值的權重比例（如百分比或係數）</small></div>
+<div class="input-group">
+  <label for="value2">數值 2</label>
+  <div class="input-row"><input type="number" id="value2" placeholder="90" value="90" step="0.01"></div>
+</div>
+<div class="input-group">
+  <label for="weight2">權重 2</label>
+  <div class="input-row"><input type="number" id="weight2" placeholder="30" value="30" step="0.01"></div>
+</div>
+<div class="input-group">
+  <label for="value3">數值 3（選填）</label>
+  <div class="input-row"><input type="number" id="value3" placeholder="88" value="88" step="0.01"></div>
+</div>
+<div class="input-group">
+  <label for="weight3">權重 3（選填）</label>
+  <div class="input-row"><input type="number" id="weight3" placeholder="40" value="40" step="0.01"></div>
+</div>
+<div class="input-group">
+  <label for="value4">數值 4（選填）</label>
+  <div class="input-row"><input type="number" id="value4" placeholder="留空表示不使用" step="0.01"></div>
+</div>
+<div class="input-group">
+  <label for="weight4">權重 4（選填）</label>
+  <div class="input-row"><input type="number" id="weight4" placeholder="留空表示不使用" step="0.01"></div>
+</div>
+  <small class="input-help">輸入至少2組數值與權重（例如成績分數及其所佔比重、或投資金額及其報酬率）；第3、4組為選填，可用於3項以上的加權平均計算，兩者需同時填寫或同時留空</small></div>
     <button class="btn-calc" onclick="calculate()">計算</button>
     <div class="results" id="results">
       <div class="result-highlight"><span class="result-label">加權平均</span><span class="result-value" id="weightedAvgResult">—</span></div>
@@ -115,28 +138,52 @@
 <footer class="footer"><div class="footer-inner"><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/home/zh-TW/privacy.html">Privacy</a><a href="/home/zh-TW/terms.html">Terms</a><span style="margin-left:auto">&copy; 2026 SoftGlow</span></div></footer>
 <script>
 function calculate() {
-  const valueInput = document.getElementById('valueInput');
-  const weightInput = document.getElementById('weightInput');
   const weightedAvgResult = document.getElementById('weightedAvgResult');
   const totalWeightResult = document.getElementById('totalWeightResult');
   const sumProductResult = document.getElementById('sumProductResult');
   const resultsDiv = document.getElementById('results');
 
-  const value = parseFloat(valueInput.value);
-  const weight = parseFloat(weightInput.value);
+  // 加權平均本質上是「多組數值與權重」的計算（見文章公式與FAQ的3項成績範例），
+  // 不能只收一組數值/權重就直接當作結果，逐組讀取並允許第3、4組選填
+  const pairs = [];
+  for (let i = 1; i <= 4; i++) {
+    const vStr = document.getElementById('value' + i).value.trim();
+    const wStr = document.getElementById('weight' + i).value.trim();
+    const vProvided = vStr !== '';
+    const wProvided = wStr !== '';
 
-  if (isNaN(value) || isNaN(weight)) {
-    alert('Please enter valid numbers for both value and weight.');
+    if (!vProvided && !wProvided) continue;
+
+    if (vProvided !== wProvided) {
+      alert('第 ' + i + ' 組的數值與權重必須同時填寫，或兩者都留空');
+      return;
+    }
+
+    const v = parseFloat(vStr);
+    const w = parseFloat(wStr);
+    if (isNaN(v) || isNaN(w)) {
+      alert('第 ' + i + ' 組請輸入有效的數字');
+      return;
+    }
+
+    pairs.push({ value: v, weight: w });
+  }
+
+  if (pairs.length < 1) {
+    alert('請至少輸入一組數值與權重');
     return;
   }
 
-  if (weight <= 0) {
-    alert('Weight must be greater than zero.');
+  // 負數值與負權重在特定統計情境下是合法輸入（見FAQ說明），不做範圍限制，
+  // 只防止總權重剛好為零導致除以零
+  const totalWeight = pairs.reduce((sum, p) => sum + p.weight, 0);
+  const sumProduct = pairs.reduce((sum, p) => sum + p.value * p.weight, 0);
+
+  if (totalWeight === 0) {
+    alert('總權重不可為零（會導致除以零）');
     return;
   }
 
-  const sumProduct = value * weight;
-  const totalWeight = weight;
   const weightedAverage = sumProduct / totalWeight;
 
   sumProductResult.textContent = sumProduct.toLocaleString('en-US', { maximumFractionDigits: 4, minimumFractionDigits: 2 });

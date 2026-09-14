@@ -27,12 +27,23 @@ _TWSE_SSL_CTX.verify_mode = _ssl.CERT_NONE
 # ──────────────────────────────────────────
 # 鉅亨 RSS feeds
 # ──────────────────────────────────────────
+# 2026/09/14修正（案件004測試中發現，帥哥鴻要求本輪發現的問題一併處理）：下面4個
+# news.cnyes.com/rss/category/{分類}格式的網址全部回傳HTTP 404，只有feedburner那個還正常。
+# 直接用WebFetch實測＋WebSearch查證確認：鉅亨網RSS網址格式已經換成
+# news.cnyes.com/rss/v1/news/category/{分類}（多了/v1/news/這一段），其中「頭條」
+# （headline）與「台股」（tw_stock）用新格式實測仍能正常抓到25/30則新聞，換成新網址即可修復。
+# 但「產業基金」（fund）、「個股新聞」（tw_stock_news）、「產業」（industry）這三個分類代碼
+# 換成新網址後不再404、可正常連線，卻只回傳空清單（0則）——查證後研判鉅亨網RSS系統這三個
+# 分類代碼在新版API裡已經跟舊版對不起來（新版RSS只保留少數幾種大分類），但找不到官方文件
+# 或替代分類代碼可以確認正確對應到什麼，不確定的東西不能用猜的硬套，所以先保留這三個網址
+# （改成新格式、不再噴404錯誤，只是每次回傳空清單，不影響爬蟲整體運作），之後帥哥鴻若查到
+# 這三個分類的正確新網址，或想討論是否需要精確分類新聞來源，再另外處理。
 CNYES_FEEDS = [
-    "https://feeds.feedburner.com/cnyes",                   # 頭條
-    "https://news.cnyes.com/rss/category/tw_stock",         # 台股
-    "https://news.cnyes.com/rss/category/fund",             # 產業基金
-    "https://news.cnyes.com/rss/category/tw_stock_news",    # 個股新聞
-    "https://news.cnyes.com/rss/category/industry",         # 產業
+    "https://feeds.feedburner.com/cnyes",                            # 頭條
+    "https://news.cnyes.com/rss/v1/news/category/tw_stock",          # 台股（已修復，實測30則）
+    "https://news.cnyes.com/rss/v1/news/category/fund",              # 產業基金（新網址不再404，但分類代碼待確認，暫回傳空清單）
+    "https://news.cnyes.com/rss/v1/news/category/tw_stock_news",     # 個股新聞（同上）
+    "https://news.cnyes.com/rss/v1/news/category/industry",          # 產業（同上）
 ]
 
 # 股票代號正則（4~6碼數字，後接中文公司名 or 括號）
