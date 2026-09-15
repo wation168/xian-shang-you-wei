@@ -82,6 +82,14 @@
    setTheme()裡也只更新了#themeSeg（設定抽屜用，該抽屜實際上沒有任何按鈕會呼叫openDrawer()
    把它打開，等於是死程式碼），導致使用者點了自動/亮/暗其實主題有真的切換成功，但畫面上
    完全看不出目前選的是哪一個。這裡補上對應的active樣式，setTheme()一併更新（見下方）。 */
+/* 2026/09/15修正：上面09/14的active樣式其實從沒生效過——三顆按鈕的HTML自己
+   寫了inline style="background:transparent;color:var(--text2)"，inline style的
+   優先度必定蓋過任何寫在<style>裡的class規則（不管那個class寫幾個），所以.active
+   時class雖然有正確加上去，畫面卻永遠是透明底、看不出來現在選的是哪一個（帥哥鴻
+   回報「手機版只有淺色系,沒有深色按鈕」）。把預設樣式改用.theme-my-btn這個class
+   本身承接（拿掉兩處按鈕HTML上重複的inline background/color），才會被.active
+   用「兩個class」的優先度正常蓋過去。 */
+.theme-my-btn{background:transparent;color:var(--text2)}
 .theme-my-btn.active{background:var(--green);color:#fff}
 .chip-filter-btn{padding:0 12px;height:30px;border:none;background:transparent;color:var(--text2);font-size:11px;cursor:pointer;transition:all .15s}
 .chip-filter-btn.active{background:var(--green);color:#fff}
@@ -1113,9 +1121,14 @@ html[data-theme="dark"] body,html:not([data-theme]) body{background:transparent}
 .tile-hot{border-top-color:var(--up)}
 .tile-anomaly{border-top-color:var(--hd2-blue)}
 .tile-deep{border-top-color:var(--accent)}
-.tile-ico{font-size:19px;margin-bottom:6px}
-.tile-ttl{font-weight:700;font-size:13px;color:var(--text);margin-bottom:2px}
-.tile-sub{font-size:11px;color:var(--muted);margin-bottom:10px}
+/* 2026/09/15修正：帥哥鴻回報「市場熱門/異常訊號/DEEP深度選股」三張卡標題跟副標題
+   不夠明顯——量過實際字級，標題只有13px、副標題11px還用--muted（--text3，三層
+   文字色階裡對比度最低那一層），在深色底下幾乎融進背景，只剩emoji圖示比較顯眼。
+   拉大標題字級＋加寬字距，副標題改用對比度較高的--text2並放大到12px，讓文字本身
+   就有份量，不用靠拿掉圖示來解決（圖示保留，跟文字分工而非互相取代）。 */
+.tile-ico{font-size:22px;margin-bottom:7px}
+.tile-ttl{font-weight:800;font-size:15px;color:var(--text);margin-bottom:3px;letter-spacing:.2px}
+.tile-sub{font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.4}
 .tile-list{min-height:60px}
 .tile-tag{display:inline-block;font-size:10px;padding:3px 8px;border-radius:6px;margin-top:9px;background:var(--surface-soft);color:var(--muted)}
 
@@ -7983,9 +7996,9 @@ async function showMyPage(){
         <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 0">
           <span style="font-size:13px;color:var(--text)">🎨 顯示主題</span>
           <div style="display:flex;border:1px solid var(--border2);border-radius:20px;overflow:hidden">
-            <button onclick="setTheme('auto')" class="theme-my-btn" data-th="auto" style="padding:4px 10px;border:none;background:transparent;color:var(--text2);font-size:11px;cursor:pointer">自動</button>
-            <button onclick="setTheme('light')" class="theme-my-btn" data-th="light" style="padding:4px 10px;border:none;background:transparent;color:var(--text2);font-size:11px;cursor:pointer">亮</button>
-            <button onclick="setTheme('dark')" class="theme-my-btn" data-th="dark" style="padding:4px 10px;border:none;background:transparent;color:var(--text2);font-size:11px;cursor:pointer">暗</button>
+            <button onclick="setTheme('auto')" class="theme-my-btn" data-th="auto" style="padding:4px 10px;border:none;font-size:11px;cursor:pointer">自動</button>
+            <button onclick="setTheme('light')" class="theme-my-btn" data-th="light" style="padding:4px 10px;border:none;font-size:11px;cursor:pointer">亮</button>
+            <button onclick="setTheme('dark')" class="theme-my-btn" data-th="dark" style="padding:4px 10px;border:none;font-size:11px;cursor:pointer">暗</button>
           </div>
         </div>
       </div>
@@ -8161,9 +8174,9 @@ async function showMyPage(){
         <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:6px">
           <span style="font-size:13px;color:var(--text)">🎨 顯示主題</span>
           <div style="display:flex;border:1px solid var(--border2);border-radius:20px;overflow:hidden">
-            <button onclick="setTheme('auto')" class="theme-my-btn" data-th="auto" style="padding:4px 10px;border:none;background:transparent;color:var(--text2);font-size:11px;cursor:pointer">自動</button>
-            <button onclick="setTheme('light')" class="theme-my-btn" data-th="light" style="padding:4px 10px;border:none;background:transparent;color:var(--text2);font-size:11px;cursor:pointer">亮</button>
-            <button onclick="setTheme('dark')" class="theme-my-btn" data-th="dark" style="padding:4px 10px;border:none;background:transparent;color:var(--text2);font-size:11px;cursor:pointer">暗</button>
+            <button onclick="setTheme('auto')" class="theme-my-btn" data-th="auto" style="padding:4px 10px;border:none;font-size:11px;cursor:pointer">自動</button>
+            <button onclick="setTheme('light')" class="theme-my-btn" data-th="light" style="padding:4px 10px;border:none;font-size:11px;cursor:pointer">亮</button>
+            <button onclick="setTheme('dark')" class="theme-my-btn" data-th="dark" style="padding:4px 10px;border:none;font-size:11px;cursor:pointer">暗</button>
           </div>
         </div>
         <button onclick="openChangePwdModal()" style="width:100%;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left">🔐 更改密碼</button>
