@@ -73,24 +73,10 @@
   --dn:#1A8F5E;--dn-l:rgba(26,143,94,.1);
   --amber:#B07010;--amber-l:rgba(176,112,16,.1);
 }
-.theme-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:.5px solid var(--border);margin-top:10px}
-.theme-row span{font-size:13px;color:var(--text2)}
-.theme-seg{display:flex;border:.5px solid var(--border2);border-radius:20px;overflow:hidden}
-.theme-seg button{padding:0 12px;height:32px;border:none;background:transparent;color:var(--text2);font-size:12px;cursor:pointer}
-.theme-seg button.active{background:var(--green);color:#fff}
-/* 2026/09/14修正：「我的」頁面的手機版主題切換鈕(.theme-my-btn)一直沒有active樣式，
-   setTheme()裡也只更新了#themeSeg（設定抽屜用，該抽屜實際上沒有任何按鈕會呼叫openDrawer()
-   把它打開，等於是死程式碼），導致使用者點了自動/亮/暗其實主題有真的切換成功，但畫面上
-   完全看不出目前選的是哪一個。這裡補上對應的active樣式，setTheme()一併更新（見下方）。 */
-/* 2026/09/15修正：上面09/14的active樣式其實從沒生效過——三顆按鈕的HTML自己
-   寫了inline style="background:transparent;color:var(--text2)"，inline style的
-   優先度必定蓋過任何寫在<style>裡的class規則（不管那個class寫幾個），所以.active
-   時class雖然有正確加上去，畫面卻永遠是透明底、看不出來現在選的是哪一個（帥哥鴻
-   回報「手機版只有淺色系,沒有深色按鈕」）。把預設樣式改用.theme-my-btn這個class
-   本身承接（拿掉兩處按鈕HTML上重複的inline background/color），才會被.active
-   用「兩個class」的優先度正常蓋過去。 */
-.theme-my-btn{background:transparent;color:var(--text2)}
-.theme-my-btn.active{background:var(--green);color:#fff}
+/* 2026/09/15：主題切換三處重複（頂部🌓、「我的」頁登入前/後兩組自動/亮/暗按鈕）
+   統一只留頂部#themeToggleBtn一處（見下方媒體查詢改成手機版也顯示），.theme-seg/
+   .theme-my-btn/#themeSeg（連同從沒人打開過的死程式碼「設定抽屜」）一併移除
+   （文件A決策④，帥哥鴻拍板）。 */
 .chip-filter-btn{padding:0 12px;height:30px;border:none;background:transparent;color:var(--text2);font-size:11px;cursor:pointer;transition:all .15s}
 .chip-filter-btn.active{background:var(--green);color:#fff}
 @media(prefers-color-scheme:dark){
@@ -110,7 +96,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 /* 手機版隱藏工具/文章/介紹頁/主題按鈕，讓搜尋列有足夠空間 */
 @media(max-width:1023px){
   #topNavLinks{display:none!important}
-  #themeToggleBtn{display:none!important}
   /* 2026/09/13修正：#desktopSidebar本來就沒有任何規則在窄螢幕隱藏它，只是靠
      @media(min-width:1024px)裡的grid排版讓它「看起來」只在電腦版出現；一旦
      watchList有資料，_renderDesktopWatchSidebar()（addWatch/removeWatch/setStockGroup
@@ -128,9 +113,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
   .m-val{font-size:17px}
   .summary-list li{font-size:14px}
 }
-
-/* 全螢幕隱藏 TAB 列（底部導覽已涵蓋所有尺寸） */
-#desktopTabBar{display:none!important}
 
 /* ══ 電腦版三欄版面 ══ */
 @media(min-width:1024px){
@@ -230,22 +212,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
   #desktopMain #homeDash .ws-mobile-bar,
   #desktopMain #homeDash #wsAddGroupRowM,
   #desktopMain #homeWatchPreview .ws-item-group{display:none}
-
-  /* 電腦版中欄 TAB 列 */
-  #desktopTabBar{
-    display:flex;align-items:center;gap:0;
-    border-bottom:.5px solid var(--border);
-    background:var(--bg);
-    padding:0 20px;
-    position:sticky;top:0;z-index:95;
-  }
-  .desktop-tab-btn{
-    padding:12px 18px;font-size:13px;font-weight:600;
-    border:none;background:none;cursor:pointer;
-    color:var(--text3);border-bottom:2px solid transparent;
-    margin-bottom:-1px;transition:color .15s;white-space:nowrap;
-  }
-  .desktop-tab-btn.active{color:var(--green);border-bottom-color:var(--green)}
 
   /* 電腦版 pageOverlay：底部不留手機 nav 空間，不蓋 TAB 列 */
   #pageOverlay{
@@ -533,15 +499,6 @@ canvas.draw-layer.active{pointer-events:all;cursor:crosshair}
 .nav-btn.active{color:var(--green)}
 .nav-icon{font-size:20px;line-height:1}
 
-/* ── API 設定（底部抽屜）── */
-.drawer{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:.5px solid var(--border);border-radius:16px 16px 0 0;padding:16px 16px calc(16px + var(--safe-bottom));z-index:200;transform:translateY(100%);transition:transform .3s ease}
-.drawer.open{transform:translateY(0)}
-.drawer-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 14px}
-.drawer h3{font-size:14px;font-weight:600;margin-bottom:12px}
-.drawer input{width:100%;height:40px;border:.5px solid var(--border2);border-radius:var(--radius);padding:0 12px;font-size:13px;font-family:var(--mono);background:var(--bg2);color:var(--text);outline:none;margin-bottom:10px}
-.drawer-btn{width:100%;height:40px;border-radius:var(--radius);border:none;background:var(--green);color:#fff;font-size:14px;font-weight:500;cursor:pointer}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:150;display:none}
-.overlay.show{display:block}
 
 .disc{font-size:9px;color:var(--text3);line-height:1.6;padding:10px 16px calc(10px + var(--safe-bottom));border-top:.5px solid var(--border)}
 
@@ -1483,15 +1440,9 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
   <!-- 電腦版中欄（包住分析主內容） -->
   <div id="desktopMain">
 
-  <!-- 電腦版 TAB 列 -->
-  <div id="desktopTabBar">
-    <button class="desktop-tab-btn active" onclick="showPage('home')" data-page="home">首頁</button>
-    <button class="desktop-tab-btn" onclick="_homeGo('picks')" data-page="picks">發現機會</button>
-    <button class="desktop-tab-btn" onclick="_homeGo('analyze')" data-page="home">個股分析</button>
-    <button class="desktop-tab-btn" onclick="_homeGo('deepanalysis')" data-page="home">深度分析</button>
-    <button class="desktop-tab-btn" onclick="showPage('watch')" data-page="watch">我的投資</button>
-    <button class="desktop-tab-btn" onclick="showPage('forum')" data-page="forum">社群</button>
-  </div>
+  <!-- 2026/09/15：移除電腦版專屬頂部TAB列(#desktopTabBar)——6顆按鈕裡有5顆跟底部導覽
+       重複（首頁/我的投資/社群對應底部導覽，發現機會/深度分析已改由首頁「今天看什麼」卡片
+       提供入口），電腦版與手機版統一只用底部5顆導覽（文件A決策①，帥哥鴻拍板）。 -->
 
   <!-- 強勢股快捷列 -->
   <div class="hotkeys" id="hotkeysEl">
@@ -2220,9 +2171,34 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
       <input type="text" id="addStockSearchInput" placeholder="如：2330 或 台積電" autocomplete="off" oninput="_onAddStockSearchInput()">
     </div>
     <div id="addStockResults" style="max-height:260px;overflow-y:auto;margin-bottom:14px"></div>
+    <!-- 2026/09/15新增（文件A決策③，帥哥鴻拍板）：持股健檢不做獨立入口，改成加自選時
+         選填股數/買入價——只勾選一檔時才會套用（多選是快速加自選觀察用，本來就沒有
+         「這股數是哪一檔的」的對應關係，所以只在單選時顯示這兩個欄位）。有填買入價
+         才會被「持股健檢」納入計算，不填就維持單純自選觀察。 -->
+    <div id="addStockHoldingFields" class="modal-field" style="display:none">
+      <label>股數／買入價（選填，僅單選一檔時可填，填了會納入「持股健檢」）</label>
+      <div style="display:flex;gap:8px">
+        <input type="number" id="addStockShares" placeholder="股數" step="1" style="flex:1">
+        <input type="number" id="addStockCost" placeholder="買入價" step="0.01" style="flex:1">
+      </div>
+    </div>
     <button class="modal-btn" onclick="_submitAddStockModal()">加入</button>
     <div style="text-align:center;margin-top:12px">
       <span class="modal-link" onclick="_closeAddStockModal()">取消</span>
+    </div>
+  </div>
+</div>
+
+<!-- 自選股設定 Modal（2026/09/15新增，文件A決策④，帥哥鴻拍板）：🔔到價提醒原本放在
+     「我的」頁，付費限定卻幾乎沒人找得到入口，決定維持付費限定、但把入口搬進這裡
+     （自選股頁面才是使用者真的在管理持股/觀察名單的地方，動線更合理）。內容依登入/
+     付費狀態動態渲染，見_openWsSettingsModal()。 -->
+<div id="wsSettingsModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)_closeWsSettingsModal()">
+  <div class="modal-box" style="max-width:400px">
+    <div class="modal-title">⚙️ 自選股設定</div>
+    <div id="wsSettingsBody"></div>
+    <div style="text-align:center;margin-top:12px">
+      <span class="modal-link" onclick="_closeWsSettingsModal()">關閉</span>
     </div>
   </div>
 </div>
@@ -2283,21 +2259,6 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
 <div id="pageOverlay" style="display:none;position:fixed;inset:0 0 calc(56px + var(--safe-bottom)) 0;background:var(--bg);overflow-y:auto;z-index:90">
   <div id="pageContentWrap" style="max-width:600px;margin:0 auto;padding:60px 16px 12px">
     <div id="pageContent"></div>
-  </div>
-</div>
-
-<!-- 設定抽屜 -->
-<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
-<div class="drawer" id="drawer">
-  <div class="drawer-handle"></div>
-  <h3>設定</h3>
-  <div class="theme-row">
-    <span>顯示主題</span>
-    <div class="theme-seg" id="themeSeg">
-      <button data-th="auto" onclick="setTheme('auto')">跟隨系統</button>
-      <button data-th="light" onclick="setTheme('light')">亮色</button>
-      <button data-th="dark" onclick="setTheme('dark')">暗色</button>
-    </div>
   </div>
 </div>
 
@@ -2620,15 +2581,6 @@ function showPage(page){
     else if(page==='deepanalysis') showDeepAnalysisPage();
   }
 }
-function openDrawer(){
-  document.getElementById('drawer').classList.add('open');
-  document.getElementById('overlay').classList.add('show');
-}
-function closeDrawer(){
-  document.getElementById('drawer').classList.remove('open');
-  document.getElementById('overlay').classList.remove('show');
-}
-
 // ══════════════════════════════════════
 // 自選股（每日作戰中心）
 // ══════════════════════════════════════
@@ -2652,6 +2604,7 @@ function showWatchList(){
         💡 加入自選後可在此快速查看，支援批次分析
       </div>
       <button onclick="_openAddStockModal('預設')" style="padding:8px 18px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">＋新增股票</button>
+      ${_authUser ? `<div style="margin-top:10px"><span onclick="_openWsSettingsModal()" style="font-size:12px;color:var(--text3);cursor:pointer;text-decoration:underline">⚙️ 自選股設定（到價提醒）</span></div>` : ''}
     </div>`;
     return;
   }
@@ -2667,7 +2620,11 @@ function _renderWatchSkeleton(el){
   el.innerHTML=`
     <div style="padding:4px 0 8px;display:flex;justify-content:space-between;align-items:center">
       <div style="font-size:16px;font-weight:700">🔥 今日關注</div>
-      <div style="font-size:11px;color:var(--text3)" id="watchUpdateTime">更新中...</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="font-size:11px;color:var(--text3)" id="watchUpdateTime">更新中...</div>
+        <!-- 2026/09/15新增：自選股設定入口（🔔到價提醒搬到這裡，文件A決策④） -->
+        <button onclick="_openWsSettingsModal()" title="自選股設定" style="background:none;border:.5px solid var(--border2);border-radius:6px;padding:3px 7px;font-size:12px;cursor:pointer;color:var(--text2)">⚙️</button>
+      </div>
     </div>
     <!-- 自訂族群篩選（2026/09/13新增）：跟桌面側欄／手機首頁預覽共用同一套_wsGroupFilter狀態與函式家族（W尾綴） -->
     <div class="ws-group-bar" style="padding:0 0 8px;border-bottom:none">
@@ -2895,12 +2852,16 @@ function _renderWatchFallback(){
       <select class="ws-item-group" onclick="event.stopPropagation()" onchange="setStockGroup('${s.id}', this.value)">${_groupOptionsHtml(s.group||'預設')}</select>
     </div>`).join('');
 }
-function addWatch(id,name,group){
+function addWatch(id,name,group,shares,costPrice){
   group = group || '預設';
   let isNew=false;
   if(!watchList.find(s=>s.id===id)){
     isNew=true;
-    watchList.unshift({id,name,date:new Date().toLocaleDateString('zh-TW'),group});
+    // 2026/09/15新增（文件A決策③）：shares/costPrice選填，有填才會被「持股健檢」納入計算
+    const item = {id,name,date:new Date().toLocaleDateString('zh-TW'),group};
+    if(shares) item.shares = shares;
+    if(costPrice) item.cost_price = costPrice;
+    watchList.unshift(item);
     if(watchList.length>30)watchList=watchList.slice(0,30);
     localStorage.setItem('watchList',JSON.stringify(watchList));
   }
@@ -2920,7 +2881,10 @@ function addWatch(id,name,group){
   // 未登入不能呼叫addWatch()，這裡理論上一定是登入狀態，但還是判斷一次比較保險。
   // fire-and-forget：不擋UI，失敗只console.warn，不回滾樂觀更新的畫面（下次登入merge會補回）。
   if(isNew && _authUser){
-    fetch(`${getAPI()}/api/watchlist/add`,{method:'POST',headers:_authHeaders(),body:JSON.stringify({id,name,group})})
+    const _payload = {id,name,group};
+    if(shares) _payload.shares = shares;
+    if(costPrice) _payload.cost_price = costPrice;
+    fetch(`${getAPI()}/api/watchlist/add`,{method:'POST',headers:_authHeaders(),body:JSON.stringify(_payload)})
       .then(r=>{ if(!r.ok) console.warn('[watchlist] 加入自選同步失敗', r.status); })
       .catch(e=>console.warn('[watchlist] 加入自選同步失敗', e));
   }
@@ -3069,12 +3033,57 @@ function _openAddStockModal(targetGroup){
   const input = document.getElementById('addStockSearchInput');
   if(input) input.value = '';
   _renderAddStockResults([]);
+  // 2026/09/15新增：每次打開Modal都重置股數/買入價欄位，避免殘留上一次輸入的值
+  const sharesI = document.getElementById('addStockShares');
+  const costI = document.getElementById('addStockCost');
+  if(sharesI) sharesI.value = '';
+  if(costI) costI.value = '';
+  const holdingFields = document.getElementById('addStockHoldingFields');
+  if(holdingFields) holdingFields.style.display = 'none';
   const modal = document.getElementById('addStockModal');
   if(modal) modal.style.display = 'flex';
   setTimeout(()=>{ const i=document.getElementById('addStockSearchInput'); if(i) i.focus(); }, 100);
 }
 function _closeAddStockModal(){
   const modal = document.getElementById('addStockModal');
+  if(modal) modal.style.display = 'none';
+}
+
+// ── 自選股設定 Modal（2026/09/15新增，文件A決策④）：目前只有🔔到價提醒一項設定，
+// 之後有新的「自選股層級」設定（跟到價提醒一樣不屬於單一股票、而是帳號整體的設定）
+// 可以繼續往這個Modal裡加。 ──
+function _openWsSettingsModal(){
+  if(!_authUser){ showLoginModal(); return; }
+  const isPaid = _authUser.plan !== 'free' && _authUser.is_active;
+  const body = document.getElementById('wsSettingsBody');
+  if(!body) return;
+  if(isPaid){
+    body.innerHTML = `
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px">🔔 到價提醒</div>
+      <div id="alertsList" style="margin-bottom:10px;font-size:12px;color:var(--text3)">載入中...</div>
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <input id="alertStock" placeholder="股票代號，如 2330" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--text);outline:none">
+        <input id="alertPrice" type="number" placeholder="目標價" style="width:80px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--text);outline:none">
+        <select id="alertDir" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 6px;font-size:12px;color:var(--text);outline:none">
+          <option value="above">漲至</option>
+          <option value="below">跌至</option>
+        </select>
+      </div>
+      <button onclick="doAddAlert()" style="width:100%;padding:8px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">新增提醒</button>
+      <div id="alertErr" style="font-size:12px;color:#f87171;min-height:16px;margin-top:4px;text-align:center"></div>`;
+    _loadAlerts();
+  }else{
+    body.innerHTML = `
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px">🔔 到價提醒</div>
+      <div style="font-size:12px;color:var(--text3);background:var(--bg2);border-radius:8px;padding:12px 14px;text-align:center">
+        付費會員限定功能，<span onclick="_closeWsSettingsModal();showPage('my')" style="color:var(--green);cursor:pointer;text-decoration:underline">升級付費</span>後可設定股票到價自動提醒
+      </div>`;
+  }
+  const modal = document.getElementById('wsSettingsModal');
+  if(modal) modal.style.display = 'flex';
+}
+function _closeWsSettingsModal(){
+  const modal = document.getElementById('wsSettingsModal');
   if(modal) modal.style.display = 'none';
 }
 let _addStockSearchTimer = null;
@@ -3103,18 +3112,42 @@ function _renderAddStockResults(list){
   el.innerHTML = list.map(s=>{
     const already = watchList.some(w=>w.id===s.stock_id);
     return `<label style="display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:.5px solid var(--border);${already?'opacity:.5' : 'cursor:pointer'}">
-      <input type="checkbox" class="add-stock-chk" value="${s.stock_id}" data-name="${(s.stock_name||'').replace(/"/g,'&quot;')}" ${already?'disabled':''}>
+      <input type="checkbox" class="add-stock-chk" value="${s.stock_id}" data-name="${(s.stock_name||'').replace(/"/g,'&quot;')}" ${already?'disabled':''} onchange="_onAddStockCheckChange()">
       <span style="font-weight:700;font-size:13px">${s.stock_id}</span>
       <span style="font-size:12px;color:var(--text2);flex:1">${s.stock_name||''}</span>
       <span style="font-size:11px;color:var(--text3)">${already?'已在清單':(s.type||'')}</span>
     </label>`;
   }).join('');
 }
+// 2026/09/15新增：股數/買入價欄位只在「剛好勾選一檔」時才有意義並顯示，
+// 勾0檔或多檔（快速批次加自選）時隱藏並清空，避免誤把值套用到不對的股票上。
+function _onAddStockCheckChange(){
+  const checks = document.querySelectorAll('#addStockResults .add-stock-chk:checked');
+  const holdingFields = document.getElementById('addStockHoldingFields');
+  if(!holdingFields) return;
+  if(checks.length === 1){
+    holdingFields.style.display = '';
+  }else{
+    holdingFields.style.display = 'none';
+    const sharesI = document.getElementById('addStockShares');
+    const costI = document.getElementById('addStockCost');
+    if(sharesI) sharesI.value = '';
+    if(costI) costI.value = '';
+  }
+}
 function _submitAddStockModal(){
   const group = document.getElementById('addStockGroupSelect')?.value || '預設';
   const checks = document.querySelectorAll('#addStockResults .add-stock-chk:checked');
   if(!checks.length){ alert('請至少勾選一檔股票'); return; }
-  checks.forEach(chk=>{ addWatch(chk.value, chk.dataset.name||chk.value, group); });
+  // 2026/09/15新增：股數/買入價只在單選一檔時套用（見_onAddStockCheckChange註解）
+  let shares = null, costPrice = null;
+  if(checks.length === 1){
+    const sharesV = parseFloat(document.getElementById('addStockShares')?.value);
+    const costV = parseFloat(document.getElementById('addStockCost')?.value);
+    shares = (!isNaN(sharesV) && sharesV > 0) ? sharesV : null;
+    costPrice = (!isNaN(costV) && costV > 0) ? costV : null;
+  }
+  checks.forEach(chk=>{ addWatch(chk.value, chk.dataset.name||chk.value, group, shares, costPrice); });
   _closeAddStockModal();
   // 三個渲染自選股的畫面都可能正在顯示，一律防呆刷新一次（各函式本身都會判斷目標元素是否存在）
   if(typeof _renderDesktopWatchSidebar==='function') _renderDesktopWatchSidebar();
@@ -4903,23 +4936,12 @@ function setTheme(th){
   localStorage.setItem('theme',th);
   if(th==='auto') document.documentElement.removeAttribute('data-theme');
   else document.documentElement.setAttribute('data-theme',th);
-  // 2026/09/14修正：一併更新「我的」頁面手機版主題按鈕(.theme-my-btn)的active樣式，
-  // 原本只更新#themeSeg（設定抽屜，實際沒有入口能打開，見上方CSS註解）。
-  document.querySelectorAll('#themeSeg button, .theme-my-btn').forEach(b=>b.classList.toggle('active',b.dataset.th===th));
   // 重繪圖表以更新顏色
   if(C.bars.length) drawChart();
 }
 function applyStoredTheme(){
   const th=localStorage.getItem('theme')||'auto';
   setTheme(th);
-}
-// 2026/09/14新增：「我的」頁面每次showMyPage()都會用innerHTML整段重建畫面，
-// 新建出來的.theme-my-btn按鈕不會自動帶有active樣式（active是setTheme()呼叫當下才會
-// 加上去的class，重建畫面並不會重新呼叫setTheme），所以畫面重繪後要手動同步一次目前
-// 主題的選中樣式，而不是重新呼叫setTheme(th)（那樣會不必要地重繪一次K線圖）。
-function _syncThemeBtnActive(){
-  const th = localStorage.getItem('theme') || 'auto';
-  document.querySelectorAll('.theme-my-btn').forEach(b=>b.classList.toggle('active', b.dataset.th===th));
 }
 
 // 通用摺疊
@@ -7715,13 +7737,17 @@ async function showPortfolioPage(){
       <div style="font-size:16px;font-weight:700;padding:10px 0 4px">💼 持股健檢</div>
       ${!isPaid ? '<div style="font-size:12px;color:var(--text3);background:var(--bg2);border-radius:8px;padding:8px 12px;margin-bottom:12px">免費版最多追蹤 1 支，<span onclick="showPage(\'my\')" style="color:var(--green);cursor:pointer;text-decoration:underline">升級付費</span>可無限新增</div>' : ''}
 
-      <!-- 新增持股表單 -->
+      <!-- 新增持股表單。2026/09/15修正（文件A決策③，帥哥鴻拍板）：這裡新增的其實就是
+           自選股，只是額外填了股數/買入價——跟「＋新增股票」Modal共用同一份watchlist_items
+           資料，兩邊都能設定持股，不是各自獨立的功能。 -->
       <div style="background:var(--bg2);border-radius:12px;padding:14px 16px;margin-bottom:16px">
-        <div style="font-size:13px;font-weight:600;margin-bottom:10px">新增持股</div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px">新增持股（也會同步加入自選股）</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <input id="pf-stock-id" type="text" placeholder="股號（如 2330）" maxlength="6"
             style="flex:1;min-width:90px;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px">
-          <input id="pf-cost" type="number" placeholder="成本價" step="0.01"
+          <input id="pf-shares" type="number" placeholder="股數（選填）" step="1"
+            style="flex:1;min-width:90px;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px">
+          <input id="pf-cost" type="number" placeholder="買入價" step="0.01"
             style="flex:1;min-width:90px;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px">
           <button onclick="_pfAdd()" style="padding:8px 16px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap">
             新增
@@ -7873,6 +7899,9 @@ async function _pfLoad(){
             <div style="font-size:14px;font-weight:700;color:${pnlCol}">${pnlSign}${pnl}%</div>
           </div>
         </div>
+        ${s.shares ? `<div style="font-size:11px;color:var(--text3);margin:-4px 0 10px">
+          持有 ${s.shares} 股${s.pnl_amount!=null ? `，損益金額 <span style="color:${pnlCol};font-weight:600">${s.pnl_amount>0?'+':''}${s.pnl_amount}</span>` : ''}
+        </div>` : ''}
 
         <!-- 位置 -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
@@ -7936,9 +7965,11 @@ async function _pfLoad(){
 }
 
 async function _pfAdd(){
-  const sid   = document.getElementById('pf-stock-id').value.trim();
-  const cost  = parseFloat(document.getElementById('pf-cost').value);
-  const msg   = document.getElementById('pf-msg');
+  const sid    = document.getElementById('pf-stock-id').value.trim();
+  const cost   = parseFloat(document.getElementById('pf-cost').value);
+  const sharesV = parseFloat(document.getElementById('pf-shares')?.value);
+  const shares = (!isNaN(sharesV) && sharesV > 0) ? sharesV : null;
+  const msg    = document.getElementById('pf-msg');
   if(!sid || isNaN(cost) || cost <= 0){
     msg.style.color = 'var(--up)';
     msg.textContent = '請輸入正確的股號與成本價';
@@ -7956,7 +7987,7 @@ async function _pfAdd(){
     const r = await fetch(`${getAPI()}/portfolio/add`, {
       method: 'POST',
       headers: { ...{'Content-Type':'application/json'}, ..._authHeaders() },
-      body: JSON.stringify({ stock_id: sid, cost_price: cost, stock_name: '' })
+      body: JSON.stringify({ stock_id: sid, cost_price: cost, shares: shares, stock_name: '' })
     });
     const j = await r.json();
     if(!r.ok) throw new Error(j.detail || '新增失敗');
@@ -7964,6 +7995,10 @@ async function _pfAdd(){
     msg.textContent = j.msg || '已新增';
     document.getElementById('pf-stock-id').value = '';
     document.getElementById('pf-cost').value = '';
+    if(document.getElementById('pf-shares')) document.getElementById('pf-shares').value = '';
+    // 這裡新增的股票同時也是自選股，但只存在後端、記憶體裡的watchList還不知道，
+    // 重新從伺服器拉一次正本，讓其他畫面（自選頁、桌面側欄、首頁預覽）的星號狀態同步
+    if(typeof _syncWatchListFromServer==='function') await _syncWatchListFromServer();
     await _pfLoad();
   } catch(e){
     msg.style.color = 'var(--up)';
@@ -7972,15 +8007,18 @@ async function _pfAdd(){
 }
 
 async function _pfDelete(stockId){
-  if(!confirm(`確定刪除 ${stockId}？`)) return;
+  // 2026/09/15修正（文件A決策③）：這裡現在只是清空該檔自選股的股數/買入價，
+  // 這檔股票仍會留在自選股清單裡，只是不再納入持股健檢，文案跟著調整避免誤會成整檔刪除。
+  if(!confirm(`確定移除 ${stockId} 的持股健檢追蹤？（仍會保留在自選股清單）`)) return;
   try{
     await fetch(`${getAPI()}/portfolio/${stockId}`, {
       method: 'DELETE',
       headers: _authHeaders()
     });
+    if(typeof _syncWatchListFromServer==='function') await _syncWatchListFromServer();
     await _pfLoad();
   } catch(e){
-    alert('刪除失敗');
+    alert('移除失敗');
   }
 }
 
@@ -7991,22 +8029,9 @@ async function showMyPage(){
 
   if(!_authUser){
     // 遊客點「我的」→ 顯示登入/註冊提示
-    // 2026/09/14修正：手機版(<1024px)頂部主題按鈕(#themeToggleBtn)是刻意隱藏的（見CSS
-    // 註解，為了讓搜尋列有空間），原本設計是靠「我的」頁面的主題切換取代，但那組按鈕只在
-    // 已登入分支（isPaid判斷那段）才有渲染，遊客分支完全沒有——導致手機版遊客使用者
-    // 「完全沒有深淺色切換」。桌面版不受影響，因為#themeToggleBtn只在<1024px才隱藏。
-    // 這裡把同一組主題按鈕也加到遊客分支，不需要_authUser/u，setTheme()本身跟登入狀態無關。
+    // 2026/09/15：主題切換已統一收斂到頂部#themeToggleBtn（手機版也顯示，見CSS），
+    // 這裡不再需要另外渲染一組主題按鈕（文件A決策④，帥哥鴻拍板）。
     el.innerHTML = `
-      <div class="member-card" style="margin-bottom:12px">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 0">
-          <span style="font-size:13px;color:var(--text)">🎨 顯示主題</span>
-          <div style="display:flex;border:1px solid var(--border2);border-radius:20px;overflow:hidden">
-            <button onclick="setTheme('auto')" class="theme-my-btn" data-th="auto" style="padding:4px 10px;border:none;font-size:11px;cursor:pointer">自動</button>
-            <button onclick="setTheme('light')" class="theme-my-btn" data-th="light" style="padding:4px 10px;border:none;font-size:11px;cursor:pointer">亮</button>
-            <button onclick="setTheme('dark')" class="theme-my-btn" data-th="dark" style="padding:4px 10px;border:none;font-size:11px;cursor:pointer">暗</button>
-          </div>
-        </div>
-      </div>
       <div style="padding:40px 0 60px;text-align:center">
         <div style="font-size:48px;margin-bottom:16px">👤</div>
         <div style="font-size:16px;font-weight:700;margin-bottom:8px">登入後查看帳號資訊</div>
@@ -8027,7 +8052,6 @@ async function showMyPage(){
           📖 不知道怎麼用？看使用說明
         </button>
       </div>`;
-    _syncThemeBtnActive();
     return;
   }
 
@@ -8109,21 +8133,8 @@ async function showMyPage(){
           ✅ 已安裝到主畫面
         </div>
       </div>
-      ${isPaid ? `
-      <div class="member-card" style="margin-top:0" id="alertsCard">
-        <div style="font-size:13px;font-weight:600;margin-bottom:10px">🔔 到價提醒</div>
-        <div id="alertsList" style="margin-bottom:10px;font-size:12px;color:var(--text3)">載入中...</div>
-        <div style="display:flex;gap:6px;margin-bottom:6px">
-          <input id="alertStock" placeholder="股票代號，如 2330" style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--text);outline:none">
-          <input id="alertPrice" type="number" placeholder="目標價" style="width:80px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--text);outline:none">
-          <select id="alertDir" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 6px;font-size:12px;color:var(--text);outline:none">
-            <option value="above">漲至</option>
-            <option value="below">跌至</option>
-          </select>
-        </div>
-        <button onclick="doAddAlert()" style="width:100%;padding:8px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">新增提醒</button>
-        <div id="alertErr" style="font-size:12px;color:#f87171;min-height:16px;margin-top:4px;text-align:center"></div>
-      </div>` : ''}
+      <!-- 2026/09/15：🔔到價提醒卡已搬到「自選股設定」Modal（見_openWsSettingsModal()），
+           不再放在「我的」頁（文件A決策④，帥哥鴻拍板：維持付費限定，只是搬入口）。 -->
       <div class="member-card" style="margin-top:0" id="referralCard">
         <div style="font-size:13px;font-weight:600;margin-bottom:4px">🎁 邀請好友解鎖全功能</div>
         <div style="font-size:12px;color:var(--text3);margin-bottom:12px">每邀請 3 位好友完成首次查詢 = 解鎖 30 天，可累積延長</div>
@@ -8175,15 +8186,6 @@ async function showMyPage(){
       </div>
       <div class="member-card" style="margin-top:0">
         <div style="font-size:13px;font-weight:600;margin-bottom:10px">帳號設定</div>
-        <!-- U6: 手機版主題切換 -->
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:6px">
-          <span style="font-size:13px;color:var(--text)">🎨 顯示主題</span>
-          <div style="display:flex;border:1px solid var(--border2);border-radius:20px;overflow:hidden">
-            <button onclick="setTheme('auto')" class="theme-my-btn" data-th="auto" style="padding:4px 10px;border:none;font-size:11px;cursor:pointer">自動</button>
-            <button onclick="setTheme('light')" class="theme-my-btn" data-th="light" style="padding:4px 10px;border:none;font-size:11px;cursor:pointer">亮</button>
-            <button onclick="setTheme('dark')" class="theme-my-btn" data-th="dark" style="padding:4px 10px;border:none;font-size:11px;cursor:pointer">暗</button>
-          </div>
-        </div>
         <button onclick="openChangePwdModal()" style="width:100%;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left">🔐 更改密碼</button>
         <button onclick="showPushGuideModal()" style="width:100%;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left;margin-top:6px">🔔 通知與聲音設定</button>
         ${isPaid && u.is_recurring ? `<button onclick="doCancelRecurring(this)" style="width:100%;padding:10px;background:transparent;color:#e05555;border:1px solid #e05555;border-radius:8px;font-size:13px;cursor:pointer;text-align:left;margin-top:6px">❌ 取消定期訂閱</button>` : ''}
@@ -8193,9 +8195,7 @@ async function showMyPage(){
         <button onclick="location.href='/contact.html'" style="width:100%;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left">✉️ 聯絡我們</button>
       </div>
     </div>`;
-  _syncThemeBtnActive();
 
-  if(isPaid) _loadAlerts();
   _loadReferralStatus();
 }
 
