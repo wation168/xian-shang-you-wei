@@ -2572,13 +2572,14 @@ function showPage(page){
     // 最大寬度（見CSS #pageOverlay.page-wide #pageContentWrap），並讓卡片改用多欄
     // 網格排列（見showDeepAnalysisPage()裡的.deep-cards-grid）；離開這頁（呼叫
     // showPage看任何其他頁）都會走到這行，用toggle依當下page重新判斷，不會漏了收回。
-    overlay.classList.toggle('page-wide', page==='deepanalysis');
+    overlay.classList.toggle('page-wide', page==='deepanalysis' || page==='multisignal');
     if(page==='watch') showWatchListWithTabs();
     else if(page==='picks') showPicksPage();
     else if(page==='portfolio') showPortfolioPage();
     else if(page==='forum') showForumPage();
     else if(page==='my') showMyPage();
     else if(page==='deepanalysis') showDeepAnalysisPage();
+    else if(page==='multisignal') showMultiSignalPage();
   }
 }
 // ══════════════════════════════════════
@@ -4243,6 +4244,7 @@ function _homeGo(kind){
     return;
   }
   if(kind==='deepanalysis'){ showPage('deepanalysis'); return; }
+  if(kind==='multisignal'){ showPage('multisignal'); return; }
   if(kind==='portfolio'){ showPage('portfolio'); return; }
   if(kind==='watch'){ showPage('watch'); return; }
   if(kind==='upgrade'){
@@ -5942,6 +5944,10 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   if(_pageParam==='deepanalysis' && !_stockParam){
     showPage('deepanalysis');
   }
+  // 2026/09/15新增：?page=multisignal 直接開12金叉選股頁
+  if(_pageParam==='multisignal' && !_stockParam){
+    showPage('multisignal');
+  }
 
   // 首頁儀表板（2026/08/22新增）：放在?stock=自動分析判斷之後，
   // 這樣有帶?stock=時resultEl會先進入分析中，觀察者會自動把dash收起來，不會閃一下空清單。
@@ -7352,6 +7358,18 @@ async function showPicksPage(){
           <div style="font-size:10px;color:#4ade80;margin-top:3px;opacity:0.7">預定每個交易日 17:00（台北）跑選股；實際名單以頁內「上次更新」為準</div>
         </div>
         <div style="font-size:20px;color:#4ade80;font-weight:700">›</div>
+      </div>
+      <div onclick="showPage('multisignal')"
+        style="background:linear-gradient(135deg,#1e2a4a 0%,#152040 100%);border-radius:12px;padding:14px 16px;margin-bottom:14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border:1.5px solid #3b5bab;box-shadow:0 2px 12px rgba(59,130,246,0.18)">
+        <div>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="font-size:15px;font-weight:800;color:#93c5fd">📊 12金叉選股</span>
+            <span style="background:#3B82F6;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;letter-spacing:0.5px">NEW</span>
+          </div>
+          <div style="font-size:11px;color:#bfdbfe">技術／籌碼／型態／基本面 12種方法，找今天剛轉強的股票</div>
+          <div style="font-size:10px;color:#93c5fd;margin-top:3px;opacity:0.7">預定每個交易日 17:20（台北）更新</div>
+        </div>
+        <div style="font-size:20px;color:#93c5fd;font-weight:700">›</div>
       </div>`;
 
     if (!items.length) {
@@ -7474,7 +7492,13 @@ async function showDeepAnalysisPage(){
     const header = `
       <div style="font-size:16px;font-weight:700;padding:10px 0 4px">🎯 深度選股</div>
       <div style="font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.6">以下個股皆符合系統技術面選股條件，僅供研究參考，不構成投資建議。股市有風險，請自行評估並嚴設停損。</div>
-      ${updatedAt}${_tierNote}`;
+      ${updatedAt}${_tierNote}
+      <div onclick="showPage('multisignal')" style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+        padding:10px 14px;margin-bottom:12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <div><div style="font-size:13px;font-weight:800;color:var(--text)">📊 12金叉選股</div>
+          <div style="font-size:11px;color:var(--text3)">12種方法找「今天剛轉強」的股票，看同時符合幾個</div></div>
+        <span style="font-size:18px;color:var(--green)">›</span>
+      </div>`;
 
     if(!items.length){
       el.innerHTML = `
@@ -7707,6 +7731,184 @@ async function showDeepAnalysisPage(){
   }catch(e){
     el.innerHTML = `<div style="padding:40px 0;text-align:center;color:var(--text3)">載入失敗，請稍後再試</div>`;
   }
+}
+
+
+// ══════════════════════════════════════
+// 12金叉選股（案件005文件B十六節，2026/09/15新增）
+// 資料來自 /api/multi-signal（平日17:20排程掃描成交量前150檔 × 12個方法）。
+// 付費限定，比照深度選股：付費看完整、免費會員藏代號名稱、未登入只給弱預覽——
+// 遮罩都在後端做，前端的模糊只是畫面效果。
+// ══════════════════════════════════════
+const _MS_CAT_COLOR = { '技術面':'#3B82F6', '籌碼面':'#DC2626', '型態面':'#7C3AED', '基本面':'#D97706' };
+let _msMinCount = 1;
+let _msCache = null;
+
+async function showMultiSignalPage(){
+  const el = document.getElementById('pageContent');
+  const overlay = document.getElementById('pageOverlay');
+  overlay.style.display = 'block';
+  el.innerHTML = '<div style="padding:20px 0;text-align:center;color:var(--text3)">載入中...</div>';
+  try{
+    const res = await fetch(`${getAPI()}/api/multi-signal`, { headers: _authHeaders() });
+    if(!res.ok) throw new Error('載入失敗');
+    _msCache = await res.json();
+    _renderMultiSignalPage();
+  }catch(e){
+    el.innerHTML = `<div style="padding:40px 0;text-align:center;color:var(--text3)">載入失敗，請稍後再試</div>`;
+  }
+}
+
+function _msSetMin(n){ _msMinCount = n; _renderMultiSignalPage(); }
+
+function _renderMultiSignalPage(){
+  const el = document.getElementById('pageContent');
+  const j = _msCache || {};
+  const all = j.data || [];
+  const methods = j.methods || [];
+  const total = j.method_total || 12;
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  const updatedAt = j.scan_date
+    ? `<div style="font-size:11px;color:var(--text3);margin-bottom:10px">資料日期（台北）：${esc(j.scan_date)}　上次更新：${esc(j.updated_at || '—')}</div>`
+    : `<div style="font-size:11px;color:var(--text3);margin-bottom:10px">尚未更新（排程約每個交易日 17:20 台北）</div>`;
+  const tierNote = j.preview
+    ? `<div style="font-size:12px;color:var(--text2);margin-bottom:8px">弱預覽：今天約 ${j.approx_count ?? all.length} 檔有轉強訊號　點開請先登入</div>`
+    : (j.masked ? `<div style="font-size:12px;color:var(--text2);margin-bottom:8px">免費預覽已藏股名</div>` : '');
+
+  const header = `
+    <div style="font-size:16px;font-weight:700;padding:10px 0 4px">📊 12金叉選股</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:6px;line-height:1.7">
+      每天收盤後，用 12 種方法掃描成交量前 150 檔，找出<b>「今天剛轉強」</b>的股票。
+      同一檔符合的方法越多、涵蓋的面向（技術／籌碼／型態／基本面）越多，訊號越值得注意。
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.6">僅供研究參考，不構成投資建議。股市有風險，請自行評估並嚴設停損。</div>
+    ${updatedAt}${tierNote}`;
+
+  // 12個方法今天各有幾檔（小白也能一眼看出今天哪種訊號多）
+  const methodChips = methods.map(m => {
+    const c = _MS_CAT_COLOR[m.category] || 'var(--text2)';
+    const dim = m.passed ? '' : 'opacity:.45;';
+    return `<div style="${dim}display:flex;justify-content:space-between;gap:6px;padding:6px 9px;border-radius:8px;background:var(--bg2);border:1px solid var(--border);font-size:12px">
+      <span style="color:var(--text);font-weight:600"><span style="color:${c}">●</span> ${esc(m.label)}</span>
+      <b style="font-family:var(--mono);color:${m.passed ? c : 'var(--text3)'}">${m.passed}</b></div>`;
+  }).join('');
+  const methodBox = methods.length ? `
+    <div style="margin-bottom:14px">
+      <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px">今天各方法轉強檔數</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px">${methodChips}</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:10px;color:var(--text3);margin-top:6px">
+        ${Object.entries(_MS_CAT_COLOR).map(([k,c]) => `<span><span style="color:${c}">●</span> ${k}</span>`).join('')}
+      </div>
+    </div>` : '';
+
+  const cnt = (n) => all.filter(s => (s.passed_count || 0) >= n).length;
+  const filterBtns = j.preview ? '' : `
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+      ${[1,2,3].map(n => `<button onclick="_msSetMin(${n})" style="padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;
+        border:1px solid ${_msMinCount===n ? 'var(--green)' : 'var(--border)'};
+        background:${_msMinCount===n ? 'var(--green)' : 'var(--bg2)'};color:${_msMinCount===n ? '#fff' : 'var(--text2)'}">
+        符合 ${n} 個以上（${cnt(n)}）</button>`).join('')}
+    </div>`;
+
+  const items = j.preview ? all : all.filter(s => (s.passed_count || 0) >= _msMinCount);
+  const locked = !_hasPremium();
+  const lockMsg = _authUser ? '升級付費方案，解鎖股票代號' : '登入後解鎖股票代號';
+  const lockAction = _authUser ? 'showUpgradeModal()' : 'showLoginModal()';
+
+  const renderCard = (s) => {
+    if (s.preview) {
+      return `<div onclick="${lockAction}" style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px;cursor:pointer">
+        <div style="font-size:20px;font-weight:800;filter:blur(7px);user-select:none">＊＊＊＊</div>
+        <div style="margin-top:10px;font-size:12px;color:var(--green);font-weight:700">🔒 ${lockMsg}</div></div>`;
+    }
+    const chg = Number(s.change_pct);
+    const hasChg = Number.isFinite(chg) && chg !== 0;
+    const chgColor = chg > 0 ? 'var(--up)' : chg < 0 ? 'var(--dn)' : 'var(--text3)';
+    const chgHtml = hasChg ? `<span style="font-size:14px;font-weight:700;color:${chgColor};margin-left:6px">${chg > 0 ? '+' : ''}${chg.toFixed(2)}%</span>` : '';
+    const n = s.passed_count || 0;
+    const ringColor = n >= 3 ? '#7C3AED' : n === 2 ? 'var(--amber)' : 'var(--text3)';
+    const cats = (s.categories || []).map(c =>
+      `<span style="font-size:11px;padding:3px 9px;border-radius:20px;background:${_MS_CAT_COLOR[c] || '#888'}1f;color:${_MS_CAT_COLOR[c] || 'var(--text2)'};font-weight:700">${esc(c)}</span>`).join('');
+    const sigs = (s.signals || []).map(x => {
+      const c = _MS_CAT_COLOR[x.category] || 'var(--text2)';
+      return `<div style="display:flex;align-items:baseline;gap:6px;font-size:13px;padding:3px 0;line-height:1.5">
+        <span style="color:${c};font-weight:800">✓</span>
+        <span style="min-width:0"><b style="color:var(--text)">${esc(x.label)}</b>
+        ${x.detail ? `<span style="color:var(--text3);font-size:12px">　${esc(x.detail)}</span>` : ''}</span></div>`;
+    }).join('');
+    const idBlur = locked ? 'filter:blur(7px);user-select:none' : '';
+    const click = locked ? lockAction : `qpAndHome('${String(s.stock_id).replace(/[^0-9A-Za-z]/g,'')}')`;
+    const footer = locked
+      ? `<div style="text-align:center;margin-top:12px;padding-top:11px;border-top:1px solid var(--border);font-size:12px;color:var(--green);font-weight:700">🔒 ${lockMsg}</div>`
+      : `<div style="text-align:right;margin-top:12px;padding-top:11px;border-top:1px solid var(--border);font-size:12px;color:var(--green);font-weight:700">查看完整技術分析 ›</div>`;
+    return `<div onclick="${click}" style="background:var(--bg2);border:1px solid var(--border);border-left:4px solid ${ringColor};
+        border-radius:var(--radius-lg);padding:16px;margin-bottom:12px;cursor:pointer">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div style="${idBlur};min-width:0">
+          <div style="font-size:20px;font-weight:800;color:var(--text);line-height:1.3">${esc(s.stock_name)}${chgHtml}</div>
+          <div style="font-size:13px;color:var(--text3);font-family:var(--mono);margin-top:2px">${esc(s.stock_id)}${s.price ? `　收盤 ${s.price}` : ''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;
+            border:2.5px solid ${ringColor};color:${ringColor};font-size:15px;font-weight:800;font-family:var(--mono)">${n}</span>
+          <span style="font-size:10px;color:${ringColor};font-weight:700;white-space:nowrap">/ ${total} 個方法</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 8px">
+        ${cats}<span style="font-size:11px;color:var(--text3);align-self:center">涵蓋 ${s.category_count || 0} 個面向</span>
+      </div>
+      <div style="background:var(--bg3);border-radius:10px;padding:8px 11px">${sigs}</div>
+      ${footer}
+    </div>`;
+  };
+
+  const unlockBanner = locked && all.length ? `
+    <div onclick="${lockAction}" style="background:var(--bg2);border:1px solid var(--green);border-radius:var(--radius);
+      padding:12px 14px;margin-bottom:14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <div><div style="font-size:13px;font-weight:800;color:var(--green);margin-bottom:2px">🔒 ${lockMsg}</div>
+        <div style="font-size:11px;color:var(--text3);line-height:1.5">每檔符合哪些方法、依據數字都已顯示，解鎖後可看代號並直接跑完整技術分析</div></div>
+      <span style="font-size:18px;color:var(--green);flex-shrink:0">›</span>
+    </div>` : '';
+
+  const empty = `
+    <div style="padding:34px 0;text-align:center">
+      <div style="font-size:40px;margin-bottom:12px">🔍</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:8px">${all.length ? `沒有同時符合 ${_msMinCount} 個以上方法的股票` : '今天沒有剛轉強的股票'}</div>
+      <div style="font-size:13px;color:var(--text3)">${all.length ? '可以把條件放寬看看' : '每個交易日 17:20 自動更新'}</div>
+    </div>`;
+
+  const legend = `
+    <details style="margin:4px 0 14px;font-size:12px;color:var(--text2);line-height:1.8">
+      <summary style="cursor:pointer;font-weight:700">這 12 個方法各是什麼？</summary>
+      <div style="padding:6px 2px">
+        <div><b>MACD金叉</b>：短期動能線（DIF）今天由下往上穿過訊號線</div>
+        <div><b>KD金叉</b>：K值今天由下往上穿過D值</div>
+        <div><b>RSI突破50</b>：強弱指標今天從50以下站上50（多空分界）</div>
+        <div><b>月季線金叉</b>：20日均線今天由下往上穿過60日均線</div>
+        <div><b>海龜突破</b>：收盤價今天突破前20天最高價</div>
+        <div><b>趨勢轉多</b>：波段高低點今天轉成「頭頭高、底底高」</div>
+        <div><b>量能放大</b>：近5天平均成交量今天放大到近20天的1.3倍以上</div>
+        <div><b>布林突破</b>：收盤價今天站上布林通道中線或上緣</div>
+        <div><b>OBV轉強</b>：能量潮今天穿過自己的20日平均，買盤開始進來</div>
+        <div><b>法人連買</b>：三大法人合計今天剛好連續買超滿3天</div>
+        <div><b>底部型態突破</b>：W底或頭肩底今天突破頸線</div>
+        <div><b>營收轉成長</b>：最新公布的月營收年增率由負轉正（一個月更新一次）</div>
+      </div>
+    </details>`;
+
+  el.innerHTML = `
+    <div style="padding:8px 0 16px">
+      ${header}
+      ${legend}
+      ${methodBox}
+      ${unlockBanner}
+      ${filterBtns}
+      ${items.length ? `<div class="deep-cards-grid">${items.map(renderCard).join('')}</div>` : empty}
+      <div style="font-size:10px;color:var(--text3);line-height:1.7;padding:12px 0 0;border-top:1px solid var(--border)">
+        本頁為自動化篩選結果，只代表「今天出現轉強訊號」，不代表一定會上漲，僅供研究參考，不構成投資建議。
+      </div>
+    </div>`;
 }
 
 

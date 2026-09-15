@@ -199,6 +199,9 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
         <button class="action-btn" onclick="showSection('deepanalysis')">
           <span class="icon">🎯</span>深度選股
         </button>
+        <button class="action-btn" onclick="showSection('multisignal')">
+          <span class="icon">📊</span>12金叉選股
+        </button>
       </div>
     </div>
 
@@ -304,6 +307,15 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
       <div class="result-box" id="deepAnalysisResult" style="margin-top:10px"></div>
     </div>
 
+    <!-- 12金叉選股（文件B十六節，2026/09/15新增，目前只有管理員看得到） -->
+    <div class="card" id="sec-multisignal" style="display:none">
+      <div class="card-title">📊 12金叉選股</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6">平日 17:20 自動掃描成交量前150檔，12個方法全部接入（技術面9＋法人＋底部型態＋月營收），除月營收外全部只認「當天」發生。按「立即執行」約2～4分鐘跑完，再按「查看結果」。用戶頁面：網址加 ?page=multisignal。</p>
+      <button class="inline-btn" id="runMultiSignalBtn" onclick="doRunMultiSignal(this)">📊 立即執行</button>
+      <button class="inline-btn" onclick="loadMultiSignal()">🔍 查看結果</button>
+      <div class="result-box" id="multiSignalResult" style="margin-top:10px;white-space:pre-wrap"></div>
+    </div>
+
   </div>
 </div>
 
@@ -364,7 +376,7 @@ if(sessionStorage.getItem('adminAuth')==='1'){
 
 // ── 顯示/隱藏區塊 ──
 function showSection(name){
-  ['grant','reset','members','messages','blocklist','earlybird','prebuild','deepanalysis'].forEach(s=>{
+  ['grant','reset','members','messages','blocklist','earlybird','prebuild','deepanalysis','multisignal'].forEach(s=>{
     document.getElementById('sec-'+s).style.display = s===name ? 'block' : 'none';
   });
   if(name==='members') loadMembers();
@@ -877,6 +889,62 @@ async function doRunDeepAnalysis(btn){
   }finally{
     btn.disabled = false;
     btn.textContent = '🎯 立即執行深度選股';
+  }
+}
+
+// ── 12金叉選股手動觸發／查看結果（2026/09/15新增）──
+async function doRunMultiSignal(btn){
+  btn.disabled = true;
+  const res = document.getElementById('multiSignalResult');
+  res.className = 'result-box show';
+  res.textContent = '送出中...';
+  try{
+    const r = await fetch(`${API}/admin/run-multi-signal-scan`, {
+      method:'POST', signal: AbortSignal.timeout(60000), headers:{'X-Admin-Key':getAdminKey()}
+    });
+    const data = await r.json();
+    res.textContent = r.ok ? ((data.ok ? '✅ ' : '⚠️ ') + (data.msg || '已開始執行') + '\n約1～3分鐘後按「查看結果」')
+                           : '❌ 失敗：' + (data.detail || '未知錯誤');
+    res.className = 'result-box show ' + (r.ok && data.ok ? 'success' : 'error');
+  }catch(e){
+    res.textContent = '❌ 連線失敗或逾時：' + e.message;
+    res.className = 'result-box show error';
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+async function loadMultiSignal(){
+  const res = document.getElementById('multiSignalResult');
+  res.className = 'result-box show';
+  res.textContent = '讀取中...';
+  try{
+    const r = await fetch(`${API}/admin/multi-signal-results`, {headers:{'X-Admin-Key':getAdminKey()}});
+    const d = await r.json();
+    if(!r.ok){ res.textContent = '❌ 失敗：' + (d.detail || '未知錯誤'); res.className = 'result-box show error'; return; }
+    const st = d.status || {};
+    const lines = [];
+    lines.push(`最近一輪：${st.running ? '⏳ 執行中 ' + st.done + '/' + st.total : (st.msg || '（伺服器重啟後尚未手動執行過）')}`);
+    if(st.errors && st.errors.length) lines.push('錯誤：' + st.errors.join('；'));
+    lines.push('');
+    if(!d.scan_date){ lines.push('資料庫目前還沒有任何結果'); }
+    else{
+      lines.push(`資料日期 ${d.scan_date}｜共 ${d.stock_count} 檔、${d.row_count} 筆`);
+      (d.methods || []).forEach(m => {
+        lines.push(`・${m.label}：${m.passed}/${m.total} 檔通過` +
+          (m.passed_stocks.length ? '｜' + m.passed_stocks.map(s => `${s.stock_id}${s.stock_name}`).join('、') : ''));
+      });
+      lines.push('');
+      lines.push('同時符合最多方法（前20名）：');
+      (d.ranking || []).slice(0,20).forEach(s => {
+        lines.push(`${s.stock_id} ${s.stock_name}：${s.passed_count}個（${s.passed_methods.join('、')}）`);
+      });
+    }
+    res.textContent = lines.join('\n');
+    res.className = 'result-box show success';
+  }catch(e){
+    res.textContent = '❌ 連線失敗：' + e.message;
+    res.className = 'result-box show error';
   }
 }
 
