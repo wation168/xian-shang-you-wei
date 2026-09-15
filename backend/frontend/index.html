@@ -362,7 +362,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
   from{transform:translateY(16px);opacity:0}
   to{transform:translateY(0);opacity:1}
 }
-#resultCloseBtn{display:none;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;border:.5px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:15px;cursor:pointer;flex-shrink:0}
+/* 2026/09/15修正：帥哥鴻反映手機版分析結果彈出層的✕關閉鈕太小、且使用者不知道有這顆鈕可以按。
+   原本是30x30px純圖示圓鈕，觸控目標偏小（一般建議至少44px），也沒有文字說明用途。改成
+   加大觸控範圍＋補上「返回」文字說明，維持圓角膠囊造型，位置與原本一致，不影響版面結構。 */
+#resultCloseBtn{display:none;align-items:center;justify-content:center;gap:4px;min-width:44px;height:40px;padding:0 14px;border-radius:20px;border:.5px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;flex-shrink:0;white-space:nowrap}
 
 /* ── 風險大卡 ── */
 .risk-card{border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:12px;border-left:4px solid var(--green)}
@@ -1583,7 +1586,7 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
             ☆ 加入自選
           </button>
           <div class="risk-badge" id="riskBadge">—</div>
-          <button id="resultCloseBtn" onclick="closeAnalysisResult()" title="關閉" aria-label="關閉">✕</button>
+          <button id="resultCloseBtn" onclick="closeAnalysisResult()" title="關閉" aria-label="關閉返回">✕ 返回</button>
         </div>
       </div>
       <div id="summaryWrap" style="position:relative"><ul class="summary-list" id="summaryList"></ul></div>
@@ -4146,9 +4149,21 @@ function _observeHomeDash(){
   const resultEl = document.getElementById('resultEl');
   const dash = document.getElementById('homeDash');
   if(!resultEl || !dash) return;
+  // 2026/09/15修正：手機版(<1024px)分析結果本來就是全螢幕彈出，蓋住整個畫面不用捲動。
+  // 但電腦版(≥1024px)沒有這個彈出效果，結果只是照原本文件順序插入在首頁儀表板6個區塊
+  // 後面（目前只有「我的投資」這個.hd-sec區塊會被收起來，其餘5個區塊都還在），按下分析
+  // 後畫面幾乎沒變化，使用者要自己往下滑很久才會看到結果，帥哥鴻反映「電腦版太下面看不到」。
+  // 這裡只在電腦版寬度、且結果從「關閉→開啟」那一刻自動捲動到結果卡片頂端；手機版彈出層
+  // 本身用fixed定位蓋滿全螢幕，捲動與否不影響顯示，不需要另外排除。
+  let _wasShown = resultEl.classList.contains('show');
   const sync = () => {
     dash.classList.add('show');
-    dash.classList.toggle('result-open', resultEl.classList.contains('show'));
+    const isShown = resultEl.classList.contains('show');
+    dash.classList.toggle('result-open', isShown);
+    if(isShown && !_wasShown && window.innerWidth>=1024){
+      requestAnimationFrame(()=>{ try{ resultEl.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){} });
+    }
+    _wasShown = isShown;
   };
   sync();
   new MutationObserver(sync).observe(resultEl, {attributes:true, attributeFilter:['class']});
