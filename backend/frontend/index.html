@@ -804,6 +804,9 @@ html[data-theme="dark"] body,html:not([data-theme]) body{background:transparent}
 .hd-sec-h{font-size:13px;font-weight:700;color:var(--text)}
 .hd-sec-more{font-size:11px;color:var(--text3);cursor:pointer}
 .hd-watch-row{display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border-radius:var(--radius);padding:11px 14px;margin-bottom:8px;cursor:pointer;border:.5px solid var(--border)}
+/* 案件005文件C項目③：訊號圖示，空著時不佔版面，有內容時跟股名之間留一點間距 */
+.hd-watch-sig{font-size:13px;margin-right:0}
+.hd-watch-sig:not(:empty){margin-right:5px}
 .hd-watch-name{font-weight:700;font-size:14px}
 .hd-watch-id{font-size:11px;color:var(--text3);margin-left:5px}
 .hd-watch-price{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
@@ -999,6 +1002,33 @@ html[data-theme="dark"] body,html:not([data-theme]) body{background:transparent}
 .hv-btn-secondary{border:1px solid var(--border2);background:transparent;color:var(--text)}
 
 .home-section{margin-bottom:14px}
+
+/* ── 案件005文件C項目⑦（2026/09/15）：DEEP深度選股頁電腦版整頁式排版 ──
+   #pageOverlay內層容器原本固定max-width:600px給所有分頁共用（單欄堆疊，手機/電腦
+   一致）。只在showPage('deepanalysis')時加上.page-wide，電腦版寬度放寬到1180px，
+   卡片改用自動換欄的網格排列，手機版（<1024px）完全不受影響、維持原本單欄卡片。 */
+@media(min-width:1024px){
+  #pageOverlay.page-wide #pageContentWrap{max-width:1180px!important}
+  .deep-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px;align-items:start}
+  .deep-cards-grid>div{margin-bottom:0!important}
+}
+
+/* ── 0. 常駐重點列：案件005文件C項目⑥新增（2026/09/15）。緊貼在頁面最上方，
+   盤中隨時可見大盤%／市場氣氛／今日最異動類股三個關鍵數字，不用捲動或展開；
+   數字更新時用淡入淡出（見renderHomeQuickBar），不用橫向捲動文字，避免使用者
+   剛好錯過想看的那個數字。 ── */
+.home-quickbar{display:flex;align-items:stretch;gap:0;background:var(--surface);
+  border:1px solid var(--border);border-radius:14px;padding:10px 4px;
+  box-shadow:var(--hd2-e1);flex-wrap:wrap}
+.hqb-item{display:flex;align-items:baseline;gap:6px;flex:1;min-width:96px;padding:2px 10px}
+.hqb-label{font-size:11px;color:var(--muted);font-weight:700;white-space:nowrap}
+.hqb-val{font-size:14px;font-weight:800;color:var(--text);transition:opacity .25s ease;white-space:nowrap}
+.hqb-sep{width:1px;align-self:stretch;background:var(--border2);flex-shrink:0}
+@media(max-width:480px){
+  .hqb-item{min-width:0;flex:1 1 0;flex-direction:column;align-items:flex-start;gap:1px}
+  .hqb-label{font-size:9px}
+  .hqb-val{font-size:13px}
+}
 
 /* ── 1. 今日市場：state-orb + 指數 + 市場氣氛，首頁視覺主角 ── */
 .market-hero{position:relative;overflow:hidden;background:linear-gradient(160deg,var(--surface-raised),var(--surface) 55%);
@@ -1461,30 +1491,24 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
   <div id="homeDash">
     <div id="homeFlow" class="home-v2">
 
-      <!-- 1. 今日市場：state-orb（大盤漲跌狀態）＋指數＋市場氣氛，首頁視覺主角 -->
-      <section class="home-section market-hero" id="homeMktRow">
-        <div class="market-hero-head">
-          <div class="market-hero-eyebrow">台股 · 每日投資駕駛艙</div>
-          <div class="market-hero-updated" id="homeHeroUpdated">資料更新後顯示台北時間</div>
-        </div>
-        <div class="market-main">
-          <div class="market-state">
-            <div class="state-orb" id="stateOrb"><div id="stateOrbGauge" style="width:100%;height:100%"></div><span id="stateOrbPct">—</span></div>
-            <div class="state-label" id="stateLabel">載入中…</div>
-          </div>
-          <div class="market-idx" id="homeMktChips"></div>
-        </div>
-        <div class="market-breadth" id="homeBreadthBox"></div>
-        <div class="market-hero-meta" id="homeMktMeta"></div>
+      <!-- 0. 常駐重點列：案件005文件C項目⑥。盤中隨時看得到大盤%／市場氣氛／今日最異動類股，
+           不用捲動、也不用另外展開；資料沿用_loadHomeMarket()既有三支API（overview/breadth/
+           industries）算出來的值，不新增任何API呼叫，由renderHomeQuickBar()彙整渲染，並搭配
+           下面新增的_scheduleHomeMarketRefresh()在盤中每60秒自動重抓一次，避免長時間停留
+           看到的是打開頁面當下的舊資料（2026/09/15新增）。 -->
+      <section class="home-section home-quickbar" id="homeQuickBar">
+        <div class="hqb-item" id="hqbIdx"><span class="hqb-label">大盤</span><span class="hqb-val" id="hqbIdxVal">載入中…</span></div>
+        <div class="hqb-sep" aria-hidden="true"></div>
+        <div class="hqb-item" id="hqbMood"><span class="hqb-label">市場氣氛</span><span class="hqb-val" id="hqbMoodVal">—</span></div>
+        <div class="hqb-sep" aria-hidden="true"></div>
+        <div class="hqb-item" id="hqbSector"><span class="hqb-label">最異動</span><span class="hqb-val" id="hqbSectorVal">—</span></div>
       </section>
 
-      <!-- 2. 資金雷達（產業族群強弱，方塊大小＝變動幅度）＋今天要聞 -->
-      <section class="home-section home-row-flow">
-        <div class="sector-flow" id="homeIndBox"></div>
-        <div class="news-panel" id="homeNewsBox"></div>
-      </section>
-
-      <!-- 3. 今天看什麼：市場熱門／異常訊號／DEEP深度選股，三張真的可點的卡 -->
+      <!-- 1. 今天看什麼：市場熱門／異常訊號／DEEP深度選股，三張真的可點的卡。
+           2026/09/15依案件005文件C項目①調整：原本排在儀表板／資金雷達／新聞之後（第4屏才
+           看得到），是首頁裡少數真正在「幫使用者做判斷」的區塊，改到常駐重點列後第一個
+           顯示，不用先滑過大盤/資金雷達/新聞才看得到。同時讓DEEP卡片（依項目④）曝光時機
+           一併提前，不用另外處理。 -->
       <section class="home-section pick-zone">
         <h2>今天看什麼</h2>
         <div class="hv-sub">同樣的資料，不同的問題——你今天想看哪一個？</div>
@@ -1514,7 +1538,7 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
         <div class="hv-cta"><button type="button" class="hv-btn-primary" onclick="_homeGo('picks')">查看全部機會</button></div>
       </section>
 
-      <!-- 4. 找股票：刻意降階，不再是進頁第一眼，但仍是同一套真正的分析功能 -->
+      <!-- 2. 找股票：跟著「今天看什麼」移動，維持原本相鄰順序，一樣是刻意降階、非進頁第一眼 -->
       <section class="home-section stock-search">
         <div class="stock-search-label">找不到你想看的？直接搜尋股票</div>
         <div class="stock-search-row">
@@ -1523,7 +1547,7 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
         </div>
       </section>
 
-      <!-- 5. 我的投資：自選/今日異動/持股 統計列＋自選股預覽(免額度)＋持股健檢入口(點擊才載入，不自動燒額度) -->
+      <!-- 3. 我的投資：自選/今日異動/持股 統計列＋自選股預覽(免額度)＋持股健檢入口(點擊才載入，不自動燒額度) -->
       <section class="home-section investment-panel hd-sec">
         <div class="invest-head">
           <h2>我的投資</h2>
@@ -1553,7 +1577,7 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
         </div>
       </section>
 
-      <!-- 6. DEEP／會員升級：資料→訊號→判斷→操作，首頁收尾的高價值大卡，金色系維持既有品牌 -->
+      <!-- 4. DEEP／會員升級：資料→訊號→判斷→操作，跟著我的投資移動，維持在同一個「判斷／操作」群組裡 -->
       <section class="home-section deep-panel">
         <div class="hd2-deep-chip" id="homeDeepChip"><span class="dot"></span>訊號已觸發</div>
         <h2>想看得更深？</h2>
@@ -1569,6 +1593,32 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
           <button type="button" class="hd2-deep-btn-primary" onclick="_homeGo('deepanalysis')">進入深度分析</button>
           <button type="button" class="hd2-deep-btn-secondary" id="homeIaUpgrade" onclick="_homeGo('upgrade')">升級付費會員</button>
         </div>
+      </section>
+
+      <!-- 5. 今日市場：state-orb（大盤漲跌狀態）＋指數＋市場氣氛，完整版儀表板。
+           2026/09/15依項目①降階：常駐重點列（上方0.）已經隨時顯示大盤%／市場氣氛精簡版，
+           這份完整儀表板（含量表動畫、細項指數卡、漲跌家數長條圖）保留給想深入看的人往下滑，
+           不再是進頁第一眼。 -->
+      <section class="home-section market-hero" id="homeMktRow">
+        <div class="market-hero-head">
+          <div class="market-hero-eyebrow">台股 · 每日投資駕駛艙</div>
+          <div class="market-hero-updated" id="homeHeroUpdated">資料更新後顯示台北時間</div>
+        </div>
+        <div class="market-main">
+          <div class="market-state">
+            <div class="state-orb" id="stateOrb"><div id="stateOrbGauge" style="width:100%;height:100%"></div><span id="stateOrbPct">—</span></div>
+            <div class="state-label" id="stateLabel">載入中…</div>
+          </div>
+          <div class="market-idx" id="homeMktChips"></div>
+        </div>
+        <div class="market-breadth" id="homeBreadthBox"></div>
+        <div class="market-hero-meta" id="homeMktMeta"></div>
+      </section>
+
+      <!-- 6. 資金雷達（產業族群強弱，方塊大小＝變動幅度）＋今天要聞：同樣依項目①降階 -->
+      <section class="home-section home-row-flow">
+        <div class="sector-flow" id="homeIndBox"></div>
+        <div class="news-panel" id="homeNewsBox"></div>
       </section>
     </div>
   </div>
@@ -2213,7 +2263,7 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
 
 <!-- 自選 / 紀錄 獨立頁面（不覆蓋分析結果）-->
 <div id="pageOverlay" style="display:none;position:fixed;inset:0 0 calc(56px + var(--safe-bottom)) 0;background:var(--bg);overflow-y:auto;z-index:90">
-  <div style="max-width:600px;margin:0 auto;padding:60px 16px 12px">
+  <div id="pageContentWrap" style="max-width:600px;margin:0 auto;padding:60px 16px 12px">
     <div id="pageContent"></div>
   </div>
 </div>
@@ -2537,6 +2587,13 @@ function showPage(page){
       }
     }
     overlay.style.display='block';
+    // 案件005文件C項目⑦（2026/09/15）：DEEP深度選股頁在電腦版原本直接沿用跟其他
+    // 分頁共用的#pageOverlay固定600px窄版容器（單欄卡片堆疊，跟手機版一樣），電腦版
+    // 畫面較寬卻沒有善用空間。這裡只在deepanalysis頁加一個page-wide class放寬容器
+    // 最大寬度（見CSS #pageOverlay.page-wide #pageContentWrap），並讓卡片改用多欄
+    // 網格排列（見showDeepAnalysisPage()裡的.deep-cards-grid）；離開這頁（呼叫
+    // showPage看任何其他頁）都會走到這行，用toggle依當下page重新判斷，不會漏了收回。
+    overlay.classList.toggle('page-wide', page==='deepanalysis');
     if(page==='watch') showWatchListWithTabs();
     else if(page==='picks') showPicksPage();
     else if(page==='portfolio') showPortfolioPage();
@@ -4189,9 +4246,11 @@ async function renderHomeDash(){
     return;
   }
   const preview = (_wsGroupFilter==='全部') ? filtered.slice(0,3) : filtered;
+  // 案件005文件C項目③：加一個id="hdsig-*"的空白圖示欄位，批次報價回來後
+  // 由_hqWatchSignal()判斷這檔現在算不算「有事」，有的話才填圖示，維持清單乾淨。
   el.innerHTML = preview.map(s=>`
     <div class="hd-watch-row" onclick="qpAndHome('${s.id}')">
-      <div><span class="hd-watch-name">${s.name||s.id}</span><span class="hd-watch-id">${s.id}</span></div>
+      <div><span class="hd-watch-sig" id="hdsig-${s.id}" title=""></span><span class="hd-watch-name">${s.name||s.id}</span><span class="hd-watch-id">${s.id}</span></div>
       <div style="text-align:right">
         <div class="hd-watch-price" id="hdp-${s.id}">—</div>
         <div class="hd-watch-chg" id="hdc-${s.id}"></div>
@@ -4209,10 +4268,37 @@ async function renderHomeDash(){
       if(!d) return;
       const priceEl = document.getElementById(`hdp-${s.id}`);
       const chgEl = document.getElementById(`hdc-${s.id}`);
+      const sigEl = document.getElementById(`hdsig-${s.id}`);
       if(priceEl && d.price!=null) priceEl.textContent = d.price;
       if(chgEl && d.pattern){ chgEl.textContent = d.pattern; chgEl.className = 'hd-watch-chg'; chgEl.style.color = 'var(--text3)'; }
+      if(sigEl){
+        const sig = _hqWatchSignal(d);
+        if(sig){ sigEl.textContent = sig.icon; sigEl.title = sig.label; sigEl.style.color = sig.color; }
+        else { sigEl.textContent=''; sigEl.title=''; }
+      }
     });
   }catch(e){}
+}
+
+// 案件005文件C項目③（2026/09/15新增）：首頁「我的投資」預覽清單原本只有價格＋
+// pattern文字（例如「支撐整理」「整理中」），對一般散戶不夠直覺，也看不出哪一檔現在
+// 有事、值得點進去看深度分析。沿用⭐自選股完整分頁（_renderWatchGroups/_watchCard，
+// 見上方2707行附近）同一套分類條件與優先順序（危險>強勢>接近壓力>接近支撐>爆量>
+// 無訊號），只取最優先那一類做成一個小圖示，兩處判斷邏輯保持一致，不用另外定義
+// 一套新規則，也不新增任何API呼叫（直接用/batch_analyze已經回傳的欄位）。
+function _hqWatchSignal(d){
+  if(!d) return null;
+  const pattern = d.pattern||'';
+  const riskLevel = d.risk_level||'';
+  const resDistPct = d.resistance && d.price ? (d.resistance - d.price)/d.price*100 : 99;
+  const supDistPct = d.support && d.price ? (d.price - d.support)/d.price*100 : 99;
+  const volRatio = d.volume_ratio||1;
+  if(riskLevel==='high' || pattern==='跌破型態') return {icon:'🚨', color:'var(--up)', label:'今日注意'};
+  if(pattern==='突破型態' || d.today_breakout || (d.trend==='上升趨勢' && volRatio>1.8)) return {icon:'🚀', color:'var(--green)', label:'今日強勢'};
+  if(resDistPct < 5) return {icon:'⚠️', color:'#f59e0b', label:'接近壓力'};
+  if(supDistPct < 5) return {icon:'🛡️', color:'#60a5fa', label:'接近支撐'};
+  if(volRatio > 2) return {icon:'📊', color:'#a78bfa', label:'爆量異動'};
+  return null;
 }
 
 // 共用批次報價：優先走/batch_analyze（不計每日額度、有快取），失敗才退回逐檔查詢
@@ -6055,6 +6141,54 @@ function _syncHomeMktCardHeights(){
   newsList.style.maxHeight = listH + 'px';
 }
 
+// ── 常駐重點列（案件005文件C項目⑥，2026/09/15新增）──
+// 三個值分別來自_loadHomeMarket()裡三支既有獨立API（overview／breadth／industries）
+// 算出來的結果，各自算完就更新對應欄位並重繪，不等三支都回來、也不新增任何API呼叫。
+// 內容改變時用淡入淡出效果提示「有更新」，不用橫向捲動文字（怕使用者剛好錯過那個數字）。
+var _hqb = {idxText:null, idxColor:null, moodText:null, moodColor:null, sectorText:null, sectorColor:null};
+function _hqbSetVal(id, text, color){
+  const el = document.getElementById(id);
+  if(!el) return;
+  if(el.textContent === text) { if(color) el.style.color = color; return; }
+  el.style.opacity = '0';
+  setTimeout(()=>{
+    el.textContent = text;
+    if(color) el.style.color = color;
+    el.style.opacity = '1';
+  }, 180);
+}
+function renderHomeQuickBar(){
+  _hqbSetVal('hqbIdxVal', _hqb.idxText || '資料暫缺', _hqb.idxColor || 'var(--text)');
+  _hqbSetVal('hqbMoodVal', _hqb.moodText || '—', _hqb.moodColor || 'var(--text)');
+  _hqbSetVal('hqbSectorVal', _hqb.sectorText || '—', _hqb.sectorColor || 'var(--text)');
+}
+
+// ── 常駐重點列盤中自動刷新（案件005文件C項目⑥）──
+// _loadHomeMarket()原本只在頁面載入當下抓一次，長時間停留（例如盤中一直開著這頁）
+// 看到的會是打開頁面那一刻的舊資料——這正是常駐重點列要解決的「看似即時、實際是舊資料」
+// 誤導問題。這裡比照既有個股即時價輪詢（startQuotePolling/QUOTE_INTERVAL）同一套
+// 「只在平日09:00-13:30盤中＋分頁可見時才排程下一次」邏輯，避免使用者換到別的分頁、
+// 或非交易時間時還一直背景打API。
+const HOME_MARKET_REFRESH_INTERVAL = 60000; // 60秒
+let _homeMarketRefreshTimer = null;
+function _isTradingSessionNow(){
+  const _twNow = new Date(Date.now() + 8*3600000);
+  const _dow = _twNow.getUTCDay();
+  const _twH = _twNow.getUTCHours(), _twM = _twNow.getUTCMinutes();
+  return (_dow>=1 && _dow<=5) && _twH>=9 && (_twH<13 || (_twH===13 && _twM<=30));
+}
+function _scheduleHomeMarketRefresh(){
+  if(_homeMarketRefreshTimer) return; // 避免重複呼叫時排出多條計時器
+  const tick = async ()=>{
+    _homeMarketRefreshTimer = null;
+    if(document.visibilityState==='visible' && _isTradingSessionNow() && document.getElementById('homeDash')){
+      try{ await _loadHomeMarket(); }catch(e){}
+    }
+    _homeMarketRefreshTimer = setTimeout(tick, HOME_MARKET_REFRESH_INTERVAL);
+  };
+  _homeMarketRefreshTimer = setTimeout(tick, HOME_MARKET_REFRESH_INTERVAL);
+}
+
 async function _loadHomeMarket(){
   const api = getAPI();
   let _mktRowHasContent = false;
@@ -6081,6 +6215,7 @@ async function _loadHomeMarket(){
       if(orbPct) orbPct.textContent='—';
       if(orbLabel) orbLabel.textContent='大盤資料暫缺';
       _mktDisposeChart('stateOrbGauge');
+      _hqb.idxText=null; _hqb.idxColor=null; renderHomeQuickBar();
     };
     if(chips){
       if(!j || !j.ok || !Array.isArray(j.items) || !j.items.length){
@@ -6121,6 +6256,7 @@ async function _loadHomeMarket(){
             if(orbPct) orbPct.textContent = (up?'+':'')+_mktFmt(p,2)+'%';
             if(orbLabel) orbLabel.textContent = '加權指數 '+(up?'上漲':(dn?'下跌':'平盤'));
             if(orb) orb.classList.add('has-gauge');
+            _hqb.idxText = (up?'+':'')+_mktFmt(p,2)+'%'; _hqb.idxColor = color2; renderHomeQuickBar();
             // 2026/09/13 Phase4修正：#homeMktRow預設display:none，要等兩個
             // try區塊都跑完才由下面統一的_mktShow('homeMktRow')顯示；但ECharts
             // 在容器還是display:none時init()量到的寬度是0，畫出來的圖表會整個
@@ -6147,6 +6283,7 @@ async function _loadHomeMarket(){
       if(!j || !j.ok || j.total==null){
         _mktDisposeChart('breadthColChart');
         box.innerHTML=''; box.style.display='none';
+        _hqb.moodText=null; _hqb.moodColor=null; renderHomeQuickBar();
       } else {
         _mktRowHasContent = true;
         const moodColor = j.mood==='偏多' ? 'var(--up)' : (j.mood==='偏空' ? 'var(--dn)' : 'var(--text3)');
@@ -6158,9 +6295,10 @@ async function _loadHomeMarket(){
         // 同上，homeMktRow這時可能還是display:none，提前顯示讓ECharts量到正確寬度。
         _mktShow('homeMktRow');
         _renderBreadthColChart(Number(j.up)||0, Number(j.flat)||0, Number(j.down)||0);
+        _hqb.moodText = j.mood || '—'; _hqb.moodColor = moodColor; renderHomeQuickBar();
       }
     }
-  }catch(e){ _mktDisposeChart('breadthColChart'); const box=document.getElementById('homeBreadthBox'); if(box){ box.innerHTML=''; box.style.display='none'; } }
+  }catch(e){ _mktDisposeChart('breadthColChart'); const box=document.getElementById('homeBreadthBox'); if(box){ box.innerHTML=''; box.style.display='none'; } _hqb.moodText=null; _hqb.moodColor=null; renderHomeQuickBar(); }
   })();
 
   const _pIndustries = (async()=>{
@@ -6171,10 +6309,11 @@ async function _loadHomeMarket(){
     if(!box) {}
     else if(!j || !j.ok || !((j.gainers&&j.gainers.length)||(j.losers&&j.losers.length))){
       _mktDisposeChart('sectorBarChart'); _mktHide('homeIndBox'); box.innerHTML='';
+      _hqb.sectorText=null; _hqb.sectorColor=null; renderHomeQuickBar();
     } else {
       const valid = (it)=> it && it.source && it.as_of && it.change_pct!=null && isFinite(Number(it.change_pct));
       const all = [].concat((j.gainers||[]).filter(valid), (j.losers||[]).filter(valid));
-      if(!all.length){ _mktDisposeChart('sectorBarChart'); _mktHide('homeIndBox'); box.innerHTML=''; }
+      if(!all.length){ _mktDisposeChart('sectorBarChart'); _mktHide('homeIndBox'); box.innerHTML=''; _hqb.sectorText=null; _hqb.sectorColor=null; renderHomeQuickBar(); }
       else {
         // 資金雷達：橫條長度＝|change_pct|排名（真實漲跌幅排序決定視覺長度，不是另外造一個「強度分數」）。
         // 目前沒有對應的「族群個股清單」頁面，點擊先導去「異常訊號」頁（現有最相關的可操作入口），
@@ -6194,9 +6333,18 @@ async function _loadHomeMarket(){
         // 同上，homeIndBox預設display:none，要先顯示容器ECharts才能量到正確寬度。
         _mktShow('homeIndBox');
         _renderSectorBarChart(ranked);
+        // 常駐重點列「最異動」欄位：取|change_pct|最大的那一檔類股（案件005文件C項目⑥）
+        const _top = ranked[0];
+        if(_top){
+          const _tp = Number(_top.change_pct);
+          const _tUp = _tp>0, _tDn = _tp<0;
+          _hqb.sectorColor = _tUp?'var(--up)':(_tDn?'var(--dn)':'var(--text3)');
+          _hqb.sectorText = (_top.name||'')+' '+(_tp>=0?'+':'')+_tp.toFixed(2)+'%';
+          renderHomeQuickBar();
+        }
       }
     }
-  }catch(e){ _mktDisposeChart('sectorBarChart'); _mktHide('homeIndBox'); }
+  }catch(e){ _mktDisposeChart('sectorBarChart'); _mktHide('homeIndBox'); _hqb.sectorText=null; _hqb.sectorColor=null; renderHomeQuickBar(); }
   })();
 
   const _pNews = (async()=>{
@@ -6330,6 +6478,7 @@ async function _loadHomeDiscover(){
   _observeHomeDash();
   renderHomeDash();  // renderHomeDash()內部會呼叫_loadInvestStats()（現定義在全域，見上方_fetchQuoteBatch後面）
   _loadHomeMarket();
+  _scheduleHomeMarketRefresh(); // 案件005文件C項目⑥：常駐重點列盤中每60秒自動刷新一次
   _loadHomeDiscover();
 });
 
@@ -7479,7 +7628,7 @@ async function showDeepAnalysisPage(){
           <span style="font-size:13px;font-weight:800;color:${g.meta.color}">${g.meta.label}</span>
           <span style="font-size:11px;color:var(--text3)">${g.list.length} 檔　${g.meta.desc}</span>
         </div>
-        ${g.list.map(renderCard).join('')}
+        <div class="deep-cards-grid">${g.list.map(renderCard).join('')}</div>
       </div>`).join('');
 
     const unlockBanner = locked ? `
