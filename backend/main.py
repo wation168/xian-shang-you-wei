@@ -4517,6 +4517,14 @@ def _do_analyze(stock_id: str, tf: str = "D",
         if abs(_gap_pct) >= 0.01:
             _basis_gap = _gap_pct
     _basis_md = price_basis_date[5:].replace("-", "/") if price_basis_date and len(price_basis_date) >= 10 else price_basis_date
+    # 2026/09/15修正：帥哥鴻回報「個股分析明顯是用當下做分析,這跟盤後分析不同步,但也沒有看到警語」。
+    # 查證後發現：fetch_df_finmind()的「盤中補今日K棒」機制（給K線圖顯示用）會把今天即時報價
+    # 補進資料序列最後一筆，導致_do_analyze()裡price_basis_date=df.index[-1]在盤中就可能等於
+    # 「今天」——這時原本掉進最下面的else分支，會講出「本分析以09/15收盤價為基準計算」這種
+    # 話，今天根本還沒收盤，用詞是錯的。這裡先不動資料來源（那要拆分析基準跟K線圖的資料流，
+    # 影響面大，帥哥鴻裁示先加警語就好），只在文案這層攔截這個情境，講清楚「這是盤中即時資料，
+    # 不是正式收盤價」，不要讓使用者誤以為分析是用已經收盤定案的數字做的。
+    _today_str = _taipei_today()
     if _data_stale:
         # 2026/08/14 新增：資料源明顯落後（連上一個交易日的資料都還沒有），
         # 不管盤中盤後都優先顯示這個提示，蓋過下面兩種正常情境的說明。
@@ -4524,6 +4532,8 @@ def _do_analyze(stock_id: str, tf: str = "D",
             f"⚠️ 資料來源可能尚未更新，目前顯示的是 {_basis_md} 的收盤資料，"
             f"與預期的最近交易日有落差（也可能剛好遇到休市日）。如有疑慮，建議稍後再重新查看。"
         )
+    elif _is_trading_session() and price_basis_date == _today_str:
+        _price_basis_note = "⏱️ 現在是盤中，以下分析（支撐、壓力、防守位、損益比）用的是今天即時資料試算，還不是正式收盤價，收盤後數字可能會再變動，僅供參考。"
     elif _is_trading_session() and _live_quote_ok and _basis_gap is not None:
         _price_basis_note = f"上方現價為即時參考；以下分析（支撐、壓力、防守位、損益比）以 {_basis_md} 收盤價為基準計算，兩者盤中可能有落差，屬正常。"
     else:
@@ -4752,7 +4762,12 @@ def _do_analyze(stock_id: str, tf: str = "D",
     # 明確告知：支撐／壓力／K棒型態／操作建議這整包分析，是以「最近一根完整收盤 K 棒」
     # 為基準計算的，不是逐筆即時運算。（做法A後 price_basis_note 已詳細說明基準日，
     # 此句保留作為 warning 內的簡短提示，與 price_basis_note 相輔。）
-    result["warning"] = (result.get("warning") or "") + "（本分析以最近收盤資料計算，盤中僅供參考）"
+    # 2026/09/15修正：跟上面_price_basis_note同一個根因——盤中補今日K棒時，這句話會變成
+    # 「用今天還沒收盤的資料」卻自稱「收盤資料」，用詞不實。這裡跟着判斷一次，措辭對齊。
+    if _is_trading_session() and price_basis_date == _today_str:
+        result["warning"] = (result.get("warning") or "") + "（本分析以今日盤中即時資料試算，非正式收盤價，僅供參考）"
+    else:
+        result["warning"] = (result.get("warning") or "") + "（本分析以最近收盤資料計算，盤中僅供參考）"
 
     # 做法A（2026/08/04）：分析基準已與即時報價脫鉤——即時報價抓不到，
     # 只代表「畫面現價」暫時等於收盤基準，分析（支撐/防守位/損益比/雷達）本身完全正確，
