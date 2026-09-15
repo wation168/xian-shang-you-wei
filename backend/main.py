@@ -6813,10 +6813,14 @@ async def line_bot_webhook(request: Request):
             chg_pct = d.get("change_pct")
             chg_str = f"（{'+' if (chg_pct or 0) >= 0 else ''}{chg_pct}%）" if chg_pct is not None else ""
             tf_label = {"D": "日K", "W": "週K", "M": "月K"}.get(tf, "日K")
+            # 2026/09/15修正：原本連去{BACKEND_URL}/report/{stock_id}是獨立的SEO靜態報告頁
+            # （沒有App導覽列/登入等功能，用完就是死路一條）。帥哥鴻回報「個股連結現在是在
+            # 個股分析（指這個靜態報告頁），不是連去個股查詢首頁」，改成帶?stock=參數連到
+            # 前端App首頁，會自動觸發個股分析並保留完整App導覽（可繼續看自選股、深度選股等）。
             reply_text = (
                 f"📊 {stock_id} {stock_name}（{tf_label}）\n"
                 f"現價 {disp_price}{chg_str}\n"
-                f"完整報告 👉 {BACKEND_URL}/report/{stock_id}\n"
+                f"完整報告 👉 {FRONTEND_URL}/?stock={stock_id}\n"
                 f"僅供參考，不構成投資建議"
             )
             _line_bot_reply(reply_token, reply_text)
