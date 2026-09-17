@@ -1374,6 +1374,96 @@ def _expected_latest_trading_date(now_tw) -> str:
     return d.strftime("%Y-%m-%d")
 
 
+# ── 日K原始資料：快取＋備援（2026/09/17新增）──
+_DAILY_ROWS_CACHE: dict = {}          # {(code, start): (存入時間, rows, 來源)}
+_DAILY_ROWS_TTL = 1800                # 30分鐘；盤中今日K棒另由即時報價補，不受這個快取影響
+_FINMIND_FAIL_UNTIL = {"t": 0.0}      # FinMind 回報額度用完時，暫停打它5分鐘，避免越打越久
+
+
+def _yahoo_daily_rows(code: str, start: str) -> list:
+    """Yahoo 日K（FinMind 失敗時的備援），轉成跟 FinMind TaiwanStockPrice 一樣的欄位"""
+    import urllib.request as _ur, json as _j
+    from datetime import date as _d, datetime as _dt, timedelta as _td
+    days = (_d.today() - _d.fromisoformat(start)).days
+    rng = "10y" if days > 1830 else "5y" if days > 1100 else "3y" if days > 370 else "1y"
+    suffixes = [".TWO", ".TW"] if _market_cache.get(code) == "otc" else [".TW", ".TWO"]
+    for sfx in suffixes:
+        try:
+            url = f"https://query1.finance.yahoo.com/v8/finance/chart/{code}{sfx}?range={rng}&interval=1d"
+            req = _ur.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with _ur.urlopen(req, timeout=12) as resp:
+                j = _j.loads(resp.read())
+            res = ((j.get("chart") or {}).get("result") or [None])[0]
+            if not res or not res.get("timestamp"):
+                continue
+            q = res["indicators"]["quote"][0]
+            rows = []
+            for i, ts in enumerate(res["timestamp"]):
+                o, h, l, c, v = (q["open"][i], q["high"][i], q["low"][i], q["close"][i], q["volume"][i])
+                if None in (o, h, l, c):
+                    continue
+                ds = (_dt.utcfromtimestamp(ts) + _td(hours=8)).strftime("%Y-%m-%d")
+                if ds < start:
+                    continue
+                rows.append({"date": ds, "open": round(o, 2), "max": round(h, 2), "min": round(l, 2),
+                             "close": round(c, 2), "Trading_Volume": int(v or 0)})
+            if rows:
+                return rows
+        except Exception as e:
+            print(f"   Yahoo 日K備援失敗 {code}{sfx}：{e}")
+    return []
+
+
+def _daily_price_rows(code: str, start: str, end: str) -> list:
+    """回傳 FinMind TaiwanStockPrice 格式的日K rows；失敗回 []"""
+    import urllib.request as _ur, urllib.error as _ue, json as _j
+    key = (code, start)
+    now = _time_mod.time()
+    hit = _DAILY_ROWS_CACHE.get(key)
+    if hit and now - hit[0] < _DAILY_ROWS_TTL:
+        return hit[1]
+    err = None
+    if now >= _FINMIND_FAIL_UNTIL["t"]:
+        try:
+            url = (f"https://api.finmindtrade.com/api/v4/data"
+                   f"?dataset=TaiwanStockPrice&data_id={code}"
+                   f"&start_date={start}&end_date={end}&token={FINMIND_TOKEN}")
+            req = _ur.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with _ur.urlopen(req, timeout=15) as resp:
+                raw = _j.loads(resp.read())
+            if raw.get("status") == 200 and raw.get("data"):
+                rows = raw["data"]
+                _DAILY_ROWS_CACHE[key] = (now, rows, "finmind")
+                if len(_DAILY_ROWS_CACHE) > 600:
+                    for k in sorted(_DAILY_ROWS_CACHE, key=lambda k: _DAILY_ROWS_CACHE[k][0])[:200]:
+                        _DAILY_ROWS_CACHE.pop(k, None)
+                return rows
+            err = f"status={raw.get('status')} msg={raw.get('msg')}"
+        except _ue.HTTPError as e:
+            body = ""
+            try:
+                body = e.read().decode("utf-8", "ignore")[:200]
+            except Exception:
+                pass
+            err = f"HTTP {e.code} {body}"
+            if e.code in (402, 429):
+                _FINMIND_FAIL_UNTIL["t"] = now + 300
+        except Exception as e:
+            err = str(e)
+        print(f"   ⚠️ FinMind 日K抓取失敗 {code}：{err}")
+    else:
+        err = "FinMind 額度暫停中"
+    if hit:
+        print(f"   ↩️ {code} 改用 {int((now - hit[0]) / 60)} 分鐘前的日K快取")
+        return hit[1]
+    rows = _yahoo_daily_rows(code, start)
+    if rows:
+        print(f"   ↩️ {code} FinMind失敗（{err}），改用 Yahoo 日K備援（{len(rows)} 筆）")
+        _DAILY_ROWS_CACHE[key] = (now - _DAILY_ROWS_TTL + 300, rows, "yahoo")   # 備援資料只快取5分鐘
+        return rows
+    return []
+
+
 def fetch_df_finmind(stock_id: str, period: str, interval: str):
     """
     FinMind 主力抓取台股 K 線資料（TaiwanStockPrice）
@@ -1393,15 +1483,14 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
     today_str = date.today().strftime("%Y-%m-%d")
 
     try:
-        url = (f"https://api.finmindtrade.com/api/v4/data"
-               f"?dataset=TaiwanStockPrice&data_id={code}"
-               f"&start_date={start}&end_date={today_str}&token={FINMIND_TOKEN}")
-        req = _ur.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with _ur.urlopen(req, timeout=15) as resp:
-            raw = _j.loads(resp.read())
-        if raw.get("status") != 200 or not raw.get("data"):
+        # 2026/09/17修正：原本這裡直接打FinMind、失敗就回空表 → 個股分析顯示404「找不到股票」。
+        # FinMind額度用完（HTTP 402）或暫時故障時，整站個股分析、K線都會一起掛。
+        # 改成 _daily_price_rows()：同一檔30分鐘內共用快取（分析＋K線原本每查一次打兩次FinMind），
+        # FinMind失敗時先用舊快取，再退回Yahoo日K，並把失敗原因印在log。
+        rows = _daily_price_rows(code, start, today_str)
+        if not rows:
             return pd.DataFrame()
-        df = pd.DataFrame(raw["data"])
+        df = pd.DataFrame(rows)
         df = df.rename(columns={
             "date": "Date", "open": "Open", "max": "High",
             "min": "Low", "close": "Close", "Trading_Volume": "Volume"
@@ -4023,8 +4112,8 @@ def _do_analyze(stock_id: str, tf: str = "D",
         mtype = _market_cache.get(stock_id.strip().upper(), "未知")
         raise HTTPException(
             status_code=404,
-            detail=f"找不到股票：{stock_id}（嘗試代碼：{symbol}，市場別：{mtype}）。"
-                   f"可能是 Yahoo Finance 暫時無資料，請稍後再試。"
+            detail=f"暫時抓不到 {stock_id} 的股價資料（市場別：{mtype}），"
+                   f"可能是資料來源暫時忙碌，請稍後再試；若代號正確仍持續出現，請聯絡客服。"
         )
 
     # 2026/08/14 新增：資料新鮮度旗標，要在 df 被切片/dropna 之前先讀出來，
