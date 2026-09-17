@@ -372,107 +372,128 @@ async def lifespan(app: FastAPI):
             except Exception as _e:
                 print(f"   ❌ 到價提醒重置失敗：{_e}")
 
+        _補單_checked: dict = {}  # trade_no -> 上次查詢時間（避免一直查同一筆未付款訂單，綠界查太快會回 403）
+
         def _run_補單_job():
-            """每日 08:00 掃 pending_orders，用 QueryTradeInfo 補查付款狀態，確認付款成功就補開通"""
-            import urllib.request as _ur2, urllib.parse as _up2, hashlib as _hl2, time as _t2
-            import datetime as _dt2
-            print("   [補單] 開始掃描 pending_orders...")
+            """每 10 分鐘掃 pending_orders，用綠界 QueryTradeInfo 補查「已付款但沒收到/沒通過開通通知」的訂單並補開通。
+            2026/09/17 重寫：原版檢查 RtnCode，但 QueryTradeInfo 根本不回傳 RtnCode（是 TradeStatus），
+            所以補單從來沒成功過；且方案天數判斷錯誤（季費被當月費）、會直接覆蓋到期日、每天才跑一次。"""
+            import time as _t2
             try:
-                from zoneinfo import ZoneInfo as _ZI2
-                _now = datetime.now(_ZI2("Asia/Taipei"))
-                _cutoff = (_now - _dt2.timedelta(hours=24)).strftime("%Y-%m-%d %H:%M:%S")
                 conn = _db_conn()
-                rows = conn.execute(
-                    "SELECT merchant_trade_no, email, plan, created_at FROM pending_orders ORDER BY created_at DESC"
-                ).fetchall()
-                conn.execute("DELETE FROM pending_orders WHERE created_at <= ?", (_cutoff,))
+                # 保留 7 天內的暫存訂單（原本 24 小時就刪）
+                conn.execute("DELETE FROM pending_orders WHERE created_at <= datetime('now','+8 hours','-7 days')")
                 conn.commit()
+                rows = conn.execute(
+                    "SELECT merchant_trade_no, email, plan, created_at FROM pending_orders "
+                    "WHERE merchant_trade_no LIKE 'XYWR%' "
+                    "AND created_at <= datetime('now','+8 hours','-5 minutes') "
+                    "AND created_at >= datetime('now','+8 hours','-2 days') "
+                    "ORDER BY created_at DESC"
+                ).fetchall()
                 conn.close()
-                print(f"   [補單] 共 {len(rows)} 筆待確認")
-                for row in rows:
-                    trade_no = row["merchant_trade_no"]
-                    email    = row["email"]
-                    plan     = row["plan"] or "monthly"
-                    try:
-                        # 先確認是否已處理過
-                        _tc = _db_conn()
-                        _already = _tc.execute(
-                            "SELECT 1 FROM processed_orders WHERE merchant_trade_no=?", (trade_no,)
-                        ).fetchone()
-                        _tc.close()
-                        if _already:
-                            print(f"   [補單] {trade_no} 已處理過，跳過")
-                            continue
-                        # 呼叫綠界 QueryTradeInfo
-                        _ts = int(_t2.time())
-                        _params = {
-                            "MerchantID":      ECPAY_MERCHANT_ID,
-                            "MerchantTradeNo": trade_no,
-                            "TimeStamp":       str(_ts),
-                        }
-                        _sorted = sorted(_params.items(), key=lambda x: x[0].lower())
-                        _raw = "&".join(f"{k}={v}" for k, v in _sorted)
-                        _raw = f"HashKey={ECPAY_HASH_KEY}&{_raw}&HashIV={ECPAY_HASH_IV}"
-                        _raw = _up2.quote_plus(_raw).lower()
-                        _mac = _hl2.sha256(_raw.encode()).hexdigest().upper()
-                        _params["CheckMacValue"] = _mac
-                        _body = _up2.urlencode(_params).encode()
-                        _req = _ur2.Request(
-                            "https://payment.ecpay.com.tw/Cashier/QueryTradeInfo/V5",
-                            data=_body,
-                            headers={"Content-Type": "application/x-www-form-urlencoded"},
-                        )
-                        with _ur2.urlopen(_req, timeout=10) as _r:
-                            _resp = dict(_up2.parse_qsl(_r.read().decode()))
-                        _rtn = _resp.get("RtnCode", "0")
-                        print(f"   [補單] {trade_no} email={email} RtnCode={_rtn}")
-                        if _rtn != "1":
-                            continue
-                        # 付款成功 → 補開通
-                        _days  = _plan_days(plan)
-                        _plan2 = "yearly" if _days >= 365 else ("quarterly" if _days >= 90 else "monthly")
-                        from zoneinfo import ZoneInfo as _ZI3
-                        _expire = (datetime.now(_ZI3("Asia/Taipei")) + _dt2.timedelta(days=_days)).strftime("%Y-%m-%d")
-                        _conn2 = _db_conn()
-                        _existing = _conn2.execute("SELECT id FROM members WHERE email=?", (email,)).fetchone()
-                        if _existing:
-                            _conn2.execute(
-                                "UPDATE members SET plan=?, expire_at=? WHERE email=?",
-                                (_plan2, _expire, email)
-                            )
-                        else:
-                            _conn2.execute(
-                                "INSERT INTO members (email, password, plan, expire_at) VALUES (?,?,?,?)",
-                                (email, _hash_pw(__import__("secrets").token_urlsafe(8)), _plan2, _expire)
-                            )
-                        _conn2.execute(
-                            "INSERT OR IGNORE INTO processed_orders (merchant_trade_no) VALUES (?)", (trade_no,)
-                        )
-                        _conn2.execute("DELETE FROM pending_orders WHERE merchant_trade_no=?", (trade_no,))
-                        _conn2.commit()
-                        _conn2.close()
-                        print(f"   [補單] ✅ 補開通成功：{email} → {_plan2} 到 {_expire}")
-                        try:
-                          if ADMIN_NOTIFY_EMAIL:
-                            _send_email(
-                                ADMIN_NOTIFY_EMAIL,
-                                "【線上有位】補單通知",
-                                f"<div style='font-family:sans-serif;padding:24px'>"
-                                f"<h3 style='color:#e67e22'>【線上有位】補單通知</h3>"
-                                f"<p>以下訂單 webhook 未即時觸發，已由每日補單排程自動開通：</p>"
-                                f"<table style='font-size:14px'>"
-                                f"<tr><td style='color:#888;padding:4px 8px'>Email</td><td style='padding:4px 8px'>{email}</td></tr>"
-                                f"<tr><td style='color:#888;padding:4px 8px'>訂單號</td><td style='padding:4px 8px'>{trade_no}</td></tr>"
-                                f"<tr><td style='color:#888;padding:4px 8px'>方案</td><td style='padding:4px 8px'>{_plan2}</td></tr>"
-                                f"<tr><td style='color:#888;padding:4px 8px'>到期日</td><td style='padding:4px 8px'>{_expire}</td></tr>"
-                                f"</table></div>"
-                            )
-                        except Exception:
-                            pass
-                    except Exception as _e:
-                        print(f"   [補單] ❌ {trade_no} 查詢失敗：{_e}")
             except Exception as _e:
-                print(f"   [補單] ❌ 排程失敗：{_e}")
+                print(f"   [補單] ❌ 讀取失敗：{_e}")
+                return
+            _now = _t2.time()
+            queried = 0
+            for row in rows:
+                trade_no = row["merchant_trade_no"]
+                email    = (row["email"] or "").strip().lower()
+                plan     = row["plan"] if row["plan"] in ("monthly", "quarterly", "yearly", "daily_test") else "monthly"
+                try:
+                    _tc = _db_conn()
+                    _done = _tc.execute(
+                        "SELECT 1 FROM processed_orders WHERE merchant_trade_no=? OR merchant_trade_no LIKE ?",
+                        (trade_no, f"R_{trade_no}_%")
+                    ).fetchone()
+                    _tc.close()
+                    if _done:
+                        continue
+                    # 同一筆未付款訂單：建立1小時內每次都查，之後每6小時查一次
+                    _last = _補單_checked.get(trade_no, 0)
+                    try:
+                        _age_h = (datetime.now(ZoneInfo("Asia/Taipei")).replace(tzinfo=None)
+                                  - datetime.fromisoformat(row["created_at"])).total_seconds() / 3600
+                    except Exception:
+                        _age_h = 0
+                    if _last and (_now - _last) < (600 if _age_h < 1 else 6 * 3600):
+                        continue
+                    if queried >= 10:
+                        break
+                    queried += 1
+                    _t2.sleep(2)
+                    _resp = _ecpay_query_trade(trade_no)
+                    _補單_checked[trade_no] = _now
+                    if _resp.get("TradeStatus") != "1":
+                        continue
+                    pay_date = _resp.get("PaymentDate", "")
+                    idem_key = f"R_{trade_no}_{pay_date}"
+                    _cl = _db_conn()
+                    _claimed = _cl.execute(
+                        "INSERT OR IGNORE INTO processed_orders (merchant_trade_no) VALUES (?)", (idem_key,)
+                    ).rowcount
+                    _cl.commit()
+                    if not _claimed:
+                        _cl.close()
+                        continue
+                    days = {"monthly": 30, "quarterly": 90, "yearly": 365, "daily_test": 1}[plan]
+                    today = _taipei_today()
+                    m = _cl.execute("SELECT * FROM members WHERE email=?", (email,)).fetchone()
+                    prev_plan   = m["plan"] if m else ""
+                    prev_expire = (m["expire_at"] if m else "") or ""
+                    prev_trade  = (m["merchant_trade_no"] if m else "") or ""
+                    dup = bool(m and prev_trade.startswith("XYWR") and prev_trade != trade_no
+                               and prev_plan != "free" and prev_expire >= today)
+                    base = max(prev_expire or today, today)
+                    new_expire = (datetime.fromisoformat(base) + timedelta(days=days)).strftime("%Y-%m-%d")
+                    if m:
+                        _cl.execute(
+                            "UPDATE members SET plan=?, expire_at=?, merchant_trade_no=? WHERE email=?",
+                            (plan, new_expire, prev_trade if dup else trade_no, email)
+                        )
+                    else:
+                        _cl.execute(
+                            "INSERT INTO members (email, password, plan, expire_at, merchant_trade_no) VALUES (?,?,?,?,?)",
+                            (email, _hash_pw(secrets.token_urlsafe(12)), plan, new_expire, trade_no)
+                        )
+                    _cl.commit()
+                    _cl.close()
+                    print(f"   [補單] ✅ 補開通：{email} {trade_no} → {plan} 到 {new_expire}")
+                    plan_label = {"monthly": "月費方案", "quarterly": "季費方案", "yearly": "年費方案", "daily_test": "每日測試方案"}[plan]
+                    try:
+                        _send_email(email, "【線上有位】付款已確認，會員已開通",
+                            _render_email(
+                                title="付款已確認，會員已開通",
+                                title_icon="✅",
+                                body_html=(
+                                    f'<p style="color:#444;margin:0 0 12px;font-size:14px;line-height:1.7">親愛的會員您好，</p>'
+                                    f'<p style="color:#444;margin:0 0 16px;font-size:14px;line-height:1.7">'
+                                    f'系統已確認您的付款，{plan_label}已開通，到期日為 <b>{new_expire}</b>。'
+                                    f'開通時間有延遲，造成不便敬請見諒。重新整理頁面即可使用完整會員功能。</p>'
+                                ),
+                                cta_text="立即使用",
+                                cta_url=f"{FRONTEND_URL}/stock/",
+                                with_ad=False,
+                            )
+                        )
+                    except Exception:
+                        pass
+                    try:
+                        if ADMIN_NOTIFY_EMAIL:
+                            _send_admin_payment_notice(
+                                email=email, trade_no=trade_no, ecpay_tx_no=_resp.get("TradeNo", ""),
+                                amount=_resp.get("TradeAmt", ""), plan_label=plan_label + "（補單排程開通）",
+                                is_renewal=False, period_no="1", pay_time=pay_date,
+                                payment_type=_resp.get("PaymentType", ""), prev_plan=prev_plan,
+                                prev_expire=prev_expire, prev_trade=prev_trade, new_expire=new_expire,
+                                is_new_account=not bool(m), inv_type="—", inv_carrier="—",
+                                recent_orders="—", dup_warning=dup, simulate=False,
+                            )
+                    except Exception:
+                        pass
+                except Exception as _e:
+                    print(f"   [補單] ❌ {trade_no} 處理失敗：{_e}")
 
         _bg_scheduler = BackgroundScheduler(timezone="Asia/Taipei")
         _bg_scheduler.add_job(_run_opening_scan_job,    "cron",     hour=9,  minute=6,  day_of_week="mon-fri")
@@ -484,7 +505,7 @@ async def lifespan(app: FastAPI):
         _bg_scheduler.add_job(_run_intraday_alert_job,  "interval", minutes=5)
         _bg_scheduler.add_job(_clear_quote_cache,       "cron",     hour=9,  minute=0,  day_of_week="mon-fri")
         _bg_scheduler.add_job(_clear_quote_cache,       "cron",     hour=14, minute=0,  day_of_week="mon-fri")  # 收盤後清快取，確保盤後覆盤資料一致
-        _bg_scheduler.add_job(_run_補單_job,            "cron",     hour=8,  minute=0)
+        _bg_scheduler.add_job(_run_補單_job,            "interval", minutes=10)  # 2026/09/17：原每天08:00，改每10分鐘
         # 2026/08/16取消：帥哥鴻確認當初這支每日批次預產生報告是為了SEO覆蓋率，
         # 但實際上不是所有股票都會有人搜尋，天天跑一輪去硬產生冷門股報告不划算；
         # 加上get_report()已修復成「查詢當下沒有今天的資料就即時分析」，資料正確性
@@ -5548,6 +5569,12 @@ def admin_grant(key: str = Header(default="", alias="X-Admin-Key"), email: str =
     conn = _db_conn()
     row = conn.execute("SELECT * FROM members WHERE email=?", (email,)).fetchone()
     if row:
+        # 2026/09/17修正：原本一律「今天+天數」，對已付費會員按「延長」反而會把到期日縮短
+        # （例如到期日 2027-03-15 的人補 30 天變成 2026-10-17）。改成從現有到期日往後加。
+        _today_g = datetime.now(ZoneInfo("Asia/Taipei")).strftime("%Y-%m-%d")
+        _cur_g = row["expire_at"] or ""
+        if plan != "free" and row["plan"] != "free" and _cur_g > _today_g:
+            new_expire = (datetime.fromisoformat(_cur_g) + timedelta(days=days)).strftime("%Y-%m-%d")
         conn.execute(
             "UPDATE members SET plan=?, expire_at=?, token_ver=token_ver+1 WHERE email=?",
             (plan, new_expire, email)
@@ -5573,6 +5600,97 @@ def admin_grant(key: str = Header(default="", alias="X-Admin-Key"), email: str =
             </div>"""
         )
         return {"ok": True, "action": "created", "email": email, "password": password, "plan": plan, "expire_at": new_expire}
+
+
+@app.post("/admin/fix-duplicate-subscription")
+def admin_fix_duplicate_subscription(key: str = Header(default="", alias="X-Admin-Key"),
+                                     email: str = "", trade_no: str = ""):
+    """
+    2026/09/17 新增：處理客人重複付款造成的「兩筆定期定額」。
+    做兩件事：①呼叫綠界停用 trade_no 這筆定期定額（之後不再扣款）
+              ②把這筆多加的天數扣回來，會員綁定的訂單改回另一筆仍有效的訂閱
+    ※ 退刷（退錢）請在綠界廠商後台對 trade_no 這筆辦理，本功能不處理金流退款。
+    """
+    import urllib.parse as _up_fx, hashlib as _hl_fx, time as _t_fx, httpx as _hx_fx
+    _check_admin(key)
+    email = email.strip().lower()
+    trade_no = trade_no.strip()
+    if not email or not trade_no.startswith("XYWR"):
+        raise HTTPException(status_code=400, detail="請填 Email 與要停用的訂單編號（XYWR 開頭）")
+    conn = _db_conn()
+    m = conn.execute("SELECT * FROM members WHERE email=?", (email,)).fetchone()
+    paid = conn.execute("SELECT 1 FROM processed_orders WHERE merchant_trade_no LIKE ?", (f"R_{trade_no}_%",)).fetchone()
+    done = conn.execute("SELECT 1 FROM processed_orders WHERE merchant_trade_no=?", (f"DUPFIX_{trade_no}",)).fetchone()
+    po = conn.execute("SELECT plan, email FROM pending_orders WHERE merchant_trade_no=?", (trade_no,)).fetchone()
+    others = conn.execute(
+        "SELECT p.merchant_trade_no FROM pending_orders p WHERE p.email=? AND p.merchant_trade_no LIKE 'XYWR%' "
+        "AND p.merchant_trade_no<>? AND EXISTS (SELECT 1 FROM processed_orders o "
+        "WHERE o.merchant_trade_no LIKE 'R_' || p.merchant_trade_no || '_%') "
+        "AND NOT EXISTS (SELECT 1 FROM processed_orders o2 WHERE o2.merchant_trade_no = 'DUPFIX_' || p.merchant_trade_no) "
+        "ORDER BY p.created_at", (email, trade_no)
+    ).fetchall()
+    conn.close()
+    if not m:
+        raise HTTPException(status_code=404, detail="找不到這個會員")
+    if po and (po["email"] or "").lower() != email:
+        raise HTTPException(status_code=400, detail="這筆訂單不屬於這個 Email")
+    if not paid:
+        raise HTTPException(status_code=400, detail="系統沒有這筆訂單的付款開通紀錄，請確認訂單編號")
+    if done:
+        raise HTTPException(status_code=400, detail="這筆訂單已經處理過了")
+
+    # ① 綠界停用定期定額
+    _p = {"MerchantID": str(ECPAY_MERCHANT_ID), "MerchantTradeNo": trade_no,
+          "Action": "Cancel", "TimeStamp": str(int(_t_fx.time()))}
+    _raw = "&".join(f"{k}={v}" for k, v in sorted(_p.items(), key=lambda x: x[0].lower()))
+    _raw = _up_fx.quote_plus(f"HashKey={ECPAY_HASH_KEY}&{_raw}&HashIV={ECPAY_HASH_IV}").lower()
+    _p["CheckMacValue"] = _hl_fx.sha256(_raw.encode()).hexdigest().upper()
+    try:
+        _resp = _hx_fx.post("https://payment.ecpay.com.tw/Cashier/CreditCardPeriodAction",
+                            data=_p, timeout=30).text
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"連線綠界失敗：{e}")
+    print(f"[重複訂閱處理] {email} {trade_no} 綠界回應：{_resp}")
+    if not _re.search(r"RtnCode=1(?:[&\s]|$)", _resp):
+        raise HTTPException(status_code=502, detail=f"綠界停用失敗（{_resp}），會員資料未變更")
+
+    # ② 扣回天數、改綁仍有效的訂單
+    plan = (po["plan"] if po else "") or m["plan"]
+    days = {"monthly": 30, "quarterly": 90, "yearly": 365, "daily_test": 1}.get(plan, 30)
+    today = _taipei_today()
+    old_expire = m["expire_at"] or today
+    new_expire = (datetime.fromisoformat(old_expire) - timedelta(days=days)).strftime("%Y-%m-%d")
+    if new_expire < today:
+        new_expire = today
+    keep_trade = m["merchant_trade_no"] or ""
+    if keep_trade == trade_no:
+        keep_trade = others[0]["merchant_trade_no"] if others else ""
+        if not keep_trade:
+            # 暫存訂單已被清掉時，改從綠界通知紀錄找這位客人另一筆驗證通過的訂單
+            try:
+                _lc = _db_conn()
+                for _lr in _lc.execute(
+                    "SELECT DISTINCT merchant_trade_no FROM ecpay_verify_log WHERE matched=1 "
+                    "AND params_json LIKE ? AND merchant_trade_no LIKE 'XYWR%' AND merchant_trade_no<>? ORDER BY id",
+                    (f'%"CustomField1": "{email}"%', trade_no)
+                ).fetchall():
+                    _t = _lr["merchant_trade_no"]
+                    if not _lc.execute("SELECT 1 FROM processed_orders WHERE merchant_trade_no=?", (f"DUPFIX_{_t}",)).fetchone():
+                        keep_trade = _t
+                        break
+                _lc.close()
+            except Exception:
+                pass
+    conn = _db_conn()
+    conn.execute("UPDATE members SET expire_at=?, merchant_trade_no=? WHERE email=?",
+                 (new_expire, keep_trade or None, email))
+    conn.execute("INSERT OR IGNORE INTO processed_orders (merchant_trade_no) VALUES (?)", (f"DUPFIX_{trade_no}",))
+    conn.commit()
+    conn.close()
+    return {"ok": True, "email": email, "cancelled_trade_no": trade_no,
+            "expire_before": old_expire, "expire_after": new_expire,
+            "active_trade_no": keep_trade,
+            "reminder": "請記得到綠界廠商後台對這筆訂單辦理退刷"}
 
 
 @app.post("/admin/reset-password")
@@ -6922,7 +7040,9 @@ def auth_me(user: dict = Depends(require_user)):
             ") LIMIT 1",
             (user["email"],)
         ).fetchone()
-    is_recurring = bool(recurring_row)
+    # 2026/09/17：付款成功時訂單編號已存進 members.merchant_trade_no，以它為主要判斷
+    # （pending_orders 會被定期清掉，原本清掉後「取消定期訂閱」按鈕就消失了）
+    is_recurring = bool(recurring_row) or str(user.get("merchant_trade_no") or "").startswith("XYWR")
     conn.close()
     used = row["count"] if row else 0
     plan = user["plan"]
@@ -7136,6 +7256,43 @@ def _send_email(to: str, subject: str, html: str):
         print(f"   ✅ 寄信成功 → {to}：{subject}")
     except Exception as e:
         print(f"   ❌ 寄信失敗 → {to}：{e}")
+
+
+def _ecpay_query_trade(trade_no: str) -> dict:
+    """呼叫綠界 QueryTradeInfo/V5 查單筆訂單。回傳綠界的欄位 dict；失敗回 {}。
+    注意：這支 API 回傳的是 TradeStatus（1=已付款、0=未付款、10200095=未成立），沒有 RtnCode。"""
+    import urllib.request as _ur_q, urllib.parse as _up_q, hashlib as _hl_q, time as _t_q
+    if not (ECPAY_HASH_KEY and ECPAY_HASH_IV and ECPAY_MERCHANT_ID and trade_no):
+        return {}
+    try:
+        _p = {"MerchantID": ECPAY_MERCHANT_ID, "MerchantTradeNo": trade_no, "TimeStamp": str(int(_t_q.time()))}
+        _raw = "&".join(f"{k}={v}" for k, v in sorted(_p.items(), key=lambda x: x[0].lower()))
+        _raw = _up_q.quote_plus(f"HashKey={ECPAY_HASH_KEY}&{_raw}&HashIV={ECPAY_HASH_IV}").lower()
+        _p["CheckMacValue"] = _hl_q.sha256(_raw.encode()).hexdigest().upper()
+        _req = _ur_q.Request(
+            "https://payment.ecpay.com.tw/Cashier/QueryTradeInfo/V5",
+            data=_up_q.urlencode(_p).encode(),
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        with _ur_q.urlopen(_req, timeout=8) as _r:
+            return dict(_up_q.parse_qsl(_r.read().decode("utf-8", "replace"), keep_blank_values=True))
+    except Exception as _e:
+        print(f"[綠界查單] {trade_no} 查詢失敗：{_e}")
+        return {}
+
+
+def _ecpay_trade_paid(trade_no: str) -> bool:
+    return _ecpay_query_trade(trade_no).get("TradeStatus", "") == "1"
+
+
+def _parse_ecpay_body(raw: bytes) -> dict:
+    """綠界 webhook 原始內容 → dict（一律 UTF-8；綠界的中文欄位可能未經百分比編碼）"""
+    import urllib.parse as _up_eb
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        text = raw.decode("latin-1")
+    return {k: v for k, v in _up_eb.parse_qsl(text, keep_blank_values=True, encoding="utf-8")}
 
 
 def _ecpay_verify(params: dict) -> bool:
@@ -7830,6 +7987,12 @@ def _complete_referral_if_pending(user_email: str):
 
         rewarded_so_far = inviter_row["referral_rewarded_count"] or 0
         new_cycles      = earned_rewards - rewarded_so_far  # 本次新達標的週期數
+
+        # 2026/09/17：邀請好友活動已結束，預設不再發放新獎勵（已發放的解鎖天數照常有效）。
+        # 若日後重啟活動，在 Zeabur 設定環境變數 REFERRAL_CAMPAIGN_ACTIVE=1 即可。
+        if new_cycles > 0 and os.environ.get("REFERRAL_CAMPAIGN_ACTIVE", "0") != "1":
+            print(f"[REFERRAL] 活動已結束，不發放獎勵 inviter={inviter} cnt={cnt}")
+            new_cycles = 0
 
         if new_cycles > 0:
             add_days  = new_cycles * 30
@@ -10194,6 +10357,31 @@ async def create_order_recurring(request: Request):
     if not ECPAY_MERCHANT_ID:
         raise HTTPException(status_code=400, detail="Payment merchant not configured")
 
+    # 2026/09/17新增：防止重複訂閱／重複付款
+    # ① 已是有效付費會員 → 不再產生新的定期定額（否則會變成兩筆訂閱、每期扣兩次）
+    _dup_conn = _db_conn()
+    _mem = _dup_conn.execute("SELECT plan, expire_at, merchant_trade_no FROM members WHERE email=?", (email,)).fetchone()
+    _recent = _dup_conn.execute(
+        "SELECT merchant_trade_no FROM pending_orders WHERE email=? AND merchant_trade_no LIKE 'XYWR%' "
+        "AND created_at >= datetime('now','+8 hours','-30 minutes') ORDER BY created_at DESC LIMIT 3",
+        (email,)
+    ).fetchall()
+    _dup_conn.close()
+    if _mem and _mem["plan"] != "free" and (_mem["expire_at"] or "") >= _taipei_today() and plan != "daily_test":
+        raise HTTPException(
+            status_code=409,
+            detail=f"您目前已是付費會員（到期日 {_mem['expire_at']}），定期訂閱會自動續約，不需要重複購買。"
+                   f"如有疑問請來信 watione@yahoo.com.tw"
+        )
+    # ② 30分鐘內已有訂單且綠界查得到「已付款」→ 付款其實成功了，只是開通通知還在路上，擋下第二次刷卡
+    for _r in _recent:
+        if await _asyncio.to_thread(_ecpay_trade_paid, _r["merchant_trade_no"]):
+            raise HTTPException(
+                status_code=409,
+                detail="您剛才的付款已經成功，系統正在開通中，請勿重複付款。"
+                       "請約1分鐘後重新整理頁面；若5分鐘後仍未開通，請來信 watione@yahoo.com.tw"
+            )
+
     trade_no = f"XYWR{int(_t.time())}{secrets.token_hex(3).upper()}"
 
     # 首次扣款日期（今天）
@@ -10208,7 +10396,8 @@ async def create_order_recurring(request: Request):
         "ChoosePayment":       "Credit",
         "EncryptType":         "1",
         "ReturnURL":           f"{BACKEND_URL}/webhook/ecpay_recurring",
-        "ClientBackURL":       f"{FRONTEND_URL}/stock/landing?pay=done",
+        # 2026/09/17：付款完成回到 App（會自動輪詢確認開通狀態），不再回銷售頁
+        "ClientBackURL":       f"{FRONTEND_URL}/stock/?pay=done",
         "TotalAmount":         str(info["amount"]),
         "TradeDesc":           "線上有位定期訂閱",
         "ItemName":            info["name"],
@@ -10226,8 +10415,9 @@ async def create_order_recurring(request: Request):
     _hashed = _hash_pw(password) if password and len(password) >= 6 else ""
     _po_conn.execute(
         "INSERT OR REPLACE INTO pending_orders "
-        "(merchant_trade_no, email, hashed_password, plan, invoice_type, invoice_carrier) VALUES (?, ?, ?, ?, ?, ?)",
-        (trade_no, email, _hashed, plan, "", "")
+        "(merchant_trade_no, email, hashed_password, plan, invoice_type, invoice_carrier, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        # 2026/09/17：正式站舊資料表的 created_at 預設是 UTC，明確寫入台北時間，防重複下單的時間判斷才準
+        (trade_no, email, _hashed, plan, "", "", _taipei_now_str())
     )
     _po_conn.commit()
     _po_conn.close()
@@ -10259,8 +10449,12 @@ async def webhook_ecpay_recurring(request: Request):
     """
     綠界每期扣款成功後打過來，自動幫會員延長到期日
     """
-    body = await request.form()
-    params = dict(body)
+    # 2026/09/17修正（重複扣款事件根因）：綠界第一次通知的內容是「未編碼的UTF-8中文」
+    # （例如 RtnMsg=交易成功），Starlette 的 request.form() 會用 latin-1 解碼成亂碼
+    # （äº¤æ...），導致簽章永遠對不上→被拒絕→客人付款後沒升級；綠界約10幾分鐘後
+    # 重送時 RtnMsg 改成英文 paid 才驗過。客人在這段空窗以為沒成功又刷第二次。
+    # 改成自己讀原始內容、用 UTF-8 解析，第一次通知就能驗過、即時開通。
+    params = _parse_ecpay_body(await request.body())
     print(f"[定期定額 Webhook] {params}")
 
     # 驗證 CheckMacValue 簽章（邏輯全在 ecpay_verify.py；缺模組／驗簽失敗一律拒）
@@ -10284,10 +10478,17 @@ async def webhook_ecpay_recurring(request: Request):
 
     email        = params.get("CustomField1", "").strip().lower()
     trade_no_w   = params.get("MerchantTradeNo", "")
-    exec_log     = params.get("ExecLog", "")        # 第幾次扣款
-    amount       = params.get("PeriodAmount", "") or params.get("TradeAmt", "") or params.get("Amount", "0")
+    amount       = params.get("PeriodAmount", "") or params.get("TradeAmt", "") or params.get("Amount", "") or "0"
     item_name    = params.get("ItemName", "")
-    payment_date = params.get("PaymentDate", "")    # 扣款日期，用於冪等 key
+    # 2026/09/17修正：首期通知（ReturnURL）帶 PaymentDate；第2期起的續約通知（PeriodReturnURL）
+    # 綠界文件列的是 ProcessDate/Gwsr/TotalSuccessTimes，沒有 PaymentDate。原本冪等 key 只用
+    # PaymentDate，續約時永遠是空字串 → 第3期起會被當成「重複通知」略過、不延長到期日。
+    payment_date = params.get("PaymentDate", "") or params.get("ProcessDate", "")
+    is_renewal   = (not params.get("PaymentDate")) and bool(params.get("ProcessDate") or params.get("Gwsr") or params.get("TotalSuccessTimes"))
+    period_no    = params.get("TotalSuccessTimes", "") or ("" if is_renewal else "1")
+    ecpay_tx_no  = params.get("TradeNo", "") or params.get("Gwsr", "") or params.get("gwsr", "")
+    idem_key     = f"R_{trade_no_w}_{payment_date}" if payment_date else \
+                   f"R_{trade_no_w}_{ecpay_tx_no}_{params.get('TotalSuccessTimes', '')}"
 
     if not email:
         print("[定期定額] ❌ email 為空")
@@ -10297,43 +10498,79 @@ async def webhook_ecpay_recurring(request: Request):
     _tmp = _db_conn()
     _already = _tmp.execute(
         "SELECT 1 FROM processed_orders WHERE merchant_trade_no=?",
-        (f"R_{trade_no_w}_{payment_date}",)
+        (idem_key,)
     ).fetchone()
     _po = _tmp.execute(
-        "SELECT hashed_password, invoice_type, invoice_carrier FROM pending_orders WHERE merchant_trade_no=?", (trade_no_w,)
+        "SELECT hashed_password, invoice_type, invoice_carrier, plan, created_at FROM pending_orders WHERE merchant_trade_no=?", (trade_no_w,)
     ).fetchone()
+    # 同一個 Email 近24小時建立了幾筆訂單（給管理員判斷是否重複下單）
+    try:
+        _recent_orders = _tmp.execute(
+            "SELECT COUNT(*) FROM pending_orders WHERE email=? AND created_at >= datetime('now','+8 hours','-24 hours')",
+            (email,)
+        ).fetchone()[0]
+    except Exception:
+        _recent_orders = 0
     _tmp.close()
     _inv_type    = (_po["invoice_type"]    or "電子發票") if _po else "電子發票"
     _inv_carrier = (_po["invoice_carrier"] or "未提供")   if _po else "未提供"
 
     if _already:
-        print(f"[定期定額] ⚠️ 重複 Webhook {trade_no_w} exec={exec_log}")
+        print(f"[定期定額] ⚠️ 重複 Webhook {trade_no_w} key={idem_key}")
+        return PlainTextResponse(content="1|OK")
+    # 先搶下處理權（避免綠界重送／補單排程同時處理，造成天數加兩次）
+    _claim = _db_conn()
+    _claimed = _claim.execute(
+        "INSERT OR IGNORE INTO processed_orders (merchant_trade_no) VALUES (?)", (idem_key,)
+    ).rowcount
+    _claim.commit()
+    _claim.close()
+    if not _claimed:
+        print(f"[定期定額] ⚠️ 同一筆正在／已經處理 {trade_no_w} key={idem_key}")
         return PlainTextResponse(content="1|OK")
 
-    # 判斷天數與方案（item_name + amount 雙重保障）
+    # 判斷天數與方案：優先用下單時記錄的方案（最可靠），沒有才用 item_name + 金額判斷
     _amount_int = int(amount) if str(amount).isdigit() else 0
-    days = _plan_days(item_name, _amount_int)
-    if days >= 365:
-        plan = "yearly"
-    elif days >= 90:
-        plan = "quarterly"
-    elif days <= 1:
-        plan = "daily_test"
+    _plan_day_map = {"monthly": 30, "quarterly": 90, "yearly": 365, "daily_test": 1}
+    _po_plan = (_po["plan"] if _po else "") or ""
+    if _po_plan in _plan_day_map:
+        plan = _po_plan
+        days = _plan_day_map[plan]
     else:
-        plan = "monthly"
+        days = _plan_days(item_name, _amount_int)
+        if days >= 365:
+            plan = "yearly"
+        elif days >= 90:
+            plan = "quarterly"
+        elif days <= 1:
+            plan = "daily_test"
+        else:
+            plan = "monthly"
     plan_label = {"monthly": "月費方案", "quarterly": "季費方案", "yearly": "年費方案", "daily_test": "每日測試方案"}.get(plan, plan)
 
     conn = _db_conn()
     row = conn.execute("SELECT * FROM members WHERE email=?", (email,)).fetchone()
 
+    _today_tw = _taipei_today()
+    prev_plan   = row["plan"] if row else ""
+    prev_expire = (row["expire_at"] if row else "") or ""
+    prev_trade  = (row["merchant_trade_no"] if row else "") or ""
+    # 疑似重複訂閱：這是「首期」通知，但會員早就有另一筆仍有效的定期定額訂單
+    dup_warning = bool(
+        row and not is_renewal and prev_trade.startswith("XYWR") and prev_trade != trade_no_w
+        and prev_plan != "free" and prev_expire >= _today_tw
+    )
+
     if row:
         # 既有會員：延長到期日
-        current_expire = row["expire_at"] or _date_cls.today().isoformat()
-        base = max(current_expire, _date_cls.today().isoformat())
+        current_expire = prev_expire or _today_tw
+        base = max(current_expire, _today_tw)
         new_expire = (datetime.fromisoformat(base) + timedelta(days=days)).strftime("%Y-%m-%d")
+        # 重複訂閱時，會員綁定的訂單編號維持第一筆（之後退刷／停用的是新這筆）
+        keep_trade = prev_trade if dup_warning else trade_no_w
         conn.execute(
             "UPDATE members SET plan=?, expire_at=?, merchant_trade_no=? WHERE email=?",
-            (plan, new_expire, trade_no_w, email)
+            (plan, new_expire, keep_trade, email)
         )
         conn.commit()
         conn.close()
@@ -10381,6 +10618,13 @@ async def webhook_ecpay_recurring(request: Request):
         except Exception as e:
             print(f"[定期定額] 建立帳號失敗: {e}")
             conn.close()
+            try:  # 釋放處理權，讓綠界重送或補單排程還能再處理
+                _rel = _db_conn()
+                _rel.execute("DELETE FROM processed_orders WHERE merchant_trade_no=?", (idem_key,))
+                _rel.commit()
+                _rel.close()
+            except Exception:
+                pass
             return PlainTextResponse(content="1|OK")
         conn.close()
         _send_email(email, "【線上有位】歡迎！您的帳號已開通（定期訂閱）",
@@ -10416,19 +10660,95 @@ async def webhook_ecpay_recurring(request: Request):
     # 記錄已處理
     _rec = _db_conn()
     _rec.execute("INSERT OR IGNORE INTO processed_orders (merchant_trade_no) VALUES (?)",
-                 (f"R_{trade_no_w}_{payment_date}",))
+                 (idem_key,))
     _rec.commit()
     _rec.close()
 
-    # 管理員通知
+    # 管理員通知（2026/09/17 帥哥鴻反映內容太少，補齊客人與訂單資訊）
     try:
         if ADMIN_NOTIFY_EMAIL:
-            _send_email(ADMIN_NOTIFY_EMAIL, f"【定期定額】{email} 扣款成功 NT${amount}",
-                f"<p>定期定額扣款成功</p><p>Email: {email}<br>方案: {plan_label}<br>金額: NT${amount}<br>次數: {exec_log}</p>")
-    except Exception:
-        pass
+            _send_admin_payment_notice(
+                email=email, trade_no=trade_no_w, ecpay_tx_no=ecpay_tx_no, amount=amount,
+                plan_label=plan_label, is_renewal=is_renewal, period_no=period_no,
+                pay_time=payment_date, payment_type=params.get("PaymentType", ""),
+                prev_plan=prev_plan, prev_expire=prev_expire, prev_trade=prev_trade,
+                new_expire=new_expire, is_new_account=not bool(row),
+                inv_type=_inv_type, inv_carrier=_inv_carrier,
+                recent_orders=_recent_orders, dup_warning=dup_warning,
+                simulate=params.get("SimulatePaid", "") == "1",
+            )
+    except Exception as _ae:
+        print(f"[定期定額] 管理員通知寄送失敗：{_ae}")
 
     return PlainTextResponse(content="1|OK")
+
+
+def _send_admin_payment_notice(**d):
+    """付款成功的管理員通知信（完整客人＋訂單資訊，方便直接對帳/回覆客人）"""
+    import html as _h
+    email = d["email"]
+    conn = _db_conn()
+    m = conn.execute("SELECT * FROM members WHERE email=?", (email,)).fetchone()
+    conn.close()
+    m = dict(m) if m else {}
+    if m.get("line_user_id"):
+        login_way = "LINE 登入"
+    elif email.endswith("@gmail.com"):
+        login_way = "Google 或 Email 密碼（Gmail 信箱）"
+    else:
+        login_way = "Email 密碼"
+    plan_names = {"free": "免費會員", "monthly": "月費", "quarterly": "季費", "yearly": "年費", "daily_test": "每日測試"}
+    if d["dup_warning"]:
+        kind = "⚠️ 疑似重複訂閱（客人已有另一筆有效訂閱）"
+    elif d["is_renewal"]:
+        kind = f"自動續約（第 {d['period_no'] or '?'} 期）"
+    else:
+        kind = "首期付款・新開通" if d["is_new_account"] else "首期付款・既有帳號升級"
+    rows = [
+        ("事件", kind),
+        ("會員 Email", email),
+        ("會員編號", m.get("id", "")),
+        ("暱稱", m.get("nickname") or "（未設定）"),
+        ("帳號建立時間", m.get("created_at", "")),
+        ("最後登入", m.get("last_login") or ""),
+        ("登入方式", login_way),
+        ("方案", d["plan_label"]),
+        ("本次金額", f"NT${d['amount']}"),
+        ("付款時間", d["pay_time"]),
+        ("付款方式", d["payment_type"] or "信用卡"),
+        ("本站訂單編號", d["trade_no"]),
+        ("綠界交易序號", d["ecpay_tx_no"]),
+        ("付款前方案／到期日", f"{plan_names.get(d['prev_plan'], d['prev_plan'] or '（新帳號）')}／{d['prev_expire'] or '—'}"),
+        ("付款前綁定訂單", d["prev_trade"] or "—"),
+        ("新到期日", d["new_expire"]),
+        ("發票方式／載具", f"{d['inv_type']}／{d['inv_carrier']}"),
+        ("此 Email 近24小時建立訂單數", d["recent_orders"]),
+    ]
+    if d.get("simulate"):
+        rows.insert(0, ("注意", "綠界模擬付款（非真實扣款）"))
+    tr = "".join(
+        f'<tr><td style="padding:6px 10px;color:#666;border-bottom:1px solid #eee;white-space:nowrap">{_h.escape(str(k))}</td>'
+        f'<td style="padding:6px 10px;border-bottom:1px solid #eee;font-weight:600">{_h.escape(str(v))}</td></tr>'
+        for k, v in rows
+    )
+    warn = ""
+    if d["dup_warning"]:
+        warn = (
+            '<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px;margin:12px 0;color:#991b1b">'
+            f'<b>這位客人已有有效訂閱（{_h.escape(d["prev_trade"])}），這筆 {_h.escape(d["trade_no"])} 很可能是重複付款。</b><br>'
+            '處理方式：①到綠界後台對「本站訂單編號」這筆辦理退刷 → ②到本站管理後台「重複訂閱處理」'
+            '輸入這位客人的 Email 與這筆訂單編號，系統會停用這筆定期定額並扣回多加的天數。</div>'
+        )
+    body = (
+        f'<div style="font-family:sans-serif;padding:16px;max-width:640px">'
+        f'<h3 style="margin:0 0 8px">【線上有位】定期定額付款通知</h3>{warn}'
+        f'<table style="border-collapse:collapse;font-size:14px;width:100%">{tr}</table>'
+        f'<p style="font-size:12px;color:#888;margin-top:12px">持卡人姓名、手機、卡號末四碼綠界不會在通知中提供，'
+        f'請到綠界廠商後台用「本站訂單編號」查詢。<br>'
+        f'管理後台：<a href="{FRONTEND_URL}/admin.html">{FRONTEND_URL}/admin.html</a></p></div>'
+    )
+    prefix = "⚠️重複訂閱" if d["dup_warning"] else ("續約" if d["is_renewal"] else "新訂閱")
+    _send_email(ADMIN_NOTIFY_EMAIL, f"【{prefix}】{email} {d['plan_label']} NT${d['amount']}", body)
 
 
 # ─────────────────────────────────────────────
