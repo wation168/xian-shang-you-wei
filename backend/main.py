@@ -13418,6 +13418,127 @@ VERDICT_TEXT = {
 }
 
 
+# ══════════════════════════════════════════════════════════
+# 📘 教學說明（2026/09/17 帥哥鴻定案 B 方案：綜合解說每一條可展開「這代表什麼？」）
+# 原則（案件008）：只解釋指標／型態的一般意義，可帶入今天的數字，不寫買賣動作。
+# 改字只要改這裡；{大括號} 會帶入數字，缺欄位時整句仍會顯示（大括號原文去掉）。
+# 分層：VERDICT_EDU_TIER——basic（一句話結論、觀察重點、看解說的順序）所有人；full 其餘付費。
+# ══════════════════════════════════════════════════════════
+VERDICT_EDU_TIER = {"basic": "free", "full": "paid"}
+
+VERDICT_EDU_GUIDE = [
+    "先看一句話結論：多方佔優、空方佔優，還是多空拉鋸",
+    "再看看多／看空理由：每一條是哪個指標給出的訊號",
+    "接著看矛盾：訊號互相打架的地方，通常就是需要特別留意的地方",
+    "最後看關鍵價位與情境：出現什麼條件，現在的判讀就需要改變",
+]
+
+VERDICT_EDU = {
+    # 一句話結論（依立場）
+    "head_bull": "系統把每個指標轉成「看多」或「看空」的理由並加權計分。看多分數明顯高於看空，代表目前多方條件較多；但分數描述的是現在的狀態，不是對未來的預測。",
+    "head_bull_wait": "多方條件佔優，但同時出現「位置偏高」的訊號（接近壓力、乖離偏大或 KD 高檔）。這種組合常見的狀況是：方向偏多，但短線已經走了一段，容易先整理。",
+    "head_bull_caution": "看多分數較高，但看空理由也不少。可以把它理解成「多方佔上風，但雜音不少」，下面列出的看空理由就是需要留意的地方。",
+    "head_neutral": "看多和看空的分數差距不大，代表指標之間意見分歧。拉鋸時，市場常見的走法是先在區間內整理，直到突破壓力或跌破支撐才出現方向。",
+    "head_bear": "看空分數明顯高於看多，代表目前空方條件較多。空方結構中，判斷止跌通常要看股價能不能重新站回月線、或出現明確的止跌 K 棒。",
+    # 觀察重點
+    "action": "「觀察重點」整理的是接下來要看的條件，而不是要做的動作。多數條件都以收盤價確認，因為盤中價格常常短暫穿過關鍵價位又回來（假突破、假跌破）。",
+    # 現在的狀況
+    "status_price": "位置百分比是把「支撐到壓力」當成 0～100%。現在 {pos}% 表示{pos_hint}。",
+    "status_trend": "趨勢用「道氏理論」判斷：近期的高點和低點都越來越高，叫上升趨勢（頭頭高、底底高）；都越來越低叫下降趨勢；看不出方向就是盤整。",
+    "status_ma": "均線是一段期間收盤價的平均。短天期均線在上、長天期在下叫「多頭排列」，代表最近買進的人成本越來越高；反過來叫「空頭排列」。均線反應較慢，適合看中期方向。",
+    "status_ms": "12金叉是 12 種常見的轉強條件。「今天剛轉強」是今天才出現的訊號，「轉強中」是前幾天出現、目前仍維持。涵蓋的面向越多（技術、籌碼、型態、營收），代表不同角度的訊號越一致。",
+    "status_basis": "分析基準是支撐、壓力、失效位置這些數字所用的收盤資料日期。盤中或收盤後官方資料更新前，現價和分析基準可能不是同一天。",
+    # 看多理由
+    "trend_up": "上升趨勢代表近期每一次拉回的低點都比前一次高，買方願意用更高的價格承接。這個結構被破壞的訊號，是跌破前一個低點。",
+    "ma_bull": "均線多頭排列代表短、中、長期的平均成本依序往上，中期方向向上。它反應比較慢，適合看大方向，不適合抓短線轉折。",
+    "breakout": "突破前高代表股價站上前一次上漲沒能越過的價位。突破是否有效，常見的確認方式是：有沒有放量、之後回測時守不守得住突破的位置。",
+    "kbar_bull": "{kbar_edu}",
+    "kd_gold": "KD 黃金交叉是 K 值由下往上穿過 D 值，代表短線動能轉強。目前 K 值 {k}，{kd_zone_hint}",
+    "macd_bull": "MACD 在 0 軸以上代表多方結構還在；DIF 在 DEA 上方代表動能偏多。如果柱體在縮小，代表上漲的力道正在減弱。",
+    "inst_buy": "三大法人合計買超 {inst_total} 張，但要拆開看：外資 {f5}、投信 {i5}、自營商 {d5}。{inst_hint}",
+    "vol_up": "量能放大代表參與的人變多。股價上漲同時放量，通常被視為買盤積極；如果放量卻收黑，意思就不同了。",
+    "gann_buy": "葛蘭碧法則是用股價和均線的相對位置判斷訊號，一共有 4 個多方、4 個空方訊號。這裡出現的是多方訊號，代表股價和均線的關係符合其中一種轉強型態。",
+    "near_sup_rr": "股價靠近支撐時，離失效位置近、離壓力遠，所以損益比通常比較高。支撐是否真的守住，要看接下來的收盤。",
+    "ms_many": "12金叉有 3 項以上同時在今天轉強，代表多個不同指標在同一天出現訊號，比單一指標更值得留意。",
+    "ms_some": "12金叉今天有少數項目轉強。單一或少數訊號的參考性比多項同時出現弱，可以搭配其他理由一起看。",
+    "revenue": "營收連續年增但股價還沒漲，代表基本面在變好、市場價格還沒反應。這種落差有可能之後被補上，也可能反映市場有其他疑慮。",
+    "fund": "本益比、殖利率、EPS 是基本面指標：本益比越高代表市場給的評價越高；殖利率是現金股利除以股價。它們描述的是估值，和短線走勢不一定同步。",
+    # 看空理由
+    "trend_down": "下降趨勢代表近期每一次反彈的高點都比前一次低，賣方持續在更低的價格出售。這個結構被破壞的訊號，是站上前一個高點。",
+    "ma_bear": "均線空頭排列代表短、中、長期的平均成本依序往下，最近買進的人多半處在帳面虧損，反彈時容易遇到賣壓。",
+    "breakdown": "跌破支撐代表原本有買盤承接的價位失守，原來的支撐常會變成之後的壓力。",
+    "kbar_bear": "{kbar_edu}",
+    "vp_exit": "爆量收出賣壓型態的 K 棒，代表大量成交發生在賣方佔優的情況下，常被視為高檔換手或出貨的訊號。隔天能不能收復這根 K 棒的中間價位，是判斷賣壓是否延續的常見方式。",
+    "kd_death": "KD 死亡交叉是 K 值由上往下穿過 D 值，代表短線動能轉弱。目前 K 值 {k}，{kd_zone_hint}",
+    "macd_bear": "MACD 在 0 軸以下代表空方結構；DIF 在 DEA 下方代表動能偏空。柱體縮小則代表下跌力道在減弱。",
+    "inst_sell": "外資、投信同時賣超，代表兩大法人近期都在減碼這檔股票。法人部位大，持續賣超時股價較容易有壓力。",
+    "gann_sell": "葛蘭碧法則的空方訊號，代表股價和均線的關係出現轉弱型態，例如跌破均線、或離均線太遠（乖離過大）。",
+    "near_res": "股價離壓力只剩一小段，上方空間有限。壓力是過去賣壓集中的價位，接近時常出現拉回或整理，要放量才比較容易突破。",
+    "rr_low": "損益比 ＝ 前方空間 ÷ 到失效位置的距離。低於 1 代表往下的距離比往上的空間還大，也就是目前位置的風險結構不理想。",
+    "channel_conflict": "軌道是用近期高低點畫出的上下通道。趨勢方向和軌道方向不一致時，代表長短期的結構在打架，判讀的可信度會降低。",
+    "overheat": "乖離率是股價離均線多遠。離月線 {bias20}% 屬於偏大，就像跑太快總要喘口氣，這時比較容易出現回檔或整理，讓股價和均線重新靠近。",
+    "kd_high": "KD 在 80 以上是高檔區，代表短線漲勢強。但強勢股的 KD 常常在高檔「鈍化」（一直維持高檔），所以高檔本身不是轉弱，出現死亡交叉才比較明確。",
+    # 矛盾
+    "cf_price_inst": "價格往上但法人在賣，代表上漲的買盤可能來自散戶或短線資金。價格和籌碼方向一致時，訊號的可信度比較高。",
+    "cf_break_kbar": "突破當天卻收出空頭 K 棒，代表突破後馬上遇到賣壓。這是「假突破」常見的樣子，通常要看隔天能不能守住突破位置。",
+    "cf_break_novol": "沒有量的突破，代表參與的人不多，比較容易被後續的賣壓壓回。常見的觀察是突破後幾天有沒有補量。",
+    "cf_kd_high_gold": "KD 在高檔出現金叉，比較像漲勢末段的延續，而不是起漲點；低檔（20 以下）出現的金叉，通常才被視為轉折。",
+    "cf_macd_below0": "MACD 在 0 軸下方出現金叉，代表空頭結構裡的反彈。要站回 0 軸以上，才比較接近正式轉多。",
+    "cf_trend_ma": "高低點結構和均線排列方向不同，通常發生在趨勢剛轉換的時候：高低點反應快，均線反應慢。",
+    "cf_single_face": "轉強訊號全部來自技術面，代表只有價格和成交量在動，籌碼和基本面還沒有同步。不同面向一起出現時，訊號比較完整。",
+    "cf_kbar_winrate": "同一檔股票過去出現這個 K 棒型態後，隔天上漲的比例偏低。歷史統計不代表未來，但可以提醒這個型態在這檔股票上不一定可靠。",
+    "cf_rev_weak": "營收成長但股價趨勢偏弱，代表基本面和市場價格方向不一致，可能是市場還沒反應，也可能是市場在意其他因素。",
+    "top_problem": "「最大的問題」是從看空理由中挑出影響權重最高的一條，代表目前最需要留意的訊號。",
+    # 關鍵價位
+    "lv_support": "支撐是過去買盤集中、股價不容易跌破的價位。系統會綜合近期低點、密集成交區、均線來找。",
+    "lv_resistance": "壓力是過去賣盤集中、股價不容易站穩的價位，通常是前波高點或密集套牢區。",
+    "lv_stop": "失效位置是系統依支撐與型態算出的價位。收盤跌破，代表目前這個技術型態的前提不成立，原本的判讀要重新看。它是判讀條件，不是叫你在這裡做任何動作。",
+    "lv_target1": "前方壓力區是股價往上時第一個可能遇到賣壓的位置，也是計算損益比時用的「前方空間」。",
+    "lv_target2": "延伸觀察價位是突破第一個壓力後，下一個可能遇到賣壓的位置，通常由軌道或等幅推算而來。",
+    "lv_ma20": "月線是 20 日均線，約等於最近一個月買進的人的平均成本，是短中期多空的常見分界。",
+    "lv_turtle": "海龜通道是用過去一段期間的最高價、最低價畫出的通道。突破上緣代表創新高；跌回下緣以下，代表這次突破沒有延續。",
+    "lv_neck": "頸線是 W 底、頭肩底這類型態的關鍵線。收盤站上頸線才算型態完成；「等幅推算」是把型態高度往上加，得到一個觀察價位。",
+    # 情境
+    "scenarios": "情境是「如果出現某個條件，結構會怎麼變化」的整理，不是預測。都以收盤價確認，比較能過濾盤中的假突破、假跌破。",
+}
+
+# K 棒型態教學（依型態名稱比對，一檔可能同時出現多個型態）
+KBAR_EDU = [
+    ("長上影黑K", "長上影黑K：盤中曾經往上衝，最後被賣回來，留下長長的上影線，代表上方有賣壓。"),
+    ("長下影紅K", "長下影紅K：盤中曾經往下殺，最後被買回來，留下長長的下影線，代表下方有承接。"),
+    ("空頭吞噬", "空頭吞噬：今天的黑K把前一根紅K整根包住，出現在漲一段之後，是常見的短線轉弱訊號。判斷是否成立，常看隔天能不能收回今天高點的一半。"),
+    ("多頭吞噬", "多頭吞噬：今天的紅K把前一根黑K整根包住，出現在跌一段之後，是常見的止跌轉強訊號，通常看隔天是否繼續收紅確認。"),
+    ("射擊之星", "射擊之星：小實體加上很長的上影線，出現在高檔，代表買方衝高後被賣方壓回，是頂部反轉型態之一。"),
+    ("錘頭", "錘頭線：小實體加上很長的下影線，出現在低檔，代表賣方殺低後被買方撐回，是底部反轉型態之一。"),
+    ("十字星", "十字星：開盤價和收盤價幾乎一樣，代表多空力量暫時平衡，常出現在方向轉換之前，要看下一根 K 棒決定方向。"),
+    ("大紅棒", "大紅棒：實體很長的紅K，代表買方從開盤到收盤都佔優勢，是強勢的表現。"),
+    ("大黑棒", "大黑棒：實體很長的黑K，代表賣方從開盤到收盤都佔優勢，是弱勢的表現。"),
+    ("孕線", "孕線：今天的 K 棒完全落在前一根 K 棒的範圍內，代表波動收斂、多空暫時休息，之後往哪邊突破是觀察重點。"),
+    ("穿刺線", "穿刺線：跌勢中出現紅K，收盤回到前一根黑K實體的一半以上，是潛在的止跌訊號。"),
+    ("烏雲蓋頂", "烏雲蓋頂：漲勢中出現黑K，收盤跌進前一根紅K實體的一半以下，是潛在的轉弱訊號。"),
+    ("早晨之星", "早晨之星：黑K、小實體、紅K三根組成，出現在低檔，是較強的底部反轉型態。"),
+    ("黃昏之星", "黃昏之星：紅K、小實體、黑K三根組成，出現在高檔，是較強的頂部反轉型態。"),
+    ("三紅兵", "三紅兵：連續三根收盤越來越高的紅K，代表多方持續推進；但連漲之後，短線乖離也會變大。"),
+    ("三烏鴉", "三烏鴉：連續三根收盤越來越低的黑K，代表空方持續壓低。"),
+    ("漲停", "漲停：股價漲到當日上限，代表買盤非常強；隔天能不能延續，常看開盤後的量價。"),
+    ("跌停", "跌停：股價跌到當日下限，代表賣壓非常重。"),
+]
+
+
+def _vedu(key: str, **kw) -> str:
+    t = VERDICT_EDU.get(key, "")
+    try:
+        return t.format(**kw)
+    except Exception:
+        import re as _re_e
+        return _re_e.sub(r"\{[^}]*\}", "", t)
+
+
+def _kbar_edu_text(kbar: str) -> str:
+    parts = [txt for key, txt in KBAR_EDU if key in (kbar or "")]
+    return "\n".join(parts) if parts else "K 棒是用開盤、最高、最低、收盤四個價格畫出的圖形，實體和影線的長短，反映當天買賣雙方誰比較強。"
+
+
 def _vt(key: str, **kw) -> str:
     """套模版；缺欄位時不讓整段壞掉，直接回傳模版原文去掉大括號"""
     t = VERDICT_TEXT.get(key, "")
@@ -13470,6 +13591,55 @@ def _ms_state_text(r: dict, ex: dict) -> str:
     day_txt = (f"已持續 {slb} 天以上" if d >= slb else f"已持續 {d} 天") if d else "持續中"
     since = ex.get("since_date")
     return f"轉強中（{day_txt}{'，' + since[5:] + ' 開始' if since else ''}）"
+
+
+def _build_verdict_edu(r, stance, kv, bull, bear, conflicts, status_keys, level_keys, pos, kd, inst) -> dict:
+    """綜合解說的📘教學說明，逐條對齊 sections 的順序"""
+    k_val = kd.get("k")
+    if k_val is None:
+        kd_zone_hint = ""
+    elif k_val >= 80:
+        kd_zone_hint = "位在 80 以上的高檔區，高檔的交叉訊號通常比低檔更敏感。"
+    elif k_val >= 50:
+        kd_zone_hint = "位在 50～80 的偏高區，前面已經漲過一段，轉弱訊號比在低檔出現更值得留意。"
+    elif k_val >= 20:
+        kd_zone_hint = "位在 20～50 的偏低區。"
+    else:
+        kd_zone_hint = "位在 20 以下的低檔區，低檔的金叉通常被視為較有意義的轉折。"
+    f5, i5, d5 = inst.get("foreign_5d"), inst.get("invest_5d"), inst.get("dealer_5d")
+    fmt = lambda v: f"{v:+,} 張" if isinstance(v, (int, float)) else "—"
+    inst_hint = ""
+    if isinstance(f5, (int, float)) and isinstance(d5, (int, float)):
+        if f5 < 0 and d5 > 0:
+            inst_hint = "外資在賣、自營商在買，方向不一致；自營商多為短線進出，參考性通常比外資、投信低。"
+        elif f5 > 0 and (i5 or 0) > 0:
+            inst_hint = "外資和投信同時買超，是法人方向比較一致的情況。"
+        else:
+            inst_hint = "各法人方向不完全一致時，合計數字的參考性會降低。"
+    if pos is None:
+        pos_hint = ""
+    elif pos >= 70:
+        pos_hint = "離壓力比較近、離支撐比較遠：往上的空間剩不多，往下拉回的空間比較大"
+    elif pos <= 30:
+        pos_hint = "離支撐比較近：往下的距離不遠，往上的空間比較大"
+    else:
+        pos_hint = "大約在區間中間，上下空間差不多"
+    ekw = {**kv, "kd_zone_hint": kd_zone_hint, "f5": fmt(f5), "i5": fmt(i5), "d5": fmt(d5),
+           "inst_hint": inst_hint, "pos": pos, "pos_hint": pos_hint,
+           "kbar_edu": _kbar_edu_text(r.get("kbar_pattern") or "")}
+    srt = lambda arr: [k for k, _, _ in sorted(arr, key=lambda x: -x[1])]
+    return {
+        "guide": VERDICT_EDU_GUIDE,
+        "headline": _vedu("head_" + stance, **ekw),
+        "action": _vedu("action", **ekw),
+        "status": [_vedu(k, **ekw) for k in status_keys],
+        "bull": [_vedu(k, **ekw) for k in srt(bull)],
+        "bear": [_vedu(k, **ekw) for k in srt(bear)],
+        "conflicts": [_vedu(k, **ekw) for k, _ in conflicts],
+        "top_problem": _vedu("top_problem", **ekw),
+        "levels": [_vedu(k, **ekw) for k in level_keys],
+        "scenarios": _vedu("scenarios", **ekw),
+    }
 
 
 def _build_verdict(r: dict, ms: list | None) -> dict:
@@ -13663,38 +13833,41 @@ def _build_verdict(r: dict, ms: list | None) -> dict:
     pos_word = "—" if pos is None else ("靠近支撐" if pos < 30 else "靠近壓力" if pos > 70 else "中間位置")
     trend_text = {"上升趨勢": "上升趨勢（頭頭高、底底高）", "下降趨勢": "下降趨勢（頭頭低、底底低）"}.get(
         trend, "盤整（高低點結構不明）")
-    status = []
+    status, status_keys = [], []
     if pos is not None:
-        status.append(_vt("status_price", **kv, pos=pos, pos_word=pos_word))
-    status.append(_vt("status_trend", trend_text=trend_text))
+        status.append(_vt("status_price", **kv, pos=pos, pos_word=pos_word)); status_keys.append("status_price")
+    status.append(_vt("status_trend", trend_text=trend_text)); status_keys.append("status_trend")
     if ma.get("text"):
-        status.append(_vt("status_ma", **kv))
+        status.append(_vt("status_ma", **kv)); status_keys.append("status_ma")
     if ms_s.get("available"):
         cats = "、".join(ms_s["categories"]) or "無"
-        status.append(_vt("status_ms", today=ms_s["today_count"], active=ms_s["active_count"], cats=cats))
+        status.append(_vt("status_ms", today=ms_s["today_count"], active=ms_s["active_count"], cats=cats)); status_keys.append("status_ms")
     if r.get("price_basis_note"):
-        status.append(_vt("status_basis", basis=r["price_basis_note"]))
+        status.append(_vt("status_basis", basis=r["price_basis_note"])); status_keys.append("status_basis")
 
     # ── 關鍵價位 ──
-    levels = []
+    levels, level_keys = [], []
+
+    def _LV(key, **kw):
+        levels.append(_vt(key, **kw)); level_keys.append(key)
     if support:
-        levels.append(_vt("lv_support", v=support, desc=r.get("support_desc") or ""))
+        _LV("lv_support", v=support, desc=r.get("support_desc") or "")
     if resistance:
-        levels.append(_vt("lv_resistance", v=resistance, desc=r.get("resistance_desc") or ""))
+        _LV("lv_resistance", v=resistance, desc=r.get("resistance_desc") or "")
     if stop_loss and price:
-        levels.append(_vt("lv_stop", v=stop_loss, pct=round((stop_loss - price) / price * 100, 1)))
+        _LV("lv_stop", v=stop_loss, pct=round((stop_loss - price) / price * 100, 1))
     if r.get("target1"):
-        levels.append(_vt("lv_target1", v=r["target1"]))
+        _LV("lv_target1", v=r["target1"])
     if r.get("target2"):
-        levels.append(_vt("lv_target2", v=r["target2"]))
+        _LV("lv_target2", v=r["target2"])
     if ma20 and ma20 != support:
-        levels.append(_vt("lv_ma20", v=ma20))
+        _LV("lv_ma20", v=ma20)
     for m in (ms or []):
         ex = m.get("extra") or {}
         if m["method"] == "turtle" and m.get("state") in ("today", "active") and ex.get("exit_level"):
-            levels.append(_vt("lv_turtle", v=ex["exit_level"]))
+            _LV("lv_turtle", v=ex["exit_level"])
         if m["method"] == "pattern" and m.get("passed") and ex.get("neckline"):
-            levels.append(_vt("lv_neck", ptype=ex.get("type", ""), v=ex["neckline"]))
+            _LV("lv_neck", ptype=ex.get("type", ""), v=ex["neckline"])
 
     # ── 情境 ──
     if stance.startswith("bull"):
@@ -13705,8 +13878,16 @@ def _build_verdict(r: dict, ms: list | None) -> dict:
         scenarios = [_vt("sc_neutral_up", **kv), _vt("sc_neutral_down", **kv)]
     action = _vt("act_" + stance, **{**kv, "target1": r.get("target1")})
 
+    # ── 📘 教學說明（跟各段落逐條對齊；沒有說明的放空字串）──
+    try:
+        edu = _build_verdict_edu(r, stance, kv, bull, bear, conflicts, status_keys, level_keys, pos, kd, inst)
+    except Exception as _edu_e:
+        print(f"[verdict] 教學說明產生失敗：{_edu_e}")
+        edu = {}
+
     return {
         "version": 1,
+        "edu": edu,
         "stance": stance, "stance_label": label, "risk_level": level,
         "bull_score": bull_w, "bear_score": bear_w,
         "headline": headline, "action": action,
@@ -13749,7 +13930,15 @@ def _verdict_for_user(v: dict | None, user: dict | None) -> dict | None:
         out_secs["signals"] = {"available": s.get("available"), "today_count": s.get("today_count"),
                                "active_count": s.get("active_count"), "total": s.get("total"),
                                "locked": True}
-    return {**{k: v[k] for k in v if k not in ("sections",)}, "sections": out_secs,
+    # 📘 教學說明分層：basic（看解說的順序、一句話結論、觀察重點）所有人；其餘依 VERDICT_EDU_TIER["full"]
+    edu = v.get("edu") or {}
+    edu_full = allow.get(VERDICT_EDU_TIER.get("full", "paid"), False)
+    if edu_full:
+        out_edu = edu
+    else:
+        out_edu = {k: edu[k] for k in ("guide", "headline", "action") if k in edu}
+    return {**{k: v[k] for k in v if k not in ("sections", "edu")}, "sections": out_secs, "edu": out_edu,
+            "edu_locked": bool(edu) and not edu_full,
             "locked_sections": locked, "locked": bool(locked)}
 
 

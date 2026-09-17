@@ -1313,6 +1313,25 @@ html[data-theme="dark"] body,html:not([data-theme]) body{background:transparent}
   .sector-node,.stock-tile,.invest-stat,.deep-funnel .df-step,.hd2-deep-btn-primary{transition:none}
   .sector-node:hover,.stock-tile:hover{transform:none}
 }
+/* 📘 綜合解說教學說明（2026/09/17 B方案）*/
+:root{--edu:#2f5fd0;--edu-l:rgba(47,95,208,.07)}
+:root[data-theme="dark"]{--edu:#7aa7ff;--edu-l:rgba(122,167,255,.10)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--edu:#7aa7ff;--edu-l:rgba(122,167,255,.10)}}
+.vd-edu-sw{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--edu);cursor:pointer;user-select:none;background:none;border:none;padding:2px 0;font-family:inherit}
+.vd-edu-sw .sw{width:32px;height:18px;border-radius:18px;background:var(--bg3);position:relative;transition:.2s;flex-shrink:0}
+.vd-edu-sw .sw::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--text3);transition:.2s}
+.vd-edu-on .vd-edu-sw .sw{background:var(--edu)}
+.vd-edu-on .vd-edu-sw .sw::after{left:16px;background:#fff}
+.vd-q{display:inline-block;margin:0 0 4px 18px;font-size:11.5px;color:var(--edu);cursor:pointer;user-select:none}
+.vd-q::before{content:'📘 '}
+.vd-open>.vd-q::after{content:'（收合）';color:var(--text3)}
+.vd-edu{display:none;margin:0 0 8px 18px;background:var(--edu-l);border-left:3px solid var(--edu);border-radius:8px;padding:8px 10px;font-size:12.5px;line-height:1.75;color:var(--text)}
+.vd-open>.vd-edu{display:block}
+.vd-guide{display:none;margin:8px 0 10px;background:var(--bg3);border-radius:10px;padding:9px 12px}
+.vd-edu-on .vd-guide{display:block}
+.vd-guide ol{margin:4px 0 0;padding-left:20px;font-size:12.5px;line-height:1.8;color:var(--text2)}
+.vd-edu-lock{display:none;margin-top:10px;font-size:12px;color:var(--edu);font-weight:700}
+.vd-edu-on .vd-edu-lock{display:block}
 </style>
 <!-- Phase 4（首頁真實資料3D-style圖表）：state-orb量表／市場氣氛柱狀／資金雷達橫條，
      全部用ECharts Canvas 2D linear-gradient＋shadowBlur畫，不用WebGL/three.js。
@@ -3962,17 +3981,36 @@ function renderAnalysisCards(d) {
 
 // ── 綜合解說（2026/09/17新增，文件B階段7模版版）──
 // 內容全部由後端 _build_verdict 產出，前端只負責排版；會員看不到的段落後端已經拿掉（locked_sections）。
+// 📘 教學說明開關（記在瀏覽器，下次打開維持同一狀態）
+function _vdEduOn(){ try{ return localStorage.getItem('verdictEdu') === '1'; }catch(e){ return false; } }
+function _vdToggleEdu(){
+  const on = !_vdEduOn();
+  try{ localStorage.setItem('verdictEdu', on ? '1' : '0'); }catch(e){}
+  const card = document.querySelector('#verdictBox .vd-card');
+  if(!card) return;
+  card.classList.toggle('vd-edu-on', on);
+  card.querySelectorAll('.vd-blk').forEach(b => b.classList.toggle('vd-open', on));
+}
+function _vdTg(el){ el.parentElement.classList.toggle('vd-open'); }
+
 function renderVerdict(v){
   const box = document.getElementById('verdictBox');
   if(!box) return;
   if(!v || !v.headline){ box.innerHTML = ''; return; }
   const esc = (t) => String(t ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const sec = v.sections || {};
+  const edu = v.edu || {};
+  const eduOn = _vdEduOn();
+  const openCls = eduOn ? ' vd-open' : '';
+  // 一段內容＋可展開的教學說明（沒有說明就只顯示內容）
+  const blk = (inner, eduText, q, indent0) => eduText
+    ? `<div class="vd-blk${openCls}">${inner}<span class="vd-q" onclick="_vdTg(this)"${indent0 ? ' style="margin-left:0"' : ''}>${q || '這代表什麼？'}</span><div class="vd-edu"${indent0 ? ' style="margin-left:0"' : ''}>${esc(eduText).replace(/\n/g, '<br>')}</div></div>`
+    : inner;
   const stanceColor = {bull:'var(--dn)', bull_wait:'var(--amber)', bull_caution:'var(--amber)', neutral:'var(--text2)', bear:'var(--up)'}[v.stance] || 'var(--text2)';
-  const list = (title, arr, icon, color) => (arr && arr.length) ? `
+  const list = (title, arr, icon, color, eduArr) => (arr && arr.length) ? `
     <div style="margin-top:12px">
       <div style="font-size:12px;font-weight:800;color:${color || 'var(--text2)'};margin-bottom:4px">${title}</div>
-      ${arr.map(t => `<div style="display:flex;gap:6px;font-size:13px;line-height:1.65;color:var(--text)"><span style="flex-shrink:0">${icon}</span><span>${esc(t)}</span></div>`).join('')}
+      ${arr.map((t, i) => blk(`<div style="display:flex;gap:6px;font-size:13px;line-height:1.65;color:var(--text)"><span style="flex-shrink:0">${icon}</span><span>${esc(t)}</span></div>`, (eduArr || [])[i])).join('')}
     </div>` : '';
   const stateMeta = {today:['🟢','今天剛轉強'], active:['🔵','轉強中'], none:['⚪','未轉強']};
   let sigHtml = '';
@@ -3992,31 +4030,42 @@ function renderVerdict(v){
     </div>`;
   }
   const conflicts = (sec.conflicts || []);
+  const cfEdu = edu.conflicts || [];
   const cfHtml = (sec.conflicts !== undefined) ? `
     <div style="margin-top:12px;background:var(--amber-l, rgba(245,158,11,.1));border-radius:10px;padding:9px 11px">
       <div style="font-size:12px;font-weight:800;color:var(--amber);margin-bottom:4px">⚖️ 矛盾與最大的問題</div>
-      ${conflicts.map(t => `<div style="font-size:13px;line-height:1.65;color:var(--text)">・${esc(t)}</div>`).join('') || '<div style="font-size:13px;color:var(--text2)">各項訊號方向沒有明顯矛盾</div>'}
-      <div style="font-size:13px;line-height:1.65;color:var(--text);margin-top:4px"><b>現在最大的問題：</b>${esc(sec.top_problem)}</div>
+      ${conflicts.map((t, i) => blk(`<div style="font-size:13px;line-height:1.65;color:var(--text)">・${esc(t)}</div>`, cfEdu[i], '為什麼會矛盾？', true)).join('') || '<div style="font-size:13px;color:var(--text2)">各項訊號方向沒有明顯矛盾</div>'}
+      ${blk(`<div style="font-size:13px;line-height:1.65;color:var(--text);margin-top:4px"><b>現在最大的問題：</b>${esc(sec.top_problem)}</div>`, edu.top_problem, '這是怎麼挑的？', true)}
     </div>` : '';
+  const scHtml = (sec.scenarios && sec.scenarios.length)
+    ? `<div style="margin-top:12px"><div style="font-size:12px;font-weight:800;color:var(--text2);margin-bottom:4px">🔀 接下來的情境</div>${blk(sec.scenarios.map(t => `<div style="display:flex;gap:6px;font-size:13px;line-height:1.65;color:var(--text)"><span style="flex-shrink:0">→</span><span>${esc(t)}</span></div>`).join(''), edu.scenarios, '為什麼都看收盤價？')}</div>`
+    : '';
+  const guideHtml = (edu.guide && edu.guide.length)
+    ? `<div class="vd-guide"><div style="font-size:12.5px;font-weight:800;color:var(--edu)">📘 看這份解說的順序</div><ol>${edu.guide.map(g => `<li>${esc(g)}</li>`).join('')}</ol></div>`
+    : '';
+  const hasEdu = !!(edu.headline || edu.action);
   const locked = v.locked && (v.locked_sections || []).length;
   box.innerHTML = `
-  <div style="background:var(--bg2);border:1px solid var(--border);border-left:4px solid ${stanceColor};border-radius:var(--radius-lg);padding:14px 14px 12px;margin:0 0 14px">
+  <div class="vd-card${eduOn ? ' vd-edu-on' : ''}" style="background:var(--bg2);border:1px solid var(--border);border-left:4px solid ${stanceColor};border-radius:var(--radius-lg);padding:14px 14px 12px;margin:0 0 14px">
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
       <span style="font-size:15px;font-weight:800;color:var(--text)">🧭 綜合解說</span>
       <span style="font-size:12px;font-weight:800;padding:2px 10px;border-radius:20px;border:1px solid ${stanceColor};color:${stanceColor}">${esc(v.stance_label)}</span>
       <span style="font-size:11px;color:var(--text3)">看多分數 ${v.bull_score}・看空分數 ${v.bear_score}</span>
+      ${hasEdu ? `<button type="button" class="vd-edu-sw" onclick="_vdToggleEdu()"><span>📘 教學模式</span><span class="sw"></span></button>` : ''}
     </div>
-    <div style="font-size:14px;line-height:1.7;color:var(--text);font-weight:600">${esc(sec.headline || v.headline)}</div>
-    ${sec.action ? `<div style="font-size:13px;line-height:1.65;color:var(--text2);margin-top:4px">👀 觀察重點：${esc(sec.action)}</div>` : ''}
-    ${list('📍 現在的狀況', sec.status, '•')}
-    ${list('📈 看多的理由', sec.bull, '＋', 'var(--dn)')}
-    ${list('📉 看空的理由', sec.bear, '－', 'var(--up)')}
+    ${guideHtml}
+    ${blk(`<div style="font-size:14px;line-height:1.7;color:var(--text);font-weight:600">${esc(sec.headline || v.headline)}</div>`, edu.headline, '這個結論怎麼來的？', true)}
+    ${sec.action ? blk(`<div style="font-size:13px;line-height:1.65;color:var(--text2);margin-top:4px">👀 觀察重點：${esc(sec.action)}</div>`, edu.action, '怎麼看觀察重點？', true) : ''}
+    ${list('📍 現在的狀況', sec.status, '•', null, edu.status)}
+    ${list('📈 看多的理由', sec.bull, '＋', 'var(--dn)', edu.bull)}
+    ${list('📉 看空的理由', sec.bear, '－', 'var(--up)', edu.bear)}
     ${cfHtml}
-    ${list('🎯 關鍵價位', sec.levels, '•')}
-    ${list('🔀 接下來的情境', sec.scenarios, '→')}
+    ${list('🎯 關鍵價位', sec.levels, '•', null, edu.levels)}
+    ${scHtml}
     ${sigHtml}
     ${locked ? `<div style="margin-top:10px;font-size:12px;color:var(--green);font-weight:700">🔒 完整解說（狀況、多空理由、矛盾、關鍵價位、情境、12金叉逐項）為付費會員內容</div>` : ''}
-    <div style="font-size:10px;color:var(--text3);margin-top:10px;line-height:1.6">以上由系統依技術、籌碼、營收資料自動整理，只描述條件、不預測漲跌，不構成投資建議。</div>
+    ${v.edu_locked ? `<div class="vd-edu-lock">📘 各段落的完整教學說明為付費會員內容</div>` : ''}
+    <div style="font-size:10px;color:var(--text3);margin-top:10px;line-height:1.6">以上由系統依技術、籌碼、營收資料自動整理，只描述條件、不預測漲跌，不構成投資建議。${hasEdu ? '📘 教學說明為一般技術分析知識。' : ''}</div>
   </div>`;
 }
 
