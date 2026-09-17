@@ -7198,7 +7198,7 @@ def _render_email(title, body_html, accent="#1D9E75", title_icon="",
         f'<p style="margin:0;font-size:14px;color:#333;font-weight:600">&mdash; 線上有位 SoftGlow 團隊 敬上</p>'
         f'<p style="margin:12px 0 0;font-size:12px;color:#9ca3af;line-height:1.8">'
         f'如未收到相關通知、發票，或有任何帳號問題，<br>'
-        f'歡迎來信客服：<a href="mailto:watione@yahoo.com.tw" style="color:#1D9E75;text-decoration:none">watione@yahoo.com.tw</a><br>'
+        f'歡迎來信客服：<a href="mailto:wation168@gmail.com" style="color:#1D9E75;text-decoration:none">wation168@gmail.com</a><br>'
         f'線上有位 SoftGlow &copy; 2026'
         f'</p></div>'
         f'</div>'
@@ -10342,7 +10342,7 @@ async def create_order_recurring(request: Request):
         raise HTTPException(
             status_code=409,
             detail=f"您目前已是付費會員（到期日 {_mem['expire_at']}），定期訂閱會自動續約，不需要重複購買。"
-                   f"如有疑問請來信 watione@yahoo.com.tw"
+                   f"如有疑問請來信 wation168@gmail.com"
         )
     # ② 30分鐘內已有訂單且綠界查得到「已付款」→ 付款其實成功了，只是開通通知還在路上，擋下第二次刷卡
     for _r in _recent:
@@ -10350,7 +10350,7 @@ async def create_order_recurring(request: Request):
             raise HTTPException(
                 status_code=409,
                 detail="您剛才的付款已經成功，系統正在開通中，請勿重複付款。"
-                       "請約1分鐘後重新整理頁面；若5分鐘後仍未開通，請來信 watione@yahoo.com.tw"
+                       "請約1分鐘後重新整理頁面；若5分鐘後仍未開通，請來信 wation168@gmail.com"
             )
 
     trade_no = f"XYWR{int(_t.time())}{secrets.token_hex(3).upper()}"
@@ -10829,7 +10829,7 @@ async def cancel_recurring(request: Request, current_user: dict = Depends(get_cu
             return JSONResponse(content={"ok": True, "msg": "已成功取消定期訂閱"})
         else:
             print(f"[取消定期定額] 綠界回應異常: {result}")
-            raise HTTPException(status_code=500, detail="取消失敗，請聯繫客服 watione@yahoo.com.tw")
+            raise HTTPException(status_code=500, detail="取消失敗，請聯繫客服 wation168@gmail.com")
     except httpx.TimeoutException:
         raise HTTPException(status_code=500, detail="連線綠界逾時，請稍後再試")
 

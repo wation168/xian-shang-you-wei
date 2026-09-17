@@ -735,7 +735,8 @@ async function quickReset(email){
 // 推測是Zeabur反向代理層處理 fetch 串流大檔案跟直接瀏覽器導覽行為不同，
 // 優先確保備份功能穩定可用，這裡維持原本 window.open 的做法。
 function doBackup(){
-  const url=`${API}/admin/backup-db?key=${getAdminKey()}`;
+  // 2026/09/17修正：密鑰含 + & # % 等符號時沒編碼會被改掉→後端回「無權限」
+  const url=`${API}/admin/backup-db?key=${encodeURIComponent(getAdminKey())}`;
   window.open(url,'_blank');
   toast('📥 備份下載中...');
 }
