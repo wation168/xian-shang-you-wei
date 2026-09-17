@@ -178,31 +178,14 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"   ⚠️ 開盤熱門股恢復失敗：{e}")
 
-    # 啟動時主動載入 FinMind 全台股名稱快取，避免查詢時才抓造成延遲或亂碼
+    # 啟動時載入全台股名稱快取（2026/09/17改：FinMind失敗時改用資料庫備份＋證交所／櫃買官方清單，並自動重試）
     try:
-        import urllib.request as _ureq, json as _json
-        url = (f"https://api.finmindtrade.com/api/v4/data"
-               f"?dataset=TaiwanStockInfo&token={FINMIND_TOKEN}")
-        req = _ureq.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with _ureq.urlopen(req, timeout=10) as resp:
-            data = _json.loads(resp.read())
-        if data.get("status") == 200:
-            count = 0
-            for item in data.get("data", []):
-                sid = str(item.get("stock_id", ""))
-                sname = str(item.get("stock_name", ""))
-                stype = str(item.get("type", "")).lower()   # "twse" / "otc" / "rotc"
-                if sid and sname and sid not in _name_cache:
-                    _name_cache[sid] = sname
-                    _name_to_code[sname] = sid
-                    count += 1
-                if sid and stype:
-                    _market_cache[sid] = stype
-            print(f"   ✅ 股名快取載入完成，共 {count} 筆")
-        else:
-            print(f"   ⚠️ FinMind 回應異常：{data.get('msg','')}")
+        _load_stock_name_cache("啟動", allow_official=False)
     except Exception as e:
-        print(f"   ⚠️ 股名快取載入失敗（{e}），將在查詢時重試")
+        print(f"   ⚠️ 股名快取載入失敗（{e}）")
+    if len(_name_cache) < _NAME_CACHE_MIN:
+        import threading as _th_nm
+        _th_nm.Thread(target=_load_stock_name_cache, args=("啟動背景補抓",), daemon=True).start()
 
     # 啟動 APScheduler 排程
     _bg_scheduler = None
@@ -507,6 +490,7 @@ async def lifespan(app: FastAPI):
         _bg_scheduler.add_job(_clear_quote_cache,       "cron",     hour=9,  minute=0,  day_of_week="mon-fri")
         _bg_scheduler.add_job(_clear_quote_cache,       "cron",     hour=14, minute=0,  day_of_week="mon-fri")  # 收盤後清快取，確保盤後覆盤資料一致
         _bg_scheduler.add_job(_run_補單_job,            "interval", minutes=10)  # 2026/09/17：原每天08:00，改每10分鐘
+        _bg_scheduler.add_job(_ensure_stock_name_cache,  "interval", minutes=10)  # 2026/09/17：股名快取不足時自動重抓
         # 2026/08/16取消：帥哥鴻確認當初這支每日批次預產生報告是為了SEO覆蓋率，
         # 但實際上不是所有股票都會有人搜尋，天天跑一輪去硬產生冷門股報告不划算；
         # 加上get_report()已修復成「查詢當下沒有今天的資料就即時分析」，資料正確性
@@ -1709,6 +1693,10 @@ STOCK_NAMES = {
     "3529": "力旺", "3532": "台勝科", "5483": "中美晶", "4989": "榮科",
 }
 
+for _c_sn, _n_sn in STOCK_NAMES.items():
+    _name_to_code.setdefault(_n_sn, _c_sn)
+
+
 def get_stock_name(symbol: str) -> str:
     """取得台股中文名稱：靜態表 → 快取 → FinMind → 回傳代號"""
     code = symbol.replace(".TWO", "").replace(".TW", "").strip()
@@ -1721,9 +1709,202 @@ def get_stock_name(symbol: str) -> str:
     if code in _name_cache:
         return _name_cache[code]
 
-    # 3. 快取沒命中 → 直接回傳代號（A4: 不再打全量 API，啟動時已預載）
-    # 若真的是新上市股票，下次重啟服務時 lifespan 會自動載入
+    # 3. 快取沒命中 → 先回傳代號，背景補抓整份清單（有節流，不會每次都打）
+    #    2026/09/17：啟動時 FinMind 額度用完，整份股名快取是空的，股名全部消失，
+    #    原本註解寫「查詢時重試」但其實沒有重試，這裡補上。
+    if code.isdigit():
+        _trigger_name_cache_reload()
     return code
+
+
+# ── 股名快取載入（2026/09/17新增）──
+# 來源順序：FinMind TaiwanStockInfo → 資料庫備份（上次成功的清單）→ 證交所／櫃買官方清單
+from contextlib import contextmanager as _contextmanager_nm
+_NAME_CACHE_MIN = 1500                     # 全台股約 2000+ 檔，少於這個數字視為沒載入完整
+_NAME_RELOAD_STATE = {"last": 0.0, "running": False}
+_NAME_RELOAD_GAP = 300                     # 背景重抓至少間隔 5 分鐘
+
+
+@_contextmanager_nm
+def _name_cache_db():
+    """用法：with _name_cache_db() as conn（自動 commit + close）"""
+    conn = sqlite3.connect(DB_PATH, timeout=10)
+    conn.execute("""CREATE TABLE IF NOT EXISTS stock_name_backup (
+        stock_id TEXT PRIMARY KEY, stock_name TEXT NOT NULL, market TEXT DEFAULT '',
+        updated_at TEXT)""")
+    conn.execute("""CREATE TABLE IF NOT EXISTS stock_info_backup (
+        id INTEGER PRIMARY KEY, data TEXT NOT NULL, updated_at TEXT)""")
+    try:
+        yield conn
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def _put_names(pairs, overwrite: bool = False) -> int:
+    """pairs: [(代號, 名稱, 市場別)]；回傳新增筆數"""
+    n = 0
+    for sid, sname, mkt in pairs:
+        sid = str(sid or "").strip()
+        sname = str(sname or "").strip()
+        if not sid or not sname:
+            continue
+        if overwrite or sid not in _name_cache:
+            if sid not in _name_cache:
+                n += 1
+            _name_cache[sid] = sname
+        _name_to_code.setdefault(sname, sid)
+        if mkt and (overwrite or sid not in _market_cache):
+            _market_cache[sid] = mkt
+    return n
+
+
+def _names_from_finmind() -> list:
+    """回傳 FinMind TaiwanStockInfo 原始清單；失敗回 []"""
+    import urllib.request as _ur, urllib.error as _ue, json as _j
+    if _time_mod.time() < _FINMIND_FAIL_UNTIL["t"]:
+        print("   股名：FinMind 額度暫停中，略過")
+        return []
+    try:
+        url = (f"https://api.finmindtrade.com/api/v4/data"
+               f"?dataset=TaiwanStockInfo&token={FINMIND_TOKEN}")
+        req = _ur.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with _ur.urlopen(req, timeout=15) as resp:
+            data = _j.loads(resp.read())
+        if data.get("status") == 200 and data.get("data"):
+            return data["data"]
+        print(f"   ⚠️ 股名：FinMind 回應異常 status={data.get('status')} msg={data.get('msg','')}")
+    except _ue.HTTPError as e:
+        if e.code in (402, 429):
+            _FINMIND_FAIL_UNTIL["t"] = _time_mod.time() + 300
+        print(f"   ⚠️ 股名：FinMind HTTP {e.code}")
+    except Exception as e:
+        print(f"   ⚠️ 股名：FinMind 失敗 {e}")
+    return []
+
+
+def _names_from_official() -> list:
+    """證交所（上市）＋櫃買（上櫃）官方清單 → [(代號, 名稱, 市場別)]"""
+    import urllib.request as _ur, csv as _csv, io as _io, json as _j
+    out = []
+    try:
+        req = _ur.Request("https://www.twse.com.tw/rwd/zh/afterTrading/STOCK_DAY_ALL", headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+            "Referer": "https://www.twse.com.tw/",
+        })
+        with _ur.urlopen(req, timeout=15, context=_TWSE_SSL_CTX) as r:
+            raw = r.read().decode("utf-8-sig", errors="replace")
+        cnt = 0
+        for row in _csv.reader(_io.StringIO(raw)):
+            if len(row) < 3:
+                continue
+            cells = [str(x).strip().strip('="').strip() for x in row[:3]]
+            # 欄位順序：日期,代號,名稱,...（既有程式註解）；若官方改成 代號,名稱,... 也能判斷
+            for ci in (1, 0):
+                code, name = cells[ci], cells[ci + 1]
+                if (code.isalnum() and 4 <= len(code) <= 6 and code[:4].isdigit()
+                        and name and not name.replace(",", "").replace(".", "").isdigit()):
+                    out.append((code, name, "twse"))
+                    cnt += 1
+                    break
+        print(f"   股名：證交所清單 {cnt} 筆")
+    except Exception as e:
+        print(f"   ⚠️ 股名：證交所清單失敗 {e}")
+    try:
+        req = _ur.Request("https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes",
+                          headers={"User-Agent": "Mozilla/5.0", "Accept": "application/json"})
+        with _ur.urlopen(req, timeout=15, context=_TWSE_SSL_CTX) as r:
+            arr = _j.loads(r.read().decode("utf-8-sig", errors="replace"))
+        cnt = 0
+        for it in arr or []:
+            code = str(it.get("SecuritiesCompanyCode", "")).strip()
+            name = str(it.get("CompanyName", "")).strip()
+            if code and name:
+                out.append((code, name, "otc"))
+                cnt += 1
+        print(f"   股名：櫃買清單 {cnt} 筆")
+    except Exception as e:
+        print(f"   ⚠️ 股名：櫃買清單失敗 {e}")
+    return out
+
+
+def _load_stock_name_cache(reason: str = "", allow_official: bool = True) -> int:
+    """載入股名快取，回傳目前快取筆數"""
+    global _stock_info_cache, _stock_info_ts
+    if _NAME_RELOAD_STATE["running"]:
+        return len(_name_cache)
+    _NAME_RELOAD_STATE["running"] = True
+    _NAME_RELOAD_STATE["last"] = _time_mod.time()
+    try:
+        now_s = datetime.now(ZoneInfo("Asia/Taipei")).strftime("%Y-%m-%d %H:%M:%S")
+        # ① FinMind
+        info = _names_from_finmind()
+        if info:
+            added = _put_names([(i.get("stock_id"), i.get("stock_name"), str(i.get("type", "")).lower())
+                                for i in info])
+            _stock_info_cache = info
+            _stock_info_ts = _time_mod.time()
+            print(f"   ✅ 股名快取（{reason}）FinMind 載入完成，新增 {added} 筆，共 {len(_name_cache)} 筆")
+            try:
+                with _name_cache_db() as conn:
+                    seen = set()
+                    rows = []
+                    for i in info:
+                        sid = str(i.get("stock_id", "")).strip()
+                        nm = str(i.get("stock_name", "")).strip()
+                        if sid and nm and sid not in seen:
+                            seen.add(sid)
+                            rows.append((sid, nm, str(i.get("type", "")).lower(), now_s))
+                    conn.executemany("INSERT OR REPLACE INTO stock_name_backup VALUES (?,?,?,?)", rows)
+                    conn.execute("INSERT OR REPLACE INTO stock_info_backup (id, data, updated_at) VALUES (1,?,?)",
+                                 (_json_mod.dumps(info, ensure_ascii=False), now_s))
+            except Exception as e:
+                print(f"   ⚠️ 股名備份寫入失敗 {e}")
+            return len(_name_cache)
+        # ② 資料庫備份
+        try:
+            with _name_cache_db() as conn:
+                rows = conn.execute("SELECT stock_id, stock_name, market FROM stock_name_backup").fetchall()
+            if rows:
+                added = _put_names(rows)
+                print(f"   ✅ 股名快取（{reason}）改用資料庫備份，新增 {added} 筆，共 {len(_name_cache)} 筆")
+        except Exception as e:
+            print(f"   ⚠️ 股名備份讀取失敗 {e}")
+        # ③ 官方清單（備份也不夠時才抓）
+        if allow_official and len(_name_cache) < _NAME_CACHE_MIN:
+            off = _names_from_official()
+            if off:
+                added = _put_names(off)
+                print(f"   ✅ 股名快取（{reason}）改用官方清單，新增 {added} 筆，共 {len(_name_cache)} 筆")
+                try:
+                    with _name_cache_db() as conn:
+                        conn.executemany(
+                            "INSERT OR IGNORE INTO stock_name_backup VALUES (?,?,?,?)",
+                            [(c, n, m, now_s) for c, n, m in off])
+                except Exception as e:
+                    print(f"   ⚠️ 股名備份寫入失敗 {e}")
+        if len(_name_cache) < _NAME_CACHE_MIN:
+            print(f"   ⚠️ 股名快取（{reason}）仍不完整（{len(_name_cache)} 筆），10分鐘後自動重試")
+        return len(_name_cache)
+    finally:
+        _NAME_RELOAD_STATE["running"] = False
+
+
+def _ensure_stock_name_cache():
+    """排程用：快取不完整，或還沒拿到 FinMind 完整資料（產業別等）時重抓"""
+    if len(_name_cache) < _NAME_CACHE_MIN or not _stock_info_cache:
+        _load_stock_name_cache("排程重試")
+
+
+def _trigger_name_cache_reload():
+    """查不到股名時，背景補抓（至少間隔5分鐘）"""
+    if len(_name_cache) >= _NAME_CACHE_MIN:
+        return
+    if _NAME_RELOAD_STATE["running"] or _time_mod.time() - _NAME_RELOAD_STATE["last"] < _NAME_RELOAD_GAP:
+        return
+    import threading as _th
+    _NAME_RELOAD_STATE["last"] = _time_mod.time()
+    _th.Thread(target=_load_stock_name_cache, args=("查詢時補抓",), daemon=True).start()
 
 
 def calc_rsi(closes: np.ndarray, period: int = 14) -> np.ndarray:
@@ -6792,11 +6973,24 @@ def get_all_stock_info() -> list:
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=8) as resp:
             data = _json.loads(resp.read())
-        if data.get("status") == 200:
+        if data.get("status") == 200 and data.get("data"):
             _stock_info_cache = data.get("data", [])
             _stock_info_ts = time.time()
+            return _stock_info_cache
+        print(f"FinMind StockInfo 回應異常：status={data.get('status')} msg={data.get('msg','')}")
     except Exception as e:
         print(f"FinMind StockInfo 失敗：{e}")
+    # 2026/09/17：FinMind 失敗且記憶體是空的 → 用資料庫備份（上次成功的清單）
+    if not _stock_info_cache:
+        try:
+            with _name_cache_db() as conn:
+                row = conn.execute("SELECT data FROM stock_info_backup WHERE id=1").fetchone()
+            if row:
+                _stock_info_cache = _json.loads(row[0])
+                _stock_info_ts = time.time() - 86400 + 600   # 10分鐘後再試 FinMind
+                print(f"FinMind StockInfo 改用資料庫備份（{len(_stock_info_cache)} 筆）")
+        except Exception as e:
+            print(f"StockInfo 備份讀取失敗：{e}")
     return _stock_info_cache
 
 
