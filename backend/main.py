@@ -503,6 +503,7 @@ async def lifespan(app: FastAPI):
         _bg_scheduler.add_job(_run_expire_notice_job,   "cron",     hour=9,  minute=0)
         _bg_scheduler.add_job(_reset_alert_triggered,   "cron",     hour=9,  minute=0,  day_of_week="mon-fri")
         _bg_scheduler.add_job(_run_intraday_alert_job,  "interval", minutes=5)
+        _bg_scheduler.add_job(_run_intraday_snapshot_job, "interval", minutes=5)  # 江波圖方案B：記錄盤中價格
         _bg_scheduler.add_job(_clear_quote_cache,       "cron",     hour=9,  minute=0,  day_of_week="mon-fri")
         _bg_scheduler.add_job(_clear_quote_cache,       "cron",     hour=14, minute=0,  day_of_week="mon-fri")  # 收盤後清快取，確保盤後覆盤資料一致
         _bg_scheduler.add_job(_run_補單_job,            "interval", minutes=10)  # 2026/09/17：原每天08:00，改每10分鐘
@@ -5550,6 +5551,296 @@ def _get_live_quote_data(code: str) -> dict | None:
     if _qc and _qc.get("data", {}).get("price"):
         return _qc["data"]
     return None
+
+
+# ══════════════════════════════════════════════════════════
+# 江波圖（盤中走勢小線圖）＋現價＋漲跌%　2026/09/17
+# 方案A：Yahoo 5 分鐘資料畫線，現價用 TWSE MIS 即時價補最後一點
+# 方案B：Yahoo 連不到時，改用本站每 5 分鐘自己記錄的價格（intraday_ticks）
+# ══════════════════════════════════════════════════════════
+_INTRADAY_CACHE: dict = {}      # code -> (ts, data)
+_INTRADAY_WANTED: dict = {}     # code -> 最近一次被請求的時間（方案B排程只記錄這些股票）
+_MIS_BATCH_CACHE: dict = {}     # code -> (ts, quote)
+_YAHOO_INTRA_STATE = {"fails": 0, "until": 0.0}
+_INTRADAY_MAX_IDS = 60
+
+
+def _tw_now():
+    from zoneinfo import ZoneInfo as _ZIi
+    return datetime.now(_ZIi("Asia/Taipei"))
+
+
+def _intraday_db():
+    conn = sqlite3.connect(DB_PATH, timeout=10)
+    conn.execute("""CREATE TABLE IF NOT EXISTS intraday_ticks (
+        code TEXT, d TEXT, hm TEXT, price REAL, prev REAL,
+        PRIMARY KEY (code, d, hm))""")
+    return conn
+
+
+def _intraday_record(quotes: dict):
+    """把盤中即時價記到 intraday_ticks（以 5 分鐘為一格），給方案B用"""
+    now = _tw_now()
+    if now.weekday() >= 5:
+        return
+    hm_i = now.hour * 100 + now.minute
+    if hm_i < 900 or hm_i > 1335:
+        return
+    today = now.strftime("%Y-%m-%d")
+    slot = min(now.hour * 60 + now.minute, 13 * 60 + 30)
+    slot -= slot % 5
+    hm = f"{slot // 60:02d}:{slot % 60:02d}"
+    rows = [(c, today, hm, q["price"], q.get("y")) for c, q in quotes.items()
+            if q.get("price") and q.get("date") == today]
+    if not rows:
+        return
+    try:
+        with _intraday_db() as conn:
+            conn.executemany("INSERT OR REPLACE INTO intraday_ticks (code,d,hm,price,prev) VALUES (?,?,?,?,?)", rows)
+    except Exception as e:
+        print(f"[INTRADAY] 記錄失敗：{e}")
+
+
+def _mis_batch_quotes(codes) -> dict:
+    """一次向 TWSE MIS 取多檔即時價；回傳 {code: {price, y, date}}（20 秒快取）"""
+    import urllib.request as _ur, json as _json, time as _t
+    now_ts = _t.time()
+    out, need = {}, []
+    for c in codes:
+        hit = _MIS_BATCH_CACHE.get(c)
+        if hit and now_ts - hit[0] < 20:
+            out[c] = hit[1]
+        else:
+            need.append(c)
+
+    def _f(v):
+        try:
+            x = float(str(v).strip())
+            return x if x > 0 else None
+        except Exception:
+            return None
+
+    def _first(raw):
+        for p in str(raw or "").split("_"):
+            x = _f(p)
+            if x:
+                return x
+        return None
+
+    fresh = {}
+    for i in range(0, len(need), 20):
+        chunk = need[i:i + 20]
+        ex_ch = "|".join(f"tse_{c}.tw|otc_{c}.tw" for c in chunk)
+        try:
+            req = _ur.Request(
+                f"https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch={ex_ch}&json=1&delay=0",
+                headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                         "Referer": "https://mis.twse.com.tw/stock/index.jsp",
+                         "Accept": "application/json"})
+            with _ur.urlopen(req, timeout=8, context=_TWSE_SSL_CTX) as resp:
+                arr = _json.loads(resp.read()).get("msgArray", []) or []
+        except Exception as e:
+            print(f"[INTRADAY] MIS 批次失敗：{e}")
+            continue
+        for it in arr:
+            c = str(it.get("c", "")).strip().upper()
+            y = _f(it.get("y"))
+            if not c or not y:
+                continue
+            price = _f(it.get("z"))
+            if not price:
+                b1, a1 = _first(it.get("b")), _first(it.get("a"))
+                price = round((b1 + a1) / 2, 2) if (b1 and a1) else None
+            d = str(it.get("d", ""))
+            d = f"{d[:4]}-{d[4:6]}-{d[6:8]}" if len(d) == 8 else ""
+            q = {"price": price, "y": y, "date": d, "name": str(it.get("n", "")).strip()}
+            if c not in fresh or (price and not fresh[c].get("price")):
+                fresh[c] = q
+    for c, q in fresh.items():
+        _MIS_BATCH_CACHE[c] = (now_ts, q)
+        out[c] = q
+    if fresh:
+        _intraday_record(fresh)
+    return out
+
+
+def _yahoo_intraday(code: str):
+    """Yahoo 5 分鐘資料 → {date, prev_close, points:[[hm, price],...]}；失敗回 None"""
+    import urllib.request as _ur, json as _j, time as _t
+    from datetime import timedelta as _td
+    if _t.time() < _YAHOO_INTRA_STATE["until"]:
+        return None
+    sfxs = [".TWO", ".TW"] if _market_cache.get(code, "") in ("otc", "rotc") else [".TW", ".TWO"]
+    for sfx in sfxs:
+        try:
+            req = _ur.Request(
+                f"https://query1.finance.yahoo.com/v8/finance/chart/{code}{sfx}?range=5d&interval=5m",
+                headers={"User-Agent": "Mozilla/5.0"})
+            with _ur.urlopen(req, timeout=6) as resp:
+                j = _j.loads(resp.read())
+        except Exception as e:
+            if "404" in str(e):
+                continue
+            _YAHOO_INTRA_STATE["fails"] += 1
+            if _YAHOO_INTRA_STATE["fails"] >= 5:
+                _YAHOO_INTRA_STATE["until"] = _t.time() + 600
+                _YAHOO_INTRA_STATE["fails"] = 0
+                print(f"[INTRADAY] Yahoo 連續失敗，暫停 10 分鐘改用本站記錄（最後錯誤：{e}）")
+            return None
+        res = ((j.get("chart") or {}).get("result") or [None])[0]
+        if not res or not res.get("timestamp"):
+            continue
+        _YAHOO_INTRA_STATE["fails"] = 0
+        closes = ((res.get("indicators") or {}).get("quote") or [{}])[0].get("close") or []
+        days: dict = {}
+        for ts, c in zip(res["timestamp"], closes):
+            if c is None:
+                continue
+            tw = datetime.utcfromtimestamp(ts) + _td(hours=8)
+            hm = tw.strftime("%H:%M")
+            if hm < "09:00" or hm > "13:30":
+                continue
+            days.setdefault(tw.strftime("%Y-%m-%d"), []).append([hm, round(float(c), 2)])
+        if not days:
+            continue
+        ds = sorted(days)
+        last = ds[-1]
+        meta = res.get("meta") or {}
+        if len(ds) >= 2:
+            prev = days[ds[-2]][-1][1]
+        else:
+            prev = meta.get("previousClose") or meta.get("chartPreviousClose")
+        pts = days[last]
+        # 收盤後 Yahoo 最後一格可能不是收盤價，用 regularMarketPrice 校正
+        rmp = meta.get("regularMarketPrice")
+        rmt = meta.get("regularMarketTime")
+        if rmp and rmt and (datetime.utcfromtimestamp(rmt) + _td(hours=8)).strftime("%Y-%m-%d") == last:
+            pts[-1][1] = round(float(rmp), 2)
+        return {"date": last, "prev_close": round(float(prev), 2) if prev else None, "points": pts}
+    return None
+
+
+def _snapshot_intraday(code: str, date: str | None = None):
+    """方案B：從本站記錄讀出走勢（date 為 None 時取最近一天）"""
+    try:
+        with _intraday_db() as conn:
+            if not date:
+                r = conn.execute("SELECT MAX(d) FROM intraday_ticks WHERE code=?", (code,)).fetchone()
+                date = r[0] if r else None
+                if not date:
+                    return None
+            rows = conn.execute("SELECT hm, price, prev FROM intraday_ticks WHERE code=? AND d=? ORDER BY hm",
+                                (code, date)).fetchall()
+    except Exception:
+        return None
+    if not rows:
+        return None
+    prev = next((r[2] for r in reversed(rows) if r[2]), None)
+    return {"date": date, "prev_close": prev, "points": [[r[0], r[1]] for r in rows]}
+
+
+def _intraday_one(code: str, mis: dict | None) -> dict:
+    now = _tw_now()
+    today = now.strftime("%Y-%m-%d")
+    hm_now = now.strftime("%H:%M")
+    live_day = now.weekday() < 5 and hm_now >= "09:00"
+    src = "yahoo"
+    base = _yahoo_intraday(code)
+    mis_today = bool(mis and mis.get("date") == today and mis.get("price") and live_day)
+    if mis_today and (not base or base["date"] != today):
+        snap = _snapshot_intraday(code, today)
+        if snap:
+            base, src = snap, "snapshot"
+        elif not base or base["date"] < today:
+            base, src = {"date": today, "prev_close": None, "points": []}, "live"
+    if not base:
+        base = _snapshot_intraday(code)
+        src = "snapshot" if base else "none"
+    if not base:
+        base = {"date": (mis or {}).get("date") or "", "prev_close": None, "points": []}
+    pts = [list(p) for p in base["points"]]
+    prev = base.get("prev_close")
+    if mis_today and base["date"] == today:
+        prev = mis.get("y") or prev
+        hm = min(hm_now, "13:30")
+        if pts and pts[-1][0] >= hm:
+            pts[-1][1] = mis["price"]
+        else:
+            pts.append([hm, mis["price"]])
+    elif mis and not prev and mis.get("date") == base["date"]:
+        prev = mis.get("y")
+    price = pts[-1][1] if pts else ((mis or {}).get("price") or (mis or {}).get("y"))
+    chg = pct = None
+    if price and prev:
+        chg = round(price - prev, 2)
+        pct = round(chg / prev * 100, 2)
+    return {
+        "code": code,
+        "name": _name_cache.get(code) or (mis or {}).get("name") or "",
+        "price": price, "prev_close": prev, "change": chg, "change_pct": pct,
+        "date": base["date"], "points": pts, "source": src,
+        "live": bool(mis_today and _is_trading_session()),
+    }
+
+
+@app.get("/api/intraday")
+def api_intraday(ids: str = ""):
+    """江波圖批次：/api/intraday?ids=2330,2317 → {ok, data:{code:{price,change_pct,points,...}}}"""
+    import re as _re, time as _t
+    from concurrent.futures import ThreadPoolExecutor as _TPE
+    codes = []
+    for c in ids.split(","):
+        c = c.strip().upper().replace(".TWO", "").replace(".TW", "")
+        if c and _re.fullmatch(r"[0-9A-Z]{4,6}", c) and c not in codes:
+            codes.append(c)
+    codes = codes[:_INTRADAY_MAX_IDS]
+    now_ts = _t.time()
+    in_sess = _is_trading_session()
+    ttl = 60 if in_sess else 900
+    out, need = {}, []
+    for c in codes:
+        _INTRADAY_WANTED[c] = now_ts
+        hit = _INTRADAY_CACHE.get(c)
+        if hit and now_ts - hit[0] < ttl:
+            out[c] = hit[1]
+        else:
+            need.append(c)
+    if need:
+        mis = _mis_batch_quotes(need)
+        with _TPE(max_workers=8) as ex:
+            for d in ex.map(lambda c: _intraday_one(c, mis.get(c)), need):
+                if d.get("price"):
+                    _INTRADAY_CACHE[d["code"]] = (now_ts, d)
+                out[d["code"]] = d
+    if len(_INTRADAY_WANTED) > 3000:
+        for k, v in sorted(_INTRADAY_WANTED.items(), key=lambda x: x[1])[:1000]:
+            _INTRADAY_WANTED.pop(k, None)
+    return JSONResponse({"ok": True, "data": out}, headers={"Cache-Control": "no-store"})
+
+
+def _run_intraday_snapshot_job():
+    """方案B：盤中每 5 分鐘，把最近 30 分鐘有人看的股票價格記下來"""
+    import time as _t
+    now = _tw_now()
+    if now.weekday() >= 5:
+        return
+    hm = now.hour * 100 + now.minute
+    if hm < 900 or hm > 1335:
+        if 1400 <= hm < 1405:
+            try:
+                cut = (now - timedelta(days=10)).strftime("%Y-%m-%d")
+                with _intraday_db() as conn:
+                    conn.execute("DELETE FROM intraday_ticks WHERE d < ?", (cut,))
+            except Exception:
+                pass
+        return
+    cutoff = _t.time() - 1800
+    codes = [c for c, ts in sorted(_INTRADAY_WANTED.items(), key=lambda x: -x[1]) if ts >= cutoff][:300]
+    if not codes:
+        return
+    for c in codes:
+        _MIS_BATCH_CACHE.pop(c, None)
+    _mis_batch_quotes(codes)
 
 
 @app.get("/api/realtime/{stock_id}")

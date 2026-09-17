@@ -304,6 +304,19 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 /* ── 快捷股票 ── */
 .hotkeys{display:flex;gap:6px;padding:8px 16px;overflow-x:auto;scrollbar-width:none}
 .hotkeys::-webkit-scrollbar{display:none}
+/* 江波圖（2026/09/17） */
+.jb{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;vertical-align:middle;font-variant-numeric:tabular-nums}
+.jb .jb-svg{flex-shrink:0;display:block}
+.jb .jb-p{font-weight:700;color:var(--text)}
+.jb .jb-c{font-style:normal;font-weight:600}
+.jb .jb-c.up{color:var(--up)}.jb .jb-c.dn{color:var(--dn)}.jb .jb-c.fl{color:var(--text3)}
+.jb .jb-pp{display:inline-flex;flex-direction:column;align-items:flex-end;line-height:1.25;min-width:52px}
+.jb-row .jb-p{font-size:14px}.jb-row .jb-c{font-size:11px}
+.jb-pp .jb-p{font-size:13px}.jb-pp .jb-c{font-size:11px}
+.jb-mini{gap:4px}.jb-mini .jb-p{font-size:11px;font-weight:600;color:var(--text2)}.jb-mini .jb-c{font-size:11px}
+.jb-chip{gap:3px;margin-left:5px}.jb-chip .jb-p{font-size:11px;font-weight:500;color:var(--text2)}.jb-chip .jb-c{font-size:10px}
+.jb-line{gap:8px}.jb-line .jb-p{font-size:15px}.jb-line .jb-c{font-size:13px}
+.jb-wide{display:flex;margin-top:4px}
 .hk{padding:5px 12px;border-radius:20px;border:.5px solid var(--border);font-size:12px;color:var(--text2);cursor:pointer;background:var(--bg2);white-space:nowrap;flex-shrink:0}
 .hk:active{background:var(--green);color:#fff;border-color:var(--green)}
 
@@ -1655,6 +1668,7 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
         <div class="m-lbl">現價 <span id="quoteLiveTag" style="display:none;font-size:9px;color:var(--green);font-weight:600;letter-spacing:0.3px">● LIVE</span><span id="quotePrevCloseTag" style="display:none;font-size:9px;color:var(--text3);font-weight:500;margin-left:2px">昨收</span><span id="m-price-date" style="font-size:9px;color:var(--text3);font-weight:500;margin-left:2px"></span></div>
         <div class="m-val lg" id="m-price">—</div>
         <div class="m-sub" id="m-change" style="font-size:11px;margin-top:2px"></div>
+        <div id="m-spark"></div>
         <div class="m-hint">盤中為即時報價，收盤後為最近兩根收盤價的漲跌幅</div>
       </div>
       <div class="metric">
@@ -2772,7 +2786,7 @@ function _watchCard(s){
           <div style="font-weight:600;font-size:14px">${s.id} ${s.name}</div>
           <div style="font-size:11px;color:var(--text3);margin-top:2px">點擊查詢</div>
         </div>
-        <div style="color:var(--text3);font-size:18px">›</div>
+        <div style="display:flex;align-items:center;gap:8px">${_jbSlot(s.id,'row')}<span style="color:var(--text3);font-size:18px">›</span></div>
       </div>
       ${controls}
     </div>`;
@@ -2792,7 +2806,7 @@ function _watchCard(s){
           <span style="font-size:13px;color:var(--text2);margin-left:6px">${s.name}</span>
         </div>
         <div style="text-align:right">
-          <div style="font-size:16px;font-weight:700">${price}</div>
+          ${_jbSlot(s.id,'row',d.price)}
           <div style="font-size:10px;color:${riskColor};font-weight:600;margin-top:1px">${d.risk_label||d.risk_level||''}</div>
         </div>
       </div>
@@ -2832,6 +2846,7 @@ function _renderWatchFallback(){
           <div style="font-size:11px;color:var(--text3)">${s.date}</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
+          ${_jbSlot(s.id,'row')}
           <button onclick="event.stopPropagation();removeWatch('${s.id}')" style="border:none;background:none;color:var(--up);font-size:12px;cursor:pointer;padding:4px">移除</button>
           <span style="color:var(--text3)">›</span>
         </div>
@@ -3799,6 +3814,7 @@ function renderResult(d,enabledMA){
 
   // 加入自選按鈕狀態
   C._currentId=stock_id||'';
+  { const _sp=document.getElementById('m-spark'); if(_sp) _sp.innerHTML=_jbSlot(stock_id,'wide'); }
   C._currentName=stock_name||'';
   const inWatch=!!watchList.find(s=>s.id===C._currentId);
   updateWatchBtn(C._currentId,inWatch);
@@ -4185,8 +4201,8 @@ async function _renderDesktopWatchSidebar(){
           <div class="dpi-id">${s.id}</div>
         </div>
         <div style="text-align:right">
-          <div class="dpi-price" id="wsp-${s.id}">—</div>
-          <div class="dpi-chg" id="wsc-${s.id}"></div>
+          ${_jbSlot(s.id,'row')}
+          <div class="dpi-chg" id="wsc-${s.id}" style="font-size:10px;color:var(--text3)"></div>
         </div>
       </div>
       <select class="ws-item-group" onclick="event.stopPropagation()" onchange="setStockGroup('${s.id}', this.value)">
@@ -4238,8 +4254,7 @@ async function _loadDesktopPicks(){
           <div class="dpi-id">${id}</div>
         </div>
         <div style="text-align:right">
-          <div class="dpi-price">${priceStr}</div>
-          <div class="dpi-chg ${chgCls}">${chgTxt}</div>
+          ${_jbSlot(id,'row',s.price,s.change_pct) || `<div class="dpi-price">${priceStr}</div><div class="dpi-chg ${chgCls}">${chgTxt}</div>`}
         </div>
       </div>`;
     }).join('');
@@ -4340,6 +4355,155 @@ function _observeHomeDash(){
   new MutationObserver(sync).observe(resultEl, {attributes:true, attributeFilter:['class']});
 }
 
+// ══════════════════════════════════════
+// 江波圖（今天盤中走勢小線圖）＋現價＋漲跌%（2026/09/17新增）
+// 用法：任何顯示個股的地方放 _jbSlot(代號, 樣式, 備用價, 備用漲跌%)，
+// 這裡會自動批次向 /api/intraday 抓資料填進去；盤中每 60 秒自動更新。
+// 線圖：09:00→13:30 橫軸，高於昨收的段落紅色、低於昨收綠色，虛線為昨收；
+// 開盤前顯示前一個交易日的走勢。
+// ══════════════════════════════════════
+const _JB_CACHE = {};          // id -> {t, d}
+const _JB_INFLIGHT = new Set();
+let _jbScanTimer = null, _jbGid = 0;
+
+function _jbInSession(){
+  try{
+    const t = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Taipei'}));
+    const d = t.getDay(), m = t.getHours()*60 + t.getMinutes();
+    return d>0 && d<6 && m>=535 && m<=815;
+  }catch(e){ return false; }
+}
+function _jbFmtP(p){
+  if(p==null || p==='' || !isFinite(+p)) return '—';
+  return String(+(+p).toFixed(2));
+}
+function _jbHm2x(hm, w){
+  const [h,m] = String(hm).split(':').map(Number);
+  const mins = Math.min(270, Math.max(0, h*60 + m - 540));
+  return 1 + mins/270*(w-2);
+}
+function _jbSvg(points, prev, w, h){
+  const empty = `<svg class="jb-svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><line x1="1" y1="${h/2}" x2="${w-1}" y2="${h/2}" style="stroke:var(--border2,#ccc)" stroke-width="1" stroke-dasharray="2 2"/></svg>`;
+  if(!points || !points.length) return empty;
+  const vals = points.map(p=>+p[1]).filter(v=>isFinite(v) && v>0);
+  if(!vals.length) return empty;
+  const ref = (prev && isFinite(+prev)) ? +prev : vals[0];
+  let mn = Math.min(ref, ...vals), mx = Math.max(ref, ...vals);
+  if(mx - mn < ref*0.002){ const pad = ref*0.001; mn -= pad; mx += pad; }
+  const pad = 2, H = h - pad*2;
+  const y = v => (pad + (mx - v)/(mx - mn)*H);
+  const pts = points.filter(p=>isFinite(+p[1]) && +p[1]>0);
+  let coords = pts.map(p=>`${_jbHm2x(p[0],w).toFixed(1)},${y(+p[1]).toFixed(1)}`);
+  if(coords.length === 1) coords = [`1,${y(ref).toFixed(1)}`, coords[0]];
+  const ry = y(ref), off = Math.min(1, Math.max(0, ry/h));
+  const gid = 'jbg' + (++_jbGid);
+  const last = coords[coords.length-1].split(',');
+  const lastV = +pts[pts.length-1][1];
+  const dotC = lastV > ref ? 'var(--up)' : lastV < ref ? 'var(--dn)' : 'var(--text3)';
+  return `<svg class="jb-svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">
+    <defs><linearGradient id="${gid}" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="${h}">
+      <stop offset="0" style="stop-color:var(--up)"/><stop offset="${off.toFixed(3)}" style="stop-color:var(--up)"/>
+      <stop offset="${off.toFixed(3)}" style="stop-color:var(--dn)"/><stop offset="1" style="stop-color:var(--dn)"/></linearGradient></defs>
+    <line x1="0" y1="${ry.toFixed(1)}" x2="${w}" y2="${ry.toFixed(1)}" style="stroke:var(--text3)" stroke-width=".6" stroke-dasharray="2 2" opacity=".7"/>
+    <polyline points="${coords.join(' ')}" fill="none" stroke="url(#${gid})" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${last[0]}" cy="${last[1]}" r="1.8" style="fill:${dotC}"/></svg>`;
+}
+const _JB_SIZE = { row:[56,22], mini:[40,16], chip:[26,12], spark:[44,22], wide:[132,30], line:[84,26] };
+function _jbHtml(d, k, fb){
+  const p = (d && d.price!=null) ? d.price : fb.p;
+  const c = (d && d.change_pct!=null) ? d.change_pct : fb.c;
+  const cls = (c==null || !isFinite(+c)) ? 'fl' : (+c>0 ? 'up' : +c<0 ? 'dn' : 'fl');
+  const pct = (c==null || !isFinite(+c)) ? '' : ((+c>0?'+':'') + (+c).toFixed(2) + '%');
+  const sz = _JB_SIZE[k] || _JB_SIZE.row;
+  const sp = (k==='pp') ? '' : _jbSvg(d && d.points, d && d.prev_close, sz[0], sz[1]);
+  const pv = `<b class="jb-p">${_jbFmtP(p)}</b>`, cv = `<i class="jb-c ${cls}">${pct}</i>`;
+  if(k==='spark' || k==='wide') return sp;
+  if(k==='pp') return `<span class="jb-pp">${pv}${cv}</span>`;
+  if(k==='row') return `${sp}<span class="jb-pp">${pv}${cv}</span>`;
+  return `${sp}${pv}${cv}`;   // mini / chip / line
+}
+function _jbTitle(d){
+  if(!d || !d.date) return '';
+  const md = d.date.slice(5).replace('-','/');
+  return d.live ? `今日盤中走勢（${md}）` : `${md} 走勢`;
+}
+function _jbSlot(id, k, fp, fc){
+  id = String(id||'').trim().toUpperCase();
+  if(!/^[0-9A-Z]{4,6}$/.test(id)) return '';
+  k = k || 'row';
+  const num = v => (v==null || v==='' || !isFinite(+v)) ? null : +v;
+  const fb = {p:num(fp), c:num(fc)};
+  const hit = _JB_CACHE[id];
+  const attrs = `${fb.p!=null?` data-fp="${fb.p}"`:''}${fb.c!=null?` data-fc="${fb.c}"`:''}`;
+  return `<span class="jb jb-${k}" data-jb="${id}" data-k="${k}"${attrs} title="${_jbTitle(hit&&hit.d)}"${hit?` data-t="${hit.t}"`:''}>${_jbHtml(hit?hit.d:null, k, fb)}</span>`;
+}
+function _jbPaint(el){
+  const h = _JB_CACHE[el.dataset.jb];
+  if(!h) return;
+  const num = v => (v==null || v==='' || !isFinite(+v)) ? null : +v;
+  el.innerHTML = _jbHtml(h.d, el.dataset.k, {p:num(el.dataset.fp), c:num(el.dataset.fc)});
+  el.dataset.t = String(h.t);
+  el.title = _jbTitle(h.d);
+}
+async function _jbFetch(ids){
+  ids.forEach(i=>_JB_INFLIGHT.add(i));
+  try{
+    const r = await fetch(`${getAPI()}/api/intraday?ids=${ids.join(',')}`, {signal:AbortSignal.timeout(20000)});
+    const j = r.ok ? await r.json() : null;
+    const data = (j && j.data) || {};
+    const t = Date.now();
+    ids.forEach(id=>{
+      const d = data[id];
+      if(d && d.price!=null) _JB_CACHE[id] = {t, d};
+      else if(!_JB_CACHE[id]) _JB_CACHE[id] = {t, d:null};
+      else _JB_CACHE[id].t = t;   // 這次沒抓到就沿用上一次的資料，避免閃掉
+    });
+    document.querySelectorAll('.jb[data-jb]').forEach(el=>{
+      if(ids.includes(el.dataset.jb)) _jbPaint(el);
+    });
+  }catch(e){
+    const t = Date.now();
+    ids.forEach(id=>{ if(!_JB_CACHE[id]) _JB_CACHE[id] = {t: t - 30000, d:null}; });
+  }finally{
+    ids.forEach(i=>_JB_INFLIGHT.delete(i));
+  }
+}
+function _jbScan(){
+  _jbScanTimer = null;
+  const ttl = _jbInSession() ? 60000 : 600000;
+  const now = Date.now(), need = [];
+  document.querySelectorAll('.jb[data-jb]').forEach(el=>{
+    const id = el.dataset.jb, h = _JB_CACHE[id];
+    if(h && el.dataset.t !== String(h.t)) _jbPaint(el);
+    if(h && h.d === null && now - h.t < 60000) return;
+    if((!h || now - h.t > ttl) && !_JB_INFLIGHT.has(id) && !need.includes(id) && el.getClientRects().length) need.push(id);
+  });
+  for(let i=0;i<need.length;i+=40) _jbFetch(need.slice(i,i+40));
+}
+function _jbQueue(delay){
+  if(_jbScanTimer) return;
+  _jbScanTimer = setTimeout(_jbScan, delay==null ? 150 : delay);
+}
+(function _jbInit(){
+  const start = ()=>{
+    try{
+      new MutationObserver(ms=>{
+        for(const m of ms){
+          for(const n of m.addedNodes){
+            if(n.nodeType===1 && (n.classList.contains('jb') || n.querySelector('.jb'))){ _jbQueue(); return; }
+          }
+        }
+      }).observe(document.body, {childList:true, subtree:true});
+    }catch(e){}
+    _jbQueue(300);
+    setInterval(()=>_jbQueue(0), 60000);
+    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) _jbQueue(0); });
+    // 分頁切換（display:none→顯示）時不會觸發新增節點，點擊後補掃一次
+    document.addEventListener('click', ()=>_jbQueue(400), true);
+  };
+  if(document.body) start(); else document.addEventListener('DOMContentLoaded', start);
+})();
+
 async function renderHomeDash(){
   _renderHomeMemberState();
   const el = document.getElementById('homeWatchPreview');
@@ -4366,7 +4530,7 @@ async function renderHomeDash(){
     <div class="hd-watch-row" onclick="qpAndHome('${s.id}')">
       <div><span class="hd-watch-sig" id="hdsig-${s.id}" title=""></span><span class="hd-watch-name">${s.name||s.id}</span><span class="hd-watch-id">${s.id}</span></div>
       <div style="text-align:right">
-        <div class="hd-watch-price" id="hdp-${s.id}">—</div>
+        ${_jbSlot(s.id,'row')}
         <div class="hd-watch-chg" id="hdc-${s.id}"></div>
         <select class="ws-item-group" style="margin-top:4px;width:auto;height:20px;font-size:9px" onclick="event.stopPropagation()" onchange="setStockGroup('${s.id}', this.value)">${_groupOptionsHtml(s.group||'預設')}</select>
       </div>
@@ -5232,7 +5396,7 @@ function stockRow(id,name){
       <span style="font-weight:500;font-size:13px">${id}</span>
       <span style="font-size:13px;color:var(--text2);margin-left:6px">${name}</span>
     </div>
-    <span style="font-size:11px;color:var(--green)">分析 ›</span>
+    <span style="display:flex;align-items:center;gap:10px">${_jbSlot(id,'row')}<span style="font-size:11px;color:var(--green)">分析 ›</span></span>
   </div>`;
 }
 
@@ -6516,7 +6680,7 @@ async function _loadHomeDiscover(){
   const _hasHistory = typeof historyList!=='undefined' && historyList.length;
   if(hotBox && _hasHistory){
     const list = historyList.slice(0,3).map(s=>({id:s.id,name:s.name}));
-    hotBox.innerHTML = list.map(s=>'<div class="hd2-disc-item" onclick="event.stopPropagation();qpAndHome(\''+_mktEsc(s.id)+'\')" style="cursor:pointer"><b>'+_mktEsc(s.name||s.id)+'</b><span style="color:var(--muted)">'+_mktEsc(s.id)+'</span></div>').join('');
+    hotBox.innerHTML = list.map(s=>'<div class="hd2-disc-item" onclick="event.stopPropagation();qpAndHome(\''+_mktEsc(s.id)+'\')" style="cursor:pointer"><b>'+_mktEsc(s.name||s.id)+'</b>'+(_jbSlot(s.id,'mini')||'<span style="color:var(--muted)">'+_mktEsc(s.id)+'</span>')+'</div>').join('');
   }
 
   let _openingItems = [];
@@ -6535,7 +6699,7 @@ async function _loadHomeDiscover(){
           const chg = s.change_pct!=null ? (s.change_pct>=0?'<span style="color:var(--up)">+'+s.change_pct.toFixed(2)+'%</span>':'<span style="color:var(--down)">'+s.change_pct.toFixed(2)+'%</span>') : '';
           const real = _isRealId(id);
           const click = real ? "event.stopPropagation();qpAndHome('"+id.replace(/'/g,"")+"')" : "event.stopPropagation();_homeGo('picks')";
-          return '<div class="hd2-disc-item" onclick="'+click+'" style="cursor:pointer"><b>'+_mktEsc(nm)+'</b>'+chg+'</div>';
+          return '<div class="hd2-disc-item" onclick="'+click+'" style="cursor:pointer"><b>'+_mktEsc(nm)+'</b>'+((real && _jbSlot(id,'mini',s.price,s.change_pct)) || chg)+'</div>';
         }).join('');
       }
     }
@@ -6555,7 +6719,7 @@ async function _loadHomeDiscover(){
       hotBox.innerHTML = pick.map(s=>{
         const id = s.stock_id || s.code || '';
         const nm = s.name || s.stock_name || id;
-        return '<div class="hd2-disc-item" onclick="event.stopPropagation();qpAndHome(\''+id.replace(/'/g,'')+'\')" style="cursor:pointer"><b>'+_mktEsc(nm)+'</b><span style="color:var(--muted)">'+_mktEsc(id)+'</span></div>';
+        return '<div class="hd2-disc-item" onclick="event.stopPropagation();qpAndHome(\''+id.replace(/'/g,'')+'\')" style="cursor:pointer"><b>'+_mktEsc(nm)+'</b>'+(_jbSlot(id,'mini',s.price,s.change_pct)||'<span style="color:var(--muted)">'+_mktEsc(id)+'</span>')+'</div>';
       }).join('');
     }
   }
@@ -6575,7 +6739,10 @@ async function _loadHomeDiscover(){
           const id = s.stock_id || s.code || '';
           const real = _isRealId(id);
           const click = real ? "event.stopPropagation();qpAndHome('"+id.replace(/'/g,"")+"')" : "event.stopPropagation();_homeGo('multisignal')";
-          return '<div class="hd2-disc-item" onclick="'+click+'" style="cursor:pointer"><b>'+_mktEsc(nm)+'</b><span style="color:var(--muted)">'+_mktEsc(conf)+'</span></div>';
+          const jb = real ? _jbSlot(id,'mini') : '';
+          return jb
+            ? '<div class="hd2-disc-item" onclick="'+click+'" style="cursor:pointer" title="'+_mktEsc(conf)+'"><b>'+_mktEsc(nm)+(s.passed_count?' <small style="color:var(--muted);font-weight:500">'+s.passed_count+'項</small>':'')+'</b>'+jb+'</div>'
+            : '<div class="hd2-disc-item" onclick="'+click+'" style="cursor:pointer"><b>'+_mktEsc(nm)+'</b><span style="color:var(--muted)">'+_mktEsc(conf)+'</span></div>';
         }).join('');
       }
     }
@@ -6615,7 +6782,7 @@ async function loadHotkeys(){
     }
     const list = real.slice(0,10).map(s=>({id:s.stock_id||s.code, name:s.name||s.stock_name||s.stock_id||s.code}));
     el.innerHTML = list.map(s=>
-      `<div class="hk" onclick="qp('${s.id}')">${s.name||s.id}</div>`
+      `<div class="hk" onclick="qp('${s.id}')">${s.name||s.id}${_jbSlot(s.id,'chip')}</div>`
     ).join('');
   }catch(e){
     if(historyList.length) return;
@@ -6632,7 +6799,7 @@ function renderHotkeys(){
   }
   const list = historyList.slice(0,10).map(s=>({id:s.id,name:s.name}));
   el.innerHTML=list.map(s=>
-    `<div class="hk" onclick="qp('${s.id}')">${s.name||s.id}</div>`
+    `<div class="hk" onclick="qp('${s.id}')">${s.name||s.id}${_jbSlot(s.id,'chip')}</div>`
   ).join('');
 }
 
@@ -7504,8 +7671,7 @@ async function showPicksPage(){
           <span style="font-size:12px;color:var(--text3);margin-left:6px">${id}</span>
         </div>
         <div style="text-align:right">
-          <div style="font-size:15px;font-weight:600;color:var(--text)">${s.price != null ? s.price.toFixed(2) : '-'}</div>
-          <div style="font-size:12px">${chg}</div>
+          ${_jbSlot(id,'row',s.price,s.change_pct) || `<div style="font-size:15px;font-weight:600;color:var(--text)">${s.price != null ? s.price.toFixed(2) : '-'}</div><div style="font-size:12px">${chg}</div>`}
         </div>
       </div>`;
     }).join('');
@@ -7688,8 +7854,9 @@ function _renderMultiSignalPage(){
         border-radius:var(--radius-lg);padding:16px;margin-bottom:12px;cursor:pointer">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
         <div style="${idBlur};min-width:0">
-          <div style="font-size:20px;font-weight:800;color:var(--text);line-height:1.3">${esc(s.stock_name)}${chgHtml}</div>
-          <div style="font-size:13px;color:var(--text3);font-family:var(--mono);margin-top:2px">${esc(s.stock_id)}${s.price ? `　收盤 ${s.price}` : ''}</div>
+          <div style="font-size:20px;font-weight:800;color:var(--text);line-height:1.3">${esc(s.stock_name)}${cardLocked ? chgHtml : ''}</div>
+          <div style="font-size:13px;color:var(--text3);font-family:var(--mono);margin-top:2px">${esc(s.stock_id)}${s.price ? `　入選日收盤 ${s.price}` : ''}</div>
+          ${cardLocked ? '' : `<div style="margin-top:6px">${_jbSlot(s.stock_id,'line')}</div>`}
         </div>
         <div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0">
           <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;
@@ -7895,17 +8062,17 @@ async function _pfLoad(){
             const closes = s.closes || [];
             const suggest = _suggest(s);
             return `<tr style="border-bottom:0.5px solid var(--border)">
-              <td style="padding:7px 8px 7px 0">${_sparkSvg(closes, s.price, chg, s.gain_5d||0)}</td>
+              <td style="padding:7px 8px 7px 0">${_jbSlot(s.stock_id,'spark') || _sparkSvg(closes, s.price, chg, s.gain_5d||0)}</td>
               <td style="padding:7px 8px 7px 0">
                 <div style="font-weight:600;color:var(--text1)">${s.stock_name||s.stock_id}</div>
                 <div style="font-size:11px;color:var(--text3)">${s.stock_id}</div>
               </td>
               <td style="padding:7px 8px">
                 <div style="color:var(--text2)">${suggest}</div>
-                <div style="font-size:11px;color:${chgCol};margin-top:2px">${chg !== 0 ? '今日 '+chgSign+chg+'%' : ''}</div>
+
               </td>
               <td style="padding:7px 8px;text-align:right;color:var(--text2)">${s.cost_price}</td>
-              <td style="padding:7px 8px;text-align:right;font-weight:600;color:var(--text1)">${s.price > 0 ? s.price : '—'}</td>
+              <td style="padding:7px 8px;text-align:right;font-weight:600;color:var(--text1)">${_jbSlot(s.stock_id,'pp',s.price>0?s.price:null,chg) || (s.price > 0 ? s.price : '—')}</td>
               <td style="padding:7px 0;text-align:right;font-weight:600;color:${pnlCol}">${pnlSign}${pnl}%</td>
             </tr>`;
           }).join('')}
@@ -7929,6 +8096,7 @@ async function _pfLoad(){
           </div>
           <button onclick="_pfDelete('${s.stock_id}')" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:0 4px">✕</button>
         </div>
+        <div style="margin:-4px 0 10px">${_jbSlot(s.stock_id,'line',s.price>0?s.price:null,s.change_pct)}</div>
 
         <!-- 損益 -->
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
