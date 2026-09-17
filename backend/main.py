@@ -4279,10 +4279,14 @@ def _fetch_institutional_safe(stock_id: str) -> dict:
             else:
                 break
         inst_5d  = rows[-5:] if len(rows) >= 5 else rows
-        foreign5 = sum(r.get("foreign", 0) for r in inst_5d)
-        invest5  = sum(r.get("invest",  0) for r in inst_5d)
-        dealer5  = sum(r.get("dealer",  0) for r in inst_5d)
-        total5   = sum(r.get("total",   0) for r in inst_5d)
+        # 2026/09/17修正：FinMind 買賣超單位是「股」，這裡要換成「張」（÷1000）。
+        # 原本沒換，個股分析「法人動向」顯示成 +8,366,418張（實際約 8,366 張），
+        # 風險提示「賣超超過500張」與綜合解說的法人張數也跟著錯。
+        def _lots(key): return int(round(sum(r.get(key, 0) for r in inst_5d) / 1000))
+        foreign5 = _lots("foreign")
+        invest5  = _lots("invest")
+        dealer5  = _lots("dealer")
+        total5   = _lots("total")
         def _dir(v): return "買超" if v > 0 else ("賣超" if v < 0 else "持平")
         extra = f"，法人連買 {consecutive_buy} 日" if consecutive_buy >= 2 else ""
         return {
@@ -6537,9 +6541,10 @@ def _send_bonus_email(email: str, title: str, days: int, r: dict):
     if not email or email.endswith("@line.softglow-ai.com"):
         return False
     title = title or "會員福利"
-    plan_label = _BONUS_PLANS.get(r["new_plan"], r["new_plan"])
+    # 2026/09/17：月／季／年費功能完全一樣，福利一律只講「付費功能＋天數」，避免會員誤會拿到年費
+    plan_label = _BONUS_PLANS.get(r["new_plan"], r["new_plan"]) if r["stacked"] else "付費功能"
     how = (f"已在您原本的到期日（{r['old_expire']}）後面再加 {days} 天，方案維持不變。"
-           if r["stacked"] else f"已為您開通 {days} 天的{plan_label}。")
+           if r["stacked"] else f"已為您開通 {days} 天的付費功能。")
     _send_email(email, f"【線上有位】🎁 {title}：{days} 天付費功能已開通",
         _render_email(
             title=f"恭喜！您獲得「{title}」",
