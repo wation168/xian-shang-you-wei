@@ -330,7 +330,7 @@ async def lifespan(app: FastAPI):
                             body_html=(
                                 f'<p style="color:#444;margin:0 0 12px;font-size:14px;line-height:1.7">親愛的會員您好，</p>'
                                 f'<p style="color:#444;margin:0 0 16px;font-size:14px;line-height:1.7">'
-                                f'您設定追蹤的個股已觸及提醒條件，詳情如下。請留意本提醒僅供參考，實際進出場請依您自己的判斷與紀律操作。</p>'
+                                f'您設定追蹤的個股已觸及提醒條件，詳情如下。請留意本提醒僅供參考，不構成投資建議，交易決策請自行判斷。</p>'
                                 f'<div style="background:#fff;border-radius:8px;padding:14px 16px;border:1px solid #f0f0f0">'
                                 f'<p style="margin:0;font-size:15px;color:#166534;font-weight:700">{_body}</p></div>'
                             ),
@@ -2278,7 +2278,7 @@ def calc_risk_level(price, support, resistance, rr_ratio, near_top, near_bot, pa
         risk_color = "amber"
     else:
         risk_level = "watch"
-        risk_label = "觀望"
+        risk_label = "方向未明"
         risk_color = "gray"
 
     # 量能修正：縮量（量比 < 0.6）時，低風險升為留意、留意升為高風險
@@ -2302,7 +2302,7 @@ def calc_risk_level(price, support, resistance, rr_ratio, near_top, near_bot, pa
 
 def build_summary(price, support, support_desc, resistance, resistance_desc,
                   trend, pattern, rr_ratio, risk_level, risk_label,
-                  near_top, near_bot, stop_loss, target1, rr_basis="防守位",
+                  near_top, near_bot, stop_loss, target1, rr_basis="失效位置",
                   kline_pattern="常態 K 線（無觸發極端型態）", win_rate=0.50):
     """條列式分析摘要"""
     sup_dist = (price - support) / price * 100
@@ -2316,9 +2316,9 @@ def build_summary(price, support, support_desc, resistance, resistance_desc,
     # 原文案「均線多頭/空頭排列」與實際判斷方式不符，改中性用詞
     # （呼應同日 _do_analyze 內 conflict_note 的同一次修正）
     trend_map = {
-        "上升趨勢": "近期高低點結構走高，趨勢偏多，回測支撐是買點",
-        "下降趨勢": "近期高低點結構走低，趨勢偏空，反彈壓力是賣點",
-        "盤整":     "高低點結構不明，多空拉鋸，等待突破方向再跟進",
+        "上升趨勢": "近期高低點結構走高，屬多方結構，回測支撐時是觀察多方是否延續的位置",
+        "下降趨勢": "近期高低點結構走低，屬空方結構，反彈至壓力時是觀察空方是否延續的位置",
+        "盤整":     "高低點結構不明，多空拉鋸，方向需等突破或跌破確認",
     }
     lines.append(f"趨勢：{trend_map.get(trend, trend)}")
 
@@ -2333,30 +2333,30 @@ def build_summary(price, support, support_desc, resistance, resistance_desc,
 
     # 型態
     pattern_detail = {
-        "突破型態": f"股價突破壓力 {resistance}，若縮量拉回不破壓力，壓力轉支撐，為強勢回測買點",
-        "跌破型態": f"股價跌破支撐 {support}，前支撐轉壓力，應等穩定再重新評估，停損優先",
-        "支撐整理": f"現價靠近支撐 {support}（-{sup_dist:.1f}%），為相對低風險觀察位，守住偏多，跌破停損",
-        "壓力整理": f"現價靠近壓力 {resistance}（+{res_dist:.1f}%），追價風險高，等回測支撐 {support} 或放量突破再跟",
-        "整理中":   f"現價位於支撐 {support} 與壓力 {resistance} 之間，等待方向訊號，不宜追高殺低",
+        "突破型態": f"股價突破壓力 {resistance}；若縮量拉回不破，壓力轉為支撐，突破結構維持",
+        "跌破型態": f"股價跌破支撐 {support}，前支撐轉為壓力，原多方結構失效",
+        "支撐整理": f"現價靠近支撐 {support}（-{sup_dist:.1f}%），支撐守住則結構偏多，跌破則支撐型態失效",
+        "壓力整理": f"現價靠近壓力 {resistance}（+{res_dist:.1f}%），上方空間有限；是否放量突破是觀察重點，支撐參考 {support}",
+        "整理中":   f"現價位於支撐 {support} 與壓力 {resistance} 之間，方向訊號尚未出現",
     }
     lines.append(f"型態：{pattern_detail.get(pattern, pattern)}")
 
     # 風險（防守位）
-    lines.append(f"防守位置 {stop_loss}（跌破停損，距現價 -{stop_dist:.1f}%）")
+    lines.append(f"失效位置 {stop_loss}（跌破代表目前型態失效，距現價 -{stop_dist:.1f}%）")
 
     # 損益比（說明計算基礎）
     if rr_ratio >= 2:
-        rr_comment = "損益比良好，值得評估"
+        rr_comment = "損益比高於 2"
     elif rr_ratio >= 1.5:
         rr_comment = "損益比尚可"
     elif rr_ratio >= 1:
-        rr_comment = "損益比偏低，需謹慎"
+        rr_comment = "損益比偏低"
     else:
         rr_comment = "損益比不佳，風險大於報酬"
-    lines.append(f"風險報酬 {rr_ratio}（以{rr_basis}為停損基準，{rr_comment}）")
+    lines.append(f"風險報酬 {rr_ratio}（以{rr_basis}計算，{rr_comment}）")
 
     lines.append(f"最新 K 線型態：{kline_pattern}")
-    lines.append(f"型態大數據勝率：{win_rate*100:.0f}%")
+    lines.append(f"型態經驗參考值：{win_rate*100:.0f}%（一般型態經驗值，非本股統計）")
     if win_rate > 0.50:
         lines.append("需伴隨成交量倍增與隔日收盤站穩確認")
 
@@ -2635,7 +2635,7 @@ def find_trend_channel(highs, lows, closes):
     dist_res = (resist_now - price)  / price * 100 if price > 0 else 999
     thr = 0.02
 
-    if   price > resist_now * (1+thr):  pos,pdesc="breakout_up",  f"已突破上軌 {resist_now}，等幅目標 {round(resist_now+channel_width,2)}"
+    if   price > resist_now * (1+thr):  pos,pdesc="breakout_up",  f"已突破上軌 {resist_now}，等幅推算價位 {round(resist_now+channel_width,2)}"
     elif price < support_now * (1-thr): pos,pdesc="breakout_dn",  f"已跌破下軌 {support_now}，注意下方空間"
     elif dist_res < 3:                  pos,pdesc="near_resist",  f"靠近上軌壓力 {resist_now}（+{dist_res:.1f}%），注意拉回設好防守"
     elif dist_sup < 3:                  pos,pdesc="near_support", f"靠近下軌支撐 {support_now}（-{dist_sup:.1f}%），相對低風險觀察位"
@@ -2697,18 +2697,18 @@ def detect_triangle_channel(highs, lows, closes):
         ctype, cdesc = "converging", "收斂三角形"
         target_up = round(resist_now + channel_width, 2)
         target_dn = round(support_now - channel_width, 2)
-        pdesc = f"收斂三角整理，上破 {resist_now:.1f} 目標 {target_up}，下破 {support_now:.1f} 目標 {target_dn}"
+        pdesc = f"收斂三角整理，上破 {resist_now:.1f} 推算價位 {target_up}，下破 {support_now:.1f} 推算價位 {target_dn}"
     elif expanding:
         ctype, cdesc = "expanding", "擴散三角形（波動加大）"
-        pdesc = f"擴散三角，上緣 {resist_now:.1f} / 下緣 {support_now:.1f}，操作難度高"
+        pdesc = f"擴散三角，上緣 {resist_now:.1f} / 下緣 {support_now:.1f}，波動加大、方向不易判斷"
     elif asc_tri:
         ctype, cdesc = "ascending_tri", "上升三角形（偏多）"
         target = round(resist_now + channel_width, 2)
-        pdesc = f"上升三角，壓力 {resist_now:.1f} 反覆測試，突破後目標 {target}"
+        pdesc = f"上升三角，壓力 {resist_now:.1f} 反覆測試，突破後推算價位 {target}"
     elif desc_tri:
         ctype, cdesc = "descending_tri", "下降三角形（偏空）"
         target = round(support_now - channel_width, 2)
-        pdesc = f"下降三角，支撐 {support_now:.1f} 反覆測試，跌破後目標 {target}"
+        pdesc = f"下降三角，支撐 {support_now:.1f} 反覆測試，跌破後推算價位 {target}"
     else:
         return None
     dist_sup = (price - support_now) / support_now * 100 if support_now > 0 else 999
@@ -2765,7 +2765,7 @@ def detect_reversal_pattern(highs, lows, closes, volumes=None):
                     "type": "double_bottom", "desc": "W底（雙底）",
                     "neckline": round(neck, 2), "target": float(target), "broken": broken,
                     "vol_confirmed": _vol_confirmed,  # T8
-                    "position_desc": f"{'已突破頸線' if broken else '接近頸線'} {neck:.1f}，目標 {target}{_vol_note}",
+                    "position_desc": f"{'已突破頸線' if broken else '接近頸線'} {neck:.1f}，推算價位 {target}{_vol_note}",
                     "support_now": round(min(v1, v2)*0.99, 2), "resist_now": round(neck, 2),
                     "support_line": None, "resist_line": None,
                     "channel_width": round(neck-min(v1, v2), 2),
@@ -2787,7 +2787,7 @@ def detect_reversal_pattern(highs, lows, closes, volumes=None):
                 return {
                     "type": "double_top", "desc": "M頭（雙頭）",
                     "neckline": round(neck, 2), "target": float(target), "broken": broken,
-                    "position_desc": f"{'已跌破頸線' if broken else '接近頸線'} {neck:.1f}，下行目標 {target}",
+                    "position_desc": f"{'已跌破頸線' if broken else '接近頸線'} {neck:.1f}，下行推算價位 {target}",
                     "support_now": round(neck, 2), "resist_now": round(max(v1, v2), 2),
                     "support_line": None, "resist_line": None,
                     "channel_width": round(max(v1, v2)-neck, 2),
@@ -2810,7 +2810,7 @@ def detect_reversal_pattern(highs, lows, closes, volumes=None):
                 return {
                     "type": "head_shoulders_top", "desc": "頭肩頂",
                     "neckline": round(neck, 2), "target": float(target), "broken": broken,
-                    "position_desc": f"頭肩頂，{'已跌破頸線' if broken else '頸線'} {neck:.1f}，下行目標 {target}",
+                    "position_desc": f"頭肩頂，{'已跌破頸線' if broken else '頸線'} {neck:.1f}，下行推算價位 {target}",
                     "support_now": round(neck, 2), "resist_now": round(head_h, 2),
                     "support_line": None, "resist_line": None,
                     "channel_width": round(head_h-neck, 2),
@@ -2833,7 +2833,7 @@ def detect_reversal_pattern(highs, lows, closes, volumes=None):
                 return {
                     "type": "head_shoulders_bottom", "desc": "頭肩底",
                     "neckline": round(neck, 2), "target": float(target), "broken": broken,
-                    "position_desc": f"頭肩底，{'已突破頸線' if broken else '頸線'} {neck:.1f}，上行目標 {target}",
+                    "position_desc": f"頭肩底，{'已突破頸線' if broken else '頸線'} {neck:.1f}，上行推算價位 {target}",
                     "support_now": round(head_l, 2), "resist_now": round(neck, 2),
                     "support_line": None, "resist_line": None,
                     "channel_width": round(neck-head_l, 2),
@@ -4199,7 +4199,7 @@ def _kd_status_desc(k_arr, d_arr) -> dict:
         zone, zone_dir = "多方優勢區（50~80）", "bullish"
     else:
         zone, zone_dir = "空方優勢區（20~50）", "bearish"
-    cross = "，本日金叉（多方進場訊號）" if golden else ("，本日死叉（空方訊號）" if death else "")
+    cross = "，本日金叉（多方訊號）" if golden else ("，本日死叉（空方訊號）" if death else "")
     direction = "bullish" if golden else ("bearish" if death else zone_dir)
     return {
         "text": f"K={k_now:.1f}，D={d_now:.1f}，位於{zone}{cross}",
@@ -4310,10 +4310,10 @@ def _individualized_risk(price, support, resistance, rr_ratio,
     """根據各股實際數據產生個股化風險提示"""
     risks = []
     if rr_ratio < 1.0:
-        risks.append(f"損益比 {rr_ratio}，現價距壓力 {resistance} 空間不足，進場時機需審慎")
+        risks.append(f"損益比 {rr_ratio}，現價距壓力 {resistance} 空間不足，風險大於報酬")
     k_val = kd_info.get("k")
     if k_val and k_val >= 80:
-        risks.append(f"KD={k_val:.0f} 進入超買區，高檔容易鈍化，追高風險增加")
+        risks.append(f"KD={k_val:.0f} 進入超買區，高檔容易鈍化，短線過熱")
     elif kd_info.get("death_cross"):
         risks.append(f"KD 剛發生死叉（K={k_val:.0f}），動能轉弱，留意後續賣壓")
     dif_val = macd_info.get("dif")
@@ -4323,12 +4323,12 @@ def _individualized_risk(price, support, resistance, rr_ratio,
         risks.append("MACD 多頭轉弱，接近死叉，注意動能確認")
     supp_dist = (price - support) / price * 100
     if supp_dist > 8:
-        risks.append(f"支撐 {support} 距現價 {supp_dist:.1f}%，停損空間較大，建議控制部位大小")
+        risks.append(f"支撐 {support} 距現價 {supp_dist:.1f}%，與支撐距離較大，短線波動空間大")
     total5 = inst.get("total_5d", 0)
     if total5 < -500:
-        risks.append(f"法人近5日賣超 {total5:,} 張，籌碼持續外流，需謹慎追多")
+        risks.append(f"法人近5日賣超 {total5:,} 張，籌碼持續流出")
     if kbar_info.get("direction") == "bearish":
-        risks.append(f"K棒出現{kbar_info.get('type','')}，空頭訊號，建議等止跌確認後再進場")
+        risks.append(f"K棒出現{kbar_info.get('type','')}，空頭訊號，止跌訊號尚未出現")
     if not risks:
         risks.append(f"技術面無明顯警示，持續追蹤均線支撐 {support} 是否守住")
     return risks
@@ -4554,7 +4554,7 @@ def _do_analyze(stock_id: str, tf: str = "D",
             # fallback：軌道上緣估算 → 波段等幅推算（創新高時無前高可用）
             if channel and channel.get("target1") and channel["target1"] > price * (1 + MIN_RES_DIST):
                 alt_res = round(float(channel["target1"]), 2)
-                alt_res_desc = "軌道目標價"
+                alt_res_desc = "軌道上緣推算"
             else:
                 # 波段等幅投影：(近60根高點 - 近60根低點) + 近60根高點
                 _swing_high = float(highs[-60:].max()) if len(highs) >= 60 else float(highs.max())
@@ -4562,7 +4562,7 @@ def _do_analyze(stock_id: str, tf: str = "D",
                 _swing_proj = round(_swing_high + (_swing_high - _swing_low), 2)
                 if _swing_proj > price * (1 + MIN_RES_DIST):
                     alt_res = _swing_proj
-                    alt_res_desc = "波段等幅目標（突破後推算）"
+                    alt_res_desc = "波段等幅推算價位（突破後推算）"
                 else:
                     alt_res = round(float(highs[:-1].max()), 2)
                     alt_res_desc = "歷史高點（備援）"
@@ -4670,7 +4670,7 @@ def _do_analyze(stock_id: str, tf: str = "D",
     risk   = price - stop_loss          # 以防守位為停損基準
     reward = target1 - price
     rr_ratio = round(reward / risk, 2) if risk > 0 else 0
-    rr_basis  = "防守位"               # 說明計算基礎，供前端顯示
+    rr_basis  = "失效位置"             # 說明計算基礎，供前端顯示（2026/09/17 防守位改稱失效位置）
 
     # 快速計算量比（供風險評估用）
     _quick_vol_ratio = None
@@ -4712,9 +4712,9 @@ def _do_analyze(stock_id: str, tf: str = "D",
     conflict_note = ""
     if trend_channel_conflict:
         if trend == "上升趨勢" and channel_type == "down":
-            conflict_note = f"⚠ 注意：趨勢偏多但股價在下降軌道內，短線結構偏弱，支撐可能失守，建議觀望或輕倉"
+            conflict_note = f"⚠ 注意：趨勢偏多但股價在下降軌道內，短線結構偏弱，支撐可能失守，方向需再確認"
         elif trend == "下降趨勢" and channel_type == "up":
-            conflict_note = f"⚠ 注意：趨勢偏空但股價在上升軌道內，反彈動能存在但趨勢仍弱，等趨勢轉向確認再追"
+            conflict_note = f"⚠ 注意：趨勢偏空但股價在上升軌道內，反彈動能存在但趨勢仍弱，趨勢尚未轉向"
 
     # 軌道趨勢矛盾警告（插在最前面，醒目位置）
     if conflict_note:
@@ -4730,23 +4730,24 @@ def _do_analyze(stock_id: str, tf: str = "D",
     kbar_neutral = not kbar_bullish and not kbar_bearish
 
     # K棒操作說明對照（具體化）
+    # 2026/09/17（案件008）：改成描述式——說明型態代表什麼、明天觀察什麼、什麼條件代表失效，不下買賣指示
     KBAR_ACTION = {
-        "錘頭線":       f"明天收紅且量縮可試多，防守位設 {stop_loss}",
-        "射擊之星":     f"頂部反轉訊號，建議先出場觀望，等回測支撐 {support} 守住再重新評估進場時機",
-        "十字星":       f"方向未定，等明天收盤確認，不宜追高也不宜殺低",
-        "大紅棒":       f"今日強攻，明天若縮量整理不跌破今日收盤 {round(float(closes[-1]),2)}，多頭延續可持有",
-        "大黑棒":       f"今日強殺，建議出場觀望，等股價回到支撐 {support} 附近且出現止跌訊號再重新評估",
-        "長上影黑K":     f"疑似衝高遭壓回，建議先減碼觀望，明天若無法收復今日高點一半，出場至防守位 {stop_loss}",
-        "長下影紅K":     f"疑似殺低後獲得承接，明天若延續收紅可嘗試進場，防守位設 {stop_loss}",
-        "多頭吞噬":     f"底部反轉訊號，明天收紅確認後可設防守位 {stop_loss} 試多",
-        "空頭吞噬":     f"頂部反轉訊號，明天收黑確認後建議減碼出場，等回測支撐 {support} 守住再重新布局",
-        "孕線":         f"整理型態，等突破今日高低點再進場，不宜在盤中追價",
-        "穿刺線":       f"底部潛在反轉，明天若繼續收紅可加碼，防守位設 {stop_loss}",
-        "烏雲蓋頂":     f"頂部潛在反轉，明天若收黑確認建議出場，等拉回至支撐 {support} 附近再重新評估",
-        "早晨之星":     f"底部強力反轉，確認訊號，可設防守位 {stop_loss} 進場，目標看 {resistance}",
-        "黃昏之星":     f"頂部強力反轉，建議出場觀望，待股價拉回至支撐 {support} 附近出現止跌K棒再重新布局",
-        "三紅兵":       f"多頭強勢，可持有，但連漲三天後注意追高風險，不宜此時首次進場",
-        "三烏鴉":       f"空頭強勢，建議全數出場觀望，等跌勢止穩、支撐 {support} 守住後再重新評估進場",
+        "錘頭線":       f"下檔出現承接；明天若收紅且量縮，型態較完整，跌破 {stop_loss} 則型態失效",
+        "射擊之星":     f"高檔出現賣壓，屬頂部反轉訊號；觀察支撐 {support} 是否守住",
+        "十字星":       f"多空力道暫時平衡，方向未定，明天收盤是觀察重點",
+        "大紅棒":       f"今日強攻；明天若縮量整理且不跌破今日收盤 {round(float(closes[-1]),2)}，多方結構延續",
+        "大黑棒":       f"今日強殺，空方力道強；觀察能否在支撐 {support} 附近出現止跌訊號",
+        "長上影黑K":     f"衝高後遭賣壓壓回；明天若無法收復今日高點的一半，轉弱訊號加重，關鍵失效位置 {stop_loss}",
+        "長下影紅K":     f"殺低後出現承接；明天若延續收紅，止跌訊號較明確，跌破 {stop_loss} 則型態失效",
+        "多頭吞噬":     f"底部反轉訊號；明天收紅可確認型態，跌破 {stop_loss} 則型態失效",
+        "空頭吞噬":     f"頂部反轉訊號；明天若收黑則轉弱訊號確認，觀察支撐 {support} 是否守住",
+        "孕線":         f"整理型態，觀察後續突破今日高點或跌破今日低點的方向",
+        "穿刺線":       f"底部潛在反轉；明天若繼續收紅，多方條件增加，跌破 {stop_loss} 則型態失效",
+        "烏雲蓋頂":     f"頂部潛在反轉；明天若收黑則轉弱訊號確認，觀察支撐 {support}",
+        "早晨之星":     f"底部強力反轉訊號；前方壓力 {resistance}，跌破 {stop_loss} 則型態失效",
+        "黃昏之星":     f"頂部強力反轉訊號；觀察股價回到支撐 {support} 附近時是否出現止跌K棒",
+        "三紅兵":       f"多方強勢延續；連漲三天後短線乖離擴大，過熱風險增加",
+        "三烏鴉":       f"空方強勢延續；觀察跌勢是否止穩、支撐 {support} 是否守住",
     }
 
     # 找對應的操作說明
@@ -4762,10 +4763,10 @@ def _do_analyze(stock_id: str, tf: str = "D",
         _n_bars = len(closes)
         if breakout_idx is not None and breakout_idx == _n_bars - 2:
             _bo_price = round(float(closes[breakout_idx]), 2)
-            kbar_action = f"昨日已放量突破，今日縮量拉回整理，屬正常拉回而非反轉，若不跌破昨日突破價 {_bo_price} 可續抱，跌破則出場觀望"
+            kbar_action = f"昨日已放量突破，今日縮量拉回整理，屬正常拉回而非反轉；不跌破昨日突破價 {_bo_price} 則突破結構維持，跌破則突破失敗"
         elif breakdown_idx is not None and breakdown_idx == _n_bars - 2:
             _bd_price = round(float(closes[breakdown_idx]), 2)
-            kbar_action = f"昨日已放量跌破，今日縮量反彈整理，屬弱勢反彈非止跌，若無法站回昨日跌破價 {_bd_price} 應持續觀望，站回才重新評估進場"
+            kbar_action = f"昨日已放量跌破，今日縮量反彈整理，屬弱勢反彈而非止跌；站回昨日跌破價 {_bd_price} 才代表跌破失敗"
 
     near_sup = pattern in ("支撐整理",) or (price - support) / price < 0.04
     near_res = pattern in ("壓力整理",) or (resistance - price) / price < 0.04
@@ -4778,60 +4779,60 @@ def _do_analyze(stock_id: str, tf: str = "D",
         ch_sup_val = channel.get("support_now", support)
         ch_sup_desc = f"靠近軌道下緣支撐 {ch_sup_val}"
 
+    # 2026/09/17（案件008）：結論改描述式，「操作：」改「觀察重點：」，只寫條件與失效位置，不寫買賣動作
     if near_sup:
         if rr_ratio >= 1.5 and kbar_bullish:
-            conclusion = f"靠近支撐 {support}，出現多頭K棒（{kbar_pattern}），損益比 {rr_ratio} 佳。操作：{kbar_action or f'可設防守位 {stop_loss} 試多，目標壓力 {resistance}'}"
+            conclusion = f"靠近支撐 {support}，出現多頭K棒（{kbar_pattern}），損益比 {rr_ratio}。觀察重點：{kbar_action or f'支撐是否守住；跌破 {stop_loss} 代表型態失效，前方壓力 {resistance}'}"
         elif rr_ratio >= 1.5 and kbar_neutral:
-            conclusion = f"靠近支撐 {support}，K棒方向未定（{kbar_pattern or '無明確型態'}）。操作：等明天收盤確認方向再進場，防守位 {stop_loss}"
+            conclusion = f"靠近支撐 {support}，K棒方向未定（{kbar_pattern or '無明確型態'}）。觀察重點：明天收盤方向；跌破 {stop_loss} 代表型態失效"
         elif rr_ratio >= 1.5 and kbar_bearish:
-            conclusion = f"靠近支撐 {support}，但出現空頭K棒（{kbar_pattern}），支撐恐失守。操作：{kbar_action or f'先觀望，跌破 {support} 出場'}"
+            conclusion = f"靠近支撐 {support}，但出現空頭K棒（{kbar_pattern}），支撐恐失守。觀察重點：{kbar_action or f'收盤是否跌破 {support}，跌破則支撐型態失效'}"
         else:
-            conclusion = f"靠近支撐 {support}，但損益比 {rr_ratio} 偏低（壓力 {resistance} 太遠或太近）。操作：等支撐確認守住再評估，防守位 {stop_loss}"
+            conclusion = f"靠近支撐 {support}，但損益比 {rr_ratio} 偏低（壓力 {resistance} 太遠或太近）。觀察重點：支撐是否守住；失效位置 {stop_loss}"
     elif ch_near_sup and not near_res:
-        # 軌道下緣靠近，優先給出低風險試多建議
         ch_sup_val = channel.get("support_now", support)
         if kbar_bullish:
-            conclusion = f"{ch_sup_desc}，出現多頭K棒（{kbar_pattern}），相對低風險位置。操作：{kbar_action or f'可設防守位 {stop_loss} 試多，目標壓力 {resistance}'}"
+            conclusion = f"{ch_sup_desc}，出現多頭K棒（{kbar_pattern}），位置風險相對低。觀察重點：{kbar_action or f'軌道支撐是否守住；跌破 {stop_loss} 代表型態失效，前方壓力 {resistance}'}"
         elif kbar_bearish:
-            conclusion = f"{ch_sup_desc}，但出現空頭K棒（{kbar_pattern}），軌道支撐恐失守。操作：{kbar_action or f'觀望，若跌破軌道下緣 {ch_sup_val} 出場'}"
+            conclusion = f"{ch_sup_desc}，但出現空頭K棒（{kbar_pattern}），軌道支撐恐失守。觀察重點：{kbar_action or f'收盤是否跌破軌道下緣 {ch_sup_val}，跌破則軌道結構失效'}"
         else:
-            conclusion = f"{ch_sup_desc}，相對低風險觀察位。操作：等明天出現止跌K棒確認守住後可設防守位 {stop_loss} 試多，目標壓力 {resistance}"
+            conclusion = f"{ch_sup_desc}，位置風險相對低。觀察重點：是否出現止跌K棒確認守住；失效位置 {stop_loss}，前方壓力 {resistance}"
     elif gann_recross:
-        # 葛蘭碧買點訊號（含買點類型）
+        # 葛蘭碧多方訊號（含訊號類型）
         ma_name  = gann_recross["ma"]
         ma_val   = gann_recross["val"]
         g_stop   = gann_recross["stop"]
-        buy_type = gann_recross.get("type", "葛蘭碧買點")
+        buy_type = gann_recross.get("type", "葛蘭碧多方訊號")
         if kbar_bullish:
-            conclusion = f"{buy_type}：{ma_name}（{ma_val}），出現多頭K棒（{kbar_pattern}）。操作：可設防守位 {g_stop}（{ma_name} 下方）試多，目標壓力 {resistance}"
+            conclusion = f"{buy_type}：{ma_name}（{ma_val}），出現多頭K棒（{kbar_pattern}），多方條件增加。觀察重點：是否站穩 {ma_name}；跌破 {g_stop}（{ma_name} 下方）代表訊號失效，前方壓力 {resistance}"
         elif kbar_bearish:
-            conclusion = f"{buy_type}：{ma_name}（{ma_val}），但出現空頭K棒（{kbar_pattern}），力道存疑。操作：等明天確認站穩 {ma_name} 再進場，防守位 {g_stop}"
+            conclusion = f"{buy_type}：{ma_name}（{ma_val}），但出現空頭K棒（{kbar_pattern}），力道存疑。觀察重點：明天能否站穩 {ma_name}；失效位置 {g_stop}"
         else:
-            conclusion = f"{buy_type}：{ma_name}（{ma_val}），潛在買點。操作：明天若確認站穩 {ma_name} 可設防守位 {g_stop} 試多，目標壓力 {resistance}"
+            conclusion = f"{buy_type}：{ma_name}（{ma_val}），出現多方訊號。觀察重點：明天能否站穩 {ma_name}；跌破 {g_stop} 代表訊號失效，前方壓力 {resistance}"
     elif near_res:
         if kbar_bullish:
-            conclusion = f"靠近壓力 {resistance}，出現多頭K棒（{kbar_pattern}）。操作：{kbar_action or f'等放量突破 {resistance} 再追，未突破先觀望，停損 {stop_loss}'}"
+            conclusion = f"靠近壓力 {resistance}，出現多頭K棒（{kbar_pattern}）。觀察重點：{kbar_action or f'能否放量突破 {resistance}；未突破前仍屬壓力區，失效位置 {stop_loss}'}"
         elif kbar_bearish:
-            conclusion = f"靠近壓力 {resistance}，出現空頭K棒（{kbar_pattern}），拉回風險高。操作：{kbar_action or f'建議先出場或減碼觀望，等拉回至支撐 {support} 附近守住再重新評估進場'}"
+            conclusion = f"靠近壓力 {resistance}，出現空頭K棒（{kbar_pattern}），拉回風險高。觀察重點：{kbar_action or f'是否回落至支撐 {support} 附近及能否守住'}"
         else:
-            conclusion = f"靠近壓力 {resistance}，追價風險高。操作：等放量突破確認後再跟，或等回測支撐 {support} 後進場，停損 {stop_loss}"
+            conclusion = f"靠近壓力 {resistance}，上方空間有限。觀察重點：是否放量突破 {resistance}，或回測支撐 {support}；失效位置 {stop_loss}"
     elif pattern == "突破型態":
         if today_breakout:
             if kbar_bearish:
-                conclusion = f"今日突破前高 {prev_high}，但出現空頭K棒（{kbar_pattern}），留意假突破。操作：等明天確認守住 {prev_high} 再進場，防守位 {stop_loss}"
+                conclusion = f"今日突破前高 {prev_high}，但出現空頭K棒（{kbar_pattern}），留意假突破。觀察重點：明天能否守住 {prev_high}；失效位置 {stop_loss}"
             else:
-                conclusion = f"今日放量突破前高 {prev_high}，突破型態確立。操作：可持有，明天若縮量回測不破 {prev_high} 可加碼，防守位 {stop_loss}，下一壓力參考 {resistance}"
+                conclusion = f"今日放量突破前高 {prev_high}，突破型態成立。觀察重點：回測時是否守住 {prev_high}，守住則突破結構延續；失效位置 {stop_loss}，下一壓力參考 {resistance}"
         else:
-            conclusion = f"股價突破壓力 {prev_high}。操作：{'縮量回測不破可加碼，防守位 ' + str(stop_loss) if not kbar_bearish else f'出現{kbar_pattern}，留意假突破，防守位 {stop_loss}'}"
+            conclusion = f"股價突破壓力 {prev_high}。觀察重點：{'縮量回測是否守住突破位置；失效位置 ' + str(stop_loss) if not kbar_bearish else f'出現{kbar_pattern}，留意假突破；失效位置 {stop_loss}'}"
     elif pattern == "跌破型態":
-        conclusion = f"股價跌破支撐 {support}，前支撐轉壓力。操作：{'建議出場觀望，等止跌企穩、支撐 ' + str(support) + ' 重新守住後再重新評估進場' if not kbar_bullish else f'出現{kbar_pattern}，觀察是否為假跌破，守住 {support} 才考慮反彈操作'}"
+        conclusion = f"股價跌破支撐 {support}，前支撐轉為壓力，原多方結構失效。觀察重點：{'跌勢是否止穩、能否重新站回 ' + str(support) if not kbar_bullish else f'出現{kbar_pattern}，觀察是否為假跌破、能否守回 {support}'}"
     else:
         if kbar_bullish:
-            conclusion = f"位於軌道中段，出現多頭K棒（{kbar_pattern}）。操作：{kbar_action or f'可小量試多，等突破壓力 {resistance} 確認再加碼，停損 {stop_loss}'}"
+            conclusion = f"位於軌道中段，出現多頭K棒（{kbar_pattern}）。觀察重點：{kbar_action or f'能否突破壓力 {resistance}；失效位置 {stop_loss}'}"
         elif kbar_bearish:
-            conclusion = f"位於軌道中段，出現空頭K棒（{kbar_pattern}）。操作：{kbar_action or f'建議減碼觀望，等拉回至支撐 {support} 附近止跌後再重新評估進場時機'}"
+            conclusion = f"位於軌道中段，出現空頭K棒（{kbar_pattern}）。觀察重點：{kbar_action or f'是否回落至支撐 {support} 附近及能否止跌'}"
         else:
-            conclusion = f"位於軌道中段，方向未明。操作：觀望為主，等突破 {resistance} 或跌破 {support} 再跟進，防守位 {stop_loss}"
+            conclusion = f"位於軌道中段，方向未明。觀察重點：收盤突破 {resistance} 或跌破 {support} 的方向；失效位置 {stop_loss}"
 
     # 移除舊的 warning，改用整合結論
     warning = conclusion
@@ -4843,9 +4844,9 @@ def _do_analyze(stock_id: str, tf: str = "D",
         # 隔天盤前行動指令：不是「今天出現→立刻減碼」（已收盤來不及），
         # 而是「今日收盤確認賣壓型態→明日守不住觀察價就在收盤前減碼一半」
         _exit_notes.append(
-            f"⚠️ 出場保護：今日收盤確認「{vp_exit_warn['shape']}」＋爆量（{vp_exit_warn['vol_x']}倍近月均量），"
-            f"為賣壓警訊。明日操作：若無法收復今日 K 棒中值 {vp_exit_warn['watch']} 附近，"
-            f"建議收盤前先減碼一半，剩餘部位守好防守位 {stop_loss}。"
+            f"⚠️ 轉弱訊號：今日收盤出現「{vp_exit_warn['shape']}」＋爆量（{vp_exit_warn['vol_x']}倍近月均量），"
+            f"屬賣壓警訊。明日觀察：若無法收復今日 K 棒中值 {vp_exit_warn['watch']} 附近，轉弱訊號加重；"
+            f"跌破 {stop_loss} 代表目前型態失效。"
         )
     # 葛蘭碧賣點：只有在「量價警訊沒觸發」時才補（避免對同一根賣壓 K 棒重複講）
     if gann_sell and not vp_exit_warn:
@@ -4855,14 +4856,14 @@ def _do_analyze(stock_id: str, tf: str = "D",
         if gann_sell.get("is_deviate"):
             # 賣8 乖離過大：短線過熱、獲利了結提示（非趨勢反轉，措辭用「留意回吐、可減碼」）
             _exit_notes.append(
-                f"⚠️ 出場提醒：{_sell_type}，股價短線急漲、正乖離 {_sell_ma}（{_sell_val}）過大，"
-                f"留意獲利回吐，明日若開高走低可考慮先減碼一半、鎖住獲利。"
+                f"⚠️ 過熱提醒：{_sell_type}，股價短線急漲、正乖離 {_sell_ma}（{_sell_val}）過大，"
+                f"短線回檔風險增加，明日若開高走低代表賣壓出現。"
             )
         else:
             # 賣5/6/7：均線弱勢訊號
             _exit_notes.append(
-                f"⚠️ 出場提醒：{_sell_type}（{_sell_ma}={_sell_val}）。"
-                f"明日若持續無法站回 {_sell_ma}，代表均線壓力有效，建議減碼觀望，防守位 {stop_loss}。"
+                f"⚠️ 轉弱提醒：{_sell_type}（{_sell_ma}={_sell_val}）。"
+                f"明日若持續無法站回 {_sell_ma}，代表均線壓力有效；跌破 {stop_loss} 代表目前型態失效。"
             )
     if _exit_notes:
         warning = conclusion + "\n" + "\n".join(_exit_notes)
@@ -4991,13 +4992,13 @@ def _do_analyze(stock_id: str, tf: str = "D",
             f"與預期的最近交易日有落差（也可能剛好遇到休市日）。如有疑慮，建議稍後再重新查看。"
         )
     elif _is_trading_session() and price_basis_date == _today_str:
-        _price_basis_note = "⏱️ 現在是盤中，以下分析（支撐、壓力、防守位、損益比）用的是今天即時資料試算，還不是正式收盤價，收盤後數字可能會再變動，僅供參考。"
+        _price_basis_note = "⏱️ 現在是盤中，以下分析（支撐、壓力、失效位置、損益比）用的是今天即時資料試算，還不是正式收盤價，收盤後數字可能會再變動，僅供參考。"
     elif _is_trading_session() and _live_quote_ok and _basis_gap is not None:
-        _price_basis_note = f"上方現價為即時參考；以下分析（支撐、壓力、防守位、損益比）以 {_basis_md} 收盤價為基準計算，兩者盤中可能有落差，屬正常。"
+        _price_basis_note = f"上方現價為即時參考；以下分析（支撐、壓力、失效位置、損益比）以 {_basis_md} 收盤價為基準計算，兩者盤中可能有落差，屬正常。"
     elif _live_quote_ok and _display_price_date > price_basis_date and _basis_gap is not None:
         # 2026/09/17：收盤後官方資料還沒更新的空窗，現價已是新的一天、分析仍是前一天
         _price_basis_note = (
-            f"最新收盤資料還在更新中：以下分析（支撐、壓力、防守位、損益比）仍以 {_basis_md} 收盤價為基準，"
+            f"最新收盤資料還在更新中：以下分析（支撐、壓力、失效位置、損益比）仍以 {_basis_md} 收盤價為基準，"
             f"上方現價是 {_display_price_date[5:].replace('-', '/')} 的價格，兩者有落差。約10分鐘後重新查詢會自動更新。"
         )
     else:
@@ -5259,7 +5260,7 @@ def _do_analyze(stock_id: str, tf: str = "D",
         _basis_suffix = ("（本分析以今日盤中即時資料試算，非正式收盤價，僅供參考）"
                          if (_is_trading_session() and price_basis_date == _today_str)
                          else "（本分析以最近收盤資料計算，盤中僅供參考）")
-        _w = f"{_vd['headline']}\n操作：{_vd['action']}{_basis_suffix}"
+        _w = f"{_vd['headline']}\n觀察重點：{_vd['action']}{_basis_suffix}"
         if _exit_notes:
             _w += "\n" + "\n".join(_exit_notes)
         result["warning"] = _w
@@ -7264,7 +7265,7 @@ def detect_kbar_pattern(opens, highs, lows, closes, volumes=None):
             and body2 < range2 * 0.3
             and not is_red1 and c1 < (o3 + c3) / 2):
         patterns.append("黃昏之星（頂部強力反轉）")
-        warnings.append("出現黃昏之星，頂部反轉訊號，若明天繼續收黑須注意出場")
+        warnings.append("出現黃昏之星，頂部反轉訊號，若明天繼續收黑則轉弱確認")
 
     # 三紅兵（強勢延續）
     elif (is_red1 and is_red2 and is_red3
@@ -7273,7 +7274,7 @@ def detect_kbar_pattern(opens, highs, lows, closes, volumes=None):
             and body2 > range2 * 0.5
             and body3 > range3 * 0.5):
         patterns.append("三紅兵（強勢多頭延續）")
-        warnings.append("出現三紅兵，多頭趨勢強，明天若再收紅趨勢持續，注意追高風險")
+        warnings.append("出現三紅兵，多頭趨勢強，明天若再收紅趨勢持續，短線乖離擴大")
 
     # 三烏鴉（弱勢延續）
     elif (not is_red1 and not is_red2 and not is_red3
@@ -9314,7 +9315,7 @@ def _inject_report_ads(html: str) -> str:
 # report_generate 靠這個標記判斷 stock_reports 裡的快取是不是舊模板產生的，
 # 是的話強制重新產生，不然光改版面/文案，使用者會一直看到卡住的舊快取（直到當天
 # 收盤基準換了才會被上面的 price_basis_date 檢查順便救回來，不夠即時）。
-_REPORT_TPL_VERSION = "v2026-09-14-hintfix"
+_REPORT_TPL_VERSION = "v2026-09-17-wording"
 # 2026/09/14修正（案件003驗收時發現）：上面這個版本標記在08/07之後就沒再更新過，但
 # 09/14這輪其實已經改了.stat-hint解說文字的CSS（字級/顏色/拿掉斜體，見_build_report_html
 # 內文字說明），忘記同步把版本標記跟著往前推——結果部署後、當天已經被瀏覽過而快取進
@@ -9439,33 +9440,33 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
     if tp_score == 4:
         if sup_dist <= 5 and res_dist >= 5:
             tp_position_icon  = "🎯"
-            tp_position_text  = f"雷達全亮且靠近支撐（距支撐 -{sup_dist}%），進場時機相對佳"
+            tp_position_text  = f"雷達全亮且靠近支撐（距支撐 -{sup_dist}%），多方條件齊備、位置風險相對低"
             tp_position_color = "#16a34a"
             tp_position_bg    = "#f0fdf4"
         elif res_dist < 5:
             tp_position_icon  = "⚠️"
-            tp_position_text  = f"雷達全亮但已漲一段（距壓力僅 +{res_dist}%），追高風險高，等回測支撐 {support} 再進場"
+            tp_position_text  = f"雷達全亮但已漲一段（距壓力僅 +{res_dist}%），位置偏高，支撐參考 {support}"
             tp_position_color = "#d97706"
             tp_position_bg    = "#fffbeb"
         else:
             tp_position_icon  = "👀"
-            tp_position_text  = f"雷達全亮，位於中段（距支撐 -{sup_dist}%，距壓力 +{res_dist}%），可持有，不追高"
+            tp_position_text  = f"雷達全亮，位於中段（距支撐 -{sup_dist}%，距壓力 +{res_dist}%），多方結構維持"
             tp_position_color = "#2563eb"
             tp_position_bg    = "#eff6ff"
     elif tp_score == 3:
         if sup_dist <= 5:
             tp_position_icon  = "👀"
-            tp_position_text  = f"三格亮，靠近支撐（距支撐 -{sup_dist}%），等第四格補齊再進場"
+            tp_position_text  = f"三格亮，靠近支撐（距支撐 -{sup_dist}%），尚差一項條件"
             tp_position_color = "#2563eb"
             tp_position_bg    = "#eff6ff"
         else:
             tp_position_icon  = "⏳"
-            tp_position_text  = f"三格亮，差一格，耐心等待雷達全亮"
+            tp_position_text  = f"三格亮，尚差一項條件"
             tp_position_color = "#6b7280"
             tp_position_bg    = "#f9fafb"
     else:
         tp_position_icon  = "🚫"
-        tp_position_text  = f"多空雷達未齊（{tp_score}/4），暫不適合進場，持續觀察"
+        tp_position_text  = f"多空雷達未齊（{tp_score}/4），多方條件不足"
         tp_position_color = "#dc2626"
         tp_position_bg    = "#fff1f2"
     wr_pct      = int(win_rate * 100)
@@ -9481,13 +9482,13 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
     if trend == "上升趨勢":
         _ma_gap_pct = round((_r_ma20 - _r_ma60) / _r_ma60 * 100, 1) if _r_ma60 > 0 else 0
         _slope_word = "趨勢加速擴大中" if _r_slope == "up" else ("但動能趨緩" if _r_slope == "down" else "穩定進行中")
-        trend_desc = f"MA20({_r_ma20}) 站上 MA60({_r_ma60})，兩線差距 {_ma_gap_pct}%，多頭排列{_slope_word}。回測均線是買點，趨勢未反轉前順勢操作為主。"
+        trend_desc = f"MA20({_r_ma20}) 站上 MA60({_r_ma60})，兩線差距 {_ma_gap_pct}%，多頭排列{_slope_word}。趨勢未反轉前，均線是多方結構的觀察位置。"
     elif trend == "下降趨勢":
         _ma_gap_pct = round((_r_ma60 - _r_ma20) / _r_ma60 * 100, 1) if _r_ma60 > 0 else 0
         _slope_word = "空方加速" if _r_slope == "down" else ("但跌勢趨緩" if _r_slope == "up" else "")
-        trend_desc = f"MA20({_r_ma20}) 在 MA60({_r_ma60}) 下方，差距 {_ma_gap_pct}%，空頭排列{_slope_word}。反彈壓力明顯，逆勢做多風險高。"
+        trend_desc = f"MA20({_r_ma20}) 在 MA60({_r_ma60}) 下方，差距 {_ma_gap_pct}%，空頭排列{_slope_word}。反彈遇均線壓力明顯，空方結構尚未改變。"
     else:
-        trend_desc = f"MA20({_r_ma20}) 與 MA60({_r_ma60}) 相近糾結，多空交戰方向未明。等均線分離或突破關鍵位再跟進。"
+        trend_desc = f"MA20({_r_ma20}) 與 MA60({_r_ma60}) 相近糾結，多空交戰方向未明，需等均線分離或突破關鍵位確認方向。"
 
     # ── 操作建議文字 ──
     # 突破型態：開高走低風險判斷
@@ -9500,7 +9501,7 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
         if _is_open_high_walk_low:
             _breakout_risk_text = (
                 f"\n\n⚠️ 風險提示（{_report_time_str} 資料）：今日出現開高走低，需留意賣壓湧現假突破風險。"
-                f"明日若收盤跌破今日低點 {today_low}，視為突破失敗訊號，應出場。"
+                f"明日若收盤跌破今日低點 {today_low}，代表突破失敗。"
             )
 
     # 合併結論邏輯：優先用 _do_analyze 產出的結論（d["warning"]），避免兩套平行邏輯矛盾
@@ -9513,26 +9514,27 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
     _conclusion_text = d.get("warning", "")
     # 從結論中提取「操作：」後面的文字
     _conclusion_op = ""
-    if "操作：" in _conclusion_text:
-        _conclusion_op = _conclusion_text.split("操作：", 1)[1].strip()
+    _op_mark = "觀察重點：" if "觀察重點：" in _conclusion_text else "操作："
+    if _op_mark in _conclusion_text:
+        _conclusion_op = _conclusion_text.split(_op_mark, 1)[1].strip()
 
     if _conclusion_op:
         # 使用結論的操作建議（位置分析更精準，且與個股解析頁一致），前面加上位置描述
-        _conclusion_pos = _conclusion_text.split("操作：")[0].strip().rstrip("。，")
-        op_text = f"{_conclusion_pos}。\n\n操作建議：{_conclusion_op}"
+        _conclusion_pos = _conclusion_text.split(_op_mark)[0].strip().rstrip("。，")
+        op_text = f"{_conclusion_pos}。\n\n觀察重點：{_conclusion_op}"
     elif _conclusion_text:
         # d["warning"]有內容但沒有「操作：」片段（少見情況），整段當op_text，一樣跟解析頁一致
         op_text = _conclusion_text
     elif kbar_action:
         op_text = kbar_action
     elif today_breakout:
-        op_text = f"今日突破前高 {prev_high}，突破型態確立。可持有，防守位 {stop_loss}，目標壓力 {resistance}，損益比 {rr_ratio:.2f}。"
+        op_text = f"今日突破前高 {prev_high}，突破型態成立。失效位置 {stop_loss}，前方壓力 {resistance}，損益比 {rr_ratio:.2f}。"
     elif tp_score == 0:
-        op_text = f"多空雷達四格全滅，技術面偏弱，暫不適合進場。等待趨勢翻多、MACD 翻正、量能放大後再評估。"
+        op_text = f"多空雷達四格全滅，技術面偏弱。趨勢翻多、MACD 翻正、量能放大是後續觀察的轉強條件。"
     elif tp_score <= 1:
-        op_text = f"多空雷達訊號不足，觀望為主。防守位 {stop_loss}，待雷達訊號補齊後再考慮進場。"
+        op_text = f"多空雷達訊號不足，方向未明。失效位置 {stop_loss}，觀察雷達訊號是否陸續補齊。"
     else:
-        op_text = f"趨勢盤整，等待方向確認。關注能否突破壓力 {resistance}，防守位 {stop_loss}，損益比 {rr_ratio:.2f}。"
+        op_text = f"趨勢盤整，方向未明。觀察能否突破壓力 {resistance}；失效位置 {stop_loss}，損益比 {rr_ratio:.2f}。"
 
     # 突破風險提示（開高走低）是額外補充資訊，跟主結論不衝突，只要today_breakout成立就補上，
     # 不綁在特定分支（舊版只有kbar_action分支才會補到，容易漏掉）
@@ -9545,13 +9547,13 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
     _bias5_color  = "#f87171" if tp_bias5 and tp_bias5 > 10 else ("#facc15" if tp_bias5 and tp_bias5 > 5 else ("#4ade80" if tp_bias5 and tp_bias5 < -3 else "var(--text)"))
     _bias20_color = "#f87171" if tp_bias20 and tp_bias20 > 8 else ("#4ade80" if tp_bias20 and tp_bias20 < -8 else "var(--text)")
     if tp_bias_entry:
-        _bias_text = f"\n\n✅ 乖離率進場訊號：雷達全亮，MA5 乖離 {_bias5_str}（剛站上均線，未過熱），為相對佳進場位。"
+        _bias_text = f"\n\n✅ 乖離率：雷達全亮，MA5 乖離 {_bias5_str}（剛站上均線，未過熱）。"
     elif tp_bias_exit_warning == "大":
-        _bias_text = f"\n\n🔴 出場風險【大】：MA5 正乖離 {_bias5_str} 已超過 +10%，股價嚴重偏離均線，高檔風險極高，建議減碼或出場。"
+        _bias_text = f"\n\n🔴 過熱程度【大】：MA5 正乖離 {_bias5_str} 已超過 +10%，股價嚴重偏離均線，高檔回檔風險高。"
     elif tp_bias_exit_warning == "中":
-        _bias_text = f"\n\n🟡 出場風險【中】：MA5 正乖離 {_bias5_str} 介於 5%~10%，股價偏離均線，若出現黑K或量縮應注意出場。"
+        _bias_text = f"\n\n🟡 過熱程度【中】：MA5 正乖離 {_bias5_str} 介於 5%~10%，股價偏離均線，若出現黑K或量縮代表轉弱。"
     elif tp_bias_exit_warning == "小":
-        _bias_text = f"\n\n🟢 出場風險【小】：KD 死叉且 MACD 動能向下，趨勢轉弱初期，建議提高警覺，設好防守位 {stop_loss}。"
+        _bias_text = f"\n\n🟢 轉弱程度【小】：KD 死叉且 MACD 動能向下，屬趨勢轉弱初期；失效位置 {stop_loss}。"
     # ── 基本面補充（有數據時才顯示）──
     _fund_text = ""
     _r_per = d.get("per")
@@ -9564,7 +9566,7 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
             if _per_f > 0:
                 _fund_text = f"\n\n📊 基本面：本益比 {_per_f:.1f}，殖利率 {_div_f:.1f}%"
                 if _per_f > 30:
-                    _fund_text += "（估值偏高，追高需謹慎）"
+                    _fund_text += "（估值偏高）"
                 elif _per_f < 12 and _div_f > 3:
                     _fund_text += "（估值偏低且高殖利率，基本面支持）"
                 elif _per_f < 12:
@@ -9586,7 +9588,7 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
         _missing_str = "、".join(_tp_missing)
         tp_supplement_html = (
             f'<div style="margin-top:10px;padding:10px 12px;background:#fefce8;border-radius:8px;border-left:3px solid #fbbf24;font-size:12px;color:#78350f;line-height:1.7">'
-            f'📋 <b>多空雷達尚缺：</b>{_missing_str}，補齊後進場訊號更強。</div>'
+            f'📋 <b>多空雷達尚缺：</b>{_missing_str}，補齊代表多方條件更完整。</div>'
         )
     else:
         tp_supplement_html = ""
@@ -9628,7 +9630,7 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
             f'background:var(--bg2);border-radius:6px;border-left:3px solid {_bt_color}">'
             f'📊 歷史回測：過去{_bt["total"]}次出現「{_bt["pattern"]}」'
             f'→ 隔日上漲 {_bt["ups"]} 次、下跌 {_bt["downs"]} 次'
-            f'（勝率 <b style="color:{_bt_color}">{_bt["win_pct"]}%</b>）</div>'
+            f'（上漲比例 <b style="color:{_bt_color}">{_bt["win_pct"]}%</b>，歷史統計不代表未來）</div>'
         )
     kd_row_html = (
         f'<div class="irow"><div class="idot" style="background:{kd_color}"></div>'
@@ -9693,8 +9695,8 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{stock_name}({stock_id}) 能買嗎？多空雷達 × 支撐壓力完整分析 {report_date}｜線上有位</title>
-<meta name="description" content="輸入股票代號，AI 自動分析多空雷達、K棒型態、支撐壓力位、葛蘭碧買點，一鍵產出完整報告。免費使用。還有 500+ 計算工具和全球彩票選號。">
+<title>{stock_name}({stock_id}) 技術面觀察：多空雷達 × 支撐壓力 {report_date}｜線上有位</title>
+<meta name="description" content="輸入股票代號，系統自動整理多空雷達、K棒型態、支撐壓力位、葛蘭碧訊號，一鍵產出完整報告。免費使用。還有 500+ 計算工具和全球彩票選號。">
 <meta property="og:title" content="{stock_id} {stock_name} 分析報告">
 <meta property="og:description" content="{trend}｜支撐 {support}｜壓力 {resistance}｜損益比 {rr_ratio:.2f}">
 <meta property="og:type" content="article">
@@ -9857,7 +9859,7 @@ function toggleTheme(){{
         <div class="stat-label">支撐位</div>
         <div class="stat-value" style="color:#3b82f6">{support}</div>
         <div style="font-size:11px;color:var(--text3);margin-top:2px">{supp_desc}，距現價 -{sup_dist}%</div>
-        <div class="stat-hint">股價較不容易跌破的價位，回測支撐可作進場參考</div>
+        <div class="stat-hint">股價較不容易跌破的價位，回測時是觀察多方能否守住的位置</div>
       </div>
       <div class="stat">
         <div class="stat-label">壓力位</div>
@@ -9867,10 +9869,10 @@ function toggleTheme(){{
       </div>
     </div>
     <div style="background:var(--stat-bg);border-radius:10px;padding:12px">
-      <div class="stat-label" style="margin-bottom:4px">操作防守位（停損線）</div>
+      <div class="stat-label" style="margin-bottom:4px">關鍵失效位置</div>
       <div style="font-size:18px;font-weight:700;color:#f87171">{stop_loss}</div>
-      <div style="font-size:11px;color:var(--text3);margin-top:2px">距現價 -{stop_dist}%，跌破需停損出場</div>
-      <div class="stat-hint">建議停損參考價，跌破代表原本判斷可能失效</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px">距現價 -{stop_dist}%，跌破代表目前型態失效</div>
+      <div class="stat-hint">收盤跌破代表目前技術型態不再成立</div>
     </div>
   </section>
 
@@ -9888,13 +9890,13 @@ function toggleTheme(){{
   <!-- 4. K線型態 -->
   <section class="card" id="kline-pattern">
     <h2>K線型態</h2>
-    <div class="stat-hint" style="margin-bottom:8px">今日蠟燭圖形狀所隱含的多空意義，勝率為歷史同型態的統計數據</div>
+    <div class="stat-hint" style="margin-bottom:8px">今日蠟燭圖形狀所隱含的多空意義，經驗參考值為一般型態經驗，非本股統計</div>
     {kbar_tag_html}{kbar_warning_html}
     <div class="irow" style="border-bottom:none">
       <div class="idot" style="background:{kp_color}"></div>
       <div>
         <div style="font-size:14px;font-weight:600;color:{kp_color};margin-bottom:2px">{kline_pattern or "常態 K 線"}</div>
-        <div style="font-size:12px;color:var(--text3)">大數據歷史勝率 <span style="color:{wr_color};font-weight:700">{wr_pct}%</span></div>
+        <div style="font-size:12px;color:var(--text3)">型態經驗參考值 <span style="color:{wr_color};font-weight:700">{wr_pct}%</span></div>
       </div>
     </div>
     {kbar_action_html}{kbar_backtest_html}
@@ -9914,7 +9916,7 @@ function toggleTheme(){{
       <div class="stat" style="flex:0 0 auto">
         <div class="stat-label">風險等級</div>
         <div class="stat-value" style="color:{risk_color}">{risk_label}</div>
-        <div class="stat-hint">依停損距現價的百分比區分：5%內低、5~10%中、10%以上高</div>
+        <div class="stat-hint">依失效位置距現價的百分比區分：5%內低、5~10%中、10%以上高</div>
       </div>
       <div class="stat" style="flex:0 0 auto">
         <div class="stat-label">損益比</div>
@@ -9950,14 +9952,14 @@ function toggleTheme(){{
     </div>
   </section>
 
-  <!-- 7. 操作建議 -->
+  <!-- 7. 觀察重點（2026/09/17 原「操作建議」）-->
   <section class="card" id="operation-advice">
-    <h2>操作建議</h2>
-    <div class="stat-hint" style="margin-bottom:8px">綜合多空雷達、K棒型態與支撐壓力位置給出的操作參考，非投資建議</div>
+    <h2>觀察重點</h2>
+    <div class="stat-hint" style="margin-bottom:8px">綜合多空雷達、K棒型態與支撐壓力位置，整理目前成立的條件與失效位置，不構成投資建議</div>
     <div style="font-size:14px;line-height:1.8;color:var(--text);padding:12px;background:var(--stat-bg);border-radius:10px;white-space:pre-line">{op_text}</div>
     {tp_supplement_html}
     <div style="margin-top:12px;display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--text3)">
-      <span>停損：<strong style="color:#f87171">{stop_loss}</strong></span>
+      <span>失效位置：<strong style="color:#f87171">{stop_loss}</strong></span>
       <span>支撐：<strong style="color:#3b82f6">{support}</strong></span>
       <span>壓力：<strong style="color:#fbbf24">{resistance}</strong></span>
     </div>
@@ -10465,7 +10467,7 @@ def get_report(slug: str):
 
 @app.get("/picks")
 def picks_page():
-    """每日精選台股 SSR 頁（公開，15分鐘快取）"""
+    """每日條件篩選台股 SSR 頁（公開，15分鐘快取；2026/09/17 改稱條件篩選，不稱精選）"""
     import time as _tm, json as _jmod
     from fastapi.responses import HTMLResponse
 
@@ -10529,13 +10531,13 @@ def picks_page():
             entry_sigs = p.get("entry_signals", [])
             entry_tag = ""
             if "buy1" in entry_sigs:
-                entry_tag += '<span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(0,229,160,.15);color:#00e5a0;font-weight:600;margin-left:4px">買1</span>'
+                entry_tag += '<span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(0,229,160,.15);color:#00e5a0;font-weight:600;margin-left:4px">訊號1</span>'
             if "buy2" in entry_sigs:
-                entry_tag += '<span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(251,191,36,.15);color:#fbbf24;font-weight:600;margin-left:4px">買2</span>'
+                entry_tag += '<span style="font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(251,191,36,.15);color:#fbbf24;font-weight:600;margin-left:4px">訊號2</span>'
             risk_row = ""
             if is_buy2_only:
                 _sup = p.get("support", "-")
-                risk_row = f'<tr><td colspan="4" style="padding:0 14px 10px;font-size:12px;color:#fbbf24">⚠️ 高風險突破型態，建議停損設於近期低點 {_sup} 元以下，嚴守停損。</td></tr>'
+                risk_row = f'<tr><td colspan="4" style="padding:0 14px 10px;font-size:12px;color:#fbbf24">⚠️ 高風險突破型態，跌破近期低點 {_sup} 元代表突破失敗。</td></tr>'
             rows_html += f"""
 <tr onclick="location.href='{stock_url}'" style="cursor:pointer">
   <td class="r-num">{i}</td>
@@ -10554,7 +10556,7 @@ def picks_page():
     json_ld = _jmod.dumps({
         "@context": "https://schema.org",
         "@type": "ItemList",
-        "name": f"台股精選名單 {date_str} — 線上有位",
+        "name": f"台股條件篩選名單 {date_str} — 線上有位",
         "description": f"依均線金叉、KD指標、量能、MACD篩選的台股強勢候選，{date_str} 共 {count} 支",
         "url": f"{BACKEND_URL}/picks",
         "numberOfItems": count,
@@ -10571,11 +10573,11 @@ def picks_page():
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>今日精選股｜AI 篩出的強勢股＋進場理由與停損位 {date_str}｜線上有位</title>
-<meta name="description" content="AI 每日從台股篩出均線金叉、KD黃金交叉、量能爆發的強勢股，附進場理由與建議停損位。{date_str} 共 {count} 支入選。還有 500+ 免費計算工具。">
+<title>今日條件篩選結果｜均線、KD、量能同時轉強的台股 {date_str}｜線上有位</title>
+<meta name="description" content="系統每日依均線金叉、KD黃金交叉、量能放大等條件篩選台股，列出符合條件的股票與訊號說明。{date_str} 共 {count} 支符合。還有 500+ 免費計算工具。">
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="{BACKEND_URL}/picks">
-<meta property="og:title" content="今日精選股｜AI 篩出的強勢股＋進場理由 {date_str}｜線上有位">
+<meta property="og:title" content="今日條件篩選結果 {date_str}｜線上有位">
 <meta property="og:description" content="依均線金叉、KD指標、量能、MACD篩選強勢候選股，{date_str} 共 {count} 支入選">
 <meta property="og:url" content="{BACKEND_URL}/picks">
 <meta property="og:type" content="website">
@@ -10607,8 +10609,8 @@ td{{padding:12px 12px;vertical-align:middle}}
 <body>
 <div class="wrap">
   <a href="{FRONTEND_URL}" class="back">← 線上有位</a>
-  <h1>📈 每日精選台股</h1>
-  <p class="sub">資料日期：{generated_at or "尚未產生"}・每日 16:30 更新・共 {count} 支入選</p>
+  <h1>📈 每日條件篩選結果</h1>
+  <p class="sub">資料日期：{generated_at or "尚未產生"}・每日 16:30 更新・共 {count} 支符合條件</p>
   <table>
     <thead>
       <tr>
@@ -10945,7 +10947,7 @@ def rankings():
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>台股今日漲跌排行｜漲幅、跌幅、成交量 Top 20 即時更新｜線上有位</title>
-<meta name="description" content="台股今日漲幅榜、跌幅榜、成交量榜 Top 20，即時更新。搭配 AI 個股分析報告（多空雷達＋K棒型態＋支撐壓力），一鍵查看任一股。">
+<meta name="description" content="台股今日漲幅榜、跌幅榜、成交量榜 Top 20，即時更新。搭配個股技術分析報告（多空雷達＋K棒型態＋支撐壓力），一鍵查看任一股。">
 <script type="application/ld+json">{json_ld}</script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1768270548115739" crossorigin="anonymous"></script>
 <style>
@@ -13199,7 +13201,7 @@ def _ms_detail_text(method: str, ex: dict) -> str:
             if ex.get("also_55d_breakout"):
                 s += "，同時創55日新高"
             if ex.get("exit_level"):
-                s += f"；海龜出場線 {ex.get('exit_level')}"
+                s += f"；海龜通道下緣 {ex.get('exit_level')}"
             return s
         if method == "trend":
             return f"波峰波谷由「{ex.get('trend_prev') or '不明'}」轉為頭頭高、底底高"
@@ -13214,7 +13216,7 @@ def _ms_detail_text(method: str, ex: dict) -> str:
             lots = ex.get("recent_lots") or []
             return f"三大法人連買 {ex.get('streak')} 天，今天 {lots[0]:+,.0f} 張" if lots else "三大法人連買成立"
         if method == "pattern":
-            return f"{ex.get('type')}今天突破頸線 {ex.get('neckline')}，等幅目標約 {ex.get('target')}"
+            return f"{ex.get('type')}今天突破頸線 {ex.get('neckline')}，等幅推算價位約 {ex.get('target')}"
         if method == "revenue":
             yo = "／".join(f"{v:+.1f}%" for v in (ex.get("yoys") or []))
             return (f"近{len(ex.get('yoys') or [])}個月營收年增 {yo}，股價近20天只漲 {ex.get('chg20')}%、"
@@ -13328,11 +13330,11 @@ VERDICT_WEIGHTS = {
 
 VERDICT_TEXT = {
     # 一句話結論（依立場）
-    "head_bull": "{name}多方條件明顯佔優（看多理由{bull}項、看空理由{bear}項），{ms_part}可以列入觀察名單。",
-    "head_bull_wait": "{name}整體偏多，但{wait_reason}，比較適合等拉回再看，不建議現在追價。",
+    "head_bull": "{name}多方條件明顯佔優（看多理由{bull}項、看空理由{bear}項），{ms_part}目前屬多方結構。",
+    "head_bull_wait": "{name}整體偏多，但{wait_reason}，短線位置偏高、過熱風險增加。",
     "head_bull_caution": "{name}偏多，但有{bear}個看空理由要留意，最大的問題是：{top_problem}。",
-    "head_neutral": "{name}多空拉鋸（看多{bull}項、看空{bear}項），方向還不明確，先觀望，等突破 {resistance} 或跌破 {support} 再決定。",
-    "head_bear": "{name}空方條件佔優（看空理由{bear}項、看多理由{bull}項），先避開，等止跌訊號出現再重新評估。",
+    "head_neutral": "{name}多空拉鋸（看多{bull}項、看空{bear}項），方向還不明確，關鍵在突破 {resistance} 或跌破 {support}。",
+    "head_bear": "{name}空方條件佔優（看空理由{bear}項、看多理由{bull}項），目前屬空方結構，止跌訊號尚未出現。",
     "ms_part_many": "今天12金叉有{n}項同時轉強，",
     "ms_part_some": "今天12金叉有{n}項轉強，",
     "wait_near_res": "距離壓力 {resistance} 只剩 {res_pct}%",
@@ -13355,7 +13357,7 @@ VERDICT_TEXT = {
     "macd_bull": "MACD 偏多：{macd_text}",
     "inst_buy": "三大法人近5日買超 {inst_total} 張{inst_streak}",
     "vol_up": "量能放大，5日均量是20日均量的 {vol_ratio} 倍",
-    "gann_buy": "葛蘭碧買點：{gann}",
+    "gann_buy": "葛蘭碧多方訊號：{gann}",
     "near_sup_rr": "股價靠近支撐 {support}，風報比 {rr} 不錯",
     "ms_many": "12金叉今天有 {n} 項同時轉強：{list}",
     "ms_some": "12金叉今天轉強：{list}",
@@ -13370,9 +13372,9 @@ VERDICT_TEXT = {
     "kd_death": "KD 死亡交叉（K {k}）",
     "macd_bear": "MACD 偏空：{macd_text}",
     "inst_sell": "三大法人近5日賣超 {inst_total} 張",
-    "gann_sell": "葛蘭碧賣點：{gann}",
+    "gann_sell": "葛蘭碧空方訊號：{gann}",
     "near_res": "距離壓力 {resistance} 只剩 {res_pct}%，上漲空間有限",
-    "rr_low": "風報比只有 {rr}，賺賠不划算",
+    "rr_low": "風報比只有 {rr}，潛在風險大於潛在空間",
     "channel_conflict": "{conflict}",
     "overheat": "股價高於月線 {bias20}%，短線過熱",
     "kd_high": "KD 在 {k} 的高檔，容易鈍化",
@@ -13392,27 +13394,27 @@ VERDICT_TEXT = {
     # 關鍵價位
     "lv_support": "支撐 {v}（{desc}）",
     "lv_resistance": "壓力 {v}（{desc}）",
-    "lv_stop": "防守位 {v}（距現價 {pct}%）",
-    "lv_target1": "第一目標 {v}",
-    "lv_target2": "第二目標 {v}",
+    "lv_stop": "失效位置 {v}（距現價 {pct}%，收盤跌破代表目前型態失效）",
+    "lv_target1": "前方壓力區 {v}",
+    "lv_target2": "延伸觀察價位 {v}",
     "lv_ma20": "月線 {v}",
-    "lv_turtle": "海龜出場線 {v}（收盤跌破代表突破失敗）",
+    "lv_turtle": "海龜通道下緣 {v}（收盤跌破代表突破失敗）",
     "lv_neck": "{ptype}頸線 {v}",
 
     # 情境（條件式，不是預測）
-    "sc_bull_up": "收盤站穩 {resistance} 並且放量 → 突破成立，下一個目標看 {target2}",
-    "sc_bull_down": "收盤跌破防守位 {stop_loss} → 這波轉強失敗，先出場",
-    "sc_neutral_up": "收盤突破 {resistance} → 轉為偏多，再考慮進場",
-    "sc_neutral_down": "收盤跌破 {support} → 轉為偏空，避開",
-    "sc_bear_up": "收盤站回月線 {ma20} 以上 → 止跌訊號，才重新評估",
-    "sc_bear_down": "繼續跌破 {support} → 可能再往下找支撐，不要急著接",
+    "sc_bull_up": "收盤站穩 {resistance} 並且放量 → 突破成立，下一個觀察價位 {target2}",
+    "sc_bull_down": "收盤跌破失效位置 {stop_loss} → 這波轉強失敗，多方結構失效",
+    "sc_neutral_up": "收盤突破 {resistance} → 轉為偏多結構",
+    "sc_neutral_down": "收盤跌破 {support} → 轉為偏空結構",
+    "sc_bear_up": "收盤站回月線 {ma20} 以上 → 出現止跌訊號",
+    "sc_bear_down": "繼續跌破 {support} → 空方結構延續，下一個支撐需重新確認",
 
-    # 操作參考（依立場，取代原本只看價格位置的「操作：」建議，避免兩套說法）
-    "act_bull": "可設防守位 {stop_loss} 分批布局，第一目標 {target1}",
-    "act_bull_wait": "先不追，等拉回支撐 {support} 附近、出現止跌K棒再考慮，防守位 {stop_loss}",
-    "act_bull_caution": "只適合小量試單，收盤跌破 {stop_loss} 就出場",
-    "act_neutral": "觀望為主，等收盤突破 {resistance} 或跌破 {support} 再跟進",
-    "act_bear": "先避開；手上有持股的，收盤跌破 {support} 應減碼出場",
+    # 觀察重點（2026/09/17 案件008：原「操作參考」，改成只寫條件與失效位置，不寫買賣動作；key 名稱沿用）
+    "act_bull": "多方結構維持；觀察重點是失效位置 {stop_loss} 是否守住，前方壓力區 {target1}",
+    "act_bull_wait": "短線位置偏高；觀察回到支撐 {support} 附近時是否出現止跌K棒，失效位置 {stop_loss}",
+    "act_bull_caution": "偏多但雜音多；收盤跌破 {stop_loss} 代表這波轉強失效",
+    "act_neutral": "方向未明；觀察收盤突破 {resistance} 或跌破 {support} 的方向",
+    "act_bear": "空方結構；觀察能否止跌，收盤跌破 {support} 代表弱勢延續",
 }
 
 
@@ -13648,10 +13650,10 @@ def _build_verdict(r: dict, ms: list | None) -> dict:
         stance, label, level = "bull", "偏多", "low"
         headline = _vt("head_bull", **kv2, ms_part=ms_part)
     elif net <= -3:
-        stance, label, level = "bear", "偏空・避開", "high"
+        stance, label, level = "bear", "偏空結構", "high"
         headline = _vt("head_bear", **kv2)
     else:
-        stance, label, level = "neutral", "多空拉鋸・觀望", "watch"
+        stance, label, level = "neutral", "多空拉鋸・方向未明", "watch"
         headline = _vt("head_neutral", **kv2)
 
     # ── 現在的狀況 ──
