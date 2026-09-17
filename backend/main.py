@@ -498,7 +498,7 @@ async def lifespan(app: FastAPI):
         _bg_scheduler = BackgroundScheduler(timezone="Asia/Taipei")
         _bg_scheduler.add_job(_run_opening_scan_job,    "cron",     hour=9,  minute=6,  day_of_week="mon-fri")
         _bg_scheduler.add_job(_run_opening_scan_job,    "cron",     hour=13, minute=45, day_of_week="mon-fri")  # 收盤後更新今日收盤價
-        _bg_scheduler.add_job(_run_deep_analysis_job,  "cron",     hour=17, minute=0,  day_of_week="mon-fri")  # 深度選股
+        # 2026/09/17：深度選股（_run_deep_analysis_job，平日17:00）帥哥鴻決定下架，由12金叉選股接手
         _bg_scheduler.add_job(_run_multi_signal_scan_job, "cron",  hour=17, minute=20, day_of_week="mon-fri")  # 12金叉選股法（文件B十六節）
         _bg_scheduler.add_job(_run_expire_notice_job,   "cron",     hour=9,  minute=0)
         _bg_scheduler.add_job(_reset_alert_triggered,   "cron",     hour=9,  minute=0,  day_of_week="mon-fri")
@@ -513,30 +513,7 @@ async def lifespan(app: FastAPI):
         # 只是不再排程自動執行；如果之後想針對特定股票手動預產生，
         # 用既有的 POST /admin/batch-generate-reports 管理端點即可。
         _bg_scheduler.start()
-        print("   ✅ APScheduler 排程已啟動（開盤熱門股 09:06、盤中到價提醒每5分鐘、到期通知 09:00、報價快取清除 09:00、補單 08:00、深度選股 17:00、12金叉選股 17:20）")
-
-        # 啟動時補跑深度選股（若今日尚未產出）
-        try:
-            from zoneinfo import ZoneInfo as _ZI
-            _now_tp = datetime.now(_ZI("Asia/Taipei"))
-            _is_weekday = _now_tp.weekday() < 5
-            _after_17 = _now_tp.hour >= 17
-            if _is_weekday and _after_17:
-                _dc2 = _db_conn()
-                _row2 = _dc2.execute(
-                    "SELECT updated_at FROM html_pages WHERE key='deep_analysis'"
-                ).fetchone()
-                _dc2.close()
-                _today_str = _now_tp.strftime("%Y-%m-%d")
-                _already_ran = _row2 and str(_row2["updated_at"]).startswith(_today_str)
-                if not _already_ran:
-                    print("   ⚠️ 今日深度選股尚未產出，啟動補跑...")
-                    import threading as _th
-                    _th.Thread(target=_run_deep_analysis_job, daemon=True).start()
-                else:
-                    print("   ✅ 今日深度選股已產出，不需補跑")
-        except Exception as _ce:
-            print(f"   ⚠️ 補跑深度選股檢查失敗：{_ce}")
+        print("   ✅ APScheduler 排程已啟動（開盤熱門股 09:06、盤中到價提醒每5分鐘、到期通知 09:00、報價快取清除 09:00、補單 08:00、12金叉選股 17:20）")
 
         # 啟動時補跑12金叉選股（2026/09/15新增：平日17:20之後重新部署/重啟時，
         # 如果今天multi_signal_results還沒有資料就補跑一次，避免漏掉當天）
@@ -551,7 +528,7 @@ async def lifespan(app: FastAPI):
                 ).fetchone()
                 _dc_ms.close()
                 if not _row_ms or _row_ms[0] == 0:
-                    print("   ⚠️ 今日12金叉選股尚未產出，啟動補跑（延遲60秒，錯開深度選股補跑）...")
+                    print("   ⚠️ 今日12金叉選股尚未產出，啟動補跑（延遲60秒，等服務完全啟動）...")
                     import threading as _th_ms
                     _th_ms.Thread(target=_run_multi_signal_scan_job,
                                   kwargs={"start_delay": 60}, daemon=True).start()
@@ -3126,6 +3103,13 @@ def _db_init():
             UNIQUE(scan_date, stock_id, method)
         );
         CREATE INDEX IF NOT EXISTS idx_msr_date_method ON multi_signal_results(scan_date, method, passed);
+        -- 12金叉整批共用資料快取（全市場法人買賣超），個股解析即時查詢時直接讀，不必再上網抓
+        CREATE TABLE IF NOT EXISTS multi_signal_ctx (
+            key        TEXT PRIMARY KEY,
+            data_date  TEXT,
+            content    TEXT,
+            updated_at TEXT DEFAULT (datetime('now','+8 hours'))
+        );
         -- 12金叉選股「營收轉成長」用的月營收快取（公開資訊觀測站彙總表，每月份抓過就不再重抓）
         CREATE TABLE IF NOT EXISTS multi_signal_revenue (
             stock_id TEXT NOT NULL,
@@ -3188,6 +3172,39 @@ def _db_init():
             print(f"   ✅ 資料庫補欄位：{table}.{col}")
         except Exception:
             pass  # 欄位已存在，忽略
+
+    # 2026/09/15補（文件A決策③後續）：持股健檢改讀watchlist_items之後，舊portfolios表裡
+    # 使用者原本存的持股（股票代號＋買入價）不會自動出現在新的持股健檢畫面——等於舊資料
+    # 被藏起來了。這裡做「只跑一次」的搬移：舊持股併進watchlist_items（已在自選股裡的
+    # 補上買入價，不在的新增到「預設」族群），舊portfolios表不刪除。
+    # 用db_migrations表記錄已跑過，之後使用者自己移除持股健檢追蹤不會被重啟時又搬回來。
+    try:
+        conn.execute("CREATE TABLE IF NOT EXISTS db_migrations (name TEXT PRIMARY KEY, done_at TEXT)")
+        _mig = "20260915_portfolios_to_watchlist"
+        if not conn.execute("SELECT 1 FROM db_migrations WHERE name=?", (_mig,)).fetchone():
+            _moved = 0
+            for _r in conn.execute(
+                "SELECT user_email, stock_id, stock_name, cost_price, created_at FROM portfolios"
+            ).fetchall():
+                _cur = conn.execute(
+                    "UPDATE watchlist_items SET cost_price=? "
+                    "WHERE user_email=? AND stock_id=? AND (cost_price IS NULL OR cost_price<=0)",
+                    (_r["cost_price"], _r["user_email"], _r["stock_id"]))
+                if _cur.rowcount:
+                    _moved += 1
+                    continue
+                _cur = conn.execute(
+                    "INSERT OR IGNORE INTO watchlist_items "
+                    "(user_email, stock_id, stock_name, group_name, added_date, cost_price) "
+                    "VALUES (?,?,?,?,?,?)",
+                    (_r["user_email"], _r["stock_id"], _r["stock_name"] or "", "預設",
+                     str(_r["created_at"] or "")[:10], _r["cost_price"]))
+                _moved += _cur.rowcount
+            conn.execute("INSERT INTO db_migrations (name, done_at) VALUES (?, datetime('now','+8 hours'))", (_mig,))
+            conn.commit()
+            print(f"   ✅ 舊持股健檢資料搬進自選股：{_moved} 筆")
+    except Exception as _me:
+        print(f"   ⚠️ 舊持股健檢資料搬移失敗（不影響啟動）：{_me}")
 
     # line_user_id 需要唯一索引（同一個LINE帳號不能對應到兩筆會員），
     # NULL值在SQLite的UNIQUE INDEX裡不會互相衝突，所以既有的Email/Google會員不受影響
@@ -4527,6 +4544,13 @@ def _do_analyze(stock_id: str, tf: str = "D",
 
     # ── 深度分析欄位 ──
     kbar_simple  = _classify_kbar_simple(opens, highs, lows, closes, volumes)
+    # 2026/09/17：深度分析的K棒卡片原本用另一套分類（_classify_kbar_simple），常常跟主結論的
+    # K棒型態（detect_kbar_pattern）說法相反（例：主結論「空頭吞噬」、卡片「小黑棒」）。
+    # 有偵測到明確型態時，卡片一律改用同一份型態結果；連K天數、量能註記仍沿用原本的計算。
+    if kbar_pattern:
+        kbar_simple["type"] = kbar_pattern.split("、")[0]
+        kbar_simple["direction"] = kbar_dir if kbar_dir in ("bullish", "bearish") else "neutral"
+        kbar_simple["meaning"] = "；".join(kbar_pattern.split("、")[1:]) or (kbar_warning or kbar_simple.get("meaning", ""))
     ma_alignment = _ma_alignment_desc(ma_values)
     kd_status    = _kd_status_desc(k_arr, d_arr)
     macd_status  = _macd_status_desc(macd_line, macd_sig, macd_hist)
@@ -4852,6 +4876,33 @@ def _do_analyze(stock_id: str, tf: str = "D",
     # 盤中即時價抓失敗時，只在畫面現價旁提示，分析照常快取。
     if _is_trading_session() and not _live_quote_ok:
         result["price_note"] = "現價更新中，暫以收盤價顯示（分析不受影響）"
+
+    # ── 綜合解說（2026/09/17新增，文件B階段7模版版）──
+    # 所有結論統一由 _build_verdict 產出：主結論、風險標籤、報告頁都讀這一份，
+    # 不再各自判斷（原本主結論只看價格位置＋K棒、風險標籤只看離支撐壓力多遠，
+    # 會出現「突破確立可持有」配「觀望」、深度選股高信心配「建議出場」這種互相打架的畫面）。
+    try:
+        _ms_res = None
+        if tf.upper() == "D":
+            _ms_dates = [d.strftime("%Y-%m-%d") if hasattr(d, "strftime") else str(d)[:10] for d in df.index]
+            _ms_res = _ms_evaluate(stock_id, _ms_dates, highs, lows, closes, volumes, _ms_ctx_cached())
+        _vd = _build_verdict(result, _ms_res)
+        result["verdict"] = _vd
+        result["position_conclusion"] = conclusion   # 舊版「只看價格位置」的結論，保留給除錯對照，畫面不再顯示
+        result["risk_level"] = _vd["risk_level"]
+        result["risk_label"] = _vd["stance_label"]
+        result["risk_color"] = {"low": "green", "medium": "amber", "high": "red"}.get(_vd["risk_level"], "gray")
+        _basis_suffix = ("（本分析以今日盤中即時資料試算，非正式收盤價，僅供參考）"
+                         if (_is_trading_session() and price_basis_date == _today_str)
+                         else "（本分析以最近收盤資料計算，盤中僅供參考）")
+        _w = f"{_vd['headline']}\n操作：{_vd['action']}{_basis_suffix}"
+        if _exit_notes:
+            _w += "\n" + "\n".join(_exit_notes)
+        result["warning"] = _w
+        result["conflict_note_raw"] = result.get("conflict_note")
+        result["conflict_note"] = ""   # 矛盾已併入解說，前端主結論不再另外插一條
+    except Exception as _vde:
+        print(f"[verdict] {stock_id} 綜合解說失敗（沿用舊結論）：{_vde}")
     _cache_set(_cache_key, result)
 
     # Wave1：扣次改在 HTTP handler 成功後，此處不扣
@@ -4905,6 +4956,10 @@ def analyze(stock_id: str, tf: str = "D",
             print(f"[REFERRAL] complete_referral_if_pending 失敗 {user['email']}：{_ref_e}")
 
     result = _do_analyze(stock_id, tf, ma1, ma2, ma3, ma4, ma5, user=user)
+    if isinstance(result, dict):
+        # 快取裡是完整版，這裡複製一份再依會員身分遮掉看不到的解說段落
+        result = dict(result)
+        result["verdict"] = _verdict_for_user(result.get("verdict"), user)
     _consume_daily_credit(request, user)
     _ok, used2, limit2 = _check_daily_credit(request, user)
     if isinstance(result, dict):
@@ -6885,39 +6940,48 @@ def _line_bot_register_group(group_id: str):
         print(f"⚠️ LINE群組ID記錄失敗: {e}")
 
 
-def _line_bot_push_deep_picks_notice(pick_count: int):
-    """深度選股排程（_run_deep_analysis_job）跑完後呼叫：如果今天有新入選的股票，
-       推播一則簡短通知到所有已記錄的LINE群組；沒有新入選就不推播（帥哥鴻2026/08/16
-       確認的需求：只要告知深度選股已出爐即可，沒選出就不用推）。"""
-    if not pick_count or pick_count <= 0:
-        print("[deep_analysis] 今日無新入選股票，不推播LINE通知")
+def _line_bot_push_multi_signal_notice(scan_date: str, count: int, strong_count: int):
+    """12金叉選股排程跑完後呼叫（2026/09/17取代原本深度選股的推播）：
+       今天有股票出現轉強訊號才推播，同一天只推一次（管理員重跑不會重複推）。"""
+    if not count or count <= 0:
+        print("[multi_signal] 今日沒有轉強股票，不推播LINE通知")
         return
     if not LINE_BOT_CHANNEL_ACCESS_TOKEN:
         return
     try:
         conn = _db_conn()
-        group_ids = [r["group_id"] for r in conn.execute("SELECT group_id FROM line_push_groups").fetchall()]
-        conn.close()
+        try:
+            row = conn.execute("SELECT value FROM app_settings WHERE key='ms_line_pushed_date'").fetchone()
+            if row and row["value"] == scan_date:
+                print("[multi_signal] 今天已推播過LINE通知，略過")
+                return
+            group_ids = [r["group_id"] for r in conn.execute("SELECT group_id FROM line_push_groups").fetchall()]
+        finally:
+            conn.close()
     except Exception as e:
         print(f"⚠️ 讀取LINE推播群組清單失敗: {e}")
         return
     if not group_ids:
-        print("[deep_analysis] 尚未記錄任何LINE群組ID（需先有人在群組內傳過訊息給機器人），略過本次推播")
+        print("[multi_signal] 尚未記錄任何LINE群組ID（需先有人在群組內傳過訊息給機器人），略過本次推播")
         return
     text = (
-        f"📈 今日深度選股已出爐，共 {pick_count} 檔入選\n"
-        # 2026/08/21修正：原本只帶{FRONTEND_URL}/stock/，前端沒有對應的參數判斷，
-        # 點進去只會落在預設的個股解析首頁，不是深度選股頁（帥哥鴻回報「點連結出來是跑去
-        # 個股解析」）。改成帶?page=deepanalysis，前端DOMContentLoaded會判斷這個參數
-        # 直接呼叫showPage('deepanalysis')開啟正確頁面。
-        f"完整名單請登入App查看 👉 {FRONTEND_URL}/stock/?page=deepanalysis\n"
+        f"📊 今日12金叉選股已出爐：{count} 檔出現轉強訊號"
+        + (f"，其中 {strong_count} 檔同時符合 3 項以上" if strong_count else "") + "\n"
+        f"完整名單請登入App查看 👉 {FRONTEND_URL}/stock/?page=multisignal\n"
         f"僅供參考，不構成投資建議"
     )
     sent = 0
     for gid in group_ids:
         if _line_bot_push(gid, text):
             sent += 1
-    print(f"[deep_analysis] LINE推播完成，{sent}/{len(group_ids)} 個群組成功")
+    try:
+        conn = _db_conn()
+        conn.execute("INSERT OR REPLACE INTO app_settings (key, value) VALUES ('ms_line_pushed_date', ?)", (scan_date,))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"⚠️ 記錄LINE推播日期失敗: {e}")
+    print(f"[multi_signal] LINE推播完成，{sent}/{len(group_ids)} 個群組成功")
 
 
 @app.post("/webhook/line-bot", include_in_schema=False)
@@ -7395,243 +7459,10 @@ def _fetch_opening_volume_top20() -> list:
     return top20
 
 
-def _log_deep_pick_events(conn, results: list, pick_date: str):
-    """
-    把今天入選的股票依「金叉事件」記錄一次選股紀錄。
-    去重靠 deep_pick_log 的 UNIQUE(stock_id, cross_date)：同一檔股票只要金叉日期
-    （ma_cross_date）沒變，就代表還是同一次金叉事件，INSERT OR IGNORE 會自動略過，
-    不會每天重複記錄同一次訊號；等到金叉重新發生（cross_date 換了）才會再記一筆。
-    """
-    for r in results:
-        cross_date = r.get("ma_cross_date")
-        if not cross_date:
-            continue
-        try:
-            conn.execute(
-                "INSERT OR IGNORE INTO deep_pick_log "
-                "(stock_id, stock_name, cross_date, pick_date, pick_price, score, confidence) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (r.get("stock_id"), r.get("stock_name", ""), cross_date, pick_date,
-                 r.get("price"), r.get("score", 0), r.get("confidence", ""))
-            )
-        except Exception as e:
-            print(f"[deep_pick_log] 記錄失敗 {r.get('stock_id')}: {e}")
-    conn.commit()
-
-
-def _update_deep_pick_returns(conn):
-    """
-    幫尚未算出20天報酬率的選股紀錄補上結果：抓選股後的實際交易日K棒，
-    滿20個交易日就用第20根的收盤價算報酬率，不足20天的先跳過，下次再檢查。
-    """
-    import sys as _sys4, os as _os4
-    _sp4 = _os4.path.join(_os4.path.dirname(_os4.path.abspath(__file__)), "stock_picker")
-    if _sp4 not in _sys4.path:
-        _sys4.path.insert(0, _sp4)
-    from crawler import fetch_price_history as _fetch_ph
-
-    rows = conn.execute(
-        "SELECT id, stock_id, pick_date, pick_price FROM deep_pick_log WHERE return_20d_pct IS NULL"
-    ).fetchall()
-    for i, row in enumerate(rows):
-        try:
-            prices = _fetch_ph(row["stock_id"], days=60)
-            after = [p for p in prices if p["date"] > row["pick_date"] and p["close"] > 0]
-            if len(after) < 20:
-                continue
-            target = after[19]
-            ret_pct = round((target["close"] - row["pick_price"]) / row["pick_price"] * 100, 2)
-            conn.execute(
-                "UPDATE deep_pick_log SET return_20d_pct=?, return_20d_date=?, return_20d_price=? WHERE id=?",
-                (ret_pct, target["date"], target["close"], row["id"])
-            )
-        except Exception as e:
-            print(f"[deep_pick_log] 更新20天報酬失敗 {row['stock_id']}: {e}")
-        if i < len(rows) - 1:
-            _time.sleep(0.35)   # 避免連續打爆 FinMind API，比照 DEEP_CFG["api_delay"]
-    conn.commit()
-
-
-def _get_deep_track_records(conn, limit: int = 20) -> list[dict]:
-    """給公開頁用：已滿20天、算出報酬率的選股紀錄，最新的在前面"""
-    rows = conn.execute(
-        "SELECT stock_id, stock_name, cross_date, pick_date, pick_price, "
-        "return_20d_pct, return_20d_date, return_20d_price "
-        "FROM deep_pick_log WHERE return_20d_pct IS NOT NULL "
-        "ORDER BY return_20d_date DESC LIMIT ?",
-        (limit,)
-    ).fetchall()
-    return [dict(r) for r in rows]
-
-
-# ══════════════════════════════════════════════════════════
-# 深度選股門檻設定（2026/08/27新增）
-# 原本 DEEP_CFG（min_score等門檻）寫死在 finmind_filter.py 裡，改門檻要
-# 改程式碼+重新部署。帥哥鴻要求改成可透過 /admin/deep-scan-config 動態
-# 調整、存DB，不用改程式碼、不用重新部署。
-# app_settings 只存「有被管理員覆寫」的欄位，沒被覆寫的欄位一律沿用
-# finmind_filter.DEEP_CFG 原本的預設值（不寫死，預設值仍在 finmind_filter.py
-# 單一位置維護）。
-# ══════════════════════════════════════════════════════════
-
-_DEEP_CFG_SETTINGS_KEY = "deep_cfg_overrides"
-
-def _import_finmind_filter():
-    """確保 stock_picker 目錄在 sys.path 上，回傳 finmind_filter 模組物件"""
-    import sys, os as _os_dc
-    _sp_dir = _os_dc.path.join(_os_dc.path.dirname(_os_dc.path.abspath(__file__)), "stock_picker")
-    if _sp_dir not in sys.path:
-        sys.path.insert(0, _sp_dir)
-    import finmind_filter as _ff
-    return _ff
-
-def _get_deep_cfg_overrides(conn) -> dict:
-    """讀取DB裡儲存的DEEP_CFG覆寫值（JSON），沒有或格式錯誤就回傳空dict"""
-    import json as _json_dc
-    row = conn.execute(
-        "SELECT value FROM app_settings WHERE key=?", (_DEEP_CFG_SETTINGS_KEY,)
-    ).fetchone()
-    if not row:
-        return {}
-    try:
-        data = _json_dc.loads(row["value"])
-        return data if isinstance(data, dict) else {}
-    except Exception:
-        return {}
-
-def _apply_deep_cfg_overrides(conn=None):
-    """把DB裡的覆寫值套用到 finmind_filter.DEEP_CFG（每次掃描前呼叫一次，
-    以及管理員透過 /admin/deep-scan-config 更新後立即套用，下一次掃描
-    馬上生效，不用等重新部署）"""
-    _ff = _import_finmind_filter()
-    _close = False
-    if conn is None:
-        conn = _db_conn()
-        _close = True
-    try:
-        overrides = _get_deep_cfg_overrides(conn)
-        for k, v in overrides.items():
-            if k in _ff.DEEP_CFG and v is not None:
-                default_val = _ff.DEEP_CFG[k]
-                try:
-                    _ff.DEEP_CFG[k] = type(default_val)(v)
-                except (TypeError, ValueError):
-                    continue
-    finally:
-        if _close:
-            conn.close()
-    return _ff.DEEP_CFG
-
-
-def _run_deep_analysis_job():
-    """
-    每個交易日 17:00 執行：深度選股掃描
-
-    2026/07/26 改版：資料輪替機制
-      - 即時結果（今天剛跑出來的）存成 JSON，供 /api/deep-analysis 給 App 內
-        登入使用者即時查看（免費看基本資訊，付費看完整含股票代號）
-      - 公開版 /deep-analysis 網頁改成顯示「上一次」的資料（等於延遲一個交易日），
-        資訊透明標註延遲時間，可以放心當 SEO/導流頁面公開，不會洩漏當天即時訊號
-    """
-    from zoneinfo import ZoneInfo as _ZI3
-    now = datetime.now(_ZI3("Asia/Taipei"))
-    if now.weekday() >= 5:
-        return
-    print(f"[deep_analysis] 開始執行 {now.strftime('%H:%M')}")
-    try:
-        import sys, os, json as _json_deep
-        sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "stock_picker"))
-        from crawler import fetch_twse_volume_top
-        from finmind_filter import run_deep_scan
-        from generator import generate_deep_analysis
-
-        # 套用DB裡管理員透過 /admin/deep-scan-config 設定的門檻覆寫值
-        # （沒有覆寫的欄位維持 finmind_filter.py 裡的原始預設值）
-        _apply_deep_cfg_overrides()
-
-        # 取成交量前150做候選
-        top_ids, name_dict = fetch_twse_volume_top(n=150)
-        if not top_ids:
-            print("[deep_analysis] 取得成交量排行失敗，跳過")
-            return
-
-        results = run_deep_scan(top_ids, name_dict=name_dict, finmind_token=FINMIND_TOKEN)
-        print(f"[deep_analysis] 完成，{len(results)} 檔入選")
-
-        _dc = _db_conn()
-
-        # ①-0a 顯示層去重（2026/08/10補）：deep_pick_log的UNIQUE(stock_id, cross_date)
-        #     原本只防止「記錄」重複寫入，沒有真正過濾「今天要顯示的入選清單」，
-        #     導致同一次金叉只要條件持續成立就天天重複顯示。這裡查出已經記錄過的
-        #     (股票代號, 金叉日期)組合，把results裡已經提示過的股票濾掉，
-        #     只留下真正的新訊號（金叉日期換了才會再出現）。
-        _seen_events = {
-            (row["stock_id"], row["cross_date"])
-            for row in _dc.execute("SELECT stock_id, cross_date FROM deep_pick_log").fetchall()
-        }
-        _before_dedup = len(results)
-        results = [r for r in results if (r.get("stock_id"), r.get("ma_cross_date")) not in _seen_events]
-        print(f"[deep_analysis] 顯示層去重：{_before_dedup}檔中有{_before_dedup - len(results)}檔是舊金叉事件已提示過，剩{len(results)}檔新訊號")
-
-        # ①-0 選股紀錄表：記錄今天入選的金叉事件（同一次金叉只記錄一次，靠DB UNIQUE去重）
-        #     並補齊之前選股中已滿20個交易日的報酬率
-        _log_deep_pick_events(_dc, results, now.strftime("%Y-%m-%d"))
-        _update_deep_pick_returns(_dc)
-        _track_records = _get_deep_track_records(_dc, limit=20)
-
-        # ① 先把「上一次」存的即時資料讀出來（這份資料現在已經滿一個交易日，
-        #    可以安心拿去產生公開版頁面了）
-        _stale_row = _dc.execute(
-            "SELECT content, updated_at FROM html_pages WHERE key='deep_analysis_data'"
-        ).fetchone()
-
-        # ② 把「今天」的即時資料存成 JSON，供 /api/deep-analysis 站內頁即時使用
-        _dc.execute(
-            "INSERT OR REPLACE INTO html_pages (key, content, updated_at) VALUES (?, ?, datetime('now','+8 hours'))",
-            ("deep_analysis_data", _json_deep.dumps(results, ensure_ascii=False))
-        )
-        _dc.commit()
-        print("[deep_analysis] 即時資料(JSON)已存入DB，供App內站內頁使用")
-
-        # ②-1 深度選股跑完，緊接著推播LINE通知（2026/08/16新增，帥哥鴻確認需求：
-        #      只要告知「今日深度選股已出爐」即可，今天沒有新入選就不推播）
-        try:
-            _line_bot_push_deep_picks_notice(len(results))
-        except Exception as _e:
-            print(f"[deep_analysis] LINE推播通知失敗（不影響選股本身）: {_e}")
-
-        # ③ 用「上一次」的資料（延遲一個交易日，安全公開）重新產生公開版HTML頁
-        if _stale_row and _stale_row["content"]:
-            try:
-                _stale_results = _json_deep.loads(_stale_row["content"])
-            except Exception:
-                _stale_results = []
-            _stale_date = (_stale_row["updated_at"] or "")[:10]
-            _note = (
-                f"⏰ 本頁資料為 {_stale_date} 收盤後分析（延遲一個交易日），"
-                f"即時分析請登入 App 查看" if _stale_date else
-                "⏰ 本頁為延遲資料，即時分析請登入 App 查看"
-            )
-            generate_deep_analysis(_stale_results, note=_note, track_records=_track_records)
-
-            _da_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "stock_picker", "output", "deep_analysis.html")
-            if os.path.exists(_da_path):
-                with open(_da_path, "r", encoding="utf-8") as _f:
-                    _da_html = _f.read()
-                _dc.execute(
-                    "INSERT OR REPLACE INTO html_pages (key, content, updated_at) VALUES (?, ?, datetime('now','+8 hours'))",
-                    ("deep_analysis", _da_html)
-                )
-                _dc.commit()
-                print(f"[deep_analysis] 公開版HTML已更新（顯示 {_stale_date} 的延遲資料）")
-        else:
-            print("[deep_analysis] 尚無前一次資料可產生公開版（首次執行，屬正常現象，明天起會開始顯示）")
-
-        _dc.close()
-    except Exception as e:
-        print(f"[deep_analysis] 執行失敗：{e}")
-        import traceback
-        traceback.print_exc()
+# 2026/09/17：深度選股下架（帥哥鴻決定由12金叉選股接手），原本這裡的
+# _run_deep_analysis_job／20天成效追蹤（_log_deep_pick_events、_update_deep_pick_returns）／
+# 門檻設定（_apply_deep_cfg_overrides）一併移除。deep_pick_log 資料表保留在DB不刪，
+# 需要查舊程式可從 main.py.bak_20260917_綜合解說前 找回。
 
 
 def _run_opening_scan_job():
@@ -9936,7 +9767,8 @@ def sitemap():
         all_stock_ids = _SEO_HARDCODED_STOCKS
 
     locs = []
-    for u in [FRONTEND_URL + "/", FRONTEND_URL + "/stock/", FRONTEND_URL + "/rankings"]:
+    for u in [FRONTEND_URL + "/", FRONTEND_URL + "/stock/", FRONTEND_URL + "/rankings",
+              FRONTEND_URL + "/multi-signal"]:   # 2026/09/17：12金叉選股公開頁（取代已下架的 /deep-analysis）
         locs.append(f"  <url><loc>{u}</loc><changefreq>daily</changefreq><priority>0.8</priority></url>")
 
     # ── Tools 工具頁（動態掃描磁碟，避免硬編碼漏頁）──
@@ -11525,38 +11357,9 @@ async def merge_watchlist(request: Request, current_user: dict = Depends(require
 
 @app.get("/deep-analysis")
 def deep_analysis_page():
-    """
-    公開版深度選股 HTML 頁面（優先從 DB 讀，重啟不消失）
-    2026/07/26 起：這裡顯示的是「延遲一個交易日」的資料，當作 SEO/導流頁面用，
-    頁面本身會清楚標註延遲時間。即時資料改由 /api/deep-analysis 供 App 內使用。
-    """
-    import os
-    # 優先從 DB 讀
-    _dc = _db_conn()
-    _row = _dc.execute("SELECT content FROM html_pages WHERE key='deep_analysis'").fetchone()
-    _dc.close()
-    if _row:
-        return HTMLResponse(content=_row["content"])
-    # DB 無資料時 fallback 讀檔
-    out_path = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)),
-        "stock_picker", "output", "deep_analysis.html"
-    )
-    if os.path.exists(out_path):
-        with open(out_path, "r", encoding="utf-8") as f:
-            return HTMLResponse(content=f.read())
-    # 連檔案都沒有時的最後 fallback。
-    # 2026/07/27：這裡原本完全沒有時間資訊，使用者無法判斷是「今天還沒跑」還是
-    # 「系統壞掉很久了」，所以一律把查詢當下的台北時間顯示出來。
-    _fb_now = _taipei_now_str("%Y-%m-%d %H:%M")
-    return HTMLResponse(content=f"""
-    <html><head><meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1"></head>
-    <body style="background:#0f172a;color:#94a3b8;font-family:sans-serif;padding:40px;text-align:center">
-    <h2 style="color:#f1f5f9">深度選股報告尚未產出</h2>
-    <p>每個交易日 17:00 自動更新</p>
-    <p style="font-size:13px;color:#64748b;margin-top:16px">查詢時間：{_fb_now}</p>
-    </body></html>""", status_code=200)
+    """2026/09/17：深度選股已下架，舊網址（官網、文章、LINE舊訊息裡的連結）一律轉到12金叉選股公開頁"""
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/multi-signal", status_code=301)
 
 
 def _deep_is_premium(user: dict | None) -> bool:
@@ -11604,94 +11407,29 @@ def _deep_mask_item(item: dict) -> dict:
 
 @app.get("/api/deep-analysis")
 def api_deep_analysis(user: dict | None = Depends(get_current_user)):
-    """
-    即時深度選股資料（JSON），供 App 內站內頁面使用。
-    2026/07/26 新增；2026/07/27 修正付費牆漏洞。
-
-    修正前的問題：這個端點完全沒有驗證身分，任何人（含未登入、未付費）
-      只要直接呼叫網址就能拿到完整、未遮罩的股票代號與名稱。前端的模糊效果
-      只是畫面樣式，真實資料早已送到瀏覽器，付費牆等同虛設。
-
-    修正後的行為：改由後端自行判斷登入/付費狀態——
-      付費有效（含邀請制解鎖）→ 回傳完整資料
-      免費會員 / 未登入      → 股票代號與名稱在伺服器端就換成遮罩字串才送出，
-                               其餘欄位照給，維持免費預覽與導流效果不變
-    """
-    _dc = _db_conn()
-    _row = _dc.execute("SELECT content, updated_at FROM html_pages WHERE key='deep_analysis_data'").fetchone()
-    _dc.close()
-    # server_time：查詢當下的台北時間，一律回傳。
-    # 前端要求「不管有沒有資料都要顯示日期時間」，沒資料時 updated_at 是 None，
-    # 前端就改用這個時間顯示「查詢時間」，不能讓時間那一行整個消失。
-    _server_time = _taipei_now_str("%Y-%m-%d %H:%M")
-    _is_premium = _deep_is_premium(user)
-
-    if not _row or not _row["content"]:
-        empty = _picks_payload([], None, user)
-        empty["server_time"] = _server_time
-        return empty
-    import json as _json_api
-    try:
-        _data = _json_api.loads(_row["content"])
-    except Exception:
-        _data = []
-
-    if _is_premium:
-        return {"data": _data, "updated_at": _row["updated_at"],
-                "server_time": _server_time, "masked": False, "tier": "paid", "preview": False}
-    if user:
-        _data = [_deep_mask_item(_it) for _it in _data]
-        return {"data": _data, "updated_at": _row["updated_at"],
-                "server_time": _server_time, "masked": True, "tier": "free", "preview": False}
-    # 遊客弱預覽：不可全空白
-    payload = _picks_payload(_data, _row["updated_at"], user)
-    payload["server_time"] = _server_time
-    return payload
+    """2026/09/17：深度選股已下架，舊版前端（使用者瀏覽器快取）若還呼叫這裡，直接回傳12金叉資料"""
+    return api_multi_signal(user)
 
 
 @app.get("/deep-analysis-status")
 def deep_analysis_status():
-    """
-    給首頁跑馬燈用的輕量狀態查詢。
-    2026/07/26 新增。只有「今天」產生的資料才回傳 available=true，
-    避免服務重啟、排程還沒跑時顯示昨天的舊提示。
-    """
-    from zoneinfo import ZoneInfo as _ZI4
-    today = datetime.now(_ZI4("Asia/Taipei")).strftime("%Y-%m-%d")
-    _dc = _db_conn()
-    _row = _dc.execute("SELECT content, updated_at FROM html_pages WHERE key='deep_analysis_data'").fetchone()
-    _dc.close()
-    if not _row or not _row["content"]:
-        return {"available": False}
-    updated_date = (_row["updated_at"] or "")[:10]
-    if updated_date != today:
-        return {"available": False}
-    import json as _json_status
-    try:
-        _data = _json_status.loads(_row["content"])
-    except Exception:
-        _data = []
-    high_conf = sum(1 for r in _data if "高信心" in (r.get("confidence") or ""))
-    return {
-        "available": True,
-        "updated_at": _row["updated_at"],
-        "count": len(_data),
-        "high_confidence_count": high_conf,
-    }
+    """首頁跑馬燈用的輕量狀態（2026/09/17起改讀12金叉；只有今天的資料才 available）"""
+    return multi_signal_status()
 
 
 # ══════════════════════════════════════════════════════════
 # 12金叉選股法（文件B十四～十六節，2026/09/15新增）
 # 每個方法對候選池每檔股票各自判斷「通過/未通過」，寫進multi_signal_results，
-# 跟深度選股（_run_deep_analysis_job / deep_pick_log）完全獨立、互不影響。
+# 2026/09/17起深度選股下架，12金叉選股正式接手（LINE推播、公開頁 /multi-signal、首頁入口）。
 #
 # 判斷標準（2026/09/15帥哥鴻拍板）：每個方法都必須是「當天」發生的金叉/突破/轉強，
 # 不往回找、不加低檔條件——目標是找出今天剛轉強的機會股。
-# 唯一例外是基本面：月營收一個月才公布一次，沒有「每天」可言，改成「最新公布的
-# 月營收年增率由負轉正」，在下個月營收公布前都算數。
+# 唯一例外是基本面：月營收一個月才公布一次，沒有「每天」可言。2026/09/17帥哥鴻改定義：
+# 原本「最新月營收年增由負轉正」會踩到內線先拉、營收公布剛好利多出盡，改成
+# 「最近3個月營收都年增，但股價還沒漲（近20天漲幅<10%、不在近60日高檔）」，條件成立期間每天都算。
 #
 # 12個方法：技術面9（MACD/KD/RSI/月季線/海龜/趨勢/量能/布林/OBV）＋籌碼面1（法人）
-#           ＋型態面1（W底/頭肩底突破頸線）＋基本面1（月營收年增轉正）
+#           ＋型態面1（W底/頭肩底突破頸線）＋基本面1（營收成長但股價未漲）
 # ══════════════════════════════════════════════════════════
 
 MULTI_SIGNAL_CFG = {
@@ -11711,6 +11449,11 @@ MULTI_SIGNAL_CFG = {
     "pattern_bottom_tol": 4.0,  # W底：兩個底相差幾%以內算同一價位
     "pattern_shoulder_tol": 6.0,  # 頭肩底：左右肩相差幾%以內
     "api_delay":         0.35,  # 每檔間隔秒數（跟深度選股同款節流）
+    # 2026/09/17新增
+    "state_lookback":    20,    # 個股解析「轉強中」：最近幾個交易日內轉強、而且現在還維持
+    "rev_months":        3,     # 基本面：最近幾個月營收年增都要>0
+    "rev_max_gain20":    10.0,  # 基本面：近20個交易日漲幅要小於幾%（還沒被拉過）
+    "rev_max_pos60":     60.0,  # 基本面：收盤價在近60日高低區間的位置要在幾%以下（不在高檔）
 }
 
 # method代碼 → (中文名稱, 類別)。類別是交叉統計「涵蓋幾個類別」用的。
@@ -11726,8 +11469,10 @@ MULTI_SIGNAL_METHODS = {
     "obv":         ("OBV轉強",      "技術面"),
     "institution": ("法人連買",     "籌碼面"),
     "pattern":     ("底部型態突破", "型態面"),
-    "revenue":     ("營收轉成長",   "基本面"),
+    "revenue":     ("營收成長・股價未漲", "基本面"),
 }
+
+MULTI_SIGNAL_FREE_MAX = 2   # 免費會員看得到「同時符合幾個以下」的股票（2026/09/17帥哥鴻拍板）
 
 _MULTI_SIGNAL_STATUS = {"running": False, "started_at": None, "finished_at": None,
                         "scan_date": None, "total": 0, "done": 0, "ok": 0,
@@ -12015,17 +11760,19 @@ def _ms_parse_mops_revenue(html: str) -> dict:
     return out
 
 
-def _ms_load_revenue(scan_date: str) -> dict:
+def _ms_load_revenue(scan_date: str, fetch: bool = True) -> dict:
     """
     月營收（上市＋上櫃，含KY股）。每個月份整份彙總表只有4個檔案，抓過就存進DB，
     之後同月份不再重抓；只有「上個月」（公司陸續公布中）每天重抓一次補新公布的公司。
-    回傳 {代號: {ym: {revenue, mom, yoy, cum_yoy}}}，只含最近3個月份。
+    回傳 {代號: {ym: {revenue, mom, yoy, cum_yoy}}}，只含最近4個月份（月初上個月還沒全部公布，
+    多抓一個月，每檔各自取有資料的最近3個月）。
+    fetch=False：只讀DB不上網抓（個股解析即時查詢用，避免拖慢查詢）。
     """
     from datetime import date as _d_ms
     d = _d_ms.fromisoformat(scan_date)
     months = []
     y, m = d.year, d.month
-    for _ in range(3):
+    for _ in range(4):
         m -= 1
         if m == 0:
             y, m = y - 1, 12
@@ -12037,8 +11784,8 @@ def _ms_load_revenue(scan_date: str) -> dict:
             row = conn.execute(
                 "SELECT fetched_date FROM multi_signal_revenue_fetch WHERE ym=?", (ym,)
             ).fetchone()
-            need = (row is None) or (idx == 0 and row["fetched_date"] != scan_date)
-            if not need:
+            need = (row is None) or (idx <= 1 and row["fetched_date"] != scan_date)
+            if not need or not fetch:
                 continue
             got = 0
             # _0＝國內公司、_1＝外國公司（KY股，例如世芯-KY、中租-KY），兩份格式相同（2026/09/15實測）
@@ -12075,125 +11822,198 @@ def _ms_load_revenue(scan_date: str) -> dict:
 
 def _multi_signal_check_one_stock(stock_id: str, stock_name: str = "", ctx: dict | None = None):
     """
-    對一檔股票跑12個方法，回傳每個方法一筆的結果list；日K資料不足回傳None（整檔跳過）。
-    每筆：{method, category, passed(bool), value(float|None), extra(dict)}
-    ctx：整批共用的資料（法人買賣超、月營收），由排程先一次抓好傳進來；沒傳的話那兩個方法記為資料缺。
+    排程用：自己抓日K，再交給 _ms_evaluate 跑12個方法。日K資料不足回傳None（整檔跳過）。
     """
     import sys as _sys_ms
     _sp = os.path.join(os.path.dirname(os.path.abspath(__file__)), "stock_picker")
     if _sp not in _sys_ms.path:
         _sys_ms.path.insert(0, _sp)
     from crawler import fetch_price_history
+
+    prices = fetch_price_history(stock_id, days=MULTI_SIGNAL_CFG["history_days"])
+    rows = [p for p in prices
+            if p["close"] > 0 and p["open"] > 0 and p["high"] > 0 and p["low"] > 0]
+    return _ms_evaluate(
+        stock_id,
+        [p["date"] for p in rows],
+        np.array([p["high"] for p in rows], dtype=float),
+        np.array([p["low"] for p in rows], dtype=float),
+        np.array([p["close"] for p in rows], dtype=float),
+        np.array([p["volume"] for p in rows], dtype=float),
+        ctx,
+    )
+
+
+def _ms_evaluate(stock_id: str, dates: list, highs, lows, closes, vols, ctx: dict | None = None):
+    """
+    對一檔股票跑12個方法（2026/09/17從 _multi_signal_check_one_stock 拆出來，
+    讓個股解析 _do_analyze 可以直接用手上已經有的K線資料算，不必再打一次FinMind）。
+    回傳每個方法一筆的list，資料不足回傳None。每筆：
+      {method, category, passed(bool：今天剛轉強，選股頁用),
+       state("today"今天剛轉強／"active"轉強中／"none"未轉強，個股解析用),
+       days(轉強中第幾天，active才有), value, extra}
+    ctx：整批共用的資料（法人買賣超、月營收）；沒傳的話那兩個方法記為資料缺。
+    """
+    import sys as _sys_ms
+    _sp = os.path.join(os.path.dirname(os.path.abspath(__file__)), "stock_picker")
+    if _sp not in _sys_ms.path:
+        _sys_ms.path.insert(0, _sp)
     from finmind_filter import _ma, _find_ma_golden_cross_index
 
     ctx = ctx or {}
     cfg = MULTI_SIGNAL_CFG
-    prices = fetch_price_history(stock_id, days=cfg["history_days"])
-    rows = [p for p in prices
-            if p["close"] > 0 and p["open"] > 0 and p["high"] > 0 and p["low"] > 0]
-    if len(rows) < cfg["min_bars"]:
-        return None
-
-    dates  = [p["date"] for p in rows]
-    closes = np.array([p["close"] for p in rows], dtype=float)
-    highs  = np.array([p["high"] for p in rows], dtype=float)
-    lows   = np.array([p["low"] for p in rows], dtype=float)
-    vols   = np.array([p["volume"] for p in rows], dtype=float)
     n = len(closes)
+    if n < cfg["min_bars"]:
+        return None
+    closes = np.asarray(closes, dtype=float)
+    highs = np.asarray(highs, dtype=float)
+    lows = np.asarray(lows, dtype=float)
+    vols = np.asarray(vols, dtype=float)
     data_date = dates[-1]
     price = float(closes[-1])
     prev_close = float(closes[-2])
+    slb = cfg["state_lookback"]
     results: list = []
 
-    def _add(method, passed, value, extra):
+    def _add(method, passed, value, extra, state=None, days=None):
         extra = dict(extra or {})
         extra.setdefault("data_date", data_date)
         extra.setdefault("close", _ms_num(price))
         extra.setdefault("prev_close", _ms_num(prev_close))
+        if state is None:
+            state = "today" if passed else "none"
+        if passed:
+            state, days = "today", 0
         results.append({"method": method, "category": MULTI_SIGNAL_METHODS[method][1],
-                        "passed": bool(passed), "value": _ms_num(value), "extra": extra})
+                        "passed": bool(passed), "state": state,
+                        "days": days if state == "active" else None,
+                        "value": _ms_num(value), "extra": extra})
 
     def _today(idx):
         return {"cross_date": data_date} if idx is not None else {}
+
+    def _cross_state(fast, slow):
+        """交叉型指標的「轉強中」：現在還在上方，且最近 slb 天內有乾淨穿越"""
+        idx = _find_cross_index(fast, slow, slb)
+        if idx is None:
+            return "none", None, None
+        return "active", n - 1 - idx, dates[idx]
+
+    def _since(cond_list):
+        """條件目前成立的話，連續成立了幾天（今天算第0天之前的天數）"""
+        d = 0
+        for v in reversed(cond_list[:-1]):
+            if v:
+                d += 1
+            else:
+                break
+        return d
 
     lb = cfg["cross_lookback"]
 
     # ── 1. MACD（12,26,9）DIF當天向上穿越DEA ──
     dif, dea, hist = calc_macd(closes)
     mi = _find_cross_index(dif, dea, lb)
+    stt, dd, cd = _cross_state(dif, dea)
     _add("macd", mi is not None, hist[-1],
          {"dif": _ms_num(dif[-1]), "dea": _ms_num(dea[-1]), "hist": _ms_num(hist[-1]),
-          "above_zero": bool(_ms_num(dif[-1]) is not None and dif[-1] > 0), **_today(mi)})
+          "above_zero": bool(_ms_num(dif[-1]) is not None and dif[-1] > 0),
+          **_today(mi), **({"since_date": cd} if cd else {})}, stt, dd)
 
     # ── 2. KD（9,3,3）K當天向上穿越D ──
     k_arr, d_arr = calc_kd(highs, lows, closes)
     ki = _find_cross_index(k_arr, d_arr, lb)
+    stt, dd, cd = _cross_state(k_arr, d_arr)
     _add("kd", ki is not None, k_arr[-1],
-         {"k": _ms_num(k_arr[-1]), "d": _ms_num(d_arr[-1]), **_today(ki)})
+         {"k": _ms_num(k_arr[-1]), "d": _ms_num(d_arr[-1]),
+          **_today(ki), **({"since_date": cd} if cd else {})}, stt, dd)
 
     # ── 3. RSI（14）當天由50以下往上穿越50 ──
     rsi = calc_rsi(closes, 14)
     rsi_now, rsi_prev = _ms_num(rsi[-1]), _ms_num(rsi[-2])
     rsi_ok = rsi_now is not None and rsi_prev is not None and rsi_prev <= cfg["rsi_mid"] < rsi_now
+    above = [bool(v > cfg["rsi_mid"]) if not np.isnan(v) else False for v in rsi]
+    rsi_state = "active" if (rsi_now is not None and rsi_now > cfg["rsi_mid"]) else "none"
     _add("rsi", rsi_ok, rsi_now, {"rsi_prev": rsi_prev, "threshold": cfg["rsi_mid"],
-                                  **({"cross_date": data_date} if rsi_ok else {})})
+                                  **({"cross_date": data_date} if rsi_ok else {})},
+         rsi_state, _since(above) if rsi_state == "active" else None)
 
     # ── 4. 月季線金叉（複用深度選股的_ma/_find_ma_golden_cross_index，只認當天）──
     close_list = [float(c) for c in closes]
     ma20_l, ma60_l = _ma(close_list, 20), _ma(close_list, 60)
     gi = _find_ma_golden_cross_index(ma20_l, ma60_l, lb)
+    gi_act = _find_ma_golden_cross_index(ma20_l, ma60_l, slb)
     ma20, ma60 = ma20_l[-1], ma60_l[-1]
     _add("ma_cross", gi is not None, ((ma20 - ma60) / ma60 * 100) if (ma20 and ma60) else None,
-         {"ma20": ma20, "ma60": ma60, **_today(gi)})
+         {"ma20": ma20, "ma60": ma60, **_today(gi),
+          **({"since_date": dates[gi_act]} if gi_act is not None else {})},
+         "active" if gi_act is not None else "none",
+         (n - 1 - gi_act) if gi_act is not None else None)
 
     # ── 5. 海龜突破（當天收盤突破前20日最高價）──
     ti, level = _turtle_breakout(highs, lows, closes, cfg["turtle_entry"],
                                  cfg["turtle_exit"], cfg["turtle_lookback"])
+    ta, _lv_a = _turtle_breakout(highs, lows, closes, cfg["turtle_entry"], cfg["turtle_exit"], slb)
     atr = _calc_atr(highs, lows, closes, 20)
+    _r2 = lambda x: round(float(x), 2) if x is not None and not np.isnan(float(x)) else None
     t_extra = {"entry_days": cfg["turtle_entry"],
-               "exit_level": _ms_num(np.min(lows[-cfg["turtle_exit"]:])), "atr20": _ms_num(atr)}
+               "exit_level": _r2(np.min(lows[-cfg["turtle_exit"]:])), "atr20": _ms_num(atr)}
     if ti is not None:
         le = cfg["turtle_long_entry"]
         t_extra.update({
-            "cross_date": data_date, "breakout_level": _ms_num(level),
-            "stop_2n": _ms_num(price - 2 * atr) if atr else None,
+            "cross_date": data_date, "breakout_level": _r2(level),
+            "stop_2n": _r2(price - 2 * atr) if atr else None,
             "also_55d_breakout": bool(ti - le >= 0 and closes[ti] > float(np.max(highs[ti - le:ti]))),
         })
-    _add("turtle", ti is not None, ((price - level) / level * 100) if (ti is not None and level) else None, t_extra)
+    elif ta is not None:
+        t_extra.update({"since_date": dates[ta], "breakout_level": _r2(_lv_a)})
+    _add("turtle", ti is not None, ((price - level) / level * 100) if (ti is not None and level) else None,
+         t_extra, "active" if ta is not None else "none", (n - 1 - ta) if ta is not None else None)
 
-    # ── 6. 趨勢（原多空雷達一，道氏波峰波谷）：今天判定為上升趨勢、昨天還不是 ──
+    # ── 6. 趨勢（原多空雷達一，道氏波峰波谷）：今天判定為上升趨勢、昨天不是 ──
     tr_now = _dow_trend(highs, lows)
     tr_prev = _dow_trend(highs[:-1], lows[:-1])
     tr_ok = tr_now == "上升趨勢" and tr_prev != "上升趨勢"
     _add("trend", tr_ok, None, {"trend": tr_now, "trend_prev": tr_prev,
-                                **({"cross_date": data_date} if tr_ok else {})})
+                                **({"cross_date": data_date} if tr_ok else {})},
+         "active" if tr_now == "上升趨勢" else "none")
 
     # ── 7. 量能（原多空雷達三，注意是量能不是籌碼）：5日均量/20日均量 今天≥1.3、昨天<1.3 ──
     def _vr(end):
+        if end < 20:
+            return None
         v5, v20 = vols[end - 5:end].mean(), vols[end - 20:end].mean()
         return (v5 / v20) if v20 > 0 else None
     vr_now, vr_prev = _vr(n), _vr(n - 1)
     vr_ok = vr_now is not None and vr_prev is not None and vr_prev < cfg["vol_ratio"] <= vr_now
+    vr_hist = [(_vr(e) or 0) >= cfg["vol_ratio"] for e in range(max(20, n - slb - 1), n + 1)]
+    vr_state = "active" if (vr_now is not None and vr_now >= cfg["vol_ratio"]) else "none"
     _add("volume", vr_ok, vr_now, {"vol_ratio_prev": _ms_num(vr_prev), "threshold": cfg["vol_ratio"],
                                    "vol_today_lots": int(vols[-1] // 1000),
-                                   **({"cross_date": data_date} if vr_ok else {})})
+                                   **({"cross_date": data_date} if vr_ok else {})},
+         vr_state, _since(vr_hist) if vr_state == "active" else None)
 
     # ── 8. 布林通道（20,2）：今天收盤向上穿越中軌或上軌 ──
     bb_mid, bb_up, bb_low = calc_bollinger(closes)
     cross_mid = closes[-2] <= bb_mid[-2] and closes[-1] > bb_mid[-1]
     cross_up = closes[-2] <= bb_up[-2] and closes[-1] > bb_up[-1]
     bb_ok = bool(cross_mid or cross_up)
+    bb_above = [bool(c > m) if not np.isnan(m) else False for c, m in zip(closes[-slb - 1:], bb_mid[-slb - 1:])]
+    bb_state = "active" if (not np.isnan(bb_mid[-1]) and closes[-1] > bb_mid[-1]) else "none"
     _add("bollinger", bb_ok, bb_mid[-1],
          {"mid": _ms_num(bb_mid[-1]), "upper": _ms_num(bb_up[-1]), "lower": _ms_num(bb_low[-1]),
           "which": ("上軌" if cross_up else "中軌") if bb_ok else None,
-          **({"cross_date": data_date} if bb_ok else {})})
+          **({"cross_date": data_date} if bb_ok else {})},
+         bb_state, _since(bb_above) if bb_state == "active" else None)
 
     # ── 9. OBV能量潮：OBV今天向上穿越自己的20日均線 ──
     obv = calc_obv(closes, vols)
     obv_ma = pd.Series(obv).rolling(cfg["obv_ma"]).mean().values
     oi = _find_cross_index(obv, obv_ma, lb)
+    stt, dd, cd = _cross_state(obv, obv_ma)
     _add("obv", oi is not None, None,
-         {"obv_lots": _ms_num(obv[-1] / 1000), "obv_ma_lots": _ms_num(obv_ma[-1] / 1000), **_today(oi)})
+         {"obv_lots": _ms_num(obv[-1] / 1000), "obv_ma_lots": _ms_num(obv_ma[-1] / 1000),
+          **_today(oi), **({"since_date": cd} if cd else {})}, stt, dd)
 
     # ── 10. 法人籌碼：三大法人合計「連買N天」剛好在今天成立（前一天之前還沒連滿N天）──
     inst = ctx.get("inst") or {}
@@ -12211,7 +12031,9 @@ def _multi_signal_check_one_stock(stock_id: str, stock_name: str = "", ctx: dict
         inst_ok = streak == need
         _add("institution", inst_ok, seq[0],
              {"streak": streak, "need": need, "recent_lots": seq[:5], "recent_dates": inst_dates[:5],
-              **({"cross_date": data_date} if inst_ok else {})})
+              "sum_lots": _ms_num(sum(v for v in seq[:5] if v is not None)),
+              **({"cross_date": data_date} if inst_ok else {})},
+             "active" if streak >= need else "none", (streak - need) if streak >= need else None)
     else:
         _add("institution", False, None,
              {"missing": True, "note": "法人資料缺（今日尚未公布或取得失敗）"})
@@ -12225,25 +12047,67 @@ def _multi_signal_check_one_stock(stock_id: str, stock_name: str = "", ctx: dict
         p_extra["cross_date"] = data_date
     _add("pattern", pat is not None, pat["neckline"] if pat else None, p_extra)
 
-    # ── 12. 基本面：最新公布月營收年增率「由負轉正」（上月年增≤0、本月年增>0）──
+    # ── 12. 基本面（2026/09/17帥哥鴻改定義）：營收成長中、但股價還沒反應 ──
+    # 原本的「最新月營收年增由負轉正」會踩到「內線先拉、營收公布剛好利多出盡」，改成：
+    #   ① 最近3個月營收年增率都 > 0（成長不是一次性）
+    #   ② 近20個交易日漲幅 < 10%（還沒被拉過）
+    #   ③ 收盤價在近60日高低區間的下方60%以內（不在高檔）
+    # 這是「狀態型」條件（營收一個月才公布一次），成立期間每天都算通過。
     rev = (ctx.get("revenue") or {}).get(stock_id) or {}
-    yms = sorted(rev.keys(), reverse=True)
-    if len(yms) >= 2 and rev[yms[0]].get("yoy") is not None and rev[yms[1]].get("yoy") is not None:
-        cur, prv = rev[yms[0]], rev[yms[1]]
-        rv_ok = prv["yoy"] <= 0 < cur["yoy"]
-        _add("revenue", rv_ok, cur["yoy"],
-             {"ym": yms[0], "yoy": cur["yoy"], "yoy_prev": prv["yoy"], "prev_ym": yms[1],
-              "mom": cur.get("mom"), "cum_yoy": cur.get("cum_yoy"),
-              **({"cross_date": yms[0]} if rv_ok else {})})
+    yms = sorted(rev.keys(), reverse=True)[:cfg["rev_months"]]
+    yoys = [rev[m].get("yoy") for m in yms]
+    if len(yms) >= cfg["rev_months"] and all(v is not None for v in yoys):
+        base20 = float(closes[-21]) if n >= 21 else float(closes[0])
+        chg20 = (price - base20) / base20 * 100 if base20 > 0 else 0
+        hi60, lo60 = float(np.max(highs[-60:])), float(np.min(lows[-60:]))
+        pos60 = (price - lo60) / (hi60 - lo60) * 100 if hi60 > lo60 else 50
+        grow = all(v > 0 for v in yoys)
+        not_run = chg20 < cfg["rev_max_gain20"] and pos60 <= cfg["rev_max_pos60"]
+        rv_ok = bool(grow and not_run)
+        _add("revenue", rv_ok, yoys[0],
+             {"ym": yms[0], "yoys": yoys, "yms": yms, "chg20": round(chg20, 2), "pos60": round(pos60, 1),
+              "grow": grow, "not_run": not_run,
+              "mom": rev[yms[0]].get("mom"), "cum_yoy": rev[yms[0]].get("cum_yoy")},
+             "today" if rv_ok else "none")
     else:
         _add("revenue", False, None, {"missing": True, "note": "月營收資料不足（非一般上市櫃公司，如ETF，或尚未公布）"})
 
     return results
 
 
+_MS_CTX_CACHE = {"loaded_at": 0, "ctx": None}
+
+
+def _ms_ctx_cached() -> dict:
+    """
+    個股解析即時查詢用的12金叉共用資料：法人（最近一次排程存下的全市場資料）＋月營收（只讀DB）。
+    記憶體快取10分鐘，避免每次查詢都讀DB、解JSON。
+    """
+    now = _time_mod.time()
+    if _MS_CTX_CACHE["ctx"] is not None and now - _MS_CTX_CACHE["loaded_at"] < 600:
+        return _MS_CTX_CACHE["ctx"]
+    ctx = {}
+    try:
+        conn = _db_conn()
+        try:
+            row = conn.execute("SELECT content FROM multi_signal_ctx WHERE key='inst'").fetchone()
+        finally:
+            conn.close()
+        if row and row["content"]:
+            ctx["inst"] = _json_mod.loads(row["content"])
+    except Exception as e:
+        print(f"[multi_signal] 讀取法人快取失敗：{e}")
+    try:
+        ctx["revenue"] = _ms_load_revenue(_taipei_today(), fetch=False)
+    except Exception as e:
+        print(f"[multi_signal] 讀取月營收快取失敗：{e}")
+    _MS_CTX_CACHE.update({"loaded_at": now, "ctx": ctx})
+    return ctx
+
+
 def _run_multi_signal_scan_job(start_delay: float = 0, stock_ids: list | None = None, force: bool = False):
     """
-    平日17:20執行（深度選股17:00之後，錯開避免搶FinMind額度）：
+    平日17:20執行（原本排在深度選股17:00之後；深度選股已於2026/09/17下架）：
     成交量前150檔 × 12個方法，結果寫進 multi_signal_results。
     同一天重跑會覆蓋（INSERT OR REPLACE），單檔失敗不影響其他檔。
     stock_ids：測試用，指定只跑哪幾檔（管理端點可帶）。
@@ -12288,6 +12152,16 @@ def _run_multi_signal_scan_job(start_delay: float = 0, stock_ids: list | None = 
         ctx = {}
         try:
             ctx["inst"] = _ms_fetch_institutional_bulk(scan_date, MULTI_SIGNAL_CFG["inst_buy_days"] + 2)
+            if ctx["inst"].get("dates"):
+                _cc = _db_conn()
+                try:
+                    _cc.execute("INSERT OR REPLACE INTO multi_signal_ctx (key, data_date, content, updated_at) "
+                                "VALUES ('inst', ?, ?, datetime('now','+8 hours'))",
+                                (ctx["inst"]["dates"][0], _json_mod.dumps(ctx["inst"], ensure_ascii=False)))
+                    _cc.commit()
+                finally:
+                    _cc.close()
+                _MS_CTX_CACHE["loaded_at"] = 0
             print(f"[multi_signal] 法人資料日期：{ctx['inst']['dates']}")
         except Exception as e:
             print(f"[multi_signal] 法人資料取得失敗：{e}")
@@ -12345,6 +12219,15 @@ def _run_multi_signal_scan_job(start_delay: float = 0, stock_ids: list | None = 
         if not inst_dates or inst_dates[0] != scan_date:
             st["msg"] += "（⚠️ 今天的法人資料還沒抓到，法人方法今天全部不通過）"
         print(f"[multi_signal] {st['msg']}")
+
+        # LINE群組推播（2026/09/17接手原本深度選股的推播；只在正式全市場掃描、而且資料是今天的才推）
+        if not stock_ids and data_dates.get(scan_date):
+            try:
+                _pl = _ms_build_payload(scan_date).get("data") or []
+                _line_bot_push_multi_signal_notice(
+                    scan_date, len(_pl), sum(1 for x in _pl if x["passed_count"] >= 3))
+            except Exception as _le:
+                print(f"[multi_signal] LINE推播失敗（不影響選股本身）：{_le}")
     except Exception as e:
         st["msg"] = f"排程失敗：{e}"
         print(f"[multi_signal] ❌ 排程失敗：{e}")
@@ -12388,7 +12271,9 @@ def _ms_detail_text(method: str, ex: dict) -> str:
         if method == "pattern":
             return f"{ex.get('type')}今天突破頸線 {ex.get('neckline')}，等幅目標約 {ex.get('target')}"
         if method == "revenue":
-            return f"{ex.get('ym')} 月營收年增 {ex.get('yoy'):+.2f}%（上月 {ex.get('yoy_prev'):+.2f}%），由衰退轉成長"
+            yo = "／".join(f"{v:+.1f}%" for v in (ex.get("yoys") or []))
+            return (f"近{len(ex.get('yoys') or [])}個月營收年增 {yo}，股價近20天只漲 {ex.get('chg20')}%、"
+                    f"位於近60日區間 {ex.get('pos60')}%，還沒反應")
     except Exception:
         pass
     return ""
@@ -12453,22 +12338,574 @@ def _ms_build_payload(scan_date: str = "") -> dict:
             "methods": list(methods.values()), "data": items}
 
 
+# ══════════════════════════════════════════════════════════
+# 個股綜合解說（模版版，2026/09/17新增，文件B階段7）
+#
+# 為什麼要做：原本個股解析同時有好幾套各自判斷的文字——主結論（只看價格位置＋K棒）、
+# 深度分析卡片（另一套K棒分類、均線排列、KD、MACD各說各話）、風險標籤（只看離支撐壓力多遠），
+# 加上深度選股又是另一套標準，常常出現「深度選股說高信心，個股解析說觀望/建議出場」。
+# 這裡把個股解析算出來的所有資料＋12金叉狀態，集中成「一份」判斷，所有畫面都讀這一份。
+#
+# 模版怎麼改：
+#   ● 句子都在 VERDICT_TEXT，{大括號} 會自動帶入數字，只改字不用動程式。
+#   ● 每條多空理由的權重在 VERDICT_WEIGHTS，數字越大影響結論越多。
+#   ● 各段要付費還是加購在 VERDICT_SECTION_TIER（目前全部 "paid"，之後要拆加購把某段改成 "addon"）。
+# ══════════════════════════════════════════════════════════
+
+VERDICT_SECTION_TIER = {
+    "headline": "free",      # 一句話結論：所有人都看得到（取代原本的「主結論」）
+    "status": "paid",        # 現在的狀況
+    "bull": "paid",          # 看多理由
+    "bear": "paid",          # 看空理由
+    "conflicts": "paid",     # 矛盾與最大問題
+    "levels": "paid",        # 關鍵價位
+    "scenarios": "paid",     # 接下來的情境
+    "action": "free",        # 操作參考（原本主結論就有「操作：」，所有人都看得到，維持不變）
+    "signals": "paid",       # 12金叉逐項燈號
+}
+
+VERDICT_WEIGHTS = {
+    "trend_up": 2, "trend_down": 2,
+    "ma_bull": 1, "ma_bear": 1,
+    "breakout": 2, "breakdown": 2,
+    "kbar_bull": 1, "kbar_bear": 1, "vp_exit": 2,
+    "kd_gold": 1, "kd_death": 1,
+    "macd_bull": 1, "macd_bear": 1,
+    "inst_buy": 1, "inst_sell": 1,
+    "vol_up": 1,
+    "gann_buy": 1, "gann_sell": 1,
+    "near_sup_rr": 1, "near_res": 1, "rr_low": 1,
+    "channel_conflict": 1,
+    "overheat": 1, "kd_high": 1,
+    "ms_many": 2, "ms_some": 1,
+    "revenue": 1,
+}
+
+VERDICT_TEXT = {
+    # 一句話結論（依立場）
+    "head_bull": "{name}多方條件明顯佔優（看多理由{bull}項、看空理由{bear}項），{ms_part}可以列入觀察名單。",
+    "head_bull_wait": "{name}整體偏多，但{wait_reason}，比較適合等拉回再看，不建議現在追價。",
+    "head_bull_caution": "{name}偏多，但有{bear}個看空理由要留意，最大的問題是：{top_problem}。",
+    "head_neutral": "{name}多空拉鋸（看多{bull}項、看空{bear}項），方向還不明確，先觀望，等突破 {resistance} 或跌破 {support} 再決定。",
+    "head_bear": "{name}空方條件佔優（看空理由{bear}項、看多理由{bull}項），先避開，等止跌訊號出現再重新評估。",
+    "ms_part_many": "今天12金叉有{n}項同時轉強，",
+    "ms_part_some": "今天12金叉有{n}項轉強，",
+    "wait_near_res": "距離壓力 {resistance} 只剩 {res_pct}%",
+    "wait_overheat": "股價已經高於月線 {bias20}%，短線漲多",
+    "wait_kd_high": "KD 已經在 {k} 的高檔",
+
+    # 現在的狀況
+    "status_price": "目前價格 {price}，位在支撐 {support} 和壓力 {resistance} 之間，大約{pos_word}（{pos}%）。",
+    "status_trend": "趨勢：{trend_text}。",
+    "status_ma": "均線：{ma_text}。",
+    "status_ms": "12金叉：今天剛轉強 {today} 項、持續轉強中 {active} 項，涵蓋{cats}。",
+    "status_basis": "{basis}",
+
+    # 看多理由
+    "trend_up": "近期高低點一路墊高（頭頭高、底底高），屬於上升趨勢",
+    "ma_bull": "均線多頭排列（{ma_text}）",
+    "breakout": "今天突破前高 {prev_high}",
+    "kbar_bull": "出現多頭K棒：{kbar}",
+    "kd_gold": "KD 黃金交叉（K {k}）",
+    "macd_bull": "MACD 偏多：{macd_text}",
+    "inst_buy": "三大法人近5日買超 {inst_total} 張{inst_streak}",
+    "vol_up": "量能放大，5日均量是20日均量的 {vol_ratio} 倍",
+    "gann_buy": "葛蘭碧買點：{gann}",
+    "near_sup_rr": "股價靠近支撐 {support}，風報比 {rr} 不錯",
+    "ms_many": "12金叉今天有 {n} 項同時轉強：{list}",
+    "ms_some": "12金叉今天轉強：{list}",
+    "revenue": "營收連續 {m} 個月年增（最新 {yoy}%），但股價近20天只漲 {chg20}%，還沒反應",
+
+    # 看空理由
+    "trend_down": "近期高低點一路走低（頭頭低、底底低），屬於下降趨勢",
+    "ma_bear": "均線空頭排列（{ma_text}）",
+    "breakdown": "股價跌破支撐 {support}",
+    "kbar_bear": "出現空頭K棒：{kbar}",
+    "vp_exit": "爆量收出「{shape}」（{vol_x} 倍均量），賣壓沉重",
+    "kd_death": "KD 死亡交叉（K {k}）",
+    "macd_bear": "MACD 偏空：{macd_text}",
+    "inst_sell": "三大法人近5日賣超 {inst_total} 張",
+    "gann_sell": "葛蘭碧賣點：{gann}",
+    "near_res": "距離壓力 {resistance} 只剩 {res_pct}%，上漲空間有限",
+    "rr_low": "風報比只有 {rr}，賺賠不划算",
+    "channel_conflict": "{conflict}",
+    "overheat": "股價高於月線 {bias20}%，短線過熱",
+    "kd_high": "KD 在 {k} 的高檔，容易鈍化",
+
+    # 矛盾
+    "cf_price_inst": "價格偏多，但三大法人在賣（近5日 {inst_total} 張）——價格和籌碼方向不一致",
+    "cf_break_kbar": "今天突破了，但收出空頭K棒——要小心假突破",
+    "cf_break_novol": "今天突破了，但量能沒有放大（{vol_ratio} 倍）——沒量的突破比較容易失敗",
+    "cf_kd_high_gold": "KD 金叉，但發生在 {k} 的高檔——比較像末升段，不是起漲",
+    "cf_macd_below0": "MACD 金叉，但還在0軸下方——比較像空頭裡的反彈，還不是正式轉多",
+    "cf_trend_ma": "高低點結構是「{trend}」，但均線是「{ma_label}」——長短線看法不一致",
+    "cf_single_face": "12金叉的轉強訊號全部來自技術面，籌碼和基本面沒有跟上",
+    "cf_kbar_winrate": "這個K棒型態在這檔股票的歷史紀錄裡，隔天上漲的機率只有 {win}%",
+    "cf_rev_weak": "營收在成長，但股價趨勢偏弱——基本面好、市場還沒買單",
+    "top_problem_none": "目前沒有明顯矛盾",
+
+    # 關鍵價位
+    "lv_support": "支撐 {v}（{desc}）",
+    "lv_resistance": "壓力 {v}（{desc}）",
+    "lv_stop": "防守位 {v}（距現價 {pct}%）",
+    "lv_target1": "第一目標 {v}",
+    "lv_target2": "第二目標 {v}",
+    "lv_ma20": "月線 {v}",
+    "lv_turtle": "海龜出場線 {v}（收盤跌破代表突破失敗）",
+    "lv_neck": "{ptype}頸線 {v}",
+
+    # 情境（條件式，不是預測）
+    "sc_bull_up": "收盤站穩 {resistance} 並且放量 → 突破成立，下一個目標看 {target2}",
+    "sc_bull_down": "收盤跌破防守位 {stop_loss} → 這波轉強失敗，先出場",
+    "sc_neutral_up": "收盤突破 {resistance} → 轉為偏多，再考慮進場",
+    "sc_neutral_down": "收盤跌破 {support} → 轉為偏空，避開",
+    "sc_bear_up": "收盤站回月線 {ma20} 以上 → 止跌訊號，才重新評估",
+    "sc_bear_down": "繼續跌破 {support} → 可能再往下找支撐，不要急著接",
+
+    # 操作參考（依立場，取代原本只看價格位置的「操作：」建議，避免兩套說法）
+    "act_bull": "可設防守位 {stop_loss} 分批布局，第一目標 {target1}",
+    "act_bull_wait": "先不追，等拉回支撐 {support} 附近、出現止跌K棒再考慮，防守位 {stop_loss}",
+    "act_bull_caution": "只適合小量試單，收盤跌破 {stop_loss} 就出場",
+    "act_neutral": "觀望為主，等收盤突破 {resistance} 或跌破 {support} 再跟進",
+    "act_bear": "先避開；手上有持股的，收盤跌破 {support} 應減碼出場",
+}
+
+
+def _vt(key: str, **kw) -> str:
+    """套模版；缺欄位時不讓整段壞掉，直接回傳模版原文去掉大括號"""
+    t = VERDICT_TEXT.get(key, "")
+    try:
+        return t.format(**kw)
+    except Exception:
+        return t
+
+
+def _ms_summary(ms: list | None) -> dict:
+    """把 _ms_evaluate 的結果整理成解說/前端用的精簡格式"""
+    if not ms:
+        return {"available": False}
+    items = []
+    for r in ms:
+        label, cat = MULTI_SIGNAL_METHODS.get(r["method"], (r["method"], r["category"]))
+        ex = r.get("extra") or {}
+        items.append({
+            "method": r["method"], "label": label, "category": cat,
+            "state": r.get("state", "none"), "days": r.get("days"),
+            "missing": bool(ex.get("missing")),
+            "detail": _ms_detail_text(r["method"], {**ex, "vol_ratio": r.get("value")})
+                      if r.get("passed") else _ms_state_text(r, ex),
+        })
+    today = [x for x in items if x["state"] == "today"]
+    active = [x for x in items if x["state"] == "active"]
+    cats = sorted({x["category"] for x in today + active})
+    return {
+        "available": True, "data_date": (ms[0].get("extra") or {}).get("data_date"),
+        "today_count": len(today), "active_count": len(active),
+        "today_categories": sorted({x["category"] for x in today}),
+        "categories": cats, "items": items, "total": len(MULTI_SIGNAL_METHODS),
+    }
+
+
+def _ms_state_text(r: dict, ex: dict) -> str:
+    """「轉強中／未轉強」的白話說明"""
+    if ex.get("missing"):
+        return ex.get("note", "資料不足")
+    m, st, d = r["method"], r.get("state"), r.get("days")
+    if st != "active":
+        if m == "revenue":
+            if ex.get("grow") and not ex.get("not_run"):
+                return f"營收有成長，但股價已先漲（近20天 {ex.get('chg20')}%／位於近60日區間 {ex.get('pos60')}%）"
+            return "近3個月營收沒有全部年增"
+        if m == "institution":
+            return f"法人目前連買 {ex.get('streak', 0)} 天"
+        return "未轉強"
+    slb = MULTI_SIGNAL_CFG.get("state_lookback", 20)
+    day_txt = (f"已持續 {slb} 天以上" if d >= slb else f"已持續 {d} 天") if d else "持續中"
+    since = ex.get("since_date")
+    return f"轉強中（{day_txt}{'，' + since[5:] + ' 開始' if since else ''}）"
+
+
+def _build_verdict(r: dict, ms: list | None) -> dict:
+    """
+    r：_do_analyze 的 result；ms：_ms_evaluate 的結果（週K/月K時為None）。
+    回傳 {stance, stance_label, risk_level, headline, sections{...}, ...}
+    """
+    name = r.get("stock_name") or r.get("stock_id") or ""
+    price = float(r.get("price") or 0)
+    support = r.get("support")
+    resistance = r.get("resistance")
+    stop_loss = r.get("stop_loss")
+    rr = r.get("risk_reward") or 0
+    trend = r.get("trend") or "盤整"
+    ma = r.get("ma_alignment") or {}
+    kd = r.get("kd_status") or {}
+    macd = r.get("macd_status") or {}
+    vol = r.get("vol_analysis") or {}
+    inst = r.get("institutional") or {}
+    radar = r.get("radar") or {}
+    kbar = r.get("kbar_pattern") or ""
+    kdir = r.get("kbar_dir") or "neutral"
+    ms_s = _ms_summary(ms)
+    ms_by = {x["method"]: x for x in ms_s.get("items", [])}
+
+    k_val = kd.get("k")
+    vol_ratio = vol.get("ratio") or radar.get("vol_ratio") or 1.0
+    bias20 = radar.get("bias20")
+    ma20 = radar.get("ma20") or (r.get("ma_values") or {}).get("ma20")
+    res_pct = round((resistance - price) / price * 100, 1) if (resistance and price) else None
+    inst_total = inst.get("total_5d")
+    kv = dict(name=name, price=price, support=support, resistance=resistance, stop_loss=stop_loss,
+              rr=rr, k=round(k_val) if k_val is not None else "—", vol_ratio=vol_ratio, bias20=bias20,
+              res_pct=res_pct, ma20=ma20, target2=r.get("target2"), prev_high=r.get("prev_high"),
+              ma_text=ma.get("text", ""), macd_text=macd.get("text", ""), kbar=kbar,
+              inst_total=f"{inst_total:+,}" if isinstance(inst_total, (int, float)) else "—")
+
+    bull, bear = [], []   # (key, weight, text)
+
+    def B(key, **extra):
+        bull.append((key, VERDICT_WEIGHTS.get(key, 1), _vt(key, **{**kv, **extra})))
+
+    def S(key, **extra):
+        bear.append((key, VERDICT_WEIGHTS.get(key, 1), _vt(key, **{**kv, **extra})))
+
+    ma_dir = ma.get("direction")
+    if trend == "上升趨勢":
+        B("trend_up")
+    elif trend == "下降趨勢":
+        S("trend_down")
+    if ma_dir == "bullish":
+        B("ma_bull")
+    elif ma_dir == "bearish":
+        S("ma_bear")
+    is_break = r.get("pattern") == "突破型態"
+    if is_break and r.get("prev_high"):
+        B("breakout")
+    if r.get("pattern") == "跌破型態":
+        S("breakdown")
+    if kdir == "bullish":
+        B("kbar_bull")
+    elif kdir == "bearish":
+        S("kbar_bear")
+    vpw = r.get("vp_exit_warn")
+    if vpw:
+        S("vp_exit", shape=vpw.get("shape"), vol_x=vpw.get("vol_x"))
+    if kd.get("golden_cross"):
+        B("kd_gold")
+    if kd.get("death_cross"):
+        S("kd_death")
+    mdir = macd.get("direction") or ""
+    if mdir in ("bullish", "slightly_bullish"):
+        B("macd_bull")
+    elif mdir in ("bearish", "slightly_bearish"):
+        S("macd_bear")
+    if isinstance(inst_total, (int, float)) and inst_total != 0:
+        cb = inst.get("consecutive_buy_days") or 0
+        if inst_total > 0:
+            B("inst_buy", inst_streak=f"，連買 {cb} 天" if cb >= 2 else "")
+        elif inst.get("foreign_5d", 0) < 0 and inst.get("invest_5d", 0) <= 0:
+            S("inst_sell")
+    if vol_ratio and vol_ratio >= 1.3 and (r.get("price_change_pct") or 0) >= 0:
+        B("vol_up")
+    g = r.get("gann_recross")
+    if g:
+        B("gann_buy", gann=f"{g.get('type')}（{g.get('ma')} {g.get('val')}）")
+    gs = r.get("gann_sell")
+    if gs and not vpw:
+        S("gann_sell", gann=f"{gs.get('type')}（{gs.get('ma')} {gs.get('val')}）")
+    near_res = res_pct is not None and res_pct < 4 and not is_break
+    if support and price and (price - support) / price < 0.04 and rr >= 1.5:
+        B("near_sup_rr")
+    if near_res:
+        S("near_res")
+    if rr < 1 and not is_break:
+        S("rr_low")
+    if r.get("conflict_note"):
+        S("channel_conflict", conflict=r["conflict_note"].replace("⚠ 注意：", ""))
+    overheat = bias20 is not None and bias20 >= 10
+    if overheat:
+        S("overheat")
+    kd_high = k_val is not None and k_val >= 80
+    if kd_high:
+        S("kd_high")
+    today_items = [x for x in ms_s.get("items", []) if x["state"] == "today"]
+    n_today = len(today_items)
+    tl = "、".join(x["label"] for x in today_items)
+    if n_today >= 3:
+        B("ms_many", n=n_today, list=tl)
+    elif n_today >= 1:
+        B("ms_some", n=n_today, list=tl)
+    for _fn in (r.get("fund_notes") or []):
+        if "支持" in _fn:
+            bull.append(("fund", 1, _fn))
+        else:
+            bear.append(("fund", 1, _fn))
+    rv = ms_by.get("revenue")
+    if rv and rv["state"] == "today":
+        ex = next((m.get("extra") for m in (ms or []) if m["method"] == "revenue"), {}) or {}
+        B("revenue", m=len(ex.get("yoys") or []), yoy=ex.get("yoys", ["—"])[0], chg20=ex.get("chg20"))
+
+    # ── 矛盾 ──
+    conflicts = []
+    if (trend == "上升趨勢" or is_break) and isinstance(inst_total, (int, float)) and inst_total < 0:
+        conflicts.append(("cf_price_inst", _vt("cf_price_inst", **kv)))
+    if is_break and (kdir == "bearish" or vpw):
+        conflicts.append(("cf_break_kbar", _vt("cf_break_kbar", **kv)))
+    if is_break and vol_ratio < 1.0:
+        conflicts.append(("cf_break_novol", _vt("cf_break_novol", **kv)))
+    if kd.get("golden_cross") and kd_high:
+        conflicts.append(("cf_kd_high_gold", _vt("cf_kd_high_gold", **kv)))
+    macd_ms = ms_by.get("macd")
+    if macd_ms and macd_ms["state"] == "today" and macd.get("dif") is not None and macd.get("dif") < 0:
+        conflicts.append(("cf_macd_below0", _vt("cf_macd_below0", **kv)))
+    ma_label = {"bullish": "多頭排列", "bearish": "空頭排列"}.get(ma_dir)
+    if ma_label and ((trend == "上升趨勢" and ma_dir == "bearish") or (trend == "下降趨勢" and ma_dir == "bullish")):
+        conflicts.append(("cf_trend_ma", _vt("cf_trend_ma", trend=trend, ma_label=ma_label)))
+    if n_today >= 2 and set(ms_s.get("today_categories", [])) == {"技術面"}:
+        conflicts.append(("cf_single_face", _vt("cf_single_face")))
+    bt = r.get("kbar_backtest") or {}
+    if kdir == "bullish" and bt.get("total", 0) >= 3 and bt.get("win_pct", 50) < 45:
+        conflicts.append(("cf_kbar_winrate", _vt("cf_kbar_winrate", win=bt.get("win_pct"))))
+    if rv and rv["state"] == "today" and trend == "下降趨勢":
+        conflicts.append(("cf_rev_weak", _vt("cf_rev_weak")))
+
+    # ── 立場 ──
+    bull_w = sum(w for _, w, _ in bull)
+    bear_w = sum(w for _, w, _ in bear)
+    net = bull_w - bear_w
+    # 最大問題：看空理由裡權重最高的，其次是第一個矛盾
+    top_problem = ""
+    if bear:
+        top_problem = sorted(bear, key=lambda x: -x[1])[0][2]
+    elif conflicts:
+        top_problem = conflicts[0][1]
+    kv2 = {**kv, "bull": len(bull), "bear": len(bear), "top_problem": top_problem or _vt("top_problem_none")}
+    ms_part = ""
+    if n_today >= 3:
+        ms_part = _vt("ms_part_many", n=n_today)
+    elif n_today >= 1:
+        ms_part = _vt("ms_part_some", n=n_today)
+
+    wait_reason = None
+    if near_res:
+        wait_reason = _vt("wait_near_res", **kv)
+    elif overheat:
+        wait_reason = _vt("wait_overheat", **kv)
+    elif kd_high:
+        wait_reason = _vt("wait_kd_high", **kv)
+
+    if net >= 3 and wait_reason:
+        stance, label, level = "bull_wait", "偏多・等拉回", "medium"
+        headline = _vt("head_bull_wait", **kv2, wait_reason=wait_reason)
+    elif net >= 3 and bear_w >= 3:
+        stance, label, level = "bull_caution", "偏多・有雜音", "medium"
+        headline = _vt("head_bull_caution", **kv2)
+    elif net >= 3:
+        stance, label, level = "bull", "偏多", "low"
+        headline = _vt("head_bull", **kv2, ms_part=ms_part)
+    elif net <= -3:
+        stance, label, level = "bear", "偏空・避開", "high"
+        headline = _vt("head_bear", **kv2)
+    else:
+        stance, label, level = "neutral", "多空拉鋸・觀望", "watch"
+        headline = _vt("head_neutral", **kv2)
+
+    # ── 現在的狀況 ──
+    pos = None
+    if support and resistance and resistance > support and price:
+        pos = round(min(100, max(0, (price - support) / (resistance - support) * 100)))
+    pos_word = "—" if pos is None else ("靠近支撐" if pos < 30 else "靠近壓力" if pos > 70 else "中間位置")
+    trend_text = {"上升趨勢": "上升趨勢（頭頭高、底底高）", "下降趨勢": "下降趨勢（頭頭低、底底低）"}.get(
+        trend, "盤整（高低點結構不明）")
+    status = []
+    if pos is not None:
+        status.append(_vt("status_price", **kv, pos=pos, pos_word=pos_word))
+    status.append(_vt("status_trend", trend_text=trend_text))
+    if ma.get("text"):
+        status.append(_vt("status_ma", **kv))
+    if ms_s.get("available"):
+        cats = "、".join(ms_s["categories"]) or "無"
+        status.append(_vt("status_ms", today=ms_s["today_count"], active=ms_s["active_count"], cats=cats))
+    if r.get("price_basis_note"):
+        status.append(_vt("status_basis", basis=r["price_basis_note"]))
+
+    # ── 關鍵價位 ──
+    levels = []
+    if support:
+        levels.append(_vt("lv_support", v=support, desc=r.get("support_desc") or ""))
+    if resistance:
+        levels.append(_vt("lv_resistance", v=resistance, desc=r.get("resistance_desc") or ""))
+    if stop_loss and price:
+        levels.append(_vt("lv_stop", v=stop_loss, pct=round((stop_loss - price) / price * 100, 1)))
+    if r.get("target1"):
+        levels.append(_vt("lv_target1", v=r["target1"]))
+    if r.get("target2"):
+        levels.append(_vt("lv_target2", v=r["target2"]))
+    if ma20 and ma20 != support:
+        levels.append(_vt("lv_ma20", v=ma20))
+    for m in (ms or []):
+        ex = m.get("extra") or {}
+        if m["method"] == "turtle" and m.get("state") in ("today", "active") and ex.get("exit_level"):
+            levels.append(_vt("lv_turtle", v=ex["exit_level"]))
+        if m["method"] == "pattern" and m.get("passed") and ex.get("neckline"):
+            levels.append(_vt("lv_neck", ptype=ex.get("type", ""), v=ex["neckline"]))
+
+    # ── 情境 ──
+    if stance.startswith("bull"):
+        scenarios = [_vt("sc_bull_up", **kv), _vt("sc_bull_down", **kv)]
+    elif stance == "bear":
+        scenarios = [_vt("sc_bear_up", **kv) if ma20 else _vt("sc_neutral_up", **kv), _vt("sc_bear_down", **kv)]
+    else:
+        scenarios = [_vt("sc_neutral_up", **kv), _vt("sc_neutral_down", **kv)]
+    action = _vt("act_" + stance, **{**kv, "target1": r.get("target1")})
+
+    return {
+        "version": 1,
+        "stance": stance, "stance_label": label, "risk_level": level,
+        "bull_score": bull_w, "bear_score": bear_w,
+        "headline": headline, "action": action,
+        "sections": {
+            "headline": headline,
+            "status": status,
+            "bull": [t for _, _, t in sorted(bull, key=lambda x: -x[1])],
+            "bear": [t for _, _, t in sorted(bear, key=lambda x: -x[1])],
+            "conflicts": [t for _, t in conflicts],
+            "top_problem": top_problem or _vt("top_problem_none"),
+            "levels": levels,
+            "scenarios": scenarios,
+            "action": action,
+            "signals": ms_s,
+        },
+        "tiers": dict(VERDICT_SECTION_TIER),
+    }
+
+
+def _verdict_for_user(v: dict | None, user: dict | None) -> dict | None:
+    """依會員身分遮掉看不到的段落（目前：付費看全部；免費/未登入只看一句話結論＋12金叉項數）"""
+    if not v:
+        return v
+    paid = _is_premium(user)
+    # 加購層之後接上：addon = paid and _has_addon(user)
+    addon = paid
+    allow = {"free": True, "paid": paid, "addon": addon}
+    secs = v.get("sections") or {}
+    out_secs, locked = {}, []
+    for k, val in secs.items():
+        tier = VERDICT_SECTION_TIER.get(k, "paid")
+        if k == "top_problem":
+            tier = VERDICT_SECTION_TIER.get("conflicts", "paid")
+        if allow.get(tier, False):
+            out_secs[k] = val
+        else:
+            locked.append(k)
+    if "signals" in locked and isinstance(secs.get("signals"), dict):
+        s = secs["signals"]
+        out_secs["signals"] = {"available": s.get("available"), "today_count": s.get("today_count"),
+                               "active_count": s.get("active_count"), "total": s.get("total"),
+                               "locked": True}
+    return {**{k: v[k] for k in v if k not in ("sections",)}, "sections": out_secs,
+            "locked_sections": locked, "locked": bool(locked)}
+
+
+@app.get("/multi-signal-status")
+def multi_signal_status():
+    """首頁跑馬燈用：今天12金叉有幾檔轉強、幾檔同時符合3項以上"""
+    p = _ms_build_payload()
+    if not p.get("scan_date") or p["scan_date"] != _taipei_today():
+        return {"available": False}
+    items = p.get("data") or []
+    return {"available": True, "updated_at": p.get("updated_at"), "count": len(items),
+            "high_confidence_count": sum(1 for x in items if x["passed_count"] >= 3)}
+
+
+@app.get("/multi-signal")
+def multi_signal_public_page():
+    """
+    12金叉選股公開頁（SEO／導流用，2026/09/17取代原本 /deep-analysis 公開頁）。
+    跟原本深度選股一樣顯示「上一次」的掃描結果（延遲一個交易日），當天即時名單只在App內給付費會員看。
+    """
+    import html as _h
+    conn = _db_conn()
+    try:
+        dates = [r[0] for r in conn.execute(
+            "SELECT DISTINCT scan_date FROM multi_signal_results ORDER BY scan_date DESC LIMIT 2").fetchall()]
+    finally:
+        conn.close()
+    today = _taipei_today()
+    show_date = next((d for d in dates if d < today), None)
+    p = _ms_build_payload(show_date) if show_date else {"data": [], "methods": []}
+    items = p.get("data") or []
+    methods = p.get("methods") or []
+    now_s = _taipei_now_str("%Y-%m-%d %H:%M")
+    cat_color = {"技術面": "#3B82F6", "籌碼面": "#DC2626", "型態面": "#7C3AED", "基本面": "#D97706"}
+    rows = []
+    for s in items[:60]:
+        sig = "".join(
+            f'<li><b style="color:{cat_color.get(x["category"], "#555")}">{_h.escape(x["label"])}</b>'
+            f'<span>{_h.escape((x.get("detail") or "").replace("今天", "當天"))}</span></li>' for x in s["signals"])
+        chg = s.get("change_pct")
+        chg_html = (f'<span class="{"up" if chg > 0 else "dn"}">{chg:+.2f}%</span>' if chg else "")
+        rows.append(
+            f'<div class="card"><div class="hd"><div><div class="nm">{_h.escape(s["stock_name"] or "")} {chg_html}</div>'
+            f'<div class="id">{_h.escape(s["stock_id"])}　收盤 {s.get("price") or "—"}</div></div>'
+            f'<div class="cnt"><b>{s["passed_count"]}</b><small>/ 12 項</small></div></div>'
+            f'<ul>{sig}</ul>'
+            f'<a class="go" href="/stock/?stock={_h.escape(s["stock_id"])}">看這檔的完整分析 ›</a></div>')
+    mt = "".join(f'<span class="mt">{_h.escape(m["label"])} <b>{m["passed"]}</b></span>' for m in methods)
+    body = "".join(rows) or '<p class="empty">目前還沒有可公開的歷史名單（每個交易日 17:20 更新，公開頁顯示前一個交易日的結果）。</p>'
+    title_date = show_date or now_s[:10]
+    html_doc = f"""<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>12金叉選股｜{title_date} 台股轉強股名單（MACD、KD、均線、法人、營收）｜線上有位</title>
+<meta name="description" content="線上有位12金叉選股：每天收盤後用MACD、KD、RSI、月季線、海龜突破、法人連買、底部型態、營收成長等12種方法掃描成交量前150檔，找出當天剛轉強的台股。{title_date} 共 {len(items)} 檔。">
+<link rel="canonical" href="{FRONTEND_URL}/multi-signal">
+<style>
+body{{margin:0;background:#0f172a;color:#e2e8f0;font-family:-apple-system,"PingFang TC","Noto Sans TC",sans-serif}}
+.wrap{{max-width:980px;margin:0 auto;padding:20px 16px 40px}}
+h1{{font-size:22px;margin:6px 0}} .sub{{color:#94a3b8;font-size:13px;line-height:1.7}}
+.note{{background:#1e293b;border:1px solid #334155;border-radius:10px;padding:10px 12px;font-size:12px;color:#cbd5e1;margin:12px 0}}
+.mts{{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 16px}} .mt{{background:#1e293b;border-radius:14px;padding:4px 10px;font-size:12px;color:#cbd5e1}}
+.grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}}
+.card{{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:14px}}
+.hd{{display:flex;justify-content:space-between;gap:8px}} .nm{{font-size:18px;font-weight:800}} .id{{color:#94a3b8;font-size:12px;margin-top:2px}}
+.cnt{{text-align:center;color:#a78bfa}} .cnt b{{font-size:22px;display:block}} .cnt small{{font-size:10px}}
+ul{{list-style:none;padding:0;margin:10px 0 0}} li{{font-size:13px;line-height:1.6;padding:2px 0}} li span{{color:#94a3b8;margin-left:6px}}
+.up{{color:#f87171;font-size:13px}} .dn{{color:#4ade80;font-size:13px}}
+.go{{display:block;text-align:right;color:#4ade80;font-size:12px;font-weight:700;margin-top:10px;text-decoration:none}}
+.cta{{display:block;text-align:center;background:#16a34a;color:#fff;border-radius:10px;padding:12px;font-weight:800;text-decoration:none;margin:16px 0}}
+.empty{{color:#94a3b8}} .ft{{color:#64748b;font-size:11px;line-height:1.7;margin-top:20px}}
+</style></head><body><div class="wrap">
+<h1>📊 12金叉選股</h1>
+<div class="sub">每天收盤後，用 12 種方法（技術面9項＋法人籌碼＋底部型態＋營收）掃描成交量前 150 檔，找出「當天剛轉強」的股票。同一檔符合的方法越多、涵蓋的面向越多，訊號越值得注意。</div>
+<div class="note">⏱️ 本頁顯示 <b>{title_date}</b> 的結果（延遲一個交易日公開）。當天 17:20 的即時名單、每檔股票的綜合解說，請登入App查看。　查詢時間：{now_s}</div>
+<a class="cta" href="/stock/?page=multisignal">打開App看今天的即時名單 ›</a>
+<div class="mts">{mt}</div>
+<div class="grid">{body}</div>
+<div class="ft">本頁為自動化篩選結果，只代表該交易日出現轉強訊號，不代表一定會上漲，僅供研究參考，不構成投資建議。股市有風險，請自行評估並嚴設停損。</div>
+</div></body></html>"""
+    return HTMLResponse(content=html_doc)
+
+
 @app.get("/api/multi-signal")
 def api_multi_signal(user: dict | None = Depends(get_current_user)):
     """
-    12金叉選股（用戶頁面用）。付費限定，比照深度選股：
-      付費有效 → 完整資料
-      免費會員 → 代號／名稱在伺服器端就遮罩（_deep_mask_item），其餘欄位照給
-      未登入   → 只給方法統計＋幾張遮罩佔位卡（_picks_payload 弱預覽）
+    12金叉選股（用戶頁面用）。2026/09/17帥哥鴻調整分層：
+      付費有效 → 全部完整
+      免費會員 → 同時符合「2個以下」的股票完整看得到；3個以上的在伺服器端就遮罩代號／名稱
+      未登入   → 只給方法統計＋幾張遮罩佔位卡（_picks_payload 弱預覽），登入後才看得到
     """
     p = _ms_build_payload()
     items = p.pop("data")
-    base = {**p, "server_time": _taipei_now_str("%Y-%m-%d %H:%M")}
+    free_max = MULTI_SIGNAL_FREE_MAX
+    base = {**p, "server_time": _taipei_now_str("%Y-%m-%d %H:%M"),
+            "max_count": max([x["passed_count"] for x in items] or [0]),
+            "free_max": free_max}
     if _deep_is_premium(user):
         return {**base, "data": items, "masked": False, "tier": "paid", "preview": False}
     if user:
-        return {**base, "data": [_deep_mask_item(dict(x)) for x in items],
-                "masked": True, "tier": "free", "preview": False}
+        return {**base, "data": [x if x["passed_count"] <= free_max else _deep_mask_item(dict(x))
+                                 for x in items],
+                "masked": any(x["passed_count"] > free_max for x in items),
+                "tier": "free", "preview": False}
     pv = _picks_payload(items, p.get("updated_at"), user)
     return {**base, "data": pv["data"], "approx_count": pv.get("approx_count"),
             "masked": True, "tier": "guest", "preview": True}
@@ -12508,82 +12945,6 @@ def admin_multi_signal_results(scan_date: str = "", key: str = Header(default=""
     methods = [{**m, "passed_stocks": by_method.get(m["method"], [])} for m in p["methods"]]
     return {"scan_date": p["scan_date"], "stock_count": p["stock_count"], "row_count": p["row_count"],
             "methods": methods, "ranking": ranking, "status": dict(_MULTI_SIGNAL_STATUS)}
-
-
-@app.post("/admin/run-deep-analysis")
-async def admin_run_deep_analysis(key: str = Header(..., alias="X-Admin-Key")):
-    """管理員手動觸發深度選股（背景執行）"""
-    _check_admin(key)
-    import threading
-    t = threading.Thread(target=_run_deep_analysis_job, daemon=True)
-    t.start()
-    return {"ok": True, "msg": "深度選股已開始執行（背景）"}
-
-
-class _DeepCfgUpdateReq(BaseModel):
-    """深度選股門檻設定（2026/08/27新增）。每個欄位都是可選的，
-    只送要調整的欄位就好，沒送的欄位維持原本的值（覆寫或預設）不變。
-    型別跟 finmind_filter.DEEP_CFG 的預設值對齊。"""
-    min_price: float | None = None
-    min_avg_volume: int | None = None
-    ma_cross_lookback: int | None = None
-    macd_cross_days: int | None = None
-    min_score: int | None = None
-    max_results: int | None = None
-    api_delay: float | None = None
-    breakout_recent_days: int | None = None
-    breakout_hold_pct: float | None = None
-
-
-@app.get("/admin/deep-scan-config")
-def admin_get_deep_scan_config(key: str = Header(default="", alias="X-Admin-Key")):
-    """查詢深度選股目前生效的門檻設定（預設值 + DB覆寫值合併後的結果），
-    以及哪些欄位是被管理員覆寫過的，避免前端要自己寫死一份預設值對照表"""
-    _check_admin(key)
-    _ff = _import_finmind_filter()
-    conn = _db_conn()
-    try:
-        overrides = _get_deep_cfg_overrides(conn)
-    finally:
-        conn.close()
-    effective = dict(_ff.DEEP_CFG)
-    for k, v in overrides.items():
-        if k in effective and v is not None:
-            try:
-                effective[k] = type(effective[k])(v)
-            except (TypeError, ValueError):
-                pass
-    return {
-        "ok": True,
-        "effective": effective,
-        "overridden_keys": [k for k in overrides if k in effective],
-    }
-
-
-@app.post("/admin/deep-scan-config")
-def admin_update_deep_scan_config(req: _DeepCfgUpdateReq, key: str = Header(default="", alias="X-Admin-Key")):
-    """更新深度選股門檻設定（存到 app_settings，並立即套用到 finmind_filter.DEEP_CFG，
-    下一次掃描——不論是排程的17:00或管理員手動觸發——馬上就會用新門檻，
-    不用改程式碼、不用重新部署"""
-    _check_admin(key)
-    import json as _json_dc2
-    conn = _db_conn()
-    try:
-        overrides = _get_deep_cfg_overrides(conn)
-        updates = req.model_dump(exclude_unset=True, exclude_none=True)
-        if not updates:
-            raise HTTPException(status_code=400, detail="沒有帶任何要更新的欄位")
-        overrides.update(updates)
-        conn.execute(
-            """INSERT INTO app_settings(key, value, updated_at) VALUES(?, ?, datetime('now','+8 hours'))
-               ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at""",
-            (_DEEP_CFG_SETTINGS_KEY, _json_dc2.dumps(overrides, ensure_ascii=False)),
-        )
-        conn.commit()
-        effective = _apply_deep_cfg_overrides(conn)
-    finally:
-        conn.close()
-    return {"ok": True, "effective": dict(effective), "overridden_keys": list(overrides.keys())}
 
 
 # ──────────────────────────────────────────

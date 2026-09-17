@@ -1392,8 +1392,8 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
   </div>
 </div>
 
-<!-- 深度選股跑馬燈（2026/07/26 新增）：有今天的資料才顯示，預設隱藏 -->
-<div id="deepAnalysisMarquee" onclick="showPage('deepanalysis')"
+<!-- 選股跑馬燈（2026/07/26 新增；2026/09/17起改顯示12金叉選股）：有今天的資料才顯示，預設隱藏 -->
+<div id="deepAnalysisMarquee" onclick="showPage('multisignal')"
   style="display:none;background:linear-gradient(90deg,#0f2d1f,#1a3a2a);border-bottom:1.5px solid #2d6a4f;
   padding:8px 0;cursor:pointer;overflow:hidden">
   <div style="display:flex;align-items:center;gap:8px;max-width:1080px;margin:0 auto;padding:0 16px">
@@ -1491,10 +1491,10 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
             <div class="tile-list" id="discPickList"><div class="hd2-disc-item" style="color:var(--muted);border:none">載入中…</div></div>
             <div class="tile-tag">依會員權限顯示</div>
           </div>
-          <div class="stock-tile tile-deep" onclick="_homeGo('deepanalysis')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')this.click()">
-            <div class="tile-ico">🧠</div>
-            <div class="tile-ttl">DEEP深度選股</div>
-            <div class="tile-sub">三重確認條件篩選結果</div>
+          <div class="stock-tile tile-deep" onclick="_homeGo('multisignal')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')this.click()">
+            <div class="tile-ico">📊</div>
+            <div class="tile-ttl">12金叉選股</div>
+            <div class="tile-sub">12種方法找今天剛轉強的股票</div>
             <div class="tile-list" id="discDeepList"><div class="hd2-disc-item" style="color:var(--muted);border:none">載入中…</div></div>
             <div class="tile-tag">付費會員完整開放</div>
           </div>
@@ -1554,7 +1554,7 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
         </div>
         <div id="homeDeepLockBox"></div>
         <div class="hv-cta">
-          <button type="button" class="hd2-deep-btn-primary" onclick="_homeGo('deepanalysis')">進入深度分析</button>
+          <button type="button" class="hd2-deep-btn-primary" onclick="_homeGo('multisignal')">進入12金叉選股</button>
           <button type="button" class="hd2-deep-btn-secondary" id="homeIaUpgrade" onclick="_homeGo('upgrade')">升級付費會員</button>
         </div>
       </section>
@@ -1715,6 +1715,7 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
 
     <!-- ── 深度分析七欄位 ── -->
     <div id="deepSection" style="display:none;padding:0 0 4px">
+      <div id="verdictBox"></div>
       <div class="deep-title">📐 深度分析</div>
       <div class="deep-grid">
         <div class="deep-card" id="dcard-kbar"><div class="deep-lbl">🕯 K棒型態</div><div id="d-kbar-tag"></div><div class="deep-val" id="d-kbar-name">—</div><div class="deep-sub" id="d-kbar-sub"></div><div class="m-hint">今日蠟燭圖形狀所隱含的多空意義</div></div>
@@ -2562,7 +2563,8 @@ function showPage(page){
     else if(page==='portfolio') showPortfolioPage();
     else if(page==='forum') showForumPage();
     else if(page==='my') showMyPage();
-    else if(page==='deepanalysis') showDeepAnalysisPage();
+    // 2026/09/17：深度選股下架，舊入口（LINE舊訊息 ?page=deepanalysis、書籤）一律導到12金叉選股
+    else if(page==='deepanalysis') showMultiSignalPage();
     else if(page==='multisignal') showMultiSignalPage();
   }
 }
@@ -3660,7 +3662,10 @@ function renderResult(d,enabledMA){
   const coreLines = [];
 
   // 0. 主結論只留一條，避免 warning 與 contradiction 同時搶視線
-  if(conflict_note){
+  // 2026/09/17：後端改由綜合解說(verdict)統一產出主結論，矛盾已併進解說，conflict_note 會是空的
+  if(d.verdict && d.verdict.headline){
+    coreLines.push({text:`主結論：${d.warning || d.verdict.headline}`, cls:'conclusion'});
+  } else if(conflict_note){
     coreLines.push({text:`主結論：訊號不一致 — ${conflict_note}`, cls:'conclusion'});
   } else if(d.warning){
     coreLines.push({text:`主結論：${d.warning}`, cls:'conclusion'});
@@ -3674,7 +3679,7 @@ function renderResult(d,enabledMA){
     const opText = kbar_action || kbar_warning;
     if(opText){
       const opCls = kDir==='bullish'?'kbar-bull-op': kDir==='bearish'?'kbar-bear-op':'action';
-      coreLines.push({text:`操作：${opText}`, cls: opCls});
+      coreLines.push({text:`K棒提醒：${opText}`, cls: opCls});
     }
   }
   // K 線大數據型態勝率
@@ -3682,6 +3687,13 @@ function renderResult(d,enabledMA){
     const wr = d.win_rate||0.50;
     const wrCls = wr > 0.55 ? 'md' : wr < 0.50 ? 'hi' : '';
     coreLines.push({text:`K線型態：${d.kline_pattern}　勝率：${Math.round(wr*100)}%`, cls: wrCls});
+  }
+
+  // 12金叉（2026/09/17新增）：所有人都看得到項數，逐項明細在下方綜合解說（付費）
+  const _msSig = d.verdict && d.verdict.sections && d.verdict.sections.signals;
+  if(_msSig && _msSig.available){
+    coreLines.push({text:`12金叉：今天 ${_msSig.today_count} 項剛轉強、${_msSig.active_count} 項持續轉強中（共 ${_msSig.total} 項）`,
+      cls: _msSig.today_count >= 3 ? 'md' : ''});
   }
 
   // 3. 防守位 + 損益比
@@ -3901,6 +3913,8 @@ function renderAnalysisCards(d) {
     set('d-inst-rows', `<div style="font-size:11px;color:var(--text3)">資料更新中…</div>`);
   }
 
+  renderVerdict(d.verdict);
+
   // 7. 風險提示
   const riskHtml = (risks.length ? risks : [{ text: '無明顯風險警示', level: 'low' }]).map(r => {
     const dotCls = typeof r === 'object' ? (r.level === 'high' ? 'bad' : r.level === 'low' ? 'ok' : 'warn') : 'warn';
@@ -3909,7 +3923,70 @@ function renderAnalysisCards(d) {
   }).join('');
   set('d-risk-list', riskHtml);
 
-  sec.style.display = '';
+  // 2026/09/17修正：原本設成''，但CSS本身有 #deepSection{display:none}，清掉行內樣式後
+  // 還是被CSS藏起來——深度分析卡片上線以來其實從沒顯示過。改成明確設block。
+  sec.style.display = 'block';
+}
+
+
+// ── 綜合解說（2026/09/17新增，文件B階段7模版版）──
+// 內容全部由後端 _build_verdict 產出，前端只負責排版；會員看不到的段落後端已經拿掉（locked_sections）。
+function renderVerdict(v){
+  const box = document.getElementById('verdictBox');
+  if(!box) return;
+  if(!v || !v.headline){ box.innerHTML = ''; return; }
+  const esc = (t) => String(t ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const sec = v.sections || {};
+  const stanceColor = {bull:'var(--dn)', bull_wait:'var(--amber)', bull_caution:'var(--amber)', neutral:'var(--text2)', bear:'var(--up)'}[v.stance] || 'var(--text2)';
+  const list = (title, arr, icon, color) => (arr && arr.length) ? `
+    <div style="margin-top:12px">
+      <div style="font-size:12px;font-weight:800;color:${color || 'var(--text2)'};margin-bottom:4px">${title}</div>
+      ${arr.map(t => `<div style="display:flex;gap:6px;font-size:13px;line-height:1.65;color:var(--text)"><span style="flex-shrink:0">${icon}</span><span>${esc(t)}</span></div>`).join('')}
+    </div>` : '';
+  const stateMeta = {today:['🟢','今天剛轉強'], active:['🔵','轉強中'], none:['⚪','未轉強']};
+  let sigHtml = '';
+  const sg = sec.signals;
+  if(sg && sg.available && sg.items){
+    sigHtml = `
+    <div style="margin-top:12px">
+      <div style="font-size:12px;font-weight:800;color:var(--text2);margin-bottom:6px">12金叉逐項（🟢今天剛轉強 ${sg.today_count}・🔵轉強中 ${sg.active_count}）</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px">
+      ${sg.items.map(x => {
+        const [ic, lb] = stateMeta[x.state] || stateMeta.none;
+        return `<div style="background:var(--bg3);border-radius:8px;padding:6px 9px;font-size:12px;line-height:1.5;opacity:${x.state === 'none' ? .7 : 1}">
+          <div><span>${ic}</span> <b style="color:var(--text)">${esc(x.label)}</b> <span style="color:var(--text3)">${x.category}・${lb}</span></div>
+          ${x.detail ? `<div style="color:var(--text3)">${esc(x.detail)}</div>` : ''}</div>`;
+      }).join('')}
+      </div>
+    </div>`;
+  }
+  const conflicts = (sec.conflicts || []);
+  const cfHtml = (sec.conflicts !== undefined) ? `
+    <div style="margin-top:12px;background:var(--amber-l, rgba(245,158,11,.1));border-radius:10px;padding:9px 11px">
+      <div style="font-size:12px;font-weight:800;color:var(--amber);margin-bottom:4px">⚖️ 矛盾與最大的問題</div>
+      ${conflicts.map(t => `<div style="font-size:13px;line-height:1.65;color:var(--text)">・${esc(t)}</div>`).join('') || '<div style="font-size:13px;color:var(--text2)">各項訊號方向沒有明顯矛盾</div>'}
+      <div style="font-size:13px;line-height:1.65;color:var(--text);margin-top:4px"><b>現在最大的問題：</b>${esc(sec.top_problem)}</div>
+    </div>` : '';
+  const locked = v.locked && (v.locked_sections || []).length;
+  box.innerHTML = `
+  <div style="background:var(--bg2);border:1px solid var(--border);border-left:4px solid ${stanceColor};border-radius:var(--radius-lg);padding:14px 14px 12px;margin:0 0 14px">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+      <span style="font-size:15px;font-weight:800;color:var(--text)">🧭 綜合解說</span>
+      <span style="font-size:12px;font-weight:800;padding:2px 10px;border-radius:20px;border:1px solid ${stanceColor};color:${stanceColor}">${esc(v.stance_label)}</span>
+      <span style="font-size:11px;color:var(--text3)">看多分數 ${v.bull_score}・看空分數 ${v.bear_score}</span>
+    </div>
+    <div style="font-size:14px;line-height:1.7;color:var(--text);font-weight:600">${esc(sec.headline || v.headline)}</div>
+    ${sec.action ? `<div style="font-size:13px;line-height:1.65;color:var(--text2);margin-top:4px">👉 操作參考：${esc(sec.action)}</div>` : ''}
+    ${list('📍 現在的狀況', sec.status, '•')}
+    ${list('📈 看多的理由', sec.bull, '＋', 'var(--dn)')}
+    ${list('📉 看空的理由', sec.bear, '－', 'var(--up)')}
+    ${cfHtml}
+    ${list('🎯 關鍵價位', sec.levels, '•')}
+    ${list('🔀 接下來的情境', sec.scenarios, '→')}
+    ${sigHtml}
+    ${locked ? `<div style="margin-top:10px;font-size:12px;color:var(--green);font-weight:700">🔒 完整解說（狀況、多空理由、矛盾、關鍵價位、情境、12金叉逐項）為付費會員內容</div>` : ''}
+    <div style="font-size:10px;color:var(--text3);margin-top:10px;line-height:1.6">以上由系統依技術、籌碼、營收資料自動整理，只描述條件、不預測漲跌，不構成投資建議。</div>
+  </div>`;
 }
 
 async function doGenerateReport(){
@@ -4227,7 +4304,7 @@ function _homeGo(kind){
     }, '請先分析一檔，再看 DEEP');
     return;
   }
-  if(kind==='deepanalysis'){ showPage('deepanalysis'); return; }
+  if(kind==='deepanalysis' || kind==='multisignal'){ showPage('multisignal'); return; }
   if(kind==='multisignal'){ showPage('multisignal'); return; }
   if(kind==='portfolio'){ showPage('portfolio'); return; }
   if(kind==='watch'){ showPage('watch'); return; }
@@ -6484,7 +6561,7 @@ async function _loadHomeDiscover(){
   }
 
   try{
-    const r = await fetch(api+'/api/deep-analysis', {headers:_authHeaders(), signal:AbortSignal.timeout(12000)});
+    const r = await fetch(api+'/api/multi-signal', {headers:_authHeaders(), signal:AbortSignal.timeout(12000)});
     const j = r.ok ? await r.json() : null;
     const box = document.getElementById('discDeepList');
     if(box){
@@ -6494,10 +6571,10 @@ async function _loadHomeDiscover(){
       } else {
         box.innerHTML = items.slice(0,3).map(s=>{
           const nm = s.name || s.stock_name || s.stock_id || s.code || '';
-          const conf = s.confidence || '';
+          const conf = s.passed_count ? (s.passed_count + ' 項轉強') : '';
           const id = s.stock_id || s.code || '';
           const real = _isRealId(id);
-          const click = real ? "event.stopPropagation();qpAndHome('"+id.replace(/'/g,"")+"')" : "event.stopPropagation();_homeGo('deepanalysis')";
+          const click = real ? "event.stopPropagation();qpAndHome('"+id.replace(/'/g,"")+"')" : "event.stopPropagation();_homeGo('multisignal')";
           return '<div class="hd2-disc-item" onclick="'+click+'" style="cursor:pointer"><b>'+_mktEsc(nm)+'</b><span style="color:var(--muted)">'+_mktEsc(conf)+'</span></div>';
         }).join('');
       }
@@ -6935,7 +7012,7 @@ function _renderHomeMemberState(){
   const upgradeBtn = document.getElementById('homeIaUpgrade');
   if(box){
     if(_hasPremium()){
-      box.innerHTML = `<div class="hd2-deep-ok">✓ 您是付費會員，深度分析已完整開放</div>`;
+      box.innerHTML = `<div class="hd2-deep-ok">✓ 您是付費會員，12金叉選股與個股綜合解說已完整開放</div>`;
       if(upgradeBtn) upgradeBtn.style.display = 'none';
     } else {
       box.innerHTML = `<div class="hd2-deep-lock">🔒 這裡有完整分析，目前需要付費會員才能查看</div>`;
@@ -7390,18 +7467,6 @@ async function showPicksPage(){
       : `<div style="font-size:11px;color:var(--text3);margin-bottom:12px">尚未更新（排程約每個交易日 09:06 台北）</div>`;
 
     const deepCard = `
-      <div onclick="showPage('deepanalysis')"
-        style="background:linear-gradient(135deg,#1a3a2a 0%,#0f2d1f 100%);border-radius:12px;padding:14px 16px;margin-bottom:14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border:1.5px solid #2d6a4f;box-shadow:0 2px 12px rgba(29,158,117,0.18)">
-        <div>
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-            <span style="font-size:15px;font-weight:800;color:#4ade80">🔬 每日深度選股</span>
-            <span style="background:#1D9E75;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;letter-spacing:0.5px">NEW</span>
-          </div>
-          <div style="font-size:11px;color:#86efac">月季線金叉＋站上月線＋MACD金叉　含停損建議與法人籌碼</div>
-          <div style="font-size:10px;color:#4ade80;margin-top:3px;opacity:0.7">預定每個交易日 17:00（台北）跑選股；實際名單以頁內「上次更新」為準</div>
-        </div>
-        <div style="font-size:20px;color:#4ade80;font-weight:700">›</div>
-      </div>
       <div onclick="showPage('multisignal')"
         style="background:linear-gradient(135deg,#1e2a4a 0%,#152040 100%);border-radius:12px;padding:14px 16px;margin-bottom:14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border:1.5px solid #3b5bab;box-shadow:0 2px 12px rgba(59,130,246,0.18)">
         <div>
@@ -7463,7 +7528,7 @@ async function showPicksPage(){
 
 async function _checkDeepAnalysisMarquee(){
   try{
-    const res = await fetch(`${getAPI()}/deep-analysis-status`);
+    const res = await fetch(`${getAPI()}/multi-signal-status`);
     if(!res.ok) return;
     const j = await res.json();
     const bar = document.getElementById('deepAnalysisMarquee');
@@ -7471,7 +7536,7 @@ async function _checkDeepAnalysisMarquee(){
     if(!bar || !track) return;
     if(j.available){
       const hc = j.high_confidence_count || 0;
-      const text = `🎯 今日深度選股已更新，共 ${j.count} 檔入選${hc>0?`，${hc} 檔🔥高信心`:''}，點我查看完整分析 ›`;
+      const text = `📊 今日12金叉選股已更新，共 ${j.count} 檔出現轉強訊號${hc>0?`，${hc} 檔同時符合 3 項以上`:''}，點我查看 ›`;
       // 重複兩次文字，讓跑馬燈捲動時視覺上無縫接續
       track.textContent = `${text}　　　　${text}`;
       bar.style.display = 'block';
@@ -7495,287 +7560,9 @@ function _syncMarqueeHeightVar(){
 }
 window.addEventListener('resize', _syncMarqueeHeightVar);
 
-const _DEEP_COND_LABELS = {
-  'cond1_低檔起漲':               '低檔起漲',
-  'cond2_高點拉回起漲(買1)':       '高點拉回起漲（買1）',
-  'cond3_均線突破(買2)':           '均線突破（買2）',
-  'cond3_均線突破(買2)_量能未確認': '均線突破（買2）⚠量能未確認',
-  'cond4_剛突破':                  '剛突破',   // 2026/08/20新增：路徑B專用
-  'MACD動能加速中':                'MACD動能加速',
-};
-
-// 2026/08/20新增：深度選股兩條入選路徑（路徑A趨勢確認／路徑B剛突破）各自的顯示色，
-// 跟 generator.py 的 _deep_entry_path_color() 用同一組配色，App跟公開報告頁視覺一致。
-const _DEEP_PATH_META = {
-  'A': { color: '#7C3AED', label: '趨勢確認' },
-  'B': { color: '#3B82F6', label: '剛突破' },
-};
-
-async function showDeepAnalysisPage(){
-  const el = document.getElementById('pageContent');
-  const overlay = document.getElementById('pageOverlay');
-  overlay.style.display = 'block';
-  el.innerHTML = '<div style="padding:20px 0;text-align:center;color:var(--text3)">載入中...</div>';
-
-  try{
-    // 2026/07/27：必須帶上登入 token，後端才知道你是不是付費會員。
-    // 後端已改為「免費/未登入在伺服器端就把代號名稱遮罩掉」，沒帶 token
-    // 的話連付費會員也只會拿到遮罩版資料。
-    const res = await fetch(`${getAPI()}/api/deep-analysis`, { headers: _authHeaders() });
-    if(!res.ok) throw new Error('載入失敗');
-    const j = await res.json();
-    const items = j.data || [];
-    const _tierNote = j.preview
-      ? `<div style="font-size:12px;color:var(--text2);margin-bottom:8px">弱預覽：約 ${j.approx_count ?? items.length} 檔　點開請先登入</div>`
-      : (j.masked ? `<div style="font-size:12px;color:var(--text2);margin-bottom:8px">免費預覽已藏股名</div>` : '');
-    const updatedAt = j.updated_at
-      ? `<div style="font-size:11px;color:var(--text3);margin-bottom:12px">上次更新（台北）：${j.updated_at}</div>`
-      : `<div style="font-size:11px;color:var(--text3);margin-bottom:12px">尚未更新（排程約每個交易日 17:00 台北）</div>`;
-
-    const header = `
-      <div style="font-size:16px;font-weight:700;padding:10px 0 4px">🎯 深度選股</div>
-      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;line-height:1.6">以下個股皆符合系統技術面選股條件，僅供研究參考，不構成投資建議。股市有風險，請自行評估並嚴設停損。</div>
-      ${updatedAt}${_tierNote}
-      <div onclick="showPage('multisignal')" style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
-        padding:10px 14px;margin-bottom:12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px">
-        <div><div style="font-size:13px;font-weight:800;color:var(--text)">📊 12金叉選股</div>
-          <div style="font-size:11px;color:var(--text3)">12種方法找「今天剛轉強」的股票，看同時符合幾個</div></div>
-        <span style="font-size:18px;color:var(--green)">›</span>
-      </div>`;
-
-    if(!items.length){
-      el.innerHTML = `
-        <div style="padding:8px 0 16px">
-          ${header}
-          <div style="padding:40px 0;text-align:center">
-            <div style="font-size:40px;margin-bottom:12px">🔍</div>
-            <div style="font-size:15px;font-weight:700;margin-bottom:8px">今日尚無符合三重確認條件的股票</div>
-            <div style="font-size:13px;color:var(--text3)">每個交易日 17:00 自動更新</div>
-          </div>
-        </div>`;
-      return;
-    }
-
-    const locked = !_hasPremium();
-    const lockMsg = _authUser ? '升級付費方案，解鎖股票代號' : '登入後解鎖股票代號';
-    const lockAction = _authUser ? 'showUpgradeModal()' : 'showLoginModal()';
-
-    // 未解鎖時：整張卡點下去導向升級／登入；已解鎖：點下去直接跑該檔完整技術分析
-    const cardClick = (id) => locked ? lockAction : `qpAndHome('${id}')`;
-
-    // 風險等級用獨立的藍/琥珀/紅危險色階，跟「紅漲綠跌」的價格語意分開，避免混淆——
-    // 風險是「危不危險」，跟股價當天漲跌方向是兩件事，不能共用同一組顏色語言。
-    const riskMeta = {
-      '低': { color:'#3B82F6', bg:'rgba(59,130,246,.12)', label:'低風險', desc:'停損距現價 5% 以內' },
-      '中': { color:'var(--amber)', bg:'var(--amber-l)', label:'中風險', desc:'停損距現價 5～10%' },
-      '高': { color:'#DC2626', bg:'rgba(220,38,38,.12)', label:'高風險', desc:'停損距現價 10% 以上' },
-    };
-
-    const renderCard = (s) => {
-      const conf      = s.confidence || '一般';
-      const score     = s.score ?? 0;
-      const confColor = conf.includes('高信心') ? '#7C3AED'
-                      : conf.includes('中信心') ? 'var(--amber)' : 'var(--text3)';
-      const rMeta     = riskMeta[s.risk_level] || riskMeta['中'];
-
-      // 今日漲跌：台股慣例紅漲綠跌，一律用 --up(紅)/--dn(綠)，不能反
-      const chg = Number(s.change_pct);
-      const hasChg = Number.isFinite(chg) && chg !== 0;
-      const chgColor = chg > 0 ? 'var(--up)' : chg < 0 ? 'var(--dn)' : 'var(--text3)';
-      const chgSign  = chg > 0 ? '+' : '';
-      const chgHtml  = hasChg
-        ? `<span style="font-size:14px;font-weight:700;color:${chgColor};margin-left:6px">${chgSign}${chg.toFixed(2)}%</span>`
-        : '';
-
-      // 2026/08/20：兩條入選路徑各自的確認清單不一樣，不能用同一組「三重確認」硬套。
-      // 路徑A（趨勢確認）：月季線金叉／站上月線／MACD金叉。
-      // 路徑B（剛突破）　：放量突破盤整區間／現價未跌破突破價／MACD金叉。
-      const entryPath  = s.entry_path || 'A';
-      const pathMeta   = _DEEP_PATH_META[entryPath] || _DEEP_PATH_META['A'];
-      const gate3 = Number.isFinite(s.macd_cross_days_ago)
-        ? (s.macd_cross_days_ago === 0 ? '就在今天發生' : `${s.macd_cross_days_ago} 個交易日前發生`)
-        : null;
-
-      let gates, gateTitle;
-      if (entryPath === 'B') {
-        const gateB1 = Number.isFinite(s.breakout_days_ago)
-          ? (s.breakout_days_ago === 0 ? '就在今天發生' : `${s.breakout_days_ago} 個交易日前發生`)
-          : null;
-        gates = [
-          ['放量突破盤整區間', gateB1], ['現價未跌破突破價', gateB1 ? '仍守在突破價之上' : null], ['MACD金叉', gate3],
-        ].filter(([, detail]) => detail);
-        gateTitle = '剛突破・入選依據';
-      } else {
-        const gate1 = Number.isFinite(s.ma_cross_days_ago)
-          ? (s.ma_cross_days_ago === 0 ? '就在今天發生' : `${s.ma_cross_days_ago} 個交易日前發生`)
-          : null;
-        const gate2 = Number.isFinite(s.above_ma20_pct)
-          ? `現價高於月線 ${s.above_ma20_pct}%` : null;
-        gates = [
-          ['月季線金叉', gate1], ['站上月線', gate2], ['MACD金叉', gate3],
-        ].filter(([, detail]) => detail);
-        gateTitle = '趨勢確認・入選依據';
-      }
-      const gateHtml = gates.length ? `
-        <div style="background:${pathMeta.color}12;border:1px solid ${pathMeta.color}33;border-radius:10px;padding:10px 12px;margin-bottom:12px">
-          <div style="font-size:10px;color:${pathMeta.color};font-weight:700;margin-bottom:6px;letter-spacing:.5px">${gateTitle}</div>
-          ${gates.map(([name, detail]) => `
-            <div style="display:flex;align-items:baseline;gap:6px;font-size:13px;padding:2px 0">
-              <span style="color:${pathMeta.color};font-weight:800">✓</span>
-              <span style="color:var(--text);font-weight:700">${name}</span>
-              <span style="color:var(--text3);font-size:12px">${detail}</span>
-            </div>`).join('')}
-        </div>` : '';
-
-      // 對應路徑的操作提醒（等拉回／嚴設停損），跟generator.py的entry_path_note同一份資料，
-      // 文字內容由後端決定，前端只負責用醒目樣式呈現，不要重複寫一份自己的提醒文字。
-      const entryNoteHtml = s.entry_path_note ? `
-        <div style="background:${pathMeta.color}0d;border:1px solid ${pathMeta.color}33;border-radius:10px;
-             padding:9px 11px;margin-bottom:12px;font-size:12px;line-height:1.6;color:var(--text2)">
-          💡 ${s.entry_path_note}
-        </div>` : '';
-
-      const price = Number(s.price), sl = Number(s.stop_loss), res = Number(s.resistance);
-      const hasRuler = [price, sl, res].every(v => Number.isFinite(v) && v > 0) && res > sl;
-      let rulerHtml = '';
-      if (hasRuler) {
-        // 風險尺：把停損→現價→壓力按真實價格比例畫在同一條軸上。
-        // 台股紅漲綠跌：往壓力（上檔／價格更高）＝紅，往停損（下檔／價格更低）＝綠，
-        // 跟股價漲跌顏色語意保持一致，不能用「好=綠、壞=紅」的直覺配色。
-        const pos      = Math.min(97, Math.max(3, (price - sl) / (res - sl) * 100));
-        const downPct  = ((price - sl) / price * 100).toFixed(1);
-        const upPct    = ((res - price) / price * 100).toFixed(1);
-        const rr       = s.rr_ratio ?? '—';
-        const rrColor  = (Number(rr) >= 1.5) ? '#3B82F6' : (Number(rr) >= 1) ? 'var(--amber)' : 'var(--dn)';
-        rulerHtml = `
-          <div style="margin:14px 0 12px">
-            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:6px">
-              <span>下檔 <b style="color:var(--dn)">${downPct}%</b></span>
-              <span>風報比 <b style="color:${rrColor}">${rr}x</b></span>
-              <span>上檔 <b style="color:var(--up)">${upPct}%</b></span>
-            </div>
-            <div style="position:relative;height:10px;border-radius:99px;overflow:hidden;background:var(--bg3)">
-              <div style="position:absolute;inset:0 auto 0 0;width:${pos}%;background:var(--dn);opacity:.6"></div>
-              <div style="position:absolute;inset:0 0 0 ${pos}%;background:var(--up);opacity:.6"></div>
-              <div style="position:absolute;top:-3px;left:${pos}%;width:3px;height:16px;border-radius:2px;
-                   background:var(--text);transform:translateX(-50%)"></div>
-            </div>
-            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:6px">
-              <span>停損 <b style="color:var(--dn)">${sl}</b></span>
-              <span style="color:var(--text);font-weight:800;font-size:12px">現價 ${price}</span>
-              <span>壓力 <b style="color:var(--up)">${res}</b></span>
-            </div>
-          </div>`;
-      }
-
-      const condBadges = (s.matched_conditions || []).map(c =>
-        `<span style="font-size:11px;padding:3px 9px;border-radius:20px;background:rgba(124,58,237,.1);color:#7C3AED;font-weight:600">${_DEEP_COND_LABELS[c] || c}</span>`
-      ).join('');
-
-      const instBadge = (s.consecutive_buy_days >= 2)
-        ? `<span style="font-size:11px;padding:3px 9px;border-radius:20px;background:var(--up-l);color:var(--up);font-weight:600">法人連買 ${s.consecutive_buy_days} 日</span>` : '';
-
-      const warnHtml = (s.warnings && s.warnings.length)
-        ? `<div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px;
-             font-size:12px;color:var(--text2);line-height:1.8">
-             ${s.warnings.map(w => `<div>⚠️ ${w}</div>`).join('')}
-           </div>` : '';
-
-      const idBlur = locked ? 'filter:blur(7px);user-select:none' : '';
-      const footer = locked
-        ? `<div style="display:flex;align-items:center;justify-content:center;gap:5px;margin-top:12px;
-             padding-top:11px;border-top:1px solid var(--border);font-size:12px;color:var(--green);font-weight:700">
-             🔒 ${lockMsg}</div>`
-        : `<div style="display:flex;align-items:center;justify-content:flex-end;gap:3px;margin-top:12px;
-             padding-top:11px;border-top:1px solid var(--border);font-size:12px;color:var(--green);font-weight:700">
-             查看完整技術分析 ›</div>`;
-
-      return `<div onclick="${cardClick(s.stock_id)}" style="background:var(--bg2);border:1px solid var(--border);
-           border-left:4px solid ${rMeta.color};border-radius:var(--radius-lg);padding:16px;margin-bottom:12px;cursor:pointer">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
-          <div style="${idBlur};min-width:0">
-            <div style="font-size:20px;font-weight:800;color:var(--text);line-height:1.3">${s.stock_name}${chgHtml}</div>
-            <div style="font-size:13px;color:var(--text3);font-family:var(--mono);margin-top:2px">${s.stock_id}${hasRuler ? `　現價 ${price}` : ''}${s.price_date ? `<span style="font-size:11px;color:var(--text3);opacity:.75">（${s.price_date}）</span>` : ''}</div>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0">
-            <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;
-                  border-radius:50%;border:2.5px solid ${confColor};color:${confColor};
-                  font-size:14px;font-weight:800;font-family:var(--mono)">${score}</span>
-            <span style="font-size:10px;color:${confColor};font-weight:700;white-space:nowrap">${conf}</span>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;margin-top:10px;flex-wrap:wrap">
-          <span style="font-size:12px;font-weight:800;padding:3px 10px;border-radius:20px;background:${pathMeta.color}22;color:${pathMeta.color}">🔎 ${pathMeta.label}</span>
-          <span style="font-size:12px;font-weight:800;padding:3px 10px;border-radius:20px;background:${rMeta.bg};color:${rMeta.color}">風險：${rMeta.label.replace('風險','')}</span>
-        </div>
-        ${gateHtml}
-        ${entryNoteHtml}
-        ${rulerHtml}
-        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-          <span style="font-size:11px;padding:3px 9px;border-radius:20px;background:var(--bg3);color:var(--text2);font-weight:600">量比 ${s.vol_ratio ?? '—'}x</span>
-          ${instBadge}${condBadges}
-        </div>
-        ${condBadges || instBadge ? `<div style="font-size:10px;color:var(--text3);margin-top:4px">↑ 加分項目（非入選必要條件）</div>` : ''}
-        <div style="font-size:11px;color:var(--text3);margin-top:9px">
-          停損依${s.stop_loss_basis ?? '—'}　跌破 ${s.stop_loss ?? '—'} 出場（-${s.stop_loss_pct ?? '—'}%）
-        </div>
-        ${warnHtml}
-        ${footer}
-      </div>`;
-    };
-
-    // 依風險分區，每區內已由後端依分數排序
-    const groups = ['低','中','高']
-      .map(k => ({ k, meta: riskMeta[k], list: items.filter(s => (s.risk_level || '中') === k) }))
-      .filter(g => g.list.length);
-
-    const sections = groups.map(g => `
-      <div style="margin-bottom:18px">
-        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:8px">
-          <span style="font-size:13px;font-weight:800;color:${g.meta.color}">${g.meta.label}</span>
-          <span style="font-size:11px;color:var(--text3)">${g.list.length} 檔　${g.meta.desc}</span>
-        </div>
-        <div class="deep-cards-grid">${g.list.map(renderCard).join('')}</div>
-      </div>`).join('');
-
-    const unlockBanner = locked ? `
-      <div onclick="${lockAction}" style="background:var(--bg2);border:1px solid var(--green);
-        border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;cursor:pointer;
-        display:flex;justify-content:space-between;align-items:center;gap:10px">
-        <div>
-          <div style="font-size:13px;font-weight:800;color:var(--green);margin-bottom:2px">🔒 ${lockMsg}</div>
-          <div style="font-size:11px;color:var(--text3);line-height:1.5">
-            停損、風報比、籌碼都已完整顯示，解鎖後可看代號並直接跑完整技術分析
-          </div>
-        </div>
-        <span style="font-size:18px;color:var(--green);flex-shrink:0">›</span>
-      </div>` : '';
-
-    const summary = `
-      <div style="display:flex;gap:14px;padding:10px 0 14px;border-bottom:1px solid var(--border);margin-bottom:14px">
-        <div><div style="font-size:19px;font-weight:800;color:var(--text);font-family:var(--mono)">${items.length}</div>
-             <div style="font-size:10px;color:var(--text3)">檔入選</div></div>
-        <div><div style="font-size:19px;font-weight:800;color:var(--up);font-family:var(--mono)">${items.filter(s=>(s.confidence||'').includes('高信心')).length}</div>
-             <div style="font-size:10px;color:var(--text3)">高信心</div></div>
-        <div><div style="font-size:19px;font-weight:800;color:var(--green);font-family:var(--mono)">${items.filter(s=>(s.risk_level||'')==='低').length}</div>
-             <div style="font-size:10px;color:var(--text3)">低風險</div></div>
-      </div>`;
-
-    el.innerHTML = `
-      <div style="padding:8px 0 16px">
-        ${header}
-        ${summary}
-        ${unlockBanner}
-        ${sections}
-        <div style="font-size:10px;color:var(--text3);line-height:1.7;padding:12px 0 0;border-top:1px solid var(--border)">
-          本頁為技術面自動化篩選結果，僅供研究參考，不構成投資建議。停損價為系統依技術結構試算，請自行評估風險。
-        </div>
-      </div>`;
-  }catch(e){
-    el.innerHTML = `<div style="padding:40px 0;text-align:center;color:var(--text3)">載入失敗，請稍後再試</div>`;
-  }
-}
-
+// 2026/09/17：深度選股頁（showDeepAnalysisPage）已下架，保留同名函式導到12金叉選股，
+// 避免任何還沒改到的舊入口點下去沒反應。
+function showDeepAnalysisPage(){ return showMultiSignalPage(); }
 
 // ══════════════════════════════════════
 // 12金叉選股（案件005文件B十六節，2026/09/15新增）
@@ -7845,18 +7632,29 @@ function _renderMultiSignalPage(){
       </div>
     </div>` : '';
 
+  // 2026/09/17：篩選改成1～12全部列出（原本只到3），12個全中叫「12金釵全框」；
+  // 當天沒有股票達到的數量按鈕變淡、不能點。可橫向滑動。
   const cnt = (n) => all.filter(s => (s.passed_count || 0) >= n).length;
   const filterBtns = j.preview ? '' : `
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
-      ${[1,2,3].map(n => `<button onclick="_msSetMin(${n})" style="padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;
-        border:1px solid ${_msMinCount===n ? 'var(--green)' : 'var(--border)'};
-        background:${_msMinCount===n ? 'var(--green)' : 'var(--bg2)'};color:${_msMinCount===n ? '#fff' : 'var(--text2)'}">
-        符合 ${n} 個以上（${cnt(n)}）</button>`).join('')}
+    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;-webkit-overflow-scrolling:touch">
+      ${Array.from({length: total}, (_, i) => i + 1).map(n => {
+        const c = cnt(n), on = _msMinCount === n, dis = c === 0 && !on;
+        const lbl = n === total ? `${n}金釵全框` : `符合 ${n} 個以上`;
+        const paidTag = (j.tier === 'free' && n > (j.free_max ?? 2)) ? ' 🔒' : '';
+        return `<button ${dis ? 'disabled' : `onclick="_msSetMin(${n})"`} style="flex-shrink:0;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700;
+          cursor:${dis ? 'default' : 'pointer'};opacity:${dis ? .4 : 1};white-space:nowrap;
+          border:1px solid ${on ? 'var(--green)' : 'var(--border)'};
+          background:${on ? 'var(--green)' : 'var(--bg2)'};color:${on ? '#fff' : 'var(--text2)'}">
+          ${lbl}（${c}）${paidTag}</button>`;
+      }).join('')}
     </div>`;
 
   const items = j.preview ? all : all.filter(s => (s.passed_count || 0) >= _msMinCount);
-  const locked = !_hasPremium();
-  const lockMsg = _authUser ? '升級付費方案，解鎖股票代號' : '登入後解鎖股票代號';
+  // 2026/09/17：免費會員看得到同時符合 free_max（2）個以下的股票，超過的才鎖（遮罩在後端做，
+  // 這裡看每一筆自己的 masked 旗標決定要不要顯示鎖）
+  const locked = !_hasPremium() && !!j.masked;
+  const freeMax = j.free_max ?? 2;
+  const lockMsg = _authUser ? `升級付費方案，看同時符合 ${freeMax + 1} 個以上的股票` : '登入後解鎖股票代號';
   const lockAction = _authUser ? 'showUpgradeModal()' : 'showLoginModal()';
 
   const renderCard = (s) => {
@@ -7880,9 +7678,10 @@ function _renderMultiSignalPage(){
         <span style="min-width:0"><b style="color:var(--text)">${esc(x.label)}</b>
         ${x.detail ? `<span style="color:var(--text3);font-size:12px">　${esc(x.detail)}</span>` : ''}</span></div>`;
     }).join('');
-    const idBlur = locked ? 'filter:blur(7px);user-select:none' : '';
-    const click = locked ? lockAction : `qpAndHome('${String(s.stock_id).replace(/[^0-9A-Za-z]/g,'')}')`;
-    const footer = locked
+    const cardLocked = !!s.masked;
+    const idBlur = cardLocked ? 'filter:blur(7px);user-select:none' : '';
+    const click = cardLocked ? lockAction : `qpAndHome('${String(s.stock_id).replace(/[^0-9A-Za-z]/g,'')}')`;
+    const footer = cardLocked
       ? `<div style="text-align:center;margin-top:12px;padding-top:11px;border-top:1px solid var(--border);font-size:12px;color:var(--green);font-weight:700">🔒 ${lockMsg}</div>`
       : `<div style="text-align:right;margin-top:12px;padding-top:11px;border-top:1px solid var(--border);font-size:12px;color:var(--green);font-weight:700">查看完整技術分析 ›</div>`;
     return `<div onclick="${click}" style="background:var(--bg2);border:1px solid var(--border);border-left:4px solid ${ringColor};
@@ -7910,7 +7709,9 @@ function _renderMultiSignalPage(){
     <div onclick="${lockAction}" style="background:var(--bg2);border:1px solid var(--green);border-radius:var(--radius);
       padding:12px 14px;margin-bottom:14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px">
       <div><div style="font-size:13px;font-weight:800;color:var(--green);margin-bottom:2px">🔒 ${lockMsg}</div>
-        <div style="font-size:11px;color:var(--text3);line-height:1.5">每檔符合哪些方法、依據數字都已顯示，解鎖後可看代號並直接跑完整技術分析</div></div>
+        <div style="font-size:11px;color:var(--text3);line-height:1.5">${_authUser
+          ? `免費會員可以看同時符合 ${freeMax} 個以下的股票；${freeMax + 1} 個以上（訊號最強的那一批）是付費限定`
+          : '每檔符合哪些方法、依據數字都已顯示，解鎖後可看代號並直接跑完整技術分析'}</div></div>
       <span style="font-size:18px;color:var(--green);flex-shrink:0">›</span>
     </div>` : '';
 
@@ -7936,7 +7737,7 @@ function _renderMultiSignalPage(){
         <div><b>OBV轉強</b>：能量潮今天穿過自己的20日平均，買盤開始進來</div>
         <div><b>法人連買</b>：三大法人合計今天剛好連續買超滿3天</div>
         <div><b>底部型態突破</b>：W底或頭肩底今天突破頸線</div>
-        <div><b>營收轉成長</b>：最新公布的月營收年增率由負轉正（一個月更新一次）</div>
+        <div><b>營收成長・股價未漲</b>：最近3個月營收都比去年同期成長，但股價近20天漲不到10%、也不在近兩個月的高檔（避開已經被先拉過、利多出盡的股票）</div>
       </div>
     </details>`;
 

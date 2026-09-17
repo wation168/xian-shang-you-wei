@@ -199,9 +199,6 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
         <button class="action-btn" onclick="showSection('prebuild')">
           <span class="icon">🔍</span>預建 SEO 選股
         </button>
-        <button class="action-btn" onclick="showSection('deepanalysis')">
-          <span class="icon">🎯</span>深度選股
-        </button>
         <button class="action-btn" onclick="showSection('multisignal')">
           <span class="icon">📊</span>12金叉選股
         </button>
@@ -348,15 +345,7 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
       <div class="result-box" id="picksResult" style="margin-top:10px"></div>
     </div>
 
-    <!-- 深度選股手動觸發 -->
-    <div class="card" id="sec-deepanalysis" style="display:none">
-      <div class="card-title">🎯 深度選股</div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6">手動觸發深度選股分析（雙重確認：月季線金叉、股價站上月線；MACD金叉為加分項），背景執行完成後更新 App 內即時資料與跑馬燈。平日 17:00 自動執行。</p>
-      <button class="inline-btn" id="runDeepAnalysisBtn" onclick="doRunDeepAnalysis(this)">🎯 立即執行深度選股</button>
-      <div class="result-box" id="deepAnalysisResult" style="margin-top:10px"></div>
-    </div>
-
-    <!-- 12金叉選股（文件B十六節，2026/09/15新增，目前只有管理員看得到） -->
+    <!-- 12金叉選股（文件B十六節，2026/09/15新增；2026/09/17起取代已下架的深度選股） -->
     <div class="card" id="sec-multisignal" style="display:none">
       <div class="card-title">📊 12金叉選股</div>
       <p style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6">平日 17:20 自動掃描成交量前150檔，12個方法全部接入（技術面9＋法人＋底部型態＋月營收），除月營收外全部只認「當天」發生。按「立即執行」約2～4分鐘跑完，再按「查看結果」。用戶頁面：網址加 ?page=multisignal。</p>
@@ -425,7 +414,7 @@ if(sessionStorage.getItem('adminAuth')==='1'){
 
 // ── 顯示/隱藏區塊 ──
 function showSection(name){
-  ['grant','setexpire','reset','members','messages','blocklist','earlybird','prebuild','deepanalysis','multisignal'].forEach(s=>{
+  ['grant','setexpire','reset','members','messages','blocklist','earlybird','prebuild','multisignal'].forEach(s=>{
     document.getElementById('sec-'+s).style.display = s===name ? 'block' : 'none';
   });
   if(name==='members') loadMembers();
@@ -971,34 +960,6 @@ async function doRunOpeningScan(btn){
   }finally{
     btn.disabled = false;
     btn.textContent = '⚡ 立即抓取開盤熱門股';
-  }
-}
-
-// ── 深度選股手動觸發 ──
-async function doRunDeepAnalysis(btn){
-  btn.disabled = true;
-  btn.textContent = '⏳ 執行中...';
-  const res = document.getElementById('deepAnalysisResult');
-  res.className = 'result-box show';
-  res.textContent = '深度選股分析已送出，背景執行中（約需數分鐘，完成後會自動更新 App 內即時資料與跑馬燈）...';
-  try{
-    const r = await fetch(`${API}/admin/run-deep-analysis`, {
-      method:'POST', signal: AbortSignal.timeout(60000), headers:{'X-Admin-Key':getAdminKey()}
-    });
-    const data = await r.json();
-    if(r.ok){
-      res.textContent = `✅ ${data.msg || '已開始執行'}`;
-      res.className = 'result-box show success';
-    } else {
-      res.textContent = '❌ 失敗：'+(data.detail||'未知錯誤');
-      res.className = 'result-box show error';
-    }
-  }catch(e){
-    res.textContent = '❌ 連線失敗或逾時：'+e.message;
-    res.className = 'result-box show error';
-  }finally{
-    btn.disabled = false;
-    btn.textContent = '🎯 立即執行深度選股';
   }
 }
 
