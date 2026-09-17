@@ -6216,69 +6216,331 @@ async def admin_run_opening_scan(key: str = Header(..., alias="X-Admin-Key")):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ══════════════════════════════════════════════════════════
+# 會員福利（2026/09/17，取代原本寫死的「早鳥批次升級」）
+#  ① 批次發送：後台貼 Email 名單（或勾選免費會員）→ 開通／延長天數＋寄信
+#  ② 兌換碼：後台自己設定代碼、方案、天數、名額、截止日 → 貼到 LINE 群，
+#     會員登入後在「我的」頁輸入就自動開通，每個帳號每組代碼只能用一次
+#  規則：已是有效付費會員 → 從原本到期日往後加天數（不改方案、不縮短）；
+#        免費或已過期 → 開通指定方案，到期日＝今天＋天數
+# ══════════════════════════════════════════════════════════
+_BONUS_PLANS = {"monthly": "月費方案", "quarterly": "季費方案", "yearly": "年費方案"}
+_PROMO_FAILS: dict = {}   # member_id -> [失敗時間...]（防亂猜代碼）
+
+
+def _promo_db_init(conn):
+    conn.executescript("""
+        CREATE TABLE IF NOT EXISTS promo_codes (
+            code        TEXT PRIMARY KEY,
+            title       TEXT DEFAULT '',
+            plan        TEXT NOT NULL,
+            days        INTEGER NOT NULL,
+            max_uses    INTEGER DEFAULT 0,
+            used_count  INTEGER DEFAULT 0,
+            expire_date TEXT DEFAULT '',
+            active      INTEGER DEFAULT 1,
+            created_at  TEXT
+        );
+        CREATE TABLE IF NOT EXISTS promo_redemptions (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            code        TEXT NOT NULL,
+            member_id   INTEGER NOT NULL,
+            email       TEXT,
+            old_plan    TEXT,
+            old_expire  TEXT,
+            new_plan    TEXT,
+            new_expire  TEXT,
+            redeemed_at TEXT,
+            UNIQUE(code, member_id)
+        );
+        CREATE TABLE IF NOT EXISTS bonus_grants (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            email       TEXT,
+            title       TEXT,
+            plan        TEXT,
+            days        INTEGER,
+            old_plan    TEXT,
+            old_expire  TEXT,
+            new_plan    TEXT,
+            new_expire  TEXT,
+            created_at  TEXT
+        );
+    """)
+
+
+def _bonus_apply(conn, row, plan: str, days: int) -> dict:
+    """在同一個 conn 裡幫會員加天數（不 commit、不登出），回傳前後狀態"""
+    from datetime import timedelta as _td
+    today = _taipei_today()
+    old_plan, old_exp = row["plan"] or "free", row["expire_at"] or ""
+    if old_plan != "free" and old_exp >= today:
+        new_plan = old_plan
+        new_exp = (datetime.fromisoformat(old_exp) + _td(days=days)).strftime("%Y-%m-%d")
+        stacked = True
+    else:
+        new_plan = plan
+        new_exp = (datetime.fromisoformat(today) + _td(days=days)).strftime("%Y-%m-%d")
+        stacked = False
+    conn.execute("UPDATE members SET plan=?, expire_at=? WHERE id=?", (new_plan, new_exp, row["id"]))
+    return {"old_plan": old_plan, "old_expire": old_exp, "new_plan": new_plan,
+            "new_expire": new_exp, "stacked": stacked}
+
+
+def _send_bonus_email(email: str, title: str, days: int, r: dict):
+    if not email or email.endswith("@line.softglow-ai.com"):
+        return False
+    title = title or "會員福利"
+    plan_label = _BONUS_PLANS.get(r["new_plan"], r["new_plan"])
+    how = (f"已在您原本的到期日（{r['old_expire']}）後面再加 {days} 天，方案維持不變。"
+           if r["stacked"] else f"已為您開通 {days} 天的{plan_label}。")
+    _send_email(email, f"【線上有位】🎁 {title}：{days} 天付費功能已開通",
+        _render_email(
+            title=f"恭喜！您獲得「{title}」",
+            title_icon="🎁",
+            body_html=(
+                f'<p style="color:#444;margin:0 0 12px;font-size:14px;line-height:1.7">親愛的會員您好，</p>'
+                f'<p style="color:#444;margin:0 0 16px;font-size:14px;line-height:1.7">'
+                f'感謝您支持線上有位！{how}即刻起可使用即時個股分析、12金叉選股、到價提醒等完整會員功能。</p>'
+                f'<table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden">'
+                f'<tr><td style="padding:10px 14px;color:#888;font-size:13px;border-bottom:1px solid #f0f0f0">方案</td><td style="padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;text-align:right">{plan_label}</td></tr>'
+                f'<tr><td style="padding:10px 14px;color:#888;font-size:13px;border-bottom:1px solid #f0f0f0">到期日</td><td style="padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;text-align:right">{r["new_expire"]}</td></tr>'
+                f'<tr><td style="padding:10px 14px;color:#888;font-size:13px">帳號</td><td style="padding:10px 14px;font-weight:700;font-size:14px;text-align:right">{email}</td></tr>'
+                f'</table>'
+            ),
+            cta_text="立即登入使用",
+            cta_url=f"{FRONTEND_URL}/stock",
+            with_ad=True,
+            card_bg="#f0fdf4", card_border="#86efac", title_color="#166534",
+        )
+    )
+    return True
+
+
+def _bonus_check(plan: str, days: int):
+    if plan not in _BONUS_PLANS:
+        raise HTTPException(status_code=400, detail="方案只能是月費／季費／年費")
+    try:
+        days = int(days)
+    except Exception:
+        raise HTTPException(status_code=400, detail="天數格式錯誤")
+    if days < 1 or days > 366:
+        raise HTTPException(status_code=400, detail="天數要在 1～366 之間")
+    return days
+
+
 class _BatchUpgradeReq(BaseModel):
     emails: list
     plan: str = "monthly"
     days: int = 30
+    title: str = ""
+    send_email: bool = True
 
 
 @app.post("/admin/batch-upgrade")
 def admin_batch_upgrade(req: _BatchUpgradeReq, key: str = Header(default="", alias="X-Admin-Key")):
-    """批次升級免費會員（升級+寄通知信）"""
+    """批次發送會員福利（已付費會員疊加天數），可選擇是否寄通知信"""
     _check_admin(key)
-    from datetime import datetime, timedelta
-    plan_label = {"monthly": "月費方案", "quarterly": "季費方案", "yearly": "年費方案"}.get(req.plan, req.plan)
-    results = []
-    for raw_email in req.emails:
-        email = raw_email.strip().lower()
-        if not email:
-            continue
-        new_expire = (datetime.now(ZoneInfo("Asia/Taipei")) + timedelta(days=req.days)).strftime("%Y-%m-%d")
-        conn = _db_conn()
-        try:
-            row = conn.execute("SELECT id FROM members WHERE email=?", (email,)).fetchone()
+    days = _bonus_check(req.plan, req.days)
+    title = (req.title or "").strip()[:30] or "會員福利"
+    emails, seen = [], set()
+    for raw in req.emails or []:
+        for e in _re.split(r"[\s,;，；、]+", str(raw)):
+            e = e.strip().lower()
+            if e and e not in seen:
+                seen.add(e)
+                emails.append(e)
+    if not emails:
+        raise HTTPException(status_code=400, detail="請至少填一個 Email")
+    if len(emails) > 1000:
+        raise HTTPException(status_code=400, detail="一次最多 1000 個 Email")
+    results, to_mail = [], []
+    conn = _db_conn()
+    try:
+        _promo_db_init(conn)
+        now_s = _taipei_now_str()
+        for email in emails:
+            row = conn.execute("SELECT id, email, plan, expire_at FROM members WHERE email=?", (email,)).fetchone()
             if not row:
-                conn.close()
-                results.append({"email": email, "ok": False, "reason": "帳號不存在"})
+                results.append({"email": email, "ok": False, "reason": "帳號不存在（請對方先註冊）"})
                 continue
+            r = _bonus_apply(conn, row, req.plan, days)
             conn.execute(
-                "UPDATE members SET plan=?, expire_at=?, token_ver=token_ver+1 WHERE email=?",
-                (req.plan, new_expire, email)
-            )
-            conn.commit()
-        except Exception as e:
-            conn.close()
-            results.append({"email": email, "ok": False, "reason": str(e)})
-            continue
+                "INSERT INTO bonus_grants (email,title,plan,days,old_plan,old_expire,new_plan,new_expire,created_at) VALUES (?,?,?,?,?,?,?,?,?)",
+                (email, title, req.plan, days, r["old_plan"], r["old_expire"], r["new_plan"], r["new_expire"], now_s))
+            results.append({"email": email, "ok": True, "expire_at": r["new_expire"],
+                            "plan": r["new_plan"], "stacked": r["stacked"], "email_sent": False})
+            to_mail.append((len(results) - 1, email, r))
+        conn.commit()
+    finally:
         conn.close()
-        email_sent = False
+    if req.send_email:
+        for idx, email, r in to_mail:
+            try:
+                results[idx]["email_sent"] = _send_bonus_email(email, title, days, r)
+            except Exception:
+                pass
+    ok = [x for x in results if x.get("ok")]
+    return {"ok": True, "total": len(emails), "success": len(ok),
+            "stacked": sum(1 for x in ok if x.get("stacked")), "results": results}
+
+
+class _PromoCreateReq(BaseModel):
+    code: str = ""
+    title: str = ""
+    plan: str = "monthly"
+    days: int = 7
+    max_uses: int = 0
+    expire_date: str = ""
+
+
+@app.post("/admin/promo-codes")
+def admin_promo_create(req: _PromoCreateReq, key: str = Header(default="", alias="X-Admin-Key")):
+    """新增兌換碼（代碼留空自動產生）"""
+    _check_admin(key)
+    days = _bonus_check(req.plan, req.days)
+    code = (req.code or "").strip().upper()
+    if code and not _re.fullmatch(r"[A-Z0-9]{4,20}", code):
+        raise HTTPException(status_code=400, detail="代碼只能用英文字母和數字，4～20 碼")
+    if not code:
+        alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+        code = "".join(secrets.choice(alphabet) for _ in range(8))
+    exp = (req.expire_date or "").strip()
+    if exp:
         try:
-            _send_email(email, "【線上有位】🎁 早鳥優惠！您的帳號已免費升級",
-                _render_email(
-                    title="恭喜！您已獲得早鳥免費升級",
-                    title_icon="🎁",
-                    body_html=(
-                        f'<p style="color:#444;margin:0 0 12px;font-size:14px;line-height:1.7">親愛的會員您好，</p>'
-                        f'<p style="color:#444;margin:0 0 16px;font-size:14px;line-height:1.7">'
-                        f'感謝您支持線上有位！作為我們的早期用戶，特別為您免費升級付費方案，'
-                        f'讓您完整體驗即時個股分析、深度選股、到價提醒等會員功能。</p>'
-                        f'<table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden">'
-                        f'<tr><td style="padding:10px 14px;color:#888;font-size:13px;border-bottom:1px solid #f0f0f0">方案</td><td style="padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;text-align:right">{plan_label}</td></tr>'
-                        f'<tr><td style="padding:10px 14px;color:#888;font-size:13px;border-bottom:1px solid #f0f0f0">到期日</td><td style="padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;text-align:right">{new_expire}</td></tr>'
-                        f'<tr><td style="padding:10px 14px;color:#888;font-size:13px">帳號</td><td style="padding:10px 14px;font-weight:700;font-size:14px;text-align:right">{email}</td></tr>'
-                        f'</table>'
-                    ),
-                    cta_text="立即登入使用",
-                    cta_url=f"{FRONTEND_URL}/stock",
-                    with_ad=True,
-                    card_bg="#f0fdf4", card_border="#86efac", title_color="#166534",
-                )
-            )
-            email_sent = True
+            exp = datetime.fromisoformat(exp).strftime("%Y-%m-%d")
         except Exception:
-            pass
-        results.append({"email": email, "ok": True, "expire_at": new_expire, "email_sent": email_sent})
-    return {"ok": True, "total": len(req.emails), "success": sum(1 for r in results if r.get("ok")), "results": results}
+            raise HTTPException(status_code=400, detail="截止日格式錯誤")
+    max_uses = max(0, int(req.max_uses or 0))
+    title = (req.title or "").strip()[:30]
+    conn = _db_conn()
+    try:
+        _promo_db_init(conn)
+        if conn.execute("SELECT 1 FROM promo_codes WHERE code=?", (code,)).fetchone():
+            raise HTTPException(status_code=409, detail=f"代碼 {code} 已經存在")
+        conn.execute(
+            "INSERT INTO promo_codes (code,title,plan,days,max_uses,used_count,expire_date,active,created_at) VALUES (?,?,?,?,?,0,?,1,?)",
+            (code, title, req.plan, days, max_uses, exp, _taipei_now_str()))
+        conn.commit()
+    finally:
+        conn.close()
+    return {"ok": True, "code": code, "link": f"{FRONTEND_URL}/stock/?promo={code}"}
+
+
+@app.get("/admin/promo-codes")
+def admin_promo_list(key: str = Header(default="", alias="X-Admin-Key")):
+    _check_admin(key)
+    conn = _db_conn()
+    try:
+        _promo_db_init(conn)
+        rows = [dict(r) for r in conn.execute("SELECT * FROM promo_codes ORDER BY created_at DESC")]
+    finally:
+        conn.close()
+    today = _taipei_today()
+    for r in rows:
+        r["link"] = f"{FRONTEND_URL}/stock/?promo={r['code']}"
+        if not r["active"]:
+            r["status"] = "已停用"
+        elif r["expire_date"] and r["expire_date"] < today:
+            r["status"] = "已過期"
+        elif r["max_uses"] and r["used_count"] >= r["max_uses"]:
+            r["status"] = "名額已滿"
+        else:
+            r["status"] = "可使用"
+    return {"codes": rows}
+
+
+class _PromoToggleReq(BaseModel):
+    code: str
+    active: bool
+
+
+@app.post("/admin/promo-codes/toggle")
+def admin_promo_toggle(req: _PromoToggleReq, key: str = Header(default="", alias="X-Admin-Key")):
+    _check_admin(key)
+    conn = _db_conn()
+    try:
+        _promo_db_init(conn)
+        cur = conn.execute("UPDATE promo_codes SET active=? WHERE code=?", (1 if req.active else 0, req.code.strip().upper()))
+        conn.commit()
+    finally:
+        conn.close()
+    if not cur.rowcount:
+        raise HTTPException(status_code=404, detail="找不到這個代碼")
+    return {"ok": True}
+
+
+@app.get("/admin/promo-codes/redemptions")
+def admin_promo_redemptions(code: str, key: str = Header(default="", alias="X-Admin-Key")):
+    _check_admin(key)
+    conn = _db_conn()
+    try:
+        _promo_db_init(conn)
+        rows = [dict(r) for r in conn.execute(
+            "SELECT email, old_plan, old_expire, new_plan, new_expire, redeemed_at FROM promo_redemptions WHERE code=? ORDER BY id DESC",
+            (code.strip().upper(),))]
+    finally:
+        conn.close()
+    return {"code": code.strip().upper(), "items": rows}
+
+
+class _PromoRedeemReq(BaseModel):
+    code: str
+
+
+@app.post("/api/promo/redeem")
+def api_promo_redeem(req: _PromoRedeemReq, user: dict = Depends(require_user)):
+    """會員輸入兌換碼領福利"""
+    import time as _t
+    mid = user["id"]
+    now_ts = _t.time()
+    fails = [x for x in _PROMO_FAILS.get(mid, []) if now_ts - x < 600]
+    _PROMO_FAILS[mid] = fails
+    if len(fails) >= 10:
+        raise HTTPException(status_code=429, detail="輸入錯誤太多次，請 10 分鐘後再試")
+
+    def _fail(msg, status=400):
+        _PROMO_FAILS.setdefault(mid, []).append(now_ts)
+        raise HTTPException(status_code=status, detail=msg)
+
+    code = (req.code or "").strip().upper()
+    if not _re.fullmatch(r"[A-Z0-9]{4,20}", code):
+        _fail("兌換碼格式不正確")
+    conn = _db_conn()
+    try:
+        _promo_db_init(conn)
+        pc = conn.execute("SELECT * FROM promo_codes WHERE code=?", (code,)).fetchone()
+        if not pc or not pc["active"]:
+            _fail("找不到這個兌換碼，或活動已結束", 404)
+        if pc["expire_date"] and pc["expire_date"] < _taipei_today():
+            _fail("這個兌換碼已經過期了")
+        if conn.execute("SELECT 1 FROM promo_redemptions WHERE code=? AND member_id=?", (code, mid)).fetchone():
+            raise HTTPException(status_code=409, detail="您已經領過這個兌換碼的福利了")
+        conn.execute("BEGIN IMMEDIATE")
+        cur = conn.execute(
+            "UPDATE promo_codes SET used_count=used_count+1 WHERE code=? AND active=1 AND (max_uses=0 OR used_count<max_uses)",
+            (code,))
+        if not cur.rowcount:
+            conn.rollback()
+            raise HTTPException(status_code=410, detail="這個兌換碼的名額已經領完了")
+        row = conn.execute("SELECT id, email, plan, expire_at FROM members WHERE id=?", (mid,)).fetchone()
+        r = _bonus_apply(conn, row, pc["plan"], int(pc["days"]))
+        try:
+            conn.execute(
+                "INSERT INTO promo_redemptions (code,member_id,email,old_plan,old_expire,new_plan,new_expire,redeemed_at) VALUES (?,?,?,?,?,?,?,?)",
+                (code, mid, row["email"], r["old_plan"], r["old_expire"], r["new_plan"], r["new_expire"], _taipei_now_str()))
+        except sqlite3.IntegrityError:
+            conn.rollback()
+            raise HTTPException(status_code=409, detail="您已經領過這個兌換碼的福利了")
+        conn.commit()
+    finally:
+        conn.close()
+    plan_label = _BONUS_PLANS.get(r["new_plan"], r["new_plan"])
+    days = int(pc["days"])
+    msg = (f"已在原本到期日後加 {days} 天，新的到期日是 {r['new_expire']}"
+           if r["stacked"] else f"已開通 {days} 天{plan_label}，到期日 {r['new_expire']}")
+    print(f"[PROMO] {row['email']} 兌換 {code}：{r['old_plan']}/{r['old_expire']} → {r['new_plan']}/{r['new_expire']}")
+    return {"ok": True, "title": pc["title"] or "會員福利", "days": days, "plan": r["new_plan"],
+            "plan_label": plan_label, "expire_at": r["new_expire"], "stacked": r["stacked"], "message": msg}
 
 
 _HOT_STOCKS = [
@@ -10583,7 +10845,9 @@ async def create_order_recurring(request: Request):
         (email,)
     ).fetchall()
     _dup_conn.close()
-    if _mem and _mem["plan"] != "free" and (_mem["expire_at"] or "") >= _taipei_today() and plan != "daily_test":
+    # （2026/09/17：只擋「定期訂閱中」的會員；福利／手動贈送天數的會員可以訂閱，天數會接在後面）
+    if (_mem and _mem["plan"] != "free" and (_mem["expire_at"] or "") >= _taipei_today()
+            and str(_mem["merchant_trade_no"] or "").startswith("XYWR") and plan != "daily_test"):
         raise HTTPException(
             status_code=409,
             detail=f"您目前已是付費會員（到期日 {_mem['expire_at']}），定期訂閱會自動續約，不需要重複購買。"

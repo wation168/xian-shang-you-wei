@@ -6145,6 +6145,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
   // 若剛從 LINE 登入導回，先把網址上的 line_token 存進 localStorage
   _handleLineCallbackToken();
+  _capturePromoFromUrl();
 
   // 先完成 auth 初始化（await），確保 _authUser 已設定
   await _initAuth();
@@ -6152,6 +6153,9 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
   // 2026/09/17：綠界付款完成導回（?pay=done），自動確認開通狀態，避免客人以為失敗又刷第二次
   _handlePayDoneReturn();
+
+  // 2026/09/17：兌換碼連結（?promo=代碼）
+  _checkPendingPromo();
 
   // 深度選股跑馬燈檢查（2026/07/26 新增，靜默失敗不影響主流程）
   _checkDeepAnalysisMarquee();
@@ -7249,10 +7253,69 @@ setInterval(()=>{ if(!document.hidden) _softRefresh('timer'); }, 5*60*1000);
   document.addEventListener('touchcancel', ()=>{ sy = null; hide(); }, {passive:true});
 })();
 
+// ── 兌換福利碼（2026/09/17）──
+// 後台「🎁 會員福利」產生代碼 → 貼到 LINE 群；也可以直接分享連結 /stock/?promo=代碼，
+// 打開就會自動帶入（沒登入會先請對方登入，登入後自動詢問是否兌換）。
+async function _redeemPromo(code, btn){
+  code = String(code||'').trim().toUpperCase();
+  if(!code){ alert('請輸入兌換碼'); return; }
+  if(!_authUser || _authUser.token_only){
+    try{ localStorage.setItem('pendingPromo', code); }catch(e){}
+    showLoginModal(); return;
+  }
+  const orig = btn ? btn.textContent : '';
+  if(btn){ btn.disabled = true; btn.textContent = '兌換中…'; }
+  try{
+    const r = await fetch(`${getAPI()}/api/promo/redeem`, {
+      method:'POST', headers:{..._authHeaders(), 'Content-Type':'application/json'},
+      body: JSON.stringify({code}), signal: AbortSignal.timeout(15000)
+    });
+    let j = {};
+    try{ j = await r.json(); }catch(e){}
+    if(r.status === 401){ try{ localStorage.setItem('pendingPromo', code); }catch(e){} showLoginModal(); return; }
+    if(!r.ok){ alert(j.detail || '兌換失敗，請稍後再試'); return; }
+    try{ localStorage.removeItem('pendingPromo'); }catch(e){}
+    alert(`🎉 ${j.title || '會員福利'}兌換成功！\n${j.message}`);
+    try{
+      const me = await fetch(`${getAPI()}/auth/me`, {headers:_authHeaders(), cache:'no-store'});
+      if(me.ok) _authUser = await me.json();
+    }catch(e){}
+    if(typeof _applyResultMasks==='function') _applyResultMasks();
+    if(_curPage === 'my' && typeof showMyPage==='function') showMyPage();
+  }catch(e){
+    alert('連線失敗，請稍後再試');
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = orig; }
+  }
+}
+function _capturePromoFromUrl(){
+  try{
+    const qs = new URLSearchParams(location.search);
+    const code = (qs.get('promo')||'').trim().toUpperCase();
+    if(!code) return;
+    localStorage.setItem('pendingPromo', code);
+    qs.delete('promo');
+    history.replaceState(null, '', location.pathname + (qs.toString() ? '?' + qs.toString() : '') + location.hash);
+  }catch(e){}
+}
+function _checkPendingPromo(){
+  let code = '';
+  try{ code = localStorage.getItem('pendingPromo') || ''; }catch(e){}
+  if(!code) return;
+  if(!_authUser || _authUser.token_only){
+    setTimeout(()=>{ if(!_authUser) showLoginModal(); }, 600);
+    return;
+  }
+  setTimeout(()=>{
+    if(confirm(`要兌換福利碼「${code}」嗎？`)) _redeemPromo(code, null);
+    else { try{ localStorage.removeItem('pendingPromo'); }catch(e){} }
+  }, 800);
+}
+
 function showUpgradeModal(){
   if(_appVerStale){ location.reload(); return; }
   if(!_authUser){ showLoginModal(); return; }
-  if(_authUser.plan && _authUser.plan !== 'free' && _authUser.is_active){
+  if(_authUser.plan && _authUser.plan !== 'free' && _authUser.is_active && _authUser.is_recurring !== false){
     alert(`您目前已是${_authUser.plan_label || '付費會員'}（到期日 ${_authUser.expire_at || '—'}），定期訂閱會自動續約，不需要重複購買。`);
     return;
   }
@@ -7563,6 +7626,8 @@ function _onLoginSuccess(){
   // 用既有token驗證成功）都會走到這裡，是拉自選股伺服器資料＋合併本地舊資料的唯一入口。
   // 不await：不擋登入流程的UI，同步在背景進行，完成後自己刷新畫面。
   _syncWatchListFromServer();
+  // 2026/09/17：登入前先點了兌換碼連結的，登入後接著兌換（_authReady 之前是開頁時的自動登入，由開頁流程處理）
+  if(typeof _authReady !== 'undefined' && _authReady) _checkPendingPromo();
 }
 
 // ── 通知說明 Modal ──
@@ -8495,9 +8560,21 @@ async function showMyPage(){
         ${expireInfo}
         ${queryInfo}
       </div>
-      ${u.plan === 'free' ? `
       <div style="background:var(--bg2);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px">
-        <div style="font-weight:700;margin-bottom:10px;font-size:14px">🚀 升級付費方案</div>
+        <div style="font-weight:700;margin-bottom:4px;font-size:14px">🎁 兌換福利碼</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px;line-height:1.6">輸入活動或社群提供的兌換碼即可領取付費天數；已是付費會員會接在原本到期日後面</div>
+        <div style="display:flex;gap:8px">
+          <input id="promoCodeInput" placeholder="輸入兌換碼" maxlength="20" autocomplete="off" autocapitalize="characters"
+            style="flex:1;min-width:0;height:38px;padding:0 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg);color:var(--text);font-size:14px;text-transform:uppercase"
+            onkeydown="if(event.key==='Enter')_redeemPromo(this.value, document.getElementById('promoRedeemBtn'))"/>
+          <button id="promoRedeemBtn" onclick="_redeemPromo(document.getElementById('promoCodeInput').value, this)"
+            style="flex-shrink:0;padding:0 16px;height:38px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">兌換</button>
+        </div>
+      </div>
+      ${(u.plan === 'free' || !u.is_active || !u.is_recurring) ? `
+      <div style="background:var(--bg2);border-radius:var(--radius);padding:14px 16px;margin-bottom:12px">
+        <div style="font-weight:700;margin-bottom:10px;font-size:14px">🚀 ${u.plan === 'free' ? '升級付費方案' : (u.is_active ? '訂閱付費方案' : '續訂付費方案')}</div>
+        ${(isPaid && !u.is_recurring) ? `<div style="font-size:12px;color:var(--text3);margin:-4px 0 10px;line-height:1.6">目前是贈送的付費天數（到期日 ${String(u.expire_at||'').replace(/-/g,'/')}），現在訂閱的天數會接在到期日後面，不會浪費</div>` : ''}
         <div style="display:flex;flex-direction:column;gap:8px">
           <button onclick="doUpgrade('monthly',this)" style="width:100%;padding:10px;background:var(--bg3);color:var(--text);border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left">月費方案 <span style="float:right;color:var(--green);font-weight:700">$499／月</span></button>
           <button onclick="doUpgrade('quarterly',this)" style="width:100%;padding:10px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;text-align:left;font-weight:600">季費方案 <span style="float:right">$999／季 ⭐</span></button>

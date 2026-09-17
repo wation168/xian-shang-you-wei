@@ -194,7 +194,7 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
           <span class="icon">🚫</span>封鎖名單
         </button>
         <button class="action-btn" onclick="showSection('earlybird')">
-          <span class="icon">🎁</span>早鳥批次升級
+          <span class="icon">🎁</span>會員福利
         </button>
         <button class="action-btn" onclick="showSection('prebuild')">
           <span class="icon">🔍</span>預建 SEO 選股
@@ -315,25 +315,62 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
       <div id="blockList"><div style="color:var(--text3);font-size:13px">載入中...</div></div>
     </div>
 
-    <!-- 早鳥批次升級 -->
+    <!-- 會員福利（2026/09/17：取代原本寫死的早鳥批次升級） -->
     <div class="card" id="sec-earlybird" style="display:none">
-      <div class="card-title">🎁 早鳥批次升級</div>
+      <div class="card-title">🎁 會員福利</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:12px;background:var(--bg);border-radius:8px;padding:10px 12px">
+        規則：已是付費會員 → 從原本到期日<b>往後加天數</b>（方案不變、不會縮短）；免費或已到期 → 開通所選方案，到期日＝今天＋天數。<br>
+        兩種方式都<b>不會把會員登出</b>。
+      </div>
+
+      <div style="font-weight:700;font-size:14px;margin:4px 0 8px">① 兌換碼（貼到 LINE 群，會員自己在「我的」頁輸入）</div>
       <div class="form-row" style="margin-bottom:10px">
-        <div class="field">
-          <label>升級方案</label>
-          <select id="earlybirdPlan">
-            <option value="monthly30">月費（30天）</option>
-            <option value="quarterly90">季費（90天）</option>
-          </select>
-        </div>
-        <button class="inline-btn secondary" onclick="loadFreeMembers()">載入免費會員</button>
+        <div class="field"><label>活動名稱（會顯示給會員）</label><input id="pcTitle" placeholder="例如 LINE群專屬福利" maxlength="30"/></div>
+        <div class="field"><label>兌換碼（留空自動產生）</label><input id="pcCode" placeholder="例如 LINE0917" maxlength="20" style="text-transform:uppercase"/></div>
+      </div>
+      <div class="form-row" style="margin-bottom:10px">
+        <div class="field"><label>方案</label>
+          <select id="pcPlan"><option value="monthly">月費</option><option value="quarterly">季費</option><option value="yearly">年費</option></select></div>
+        <div class="field"><label>天數</label>
+          <select id="pcDays" onchange="document.getElementById('pcDaysCustom').style.display=this.value==='custom'?'':'none'">
+            <option value="7">7 天</option><option value="14">14 天</option><option value="30" selected>30 天</option><option value="custom">自訂…</option></select>
+          <input id="pcDaysCustom" type="number" min="1" max="366" placeholder="天數" style="display:none;margin-top:6px"/></div>
+        <div class="field"><label>名額（0＝不限）</label><input id="pcMax" type="number" min="0" value="0"/></div>
+        <div class="field"><label>截止日（可不填）</label><input id="pcExpire" type="date"/></div>
+      </div>
+      <button class="inline-btn" onclick="createPromoCode(this)">＋ 建立兌換碼</button>
+      <div class="result-box" id="pcResult" style="margin-top:10px"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 6px">
+        <div style="font-size:13px;font-weight:600">兌換碼清單</div>
+        <button class="inline-btn secondary" style="height:32px;padding:4px 12px" onclick="loadPromoCodes()">重新整理</button>
+      </div>
+      <div id="pcList" style="font-size:13px;color:var(--text3)">點「重新整理」載入</div>
+
+      <div style="border-top:1px solid var(--border2);margin:18px 0 12px"></div>
+      <div style="font-weight:700;font-size:14px;margin-bottom:8px">② 批次發送（直接幫指定帳號加天數）</div>
+      <div class="form-row" style="margin-bottom:10px">
+        <div class="field"><label>活動名稱（通知信標題用）</label><input id="bgTitle" placeholder="例如 LINE群專屬福利" maxlength="30"/></div>
+        <div class="field"><label>方案</label>
+          <select id="earlybirdPlan"><option value="monthly">月費</option><option value="quarterly">季費</option><option value="yearly">年費</option></select></div>
+        <div class="field"><label>天數</label>
+          <select id="bgDays" onchange="document.getElementById('bgDaysCustom').style.display=this.value==='custom'?'':'none'">
+            <option value="7">7 天</option><option value="14">14 天</option><option value="30" selected>30 天</option><option value="custom">自訂…</option></select>
+          <input id="bgDaysCustom" type="number" min="1" max="366" placeholder="天數" style="display:none;margin-top:6px"/></div>
+      </div>
+      <div class="field" style="margin-bottom:8px">
+        <label>會員 Email（一行一個，或用逗號分隔）</label>
+        <textarea id="bgEmails" rows="5" placeholder="a@gmail.com&#10;b@gmail.com" style="width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:8px;background:var(--bg);color:var(--text);font-size:14px;outline:none;box-sizing:border-box;font-family:inherit"></textarea>
+      </div>
+      <div class="form-row" style="margin-bottom:10px;align-items:center">
+        <button class="inline-btn secondary" onclick="loadFreeMembers()">從免費會員勾選</button>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2)"><input type="checkbox" id="bgSendMail" checked style="width:16px;height:16px;accent-color:var(--green)"/> 寄通知信</label>
       </div>
       <div id="freeMemberList" style="margin-bottom:10px"></div>
       <div id="earlybirdBatchRow" style="display:none;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px" class="form-row">
         <button class="inline-btn secondary" onclick="toggleSelectAll()" id="selectAllBtn">全選</button>
-        <button class="inline-btn" onclick="doEarlyBirdUpgrade()">批次升級 + 寄信</button>
       </div>
-      <div class="result-box" id="earlybirdResult"></div>
+      <button class="inline-btn" onclick="doEarlyBirdUpgrade()">🎁 發送福利</button>
+      <div class="result-box" id="earlybirdResult" style="margin-top:10px"></div>
     </div>
 
     <!-- 開盤熱門股 -->
@@ -864,7 +901,88 @@ async function doUnblock(email){
   }catch(e){toast('連線失敗');}
 }
 
-// ── 早鳥批次升級 ──
+// ── 會員福利（2026/09/17）──
+const _PLAN_ZH = {monthly:'月費', quarterly:'季費', yearly:'年費', free:'免費'};
+function _pickDays(selId, customId){
+  const v = document.getElementById(selId).value;
+  const n = parseInt(v === 'custom' ? document.getElementById(customId).value : v, 10);
+  return (n >= 1 && n <= 366) ? n : null;
+}
+async function createPromoCode(btn){
+  const days = _pickDays('pcDays','pcDaysCustom');
+  const res = document.getElementById('pcResult');
+  if(!days){ toast('天數要在 1～366 之間'); return; }
+  const body = {
+    code: document.getElementById('pcCode').value.trim().toUpperCase(),
+    title: document.getElementById('pcTitle').value.trim(),
+    plan: document.getElementById('pcPlan').value,
+    days,
+    max_uses: parseInt(document.getElementById('pcMax').value || '0', 10) || 0,
+    expire_date: document.getElementById('pcExpire').value || ''
+  };
+  btn.disabled = true;
+  try{
+    const r = await fetch(`${API}/admin/promo-codes`, {method:'POST', headers:{'Content-Type':'application/json','X-Admin-Key':getAdminKey()}, body: JSON.stringify(body)});
+    const d = await r.json();
+    if(!r.ok){ res.textContent = '❌ ' + (d.detail || '建立失敗'); res.className = 'result-box show error'; return; }
+    res.textContent = `✅ 已建立兌換碼：${d.code}\n可直接貼到 LINE 群的文字：\n\n🎁 ${body.title || '會員福利'}：登入「線上有位」後到「我的」頁輸入兌換碼 ${d.code}，即可領取 ${days} 天付費功能（已是付費會員會接在原本到期日後面）${body.expire_date ? `，${body.expire_date} 截止` : ''}${body.max_uses ? `，限量 ${body.max_uses} 名` : ''}。\n或直接點連結：${d.link}`;
+    res.className = 'result-box show success';
+    document.getElementById('pcCode').value = '';
+    loadPromoCodes();
+  }catch(e){
+    res.textContent = '❌ 連線失敗'; res.className = 'result-box show error';
+  }finally{ btn.disabled = false; }
+}
+async function loadPromoCodes(){
+  const el = document.getElementById('pcList');
+  el.textContent = '載入中…';
+  try{
+    const r = await fetch(`${API}/admin/promo-codes`, {headers:{'X-Admin-Key':getAdminKey()}});
+    const d = await r.json();
+    if(!r.ok){ el.textContent = '載入失敗：' + (d.detail || ''); return; }
+    const list = d.codes || [];
+    if(!list.length){ el.textContent = '還沒有兌換碼'; return; }
+    el.innerHTML = list.map(c => {
+      const ok = c.status === '可使用';
+      return `<div style="background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:6px;color:var(--text)">
+        <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center">
+          <div><b style="font-family:monospace;font-size:15px">${escHtml(c.code)}</b>
+            <span style="font-size:11px;margin-left:6px;padding:2px 8px;border-radius:10px;background:${ok?'var(--green)':'var(--border2)'};color:${ok?'#fff':'var(--text2)'}">${escHtml(c.status)}</span></div>
+          <div style="display:flex;gap:6px">
+            <button class="inline-btn secondary" style="height:30px;padding:2px 10px;font-size:12px" onclick="navigator.clipboard&&navigator.clipboard.writeText('${escHtml(c.link)}').then(()=>toast('已複製連結'))">複製連結</button>
+            <button class="inline-btn secondary" style="height:30px;padding:2px 10px;font-size:12px" onclick="showPromoRedemptions('${escHtml(c.code)}')">領取名單</button>
+            <button class="inline-btn secondary" style="height:30px;padding:2px 10px;font-size:12px" onclick="togglePromoCode('${escHtml(c.code)}', ${c.active ? 'false' : 'true'})">${c.active ? '停用' : '啟用'}</button>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--text2);margin-top:4px">${escHtml(c.title || '會員福利')}｜${_PLAN_ZH[c.plan] || c.plan} ${c.days} 天｜已領 ${c.used_count}${c.max_uses ? ' / ' + c.max_uses : '（不限名額）'}｜截止 ${c.expire_date || '不限'}｜建立 ${fmtTime(c.created_at)}</div>
+        <div id="pcr-${escHtml(c.code)}"></div>
+      </div>`;
+    }).join('');
+  }catch(e){ el.textContent = '連線失敗'; }
+}
+async function togglePromoCode(code, active){
+  if(!active && !confirm(`確定停用 ${code}？停用後就不能再兌換（已領的天數不受影響）`)) return;
+  const r = await fetch(`${API}/admin/promo-codes/toggle`, {method:'POST', headers:{'Content-Type':'application/json','X-Admin-Key':getAdminKey()}, body: JSON.stringify({code, active})});
+  if(!r.ok){ toast('操作失敗'); return; }
+  toast(active ? '已啟用' : '已停用');
+  loadPromoCodes();
+}
+async function showPromoRedemptions(code){
+  const box = document.getElementById('pcr-' + code);
+  if(!box) return;
+  if(box.innerHTML){ box.innerHTML = ''; return; }
+  box.textContent = '載入中…';
+  try{
+    const r = await fetch(`${API}/admin/promo-codes/redemptions?code=${encodeURIComponent(code)}`, {headers:{'X-Admin-Key':getAdminKey()}});
+    const d = await r.json();
+    const items = d.items || [];
+    box.innerHTML = items.length
+      ? `<div style="margin-top:8px;font-size:12px;border-top:1px solid var(--border2);padding-top:6px">${items.map(x =>
+          `<div style="padding:3px 0">${escHtml(x.email)}　${_PLAN_ZH[x.old_plan]||x.old_plan} ${x.old_expire||'—'} → ${_PLAN_ZH[x.new_plan]||x.new_plan} ${x.new_expire}　<span style="color:var(--text3)">${fmtTime(x.redeemed_at)}</span></div>`).join('')}</div>`
+      : '<div style="margin-top:6px;font-size:12px;color:var(--text3)">還沒有人領取</div>';
+  }catch(e){ box.textContent = '載入失敗'; }
+}
+
 let _freeMembersCache = [];
 async function loadFreeMembers(){
   const el = document.getElementById('freeMemberList');
@@ -881,13 +999,15 @@ async function loadFreeMembers(){
       return;
     }
     el.innerHTML = `
-      <div style="font-size:12px;color:var(--text3);margin-bottom:6px">共 ${_freeMembersCache.length} 位免費會員，勾選要升級的帳號：</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:6px">共 ${_freeMembersCache.length} 位免費會員，勾選的會跟上面輸入的 Email 一起發送：</div>
+      <div style="max-height:320px;overflow:auto">
       ${_freeMembersCache.map((m,i)=>`
         <label style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg);border-radius:8px;margin-bottom:5px;cursor:pointer;font-size:13px">
           <input type="checkbox" class="earlybird-chk" value="${escHtml(m.email)}" style="width:15px;height:15px;accent-color:var(--green)"/>
           <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(m.email)}</span>
           <span style="font-size:11px;color:var(--text3)">建立 ${fmtTime(m.created_at)}</span>
-        </label>`).join('')}`;
+        </label>`).join('')}
+      </div>`;
     document.getElementById('earlybirdBatchRow').style.display = 'flex';
     document.getElementById('selectAllBtn').textContent = '全選';
   }catch(e){
@@ -903,31 +1023,35 @@ function toggleSelectAll(){
 }
 
 async function doEarlyBirdUpgrade(){
-  const chks = [...document.querySelectorAll('.earlybird-chk:checked')];
-  if(!chks.length){ toast('請先勾選要升級的會員'); return; }
-  const planVal = document.getElementById('earlybirdPlan').value;
-  const plan = planVal === 'quarterly90' ? 'quarterly' : 'monthly';
-  const days = planVal === 'quarterly90' ? 90 : 30;
-  const emails = chks.map(c=>c.value);
-  if(!confirm(`確定批次升級 ${emails.length} 位會員為${plan==='quarterly'?'季費（90天）':'月費（30天）'}並寄通知信？`)) return;
+  const typed = document.getElementById('bgEmails').value.split(/[\s,;，；、]+/).map(x=>x.trim().toLowerCase()).filter(Boolean);
+  const checked = [...document.querySelectorAll('.earlybird-chk:checked')].map(c=>c.value.toLowerCase());
+  const emails = [...new Set([...typed, ...checked])];
+  if(!emails.length){ toast('請輸入 Email 或勾選會員'); return; }
+  const days = _pickDays('bgDays','bgDaysCustom');
+  if(!days){ toast('天數要在 1～366 之間'); return; }
+  const plan = document.getElementById('earlybirdPlan').value;
+  const title = document.getElementById('bgTitle').value.trim();
+  const sendMail = document.getElementById('bgSendMail').checked;
+  if(!confirm(`確定發送福利給 ${emails.length} 位會員？\n${_PLAN_ZH[plan]} ${days} 天（已付費會員接在原本到期日後面）${sendMail ? '\n會寄通知信' : '\n不寄通知信'}`)) return;
   const res = document.getElementById('earlybirdResult');
-  res.textContent = `升級中... (0/${emails.length})`;
+  res.textContent = `發送中…（共 ${emails.length} 位）`;
   res.className = 'result-box show';
   try{
     const r = await fetch(`${API}/admin/batch-upgrade`, {
       method:'POST',
       headers:{'Content-Type':'application/json','X-Admin-Key':getAdminKey()},
-      body: JSON.stringify({emails, plan, days})
+      body: JSON.stringify({emails, plan, days, title, send_email: sendMail})
     });
     const data = await r.json();
     if(!r.ok){ res.textContent='失敗：'+(data.detail||'未知錯誤'); res.className='result-box show error'; return; }
     const ok = data.results.filter(x=>x.ok);
     const fail = data.results.filter(x=>!x.ok);
     const mailOk = ok.filter(x=>x.email_sent).length;
-    let txt = `✅ 升級完成！\n成功：${ok.length} 位，失敗：${fail.length} 位\n已寄信：${mailOk} 封`;
+    let txt = `✅ 發送完成！\n成功：${ok.length} 位（其中 ${data.stacked} 位是付費會員，已接在原到期日後面），失敗：${fail.length} 位\n已寄信：${mailOk} 封`;
+    txt += '\n\n' + ok.map(x=>`${x.email} → ${_PLAN_ZH[x.plan]||x.plan} 到期 ${x.expire_at}${x.stacked?'（疊加）':''}`).join('\n');
     if(fail.length) txt += '\n\n失敗清單：\n'+fail.map(f=>`${f.email}：${f.reason}`).join('\n');
     res.textContent = txt;
-    res.className = 'result-box show success';
+    res.className = fail.length ? 'result-box show' : 'result-box show success';
     loadStats();
   }catch(e){
     res.textContent = '連線失敗';
