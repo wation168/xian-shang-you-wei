@@ -627,6 +627,8 @@ html[data-theme="dark"] body,html:not([data-theme]) body{background:transparent}
   box-shadow:0 0 30px #1489cc22;
 }
 .search-box input{color:#1a1a18;background:#fff}.search-box input::placeholder{color:#6b7280;opacity:1}
+/* 2026/09/17修正：原本 .search-wrap input:focus 把底色改成 var(--bg)（深色模式是深藍），字卻固定深色，打字時看不到 */
+.search-wrap .search-box input:focus{background:#fff;color:#1a1a18;caret-color:#1a1a18}
 .btn-analyze{
   background:linear-gradient(135deg,#3caeff,#2877ef) !important;
   color:#fff !important;
@@ -2548,7 +2550,9 @@ document.getElementById('countInput').addEventListener('change',e=>{
 // ══════════════════════════════════════
 // 底部導航
 // ══════════════════════════════════════
+let _curPage = 'home';
 function showPage(page){
+  _curPage = page;
   document.querySelectorAll('.nav-btn').forEach((b,i)=>b.classList.toggle('active',['home','watch','picks','forum','my'][i]===page));
   const overlay=document.getElementById('pageOverlay');
   if(page==='home'){
@@ -5442,6 +5446,9 @@ async function fetchAndUpdateQuote(stockId){
   console.log('[QUOTE-FRONT] 開始抓即時價', code, '| 台灣時間', `${_twH}:${String(_twM).padStart(2,'0')}`, '| inSession=', _inSession, '| isPostClose=', _isPostClose);
 
   if(!_inSession && !_isPostClose){ scheduleNext(stockId, false); return; }
+  // 收盤後到15:00只抓一次收盤價，之後每分鐘只檢查時間、不再打API
+  const _pcKey = code + '|' + _twNow.toISOString().slice(0,10);
+  if(_isPostClose && _quotePostCloseDone === _pcKey){ scheduleNext(stockId, false); return; }
 
   try{
     const r = await fetch(`${getAPI()}/api/quote/${code}`, {signal:AbortSignal.timeout(8000)});
@@ -5450,6 +5457,7 @@ async function fetchAndUpdateQuote(stockId){
     console.log('[QUOTE-FRONT] price=', d.price, 'change=', d.change, 'change_pct=', d.change_pct);
 
     if(d.price != null){
+      if(_isPostClose) _quotePostCloseDone = _pcKey;
       updateQuoteUI({
         price:      d.price,
         change:     d.change     ?? null,
@@ -5465,9 +5473,12 @@ async function fetchAndUpdateQuote(stockId){
   }
 }
 
+let _quotePostCloseDone = '';
 function scheduleNext(stockId, inSession){
-  if(!inSession) return; // 盤後不繼續
-  _quoteTimer = setTimeout(()=>fetchAndUpdateQuote(stockId), QUOTE_INTERVAL);
+  if(_quoteTimer){ clearTimeout(_quoteTimer); _quoteTimer = null; }
+  if(stockId !== _quoteStockId) return;
+  // 2026/09/17：盤中每30秒；非盤中每60秒檢查一次時間（開盤後自動恢復更新，不用重開App）
+  _quoteTimer = setTimeout(()=>fetchAndUpdateQuote(stockId), inSession ? QUOTE_INTERVAL : 60000);
 }
 
 function updateQuoteUI(d){
@@ -6752,6 +6763,9 @@ async function _loadHomeDiscover(){
   }
 }
 
+  // 2026/09/17：讓「自動更新／下拉更新」（_softRefresh）也能呼叫這兩支首頁載入函式
+  window._loadHomeDiscover = _loadHomeDiscover;
+  window._loadHomeMarket = _loadHomeMarket;
   _observeHomeDash();
   renderHomeDash();  // renderHomeDash()內部會呼叫_loadInvestStats()（現定義在全域，見上方_fetchQuoteBatch後面）
   _loadHomeMarket();
@@ -7077,7 +7091,166 @@ async function _handlePayDoneReturn(){
     + '若仍未開通，請來信 <a href="mailto:wation168@gmail.com" style="color:#fff;text-decoration:underline">wation168@gmail.com</a>。' + close;
 }
 
+// ── 網站改版偵測（2026/09/17）──
+// 客人手機上開著舊版頁面時（例：舊版升級按鈕在手機按了沒反應），提示重新整理；
+// 按升級時若偵測到已改版，直接重新整理成新版再付款。
+let _appVer = null, _appVerStale = false;
+async function _checkAppVersion(){
+  try{
+    const r = await fetch(`${getAPI()}/api/app-version`, {cache:'no-store', signal:AbortSignal.timeout(8000)});
+    const v = r.ok ? (await r.json()).v : '';
+    if(!v) return _appVerStale;
+    if(_appVer === null){ _appVer = v; return false; }
+    if(v !== _appVer && !_appVerStale){
+      _appVerStale = true;
+      const bar = document.createElement('div');
+      bar.id = 'appUpdateBar';
+      bar.style.cssText = 'position:fixed;left:12px;right:12px;bottom:84px;z-index:10050;background:#1D9E75;color:#fff;border-radius:12px;padding:12px 14px;font-size:14px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,.25);cursor:pointer;text-align:center';
+      bar.textContent = '🔄 網站已更新，點這裡重新整理';
+      bar.onclick = ()=>location.reload();
+      document.body.appendChild(bar);
+    }
+  }catch(e){}
+  return _appVerStale;
+}
+_checkAppVersion();
+setInterval(_checkAppVersion, 5*60*1000);
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) _checkAppVersion(); });
+
+// ── 資料自動更新／下拉更新（2026/09/17）──
+// 帥哥鴻反映：進入App後資料就固定，要重開才會更新。改成：
+//  ① 從背景切回來（離開超過2分鐘）→ 自動更新目前畫面；網站有改版就直接重新整理
+//  ② 每5分鐘自動更新首頁卡片、跑馬燈、會員狀態（價格與江波圖本來就每60秒更新）
+//  ③ 在頁面最上方往下拉 → 放開即更新（加到主畫面的App沒有重新整理鈕，也能手動更新）
+// 注意：不會自動重跑「個股分析」與「持股健檢」，因為這兩個會扣每日查詢次數。
+let _softRefreshing = false, _hiddenAt = 0;
+function _isStandaloneApp(){
+  try{ return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; }catch(e){ return false; }
+}
+function _anyModalOpen(){
+  return [...document.querySelectorAll('[id$="Modal"],.modal-overlay')].some(m=>{
+    try{ return getComputedStyle(m).display !== 'none'; }catch(e){ return false; }
+  });
+}
+function _isTyping(){
+  const a = document.activeElement;
+  return !!(a && (a.tagName==='INPUT' || a.tagName==='TEXTAREA' || a.tagName==='SELECT' || a.isContentEditable));
+}
+async function _softRefresh(src){
+  if(_softRefreshing) return;
+  _softRefreshing = true;
+  try{
+    if(src !== 'timer' && await _checkAppVersion() && !_anyModalOpen() && !_isTyping()){
+      location.reload(); return;
+    }
+    const jobs = [];
+    // 會員狀態（例如剛在別的裝置付款升級）
+    if(typeof _getToken==='function' && _getToken()){
+      jobs.push((async()=>{
+        try{
+          const r = await fetch(`${getAPI()}/auth/me`, {headers:_authHeaders(), cache:'no-store', signal:AbortSignal.timeout(8000)});
+          if(r.ok){ const u = await r.json(); if(u && u.email) _authUser = u; }
+        }catch(e){}
+      })());
+    }
+    // 價格＋江波圖：全部標成過期，馬上重抓
+    Object.values(_JB_CACHE).forEach(h=>{ h.t = 0; });
+    _jbQueue(0);
+    // 個股分析頁的即時價（不重跑分析，不扣次數）
+    if(_quoteStockId && src !== 'timer'){ jobs.push(fetchAndUpdateQuote(_quoteStockId).catch(()=>{})); }
+    // 首頁
+    if(typeof _loadHomeDiscover==='function') jobs.push(_loadHomeDiscover().catch(()=>{}));
+    if(typeof _checkDeepAnalysisMarquee==='function') jobs.push(_checkDeepAnalysisMarquee().catch(()=>{}));
+    if(src !== 'timer'){
+      if(typeof _loadHomeMarket==='function') jobs.push(_loadHomeMarket().catch(()=>{}));
+      if(typeof renderHomeDash==='function' && _authUser) jobs.push(Promise.resolve(renderHomeDash()).catch(()=>{}));
+      // 目前開著的分頁重新載入（持股健檢會扣次數，不自動重跑）
+      const ov = document.getElementById('pageOverlay');
+      if(ov && ov.style.display !== 'none' && _curPage && _curPage !== 'home' && !_anyModalOpen() && !_isTyping()){
+        const st = ov.scrollTop;
+        if(_curPage === 'forum'){ if(typeof _forumLoadPosts==='function') jobs.push(_forumLoadPosts().catch(()=>{})); }
+        else if(_curPage !== 'portfolio'){
+          showPage(_curPage);
+          if(src !== 'pull') setTimeout(()=>{ ov.scrollTop = st; }, 1200);
+        }
+      }
+    }
+    await Promise.race([Promise.all(jobs), new Promise(r=>setTimeout(r, 10000))]);
+  } finally {
+    _softRefreshing = false;
+  }
+}
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden){ _hiddenAt = Date.now(); return; }
+  if(_hiddenAt && Date.now() - _hiddenAt >= 2*60*1000) _softRefresh('resume');
+  _hiddenAt = 0;
+});
+window.addEventListener('pageshow', e=>{ if(e.persisted) _softRefresh('resume'); });
+setInterval(()=>{ if(!document.hidden) _softRefresh('timer'); }, 5*60*1000);
+
+(function _pullToRefreshInit(){
+  let sy = null, sx = 0, dy = 0, bar = null, onOverlay = false;
+  const TH = 70;
+  const ov = ()=> document.getElementById('pageOverlay');
+  const overlayOpen = ()=>{ const o = ov(); return !!(o && o.style.display !== 'none'); };
+  const ensureBar = ()=>{
+    if(bar) return bar;
+    bar = document.createElement('div');
+    bar.id = 'ptrBar';
+    bar.style.cssText = 'position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 58px);z-index:10060;transform:translate(-50%,-60px);'
+      + 'background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:13px;font-weight:600;'
+      + 'box-shadow:0 4px 14px rgba(0,0,0,.18);pointer-events:none;opacity:0;transition:opacity .15s;white-space:nowrap';
+    document.body.appendChild(bar);
+    return bar;
+  };
+  const show = (txt, y, anim)=>{
+    const b = ensureBar();
+    b.textContent = txt;
+    b.style.transition = anim ? 'transform .2s, opacity .2s' : 'opacity .15s';
+    b.style.transform = `translate(-50%,${y}px)`;
+    b.style.opacity = y > -40 ? '1' : '0';
+  };
+  const hide = ()=>{ if(bar){ bar.style.transition='transform .25s, opacity .25s'; bar.style.transform='translate(-50%,-60px)'; bar.style.opacity='0'; } };
+  document.addEventListener('touchstart', e=>{
+    sy = null; dy = 0;
+    if(_softRefreshing || e.touches.length !== 1 || _anyModalOpen()) return;
+    const t = e.target;
+    if(t && t.closest && t.closest('input,textarea,select,.search-dropdown,#chatPanel,#chat-panel')) return;
+    onOverlay = overlayOpen();
+    if(onOverlay){
+      if(!ov().contains(t) || ov().scrollTop > 0) return;
+    }else{
+      // 一般瀏覽器本來就有下拉重新整理，只有「加到主畫面」的App才接手首頁
+      if(!_isStandaloneApp()) return;
+      if((window.scrollY || document.documentElement.scrollTop) > 0) return;
+    }
+    sy = e.touches[0].clientY; sx = e.touches[0].clientX;
+  }, {passive:true});
+  document.addEventListener('touchmove', e=>{
+    if(sy === null) return;
+    const y = e.touches[0].clientY, x = e.touches[0].clientX;
+    dy = y - sy;
+    const stillTop = onOverlay ? ov().scrollTop <= 0 : (window.scrollY || document.documentElement.scrollTop) <= 0;
+    if(dy <= 0 || Math.abs(x - sx) > dy || !stillTop){ if(dy <= 0 || !stillTop){ sy = null; hide(); } return; }
+    const pull = Math.min(dy * 0.5, 60);
+    show(dy >= TH ? '↑ 放開即可更新' : '↓ 下拉更新資料', pull - 40, false);
+  }, {passive:true});
+  document.addEventListener('touchend', async ()=>{
+    if(sy === null) return;
+    const go = dy >= TH;
+    sy = null;
+    if(!go){ hide(); return; }
+    show('更新中…', 10, true);
+    await _softRefresh('pull');
+    const t = new Date().toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit', hour12:false});
+    show(`✓ 已更新 ${t}`, 10, true);
+    setTimeout(hide, 1400);
+  }, {passive:true});
+  document.addEventListener('touchcancel', ()=>{ sy = null; hide(); }, {passive:true});
+})();
+
 function showUpgradeModal(){
+  if(_appVerStale){ location.reload(); return; }
   if(!_authUser){ showLoginModal(); return; }
   if(_authUser.plan && _authUser.plan !== 'free' && _authUser.is_active){
     alert(`您目前已是${_authUser.plan_label || '付費會員'}（到期日 ${_authUser.expire_at || '—'}），定期訂閱會自動續約，不需要重複購買。`);
@@ -7094,6 +7267,7 @@ function hideUpgradeModal(){
 
 async function doUpgrade(plan, btn){
   if(!_authUser){ showLoginModal(); return; }
+  if(_appVerStale){ location.reload(); return; }
   const origInner = btn.innerHTML;
   btn.disabled = true;
   btn.textContent = '建立訂單中…';

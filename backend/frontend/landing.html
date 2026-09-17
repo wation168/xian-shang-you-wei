@@ -1213,7 +1213,8 @@ async function doCheckout(){
   try{
     const r = await fetch(`${API}/create_order_recurring`, {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({email, plan:_currentPlan, password})
+      // 2026/09/17修正：發票載具原本只有檢查、沒有送到後台（管理員通知信一直顯示「未提供」）
+      body: JSON.stringify({email, plan:_currentPlan, password, invoice_type:invType, invoice_carrier:invCarrier})
     });
     if(!r.ok){ const data=await r.json(); errEl.textContent=data.detail||'建立訂單失敗，請稍後再試'; btn.textContent='前往付款 →'; btn.disabled=false; return; }
     const html = await r.text();

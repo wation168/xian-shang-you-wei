@@ -678,6 +678,20 @@ class ApiNoindexMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(ApiNoindexMiddleware)
 
+# ---- 網頁不快取（2026/09/17）----
+# 原本 HTML 沒有 Cache-Control，手機瀏覽器（特別是 iPhone Safari）會自己決定快取多久，
+# 改版上線後客人還在用舊版頁面（例：舊版升級按鈕在手機按了沒反應）。
+# 改成每次都先跟伺服器確認有沒有新版（沒變時伺服器回 304，幾乎不耗流量）。
+class HtmlNoCacheMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        ctype = response.headers.get("content-type", "")
+        if ctype.startswith("text/html") and "cache-control" not in response.headers:
+            response.headers["Cache-Control"] = "no-cache"
+        return response
+
+app.add_middleware(HtmlNoCacheMiddleware)
+
 # CORS：明確列出允許來源，支援帶 Authorization header 的請求
 _cors_origins = ALLOWED_ORIGINS if ALLOWED_ORIGINS else ["*"]
 app.add_middleware(
@@ -705,6 +719,16 @@ async def serve_homepage(request: Request):
     if _os.path.isfile(hp):
         return FileResponse(hp)
     return FileResponse(_os.path.join(_FRONTEND_DIR, "index.html"))
+
+@app.get("/api/app-version", include_in_schema=False)
+def api_app_version():
+    """前端用來判斷網站是否已改版（index.html 的修改時間＋大小）"""
+    try:
+        st = os.stat(os.path.join(_FRONTEND_DIR, "index.html"))
+        v = f"{int(st.st_mtime)}-{st.st_size}"
+    except Exception:
+        v = ""
+    return JSONResponse({"v": v}, headers={"Cache-Control": "no-store"})
 
 @app.get("/stock", include_in_schema=False)
 @app.get("/stock/", include_in_schema=False)
@@ -10520,6 +10544,15 @@ async def create_order_recurring(request: Request):
     email    = body.get("email", "").strip().lower()
     plan     = body.get("plan", "monthly")
     password = body.get("password", "").strip()
+    # 2026/09/17：銷售頁填的發票載具（手機條碼／Email），原本沒存，管理員信一直顯示「未提供」
+    _inv_t = str(body.get("invoice_type") or "").strip()
+    _inv_c = str(body.get("invoice_carrier") or "").strip()[:100]
+    if _inv_t == "phone" and _re.fullmatch(r"/[0-9A-Z.+\-]{7}", _inv_c.upper()):
+        invoice_type, invoice_carrier = "手機條碼載具", _inv_c.upper()
+    elif _inv_t == "email" and _re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", _inv_c):
+        invoice_type, invoice_carrier = "Email載具", _inv_c.lower()
+    else:
+        invoice_type, invoice_carrier = "", ""
 
     if not email or not _re.match(r"^[^@]+@[^@]+\.[^@]+$", email):
         raise HTTPException(status_code=400, detail="Email 格式不正確")
@@ -10600,7 +10633,7 @@ async def create_order_recurring(request: Request):
         "INSERT OR REPLACE INTO pending_orders "
         "(merchant_trade_no, email, hashed_password, plan, invoice_type, invoice_carrier, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
         # 2026/09/17：正式站舊資料表的 created_at 預設是 UTC，明確寫入台北時間，防重複下單的時間判斷才準
-        (trade_no, email, _hashed, plan, "", "", _taipei_now_str())
+        (trade_no, email, _hashed, plan, invoice_type, invoice_carrier, _taipei_now_str())
     )
     _po_conn.commit()
     _po_conn.close()
