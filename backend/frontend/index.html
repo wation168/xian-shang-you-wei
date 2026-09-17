@@ -3750,7 +3750,9 @@ function renderResult(d,enabledMA){
     changeEl0.textContent = `${sign0}${price_change_pct}%`;
   }
   const dateEl0 = document.getElementById('m-price-date');
-  if(dateEl0) dateEl0.textContent = price_basis_date ? price_basis_date.slice(5).replace('-','/') : '';
+  // 2026/09/17：顯示「現價」本身的日期（原本誤用分析基準日，收盤後空窗會出現「現價 09/16」但其實是今天的價格）
+  const _dispDate = d.display_price_date || price_basis_date;
+  if(dateEl0) dateEl0.textContent = _dispDate ? _dispDate.slice(5).replace('-','/') : '';
 
   // 做法A：分析基準白話說明（第10點）— 有後端說明句才顯示，並在現價與收盤基準有落差時補上具體數字
   const _basisNoteEl = document.getElementById('priceBasisNote');
@@ -3793,6 +3795,15 @@ function renderResult(d,enabledMA){
     rrTag.textContent='⚠ 風險大於報酬';rrTag.className='rr-tag bad';
     rrDesc.textContent=`損益比偏低，不建議此位置進場（${basisNote}）`;
   }
+
+  // 2026/09/17：記下分析基準，現價跌破防守位時提醒（分析基準日跟現價不同天時會發生）
+  C._stopWatch = {
+    stop: +stop_loss || 0, basis: +price || 0,
+    basisDate: price_basis_date ? price_basis_date.slice(5).replace('-','/') : '',
+    tagText: rrTag.textContent, tagCls: rrTag.className, desc: rrDesc.textContent,
+    stopD: document.getElementById('m-stop-d').textContent,
+  };
+  _applyStopBreach(displayPrice);
 
   renderPositionBar(d);
 
@@ -5481,6 +5492,29 @@ function scheduleNext(stockId, inSession){
   _quoteTimer = setTimeout(()=>fetchAndUpdateQuote(stockId), inSession ? QUOTE_INTERVAL : 60000);
 }
 
+function _applyStopBreach(cur){
+  const w = C._stopWatch;
+  if(!w || !w.stop || !w.basis) return;
+  cur = +cur;
+  const rrTag = document.getElementById('rr-tag');
+  const rrDesc = document.getElementById('rr-desc');
+  const sd = document.getElementById('m-stop-d');
+  if(!rrTag || !rrDesc || !sd) return;
+  const breached = isFinite(cur) && cur > 0 && w.basis > w.stop && cur < w.stop;
+  if(breached){
+    const gap = ((cur - w.stop) / w.stop * 100).toFixed(1);
+    sd.textContent = `⚠️ 現價已跌破（${gap}%）`;
+    rrTag.textContent = '⚠ 現價已跌破防守位';
+    rrTag.className = 'rr-tag bad';
+    rrDesc.textContent = `分析基準${w.basisDate ? ' ' + w.basisDate + ' ' : ''}收盤 ${w.basis}，現價 ${cur} 已低於防守位 ${w.stop}，上面的損益比已不適用，請依自己的停損紀律處理`;
+  } else {
+    sd.textContent = w.stopD;
+    rrTag.textContent = w.tagText;
+    rrTag.className = w.tagCls;
+    rrDesc.textContent = w.desc;
+  }
+}
+
 function updateQuoteUI(d){
   const priceEl = document.getElementById('m-price');
   const changeEl = document.getElementById('m-change');
@@ -5489,6 +5523,7 @@ function updateQuoteUI(d){
 
   // 取消任何進行中的 m-price 動畫，確保即時價不被舊動畫覆蓋
   _priceAnimVer++;
+  try{ _applyStopBreach(d.price); }catch(e){}
   // 現價：閃一下讓用戶感知到更新
   const newPrice = (+d.price).toFixed(2);
   if(priceEl.textContent !== newPrice){

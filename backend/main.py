@@ -1504,8 +1504,11 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
     period_days = {"5d": 7, "1mo": 35, "3mo": 95, "6mo": 185,
                    "1y": 370, "2y": 740, "3y": 1100, "5y": 1830, "10y": 3660}
     days = period_days.get(period, 1100)
-    start     = (date.today() - timedelta(days=days)).strftime("%Y-%m-%d")
-    today_str = date.today().strftime("%Y-%m-%d")
+    # 2026/09/17修正：伺服器時區是 UTC，原本 date.today() 在台灣 00:00～08:00 會是「前一天」，
+    # 下面「盤前刪掉今日那筆」就會誤刪最近一個交易日的真實收盤 K 棒。一律用台北日期。
+    _tw_today_d = datetime.now(ZoneInfo("Asia/Taipei")).date()
+    start     = (_tw_today_d - timedelta(days=days)).strftime("%Y-%m-%d")
+    today_str = _tw_today_d.strftime("%Y-%m-%d")
 
     try:
         # 2026/09/17修正：原本這裡直接打FinMind、失敗就回空表 → 個股分析顯示404「找不到股票」。
@@ -1581,7 +1584,7 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
         # 只有URL、JSON資料key、log標籤不同，改用共用函式 _fetch_tw_month_report_row()，
         # 抓取/解析行為完全不變，只是不用維護兩份。
         if today_ts not in df.index:
-            today_obj = date.today()
+            today_obj = _tw_today_d
             roc_year  = today_obj.year - 1911
             roc_date  = f"{roc_year}/{today_obj.month:02d}/{today_obj.day:02d}"
             yyyymmdd  = today_obj.strftime("%Y%m%d")
@@ -1614,6 +1617,25 @@ def fetch_df_finmind(stock_id: str, period: str, interval: str):
                     df = pd.concat([df, today_bar])
                     print(f"   {'TWSE' if not _is_otc else 'TPEX'} 月報補今日 K 棒：{code} close={cp}")
                     filled = True
+
+        # ── 收盤後最終備援（2026/09/17新增）──
+        # 帥哥鴻回報（6173信昌電）：收盤後到官方日報／FinMind更新前這段空窗，分析基準仍停在前一天
+        # （例：昨收315算出防守位305.55，今天收303.5已跌破，畫面卻還顯示「報酬大於風險」）。
+        # 13:30後證交所即時揭示的成交價就是今天的收盤價，且回傳資料日期，確認是今天才補。
+        if today_ts not in df.index and is_weekday and now_tw.time() >= _dtime(13, 31):
+            try:
+                _mq = _mis_batch_quotes([code]).get(code) or {}
+                if _mq.get("date") == today_str and _mq.get("price") and _mq.get("close_final"):
+                    cp = float(_mq["price"])
+                    op = float(_mq.get("open") or cp)
+                    hi = max(float(_mq.get("high") or cp), cp)
+                    lo = min(float(_mq.get("low") or cp), cp)
+                    vol = float(_mq.get("volume") or 0)
+                    df = pd.concat([df, pd.DataFrame([[op, hi, lo, cp, vol]], index=[today_ts],
+                                                     columns=["Open", "High", "Low", "Close", "Volume"])])
+                    print(f"   證交所即時揭示補今日收盤 K 棒：{code} close={cp}")
+            except Exception as _mq_e:
+                print(f"   即時揭示補收盤K棒失敗 {code}：{_mq_e}")
 
         # ── 資料新鮮度檢查（2026/08/14 新增）──
         # 上面幾段補棒都失敗時，df 最新一筆可能還停在「上一個交易日更早之前」，
@@ -2954,17 +2976,38 @@ def _get_analyze_cache_ttl() -> int:
         next_open += _dt.timedelta(days=1)
     return max(60, int((next_open - now).total_seconds()))
 
+def _analysis_basis_behind(data: dict) -> bool:
+    """收盤後（或隔天開盤前）分析基準日還沒跟上最近交易日 → True（快取只留10分鐘，等資料更新後重算）"""
+    try:
+        from zoneinfo import ZoneInfo
+        now = datetime.now(ZoneInfo("Asia/Taipei"))
+        basis = str((data or {}).get("price_basis_date") or "")
+        if not basis:
+            return False
+        if now.weekday() < 5 and (now.hour, now.minute) >= (13, 30):
+            expected = now.strftime("%Y-%m-%d")
+        else:
+            expected = _expected_latest_trading_date(now)
+        return basis < expected
+    except Exception:
+        return False
+
 def _cache_get(key: str):
     entry = _analyze_cache.get(key)
-    if entry and (_time.time() - entry["ts"]) < _get_analyze_cache_ttl():
+    # 2026/09/17修正：原本用「讀取當下」的時效判斷，盤中算好的結果（本來15分鐘）一到收盤後
+    # 就變成「留到隔天09:00」，分析基準卡在盤中數字／前一天。改成建立時就決定到期時間。
+    if entry and _time.time() < entry.get("exp", entry["ts"] + 900):
         return entry["data"]
     return None
 
 def _cache_set(key: str, data: dict):
-    _analyze_cache[key] = {"ts": _time.time(), "data": data}
+    ttl = _get_analyze_cache_ttl()
+    if _analysis_basis_behind(data):
+        ttl = min(ttl, 600)
+    now_ts = _time.time()
+    _analyze_cache[key] = {"ts": now_ts, "exp": now_ts + ttl, "data": data}
     if len(_analyze_cache) > 200:
-        cutoff = _time.time() - _get_analyze_cache_ttl()
-        expired = [k for k, v in _analyze_cache.items() if v["ts"] < cutoff]
+        expired = [k for k, v in _analyze_cache.items() if v.get("exp", 0) < now_ts]
         for k in expired:
             _analyze_cache.pop(k, None)
 
@@ -3430,7 +3473,7 @@ def require_paid_user(user: dict | None = Depends(get_current_user)):
         raise HTTPException(status_code=401, detail="請先登入")
     if _is_referral_active(user):
         return user
-    today = _date_cls.today().isoformat()
+    today = _taipei_today()
     if user["plan"] == "free":
         raise HTTPException(status_code=403, detail="此功能需付費方案")
     if user.get("expire_at") and user["expire_at"] < today:
@@ -4725,6 +4768,18 @@ def _do_analyze(stock_id: str, tf: str = "D",
             "volume": int(df["Volume"].iloc[i]) if not np.isnan(df["Volume"].iloc[i]) else 0,
         })
 
+    # 2026/09/17：現價日期。拿到即時報價時，是「最近一個已開盤的交易日」（平日09:00後＝今天）
+    _display_price_date = price_basis_date
+    if _live_quote_ok:
+        try:
+            _nw = datetime.now(ZoneInfo("Asia/Taipei"))
+            _display_price_date = (_nw.strftime("%Y-%m-%d") if (_nw.weekday() < 5 and _nw.hour >= 9)
+                                   else _expected_latest_trading_date(_nw))
+            if _display_price_date < price_basis_date:
+                _display_price_date = price_basis_date
+        except Exception:
+            pass
+
     # 做法A：分析基準與顯示現價的落差說明（給前端顯示，白話告知使用者）
     _basis_gap = None
     if display_price and analysis_price and analysis_price > 0:
@@ -4751,6 +4806,12 @@ def _do_analyze(stock_id: str, tf: str = "D",
         _price_basis_note = "⏱️ 現在是盤中，以下分析（支撐、壓力、防守位、損益比）用的是今天即時資料試算，還不是正式收盤價，收盤後數字可能會再變動，僅供參考。"
     elif _is_trading_session() and _live_quote_ok and _basis_gap is not None:
         _price_basis_note = f"上方現價為即時參考；以下分析（支撐、壓力、防守位、損益比）以 {_basis_md} 收盤價為基準計算，兩者盤中可能有落差，屬正常。"
+    elif _live_quote_ok and _display_price_date > price_basis_date and _basis_gap is not None:
+        # 2026/09/17：收盤後官方資料還沒更新的空窗，現價已是新的一天、分析仍是前一天
+        _price_basis_note = (
+            f"最新收盤資料還在更新中：以下分析（支撐、壓力、防守位、損益比）仍以 {_basis_md} 收盤價為基準，"
+            f"上方現價是 {_display_price_date[5:].replace('-', '/')} 的價格，兩者有落差。約10分鐘後重新查詢會自動更新。"
+        )
     else:
         _price_basis_note = f"本分析以 {_basis_md} 收盤價為基準計算。"
 
@@ -4760,6 +4821,7 @@ def _do_analyze(stock_id: str, tf: str = "D",
         "price_change_pct": price_change_pct,  # 現價漲跌%（近兩根收盤價計算，不依賴即時報價）
         "analysis_price": analysis_price,      # 做法A：分析基準（確定收盤），下游分析欄位皆用此
         "display_price": display_price,        # 做法A：畫面現價（盤中即時，抓不到＝收盤基準）
+        "display_price_date": _display_price_date,  # 2026/09/17：畫面現價是哪一天的價格
         "price_basis_date": price_basis_date,  # 做法A：分析基準是哪一天的收盤
         "price_basis_note": _price_basis_note, # 做法A：白話說明（給使用者看，第10點）
         "data_stale": _data_stale,             # 2026/08/14新增：資料源是否明顯落後（供前端另外標示用）
@@ -5099,7 +5161,7 @@ def get_top_gainers(limit: int = 10):
     # 往回找最近 5 個交易日，避免假日
     token = FINMIND_TOKEN
     for days_back in range(1, 6):
-        target = (date.today() - timedelta(days=days_back)).strftime("%Y-%m-%d")
+        target = (datetime.now(ZoneInfo("Asia/Taipei")).date() - timedelta(days=days_back)).strftime("%Y-%m-%d")
         try:
             url = (f"https://api.finmindtrade.com/api/v4/data"
                    f"?dataset=TaiwanStockPrice&start_date={target}&end_date={target}"
@@ -5677,7 +5739,11 @@ def _mis_batch_quotes(codes) -> dict:
                 price = round((b1 + a1) / 2, 2) if (b1 and a1) else None
             d = str(it.get("d", ""))
             d = f"{d[:4]}-{d[4:6]}-{d[6:8]}" if len(d) == 8 else ""
-            q = {"price": price, "y": y, "date": d, "name": str(it.get("n", "")).strip()}
+            _vol = _f(it.get("v"))
+            q = {"price": price, "y": y, "date": d, "name": str(it.get("n", "")).strip(),
+                 "open": _f(it.get("o")), "high": _f(it.get("h")), "low": _f(it.get("l")),
+                 "volume": int(_vol * 1000) if _vol else 0,
+                 "close_final": bool(_f(it.get("z")))}
             if c not in fresh or (price and not fresh[c].get("price")):
                 fresh[c] = q
     for c, q in fresh.items():
@@ -5970,7 +6036,7 @@ def admin_list_members(key: str = Header(default="", alias="X-Admin-Key")):
         "SELECT id, email, plan, expire_at, created_at, last_login FROM members ORDER BY id DESC"
     ).fetchall()
     conn.close()
-    today = _date_cls.today().isoformat()
+    today = _taipei_today()
     members = []
     for r in rows:
         d = dict(r)
@@ -7091,7 +7157,7 @@ def get_chips(stock_id: str, days: int = 30, user: dict | None = Depends(get_cur
     """
     from datetime import date, timedelta
     code = stock_id.strip().replace(".TW", "").replace(".TWO", "")
-    _today = date.today().strftime("%Y%m%d")
+    _today = _taipei_today().replace("-", "")
     _chips_key = f"{code}_{_today}"
     _cc = _CHIPS_CACHE.get(_chips_key)
     if _cc and _cc["expires"] > _time_mod.time():
@@ -8464,7 +8530,7 @@ def _complete_referral_if_pending(user_email: str):
 
         if new_cycles > 0:
             add_days  = new_cycles * 30
-            today_str = _date_cls.today().isoformat()
+            today_str = _taipei_today()
             # 從現有到期日或今天起計算
             cur_exp   = inviter_row["referral_expire_date"]
             base_date = max(cur_exp, today_str) if cur_exp else today_str
@@ -11260,7 +11326,7 @@ async def cancel_recurring(request: Request, current_user: dict = Depends(get_cu
 
     if not member or member["plan"] == "free":
         raise HTTPException(status_code=400, detail="您目前沒有有效的定期訂閱")
-    today_str = _date_cls.today().isoformat()
+    today_str = _taipei_today()
     if not member["expire_at"] or member["expire_at"] < today_str:
         raise HTTPException(status_code=400, detail="您目前沒有有效的定期訂閱")
 
@@ -11741,7 +11807,7 @@ def _ws_is_paid(current_user: dict) -> bool:
     """動態計算是否為有效付費會員（members表無is_active欄位，需即時計算）。
     比照原本/portfolio/add既有的算法（2026/09/15持股健檢併入自選股資料後抽成共用函式，
     給/api/watchlist/add跟/portfolio/add的免費會員1支持股健檢限制共用）。"""
-    today_str = _date_cls.today().isoformat()
+    today_str = _taipei_today()
     plan      = current_user.get("plan", "free")
     expire_at = current_user.get("expire_at") or ""
     return (plan != "free") and bool(expire_at) and (expire_at >= today_str)
@@ -13794,7 +13860,7 @@ async def forum_get_posts(
 
     is_paid = False
     if user:
-        today = _date_cls.today().isoformat()
+        today = _taipei_today()
         is_paid = (user.get("plan") != "free" and user.get("expire_at", "") >= today) or _is_referral_active(user)
 
     posts = []
