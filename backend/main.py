@@ -3185,6 +3185,9 @@ def _cache_set(key: str, data: dict):
     ttl = _get_analyze_cache_ttl()
     if _analysis_basis_behind(data):
         ttl = min(ttl, 600)
+    # 2026/09/17：法人資料當下沒抓到（FinMind 忙碌／額度），不要把「資料更新中」留到隔天，10分鐘後重抓
+    if isinstance(data, dict) and "institutional" in data and not data.get("institutional"):
+        ttl = min(ttl, 600)
     now_ts = _time.time()
     _analyze_cache[key] = {"ts": now_ts, "exp": now_ts + ttl, "data": data}
     if len(_analyze_cache) > 200:

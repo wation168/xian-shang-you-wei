@@ -493,6 +493,7 @@ def fetch_institutional(stock_id: str, days: int = 25) -> list[dict]:
     try:
         data = _finmind_request(url)
         if data.get("status") != 200:
+            print(f"[crawler] fetch_institutional {stock_id} FinMind 回應異常：status={data.get('status')} msg={data.get('msg','')}")
             return []
         daily: dict = {}
         for r in data.get("data", []):
