@@ -5602,95 +5602,66 @@ def admin_grant(key: str = Header(default="", alias="X-Admin-Key"), email: str =
         return {"ok": True, "action": "created", "email": email, "password": password, "plan": plan, "expire_at": new_expire}
 
 
-@app.post("/admin/fix-duplicate-subscription")
-def admin_fix_duplicate_subscription(key: str = Header(default="", alias="X-Admin-Key"),
-                                     email: str = "", trade_no: str = ""):
-    """
-    2026/09/17 新增：處理客人重複付款造成的「兩筆定期定額」。
-    做兩件事：①呼叫綠界停用 trade_no 這筆定期定額（之後不再扣款）
-              ②把這筆多加的天數扣回來，會員綁定的訂單改回另一筆仍有效的訂閱
-    ※ 退刷（退錢）請在綠界廠商後台對 trade_no 這筆辦理，本功能不處理金流退款。
-    """
-    import urllib.parse as _up_fx, hashlib as _hl_fx, time as _t_fx, httpx as _hx_fx
+@app.get("/admin/member-billing")
+def admin_member_billing(key: str = Header(default="", alias="X-Admin-Key"), email: str = ""):
+    """2026/09/17：查會員目前方案／到期日／綁定訂單，以及這個 Email 付款成功過的定期定額訂單"""
     _check_admin(key)
     email = email.strip().lower()
-    trade_no = trade_no.strip()
-    if not email or not trade_no.startswith("XYWR"):
-        raise HTTPException(status_code=400, detail="請填 Email 與要停用的訂單編號（XYWR 開頭）")
     conn = _db_conn()
-    m = conn.execute("SELECT * FROM members WHERE email=?", (email,)).fetchone()
-    paid = conn.execute("SELECT 1 FROM processed_orders WHERE merchant_trade_no LIKE ?", (f"R_{trade_no}_%",)).fetchone()
-    done = conn.execute("SELECT 1 FROM processed_orders WHERE merchant_trade_no=?", (f"DUPFIX_{trade_no}",)).fetchone()
-    po = conn.execute("SELECT plan, email FROM pending_orders WHERE merchant_trade_no=?", (trade_no,)).fetchone()
-    others = conn.execute(
-        "SELECT p.merchant_trade_no FROM pending_orders p WHERE p.email=? AND p.merchant_trade_no LIKE 'XYWR%' "
-        "AND p.merchant_trade_no<>? AND EXISTS (SELECT 1 FROM processed_orders o "
-        "WHERE o.merchant_trade_no LIKE 'R_' || p.merchant_trade_no || '_%') "
-        "AND NOT EXISTS (SELECT 1 FROM processed_orders o2 WHERE o2.merchant_trade_no = 'DUPFIX_' || p.merchant_trade_no) "
-        "ORDER BY p.created_at", (email, trade_no)
-    ).fetchall()
-    conn.close()
+    m = conn.execute("SELECT id, email, plan, expire_at, merchant_trade_no FROM members WHERE email=?", (email,)).fetchone()
     if not m:
+        conn.close()
         raise HTTPException(status_code=404, detail="找不到這個會員")
-    if po and (po["email"] or "").lower() != email:
-        raise HTTPException(status_code=400, detail="這筆訂單不屬於這個 Email")
-    if not paid:
-        raise HTTPException(status_code=400, detail="系統沒有這筆訂單的付款開通紀錄，請確認訂單編號")
-    if done:
-        raise HTTPException(status_code=400, detail="這筆訂單已經處理過了")
-
-    # ① 綠界停用定期定額
-    _p = {"MerchantID": str(ECPAY_MERCHANT_ID), "MerchantTradeNo": trade_no,
-          "Action": "Cancel", "TimeStamp": str(int(_t_fx.time()))}
-    _raw = "&".join(f"{k}={v}" for k, v in sorted(_p.items(), key=lambda x: x[0].lower()))
-    _raw = _up_fx.quote_plus(f"HashKey={ECPAY_HASH_KEY}&{_raw}&HashIV={ECPAY_HASH_IV}").lower()
-    _p["CheckMacValue"] = _hl_fx.sha256(_raw.encode()).hexdigest().upper()
+    trades = set()
+    for r in conn.execute("SELECT merchant_trade_no FROM pending_orders WHERE email=? AND merchant_trade_no LIKE 'XYWR%'", (email,)):
+        trades.add(r["merchant_trade_no"])
     try:
-        _resp = _hx_fx.post("https://payment.ecpay.com.tw/Cashier/CreditCardPeriodAction",
-                            data=_p, timeout=30).text
-    except Exception as e:
-        raise HTTPException(status_code=502, detail=f"連線綠界失敗：{e}")
-    print(f"[重複訂閱處理] {email} {trade_no} 綠界回應：{_resp}")
-    if not _re.search(r"RtnCode=1(?:[&\s]|$)", _resp):
-        raise HTTPException(status_code=502, detail=f"綠界停用失敗（{_resp}），會員資料未變更")
+        for r in conn.execute("SELECT DISTINCT merchant_trade_no FROM ecpay_verify_log WHERE matched=1 AND params_json LIKE ?",
+                              (f'%"CustomField1": "{email}"%',)):
+            trades.add(r["merchant_trade_no"])
+    except Exception:
+        pass
+    if m["merchant_trade_no"]:
+        trades.add(m["merchant_trade_no"])
+    orders = []
+    for t in sorted(trades):
+        paid = conn.execute("SELECT processed_at FROM processed_orders WHERE merchant_trade_no LIKE ? ORDER BY processed_at LIMIT 1",
+                            (f"R_{t}_%",)).fetchone()
+        if paid or t == m["merchant_trade_no"]:
+            orders.append({"trade_no": t, "paid_at": paid["processed_at"] if paid else ""})
+    conn.close()
+    return {"email": m["email"], "plan": m["plan"], "expire_at": m["expire_at"],
+            "merchant_trade_no": m["merchant_trade_no"], "orders": orders}
 
-    # ② 扣回天數、改綁仍有效的訂單
-    plan = (po["plan"] if po else "") or m["plan"]
-    days = {"monthly": 30, "quarterly": 90, "yearly": 365, "daily_test": 1}.get(plan, 30)
-    today = _taipei_today()
-    old_expire = m["expire_at"] or today
-    new_expire = (datetime.fromisoformat(old_expire) - timedelta(days=days)).strftime("%Y-%m-%d")
-    if new_expire < today:
-        new_expire = today
-    keep_trade = m["merchant_trade_no"] or ""
-    if keep_trade == trade_no:
-        keep_trade = others[0]["merchant_trade_no"] if others else ""
-        if not keep_trade:
-            # 暫存訂單已被清掉時，改從綠界通知紀錄找這位客人另一筆驗證通過的訂單
-            try:
-                _lc = _db_conn()
-                for _lr in _lc.execute(
-                    "SELECT DISTINCT merchant_trade_no FROM ecpay_verify_log WHERE matched=1 "
-                    "AND params_json LIKE ? AND merchant_trade_no LIKE 'XYWR%' AND merchant_trade_no<>? ORDER BY id",
-                    (f'%"CustomField1": "{email}"%', trade_no)
-                ).fetchall():
-                    _t = _lr["merchant_trade_no"]
-                    if not _lc.execute("SELECT 1 FROM processed_orders WHERE merchant_trade_no=?", (f"DUPFIX_{_t}",)).fetchone():
-                        keep_trade = _t
-                        break
-                _lc.close()
-            except Exception:
-                pass
+
+@app.post("/admin/set-expire")
+def admin_set_expire(key: str = Header(default="", alias="X-Admin-Key"), email: str = "",
+                     expire_at: str = "", plan: str = "", trade_no: str = ""):
+    """2026/09/17：直接設定會員到期日（可同時改方案、綁定的定期訂單）。不寄信、不登出會員。
+    用途例：客人重複付款，已在綠界後台退刷＋停用其中一筆後，把到期日調回正確日期。"""
+    _check_admin(key)
+    email = email.strip().lower()
+    try:
+        expire_at = datetime.strptime(expire_at.strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
+    except Exception:
+        raise HTTPException(status_code=400, detail="到期日格式錯誤")
+    if plan and plan not in ("free", "monthly", "quarterly", "yearly"):
+        raise HTTPException(status_code=400, detail="方案錯誤")
     conn = _db_conn()
-    conn.execute("UPDATE members SET expire_at=?, merchant_trade_no=? WHERE email=?",
-                 (new_expire, keep_trade or None, email))
-    conn.execute("INSERT OR IGNORE INTO processed_orders (merchant_trade_no) VALUES (?)", (f"DUPFIX_{trade_no}",))
+    m = conn.execute("SELECT plan, expire_at, merchant_trade_no FROM members WHERE email=?", (email,)).fetchone()
+    if not m:
+        conn.close()
+        raise HTTPException(status_code=404, detail="找不到這個會員")
+    new_plan = plan or m["plan"]
+    new_trade = m["merchant_trade_no"] if trade_no == "" else (None if trade_no == "-" else trade_no.strip())
+    conn.execute("UPDATE members SET plan=?, expire_at=?, merchant_trade_no=? WHERE email=?",
+                 (new_plan, expire_at, new_trade, email))
     conn.commit()
     conn.close()
-    return {"ok": True, "email": email, "cancelled_trade_no": trade_no,
-            "expire_before": old_expire, "expire_after": new_expire,
-            "active_trade_no": keep_trade,
-            "reminder": "請記得到綠界廠商後台對這筆訂單辦理退刷"}
+    print(f"[管理員設定到期日] {email} {m['plan']}/{m['expire_at']}/{m['merchant_trade_no']} → {new_plan}/{expire_at}/{new_trade}")
+    return {"ok": True, "email": email,
+            "before": {"plan": m["plan"], "expire_at": m["expire_at"], "merchant_trade_no": m["merchant_trade_no"]},
+            "after": {"plan": new_plan, "expire_at": expire_at, "merchant_trade_no": new_trade}}
 
 
 @app.post("/admin/reset-password")
@@ -10736,8 +10707,8 @@ def _send_admin_payment_notice(**d):
         warn = (
             '<div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px;margin:12px 0;color:#991b1b">'
             f'<b>這位客人已有有效訂閱（{_h.escape(d["prev_trade"])}），這筆 {_h.escape(d["trade_no"])} 很可能是重複付款。</b><br>'
-            '處理方式：①到綠界後台對「本站訂單編號」這筆辦理退刷 → ②到本站管理後台「重複訂閱處理」'
-            '輸入這位客人的 Email 與這筆訂單編號，系統會停用這筆定期定額並扣回多加的天數。</div>'
+            '處理方式：①到綠界後台對「本站訂單編號」這筆辦理退刷，並停用這筆定期定額 → '
+            '②到本站管理後台「📅 設定到期日」查詢這位客人，把到期日調回正確日期、綁定訂單選仍有效的那筆。</div>'
         )
     body = (
         f'<div style="font-family:sans-serif;padding:16px;max-width:640px">'

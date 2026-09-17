@@ -181,8 +181,8 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
         <button class="action-btn" onclick="showSection('grant')">
           <span class="icon">✅</span>開通帳號
         </button>
-        <button class="action-btn" onclick="showSection('dupfix')">
-          <span class="icon">🔁</span>重複訂閱處理
+        <button class="action-btn" onclick="showSection('setexpire')">
+          <span class="icon">📅</span>設定到期日
         </button>
         <button class="action-btn" onclick="showSection('reset')">
           <span class="icon">🔐</span>重設密碼
@@ -238,27 +238,50 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
       <div class="result-box" id="grantResult"></div>
     </div>
 
-    <!-- 重複訂閱處理（2026/09/17） -->
-    <div class="card" id="sec-dupfix" style="display:none">
-      <div class="card-title">🔁 重複訂閱處理</div>
-      <p style="font-size:13px;line-height:1.7;margin:0 0 12px">客人重複付款、變成兩筆定期定額時使用。<br>
-      步驟：① 先到<b>綠界廠商後台</b>對「多出來的那筆訂單」辦理退刷（退錢）→ ② 在這裡輸入客人 Email 與那筆訂單編號，
-      系統會通知綠界<b>停用那筆定期定額</b>（之後不會再扣款），並把多加的天數扣回來。<br>
-      訂單編號可在「⚠️重複訂閱」管理員通知信裡找到（本站訂單編號，XYWR 開頭）。</p>
+    <!-- 設定到期日（2026/09/17） -->
+    <div class="card" id="sec-setexpire" style="display:none">
+      <div class="card-title">📅 設定到期日</div>
+      <p style="font-size:13px;line-height:1.7;margin:0 0 12px">直接改會員的方案、到期日、綁定的定期訂單（不寄信、不會把會員登出）。<br>
+      例：客人重複付款 → 綠界後台退刷並停用多的那筆 → 這裡把到期日調回來，綁定訂單選仍在扣款的那筆。</p>
       <div class="form-row">
         <div class="field">
-          <label>客人 Email</label>
-          <input type="email" id="dupEmail" placeholder="客人 Email"/>
+          <label>會員 Email</label>
+          <input type="email" id="seEmail" placeholder="會員 Email"/>
+        </div>
+        <button class="inline-btn" onclick="seLoad()">查詢</button>
+      </div>
+      <div id="seForm" style="display:none">
+        <div id="seNow" style="font-size:13px;margin:4px 0 12px;line-height:1.7"></div>
+        <div class="form-row">
+          <div class="field">
+            <label>方案</label>
+            <select id="sePlan">
+              <option value="free">免費</option>
+              <option value="monthly">月費</option>
+              <option value="quarterly">季費</option>
+              <option value="yearly">年費</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>到期日</label>
+            <div style="display:flex;gap:6px">
+              <select id="seY"></select><select id="seM"></select><select id="seD"></select>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>綁定的定期訂單（會員按「取消訂閱」時停用的那筆）</label>
+            <select id="seTrade"></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <button class="inline-btn" onclick="seSave()">儲存</button>
         </div>
       </div>
-      <div class="form-row">
-        <div class="field">
-          <label>要停用的訂單編號（XYWR 開頭）</label>
-          <input type="text" id="dupTradeNo" placeholder="例如 XYWR1789571875BEC6FC"/>
-        </div>
-        <button class="inline-btn" onclick="doDupFix()">停用並扣回天數</button>
-      </div>
-      <div class="result-box" id="dupResult"></div>
+      <div class="result-box" id="seResult"></div>
     </div>
 
     <!-- 重設密碼 -->
@@ -402,7 +425,7 @@ if(sessionStorage.getItem('adminAuth')==='1'){
 
 // ── 顯示/隱藏區塊 ──
 function showSection(name){
-  ['grant','dupfix','reset','members','messages','blocklist','earlybird','prebuild','deepanalysis','multisignal'].forEach(s=>{
+  ['grant','setexpire','reset','members','messages','blocklist','earlybird','prebuild','deepanalysis','multisignal'].forEach(s=>{
     document.getElementById('sec-'+s).style.display = s===name ? 'block' : 'none';
   });
   if(name==='members') loadMembers();
@@ -583,25 +606,64 @@ async function doGrant(){
   }
 }
 
-// ── 重複訂閱處理 ──
-async function doDupFix(){
-  const email=document.getElementById('dupEmail').value.trim();
-  const tradeNo=document.getElementById('dupTradeNo').value.trim();
-  const res=document.getElementById('dupResult');
-  if(!email||!tradeNo){res.textContent='請輸入 Email 與訂單編號';res.className='result-box show error';return;}
-  if(!confirm(`確定要停用 ${tradeNo} 這筆定期定額，並扣回它加的天數嗎？\n（退刷請另外在綠界後台辦理）`))return;
-  res.textContent='處理中...';res.className='result-box show';
+// ── 設定到期日 ──
+function _seFillDays(keep){
+  const y=+document.getElementById('seY').value, m=+document.getElementById('seM').value;
+  const n=new Date(y,m,0).getDate(), dEl=document.getElementById('seD');
+  const cur=keep||+dEl.value||1;
+  dEl.innerHTML=Array.from({length:n},(_,i)=>`<option value="${i+1}">${i+1}日</option>`).join('');
+  dEl.value=Math.min(cur,n);
+}
+function _seSetDate(str){
+  const now=new Date(), y0=now.getFullYear();
+  const yEl=document.getElementById('seY'), mEl=document.getElementById('seM');
+  yEl.innerHTML=Array.from({length:8},(_,i)=>`<option value="${y0-1+i}">${y0-1+i}年</option>`).join('');
+  mEl.innerHTML=Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}月</option>`).join('');
+  yEl.onchange=mEl.onchange=()=>_seFillDays();
+  const p=(str||'').split('-').map(Number);
+  const d=(p.length===3&&p[0])?p:[y0,now.getMonth()+1,now.getDate()];
+  if(![...yEl.options].some(o=>+o.value===d[0])) yEl.insertAdjacentHTML('beforeend',`<option value="${d[0]}">${d[0]}年</option>`);
+  yEl.value=d[0]; mEl.value=d[1]; _seFillDays(d[2]);
+}
+async function seLoad(){
+  const email=document.getElementById('seEmail').value.trim();
+  const res=document.getElementById('seResult');
+  document.getElementById('seForm').style.display='none';
+  if(!email){res.textContent='請輸入 Email';res.className='result-box show error';return;}
+  res.textContent='查詢中...';res.className='result-box show';
   try{
-    const r=await fetch(`${API}/admin/fix-duplicate-subscription?email=${encodeURIComponent(email)}&trade_no=${encodeURIComponent(tradeNo)}`,{method:'POST',headers:{'X-Admin-Key':getAdminKey()}});
-    const data=await r.json();
-    if(!r.ok){res.textContent='失敗：'+(data.detail||'未知錯誤');res.className='result-box show error';return;}
-    res.textContent=`✅ 已停用 ${data.cancelled_trade_no}\n到期日：${data.expire_before} → ${data.expire_after}\n仍有效的訂閱：${data.active_trade_no||'（無）'}\n\n⚠️ ${data.reminder}`;
+    const r=await fetch(`${API}/admin/member-billing?email=${encodeURIComponent(email)}`,{headers:{'X-Admin-Key':getAdminKey()}});
+    const d=await r.json();
+    if(!r.ok){res.textContent='失敗：'+(d.detail||'未知錯誤');res.className='result-box show error';return;}
+    res.className='result-box';
+    document.getElementById('seNow').innerHTML=`目前：<b>${d.plan}</b>，到期日 <b>${d.expire_at||'—'}</b>，綁定訂單 <b>${d.merchant_trade_no||'—'}</b>`
+      +`<br>付款成功過的訂單：${d.orders.length?d.orders.map(o=>`${o.trade_no}${o.paid_at?`（${o.paid_at}）`:''}`).join('、'):'無'}`;
+    document.getElementById('sePlan').value=d.plan;
+    _seSetDate(d.expire_at);
+    const t=document.getElementById('seTrade');
+    t.innerHTML='<option value="-">（不綁定）</option>'+d.orders.map(o=>`<option value="${o.trade_no}">${o.trade_no}${o.paid_at?'　付款 '+o.paid_at:''}</option>`).join('');
+    t.value=d.merchant_trade_no||'-';
+    document.getElementById('seForm').style.display='';
+  }catch(e){res.textContent='連線失敗，請確認後端是否正常';res.className='result-box show error';}
+}
+async function seSave(){
+  const email=document.getElementById('seEmail').value.trim();
+  const pad=n=>String(n).padStart(2,'0');
+  const date=`${document.getElementById('seY').value}-${pad(document.getElementById('seM').value)}-${pad(document.getElementById('seD').value)}`;
+  const plan=document.getElementById('sePlan').value;
+  const trade=document.getElementById('seTrade').value;
+  const res=document.getElementById('seResult');
+  if(!confirm(`確定把 ${email} 設為：${plan}，到期日 ${date}，綁定訂單 ${trade==='-'?'（不綁定）':trade}？`))return;
+  res.textContent='儲存中...';res.className='result-box show';
+  try{
+    const r=await fetch(`${API}/admin/set-expire?email=${encodeURIComponent(email)}&expire_at=${date}&plan=${plan}&trade_no=${encodeURIComponent(trade)}`,{method:'POST',headers:{'X-Admin-Key':getAdminKey()}});
+    const d=await r.json();
+    if(!r.ok){res.textContent='失敗：'+(d.detail||'未知錯誤');res.className='result-box show error';return;}
+    res.textContent=`✅ 已更新 ${email}\n方案：${d.before.plan} → ${d.after.plan}\n到期日：${d.before.expire_at||'—'} → ${d.after.expire_at}\n綁定訂單：${d.before.merchant_trade_no||'—'} → ${d.after.merchant_trade_no||'—'}`;
     res.className='result-box show success';
+    document.getElementById('seNow').innerHTML=`目前：<b>${d.after.plan}</b>，到期日 <b>${d.after.expire_at}</b>，綁定訂單 <b>${d.after.merchant_trade_no||'—'}</b>`;
     loadStats();
-  }catch(e){
-    res.textContent='連線失敗，請確認後端是否正常';
-    res.className='result-box show error';
-  }
+  }catch(e){res.textContent='連線失敗，請確認後端是否正常';res.className='result-box show error';}
 }
 
 // ── 延長到期日 ──
