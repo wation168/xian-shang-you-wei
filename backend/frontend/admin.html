@@ -126,6 +126,43 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
 .block-type-badge{font-size:11px;padding:2px 7px;border-radius:20px;font-weight:600;white-space:nowrap;flex-shrink:0}
 .block-comment{background:rgba(245,158,11,.12);color:#b45309}
 .block-login{background:rgba(214,59,59,.12);color:var(--up)}
+
+/* ── 營運數據（案件009第二批） ── */
+.ops-sub{font-size:12px;color:var(--text3);margin:2px 0 10px}
+.ops-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.ops-toolbar select{padding:8px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;outline:none}
+.ops-block{margin-bottom:20px}
+.ops-block:last-child{margin-bottom:0}
+.ops-block-title{font-size:13px;font-weight:700;margin-bottom:10px;color:var(--text)}
+.range-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.range-tbl th,.range-tbl td{padding:7px 4px;text-align:center;border-bottom:1px solid var(--border)}
+.range-tbl th{color:var(--text3);font-weight:600}
+.range-tbl td:first-child,.range-tbl th:first-child{text-align:left;color:var(--text2);white-space:nowrap}
+.range-tbl tbody tr:last-child td{border-bottom:none}
+.funnel-wrap{display:flex;flex-direction:column;gap:10px}
+.funnel-row{display:flex;align-items:center;gap:10px}
+.funnel-lbl{width:78px;font-size:12px;color:var(--text2);flex-shrink:0}
+.funnel-track{flex:1;background:var(--bg);border-radius:6px;height:22px;overflow:hidden}
+.funnel-fill{height:100%;background:var(--green);border-radius:6px;transition:width .3s;min-width:2px}
+.funnel-val{width:56px;text-align:right;font-size:13px;font-weight:700;flex-shrink:0}
+.retention-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.retention-card{background:var(--bg);border-radius:var(--radius);padding:12px;text-align:center}
+.retention-rate{font-size:22px;font-weight:900;color:var(--green)}
+.retention-rate.na{color:var(--text3);font-size:14px}
+.retention-lbl{font-size:11px;color:var(--text3);margin-top:2px}
+.retention-sub{font-size:10px;color:var(--text3);margin-top:2px}
+.rank-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
+.rank-row:last-child{border-bottom:none}
+.rank-idx{width:16px;font-size:11px;color:var(--text3);text-align:center;flex-shrink:0}
+.rank-lbl{flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank-track{width:70px;background:var(--bg);border-radius:4px;height:8px;overflow:hidden;flex-shrink:0}
+.rank-fill{height:100%;background:var(--green)}
+.rank-val{width:32px;text-align:right;font-size:12px;font-weight:700;color:var(--text2);flex-shrink:0}
+.device-bar{display:flex;height:24px;border-radius:6px;overflow:hidden;margin-bottom:8px}
+.device-seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:600;overflow:hidden}
+.device-legend{display:flex;gap:14px;font-size:12px;color:var(--text2);flex-wrap:wrap}
+.device-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:middle}
+.ops-empty{font-size:12px;color:var(--text3);text-align:center;padding:10px 0}
 </style>
 </head>
 <body>
@@ -174,6 +211,9 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
       <div class="action-grid">
         <button class="action-btn" onclick="loadMembers()">
           <span class="icon">👥</span>查看所有會員
+        </button>
+        <button class="action-btn" onclick="showSection('opstats')">
+          <span class="icon">📈</span>營運數據
         </button>
         <button class="action-btn" onclick="doBackup()">
           <span class="icon">💾</span>備份資料庫
@@ -389,6 +429,68 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
       <div class="result-box" id="multiSignalResult" style="margin-top:10px;white-space:pre-wrap"></div>
     </div>
 
+    <!-- 營運數據（案件009第二批，2026/09/19） -->
+    <div class="card" id="sec-opstats" style="display:none">
+      <div class="card-title">📈 營運數據</div>
+      <div class="ops-sub" id="opsServerTime">尚未載入</div>
+
+      <div class="ops-toolbar">
+        <label style="font-size:12px;color:var(--text2)">統計區間（影響漏斗／留存／熱門排行）</label>
+        <select id="opsDaysSel" onchange="loadOpsStats(parseInt(this.value))">
+          <option value="7">近 7 天</option>
+          <option value="30" selected>近 30 天</option>
+          <option value="90">近 90 天</option>
+        </select>
+        <button class="inline-btn secondary" style="height:34px;padding:4px 12px" onclick="loadOpsStats()">🔄 重新整理</button>
+        <button class="inline-btn secondary" style="height:34px;padding:4px 12px" onclick="exportOpsStatsCsv()">📥 匯出 CSV（彙總）</button>
+      </div>
+
+      <!-- 今日／7日／30日 -->
+      <div class="ops-block">
+        <div class="ops-block-title">今日／7日／30日</div>
+        <table class="range-tbl">
+          <thead><tr><th></th><th>今日</th><th>近7日</th><th>近30日</th></tr></thead>
+          <tbody id="opsRangeTbl">
+            <tr><td colspan="4" class="ops-empty">載入中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 轉換漏斗 -->
+      <div class="ops-block">
+        <div class="ops-block-title">轉換漏斗（<span id="opsFunnelDays">30</span> 天內）</div>
+        <div class="funnel-wrap" id="opsFunnelWrap">
+          <div class="ops-empty">載入中...</div>
+        </div>
+      </div>
+
+      <!-- 留存 -->
+      <div class="ops-block">
+        <div class="ops-block-title">會員留存（在<span id="opsRetDays">30</span>天內註冊、且已滿該天數的會員）</div>
+        <div class="retention-grid" id="opsRetentionGrid">
+          <div class="ops-empty">載入中...</div>
+        </div>
+      </div>
+
+      <!-- 熱門股票／來源 -->
+      <div class="ops-block">
+        <div class="ops-block-title">熱門股票（依分析次數）</div>
+        <div id="opsTopStocks"><div class="ops-empty">載入中...</div></div>
+      </div>
+      <div class="ops-block">
+        <div class="ops-block-title">流量來源</div>
+        <div id="opsTopSources"><div class="ops-empty">載入中...</div></div>
+      </div>
+
+      <!-- 裝置比例 -->
+      <div class="ops-block">
+        <div class="ops-block-title">裝置比例</div>
+        <div id="opsDeviceSplit"><div class="ops-empty">載入中...</div></div>
+      </div>
+
+      <div class="ops-sub" id="opsMemberTotals"></div>
+    </div>
+
   </div>
 </div>
 
@@ -449,12 +551,13 @@ if(sessionStorage.getItem('adminAuth')==='1'){
 
 // ── 顯示/隱藏區塊 ──
 function showSection(name){
-  ['grant','setexpire','reset','members','messages','blocklist','earlybird','prebuild','multisignal'].forEach(s=>{
+  ['grant','setexpire','reset','members','messages','blocklist','earlybird','prebuild','multisignal','opstats'].forEach(s=>{
     document.getElementById('sec-'+s).style.display = s===name ? 'block' : 'none';
   });
   if(name==='members') loadMembers();
   if(name==='messages') loadContactMessages();
   if(name==='blocklist') loadBlocklist();
+  if(name==='opstats') loadOpsStats();
 }
 
 // ── Toast ──
@@ -486,6 +589,127 @@ async function loadStats(){
       document.getElementById('st-ac').textContent = (s.analyze_count||0).toLocaleString();
     }
   }catch(e){}
+}
+
+// ── 營運數據（案件009第二批） ──
+let _opsLastData = null;
+
+async function loadOpsStats(days){
+  days = days || parseInt(document.getElementById('opsDaysSel').value) || 30;
+  document.getElementById('opsDaysSel').value = String(days);
+  document.getElementById('opsFunnelDays').textContent = days;
+  document.getElementById('opsRetDays').textContent = days;
+  try{
+    const r = await fetch(`${API}/admin/stats?days=${days}`, {headers:{'X-Admin-Key':getAdminKey()}});
+    if(!r.ok){
+      document.getElementById('opsServerTime').textContent = '載入失敗（管理金鑰或連線問題）';
+      return;
+    }
+    const data = await r.json();
+    _opsLastData = data;
+    document.getElementById('opsServerTime').textContent =
+      `伺服器時間：${data.server_time || '—'}　｜　事件明細保留 ${data.retention_days || '—'} 天（彙總永久保留）`;
+    renderOpsRangeTable(data.range_summary);
+    renderOpsFunnel(data.funnel);
+    renderOpsRetention(data.user_retention);
+    renderOpsRankList('opsTopStocks', (data.range_top && data.range_top.top_stocks) || [], r=>r.stock_id, r=>r.n);
+    renderOpsRankList('opsTopSources', (data.range_top && data.range_top.top_sources) || [], r=>r.source, r=>r.n);
+    renderOpsDeviceSplit((data.range_top && data.range_top.device_split) || {});
+    const mem = data.members || {};
+    document.getElementById('opsMemberTotals').textContent = `會員總數：${mem.total||0}　｜　目前有效付費：${mem.paid||0}`;
+  }catch(e){
+    document.getElementById('opsServerTime').textContent = '載入失敗：' + e.message;
+  }
+}
+
+function renderOpsRangeTable(rs){
+  const el = document.getElementById('opsRangeTbl');
+  if(!rs){ el.innerHTML = '<tr><td colspan="4" class="ops-empty">無資料</td></tr>'; return; }
+  const rows = [
+    ['不重複訪客','visitors'], ['活躍會員','members_active'], ['付費活躍','paid_active'],
+    ['新註冊','signups'], ['升級／購買','upgrades'], ['分析次數','analyze_count'],
+  ];
+  el.innerHTML = rows.map(([lbl,key])=>
+    `<tr><td>${lbl}</td><td>${(rs.today&&rs.today[key])||0}</td><td>${(rs.d7&&rs.d7[key])||0}</td><td>${(rs.d30&&rs.d30[key])||0}</td></tr>`
+  ).join('');
+}
+
+function renderOpsFunnel(f){
+  const el = document.getElementById('opsFunnelWrap');
+  if(!f){ el.innerHTML = '<div class="ops-empty">無資料</div>'; return; }
+  const stages = [['訪客', f.visitors], ['註冊', f.signups], ['首次分析', f.first_analyze], ['升級', f.upgrades]];
+  const max = Math.max(1, ...stages.map(s=>s[1]||0));
+  el.innerHTML = stages.map(([lbl,val])=>{
+    const pct = Math.max(2, Math.round((val||0)/max*100));
+    return `<div class="funnel-row"><div class="funnel-lbl">${lbl}</div><div class="funnel-track"><div class="funnel-fill" style="width:${pct}%"></div></div><div class="funnel-val">${(val||0).toLocaleString()}</div></div>`;
+  }).join('');
+}
+
+function renderOpsRetention(ur){
+  const el = document.getElementById('opsRetentionGrid');
+  if(!ur){ el.innerHTML = '<div class="ops-empty">無資料</div>'; return; }
+  const items = [['D1','d1'],['D7','d7'],['D30','d30']];
+  el.innerHTML = items.map(([lbl,key])=>{
+    const d = ur[key] || {};
+    const hasCohort = d.cohort && d.cohort > 0;
+    const rateTxt = hasCohort ? `${Math.round((d.rate||0)*100)}%` : '資料不足';
+    return `<div class="retention-card"><div class="retention-rate${hasCohort?'':' na'}">${rateTxt}</div><div class="retention-lbl">${lbl} 留存</div><div class="retention-sub">${d.retained||0} / ${d.cohort||0} 人</div></div>`;
+  }).join('');
+}
+
+function renderOpsRankList(elId, list, getLbl, getVal){
+  const el = document.getElementById(elId);
+  if(!list || !list.length){ el.innerHTML = '<div class="ops-empty">目前沒有資料</div>'; return; }
+  const top = list.slice(0, 10);
+  const max = Math.max(1, ...top.map(getVal));
+  el.innerHTML = top.map((r,i)=>{
+    const lbl = getLbl(r) || '（未知）';
+    const val = getVal(r) || 0;
+    const pct = Math.max(4, Math.round(val/max*100));
+    return `<div class="rank-row"><div class="rank-idx">${i+1}</div><div class="rank-lbl">${lbl}</div><div class="rank-track"><div class="rank-fill" style="width:${pct}%"></div></div><div class="rank-val">${val}</div></div>`;
+  }).join('');
+}
+
+const OPS_DEVICE_COLORS = {mobile:'#1D9E75', desktop:'#60a5fa', unknown:'#c9c6ba'};
+const OPS_DEVICE_LABELS = {mobile:'手機', desktop:'電腦', unknown:'未知'};
+function renderOpsDeviceSplit(split){
+  const el = document.getElementById('opsDeviceSplit');
+  const entries = Object.entries(split||{});
+  const total = entries.reduce((s,[,n])=>s+n, 0);
+  if(!total){ el.innerHTML = '<div class="ops-empty">目前沒有資料</div>'; return; }
+  entries.sort((a,b)=>b[1]-a[1]);
+  const bar = entries.map(([k,n])=>{
+    const pct = (n/total*100);
+    const color = OPS_DEVICE_COLORS[k] || '#a78bfa';
+    return `<div class="device-seg" style="width:${pct}%;background:${color}">${pct>=10?Math.round(pct)+'%':''}</div>`;
+  }).join('');
+  const legend = entries.map(([k,n])=>{
+    const color = OPS_DEVICE_COLORS[k] || '#a78bfa';
+    const label = OPS_DEVICE_LABELS[k] || k;
+    return `<span><span class="device-dot" style="background:${color}"></span>${label} ${n}（${Math.round(n/total*100)}%）</span>`;
+  }).join('');
+  el.innerHTML = `<div class="device-bar">${bar}</div><div class="device-legend">${legend}</div>`;
+}
+
+function exportOpsStatsCsv(){
+  if(!_opsLastData || !_opsLastData.days || !_opsLastData.days.length){
+    toast('目前還沒有每日彙總資料可匯出（要等隔天 00:30 產生第一筆）');
+    return;
+  }
+  const cols = ['date','visitors','members_active','paid_active','signups','upgrades','analyze_count','paywall_hits','signup_wall_hits'];
+  const header = ['日期','不重複訪客','活躍會員','付費活躍','新註冊','升級','分析次數','撞到付費牆','撞到註冊牆'];
+  const lines = [header.join(',')];
+  _opsLastData.days.forEach(r=>{ lines.push(cols.map(c=>r[c]==null?'':r[c]).join(',')); });
+  const csv = '﻿' + lines.join('\n');  // 開頭加BOM，Excel開中文才不會亂碼
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `營運數據彙總_${_opsLastData.days[0].date}_${_opsLastData.days[_opsLastData.days.length-1].date}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 // ── 查看會員 ──

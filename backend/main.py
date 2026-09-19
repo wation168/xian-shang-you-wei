@@ -3545,6 +3545,9 @@ def _db_init():
         ("members",         "register_channel","TEXT DEFAULT NULL"),
         ("members",         "last_seen",       "TEXT DEFAULT NULL"),
         ("members",         "total_queries",   "INTEGER DEFAULT 0"),
+        # 2026/09/19（案件009第二批）：漏斗「首次分析」統計用——會員第一次完成
+        # analyze事件的日期，只在第一次寫入、之後不再覆蓋
+        ("members",         "first_analyze_date", "TEXT DEFAULT NULL"),
     ]
     for table, col, coldef in new_columns:
         try:
@@ -6980,6 +6983,11 @@ def _log_event(event: str, *, user: dict | None = None, anon_id: str = "", stock
             if user and user.get("id"):
                 conn.execute("UPDATE members SET last_seen=? WHERE id=?",
                              (now.strftime("%Y-%m-%d %H:%M:%S"), user["id"]))
+                if event == "analyze":
+                    conn.execute(
+                        "UPDATE members SET first_analyze_date=? WHERE id=? AND first_analyze_date IS NULL",
+                        (now.strftime("%Y-%m-%d"), user["id"])
+                    )
     except Exception as e:
         print(f"[events] 寫入失敗（不影響功能）：{e}")
 
@@ -7040,6 +7048,47 @@ def _run_daily_stats_job(target_date: str | None = None):
         print(f"[events] 每日彙總失敗：{e}")
 
 
+def _range_stats(conn, start_date: str, end_date: str) -> dict:
+    """直接對events表查某段日期(含頭尾)的不重複訪客/活躍會員/付費活躍、註冊/升級/分析次數、
+    熱門股票/來源/裝置比例——比把每天的daily_stats加總更準（不會把同一人跨日重複算成兩人）"""
+    row = conn.execute(
+        "SELECT COUNT(DISTINCT COALESCE(anon_id, member_id)) v, "
+        "COUNT(DISTINCT CASE WHEN member_id IS NOT NULL THEN member_id END) m, "
+        "COUNT(DISTINCT CASE WHEN plan='paid' THEN member_id END) p, "
+        "SUM(CASE WHEN event='signup' THEN 1 ELSE 0 END) su, "
+        "SUM(CASE WHEN event='purchase' THEN 1 ELSE 0 END) up, "
+        "SUM(CASE WHEN event='analyze' THEN 1 ELSE 0 END) an "
+        "FROM events WHERE date>=? AND date<=?", (start_date, end_date)).fetchone()
+    top_stocks = [{"stock_id": r[0], "n": r[1]} for r in conn.execute(
+        "SELECT stock_id, COUNT(*) c FROM events WHERE date>=? AND date<=? AND event='analyze' AND stock_id<>'' "
+        "GROUP BY stock_id ORDER BY c DESC LIMIT 20", (start_date, end_date)).fetchall()]
+    top_sources = [{"source": r[0], "n": r[1]} for r in conn.execute(
+        "SELECT source, COUNT(*) c FROM events WHERE date>=? AND date<=? AND source<>'' "
+        "GROUP BY source ORDER BY c DESC LIMIT 20", (start_date, end_date)).fetchall()]
+    device_split = {r[0] or "unknown": r[1] for r in conn.execute(
+        "SELECT device, COUNT(*) FROM events WHERE date>=? AND date<=? GROUP BY device", (start_date, end_date)).fetchall()}
+    return {
+        "visitors": row[0] or 0, "members_active": row[1] or 0, "paid_active": row[2] or 0,
+        "signups": row[3] or 0, "upgrades": row[4] or 0, "analyze_count": row[5] or 0,
+        "top_stocks": top_stocks, "top_sources": top_sources, "device_split": device_split,
+    }
+
+
+def _retention_calc(conn, start_date: str, today: str, horizon: int) -> dict:
+    """留存率：在start_date~today範圍內、且「創立日+horizon天」已經過去的會員裡，
+    有多少比例在創立日剛好+horizon天那天有任何events紀錄（登入/使用行為）"""
+    cohort_cutoff = (datetime.now(ZoneInfo("Asia/Taipei")) - timedelta(days=horizon)).strftime("%Y-%m-%d")
+    row = conn.execute(
+        "SELECT COUNT(*) cohort, SUM(CASE WHEN EXISTS("
+        "  SELECT 1 FROM events e WHERE e.member_id = m.id AND e.date = date(m.created_at, ?)"
+        ") THEN 1 ELSE 0 END) retained "
+        "FROM members m WHERE date(m.created_at) >= ? AND date(m.created_at) <= ?",
+        (f"+{horizon} days", start_date, cohort_cutoff)).fetchone()
+    cohort = row[0] or 0
+    retained = row[1] or 0
+    return {"cohort": cohort, "retained": retained, "rate": round(retained / cohort, 4) if cohort else None}
+
+
 @app.get("/admin/stats")
 def admin_stats(days: int = 30, key: str = Header(default="", alias="X-Admin-Key")):
     """後台營運數據（彙總，不含個人資料）"""
@@ -7047,6 +7096,8 @@ def admin_stats(days: int = 30, key: str = Header(default="", alias="X-Admin-Key
     import json as _js
     days = max(1, min(days, 400))
     start = (datetime.now(ZoneInfo("Asia/Taipei")) - timedelta(days=days)).strftime("%Y-%m-%d")
+    d7_start = (datetime.now(ZoneInfo("Asia/Taipei")) - timedelta(days=6)).strftime("%Y-%m-%d")
+    d30_start = (datetime.now(ZoneInfo("Asia/Taipei")) - timedelta(days=29)).strftime("%Y-%m-%d")
     today = _taipei_today()
     with _db() as conn:
         rows = [dict(r) for r in conn.execute(
@@ -7057,6 +7108,24 @@ def admin_stats(days: int = 30, key: str = Header(default="", alias="X-Admin-Key
         members = dict(conn.execute(
             "SELECT COUNT(*) total, SUM(CASE WHEN plan!='free' AND (expire_at IS NULL OR expire_at>=?) THEN 1 ELSE 0 END) paid "
             "FROM members", (today,)).fetchone())
+        range_summary = {
+            "today": _range_stats(conn, today, today),
+            "d7": _range_stats(conn, d7_start, today),
+            "d30": _range_stats(conn, d30_start, today),
+        }
+        selected_range = _range_stats(conn, start, today)
+        first_analyze_count = conn.execute(
+            "SELECT COUNT(*) FROM members WHERE first_analyze_date IS NOT NULL "
+            "AND first_analyze_date>=? AND first_analyze_date<=?", (start, today)).fetchone()[0] or 0
+        funnel = {
+            "days": days, "visitors": selected_range["visitors"], "signups": selected_range["signups"],
+            "first_analyze": first_analyze_count, "upgrades": selected_range["upgrades"],
+        }
+        user_retention = {
+            "d1": _retention_calc(conn, start, today, 1),
+            "d7": _retention_calc(conn, start, today, 7),
+            "d30": _retention_calc(conn, start, today, 30),
+        }
     for r in rows:
         for k in ("top_stocks", "top_sources", "top_events", "device_split"):
             try:
@@ -7064,7 +7133,10 @@ def admin_stats(days: int = 30, key: str = Header(default="", alias="X-Admin-Key
             except Exception:
                 r[k] = []
     return {"days": rows, "today": live, "members": members,
-            "retention_days": EVENT_RETENTION_DAYS, "server_time": _taipei_now_str("%Y-%m-%d %H:%M")}
+            "retention_days": EVENT_RETENTION_DAYS, "server_time": _taipei_now_str("%Y-%m-%d %H:%M"),
+            "range_summary": range_summary, "funnel": funnel, "user_retention": user_retention,
+            "range_top": {"top_stocks": selected_range["top_stocks"], "top_sources": selected_range["top_sources"],
+                          "device_split": selected_range["device_split"]}}
 
 @app.get("/api/stats")
 def api_stats():
