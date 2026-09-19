@@ -77,6 +77,17 @@ SMTP_FROM = os.environ.get("SMTP_FROM", SMTP_USER)
 # 改成獨立的ADMIN_NOTIFY_EMAIL環境變數，跟SMTP登入帳號脫鉤，請在Zeabur設定成真正要收通知的信箱。
 ADMIN_NOTIFY_EMAIL = os.environ.get("ADMIN_NOTIFY_EMAIL", "")
 
+# 光貿（Amego）電子發票 API（2026/09/19新增：綠界付款成功後自動開立）
+# 文件：https://invoice.amego.tw/api_doc/　測試環境統編/Key請跟光貿客服要，或先用光貿公開的測試環境值：
+#   統編 12345678、APP Key sHeq7t8G1wiQvhAuIM27（測試環境登入 https://invoice.amego.tw/ test@amego.tw/12345678）
+# 正式上線前，把這兩個環境變數換成貴公司自己的統編與跟光貿客服申請的正式 APP Key。
+AMEGO_INVOICE_NUMBER = os.environ.get("AMEGO_INVOICE_NUMBER", "")
+AMEGO_APP_KEY        = os.environ.get("AMEGO_APP_KEY", "")
+AMEGO_API_BASE        = "https://invoice-api.amego.tw"  # 測試/正式共用同一網址，差別在上面兩個帶的統編與Key
+AMEGO_ENABLED         = bool(AMEGO_INVOICE_NUMBER and AMEGO_APP_KEY)
+if not AMEGO_ENABLED:
+    print("⚠️  [光貿發票] 未設定 AMEGO_INVOICE_NUMBER / AMEGO_APP_KEY，付款成功後不會自動開立發票（不影響會員權益）。")
+
 # SQLite 資料庫路徑（Zeabur 持久化硬碟）
 DB_PATH = os.environ.get("DB_PATH", "/data/members.db")
 
@@ -3510,6 +3521,20 @@ def _db_init():
         );
         CREATE INDEX IF NOT EXISTS idx_game_scores_slug ON game_scores(game_slug);
         CREATE INDEX IF NOT EXISTS idx_game_scores_member ON game_scores(member_id, game_slug);
+        CREATE TABLE IF NOT EXISTS invoices (
+            id             INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id       TEXT UNIQUE NOT NULL,
+            member_email   TEXT,
+            amount         INTEGER,
+            invoice_number TEXT,
+            invoice_time   INTEGER,
+            random_number  TEXT,
+            carrier_type   TEXT,
+            carrier_id     TEXT,
+            status         TEXT DEFAULT 'issued',
+            raw_response   TEXT,
+            created_at     TEXT DEFAULT (datetime('now','+8 hours'))
+        );
     """)
     conn.commit()
 
@@ -11477,6 +11502,130 @@ async def create_order_recurring(request: Request):
 
 
 # ─────────────────────────────────────────────
+# 光貿電子發票 API（2026/09/19新增：綠界付款成功後自動開立）
+# 文件：https://invoice.amego.tw/api_doc/（開立發票-自動配號 POST /json/f0401）
+# 09/19帥哥鴻決定：先接「線上有位」，全部當一般消費者發票（不支援打統編／B2B）。
+# 任何失敗都絕對不能擋住會員開通/續約——整支函式自己包好try/except，永遠不會raise，
+# 失敗時回傳{"code":-1,...}並把失敗記錄寫進invoices表（status=failed），方便之後人工補開。
+# ─────────────────────────────────────────────
+def _amego_issue_invoice(*, order_id: str, buyer_email: str, buyer_name: str,
+                          amount, item_name: str,
+                          carrier_type: str = "", carrier_id: str = "") -> dict:
+    if not AMEGO_ENABLED:
+        print(f"[光貿發票] 未設定AMEGO_INVOICE_NUMBER/AMEGO_APP_KEY，略過開立（order={order_id}，不影響會員權益）")
+        return {"code": -1, "msg": "未設定光貿API金鑰"}
+    import urllib.request as _ur, urllib.parse as _up, json as _js2, hashlib as _hl2, time as _tm2
+    order_id = (order_id or "")[:40]
+    try:
+        amount_int = int(amount)
+    except Exception:
+        amount_int = 0
+    if amount_int <= 0:
+        print(f"[光貿發票] 金額異常（{amount}），略過開立 order={order_id}")
+        return {"code": -1, "msg": f"金額異常：{amount}"}
+    data = {
+        "OrderId": order_id,
+        "BuyerIdentifier": "0000000000",  # 一律當一般消費者發票，不支援打統編（09/19帥哥鴻決定）
+        "BuyerName": (buyer_name or "消費者")[:100],
+        "BuyerEmailAddress": (buyer_email or "")[:100],
+        "CarrierType": carrier_type or "",
+        "CarrierId1": carrier_id or "",
+        "CarrierId2": carrier_id or "",
+        "ProductItem": [{
+            "Description": (item_name or "訂閱服務")[:256],
+            "Quantity": "1",
+            "UnitPrice": str(amount_int),
+            "Amount": str(amount_int),
+            "TaxType": "1",
+        }],
+        "SalesAmount": str(amount_int),
+        "FreeTaxSalesAmount": "0",
+        "ZeroTaxSalesAmount": "0",
+        "TaxType": "1",
+        "TaxRate": "0.05",
+        "TaxAmount": "0",   # 沒打統編一律帶0（光貿文件規定：有打統編才需計算5%稅額）
+        "TotalAmount": str(amount_int),
+    }
+    data_str = _js2.dumps(data, ensure_ascii=False, separators=(",", ":"))
+    ts = str(int(_tm2.time()))
+    sign = _hl2.md5((data_str + ts + AMEGO_APP_KEY).encode("utf-8")).hexdigest()
+    result = {"code": -1, "msg": "未知錯誤"}
+    try:
+        post_body = _up.urlencode({
+            "invoice": AMEGO_INVOICE_NUMBER, "data": data_str, "time": ts, "sign": sign,
+        }).encode("utf-8")
+        req = _ur.Request(
+            f"{AMEGO_API_BASE}/json/f0401", data=post_body,
+            headers={"Content-Type": "application/x-www-form-urlencoded"}, method="POST",
+        )
+        with _ur.urlopen(req, timeout=15) as resp:
+            result = _js2.loads(resp.read().decode("utf-8"))
+    except Exception as e:
+        result = {"code": -1, "msg": f"呼叫例外：{e}"}
+    ok = result.get("code") == 0
+    if ok:
+        print(f"[光貿發票] 開立成功 order={order_id} invoice={result.get('invoice_number')}")
+    else:
+        print(f"[光貿發票] 開立失敗 order={order_id} code={result.get('code')} msg={result.get('msg')}（不影響會員權益，需人工補開）")
+        # 開票失敗時客人其實已經付款成功、會員也已經開通，不主動通知的話沒人會發現發票漏開，
+        # 所以這裡寄一封管理員信提醒人工補開（寄信失敗一樣不影響主流程）
+        try:
+            if ADMIN_NOTIFY_EMAIL:
+                _send_email(
+                    ADMIN_NOTIFY_EMAIL,
+                    f"⚠️【線上有位】電子發票開立失敗，需人工補開（{order_id}）",
+                    _render_email(
+                        title="電子發票開立失敗",
+                        title_icon="⚠️",
+                        body_html=(
+                            '<p style="color:#444;margin:0 0 16px;font-size:14px;line-height:1.7">'
+                            '客人的付款已經成功、會員權益也已經開通，但呼叫光貿API開立電子發票失敗，'
+                            '請到光貿後台手動補開這一張發票。</p>'
+                            '<table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden">'
+                            f'<tr><td style="padding:10px 14px;color:#888;font-size:13px;border-bottom:1px solid #f0f0f0">訂單編號</td><td style="padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;text-align:right">{order_id}</td></tr>'
+                            f'<tr><td style="padding:10px 14px;color:#888;font-size:13px;border-bottom:1px solid #f0f0f0">會員</td><td style="padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;text-align:right">{buyer_email}</td></tr>'
+                            f'<tr><td style="padding:10px 14px;color:#888;font-size:13px;border-bottom:1px solid #f0f0f0">金額</td><td style="padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;text-align:right">NT${amount_int}</td></tr>'
+                            f'<tr><td style="padding:10px 14px;color:#888;font-size:13px;border-bottom:1px solid #f0f0f0">載具</td><td style="padding:10px 14px;font-weight:700;font-size:14px;border-bottom:1px solid #f0f0f0;text-align:right">{carrier_type or "無"} {carrier_id or ""}</td></tr>'
+                            f'<tr><td style="padding:10px 14px;color:#888;font-size:13px">失敗原因</td><td style="padding:10px 14px;font-weight:700;font-size:14px;text-align:right">code={result.get("code")}　{result.get("msg")}</td></tr>'
+                            '</table>'
+                        ),
+                        with_ad=False,
+                        card_bg="#fef2f2", card_border="#fca5a5", title_color="#991b1b",
+                    )
+                )
+        except Exception as _me:
+            print(f"[光貿發票] 開立失敗通知信寄送失敗：{_me}")
+    try:
+        with _db() as conn:
+            conn.execute(
+                "INSERT OR REPLACE INTO invoices (order_id, member_email, amount, invoice_number, invoice_time, "
+                "random_number, carrier_type, carrier_id, status, raw_response, created_at) "
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                (order_id, buyer_email, amount_int, result.get("invoice_number"), result.get("invoice_time"),
+                 result.get("random_number"), carrier_type, carrier_id, "issued" if ok else "failed",
+                 _js2.dumps(result, ensure_ascii=False), _taipei_now_str())
+            )
+    except Exception as e:
+        print(f"[光貿發票] 寫入invoices表失敗（不影響會員權益）：{e}")
+    return result
+
+
+@app.get("/admin/invoices")
+def admin_invoices(days: int = 30, key: str = Header(default="", alias="X-Admin-Key")):
+    """後台查發票開立紀錄，方便對帳／找失敗需要人工補開的訂單"""
+    _check_admin(key)
+    days = max(1, min(days, 400))
+    start = (datetime.now(ZoneInfo("Asia/Taipei")) - timedelta(days=days)).strftime("%Y-%m-%d")
+    with _db() as conn:
+        rows = [dict(r) for r in conn.execute(
+            "SELECT id, order_id, member_email, amount, invoice_number, invoice_time, random_number, "
+            "carrier_type, carrier_id, status, created_at FROM invoices WHERE created_at>=? ORDER BY created_at DESC",
+            (start,)).fetchall()]
+        failed = sum(1 for r in rows if r["status"] != "issued")
+    return {"invoices": rows, "total": len(rows), "failed": failed, "amego_enabled": AMEGO_ENABLED}
+
+
+# ─────────────────────────────────────────────
 # 定期定額：定期扣款 Webhook（每期自動續約）
 # ─────────────────────────────────────────────
 @app.post("/webhook/ecpay_recurring")
@@ -11694,6 +11843,20 @@ async def webhook_ecpay_recurring(request: Request):
                 card_bg="#f0fdf4", card_border="#86efac", title_color="#166534",
             )
         )
+
+    # 開立電子發票（光貿 Amego，2026/09/19新增）：手機條碼載具才帶CarrierType，
+    # Email載具／未提供都當一般消費者發票（不掛載具），但都會帶BuyerEmailAddress讓光貿寄通知信
+    _amego_carrier_type, _amego_carrier_id = "", ""
+    if _inv_type == "手機條碼載具" and _inv_carrier:
+        _amego_carrier_type, _amego_carrier_id = "3J0002", _inv_carrier
+    try:
+        _amego_issue_invoice(
+            order_id=idem_key, buyer_email=email, buyer_name="消費者",
+            amount=_amount_int, item_name=item_name or plan_label,
+            carrier_type=_amego_carrier_type, carrier_id=_amego_carrier_id,
+        )
+    except Exception as _ie:
+        print(f"[光貿發票] 呼叫時發生例外（不影響會員權益）：{_ie}")
 
     # 記錄已處理
     _rec = _db_conn()
