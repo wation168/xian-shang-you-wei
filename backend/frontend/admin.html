@@ -215,6 +215,9 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
         <button class="action-btn" onclick="showSection('opstats')">
           <span class="icon">📈</span>營運數據
         </button>
+        <button class="action-btn" onclick="showSection('invoices')">
+          <span class="icon">🧾</span>電子發票
+        </button>
         <button class="action-btn" onclick="doBackup()">
           <span class="icon">💾</span>備份資料庫
         </button>
@@ -491,6 +494,25 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
       <div class="ops-sub" id="opsMemberTotals"></div>
     </div>
 
+    <!-- 電子發票（案件011，2026/09/19） -->
+    <div class="card" id="sec-invoices" style="display:none">
+      <div class="card-title">🧾 電子發票</div>
+      <div class="ops-sub" id="invStatus">載入中...</div>
+
+      <div class="ops-toolbar">
+        <select id="invDaysSel" onchange="loadInvoices(parseInt(this.value))">
+          <option value="7">近 7 天</option>
+          <option value="30" selected>近 30 天</option>
+          <option value="90">近 90 天</option>
+        </select>
+        <button class="inline-btn secondary" style="height:34px;padding:4px 12px" onclick="loadInvoices()">🔄 重新整理</button>
+        <button class="inline-btn" style="height:34px;padding:4px 12px" id="invTestBtn" onclick="doTestInvoice(this)">🧪 測試開立一張發票</button>
+      </div>
+      <div class="result-box" id="invTestResult"></div>
+
+      <div id="invList" style="margin-top:12px"><div class="ops-empty">載入中...</div></div>
+    </div>
+
   </div>
 </div>
 
@@ -551,13 +573,14 @@ if(sessionStorage.getItem('adminAuth')==='1'){
 
 // ── 顯示/隱藏區塊 ──
 function showSection(name){
-  ['grant','setexpire','reset','members','messages','blocklist','earlybird','prebuild','multisignal','opstats'].forEach(s=>{
+  ['grant','setexpire','reset','members','messages','blocklist','earlybird','prebuild','multisignal','opstats','invoices'].forEach(s=>{
     document.getElementById('sec-'+s).style.display = s===name ? 'block' : 'none';
   });
   if(name==='members') loadMembers();
   if(name==='messages') loadContactMessages();
   if(name==='blocklist') loadBlocklist();
   if(name==='opstats') loadOpsStats();
+  if(name==='invoices') loadInvoices();
 }
 
 // ── Toast ──
@@ -710,6 +733,70 @@ function exportOpsStatsCsv(){
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+// ── 電子發票（案件011） ──
+async function loadInvoices(days){
+  days = days || parseInt(document.getElementById('invDaysSel').value) || 30;
+  document.getElementById('invDaysSel').value = String(days);
+  const statusEl = document.getElementById('invStatus');
+  const listEl = document.getElementById('invList');
+  try{
+    const r = await fetch(`${API}/admin/invoices?days=${days}`, {headers:{'X-Admin-Key':getAdminKey()}});
+    if(!r.ok){ statusEl.textContent = '載入失敗（管理金鑰或連線問題）'; return; }
+    const d = await r.json();
+    if(!d.amego_enabled){
+      statusEl.innerHTML = '⚠️ <b>發票功能未啟用</b>：Zeabur 還沒設定 AMEGO_INVOICE_NUMBER／AMEGO_APP_KEY，付款成功不會開發票。';
+    }else if(d.amego_is_test){
+      statusEl.innerHTML = `🧪 目前是<b>測試環境</b>（統編 ${d.amego_invoice_number}），開出來的是測試發票，不是真發票。共 ${d.total} 筆，失敗 ${d.failed} 筆。`;
+    }else{
+      statusEl.innerHTML = `✅ 目前是<b>正式環境</b>（統編 ${d.amego_invoice_number}），開出來是真發票。共 ${d.total} 筆，失敗 ${d.failed} 筆。`;
+    }
+    const rows = d.invoices || [];
+    if(!rows.length){ listEl.innerHTML = '<div class="ops-empty">這段期間沒有發票紀錄</div>'; return; }
+    listEl.innerHTML = rows.map(r=>{
+      const ok = r.status === 'issued';
+      return `<div class="mem-card">
+        <div class="mem-head">
+          <div class="mem-email">${r.invoice_number || '（沒開成功）'}</div>
+          <span class="mem-status ${ok?'status-active':'status-expired'}">${ok?'已開立':'失敗'}</span>
+        </div>
+        <div class="mem-meta">
+          <span>訂單：${r.order_id||'—'}</span>
+          <span>金額：NT$${r.amount||0}</span>
+          <span>會員：${r.member_email||'—'}</span>
+          <span>隨機碼：${r.random_number||'—'}</span>
+          <span>載具：${r.carrier_type||'無'} ${r.carrier_id||''}</span>
+          <span>時間：${r.created_at||'—'}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    statusEl.textContent = '載入失敗：' + e.message;
+  }
+}
+
+async function doTestInvoice(btn){
+  const box = document.getElementById('invTestResult');
+  box.className = 'result-box show';
+  box.textContent = '呼叫光貿 API 中…';
+  btn.disabled = true;
+  try{
+    const r = await fetch(`${API}/admin/test-invoice`, {method:'POST', headers:{'X-Admin-Key':getAdminKey()}});
+    const d = await r.json();
+    if(d.ok){
+      box.className = 'result-box show success';
+      box.textContent = `✅ 測試成功！光貿回傳發票號碼：${d.invoice_number}\n訂單編號：${d.order_id}\n\n代表金鑰、簽章、對外連線都正常。可以登入光貿測試後台查這張發票。`;
+    }else{
+      box.className = 'result-box show error';
+      box.textContent = `❌ 測試失敗\n${d.msg || ''}\n錯誤代碼：${d.code === undefined ? '—' : d.code}\n\n（常見原因：環境變數沒設定或設錯、光貿要求IP白名單、伺服器時間誤差超過60秒）`;
+    }
+    loadInvoices();
+  }catch(e){
+    box.className = 'result-box show error';
+    box.textContent = '測試失敗：' + e.message;
+  }
+  btn.disabled = false;
 }
 
 // ── 查看會員 ──

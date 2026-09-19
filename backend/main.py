@@ -11510,7 +11510,8 @@ async def create_order_recurring(request: Request):
 # ─────────────────────────────────────────────
 def _amego_issue_invoice(*, order_id: str, buyer_email: str, buyer_name: str,
                           amount, item_name: str,
-                          carrier_type: str = "", carrier_id: str = "") -> dict:
+                          carrier_type: str = "", carrier_id: str = "",
+                          notify_on_fail: bool = True) -> dict:
     if not AMEGO_ENABLED:
         print(f"[光貿發票] 未設定AMEGO_INVOICE_NUMBER/AMEGO_APP_KEY，略過開立（order={order_id}，不影響會員權益）")
         return {"code": -1, "msg": "未設定光貿API金鑰"}
@@ -11570,7 +11571,7 @@ def _amego_issue_invoice(*, order_id: str, buyer_email: str, buyer_name: str,
         # 開票失敗時客人其實已經付款成功、會員也已經開通，不主動通知的話沒人會發現發票漏開，
         # 所以這裡寄一封管理員信提醒人工補開（寄信失敗一樣不影響主流程）
         try:
-            if ADMIN_NOTIFY_EMAIL:
+            if notify_on_fail and ADMIN_NOTIFY_EMAIL:
                 _send_email(
                     ADMIN_NOTIFY_EMAIL,
                     f"⚠️【線上有位】電子發票開立失敗，需人工補開（{order_id}）",
@@ -11622,7 +11623,32 @@ def admin_invoices(days: int = 30, key: str = Header(default="", alias="X-Admin-
             "carrier_type, carrier_id, status, created_at FROM invoices WHERE created_at>=? ORDER BY created_at DESC",
             (start,)).fetchall()]
         failed = sum(1 for r in rows if r["status"] != "issued")
-    return {"invoices": rows, "total": len(rows), "failed": failed, "amego_enabled": AMEGO_ENABLED}
+    return {"invoices": rows, "total": len(rows), "failed": failed,
+            "amego_enabled": AMEGO_ENABLED,
+            "amego_is_test": AMEGO_INVOICE_NUMBER == "12345678",
+            "amego_invoice_number": AMEGO_INVOICE_NUMBER}
+
+
+@app.post("/admin/test-invoice")
+def admin_test_invoice(key: str = Header(default="", alias="X-Admin-Key")):
+    """測試開立一張 NT$1 發票，用來確認金鑰、簽章、對外連線都正常——
+    不用真的刷卡就能驗證整條串接。安全鎖：只有統編是光貿測試環境的 12345678 時才會執行，
+    換成正式統編之後這支端點一律拒絕，不可能誤開出一張真發票。"""
+    _check_admin(key)
+    if not AMEGO_ENABLED:
+        return {"ok": False, "msg": "還沒設定 AMEGO_INVOICE_NUMBER / AMEGO_APP_KEY（請到 Zeabur 環境變數設定）"}
+    if AMEGO_INVOICE_NUMBER != "12345678":
+        return {"ok": False, "msg": f"目前用的是正式統編（{AMEGO_INVOICE_NUMBER}），測試按鈕已自動停用，避免開出真發票"}
+    import time as _tm3
+    order_id = f"TEST{int(_tm3.time())}"
+    result = _amego_issue_invoice(
+        order_id=order_id, buyer_email=ADMIN_NOTIFY_EMAIL or "", buyer_name="測試消費者",
+        amount=1, item_name="API串接測試", notify_on_fail=False,
+    )
+    ok = result.get("code") == 0
+    return {"ok": ok, "order_id": order_id,
+            "invoice_number": result.get("invoice_number", ""),
+            "code": result.get("code"), "msg": result.get("msg", "")}
 
 
 # ─────────────────────────────────────────────
