@@ -491,6 +491,7 @@ async def lifespan(app: FastAPI):
         _bg_scheduler.add_job(_clear_quote_cache,       "cron",     hour=14, minute=0,  day_of_week="mon-fri")  # 收盤後清快取，確保盤後覆盤資料一致
         _bg_scheduler.add_job(_run_補單_job,            "interval", minutes=10)  # 2026/09/17：原每天08:00，改每10分鐘
         _bg_scheduler.add_job(_ensure_stock_name_cache,  "interval", minutes=10)  # 2026/09/17：股名快取不足時自動重抓
+        _bg_scheduler.add_job(_run_daily_stats_job,      "cron",     hour=0, minute=30)  # 2026/09/19：營運數據彙總＋清理過期明細
         # 2026/08/16取消：帥哥鴻確認當初這支每日批次預產生報告是為了SEO覆蓋率，
         # 但實際上不是所有股票都會有人搜尋，天天跑一輪去硬產生冷門股報告不划算；
         # 加上get_report()已修復成「查詢當下沒有今天的資料就即時分析」，資料正確性
@@ -3336,6 +3337,39 @@ def _db_init():
             key   TEXT PRIMARY KEY,
             value INTEGER DEFAULT 0
         );
+        CREATE TABLE IF NOT EXISTS events (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            ts         TEXT NOT NULL,
+            date       TEXT NOT NULL,
+            member_id  INTEGER,
+            anon_id    TEXT,
+            event      TEXT NOT NULL,
+            stock_id   TEXT,
+            page       TEXT,
+            source     TEXT,
+            campaign   TEXT,
+            device     TEXT,
+            plan       TEXT
+        );
+        CREATE INDEX IF NOT EXISTS idx_events_date ON events(date);
+        CREATE INDEX IF NOT EXISTS idx_events_member ON events(member_id);
+        CREATE INDEX IF NOT EXISTS idx_events_event ON events(event, date);
+        CREATE TABLE IF NOT EXISTS daily_stats (
+            date            TEXT PRIMARY KEY,
+            visitors        INTEGER DEFAULT 0,
+            members_active  INTEGER DEFAULT 0,
+            paid_active     INTEGER DEFAULT 0,
+            signups         INTEGER DEFAULT 0,
+            upgrades        INTEGER DEFAULT 0,
+            analyze_count   INTEGER DEFAULT 0,
+            paywall_hits    INTEGER DEFAULT 0,
+            signup_wall_hits INTEGER DEFAULT 0,
+            top_stocks      TEXT DEFAULT '[]',
+            top_sources     TEXT DEFAULT '[]',
+            top_events      TEXT DEFAULT '[]',
+            device_split    TEXT DEFAULT '{}',
+            updated_at      TEXT
+        );
         CREATE TABLE IF NOT EXISTS opening_picks (
             date       TEXT PRIMARY KEY,
             data       TEXT,
@@ -3505,6 +3539,12 @@ def _db_init():
         # /portfolio/analysis納入計算，沒填的維持單純自選觀察。
         ("watchlist_items", "shares",          "REAL DEFAULT NULL"),
         ("watchlist_items", "cost_price",      "REAL DEFAULT NULL"),
+        # 2026/09/19（案件009）：轉換漏斗與營運數據用
+        ("members",         "first_source",    "TEXT DEFAULT NULL"),
+        ("members",         "first_campaign",  "TEXT DEFAULT NULL"),
+        ("members",         "register_channel","TEXT DEFAULT NULL"),
+        ("members",         "last_seen",       "TEXT DEFAULT NULL"),
+        ("members",         "total_queries",   "INTEGER DEFAULT 0"),
     ]
     for table, col, coldef in new_columns:
         try:
@@ -5301,11 +5341,13 @@ def analyze(stock_id: str, tf: str = "D",
     allowed, used, limit = _check_daily_credit(request, user)
     if not allowed:
         if user:
+            _log_event("paywall", user=user, stock_id=stock_id, page="analyze", request=request)
             return _quota_429(
                 "today_limit",
                 f"今日完整分析／健檢次數已用完（{limit} 次），升級即可無限使用",
                 used, limit,
             )
+        _log_event("signup_wall", user=None, stock_id=stock_id, page="analyze", request=request)
         return _quota_429(
             "guest_limit",
             f"免費試用已達上限（{limit} 次），登入後完整分析與健檢共用每日額度",
@@ -5313,6 +5355,7 @@ def analyze(stock_id: str, tf: str = "D",
         )
 
     _inc_counter("analyze_count")
+    _log_event("analyze", user=user, stock_id=stock_id, page="analyze", request=request)
 
     if user:
         try:
@@ -6541,6 +6584,10 @@ def _bonus_apply(conn, row, plan: str, days: int) -> dict:
             "new_expire": new_exp, "stacked": stacked}
 
 
+def _log_promo_redeem(member_id, plan, expire_at):
+    _log_event("promo_redeem", user={"id": member_id, "plan": plan, "expire_at": expire_at}, page="promo")
+
+
 def _send_bonus_email(email: str, title: str, days: int, r: dict):
     if not email or email.endswith("@line.softglow-ai.com"):
         return False
@@ -6795,6 +6842,7 @@ def api_promo_redeem(req: _PromoRedeemReq, user: dict = Depends(require_user)):
     msg = (f"已在原本到期日後加 {days} 天，新的到期日是 {r['new_expire']}"
            if r["stacked"] else f"已開通 {days} 天{plan_label}，到期日 {r['new_expire']}")
     print(f"[PROMO] {row['email']} 兌換 {code}：{r['old_plan']}/{r['old_expire']} → {r['new_plan']}/{r['new_expire']}")
+    _log_promo_redeem(mid, r["new_plan"], r["new_expire"])
     return {"ok": True, "title": pc["title"] or "會員福利", "days": days, "plan": r["new_plan"],
             "plan_label": plan_label, "expire_at": r["new_expire"], "stacked": r["stacked"], "message": msg}
 
@@ -6860,6 +6908,163 @@ def _inc_counter(key: str):
 
 def _record_visit():
     _inc_counter("visit_count")
+
+
+# ══════════════════════════════════════════════════════════
+# 📈 營運數據事件紀錄（2026/09/19，案件009）
+#   目的：知道訪客從哪裡來、看了什麼、在哪一道牆停住，之後才有數據跟廣告主談。
+#   原則：只記「行為」，不記輸入內容；IP 只留前三段（去識別化）；明細保留 12 個月，
+#         每日彙總（daily_stats）永久保留，刪掉明細後趨勢圖還是畫得出來。
+# ══════════════════════════════════════════════════════════
+EVENT_RETENTION_DAYS = 365          # 事件明細保留天數（彙總不刪）
+_ALLOWED_EVENTS = {
+    "view_page",        # 進入某個分頁
+    "analyze",          # 完成一次個股分析
+    "report_view",      # 看個股報告頁
+    "add_watch",        # 加入自選股
+    "add_holding",      # 新增持股（含買入價）
+    "verdict_more",     # 展開完整綜合解說
+    "edu_open",         # 展開教學說明
+    "multi_signal_view",# 看12金叉
+    "signup_wall",      # 撞到註冊牆（訪客）
+    "paywall",          # 撞到付費牆（免費會員）
+    "upgrade_click",    # 點升級按鈕
+    "signup",           # 註冊成功
+    "login",            # 登入成功
+    "purchase",         # 付款成功
+    "promo_redeem",     # 兌換福利碼
+}
+
+
+def _ip_prefix(ip: str) -> str:
+    """IPv4 只留前三段、IPv6 只留前四段（個資法：不保留完整 IP）"""
+    ip = (ip or "").strip()
+    if not ip:
+        return ""
+    if ":" in ip:
+        return ":".join(ip.split(":")[:4])
+    parts = ip.split(".")
+    return ".".join(parts[:3]) if len(parts) == 4 else ""
+
+
+def _log_event(event: str, *, user: dict | None = None, anon_id: str = "", stock_id: str = "",
+               page: str = "", source: str = "", campaign: str = "", device: str = "",
+               request: Request | None = None):
+    """寫一筆事件；任何失敗都不能影響主要功能"""
+    try:
+        if event not in _ALLOWED_EVENTS:
+            return
+        now = datetime.now(ZoneInfo("Asia/Taipei"))
+        plan = "guest"
+        if user:
+            plan = "paid" if _is_premium(user) else "free"
+        if not device and request is not None:
+            ua = (request.headers.get("user-agent") or "").lower()
+            device = "mobile" if any(k in ua for k in ("iphone", "android", "ipad", "mobile")) else "desktop"
+        if not source and request is not None:
+            ref = request.headers.get("referer") or ""
+            if ref and "softglow-ai.com" not in ref:
+                try:
+                    source = _re.sub(r"^https?://(www\.)?", "", ref).split("/")[0][:60]
+                except Exception:
+                    source = ""
+        with _db() as conn:
+            conn.execute(
+                "INSERT INTO events (ts, date, member_id, anon_id, event, stock_id, page, source, campaign, device, plan) "
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                (now.strftime("%Y-%m-%d %H:%M:%S"), now.strftime("%Y-%m-%d"),
+                 (user or {}).get("id"), (anon_id or "")[:40], event, (stock_id or "")[:10],
+                 (page or "")[:40], (source or "")[:60], (campaign or "")[:60],
+                 (device or "")[:10], plan)
+            )
+            if user and user.get("id"):
+                conn.execute("UPDATE members SET last_seen=? WHERE id=?",
+                             (now.strftime("%Y-%m-%d %H:%M:%S"), user["id"]))
+    except Exception as e:
+        print(f"[events] 寫入失敗（不影響功能）：{e}")
+
+
+class EventReq(BaseModel):
+    event: str
+    anon_id: str = ""
+    stock_id: str = ""
+    page: str = ""
+    source: str = ""
+    campaign: str = ""
+    device: str = ""
+
+
+@app.post("/api/event")
+def api_log_event(req: EventReq, request: Request, user: dict | None = Depends(get_current_user)):
+    """前端埋點用（不回傳資料，永遠回 ok，不讓埋點影響使用者）"""
+    _log_event(req.event, user=user, anon_id=req.anon_id, stock_id=req.stock_id,
+               page=req.page, source=req.source, campaign=req.campaign,
+               device=req.device, request=request)
+    return {"ok": True}
+
+
+def _run_daily_stats_job(target_date: str | None = None):
+    """每天凌晨把前一天的事件彙總進 daily_stats，並清掉超過保留期限的明細"""
+    import json as _js
+    try:
+        d = target_date or (datetime.now(ZoneInfo("Asia/Taipei")) - timedelta(days=1)).strftime("%Y-%m-%d")
+        with _db() as conn:
+            q = lambda sql, *a: conn.execute(sql, a).fetchone()
+            visitors = q("SELECT COUNT(DISTINCT COALESCE(anon_id, member_id)) FROM events WHERE date=?", d)[0] or 0
+            members_active = q("SELECT COUNT(DISTINCT member_id) FROM events WHERE date=? AND member_id IS NOT NULL", d)[0] or 0
+            paid_active = q("SELECT COUNT(DISTINCT member_id) FROM events WHERE date=? AND plan='paid'", d)[0] or 0
+            cnt = lambda ev: q("SELECT COUNT(*) FROM events WHERE date=? AND event=?", d, ev)[0] or 0
+            top_stocks = [{"stock_id": r[0], "n": r[1]} for r in conn.execute(
+                "SELECT stock_id, COUNT(*) c FROM events WHERE date=? AND event='analyze' AND stock_id<>'' "
+                "GROUP BY stock_id ORDER BY c DESC LIMIT 20", (d,)).fetchall()]
+            top_sources = [{"source": r[0], "n": r[1]} for r in conn.execute(
+                "SELECT source, COUNT(*) c FROM events WHERE date=? AND source<>'' "
+                "GROUP BY source ORDER BY c DESC LIMIT 20", (d,)).fetchall()]
+            top_events = [{"event": r[0], "n": r[1]} for r in conn.execute(
+                "SELECT event, COUNT(*) c FROM events WHERE date=? GROUP BY event ORDER BY c DESC", (d,)).fetchall()]
+            device_split = {r[0] or "unknown": r[1] for r in conn.execute(
+                "SELECT device, COUNT(*) FROM events WHERE date=? GROUP BY device", (d,)).fetchall()}
+            conn.execute(
+                "INSERT OR REPLACE INTO daily_stats (date, visitors, members_active, paid_active, signups, upgrades,"
+                " analyze_count, paywall_hits, signup_wall_hits, top_stocks, top_sources, top_events, device_split, updated_at)"
+                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                (d, visitors, members_active, paid_active, cnt("signup"), cnt("purchase"),
+                 cnt("analyze"), cnt("paywall"), cnt("signup_wall"),
+                 _js.dumps(top_stocks, ensure_ascii=False), _js.dumps(top_sources, ensure_ascii=False),
+                 _js.dumps(top_events, ensure_ascii=False), _js.dumps(device_split, ensure_ascii=False),
+                 _taipei_now_str("%Y-%m-%d %H:%M:%S")))
+            cut = (datetime.now(ZoneInfo("Asia/Taipei")) - timedelta(days=EVENT_RETENTION_DAYS)).strftime("%Y-%m-%d")
+            conn.execute("DELETE FROM events WHERE date < ?", (cut,))
+        print(f"   ✅ 營運數據彙總完成（{d}）：訪客 {visitors}、活躍會員 {members_active}")
+    except Exception as e:
+        print(f"[events] 每日彙總失敗：{e}")
+
+
+@app.get("/admin/stats")
+def admin_stats(days: int = 30, key: str = Header(default="", alias="X-Admin-Key")):
+    """後台營運數據（彙總，不含個人資料）"""
+    _check_admin(key)
+    import json as _js
+    days = max(1, min(days, 400))
+    start = (datetime.now(ZoneInfo("Asia/Taipei")) - timedelta(days=days)).strftime("%Y-%m-%d")
+    today = _taipei_today()
+    with _db() as conn:
+        rows = [dict(r) for r in conn.execute(
+            "SELECT * FROM daily_stats WHERE date>=? ORDER BY date", (start,)).fetchall()]
+        live = dict(conn.execute(
+            "SELECT COUNT(DISTINCT COALESCE(anon_id, member_id)) v, COUNT(DISTINCT member_id) m, "
+            "SUM(CASE WHEN event='analyze' THEN 1 ELSE 0 END) a FROM events WHERE date=?", (today,)).fetchone())
+        members = dict(conn.execute(
+            "SELECT COUNT(*) total, SUM(CASE WHEN plan!='free' AND (expire_at IS NULL OR expire_at>=?) THEN 1 ELSE 0 END) paid "
+            "FROM members", (today,)).fetchone())
+    for r in rows:
+        for k in ("top_stocks", "top_sources", "top_events", "device_split"):
+            try:
+                r[k] = _js.loads(r.get(k) or "[]")
+            except Exception:
+                r[k] = []
+    return {"days": rows, "today": live, "members": members,
+            "retention_days": EVENT_RETENTION_DAYS, "server_time": _taipei_now_str("%Y-%m-%d %H:%M")}
 
 @app.get("/api/stats")
 def api_stats():
@@ -7546,6 +7751,7 @@ def _register_account(req: RegisterReq, ref: str, request: Request, success_mess
             )
             conn.commit()
     conn.close()
+    _log_event("signup", user=None, page="register", request=request)
     return {"ok": True, "message": success_message}
 
 
@@ -7583,6 +7789,7 @@ def _issue_login_session(conn, row, email: str):
         "exp": _time_mod.time() + JWT_EXPIRE_DAYS * 86400,
     }
     token = _jwt_create(payload)
+    _log_event("login", user={"id": row["id"], "plan": row["plan"], "expire_at": row["expire_at"]}, page="login")
     return {
         "token": token,
         "email": email,
@@ -8426,8 +8633,14 @@ def _run_opening_scan_job():
         traceback.print_exc()
 
 
-def _picks_payload(rows, updated_at, user):
+def _picks_payload(rows, updated_at, user, open_all: bool = False):
+    """open_all=True：所有人（含訪客）都給完整資料。
+    2026/09/19 帥哥鴻拍板：開盤成交量排行本來就是公開資訊，遮起來只會讓人覺得什麼都要錢，
+    改成全開；註冊牆改放在加自選／報告頁／討論內文，付費牆放在12金叉與完整綜合解說。"""
     st = _taipei_now_str("%Y-%m-%d %H:%M")
+    if open_all:
+        return {"data": rows, "updated_at": updated_at, "server_time": st,
+                "tier": "open", "masked": False, "preview": False}
     if _is_premium(user):
         return {"data": rows, "updated_at": updated_at, "server_time": st,
                 "tier": "paid", "masked": False, "preview": False}
@@ -8450,7 +8663,7 @@ def _picks_payload(rows, updated_at, user):
 # 裝饰器改掛回真正處理請求的 get_opening_picks，_picks_payload 只當內部輔助函式使用。
 @app.get("/api/picks/opening")
 def get_opening_picks(user: dict | None = Depends(get_current_user)):
-    """開盤熱門股（成交量前20；遊客弱預覽／免費藏名／付費全開）
+    """開盤成交量排行（成交量前20；2026/09/19起所有人都看得到完整資料）
     盤中補即時報價，盤後補當日收盤價，都用 MIS API。
     """
     import urllib.request as _urq, json as _jq
@@ -8458,7 +8671,7 @@ def get_opening_picks(user: dict | None = Depends(get_current_user)):
     updated_at = _OPENING_TOP20.get("updated_at")
 
     if not base_data:
-        return _picks_payload(base_data, updated_at, user)
+        return _picks_payload(base_data, updated_at, user, open_all=True)
 
     enriched = []
     for item in base_data:
@@ -8478,7 +8691,7 @@ def get_opening_picks(user: dict | None = Depends(get_current_user)):
             pass
         enriched.append(new_item)
 
-    return _picks_payload(enriched, updated_at, user)
+    return _picks_payload(enriched, updated_at, user, open_all=True)
 
 
 # ══════════════════════════════════════════════════════════
@@ -11322,8 +11535,11 @@ async def webhook_ecpay_recurring(request: Request):
             "UPDATE members SET plan=?, expire_at=?, merchant_trade_no=? WHERE email=?",
             (plan, new_expire, keep_trade, email)
         )
+        _mid_row = conn.execute("SELECT id FROM members WHERE email=?", (email,)).fetchone()
         conn.commit()
         conn.close()
+        _log_event("purchase", user={"id": _mid_row["id"] if _mid_row else None,
+                                     "plan": plan, "expire_at": new_expire}, page="ecpay")
         # 寄續約通知信
         _send_email(email, "【線上有位】自動續約成功",
             _render_email(

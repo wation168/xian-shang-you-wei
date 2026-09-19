@@ -102,16 +102,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
      等地方都會無條件呼叫）就會把它填滿內容，在手機版直接以一般區塊的方式插在頁面最上方。
      這是既有問題（這次新增的「＋新增股票」按鈕只是讓它更明顯），這裡順手補上真正的隱藏規則。 */
   #desktopSidebar{display:none!important}
-  /* 2026/08/03新增：手機版關鍵數字/文字字級放大，原本跟桌面版用同一套尺寸太小難閱讀 */
-  .xhair{font-size:12px}
-  .leg{font-size:12px}
-  .chart-name{font-size:13px}
-  .rb{font-size:13px}
-  .count-wrap{font-size:13px}
-  .deep-val{font-size:15px}
-  .deep-sub{font-size:13px}
-  .m-val{font-size:17px}
-  .summary-list li{font-size:14px}
 }
 
 /* ══ 電腦版三欄版面 ══ */
@@ -397,6 +387,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 /* 整合結論（置頂，最醒目） */
 .summary-list li.conclusion{font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 .summary-list li.conclusion .dot{display:none}
+/* 摘要摺疊（2026/09/18）：手機版先顯示前 4 條 */
+.summary-list li.sum-rest{display:none}
+.summary-list.sum-more-on li.sum-rest{display:flex}
+.summary-list li.sum-toggle{color:var(--green);font-weight:700;cursor:pointer;font-size:13px}
+.summary-list li.sum-toggle .dot{display:none}
+.summary-list li.sum-toggle span::after{content:'顯示全部 ▼'}
+.summary-list.sum-more-on li.sum-toggle span::after{content:'收起 ▲'}
 
 /* ── 深度分析區塊 ── */
 #deepSection{display:none;padding:0 0 4px}
@@ -1331,6 +1328,60 @@ html[data-theme="dark"] body,html:not([data-theme]) body{background:transparent}
 .vd-edu-on .vd-guide{display:block}
 .vd-guide ol{margin:4px 0 0;padding-left:20px;font-size:12.5px;line-height:1.8;color:var(--text2)}
 .vd-edu-lock{display:none;margin-top:10px;font-size:12px;color:var(--edu);font-weight:700}
+/* 綜合解說字級（2026/09/18 改用 class，手機版才能整體放大）*/
+.vd-head{font-size:14px;line-height:1.7;color:var(--text);font-weight:600}
+.vd-act{font-size:13px;line-height:1.65;color:var(--text2);margin-top:4px}
+.vd-st{font-size:12px;font-weight:800;margin-bottom:4px}
+.vd-item{display:flex;gap:6px;font-size:13px;line-height:1.65;color:var(--text)}
+.vd-item .vd-ic{flex-shrink:0}
+/* 完整解說摺疊（2026/09/18：手機版頁面太長）*/
+.vd-rest{display:none}
+.vd-more-on .vd-rest{display:block}
+.vd-more{margin-top:10px;font-size:12.5px;font-weight:700;color:var(--green);cursor:pointer;user-select:none;display:inline-block}
+.vd-more::after{content:' ▼'}
+.vd-more-on .vd-more::after{content:' ▲'}
+
+/* ══ 手機版字級（2026/09/18 移到這裡）══
+   原本這段放在檔案前面的 @media(max-width:1023px) 裡，但 .deep-val / .m-val 這些基礎樣式
+   寫在它後面，同樣的優先權下後面的規則會贏——所以手機放大字級其實從來沒生效過（帥哥鴻回報
+   手機字太小看得很吃力）。移到所有基礎樣式之後才會真正套用。 */
+@media(max-width:1023px){
+  .xhair{font-size:12px}
+  .leg{font-size:12px}
+  .chart-name{font-size:13px}
+  .rb{font-size:13px}
+  .count-wrap{font-size:13px}
+  .deep-val{font-size:16px}
+  .deep-sub{font-size:13.5px}
+  .m-val{font-size:19px}
+  .summary-list li{font-size:15px;line-height:1.75}
+  /* 2026/09/18：手機字太小看得吃力，主要文字再放大一級 */
+  .deep-lbl{font-size:12px}
+  .m-lbl{font-size:11.5px}
+  .m-val.lg{font-size:26px}
+  .m-sub{font-size:11px}
+  .m-hint{font-size:13px;line-height:1.6}
+  .inst-lbl,.inst-val{font-size:13px}
+  .risk-item{font-size:13px;line-height:1.7}
+  .dtag{font-size:11.5px}
+  .rr-left .lbl{font-size:12.5px}
+  .rr-left .val{font-size:26px}
+  .rr-tag{font-size:13px}
+  .rr-desc{font-size:12px}
+  .summary-list li.conclusion{font-size:17px;line-height:1.7}
+  .ind-num-item{font-size:12.5px}
+  .ma-hdr{font-size:13.5px}
+  .vd-head{font-size:15.5px}
+  .vd-act,.vd-item{font-size:14px;line-height:1.75}
+  .vd-st{font-size:13px}
+  .vd-edu{font-size:13.5px;line-height:1.8}
+  .vd-q{font-size:12.5px}
+  .vd-more{font-size:13.5px}
+  /* 手機版沒開教學模式時，不顯示每一條的「📘 這代表什麼？」，避免頁面被撐長；
+     打開右上角教學模式就會全部出現 */
+  .vd-card:not(.vd-edu-on) .vd-q{display:none}
+}
+
 .vd-edu-on .vd-edu-lock{display:block}
 </style>
 <!-- Phase 4（首頁真實資料3D-style圖表）：state-orb量表／市場氣氛柱狀／資金雷達橫條，
@@ -1751,8 +1802,13 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
     <!-- ── 深度分析七欄位 ── -->
     <div id="deepSection" style="display:none;padding:0 0 4px">
       <div id="verdictBox"></div>
-      <div class="deep-title">📐 深度分析</div>
-      <div class="deep-grid">
+      <div class="ma-cfg" style="margin-bottom:8px">
+        <div class="ma-hdr" onclick="toggleSection('deepCardsBody','deepCardsArr')">
+          <span>📐 技術指標明細（K棒・均線・KD・MACD・量能・法人・風險）</span>
+          <span class="arr" id="deepCardsArr">▼ 展開</span>
+        </div>
+      </div>
+      <div id="deepCardsBody" class="deep-grid" style="display:none">
         <div class="deep-card" id="dcard-kbar"><div class="deep-lbl">🕯 K棒型態</div><div id="d-kbar-tag"></div><div class="deep-val" id="d-kbar-name">—</div><div class="deep-sub" id="d-kbar-sub"></div><div class="m-hint">今日蠟燭圖形狀所隱含的多空意義</div></div>
         <div class="deep-card" id="dcard-ma"><div class="deep-lbl">📊 均線排列</div><div id="d-ma-tag"></div><div class="deep-sub" id="d-ma-sub"></div><div class="m-hint">多條均線的排列方向，判斷中長期趨勢是否一致</div></div>
         <div class="deep-card" id="dcard-kd"><div class="deep-lbl">〽️ KD 指標</div><div id="d-kd-tag"></div><div class="ind-nums" id="d-kd-nums"></div><div class="deep-sub" id="d-kd-sub"></div><div class="m-hint">短線動能指標，判斷是否超買或超賣</div></div>
@@ -2572,6 +2628,7 @@ document.getElementById('countInput').addEventListener('change',e=>{
 let _curPage = 'home';
 function showPage(page){
   _curPage = page;
+  _ev('view_page', {page: page});
   document.querySelectorAll('.nav-btn').forEach((b,i)=>b.classList.toggle('active',['home','watch','picks','forum','my'][i]===page));
   const overlay=document.getElementById('pageOverlay');
   if(page==='home'){
@@ -2878,6 +2935,7 @@ function _renderWatchFallback(){
     </div>`).join('');
 }
 function addWatch(id,name,group,shares,costPrice){
+  _ev(costPrice ? 'add_holding' : 'add_watch', {stock_id: String(id||'')});
   group = group || '預設';
   let isNew=false;
   if(!watchList.find(s=>s.id===id)){
@@ -3503,6 +3561,49 @@ function getAPI(){
   if(isLocal) return 'http://localhost:8000';
   return 'https://api.softglow-ai.com';
 }
+
+// ── 📈 營運數據埋點（2026/09/19，案件009）──
+// 只記「做了什麼」，不記輸入內容；anon_id 是瀏覽器自己產生的隨機碼，不含任何個人資料。
+function _anonId(){
+  try{
+    let v = localStorage.getItem('anonId');
+    if(!v){ v = 'a' + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem('anonId', v); }
+    return v;
+  }catch(e){ return ''; }
+}
+function _firstSource(){
+  try{
+    let src = localStorage.getItem('firstSource'), cmp = localStorage.getItem('firstCampaign');
+    if(src === null){
+      const q = new URLSearchParams(location.search);
+      src = q.get('utm_source') || (document.referrer && !document.referrer.includes('softglow-ai.com')
+            ? document.referrer.replace(/^https?:\/\/(www\.)?/, '').split('/')[0] : '');
+      cmp = q.get('utm_campaign') || '';
+      localStorage.setItem('firstSource', src || '');
+      localStorage.setItem('firstCampaign', cmp || '');
+    }
+    return {source: src || '', campaign: cmp || ''};
+  }catch(e){ return {source:'', campaign:''}; }
+}
+let _evLast = {};
+function _ev(event, extra){
+  try{
+    const now = Date.now();
+    const key = event + (extra && extra.stock_id ? ':' + extra.stock_id : '');
+    if(_evLast[key] && now - _evLast[key] < 3000) return;   // 同一事件 3 秒內不重複送
+    _evLast[key] = now;
+    const f = _firstSource();
+    const body = Object.assign({
+      event, anon_id: _anonId(), source: f.source, campaign: f.campaign,
+      device: window.innerWidth < 1024 ? 'mobile' : 'desktop'
+    }, extra || {});
+    fetch(getAPI() + '/api/event', {
+      method: 'POST', keepalive: true,
+      headers: Object.assign({'Content-Type':'application/json'}, _authHeaders()),
+      body: JSON.stringify(body)
+    }).catch(()=>{});
+  }catch(e){}
+}
 function setSt(msg,err){
   const el=document.getElementById('statusBar');
   el.innerHTML=msg;
@@ -3752,11 +3853,12 @@ function renderResult(d,enabledMA){
     cls: channel.position==='near_support'?'md':channel.position==='near_resist'?'hi':''
   });
 
-  document.getElementById('summaryList').innerHTML=coreLines.map(({text,cls})=>{
-    const isConclusion = cls==='conclusion';
-    const isConflict   = cls==='conflict';
-    return `<li class="${cls||''}"><div class="dot"></div><span>${text}</span></li>`;
-  }).join('');
+  // 2026/09/18：手機版頁面太長 → 先顯示前 4 條，其餘收在「顯示全部」（電腦版全部展開）
+  const _sumLi = ({text,cls}, i) => `<li class="${cls||''}${i>=4 ? ' sum-rest' : ''}"><div class="dot"></div><span>${text}</span></li>`;
+  const _sumEl = document.getElementById('summaryList');
+  _sumEl.classList.toggle('sum-more-on', window.innerWidth >= 1024 || coreLines.length <= 5);
+  _sumEl.innerHTML = coreLines.map(_sumLi).join('')
+    + (coreLines.length > 5 ? `<li class="sum-toggle" onclick="this.parentElement.classList.toggle('sum-more-on')"><span></span></li>` : '');
 
   // 指標卡
   // 做法A：大字現價顯示 displayPrice（畫面現價/即時價），與下方分析數字（用收盤基準 price）分離
@@ -3976,6 +4078,8 @@ function renderAnalysisCards(d) {
   // 2026/09/17修正：原本設成''，但CSS本身有 #deepSection{display:none}，清掉行內樣式後
   // 還是被CSS藏起來——深度分析卡片上線以來其實從沒顯示過。改成明確設block。
   sec.style.display = 'block';
+  // 2026/09/18：手機版頁面太長，技術指標明細預設收合（電腦版預設展開）；使用者按過就記住
+  _applyFoldDefault('deepCardsBody', 'deepCardsArr', 'foldDeepCards');
 }
 
 
@@ -3985,6 +4089,7 @@ function renderAnalysisCards(d) {
 function _vdEduOn(){ try{ return localStorage.getItem('verdictEdu') === '1'; }catch(e){ return false; } }
 function _vdToggleEdu(){
   const on = !_vdEduOn();
+  if(on) _ev('edu_open', {});
   try{ localStorage.setItem('verdictEdu', on ? '1' : '0'); }catch(e){}
   const card = document.querySelector('#verdictBox .vd-card');
   if(!card) return;
@@ -3992,6 +4097,18 @@ function _vdToggleEdu(){
   card.querySelectorAll('.vd-blk').forEach(b => b.classList.toggle('vd-open', on));
 }
 function _vdTg(el){ el.parentElement.classList.toggle('vd-open'); }
+// 完整解說摺疊（2026/09/18：手機版預設只顯示結論、觀察重點、關鍵價位）
+function _vdMoreOn(){
+  try{ const v = localStorage.getItem('verdictMore'); if(v==='1') return true; if(v==='0') return false; }catch(e){}
+  return window.innerWidth >= 1024;
+}
+function _vdToggleMore(el){
+  const card = el.closest('.vd-card'); if(!card) return;
+  const on = !card.classList.contains('vd-more-on');
+  if(on) _ev('verdict_more', {});
+  card.classList.toggle('vd-more-on', on);
+  try{ localStorage.setItem('verdictMore', on ? '1' : '0'); }catch(e){}
+}
 
 function renderVerdict(v){
   const box = document.getElementById('verdictBox');
@@ -4009,8 +4126,8 @@ function renderVerdict(v){
   const stanceColor = {bull:'var(--dn)', bull_wait:'var(--amber)', bull_caution:'var(--amber)', neutral:'var(--text2)', bear:'var(--up)'}[v.stance] || 'var(--text2)';
   const list = (title, arr, icon, color, eduArr) => (arr && arr.length) ? `
     <div style="margin-top:12px">
-      <div style="font-size:12px;font-weight:800;color:${color || 'var(--text2)'};margin-bottom:4px">${title}</div>
-      ${arr.map((t, i) => blk(`<div style="display:flex;gap:6px;font-size:13px;line-height:1.65;color:var(--text)"><span style="flex-shrink:0">${icon}</span><span>${esc(t)}</span></div>`, (eduArr || [])[i])).join('')}
+      <div class="vd-st" style="color:${color || 'var(--text2)'}">${title}</div>
+      ${arr.map((t, i) => blk(`<div class="vd-item"><span class="vd-ic">${icon}</span><span>${esc(t)}</span></div>`, (eduArr || [])[i])).join('')}
     </div>` : '';
   const stateMeta = {today:['🟢','今天剛轉強'], active:['🔵','轉強中'], none:['⚪','未轉強']};
   let sigHtml = '';
@@ -4018,7 +4135,7 @@ function renderVerdict(v){
   if(sg && sg.available && sg.items){
     sigHtml = `
     <div style="margin-top:12px">
-      <div style="font-size:12px;font-weight:800;color:var(--text2);margin-bottom:6px">12金叉逐項（🟢今天剛轉強 ${sg.today_count}・🔵轉強中 ${sg.active_count}）</div>
+      <div class="vd-st" style="color:var(--text2);margin-bottom:6px">12金叉逐項（🟢今天剛轉強 ${sg.today_count}・🔵轉強中 ${sg.active_count}）</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px">
       ${sg.items.map(x => {
         const [ic, lb] = stateMeta[x.state] || stateMeta.none;
@@ -4033,20 +4150,22 @@ function renderVerdict(v){
   const cfEdu = edu.conflicts || [];
   const cfHtml = (sec.conflicts !== undefined) ? `
     <div style="margin-top:12px;background:var(--amber-l, rgba(245,158,11,.1));border-radius:10px;padding:9px 11px">
-      <div style="font-size:12px;font-weight:800;color:var(--amber);margin-bottom:4px">⚖️ 矛盾與最大的問題</div>
-      ${conflicts.map((t, i) => blk(`<div style="font-size:13px;line-height:1.65;color:var(--text)">・${esc(t)}</div>`, cfEdu[i], '為什麼會矛盾？', true)).join('') || '<div style="font-size:13px;color:var(--text2)">各項訊號方向沒有明顯矛盾</div>'}
-      ${blk(`<div style="font-size:13px;line-height:1.65;color:var(--text);margin-top:4px"><b>現在最大的問題：</b>${esc(sec.top_problem)}</div>`, edu.top_problem, '這是怎麼挑的？', true)}
+      <div class="vd-st" style="color:var(--amber)">⚖️ 矛盾與最大的問題</div>
+      ${conflicts.map((t, i) => blk(`<div class="vd-item"><span>・${esc(t)}</span></div>`, cfEdu[i], '為什麼會矛盾？', true)).join('') || '<div class="vd-item"><span>各項訊號方向沒有明顯矛盾</span></div>'}
+      ${blk(`<div class="vd-item" style="margin-top:4px"><span><b>現在最大的問題：</b>${esc(sec.top_problem)}</span></div>`, edu.top_problem, '這是怎麼挑的？', true)}
     </div>` : '';
   const scHtml = (sec.scenarios && sec.scenarios.length)
-    ? `<div style="margin-top:12px"><div style="font-size:12px;font-weight:800;color:var(--text2);margin-bottom:4px">🔀 接下來的情境</div>${blk(sec.scenarios.map(t => `<div style="display:flex;gap:6px;font-size:13px;line-height:1.65;color:var(--text)"><span style="flex-shrink:0">→</span><span>${esc(t)}</span></div>`).join(''), edu.scenarios, '為什麼都看收盤價？')}</div>`
+    ? `<div style="margin-top:12px"><div class="vd-st" style="color:var(--text2)">🔀 接下來的情境</div>${blk(sec.scenarios.map(t => `<div class="vd-item"><span class="vd-ic">→</span><span>${esc(t)}</span></div>`).join(''), edu.scenarios, '為什麼都看收盤價？')}</div>`
     : '';
   const guideHtml = (edu.guide && edu.guide.length)
     ? `<div class="vd-guide"><div style="font-size:12.5px;font-weight:800;color:var(--edu)">📘 看這份解說的順序</div><ol>${edu.guide.map(g => `<li>${esc(g)}</li>`).join('')}</ol></div>`
     : '';
   const hasEdu = !!(edu.headline || edu.action);
+  const hasRest = !!((sec.status && sec.status.length) || (sec.bull && sec.bull.length) || (sec.bear && sec.bear.length) || sec.conflicts !== undefined || (sec.scenarios && sec.scenarios.length) || sigHtml);
+  const moreOn = _vdMoreOn();
   const locked = v.locked && (v.locked_sections || []).length;
   box.innerHTML = `
-  <div class="vd-card${eduOn ? ' vd-edu-on' : ''}" style="background:var(--bg2);border:1px solid var(--border);border-left:4px solid ${stanceColor};border-radius:var(--radius-lg);padding:14px 14px 12px;margin:0 0 14px">
+  <div class="vd-card${eduOn ? ' vd-edu-on' : ''}${moreOn ? ' vd-more-on' : ''}" style="background:var(--bg2);border:1px solid var(--border);border-left:4px solid ${stanceColor};border-radius:var(--radius-lg);padding:14px 14px 12px;margin:0 0 14px">
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
       <span style="font-size:15px;font-weight:800;color:var(--text)">🧭 綜合解說</span>
       <span style="font-size:12px;font-weight:800;padding:2px 10px;border-radius:20px;border:1px solid ${stanceColor};color:${stanceColor}">${esc(v.stance_label)}</span>
@@ -4054,15 +4173,18 @@ function renderVerdict(v){
       ${hasEdu ? `<button type="button" class="vd-edu-sw" onclick="_vdToggleEdu()"><span>📘 教學模式</span><span class="sw"></span></button>` : ''}
     </div>
     ${guideHtml}
-    ${blk(`<div style="font-size:14px;line-height:1.7;color:var(--text);font-weight:600">${esc(sec.headline || v.headline)}</div>`, edu.headline, '這個結論怎麼來的？', true)}
-    ${sec.action ? blk(`<div style="font-size:13px;line-height:1.65;color:var(--text2);margin-top:4px">👀 觀察重點：${esc(sec.action)}</div>`, edu.action, '怎麼看觀察重點？', true) : ''}
-    ${list('📍 現在的狀況', sec.status, '•', null, edu.status)}
-    ${list('📈 看多的理由', sec.bull, '＋', 'var(--dn)', edu.bull)}
-    ${list('📉 看空的理由', sec.bear, '－', 'var(--up)', edu.bear)}
-    ${cfHtml}
+    ${blk(`<div class="vd-head">${esc(sec.headline || v.headline)}</div>`, edu.headline, '這個結論怎麼來的？', true)}
+    ${sec.action ? blk(`<div class="vd-act">👀 觀察重點：${esc(sec.action)}</div>`, edu.action, '怎麼看觀察重點？', true) : ''}
     ${list('🎯 關鍵價位', sec.levels, '•', null, edu.levels)}
-    ${scHtml}
-    ${sigHtml}
+    ${hasRest ? `<div class="vd-rest">
+      ${list('📍 現在的狀況', sec.status, '•', null, edu.status)}
+      ${list('📈 看多的理由', sec.bull, '＋', 'var(--dn)', edu.bull)}
+      ${list('📉 看空的理由', sec.bear, '－', 'var(--up)', edu.bear)}
+      ${cfHtml}
+      ${scHtml}
+      ${sigHtml}
+    </div>
+    <div class="vd-more" onclick="_vdToggleMore(this)">看完整解說（狀況、多空理由、矛盾、情境、12金叉）</div>` : ''}
     ${locked ? `<div style="margin-top:10px;font-size:12px;color:var(--green);font-weight:700">🔒 完整解說（狀況、多空理由、矛盾、關鍵價位、情境、12金叉逐項）為付費會員內容</div>` : ''}
     ${v.edu_locked ? `<div class="vd-edu-lock">📘 各段落的完整教學說明為付費會員內容</div>` : ''}
     <div style="font-size:10px;color:var(--text3);margin-top:10px;line-height:1.6">以上由系統依技術、籌碼、營收資料自動整理，只描述條件、不預測漲跌，不構成投資建議。${hasEdu ? '📘 教學說明為一般技術分析知識。' : ''}</div>
@@ -4070,6 +4192,7 @@ function renderVerdict(v){
 }
 
 async function doGenerateReport(){
+  _ev('report_view', {stock_id: (window.C && C._currentId) ? String(C._currentId) : ''});
   if(!_authUser){ showLoginModal(); return; }
   const btn=document.getElementById('reportBtn');
   if(!btn)return;
@@ -5236,12 +5359,24 @@ function applyStoredTheme(){
 }
 
 // 通用摺疊
+// 2026/09/18：摺疊區塊的預設狀態（手機收合、電腦展開），使用者按過之後以他的選擇為準
+const _FOLD_KEYS = {deepCardsBody:'foldDeepCards'};
+function _applyFoldDefault(bodyId, arrId, storeKey){
+  const body=document.getElementById(bodyId), arr=document.getElementById(arrId);
+  if(!body||!arr) return;
+  let open = window.innerWidth >= 1024;   // 電腦版預設展開
+  try{ const v = localStorage.getItem(storeKey); if(v==='1') open=true; else if(v==='0') open=false; }catch(e){}
+  body.style.display = open ? '' : 'none';
+  arr.textContent = open ? '▲ 收起' : '▼ 展開';
+}
 function toggleSection(bodyId, arrId){
   const body=document.getElementById(bodyId);
   const arr=document.getElementById(arrId);
   const open=body.style.display==='none';
-  body.style.display=open?'block':'none';
+  body.style.display=open?'':'none';
   arr.textContent=open?'▲ 收起':'▼ 展開';
+  const key=_FOLD_KEYS[bodyId];
+  if(key){ try{ localStorage.setItem(key, open?'1':'0'); }catch(e){} }
   // 展開族群時才載入資料
   if(open && bodyId==='peerBody' && _currentPeerStock) _loadPeerData(_currentPeerStock);
   // 展開籌碼時才載入資料
@@ -7397,6 +7532,7 @@ function _checkPendingPromo(){
 }
 
 function showUpgradeModal(){
+  _ev('upgrade_click', {page: _curPage || ''});
   if(_appVerStale){ location.reload(); return; }
   if(!_authUser){ showLoginModal(); return; }
   if(_authUser.plan && _authUser.plan !== 'free' && _authUser.is_active && _authUser.is_recurring !== false){
