@@ -4578,7 +4578,7 @@ def _do_analyze(stock_id: str, tf: str = "D",
                 if new_dist < sup_dist_pct:
                     support = round(float(ma_v), 2)
                     supp_detail["support_source"] = "ma_fallback"
-                    supp_detail["support_desc"] = f"{ma_name} 動態支撐（原支撐過遠已降級）"
+                    supp_detail["support_desc"] = f"{ma_name} 動態支撐"
                     sup_dist_pct = new_dist
                     break
 
@@ -4930,17 +4930,21 @@ def _do_analyze(stock_id: str, tf: str = "D",
         _sell_ma   = gann_sell["ma"]
         _sell_val  = gann_sell["val"]
         _sell_type = gann_sell["type"]
+        # 2026/09/20（案件012）：提醒文字裡不要印均線的價位，改印均線名稱。
+        # 原本寫「正乖離 MA20（45.24）過大」，等於把支撐價從另一個地方洩出來，
+        # 跟「支撐區只講月線不講價位」自相矛盾。
+        _sell_ma_s = _level_short(_sell_ma, _sell_ma)
         if gann_sell.get("is_deviate"):
             # 賣8 乖離過大：短線過熱、獲利了結提示（非趨勢反轉，措辭用「留意回吐、可減碼」）
             _exit_notes.append(
-                f"⚠️ 過熱提醒：{_sell_type}，股價短線急漲、正乖離 {_sell_ma}（{_sell_val}）過大，"
+                f"⚠️ 過熱提醒：{_sell_type}，股價短線急漲、正乖離{_sell_ma_s}過大，"
                 f"短線回檔風險增加，明日若開高走低代表賣壓出現。"
             )
         else:
             # 賣5/6/7：均線弱勢訊號
             _exit_notes.append(
-                f"⚠️ 轉弱提醒：{_sell_type}（{_sell_ma}={_sell_val}）。"
-                f"明日若持續無法站回 {_sell_ma}，代表均線壓力有效；跌破 {stop_loss} 代表目前型態失效。"
+                f"⚠️ 轉弱提醒：{_sell_type}（{_sell_ma_s}）。"
+                f"明日若持續無法站回{_sell_ma_s}，代表均線壓力有效；收盤跌破支撐區代表目前型態失效。"
             )
     if _exit_notes:
         warning = conclusion + "\n" + "\n".join(_exit_notes)
@@ -5069,13 +5073,13 @@ def _do_analyze(stock_id: str, tf: str = "D",
             f"與預期的最近交易日有落差（也可能剛好遇到休市日）。如有疑慮，建議稍後再重新查看。"
         )
     elif _is_trading_session() and price_basis_date == _today_str:
-        _price_basis_note = "⏱️ 現在是盤中，以下分析（支撐、壓力、失效位置、損益比）用的是今天即時資料試算，還不是正式收盤價，收盤後數字可能會再變動，僅供參考。"
+        _price_basis_note = "⏱️ 現在是盤中，以下分析（支撐壓力區、均線結構等）用的是今天即時資料試算，還不是正式收盤價，收盤後可能會再變動，僅供參考。"
     elif _is_trading_session() and _live_quote_ok and _basis_gap is not None:
-        _price_basis_note = f"上方現價為即時參考；以下分析（支撐、壓力、失效位置、損益比）以 {_basis_md} 收盤價為基準計算，兩者盤中可能有落差，屬正常。"
+        _price_basis_note = f"上方現價為即時參考；以下分析（支撐壓力區、均線結構等）以 {_basis_md} 收盤價為基準計算，兩者盤中可能有落差，屬正常。"
     elif _live_quote_ok and _display_price_date > price_basis_date and _basis_gap is not None:
         # 2026/09/17：收盤後官方資料還沒更新的空窗，現價已是新的一天、分析仍是前一天
         _price_basis_note = (
-            f"最新收盤資料還在更新中：以下分析（支撐、壓力、失效位置、損益比）仍以 {_basis_md} 收盤價為基準，"
+            f"最新收盤資料還在更新中：以下分析（支撐壓力區、均線結構等）仍以 {_basis_md} 收盤價為基準，"
             f"上方現價是 {_display_price_date[5:].replace('-', '/')} 的價格，兩者有落差。約10分鐘後重新查詢會自動更新。"
         )
     else:
@@ -9634,7 +9638,7 @@ def _inject_report_ads(html: str) -> str:
 # report_generate 靠這個標記判斷 stock_reports 裡的快取是不是舊模板產生的，
 # 是的話強制重新產生，不然光改版面/文案，使用者會一直看到卡住的舊快取（直到當天
 # 收盤基準換了才會被上面的 price_basis_date 檢查順便救回來，不夠即時）。
-_REPORT_TPL_VERSION = "v2026-09-20-levels"
+_REPORT_TPL_VERSION = "v2026-09-20-names"
 # 2026/09/14修正（案件003驗收時發現）：上面這個版本標記在08/07之後就沒再更新過，但
 # 09/14這輪其實已經改了.stat-hint解說文字的CSS（字級/顏色/拿掉斜體，見_build_report_html
 # 內文字說明），忘記同步把版本標記跟著往前推——結果部署後、當天已經被瀏覽過而快取進
@@ -9847,13 +9851,13 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
     elif kbar_action:
         op_text = kbar_action
     elif today_breakout:
-        op_text = f"今日突破前高 {prev_high}，突破型態成立。失效位置 {stop_loss}，前方壓力 {resistance}，損益比 {rr_ratio:.2f}。"
+        op_text = f"今日突破前波高點，突破型態成立。觀察回測時是否守住突破位置。"
     elif tp_score == 0:
         op_text = f"多空雷達四格全滅，技術面偏弱。趨勢翻多、MACD 翻正、量能放大是後續觀察的轉強條件。"
     elif tp_score <= 1:
-        op_text = f"多空雷達訊號不足，方向未明。失效位置 {stop_loss}，觀察雷達訊號是否陸續補齊。"
+        op_text = f"多空雷達訊號不足，方向未明。觀察雷達訊號是否陸續補齊。"
     else:
-        op_text = f"趨勢盤整，方向未明。觀察能否突破壓力 {resistance}；失效位置 {stop_loss}，損益比 {rr_ratio:.2f}。"
+        op_text = f"趨勢盤整，方向未明。觀察能否突破上方壓力區，或跌破下方支撐區。"
 
     # 突破風險提示（開高走低）是額外補充資訊，跟主結論不衝突，只要today_breakout成立就補上，
     # 不綁在特定分支（舊版只有kbar_action分支才會補到，容易漏掉）
@@ -9997,7 +10001,7 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
         "headline": f"{stock_id} {stock_name} 個股分析報告",
         "datePublished": report_date,
         "publisher": {"@type": "Organization", "name": "線上有位"},
-        "description": f"{stock_id} {stock_name} {report_date} 技術分析：{trend}，支撐 {support}，壓力 {resistance}，損益比 {rr_ratio:.2f}",
+        "description": f"{stock_id} {stock_name} {report_date} 技術分析：{trend}；整理支撐壓力區、K線型態與法人籌碼",
     }, ensure_ascii=False)
 
     return f"""<!DOCTYPE html>
@@ -10015,9 +10019,9 @@ def _build_report_html(stock_id: str, stock_name: str, report_date: str, d: dict
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{stock_name}({stock_id}) 技術面觀察：多空雷達 × 支撐壓力 {report_date}｜線上有位</title>
-<meta name="description" content="輸入股票代號，系統自動整理多空雷達、K棒型態、支撐壓力位、葛蘭碧訊號，一鍵產出完整報告。免費使用。還有 500+ 計算工具和全球彩票選號。">
+<meta name="description" content="輸入股票代號，系統自動整理多空雷達、K棒型態、支撐壓力區、葛蘭碧訊號，一鍵產出完整報告。免費使用。還有 500+ 計算工具和全球彩票選號。">
 <meta property="og:title" content="{stock_id} {stock_name} 分析報告">
-<meta property="og:description" content="{trend}｜支撐 {support}｜壓力 {resistance}｜損益比 {rr_ratio:.2f}">
+<meta property="og:description" content="{trend}｜支撐壓力區｜K線型態｜法人籌碼">
 <meta property="og:type" content="article">
 <link rel="canonical" href="{FRONTEND_URL}/report/{stock_id}">
 <script type="application/ld+json">{json_ld}</script>
@@ -10126,11 +10130,6 @@ function toggleTheme(){{
         <div class="stat-value" style="font-size:15px;color:{ma_color}">{trend}</div>
         <div class="stat-hint">用道氏理論的波峰波谷判斷目前多空方向</div>
       </div>
-      <div class="stat">
-        <div class="stat-label">損益比</div>
-        <div class="stat-value" style="color:{rr_color}">{rr_ratio:.2f}</div>
-        <div class="stat-hint">潛在獲利÷潛在虧損，數字越高代表越划算</div>
-      </div>
     </div>
     <!-- 多空雷達 -->
     <div style="margin-top:16px;padding:14px;background:var(--bg2,#f8f8f8);border-radius:12px">
@@ -10235,12 +10234,7 @@ function toggleTheme(){{
       <div class="stat" style="flex:0 0 auto">
         <div class="stat-label">風險等級</div>
         <div class="stat-value" style="color:{risk_color}">{risk_label}</div>
-        <div class="stat-hint">依失效位置距現價的百分比區分：5%內低、5~10%中、10%以上高</div>
-      </div>
-      <div class="stat" style="flex:0 0 auto">
-        <div class="stat-label">損益比</div>
-        <div class="stat-value" style="color:{rr_color}">{rr_ratio:.2f}</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:2px">{"良好" if rr_ratio >= 2 else ("尚可" if rr_ratio >= 1 else "偏低")}</div>
+        <div class="stat-hint">依現價距離支撐區的百分比區分：5%內低、5~10%中、10%以上高</div>
       </div>
     </div>
     <ul style="list-style:none">{risk_items_html}</ul>
