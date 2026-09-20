@@ -2647,10 +2647,12 @@ def find_trend_channel(highs, lows, closes):
     dist_res = (resist_now - price)  / price * 100 if price > 0 else 999
     thr = 0.02
 
-    if   price > resist_now * (1+thr):  pos,pdesc="breakout_up",  f"已突破上軌 {resist_now}，等幅推算價位 {round(resist_now+channel_width,2)}"
-    elif price < support_now * (1-thr): pos,pdesc="breakout_dn",  f"已跌破下軌 {support_now}，注意下方空間"
-    elif dist_res < 3:                  pos,pdesc="near_resist",  f"靠近上軌壓力 {resist_now}（+{dist_res:.1f}%），注意拉回設好防守"
-    elif dist_sup < 3:                  pos,pdesc="near_support", f"靠近下軌支撐 {support_now}（-{dist_sup:.1f}%），相對低風險觀察位"
+    # 2026/09/20（案件012第四批）：拿掉軌道的具體價位、等幅推算價位（屬未來價位推算），
+    # 以及「注意拉回設好防守」這種操作指示（案件008 漏掉的）。只留位置關係與百分比。
+    if   price > resist_now * (1+thr):  pos,pdesc="breakout_up",  "已突破軌道上緣"
+    elif price < support_now * (1-thr): pos,pdesc="breakout_dn",  "已跌破軌道下緣"
+    elif dist_res < 3:                  pos,pdesc="near_resist",  f"靠近軌道上緣（+{dist_res:.1f}%）"
+    elif dist_sup < 3:                  pos,pdesc="near_support", f"靠近軌道下緣（-{dist_sup:.1f}%）"
     else:                               pos,pdesc="middle",       f"位於軌道中段，距支撐 -{dist_sup:.1f}%，距壓力 +{dist_res:.1f}%"
 
     return {
@@ -4592,7 +4594,7 @@ def _do_analyze(stock_id: str, tf: str = "D",
         if ch_sup and ch_sup < price * 0.999:
             ch_sup_dist = (price - ch_sup) / price * 100
             if ch_sup_dist > 8:
-                supp_detail["support_desc"] += f"，軌道下緣 {round(ch_sup,1)}（-{ch_sup_dist:.1f}%，長線參考）"
+                supp_detail["support_desc"] += f"，下方另有軌道下緣（-{ch_sup_dist:.1f}%，長線參考）"
 
     # ── 今日突破快速判斷：現價超過前19根最高點 ──
     # 避免今天創高時，近20日最高點 = 現價，導致壓力 = 現價、損益比 = 0
@@ -13866,16 +13868,16 @@ VERDICT_TEXT = {
     "head_bull": "{name}目前符合 {bull} 項偏多條件、{bear} 項偏空條件，{ms_part}偏多條件較多。",
     "head_bull_wait": "{name}偏多條件較多，但{wait_reason}，目前價格位置偏高。",
     "head_bull_caution": "{name}偏多條件較多，同時有 {bear} 項偏空條件，其中權重最高的是：{top_problem}。",
-    "head_neutral": "{name}偏多條件 {bull} 項、偏空條件 {bear} 項，數量接近；觀察收盤突破 {resistance} 或跌破 {support}。",
+    "head_neutral": "{name}偏多條件 {bull} 項、偏空條件 {bear} 項，數量接近；觀察收盤突破壓力區（{resistance}）或跌破支撐區（{support}）。",
     "head_bear": "{name}目前符合 {bear} 項偏空條件、{bull} 項偏多條件，偏空條件較多；止跌類條件尚未出現。",
     "ms_part_many": "今天12金叉有{n}項同時轉強，",
     "ms_part_some": "今天12金叉有{n}項轉強，",
-    "wait_near_res": "距離壓力 {resistance} 只剩 {res_pct}%",
+    "wait_near_res": "距離壓力區（{resistance}）只剩 {res_pct}%",
     "wait_overheat": "股價已經高於月線 {bias20}%，短線漲多",
     "wait_kd_high": "KD 已經在 {k} 的高檔",
 
     # 現在的狀況
-    "status_price": "目前價格 {price}，位在支撐 {support} 和壓力 {resistance} 之間，大約{pos_word}（{pos}%）。",
+    "status_price": "目前價格 {price}，位在支撐區（{support}）與壓力區（{resistance}）之間，{pos_word}。",
     "status_trend": "趨勢：{trend_text}。",
     "status_ma": "均線：{ma_text}。",
     "status_ms": "12金叉：今天剛轉強 {today} 項、持續轉強中 {active} 項，涵蓋{cats}。",
@@ -13884,14 +13886,14 @@ VERDICT_TEXT = {
     # 看多理由
     "trend_up": "近期高低點一路墊高（頭頭高、底底高），屬於上升趨勢",
     "ma_bull": "均線多頭排列（{ma_text}）",
-    "breakout": "今天突破前高 {prev_high}",
+    "breakout": "今天突破前波高點",
     "kbar_bull": "出現多頭K棒：{kbar}",
     "kd_gold": "KD 黃金交叉（K {k}）",
     "macd_bull": "MACD 偏多：{macd_text}",
     "inst_buy": "三大法人近5日買超 {inst_total} 張{inst_streak}",
     "vol_up": "量能放大，5日均量是20日均量的 {vol_ratio} 倍",
     "gann_buy": "葛蘭碧多方訊號：{gann}",
-    "near_sup_rr": "股價靠近支撐 {support}，損益比 {rr}",
+    "near_sup_rr": "股價靠近支撐區（{support}）",
     "ms_many": "12金叉今天有 {n} 項同時轉強：{list}",
     "ms_some": "12金叉今天轉強：{list}",
     "revenue": "營收連續 {m} 個月年增（最新 {yoy}%），股價近20天漲 {chg20}%",
@@ -13899,15 +13901,15 @@ VERDICT_TEXT = {
     # 看空理由
     "trend_down": "近期高低點一路走低（頭頭低、底底低），屬於下降趨勢",
     "ma_bear": "均線空頭排列（{ma_text}）",
-    "breakdown": "股價跌破支撐 {support}",
+    "breakdown": "股價跌破支撐區（{support}）",
     "kbar_bear": "出現空頭K棒：{kbar}",
     "vp_exit": "爆量收出「{shape}」（{vol_x} 倍均量）",
     "kd_death": "KD 死亡交叉（K {k}）",
     "macd_bear": "MACD 偏空：{macd_text}",
     "inst_sell": "三大法人近5日賣超 {inst_total} 張",
     "gann_sell": "葛蘭碧空方訊號：{gann}",
-    "near_res": "距離壓力 {resistance} 只剩 {res_pct}%",
-    "rr_low": "損益比 {rr}（到失效位置的距離大於到前方壓力區的距離）",
+    "near_res": "距離壓力區（{resistance}）只剩 {res_pct}%",
+    "rr_low": "現價距壓力區的空間，小於距支撐區的距離",
     "channel_conflict": "{conflict}",
     "overheat": "股價高於月線 {bias20}%，短線過熱",
     "kd_high": "KD 在 {k} 的高檔，容易鈍化",
@@ -13925,29 +13927,29 @@ VERDICT_TEXT = {
     "top_problem_none": "目前沒有明顯矛盾",
 
     # 關鍵價位
-    "lv_support": "{v} — 支撐區（{desc}）",
-    "lv_resistance": "{v} — 壓力區（{desc}）",
+    "lv_support": "支撐區：{desc}",
+    "lv_resistance": "壓力區：{desc}",
     "lv_stop": "失效位置 {v}（距現價 {pct}%，收盤跌破代表目前型態失效）",
     "lv_target1": "前方壓力區 {v}",
     "lv_target2": "延伸觀察價位 {v}",
-    "lv_ma20": "月線 {v}",
-    "lv_turtle": "海龜通道下緣 {v}（收盤跌破代表突破失敗）",
-    "lv_neck": "{ptype}頸線 {v}",
+    "lv_ma20": "月線（20日均線）",
+    "lv_turtle": "海龜通道下緣（收盤跌破代表突破失敗）",
+    "lv_neck": "{ptype}頸線",
 
     # 情境（條件式，不是預測）
-    "sc_bull_up": "收盤站穩 {resistance} 並且放量 → 突破成立",
-    "sc_bull_down": "收盤跌破支撐 {support} → 這批偏多條件失效",
-    "sc_neutral_up": "收盤突破 {resistance} → 偏多條件增加",
-    "sc_neutral_down": "收盤跌破 {support} → 偏空條件增加",
-    "sc_bear_up": "收盤站回月線 {ma20} 以上 → 出現止跌類條件",
-    "sc_bear_down": "繼續跌破 {support} → 偏空條件延續，下一個支撐需重新確認",
+    "sc_bull_up": "收盤站穩壓力區（{resistance}）並且放量 → 突破成立",
+    "sc_bull_down": "收盤跌破支撐區（{support}） → 這批偏多條件失效",
+    "sc_neutral_up": "收盤突破壓力區（{resistance}） → 偏多條件增加",
+    "sc_neutral_down": "收盤跌破支撐區（{support}） → 偏空條件增加",
+    "sc_bear_up": "收盤站回月線以上 → 出現止跌類條件",
+    "sc_bear_down": "繼續跌破支撐區（{support}） → 偏空條件延續，下一個支撐需重新確認",
 
     # 觀察重點（2026/09/17 案件008：原「操作參考」，改成只寫條件與失效位置，不寫買賣動作；key 名稱沿用）
-    "act_bull": "偏多條件維持中；觀察支撐 {support} 是否守住，上方壓力 {resistance}",
-    "act_bull_wait": "短線位置偏高；觀察回到支撐 {support} 附近時是否出現止跌K棒",
-    "act_bull_caution": "偏多條件較多但互相分歧；收盤跌破支撐 {support} 代表這批轉強條件失效",
-    "act_neutral": "方向未明；觀察收盤突破 {resistance} 或跌破 {support} 的方向",
-    "act_bear": "偏空條件較多；觀察止跌條件是否出現，收盤跌破 {support} 代表偏空條件延續",
+    "act_bull": "偏多條件維持中；觀察支撐區（{support}）是否守住，上方為壓力區（{resistance}）",
+    "act_bull_wait": "短線位置偏高；觀察回到支撐區（{support}）附近時是否出現止跌K棒",
+    "act_bull_caution": "偏多條件較多但互相分歧；收盤跌破支撐區（{support}）代表這批轉強條件失效",
+    "act_neutral": "方向未明；觀察收盤突破壓力區（{resistance}）或跌破支撐區（{support}）的方向",
+    "act_bear": "偏空條件較多；觀察止跌條件是否出現，收盤跌破支撐區（{support}）代表偏空條件延續",
 }
 
 
@@ -13976,7 +13978,7 @@ VERDICT_EDU = {
     # 觀察重點
     "action": "「觀察重點」整理的是接下來要看的條件，而不是要做的動作。多數條件都以收盤價確認，因為盤中價格常常短暫穿過關鍵價位又回來（假突破、假跌破）。",
     # 現在的狀況
-    "status_price": "位置百分比是把「支撐到壓力」當成 0～100%。現在 {pos}% 表示{pos_hint}。",
+    "status_price": "這一條講的是現價落在支撐區與壓力區之間的哪個位置。{pos_hint}",
     "status_trend": "趨勢用「道氏理論」判斷：近期的高點和低點都越來越高，叫上升趨勢（頭頭高、底底高）；都越來越低叫下降趨勢；看不出方向就是盤整。",
     "status_ma": "均線是一段期間收盤價的平均。短天期均線在上、長天期在下叫「多頭排列」，代表最近買進的人成本越來越高；反過來叫「空頭排列」。均線反應較慢，適合看中期方向。",
     "status_ms": "12金叉是 12 種常見的轉強條件。「今天剛轉強」是今天才出現的訊號，「轉強中」是前幾天出現、目前仍維持。涵蓋的面向越多（技術、籌碼、型態、營收），代表不同角度的訊號越一致。",
@@ -13991,7 +13993,7 @@ VERDICT_EDU = {
     "inst_buy": "三大法人合計買超 {inst_total} 張，但要拆開看：外資 {f5}、投信 {i5}、自營商 {d5}。{inst_hint}",
     "vol_up": "量能放大代表參與的人變多。股價上漲同時放量，通常被視為買盤積極；如果放量卻收黑，意思就不同了。",
     "gann_buy": "葛蘭碧法則是用股價和均線的相對位置判斷訊號，一共有 4 個多方、4 個空方訊號。這裡出現的是多方訊號，代表股價和均線的關係符合其中一種轉強型態。",
-    "near_sup_rr": "股價靠近支撐時，離失效位置近、離壓力遠，所以損益比通常比較高。支撐是否真的守住，要看接下來的收盤。",
+    "near_sup_rr": "股價靠近支撐區時，距離下方支撐較近、距離上方壓力較遠。支撐是否真的守住，要看接下來的收盤。",
     "ms_many": "12金叉有 3 項以上同時在今天轉強，代表多個不同指標在同一天出現訊號，比單一指標更值得留意。",
     "ms_some": "12金叉今天有少數項目轉強。單一或少數訊號的參考性比多項同時出現弱，可以搭配其他理由一起看。",
     "revenue": "營收連續年增但股價還沒漲，代表基本面在變好、市場價格還沒反應。這種落差有可能之後被補上，也可能反映市場有其他疑慮。",
@@ -14007,7 +14009,7 @@ VERDICT_EDU = {
     "inst_sell": "外資、投信同時賣超，代表兩大法人近期都在減碼這檔股票。法人部位大，持續賣超時股價較容易有壓力。",
     "gann_sell": "葛蘭碧法則的空方訊號，代表股價和均線的關係出現轉弱型態，例如跌破均線、或離均線太遠（乖離過大）。",
     "near_res": "股價離壓力只剩一小段。壓力是過去賣壓集中的價位，技術分析中通常會觀察量能是否放大，作為能否站上的判斷條件。",
-    "rr_low": "損益比 ＝ 前方空間 ÷ 到失效位置的距離。低於 1 代表到失效位置的距離比到前方壓力區的空間還大。",
+    "rr_low": "這一條比較的是「現價到上方壓力區」與「現價到下方支撐區」兩段距離。上方空間較小時，代表目前位置比較接近壓力。",
     "channel_conflict": "軌道是用近期高低點畫出的上下通道。趨勢方向和軌道方向不一致時，代表長短期的結構在打架，判讀的可信度會降低。",
     "overheat": "乖離率是股價離均線多遠。離月線 {bias20}% 屬於偏大；技術分析中，乖離過大常被列為觀察股價與均線是否重新靠近的條件之一。",
     "kd_high": "KD 在 80 以上是高檔區，代表短線漲勢強。但強勢股的 KD 常常在高檔「鈍化」（一直維持高檔），所以高檔本身不是轉弱，出現死亡交叉才比較明確。",
@@ -14070,6 +14072,25 @@ def _vedu(key: str, **kw) -> str:
 def _kbar_edu_text(kbar: str) -> str:
     parts = [txt for key, txt in KBAR_EDU if key in (kbar or "")]
     return "\n".join(parts) if parts else "K 棒是用開盤、最高、最低、收盤四個價格畫出的圖形，實體和影線的長短，反映當天買賣雙方誰比較強。"
+
+
+def _level_short(desc: str, default: str) -> str:
+    """把支撐／壓力的來源說明壓成一個短名稱，用來取代畫面上的價格數字。
+    2026/09/20（案件012第四批）：改成講「月線」「前波高點」這類技術名稱，
+    而不是給一個具體價位——講的是技術分析概念，不是可以照著動作的數字。"""
+    d = desc or ""
+    for key, name in (("MA5", "5日線"), ("MA10", "10日線"), ("MA20", "月線"),
+                      ("MA60", "季線"), ("MA120", "半年線"), ("MA240", "年線")):
+        if key in d:
+            return name
+    if "軌道下緣" in d:  return "軌道下緣"
+    if "軌道上緣" in d:  return "軌道上緣"
+    if "密集不破" in d:  return "近期密集成交區"
+    if "爆量支撐" in d:  return "前方爆量低點"
+    if "凹洞量" in d:    return "前方低量區"
+    if "前波高點" in d or "前高" in d: return "前波高點"
+    if "頸線" in d:      return "型態頸線"
+    return default
 
 
 def _vt(key: str, **kw) -> str:
@@ -14152,11 +14173,11 @@ def _build_verdict_edu(r, stance, kv, bull, bear, conflicts, status_keys, level_
     if pos is None:
         pos_hint = ""
     elif pos >= 70:
-        pos_hint = "離壓力比較近、離支撐比較遠：往上的空間剩不多，往下拉回的空間比較大"
+        pos_hint = "目前離壓力區比較近、離支撐區比較遠：往上的空間較小，往下的距離較大。"
     elif pos <= 30:
-        pos_hint = "離支撐比較近：往下的距離不遠，往上的空間比較大"
+        pos_hint = "目前離支撐區比較近：往下的距離較小，往上的空間較大。"
     else:
-        pos_hint = "大約在區間中間，上下空間差不多"
+        pos_hint = "目前大約在中間，上下的距離差不多。"
     ekw = {**kv, "kd_zone_hint": kd_zone_hint, "f5": fmt(f5), "i5": fmt(i5), "d5": fmt(d5),
            "inst_hint": inst_hint, "pos": pos, "pos_hint": pos_hint,
            "kbar_edu": _kbar_edu_text(r.get("kbar_pattern") or "")}
@@ -14204,7 +14225,11 @@ def _build_verdict(r: dict, ms: list | None) -> dict:
     ma20 = radar.get("ma20") or (r.get("ma_values") or {}).get("ma20")
     res_pct = round((resistance - price) / price * 100, 1) if (resistance and price) else None
     inst_total = inst.get("total_5d")
-    kv = dict(name=name, price=price, support=support, resistance=resistance, stop_loss=stop_loss,
+    # 2026/09/20（案件012第四批）：support／resistance／stop_loss 改帶「名稱」不帶數字。
+    # 這樣下面所有模板一次全部變成講「月線」「前波高點」，不用逐條改。
+    sup_ref = _level_short(r.get("support_desc"), "近期支撐區")
+    res_ref = _level_short(r.get("resistance_desc"), "上方壓力區")
+    kv = dict(name=name, price=price, support=sup_ref, resistance=res_ref, stop_loss=sup_ref,
               rr=rr, k=round(k_val) if k_val is not None else "—", vol_ratio=vol_ratio, bias20=bias20,
               res_pct=res_pct, ma20=ma20, target2=r.get("target2"), prev_high=r.get("prev_high"),
               ma_text=ma.get("text", ""), macd_text=macd.get("text", ""), kbar=kbar,
@@ -14363,7 +14388,9 @@ def _build_verdict(r: dict, ms: list | None) -> dict:
     pos = None
     if support and resistance and resistance > support and price:
         pos = round(min(100, max(0, (price - support) / (resistance - support) * 100)))
-    pos_word = "—" if pos is None else ("靠近支撐" if pos < 30 else "靠近壓力" if pos > 70 else "中間位置")
+    # 2026/09/20（案件012）：原本寫「大約靠近壓力（88%）」，那個百分比沒頭沒尾看不懂，拿掉。
+    pos_word = "位置不明" if pos is None else (
+        "比較靠近支撐區" if pos < 30 else "比較靠近壓力區" if pos > 70 else "大約在中間")
     trend_text = {"上升趨勢": "上升趨勢（頭頭高、底底高）", "下降趨勢": "下降趨勢（頭頭低、底底低）"}.get(
         trend, "盤整（高低點結構不明）")
     status, status_keys = [], []
@@ -14387,8 +14414,8 @@ def _build_verdict(r: dict, ms: list | None) -> dict:
         _LV("lv_support", v=support, desc=r.get("support_desc") or "")
     if resistance:
         _LV("lv_resistance", v=resistance, desc=r.get("resistance_desc") or "")
-    if stop_loss and price:
-        _LV("lv_stop", v=stop_loss, pct=round((stop_loss - price) / price * 100, 1))
+    # 2026/09/20（案件012第四批）：失效位置已等於支撐（上面「支撐區」那條就是），
+    # 再列一次只是同一個東西講兩遍，拿掉。
     # 2026/09/20（案件012第三批）：不再把推算價位列進「關鍵價位」。
     # target1 就是 resistance（上面已列為壓力區），重複顯示只是換個名字；
     # target2 在沒有軌道時是 resistance*1.10，沒有技術依據，屬於對未來價位的推算。

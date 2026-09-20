@@ -31,12 +31,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://softglow-ai.com/"/>
-<meta property="og:title" content="線上有位｜台股個股位置分析｜支撐壓力・損益比・K線型態"/>
-<meta property="og:description" content="輸入台股代號或股票名稱，立即查看支撐壓力、關鍵失效位置、均線趨勢、K線型態與損益比，快速掌握股價目前的位置與風險。"/>
+<meta property="og:title" content="線上有位｜台股個股位置分析｜支撐壓力・均線結構・K線型態"/>
+<meta property="og:description" content="輸入台股代號或股票名稱，立即查看支撐壓力區、均線結構、K線型態與法人籌碼，快速看懂股價目前的位置。"/>
 <meta property="og:image" content="https://softglow-ai.com/assets/og-image.jpg"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="線上有位｜台股個股位置分析"/>
-<meta name="twitter:description" content="輸入台股代號，立即查看支撐壓力、關鍵失效位置、K線型態與損益比，快速掌握目前的位置與風險。"/>
+<meta name="twitter:description" content="輸入台股代號，立即查看支撐壓力區、均線結構與K線型態，快速看懂股價目前的位置。"/>
 <meta name="twitter:image" content="https://softglow-ai.com/assets/og-image.jpg"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
@@ -433,7 +433,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .metric{background:var(--bg2);border-radius:var(--radius);padding:10px 12px}
 .metric.span2{grid-column:span 2}
 .m-lbl{font-size:10px;color:var(--text3);margin-bottom:2px;letter-spacing:.2px}
-.m-val{font-size:15px;font-weight:600;font-family:var(--mono)}
+.m-val{font-size:14px;font-weight:700;line-height:1.35}
 .m-val.lg{font-size:22px}
 .m-sub{font-size:9px;color:var(--text3);margin-top:1px;line-height:1.3}
 .m-hint{font-size:12px;font-style:normal;color:var(--text2);opacity:1;margin-top:4px;line-height:1.45}
@@ -1766,25 +1766,15 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
         <div class="m-hint">股價較不容易站穩突破的價位，是上漲的阻力</div>
       </div>
       <div class="metric">
-        <div class="m-lbl">失效位置</div>
+        <div class="m-lbl">判讀失效條件</div>
         <div class="m-val" id="m-stop">—</div>
         <div class="m-sub tw-up" id="m-stop-d"></div>
-        <div class="m-hint">收盤跌破代表目前技術型態失效</div>
+        <div class="m-hint">收盤跌破此區，目前技術型態的前提不成立</div>
       </div>
     </div>
 
-    <!-- 損益比直覺卡 -->
-    <div class="rr-card">
-      <div class="rr-left">
-        <div class="lbl">風險報酬</div>
-        <div class="val" id="rr-val">—</div>
-      </div>
-      <div class="rr-right">
-        <div class="rr-tag" id="rr-tag">—</div>
-        <div class="rr-desc" id="rr-desc">—</div>
-      </div>
-    </div>
-    <div class="m-hint" style="margin:-6px 0 12px 2px">損益比＝（前方壓力−現價）÷（現價−失效位置），數字越高代表潛在空間相對風險越大</div>
+    <!-- 2026/09/20（案件012第四批）：損益比卡已移除——它是風險報酬試算，屬於操作判斷。
+         位置資訊改由下方「位置風險進度條」呈現（現價在支撐區與壓力區之間的相對位置）。 -->
 
     <!-- 位置風險進度條 -->
     <div id="posBarWrap" style="display:none;background:var(--bg2);border-radius:var(--radius);padding:10px 14px;margin-bottom:12px">
@@ -2722,7 +2712,6 @@ function _renderWatchSkeleton(el){
     <!-- U4: 排序按鈕 -->
     <div style="display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap">
       <button onclick="_sortWatch('group')" class="watch-sort-btn" style="padding:3px 10px;border-radius:12px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:10px;cursor:pointer">分組</button>
-      <button onclick="_sortWatch('rr')" class="watch-sort-btn" style="padding:3px 10px;border-radius:12px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:10px;cursor:pointer">損益比↓</button>
       <button onclick="_sortWatch('risk')" class="watch-sort-btn" style="padding:3px 10px;border-radius:12px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:10px;cursor:pointer">風險↓</button>
       <button onclick="_sortWatch('sup')" class="watch-sort-btn" style="padding:3px 10px;border-radius:12px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);font-size:10px;cursor:pointer">距支撐↓</button>
     </div>
@@ -2895,7 +2884,6 @@ function _watchCard(s){
         ${supDistPct?`<span style="font-size:10px;color:var(--green);background:rgba(0,201,122,0.1);padding:2px 7px;border-radius:4px">支 -${supDistPct}%</span>`:''}
         ${resDistPct?`<span style="font-size:10px;color:#f59e0b;background:rgba(245,158,11,0.1);padding:2px 7px;border-radius:4px">壓 +${resDistPct}%</span>`:''}
         ${d.pattern?`<span style="font-size:10px;color:var(--text3);background:var(--border);padding:2px 7px;border-radius:4px">${d.pattern}</span>`:''}
-        ${d.rr_ratio!=null?`<span style="font-size:10px;color:${d.rr_ratio>=2?'var(--green)':d.rr_ratio>=1?'#f59e0b':'var(--up)'};background:var(--border);padding:2px 7px;border-radius:4px">RR ${d.rr_ratio}</span>`:''}
         ${d.today_breakout?`<span style="font-size:10px;color:#a78bfa;background:rgba(167,139,250,0.1);padding:2px 7px;border-radius:4px">🚀今日突破</span>`:''}
         ${d.near_bot?`<span style="font-size:10px;color:var(--green);background:rgba(0,201,122,0.1);padding:2px 7px;border-radius:4px">📍接近底部</span>`:''}
       </div>
@@ -3737,6 +3725,22 @@ function closeAnalysisResult(){
 // ══════════════════════════════════════
 const pct=(a,b)=>((a-b)/b*100).toFixed(1);
 const fmt=n=>(+n).toFixed(2);
+// 2026/09/20（案件012第四批）：把支撐/壓力的來源說明壓成短名稱，取代畫面上的價格數字
+function _levelName(desc, dflt){
+  const d = desc || '';
+  const ma = [['MA5','5日線'],['MA10','10日線'],['MA20','月線'],
+              ['MA60','季線'],['MA120','半年線'],['MA240','年線']];
+  for(const [k,n] of ma){ if(d.indexOf(k)>=0) return n; }
+  if(d.indexOf('軌道下緣')>=0) return '軌道下緣';
+  if(d.indexOf('軌道上緣')>=0) return '軌道上緣';
+  if(d.indexOf('密集不破')>=0) return '近期密集成交區';
+  if(d.indexOf('爆量支撐')>=0) return '前方爆量低點';
+  if(d.indexOf('凹洞量')>=0)   return '前方低量區';
+  if(d.indexOf('前波高點')>=0||d.indexOf('前高')>=0) return '前波高點';
+  if(d.indexOf('轉折高點')>=0) return '前方轉折高點';
+  if(d.indexOf('頸線')>=0)     return '型態頸線';
+  return dflt;
+}
 
 function _animateNumber(el, target, decimals, duration){
   if(!el) return;
@@ -3765,9 +3769,11 @@ function renderPositionBar(d){
   bar.style.width = '0';
   bar.style.background = color;
   setTimeout(()=>{ bar.style.width = pos.toFixed(1)+'%'; }, 80);
-  document.getElementById('posBarSup').textContent = support;
+  // 2026/09/20（案件012第四批）：兩端改顯示「這個價位是哪裡來的」，不顯示價格本身。
+  // 現價保留數字——那是公開的市場行情，不是我們算出來的判讀價位。
+  document.getElementById('posBarSup').textContent = _levelName(d.support_desc, '支撐區');
   document.getElementById('posBarPriceLbl').textContent = price;
-  document.getElementById('posBarRes').textContent = resistance;
+  document.getElementById('posBarRes').textContent = _levelName(d.resistance_desc, '壓力區');
 }
 
 function renderResult(d,enabledMA){
@@ -3835,12 +3841,11 @@ function renderResult(d,enabledMA){
       cls: _msSig.today_count >= 3 ? 'md' : ''});
   }
 
-  // 3. 防守位 + 損益比
-  const basisLabel = rr_basis ? `（以${rr_basis}計算）` : '';
-  coreLines.push({text:`失效位置 ${stop_loss}（距現價 ${pct(stop_loss,price)}%，收盤跌破代表目前型態失效），損益比 ${rr}${basisLabel}`, cls: rr>=1.5?'md':rr<1?'hi':''});
+  // 3. 判讀前提（2026/09/20 案件012第四批：不再給具體失效價位，損益比整條移除）
+  coreLines.push({text:`判讀前提：收盤維持在支撐區上方（距現價 ${pct(stop_loss,price)}%）；跌破則目前型態的前提不成立`, cls:''});
 
-  // 4. 支撐壓力
-  coreLines.push({text:`支撐 ${support}（${support_desc}），壓力 ${resistance}（${resistance_desc}）`, cls:''});
+  // 4. 支撐壓力（只講來源，不給價位）
+  coreLines.push({text:`支撐區：${support_desc}　｜　壓力區：${resistance_desc}`, cls:''});
 
   // 5. 趨勢（2026/08/06修正：trend已改道氏波峰波谷判斷,非均線,原「均線多頭/空頭排列」文案改中性用詞,呼應main.py同日修正）
   const trendMap={'上升趨勢':'近期高低點結構走高（頭頭高、底底高），回測支撐時是觀察這個結構是否延續的位置','下降趨勢':'近期高低點結構走低（頭頭低、底底低），反彈至壓力時是觀察這個結構是否延續的位置','盤整':'高低點結構不明，偏多與偏空條件互相牴觸，方向需等突破或跌破確認'};
@@ -3893,35 +3898,20 @@ function renderResult(d,enabledMA){
   const tEl=document.getElementById('m-trend');
   tEl.textContent=trend;tEl.className='m-val'+(trend==='上升趨勢'?' tw-dn':trend==='下降趨勢'?' tw-up':'');
   document.getElementById('m-pat').textContent=pattern;
-  document.getElementById('m-sup').textContent=fmt(support);
+  // 2026/09/20（案件012第四批）：指標卡改顯示「這個價位是哪裡來的」，不顯示價格本身。
+  document.getElementById('m-sup').textContent=_levelName(support_desc,'近期支撐區');
   document.getElementById('m-sup-desc').textContent=support_desc||'';
-  document.getElementById('m-res').textContent=fmt(resistance);
+  document.getElementById('m-res').textContent=_levelName(resistance_desc,'上方壓力區');
   document.getElementById('m-res-desc').textContent=resistance_desc||'';
-  document.getElementById('m-stop').textContent=fmt(stop_loss);
+  document.getElementById('m-stop').textContent=_levelName(support_desc,'近期支撐區');
   document.getElementById('m-stop-d').textContent=pct(stop_loss,price)+'%';
 
-  // 損益比直覺卡
-  const rrEl=document.getElementById('rr-val');
-  const rrTag=document.getElementById('rr-tag');
-  const rrDesc=document.getElementById('rr-desc');
-  _animateNumber(rrEl, risk_reward, 2, 800);
-  const basisNote = rr_basis ? `以${rr_basis}計算` : '以失效位置計算';
-  if(risk_reward>=2){
-    rrTag.textContent='✓ 空間大於風險';rrTag.className='rr-tag good';
-    rrDesc.textContent=`損益比高於 2，前方空間相對風險較大（${basisNote}）`;
-  }else if(risk_reward>=1){
-    rrTag.textContent='⚡ 風險報酬尚可';rrTag.className='rr-tag mid';
-    rrDesc.textContent=`損益比介於 1～2（${basisNote}）`;
-  }else{
-    rrTag.textContent='⚠ 風險大於空間';rrTag.className='rr-tag bad';
-    rrDesc.textContent=`損益比低於 1，目前位置的潛在風險大於前方空間（${basisNote}）`;
-  }
+  // 2026/09/20（案件012第四批）：損益比卡已移除，相關 JS 一併拿掉
 
   // 2026/09/17：記下分析基準，現價跌破防守位時提醒（分析基準日跟現價不同天時會發生）
   C._stopWatch = {
     stop: +stop_loss || 0, basis: +price || 0,
     basisDate: price_basis_date ? price_basis_date.slice(5).replace('-','/') : '',
-    tagText: rrTag.textContent, tagCls: rrTag.className, desc: rrDesc.textContent,
     stopD: document.getElementById('m-stop-d').textContent,
   };
   _applyStopBreach(displayPrice);
@@ -5680,22 +5670,14 @@ function _applyStopBreach(cur){
   const w = C._stopWatch;
   if(!w || !w.stop || !w.basis) return;
   cur = +cur;
-  const rrTag = document.getElementById('rr-tag');
-  const rrDesc = document.getElementById('rr-desc');
   const sd = document.getElementById('m-stop-d');
-  if(!rrTag || !rrDesc || !sd) return;
+  if(!sd) return;
   const breached = isFinite(cur) && cur > 0 && w.basis > w.stop && cur < w.stop;
   if(breached){
     const gap = ((cur - w.stop) / w.stop * 100).toFixed(1);
-    sd.textContent = `⚠️ 現價已跌破（${gap}%）`;
-    rrTag.textContent = '⚠ 現價已跌破失效位置';
-    rrTag.className = 'rr-tag bad';
-    rrDesc.textContent = `分析基準${w.basisDate ? ' ' + w.basisDate + ' ' : ''}收盤 ${w.basis}，現價 ${cur} 已低於失效位置 ${w.stop}，原本的型態判讀與損益比已不適用`;
+    sd.textContent = `⚠️ 現價已跌破支撐區（${gap}%）`;
   } else {
     sd.textContent = w.stopD;
-    rrTag.textContent = w.tagText;
-    rrTag.className = w.tagCls;
-    rrDesc.textContent = w.desc;
   }
 }
 
@@ -7971,7 +7953,7 @@ function adminTap(){
 const TOUR_STEPS = [
   {
     title: '👋 歡迎使用線上有位！',
-    desc: '這裡是台股個股位置導航系統。輸入股票代號，系統會幫你分析支撐壓力、趨勢與損益比，讓每個買賣決策都有所依據。'
+    desc: '這裡是台股個股位置導航系統。輸入股票代號，系統會整理支撐壓力區、均線結構與目前成立的技術條件，幫你看懂股價現在的位置。'
   },
   {
     title: '🔍 如何查詢股票',
@@ -7979,7 +7961,7 @@ const TOUR_STEPS = [
   },
   {
     title: '📊 看懂分析結果',
-    desc: '分析完成後，你會看到：風險等級（高/中/低）、支撐壓力區、損益比（高於 2 代表前方空間相對風險較大）、K線型態與趨勢判斷。'
+    desc: '分析完成後，你會看到：風險等級（高/中/低）、支撐壓力區來自哪裡、K線型態與趨勢結構，以及目前符合哪些技術條件。'
   },
   {
     title: '🚀 升級享受完整功能',
