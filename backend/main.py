@@ -9559,6 +9559,137 @@ def api_market_breadth():
     return payload
 
 
+# ══════════════════════════════════════════════════════════
+# 處置股查詢（案件013，2026/09/20 拍板）
+# 定位：只列證交所／櫃買中心官方公告原文——處置原因、處置期間、分盤／預收
+# 款券等分盤方式，不做任何判讀、不加評語、不改寫官方原因文字。
+# 免費功能，但需登入會員才能查看（require_user：只驗證有沒有登入，不看方案）。
+# ══════════════════════════════════════════════════════════
+_MARKET_CACHE["disposal"] = {"data": None, "expires": 0.0}
+
+
+def _roc_date_to_iso(s) -> str:
+    """民國年日期字串轉西元 ISO（YYYY-MM-DD）。格式辨識不出來就回傳空字串，
+    不猜一個日期出來湊數——抓不準的資料寧可留白，前端就不顯示這格。"""
+    import re as _re
+    s = str(s or "").strip()
+    if not s:
+        return ""
+    m = _re.match(r"^(\d{2,3})[/\-](\d{1,2})[/\-](\d{1,2})$", s)
+    if m:
+        y, mo, d = int(m.group(1)) + 1911, int(m.group(2)), int(m.group(3))
+        return f"{y:04d}-{mo:02d}-{d:02d}"
+    m = _re.match(r"^(\d{3})(\d{2})(\d{2})$", s)
+    if m:
+        y, mo, d = int(m.group(1)) + 1911, int(m.group(2)), int(m.group(3))
+        return f"{y:04d}-{mo:02d}-{d:02d}"
+    return ""
+
+
+def _fetch_disposal_twse() -> list[dict]:
+    """上市處置股：證交所官方公告 API（原文照登，不改寫）。
+    2026/09/20 已實測確認可用。回應格式為 {"data":[[...],[...]]}，
+    欄位順序：0編號 1公布日期 2證券代號 3證券名稱 4累計 5處置條件
+              6處置起迄時間 7處置措施 8處置內容 9備註"""
+    try:
+        j = _market_http_json(
+            "https://www.twse.com.tw/rwd/zh/announcement/punish?response=json",
+            timeout=12,
+        )
+    except Exception as e:
+        print(f"[DISPOSAL] TWSE 抓取失敗：{e}")
+        return []
+    rows = (j or {}).get("data") or []
+    out = []
+    for r in rows:
+        try:
+            if len(r) < 9:
+                continue
+            code = str(r[2]).strip()
+            if not code:
+                continue
+            out.append({
+                "market": "上市",
+                "code": code,
+                "name": str(r[3]).strip(),
+                "announce_date": str(r[1]).strip(),
+                "announce_date_iso": _roc_date_to_iso(r[1]),
+                "count": str(r[4]).strip(),
+                "reason": str(r[5]).strip(),
+                "period": str(r[6]).strip(),
+                "measures": str(r[7]).strip(),
+                "detail": str(r[8]).strip(),
+            })
+        except Exception:
+            continue
+    return out
+
+
+def _fetch_disposal_tpex() -> list[dict]:
+    """上櫃處置股：櫃買中心官方 OpenAPI（原文照登，不改寫）。
+    ⚠️ 沙箱環境連不到 tpex.org.tw，欄位名稱是依官方 OpenAPI 文件命名推斷、
+    尚未實測過真實回應內容。上線後第一次抓到資料時務必看 Zeabur log 的
+    [DISPOSAL] 訊息核對欄位是否對得上、日期有沒有正確轉換；抓不到或欄位
+    對不上，把 log 貼回來再調整，不要放著讓它默默顯示錯誤欄位。"""
+    try:
+        arr = _market_http_json(
+            "https://www.tpex.org.tw/openapi/v1/tpex_disposal_information",
+            timeout=12,
+        )
+    except Exception as e:
+        print(f"[DISPOSAL] TPEx 抓取失敗：{e}")
+        return []
+    out = []
+    for r in arr or []:
+        try:
+            code = str(r.get("SecuritiesCompanyCode") or r.get("Code") or "").strip()
+            if not code:
+                continue
+            date_raw = str(r.get("Date") or "").strip()
+            out.append({
+                "market": "上櫃",
+                "code": code,
+                "name": str(r.get("CompanyName") or r.get("Name") or "").strip(),
+                "announce_date": date_raw,
+                "announce_date_iso": _roc_date_to_iso(date_raw),
+                "count": str(r.get("Count") or r.get("累計") or "").strip(),
+                "reason": str(r.get("DispositionReasons") or r.get("ReasonsOfDisposition") or "").strip(),
+                "period": str(r.get("DispositionPeriod") or "").strip(),
+                "measures": str(r.get("DispositionMeasures") or "").strip(),
+                "detail": str(r.get("DisposalCondition") or r.get("Detail") or "").strip(),
+            })
+        except Exception:
+            continue
+    if arr:
+        print(f"[DISPOSAL] TPEx 原始回應第一筆（供核對欄位用）：{arr[0]}")
+    return out
+
+
+@app.get("/api/market/disposal")
+def api_market_disposal(user: dict = Depends(require_user)):
+    """處置股查詢（案件013）：只列證交所／櫃買中心官方公告事實——處置原因、
+    處置期間、分盤／預收款券等分盤方式，不做任何判讀、不給建議、不加評語。
+    免費功能，登入會員（不需付費方案）即可查看。"""
+    hit = _market_cache_get("disposal")
+    if hit is not None:
+        return hit
+    items = []
+    items.extend(_fetch_disposal_twse())
+    items.extend(_fetch_disposal_tpex())
+    items.sort(key=lambda x: (x.get("announce_date_iso") or "", x.get("code") or ""), reverse=True)
+    as_of = _taipei_now_str()
+    payload = {
+        "ok": bool(items),
+        "as_of": as_of,
+        "timezone": "Asia/Taipei",
+        "source": "TWSE 公告及公開資訊 / TPEx 公告及法規（官方原文，僅整理不判讀）",
+        "count": len(items),
+        "items": items,
+    }
+    _market_cache_set("disposal", payload, 1800 if payload["ok"] else 60)
+    return payload
+
+
 def _fetch_stock_news(stock_id: str, max_results: int = 3) -> list:
     """從鉅亨 RSS 抓與該股票相關的新聞（代號精確比對 + 中文股名比對）"""
     try:
