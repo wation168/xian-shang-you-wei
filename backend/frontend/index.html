@@ -43,6 +43,8 @@
 <meta name="apple-mobile-web-app-title" content="線上有位"/>
 <meta name="theme-color" content="#1D9E75"/>
 <link rel="manifest" href="manifest.json"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <title>線上有位 — 台股技術分析</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -1442,7 +1444,7 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
       <input type="text" id="stockInput" placeholder="輸入股票代號或名稱，如：2330 或 台積電" inputmode="text" autocomplete="off"/>
       <div class="search-dropdown" id="searchDropdown"></div>
     </div>
-    <button class="btn-analyze" onclick="analyzeStock()">分析</button>
+    <button class="btn-analyze" onclick="analyzeStock()">查詢</button>
   </div>
   <div style="display:flex;gap:6px;flex-shrink:0;margin-left:4px;align-items:center">
     <!-- 電腦版計數器 -->
@@ -2171,7 +2173,7 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
 <div id="referralWelcomeModal" class="modal-overlay" style="display:none">
   <div class="modal-box" style="max-width:360px;text-align:center">
     <div class="modal-title">🎉 歡迎加入！</div>
-    <p style="color:var(--text2);font-size:14px;line-height:1.6;margin:0 0 16px">免費帳號已建立完成，現在就可以開始查詢個股。<br>想使用完整功能，可隨時在「我的」頁面升級付費方案。</p>
+    <p style="color:var(--text2);font-size:14px;line-height:1.6;margin:0 0 16px">免費帳號已建立完成，現在就可以開始查詢個股。<br>想使用完整功能，可隨時在「設定」頁面升級付費方案。</p>
     <button class="modal-btn" onclick="hideReferralWelcomeModal()">開始使用</button>
   </div>
 </div>
@@ -2306,7 +2308,7 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
 <!-- 底部導航 -->
 <div class="bottom-nav">
   <button class="nav-btn active" onclick="showPage('home')">
-    <div class="nav-icon">📊</div>分析
+    <div class="nav-icon">📊</div>個股查詢
   </button>
   <button class="nav-btn" onclick="showPage('watch')">
     <div class="nav-icon">🔥</div>關注
@@ -2318,7 +2320,7 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
     <div class="nav-icon">💬</div>討論
   </button>
   <button class="nav-btn" onclick="showPage('my')">
-    <div class="nav-icon">👤</div>我的
+    <div class="nav-icon">⚙️</div>設定
   </button>
 </div>
 
@@ -3654,7 +3656,7 @@ async function analyzeStock(){
       let detail=`HTTP ${r.status}`;
       try{const j=JSON.parse(txt);detail=j.detail||j.message||detail;}catch{}
       if(r.status===401){ showLoginModal(); setSt('❌ 請先登入',true); return; }
-      if(r.status===403){ setSt('❌ 訂閱已到期，請至「我的」頁面續費',true); return; }
+      if(r.status===403){ setSt('❌ 訂閱已到期，請至「設定」頁面續費',true); return; }
       if(r.status===429){
         let _j429=null;
         try{ _j429=JSON.parse(txt); }catch(e){}
@@ -7033,7 +7035,7 @@ function goPayFromApp(plan) {
     showUpgradeModal();
     return;
   }
-  alert('舊付款短網址已停用。請至「我的」頁面選擇方案升級（現行價格 499／999／3688）。');
+  alert('舊付款短網址已停用。請至「設定」頁面選擇方案升級（現行價格 499／999／3688）。');
 }
 
 // ══════════════════════════════════════
@@ -7817,7 +7819,7 @@ function _onLoginSuccess(){
   const topLoginBtn = document.getElementById('topLoginBtn');
   if(topLoginBtn) topLoginBtn.style.display = 'none';
   const myBtn = document.querySelector('.nav-btn[onclick*="my"]');
-  if(myBtn) myBtn.innerHTML = '<div class="nav-icon">👤</div>我的';
+  if(myBtn) myBtn.innerHTML = '<div class="nav-icon">⚙️</div>設定';
   // 已有通知權限直接訂閱，否則先顯示說明 Modal
   if(Notification.permission === 'granted'){
     _subscribeWebPush();
@@ -7966,7 +7968,7 @@ const TOUR_STEPS = [
   },
   {
     title: '🚀 升級享受完整功能',
-    desc: '免費版每日可查詢 3 次。升級付費方案即可無限查詢，並解鎖籌碼分析、族群比較等進階功能。前往「我的」頁面了解方案。'
+    desc: '免費版每日可查詢 3 次。升級付費方案即可無限查詢，並解鎖籌碼分析、族群比較等進階功能。前往「設定」頁面了解方案。'
   },
 ];
 let _tourIdx = 0;

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-8MBD31GNL8"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-8MBD31GNL8');</script>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>處置股查詢｜線上有位</title>
+<meta name="description" content="查詢目前上市／上櫃處置股：處置原因、處置期間、分盤方式，資料來源為證交所與櫃買中心官方公告，只列事實不做判讀。登入會員免費查看。"/>
+<meta name="robots" content="noindex, follow"/>
+<link rel="canonical" href="https://softglow-ai.com/disposal.html"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<script>
+// 主題判斷要在畫面畫出來之前跑，避免先閃一次再變色（跟 index.html 用同一把 localStorage 'theme'）
+(function(){
+  try{
+    var t = localStorage.getItem('theme');
+    if(t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+  }catch(e){}
+})();
+</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f2f1ec;--bg3:#e6e5df;
+  --text:#1a1a18;--text2:#4a4948;--text3:#888780;
+  --border:rgba(0,0,0,.1);--border2:rgba(0,0,0,.2);
+  --green:#1D9E75;--amber:#B07010;--amber-l:rgba(176,112,16,.1);
+  --radius:10px;--radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#07111f;--bg2:#0d1c2d;--bg3:#10243a;
+    --text:#edf6ff;--text2:#8da5bb;--text3:#6f8da7;
+    --border:#21415e;--border2:#18334d;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#07111f;--bg2:#0d1c2d;--bg3:#10243a;
+  --text:#edf6ff;--text2:#8da5bb;--text3:#6f8da7;
+  --border:#21415e;--border2:#18334d;
+}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.7;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-size:18px;font-weight:900;letter-spacing:-.5px;color:var(--text);text-decoration:none}.nav-logo em{color:var(--green);font-style:normal}
+.nav-back{font-size:13px;color:var(--text3);text-decoration:none;padding:6px 12px;border-radius:8px;border:1px solid var(--border2)}
+main{max-width:960px;margin:0 auto;padding:28px 16px 60px}
+h1{font-size:22px;font-weight:900;margin-bottom:6px}
+.sub{font-size:13px;color:var(--text3);margin-bottom:20px}
+.notice{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.7}
+.state-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:40px 20px;text-align:center;color:var(--text2);font-size:14px}
+.state-box .big{font-size:15px;color:var(--text);font-weight:700;margin-bottom:10px}
+.btn{display:inline-block;margin-top:14px;background:var(--green);color:#fff;border:none;border-radius:30px;padding:10px 24px;font-size:14px;font-weight:700;text-decoration:none;cursor:pointer}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{text-align:left;color:var(--text3);font-weight:600;font-size:12px;padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
+tbody td{padding:10px;border-bottom:1px solid var(--border);vertical-align:top;color:var(--text2)}
+tbody tr:hover{background:var(--bg2)}
+.code{font-family:'SF Mono','Fira Code',monospace;color:var(--text)}
+.name{color:var(--text);font-weight:700}
+.tag-market{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;border:1px solid var(--border2);color:var(--text3);white-space:nowrap}
+.detail-toggle{font-size:12px;color:var(--green);cursor:pointer;background:none;border:none;padding:0;text-decoration:underline}
+.detail-box{display:none;margin-top:8px;padding:10px;background:var(--bg2);border-radius:8px;font-size:12px;color:var(--text2);white-space:pre-wrap;line-height:1.8}
+.detail-box.open{display:block}
+.card-list{display:none}
+@media(max-width:760px){
+  table,thead{display:none}
+  .card-list{display:block}
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px}
+  .card .row1{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .card .name{font-size:15px}
+  .card .field{font-size:13px;color:var(--text2);margin-top:4px}
+  .card .field b{color:var(--text3);font-weight:600;margin-right:4px}
+}
+.desk-table{display:block}
+@media(max-width:760px){.desk-table{display:none}}
+footer{text-align:center;padding:30px 16px;color:var(--text3);font-size:12px}
+footer a{color:var(--text3);text-decoration:none;margin:0 6px}
+.count-line{font-size:13px;color:var(--text3);margin-bottom:12px}
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-logo" href="/stock/">線上<em>有位</em></a>
+  <a class="nav-back" href="/stock/">← 回到分析首頁</a>
+</nav>
+<main>
+  <h1>🚫 處置股查詢</h1>
+  <div class="sub">目前上市／上櫃處置股，資料來源：證交所（TWSE）與櫃買中心（TPEx）官方公告</div>
+  <div class="notice">
+    這裡只整理官方公告原文（處置原因、處置期間、分盤／預收款券等分盤方式），<b>不做任何判讀、不給任何操作建議</b>。免費功能，登入會員即可查看。
+  </div>
+
+  <div id="stateBox" class="state-box">
+    <div class="big">正在查詢…</div>
+    <div>連線到伺服器中，請稍候</div>
+  </div>
+
+  <div id="resultArea" style="display:none">
+    <div class="count-line" id="countLine"></div>
+    <table class="desk-table">
+      <thead>
+        <tr>
+          <th>市場</th><th>代號</th><th>名稱</th><th>累計</th>
+          <th>公告日期</th><th>處置原因</th><th>處置期間</th><th>處置措施</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="card-list" id="cardList"></div>
+  </div>
+
+  <div id="asOfLine" class="sub" style="margin-top:16px"></div>
+</main>
+<footer>
+  <p>本頁僅整理證交所／櫃買中心官方公告原文，不構成任何投資建議。投資有風險，請自行判斷。</p>
+  <p style="margin-top:8px"><a href="/stock/">回到分析首頁</a> · <a href="/about.html">關於我們</a> · <a href="/privacy.html">隱私權政策</a></p>
+</footer>
+<script>
+function getAPI(){
+  var h = location.hostname;
+  if(h === 'localhost' || h === '127.0.0.1' || h.startsWith('192.168')) return 'http://localhost:8000';
+  return 'https://api.softglow-ai.com';
+}
+function getToken(){ try{ return localStorage.getItem('auth_token'); }catch(e){ return null; } }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+function showState(big, sub, showBtn){
+  var box = document.getElementById('stateBox');
+  document.getElementById('resultArea').style.display = 'none';
+  box.style.display = 'block';
+  box.innerHTML = '<div class="big">' + esc(big) + '</div><div>' + esc(sub) + '</div>' +
+    (showBtn ? '<a class="btn" href="/stock/">前往登入</a>' : '');
+}
+
+function render(payload){
+  document.getElementById('stateBox').style.display = 'none';
+  var area = document.getElementById('resultArea');
+  area.style.display = 'block';
+  var items = payload.items || [];
+  document.getElementById('countLine').textContent =
+    items.length ? ('共 ' + items.length + ' 檔目前列入處置') : '目前查無處置股公告';
+  document.getElementById('asOfLine').textContent = payload.as_of ? ('資料時間：' + payload.as_of + '（台北時間）・來源：' + (payload.source || '')) : '';
+
+  var tbody = document.getElementById('tbody');
+  var cardList = document.getElementById('cardList');
+  tbody.innerHTML = '';
+  cardList.innerHTML = '';
+
+  items.forEach(function(it, idx){
+    var detailId = 'detail_' + idx;
+    // 桌面表格列
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td><span class="tag-market">' + esc(it.market) + '</span></td>' +
+      '<td class="code">' + esc(it.code) + '</td>' +
+      '<td class="name">' + esc(it.name) + '</td>' +
+      '<td>' + esc(it.count) + '</td>' +
+      '<td>' + esc(it.announce_date) + '</td>' +
+      '<td>' + esc(it.reason) + '</td>' +
+      '<td>' + esc(it.period) + '</td>' +
+      '<td>' + esc(it.measures) + '</td>' +
+      '<td><button class="detail-toggle" onclick="toggleDetail(\'' + detailId + '\')">完整內容</button></td>';
+    tbody.appendChild(tr);
+    var trDetail = document.createElement('tr');
+    trDetail.innerHTML = '<td colspan="9"><div class="detail-box" id="' + detailId + '">' + esc(it.detail) + '</div></td>';
+    tbody.appendChild(trDetail);
+
+    // 手機卡片
+    var card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML =
+      '<div class="row1"><span class="name">' + esc(it.name) + ' ' + esc(it.code) + '</span><span class="tag-market">' + esc(it.market) + '</span></div>' +
+      '<div class="field"><b>累計</b>' + esc(it.count) + '</div>' +
+      '<div class="field"><b>公告日期</b>' + esc(it.announce_date) + '</div>' +
+      '<div class="field"><b>處置原因</b>' + esc(it.reason) + '</div>' +
+      '<div class="field"><b>處置期間</b>' + esc(it.period) + '</div>' +
+      '<div class="field"><b>處置措施</b>' + esc(it.measures) + '</div>' +
+      '<button class="detail-toggle" style="margin-top:8px" onclick="toggleDetail(\'m' + detailId + '\')">完整內容</button>' +
+      '<div class="detail-box" id="m' + detailId + '">' + esc(it.detail) + '</div>';
+    cardList.appendChild(card);
+  });
+}
+
+function toggleDetail(id){
+  var el = document.getElementById(id);
+  if(el) el.classList.toggle('open');
+}
+
+async function load(){
+  var token = getToken();
+  if(!token){
+    showState('請先登入', '處置股查詢是會員免費功能，登入後即可查看（不需付費方案）', true);
+    return;
+  }
+  try{
+    var res = await fetch(getAPI() + '/api/market/disposal', {
+      headers: { 'Authorization': 'Bearer ' + token },
+      signal: AbortSignal.timeout(15000),
+    });
+    if(res.status === 401){
+      showState('登入已過期', '請重新登入後再查看', true);
+      return;
+    }
+    if(!res.ok){
+      showState('查詢失敗', '伺服器暫時無法回應，請稍後再試（HTTP ' + res.status + '）', false);
+      return;
+    }
+    var payload = await res.json();
+    render(payload);
+  }catch(e){
+    showState('連線失敗', '請檢查網路連線後重新整理頁面', false);
+  }
+}
+load();
+</script>
+</body>
+</html>
