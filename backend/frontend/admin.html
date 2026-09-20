@@ -510,6 +510,29 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
       </div>
       <div class="result-box" id="invTestResult"></div>
 
+      <div style="border-top:1px solid var(--border2);margin:16px 0 12px"></div>
+      <div style="font-weight:700;font-size:14px;margin-bottom:4px">補開發票</div>
+      <div class="ops-sub" style="margin-bottom:10px">給之前已經付款、但那時候還沒接發票的訂單用。會照上面顯示的環境開立——測試環境開出來是測試發票。</div>
+      <div class="form-row">
+        <div class="field"><label>會員 Email（發票通知信寄這裡）</label><input id="miEmail" type="email" placeholder="客人的 email"/></div>
+        <div class="field"><label>金額（含稅）</label><input id="miAmount" type="number" min="1" placeholder="例如 499"/></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>品名</label><input id="miItem" value="線上有位訂閱"/></div>
+        <div class="field"><label>訂單編號（留空自動產生）</label><input id="miOrder" placeholder="可填綠界的訂單編號"/></div>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>載具</label>
+          <select id="miCarrier" onchange="document.getElementById('miCarrierId').style.display=this.value==='3J0002'?'':'none'">
+            <option value="">無（不掛載具）</option>
+            <option value="3J0002">手機條碼</option>
+          </select>
+          <input id="miCarrierId" placeholder="/ABC1234" style="display:none;margin-top:6px;text-transform:uppercase"/>
+        </div>
+        <button class="inline-btn" onclick="doIssueInvoice(this)">開立發票</button>
+      </div>
+      <div class="result-box" id="miResult"></div>
+
       <div id="invList" style="margin-top:12px"><div class="ops-empty">載入中...</div></div>
     </div>
 
@@ -795,6 +818,45 @@ async function doTestInvoice(btn){
   }catch(e){
     box.className = 'result-box show error';
     box.textContent = '測試失敗：' + e.message;
+  }
+  btn.disabled = false;
+}
+
+async function doIssueInvoice(btn){
+  const email  = document.getElementById('miEmail').value.trim();
+  const amount = parseInt(document.getElementById('miAmount').value) || 0;
+  const item   = document.getElementById('miItem').value.trim() || '線上有位訂閱';
+  const order  = document.getElementById('miOrder').value.trim();
+  const ct     = document.getElementById('miCarrier').value;
+  const cid    = document.getElementById('miCarrierId').value.trim().toUpperCase();
+  const box    = document.getElementById('miResult');
+  box.className = 'result-box show';
+  if(amount <= 0){ box.className='result-box show error'; box.textContent='金額要大於 0'; return; }
+  if(!confirm(`確定要開這張發票？\n\n金額：NT$${amount}\n品名：${item}\n會員：${email||'（未填）'}\n載具：${ct==='3J0002'?cid:'無'}\n\n發票開出去不能反悔，只能作廢。`)) return;
+  box.textContent = '開立中…';
+  btn.disabled = true;
+  try{
+    const r = await fetch(`${API}/admin/issue-invoice`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Admin-Key':getAdminKey()},
+      body: JSON.stringify({email:email, amount:amount, item_name:item, order_id:order, carrier_type:ct, carrier_id:cid})
+    });
+    const d = await r.json();
+    if(d.ok){
+      box.className='result-box show success';
+      box.textContent = `✅ 開立成功！發票號碼：${d.invoice_number}\n訂單編號：${d.order_id}`;
+      document.getElementById('miEmail').value='';
+      document.getElementById('miAmount').value='';
+      document.getElementById('miOrder').value='';
+      document.getElementById('miCarrierId').value='';
+    }else{
+      box.className='result-box show error';
+      box.textContent = `❌ 開立失敗\n${d.msg||''}\n錯誤代碼：${d.code===undefined?'—':d.code}`;
+    }
+    loadInvoices();
+  }catch(e){
+    box.className='result-box show error';
+    box.textContent = '開立失敗：' + e.message;
   }
   btn.disabled = false;
 }

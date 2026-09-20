@@ -3803,11 +3803,11 @@ function renderResult(d,enabledMA){
   // 0. 主結論只留一條，避免 warning 與 contradiction 同時搶視線
   // 2026/09/17：後端改由綜合解說(verdict)統一產出主結論，矛盾已併進解說，conflict_note 會是空的
   if(d.verdict && d.verdict.headline){
-    coreLines.push({text:`主結論：${d.warning || d.verdict.headline}`, cls:'conclusion'});
+    coreLines.push({text:`分析摘要：${d.warning || d.verdict.headline}`, cls:'conclusion'});
   } else if(conflict_note){
-    coreLines.push({text:`主結論：訊號不一致 — ${conflict_note}`, cls:'conclusion'});
+    coreLines.push({text:`分析摘要：訊號不一致 — ${conflict_note}`, cls:'conclusion'});
   } else if(d.warning){
-    coreLines.push({text:`主結論：${d.warning}`, cls:'conclusion'});
+    coreLines.push({text:`分析摘要：${d.warning}`, cls:'conclusion'});
   }
 
   // 2. K棒型態（型態名稱 + 操作說明）
@@ -3843,7 +3843,7 @@ function renderResult(d,enabledMA){
   coreLines.push({text:`支撐 ${support}（${support_desc}），壓力 ${resistance}（${resistance_desc}）`, cls:''});
 
   // 5. 趨勢（2026/08/06修正：trend已改道氏波峰波谷判斷,非均線,原「均線多頭/空頭排列」文案改中性用詞,呼應main.py同日修正）
-  const trendMap={'上升趨勢':'近期高低點結構走高，屬多方結構，回測支撐時是觀察多方是否延續的位置','下降趨勢':'近期高低點結構走低，屬空方結構，反彈至壓力時是觀察空方是否延續的位置','盤整':'高低點結構不明，多空拉鋸，方向需等突破或跌破確認'};
+  const trendMap={'上升趨勢':'近期高低點結構走高（頭頭高、底底高），回測支撐時是觀察這個結構是否延續的位置','下降趨勢':'近期高低點結構走低（頭頭低、底底低），反彈至壓力時是觀察這個結構是否延續的位置','盤整':'高低點結構不明，偏多與偏空條件互相牴觸，方向需等突破或跌破確認'};
   const trendCls = trend==='下降趨勢'?'hi':'';
   coreLines.push({text:`趨勢：${trendMap[trend]||trend}`, cls: trendCls});
 
@@ -4169,7 +4169,7 @@ function renderVerdict(v){
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
       <span style="font-size:15px;font-weight:800;color:var(--text)">🧭 綜合解說</span>
       <span style="font-size:12px;font-weight:800;padding:2px 10px;border-radius:20px;border:1px solid ${stanceColor};color:${stanceColor}">${esc(v.stance_label)}</span>
-      <span style="font-size:11px;color:var(--text3)">看多分數 ${v.bull_score}・看空分數 ${v.bear_score}</span>
+      <span style="font-size:11px;color:var(--text3)">偏多條件 ${v.bull_count} 項・偏空條件 ${v.bear_count} 項</span>
       ${hasEdu ? `<button type="button" class="vd-edu-sw" onclick="_vdToggleEdu()"><span>📘 教學模式</span><span class="sw"></span></button>` : ''}
     </div>
     ${guideHtml}
@@ -4178,8 +4178,8 @@ function renderVerdict(v){
     ${list('🎯 關鍵價位', sec.levels, '•', null, edu.levels)}
     ${hasRest ? `<div class="vd-rest">
       ${list('📍 現在的狀況', sec.status, '•', null, edu.status)}
-      ${list('📈 看多的理由', sec.bull, '＋', 'var(--dn)', edu.bull)}
-      ${list('📉 看空的理由', sec.bear, '－', 'var(--up)', edu.bear)}
+      ${list('📈 偏多條件', sec.bull, '＋', 'var(--dn)', edu.bull)}
+      ${list('📉 偏空條件', sec.bear, '－', 'var(--up)', edu.bear)}
       ${cfHtml}
       ${scHtml}
       ${sigHtml}
