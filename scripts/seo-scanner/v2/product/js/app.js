@@ -207,12 +207,15 @@
       ? ("下一步建議：先看「" + top.title + "」。")
       : "下一步建議：點「網站健不健康？」看結構地圖。";
     el.className = "glass panel result-hero";
+    const offlineNote = (c.httpMode === "offline")
+      ? ('<div class="muted" style="margin-top:8px">補充：這次沒有連線檢查網址是否真的打不開，所以「找不到頁面」先當成「證據還不夠」，不是直接宣判 404。</div>')
+      : "";
     el.innerHTML = "<h3>用一句話說明這次結果</h3>" +
-      "<p class="big">" + verdict + "</p>" +
-      "<p class="muted">這份報告在幫你做網站「可見度健檢」：搜尋看不看得到、AI 提不提得到、網站與內容有沒有明顯問題。</p>" +
-      "<div class="next-box"><strong>" + next + "</strong>下面四張卡片用白話分類；點進去才看細節。專業術語都藏在「查看詳細證據」。" +
-      (c.httpMode === "offline" ? "<div class="muted" style="margin-top:8px">補充：這次沒有連線檢查網址是否真的打不開，所以「找不到頁面」先當成「證據還不夠」，不是直接宣判 404。</div>" : "") +
-      "</div>";
+      "<p class=\"big\">" + verdict + "</p>" +
+      "<p class=\"muted\">這份報告在幫你做網站「可見度健檢」：搜尋看不看得到、AI 提不提得到、網站與內容有沒有明顯問題。</p>" +
+      "<div class=\"next-box\"><strong>" + next + "</strong>" +
+      "下面四張卡片用白話分類；點進去才看細節。專業術語都藏在「查看詳細證據」。" +
+      offlineNote + "</div>";
   }
 
   function renderPillars() {
@@ -292,7 +295,11 @@
   function renderTopIssues() {
     const box = $("top-issues");
     const list = topPlainIssues(5);
-    box.innerHTML = list.map((p) => renderIssueCard(p)).join("") || '<p class="muted">目前沒有需要置頂的項目。</p>';
+    const heading = document.querySelector("#overview-extras h3");
+    if (heading) heading.textContent = "現在最該先看的一件（或幾件）事";
+    const sub = document.querySelector("#overview-extras .muted");
+    if (sub) sub.textContent = "不用一次看懂全部。先處理最上面的，看完再決定要不要點四張卡片。";
+    box.innerHTML = list.map((p) => renderIssueCard(p)).join("") || '<p class="muted">目前沒有特別急的項目。可以點上面四張卡片隨意逛逛。</p>';
     bindEvidenceToggles(box);
   }
 
