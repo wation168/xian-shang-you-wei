@@ -246,19 +246,27 @@
     const watchN = groups.filter(function (g) { return g.level === "watch"; }).length;
     const urgentN = groups.filter(function (g) { return g.level === "urgent"; }).length;
     let verdict;
+    let tone = "ok";
+    let badge = "目前沒有急件";
     if (urgentN === 0 && watchN === 0) {
       verdict = "目前沒有需要立即處理的重大問題，也沒有特別需要留意的項目。";
+      badge = "整體看起來穩定";
     } else if (urgentN === 0) {
       verdict = "目前沒有需要立即處理的重大問題。不過有幾個地方的基本資訊與內容結構值得先整理。";
+      tone = "watch";
+      badge = "有幾項值得先看";
     } else {
       verdict = "有 " + urgentN + " 類問題建議優先處理；其餘可稍後再看。";
+      tone = "urgent";
+      badge = "建議優先處理";
     }
-    el.className = "glass panel result-hero";
+    el.className = "glass panel result-hero tone-" + tone;
     const offlineNote =
       c.httpMode === "offline"
-        ? '<div class="muted" style="margin-top:8px">補充：這次沒有連線檢查網址是否真的打不開，所以「找不到頁面」先當成「證據還不夠」，不是直接宣判 404。</div>'
+        ? '<div class="note-card">補充：這次沒有連線檢查網址是否真的打不開，所以「找不到頁面」先當成「證據還不夠」，不是直接宣判 404。</div>'
         : "";
     el.innerHTML =
+      '<div class="hero-badge ' + tone + '">' + escapeHtml(badge) + "</div>" +
       "<h3>一句話看懂</h3>" +
       '<p class="big">' +
       escapeHtml(verdict) +
@@ -267,13 +275,19 @@
       offlineNote;
   }
 
+  function pillarTone(icon) {
+    if (icon === "⚠️") return "watch";
+    if (icon === "⏳") return "pending";
+    return "ok";
+  }
+
   function pillarCards(c) {
     const st = pillarStatus(c, buildGroups(state.data.issues || []));
     return [
-      { id: "search", kicker: "搜尋", name: "別人搜得到嗎？", blurb: "Google 這類搜尋，能不能正確讀懂你的網站。", metric: st.search.text, metricIcon: st.search.icon },
-      { id: "ai", kicker: "AI", name: "AI 提得到你嗎？", blurb: "這版還沒接真實 AI 觀測，所以誠實寫尚未測量——不會給假分數。", metric: st.ai.text, metricIcon: st.ai.icon, tier: "unmeasured" },
-      { id: "website", kicker: "網站", name: "網站健不健康？", blurb: "結構、連結、技術基礎有沒有明顯問題。", metric: st.website.text, metricIcon: st.website.icon },
-      { id: "content", kicker: "內容", name: "內容清不清楚？", blurb: "頁面是不是講清楚、會不會彼此太像。", metric: st.content.text, metricIcon: st.content.icon },
+      { id: "search", icon: "🔎", kicker: "搜尋", name: "別人搜得到嗎？", blurb: "Google 這類搜尋，能不能正確讀懂你的網站。", metric: st.search.text, metricIcon: st.search.icon, tone: pillarTone(st.search.icon) },
+      { id: "ai", icon: "🤖", kicker: "AI", name: "AI 提得到你嗎？", blurb: "這版還沒接真實 AI 觀測，所以誠實寫尚未測量——不會給假分數。", metric: st.ai.text, metricIcon: st.ai.icon, tier: "unmeasured", tone: "pending" },
+      { id: "website", icon: "🌐", kicker: "網站", name: "網站健不健康？", blurb: "結構、連結、技術基礎有沒有明顯問題。", metric: st.website.text, metricIcon: st.website.icon, tone: pillarTone(st.website.icon) },
+      { id: "content", icon: "📝", kicker: "內容", name: "內容清不清楚？", blurb: "頁面是不是講清楚、會不會彼此太像。", metric: st.content.text, metricIcon: st.content.icon, tone: pillarTone(st.content.icon) },
     ];
   }
 
@@ -283,9 +297,13 @@
     box.innerHTML = pillarCards(c)
       .map(function (p) {
         return (
-          '<article class="glass pillar" data-pillar="' +
+          '<article class="glass pillar tone-' +
+          (p.tone || "ok") +
+          '" data-pillar="' +
           p.id +
-          '"><div class="kicker">' +
+          '"><div class="pillar-icon">' +
+          (p.icon || "") +
+          '</div><div class="kicker">' +
           escapeHtml(p.kicker) +
           '</div><div class="name">' +
           escapeHtml(p.name) +
@@ -293,11 +311,11 @@
           escapeHtml(p.blurb) +
           '</p><div class="metric"><span class="status-ico">' +
           (p.metricIcon || "") +
-          "</span> " +
+          "</span><span>" +
           escapeHtml(p.metric) +
-          "</div>" +
+          "</span></div>" +
           (p.tier === "unmeasured" ? '<div style="margin-top:10px"><span class="tier unmeasured">尚未測量</span></div>' : "") +
-          "</article>"
+          '<div class="pillar-cta">點進去看細節 →</div></article>'
         );
       })
       .join("");
@@ -355,13 +373,17 @@
       "</div>";
 
     return (
-      '<article class="issue group-card"><div><span class="tag ' +
+      '<article class="issue group-card level-' +
+      g.level +
+      '"><div class="group-meta"><span class="tag ' +
       g.level +
       '">' +
       escapeHtml(g.label) +
       '</span><span class="tag">' +
       g.count +
-      " 項</span></div><h4>" +
+      " 項</span>" +
+      (g.pages && g.pages.length ? '<span class="tag">' + g.pages.length + " 頁</span>" : "") +
+      "</div><h4>" +
       (idx + 1) +
       "｜" +
       escapeHtml(g.title) +
@@ -372,7 +394,7 @@
       (g.impact ? '<p class="why"><strong>影響：</strong>' + escapeHtml(g.impact) + "</p>" : "") +
       (g.advice ? '<p class="why"><strong>建議：</strong>' + escapeHtml(g.advice) + "</p>" : "") +
       '<div class="actions">' +
-      (pages.length ? '<button class="btn ghost" data-toggle="' + gid + '-pages">查看受影響頁面</button>' : "") +
+      (pages.length ? '<button class="btn ghost" data-toggle="' + gid + '-pages">查看受影響頁面 →</button>' : "") +
       '<button class="btn ghost" data-toggle="' +
       gid +
       '-ev">查看詳細證據</button></div>' +
