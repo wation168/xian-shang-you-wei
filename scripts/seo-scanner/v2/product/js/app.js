@@ -15,7 +15,89 @@
     "評估 AI 可見度（未測量則誠實標示）",
   ];
 
-  const state = { data: null, view: "landing", detail: null, mode: null };
+
+  const SOLUTION_PLAYBOOKS = {
+    meta_bundle: {
+      freeImpact: "可能讓搜尋引擎較難判斷頁面主題與主要網址，進而影響點擊與收錄品質。",
+      paidSteps: [
+        "盤點首頁、主要分類與轉換頁，列出缺 description／canonical／標題的頁面。",
+        "為每一頁寫一句「這頁在講什麼＋給誰看」的摘要（建議 70–155 字）。",
+        "確認每頁只有一個 canonical，且指向你希望被索引的正式網址。",
+        "標題（title）與 H1 對齊主題，避免多頁共用同一組文案。",
+        "改完後用預覽／檢視原始碼抽查 3–5 個代表性頁面。",
+        "付費方案可再測一次，確認問題群是否消失或降級。",
+      ],
+      paidDraftHint: "升級後可取得：各頁 Meta description 草稿範例、canonical 設定檢查清單、標題對照表。",
+      verifyHint: "修復後再測（付費）：重新掃描同一批 URL，比對 meta_bundle 群組是否仍出現。",
+    },
+    content_similar: {
+      freeImpact: "頁面過度相似時，搜尋與使用者較難分辨差異，可能稀釋曝光。",
+      paidSteps: [
+        "先挑相似度最高的一組，並列開啟兩頁比較「獨特段落」。",
+        "標出可合併、可刪、或必須保留的頁面角色（入口／細節／轉換）。",
+        "為保留頁補上獨特案例、表格、FAQ 或步驟說明，拉開差異。",
+        "調整內部連結與標題，讓每頁意圖更清楚。",
+        "若是樣板殼層過重，優先改正文區而非全站導覽。",
+        "付費可再測，確認相似群組縮小或消失。",
+      ],
+      paidDraftHint: "升級後可取得：差異化大綱草稿、可合併頁建議、獨特段落改寫提示。",
+      verifyHint: "修復後再測（付費）：重跑掃描，看 content_similar 群組數量與嚴重度是否下降。",
+    },
+    url_uncertain: {
+      freeImpact: "連結目標證據不足時，不應直接當 404；但未確認前可能影響體驗與信任。",
+      paidSteps: [
+        "匯出受影響連結清單，標註來源頁與目標 URL。",
+        "先做連線／狀態碼確認（200／301／404），再決定修法。",
+        "404：改連到正確頁或移除失效錨點；301：更新為最終網址。",
+        "相對路徑與尾斜線規則統一，避免同頁多種寫法。",
+        "抽查導覽、頁尾、正文內連三處高流量來源。",
+        "付費可再測，確認 url_uncertain 是否清掉。",
+      ],
+      paidDraftHint: "升級後可取得：失效連結修補優先序、建議替換目標、重導向對照草稿。",
+      verifyHint: "修復後再測（付費）：開啟連線檢查模式重掃，確認證據鏈與狀態。",
+    },
+    i18n: {
+      freeImpact: "若你確實有多語版本，hreflang／語系標示不完整可能讓搜尋選錯語言版本。",
+      paidSteps: [
+        "先確認站點是單語還是多語；單語通常不必硬加 hreflang。",
+        "多語：列出語言代碼與對應首頁／關鍵頁 URL 對照表。",
+        "每頁補齊互指的 hreflang，並包含 x-default（若適用）。",
+        "檢查語言版本內容是否真的不同，避免只換殼。",
+        "用 Search Console／網址檢查抽樣驗證（若有）。",
+        "付費可再測，確認 i18n 群組是否仍需處理。",
+      ],
+      paidDraftHint: "升級後可取得：hreflang 標籤草稿、語言對照表範本、單語／多語決策說明。",
+      verifyHint: "修復後再測（付費）：重掃後看 i18n 問題是否降為可略過或消失。",
+    },
+    links_opportunity: {
+      freeImpact: "相關頁缺少自然內連不一定是錯誤，但可能錯過主題權重流動的機會。",
+      paidSteps: [
+        "只挑「主題真的相關」的頁面對，略過年表／歸檔噪音。",
+        "在正文自然段落加入 1–2 條說明性內連，避免硬塞。",
+        "錨點文字寫清楚主題，少用「點這裡」。",
+        "檢查是否已有導覽／側欄連到同一目標，避免重複堆疊。",
+        "優先處理高流量或轉換路徑上的頁面。",
+        "付費可再測，看內連機會是否被消化。",
+      ],
+      paidDraftHint: "升級後可取得：建議內連對照表、錨點文案草稿、優先處理清單。",
+      verifyHint: "修復後再測（付費）：重掃後 links_opportunity 是否減少或改為可略過。",
+    },
+    other: {
+      freeImpact: "其他項目建議先看證據再決定；不一定都要立刻改。",
+      paidSteps: [
+        "閱讀詳細證據與 disposition，分辨 true_issue 與 needs_review。",
+        "依影響面（流量／轉換／信任）排出優先順序。",
+        "對 true_issue 寫出最小可行修復步驟。",
+        "needs_review 先補證據，再決定是否動手。",
+        "改完記錄變更範圍，方便對照。",
+        "付費可再測，驗證修復是否生效。",
+      ],
+      paidDraftHint: "升級後可取得：依群組客製的修復步驟與文案／設定草稿。",
+      verifyHint: "修復後再測（付費）：同一 URL 再掃一次，比對該群組是否改善。",
+    },
+  };
+
+  const state = { data: null, view: "landing", detail: null, mode: null, demoUnlock: {} };
   const $ = (id) => document.getElementById(id);
 
   function show(view) {
@@ -327,6 +409,7 @@
       escapeHtml(verdict) +
       "</p>" +
       '<p class="muted">這是網站「可見度健檢」：搜尋看不看得到、AI 提不提得到、網站與內容有沒有明顯問題。你不需要先懂 SEO。</p>' +
+      '<p class="muted freemium-line">免費：看懂問題與影響。付費：完整解法、草稿、AI 真實觀測、修復後再測。</p>' +
       offlineNote;
   }
 
@@ -340,7 +423,7 @@
     const st = pillarStatus(c, buildGroups(state.data.issues || []));
     return [
       { id: "search", icon: "🔎", kicker: "搜尋", name: "別人搜得到嗎？", blurb: "Google 這類搜尋，能不能正確讀懂你的網站。", metric: st.search.text, metricIcon: st.search.icon, tone: pillarTone(st.search.icon) },
-      { id: "ai", icon: "🤖", kicker: "AI", name: "AI 提得到你嗎？", blurb: "這版還沒接真實 AI 觀測，所以誠實寫尚未測量——不會給假分數。", metric: st.ai.text, metricIcon: st.ai.icon, tier: "unmeasured", tone: "pending" },
+      { id: "ai", icon: "🤖", kicker: "AI", name: "AI 提得到你嗎？", blurb: "測量 ChatGPT 等是否提到你是付費功能。免費版誠實標「尚未測量」、不造假分數；尚未接上真實證據前不會顯示「已測量」。", metric: st.ai.text, metricIcon: st.ai.icon, tier: "unmeasured", tone: "pending", planBadge: "付費可測" },
       { id: "website", icon: "🌐", kicker: "網站", name: "網站健不健康？", blurb: "結構、連結、技術基礎有沒有明顯問題。", metric: st.website.text, metricIcon: st.website.icon, tone: pillarTone(st.website.icon) },
       { id: "content", icon: "📝", kicker: "內容", name: "內容清不清楚？", blurb: "頁面是不是講清楚、會不會彼此太像。", metric: st.content.text, metricIcon: st.content.icon, tone: pillarTone(st.content.icon) },
     ];
@@ -369,7 +452,7 @@
           "</span><span>" +
           escapeHtml(p.metric) +
           "</span></div>" +
-          (p.tier === "unmeasured" ? '<div style="margin-top:10px"><span class="tier unmeasured">尚未測量</span></div>' : "") +
+          (p.tier === "unmeasured" ? '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="tier unmeasured">尚未測量</span>' + (p.planBadge ? '<span class="plan-chip paid">' + escapeHtml(p.planBadge) + '</span>' : '') + '</div>' : "") +
           '<div class="pillar-cta">點進去看細節 →</div></article>'
         );
       })
@@ -386,6 +469,74 @@
       btn.addEventListener("click", function () {
         const el = document.getElementById(btn.getAttribute("data-toggle"));
         if (el) el.classList.toggle("hidden");
+      });
+    });
+  }
+
+
+  function playbookFor(key) {
+    return SOLUTION_PLAYBOOKS[key] || SOLUTION_PLAYBOOKS.other;
+  }
+
+  function freeImpactText(g) {
+    const pb = playbookFor(g.key);
+    const base = (g.impact || "").trim();
+    const free = (pb.freeImpact || "").trim();
+    if (!free) return base;
+    if (!base) return free;
+    if (base === free || free.indexOf(base) >= 0 || base.indexOf(free) >= 0) return base;
+    return base;
+  }
+
+  function paywallHtml(g, unlockId) {
+    const pb = playbookFor(g.key);
+    const unlocked = !!(state.demoUnlock && state.demoUnlock[unlockId]);
+    const steps = pb.paidSteps || [];
+    const preview = steps.slice(0, 2);
+    if (unlocked) {
+      return (
+        '<div class="paywall unlocked" data-paywall-id="' + unlockId + '">' +
+        '<div class="paywall-head"><span class="lock-badge">付費功能預覽</span>' +
+        '<span class="plan-chip paid">付費方案</span></div>' +
+        '<h5>完整解決方案（付費）</h5>' +
+        '<ol class="paywall-steps">' +
+        steps.map(function (s) { return "<li>" + escapeHtml(s) + "</li>"; }).join("") +
+        "</ol>" +
+        '<p class="why"><strong>文案／草稿：</strong>' + escapeHtml(pb.paidDraftHint || "") + "</p>" +
+        '<p class="why"><strong>修復後再測：</strong>' + escapeHtml(pb.verifyHint || "") + "</p>" +
+        '<button type="button" class="btn ghost" data-demo-unlock="' + unlockId + '">收起預覽</button>' +
+        "</div>"
+      );
+    }
+    return (
+      '<div class="paywall" data-paywall-id="' + unlockId + '">' +
+      '<div class="paywall-head"><span class="lock-badge">🔒 鎖定</span>' +
+      '<span class="plan-chip paid">付費功能</span></div>' +
+      "<h5>完整解決方案（付費）</h5>" +
+      '<ol class="paywall-steps locked-preview">' +
+      preview.map(function (s) { return '<li class="blurred">' + escapeHtml(s) + "</li>"; }).join("") +
+      (steps.length > 2 ? '<li class="blurred">……</li>' : "") +
+      "</ol>" +
+      '<p class="paywall-teaser">升級後解鎖：逐步做法、文案草稿、修復後再測</p>' +
+      '<button type="button" class="btn ghost" data-demo-unlock="' + unlockId + '">預覽解法（產品示範）</button>' +
+      '<p class="muted" style="margin-top:8px;font-size:.82rem">示範解鎖僅供產品預覽，非真實付費；不會呼叫外部 AI。</p>' +
+      "</div>"
+    );
+  }
+
+  function bindDemoUnlock(root) {
+    root.querySelectorAll("[data-demo-unlock]").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = btn.getAttribute("data-demo-unlock");
+        if (!id) return;
+        state.demoUnlock[id] = !state.demoUnlock[id];
+        // re-render current view pieces that contain paywalls
+        if (state.detail) openDetail(state.detail);
+        else {
+          renderTopIssues();
+        }
       });
     });
   }
@@ -427,6 +578,8 @@
       (g.issues.length > 10 ? "\n…還有 " + (g.issues.length - 10) + " 筆原始項目" : "") +
       "</div>";
 
+    const impactText = freeImpactText(g);
+    const unlockId = "grp-" + g.key + "-" + idx;
     return (
       '<article class="issue group-card level-' +
       g.level +
@@ -434,7 +587,7 @@
       g.level +
       '">' +
       escapeHtml(g.label) +
-      '</span><span class="tag">' +
+      '</span><span class="plan-chip free">免費</span><span class="tag">' +
       g.count +
       " 項</span>" +
       (g.pages && g.pages.length ? '<span class="tag">' + g.pages.length + " 頁</span>" : "") +
@@ -446,7 +599,7 @@
       escapeHtml(g.summary) +
       "</p>" +
       kinds +
-      (g.impact ? '<p class="why"><strong>影響：</strong>' + escapeHtml(g.impact) + "</p>" : "") +
+      (impactText ? '<p class="why"><strong>影響（免費）：</strong>' + escapeHtml(impactText) + "</p>" : "") +
       (g.advice ? '<p class="why"><strong>建議：</strong>' + escapeHtml(g.advice) + "</p>" : "") +
       '<div class="actions">' +
       (pages.length ? '<button class="btn ghost" data-toggle="' + gid + '-pages">查看受影響頁面 →</button>' : "") +
@@ -455,6 +608,7 @@
       '-ev">查看詳細證據</button></div>' +
       pageBlock +
       evidBlock +
+      paywallHtml(g, unlockId) +
       "</article>"
     );
   }
@@ -464,7 +618,7 @@
     const heading = document.querySelector("#overview-extras h3");
     if (heading) heading.textContent = "現在最值得先看的地方";
     const sub = document.querySelector("#overview-extras .muted");
-    if (sub) sub.textContent = "先看群組。專業詞（P1、needs_review、meta、canonical）都藏在「查看詳細證據」。";
+    if (sub) sub.textContent = "先看群組。專業詞（P1、needs_review、meta、canonical）都藏在「查看詳細證據」。免費：看懂問題與影響。付費：完整解法、草稿、AI 真實觀測、修復後再測。";
 
     const groups = buildGroups(state.data.issues || [])
       .filter(function (g) { return g.level !== "ok"; })
@@ -475,6 +629,7 @@
     }
     box.innerHTML = groups.map(renderGroupCard).join("");
     bindEvidenceToggles(box);
+    bindDemoUnlock(box);
   }
 
   function websiteMapHtml(c) {
@@ -516,11 +671,42 @@
         (g.map(renderGroupCard).join("") || '<p class="muted">這一層暫時沒有需要留意的項目。</p>') +
         "</div>";
     } else if (pillar === "ai") {
+      const aiUnlock = "pillar-ai";
+      const aiUnlocked = !!(state.demoUnlock && state.demoUnlock[aiUnlock]);
+      const aiPaywallLocked =
+        '<div class="paywall" data-paywall-id="' + aiUnlock + '">' +
+        '<div class="paywall-head"><span class="lock-badge">🔒 鎖定</span><span class="plan-chip paid">付費功能</span></div>' +
+        "<h5>完整解決方案（付費）</h5>" +
+        '<ol class="paywall-steps locked-preview">' +
+        '<li class="blurred">對真實 ChatGPT（或其他指定模型）跑提及／引用觀測迴圈</li>' +
+        '<li class="blurred">彙整可核對的 mention／citation／source 證據</li>' +
+        '<li class="blurred">……</li></ol>' +
+        '<p class="paywall-teaser">升級後解鎖：逐步做法、文案草稿、修復後再測</p>' +
+        '<button type="button" class="btn ghost" data-demo-unlock="' + aiUnlock + '">預覽解法（產品示範）</button>' +
+        '<p class="muted" style="margin-top:8px;font-size:.82rem">示範解鎖僅供產品預覽，非真實付費；不會呼叫 OpenAI。</p></div>';
+      const aiPaywallOpen =
+        '<div class="paywall unlocked" data-paywall-id="' + aiUnlock + '">' +
+        '<div class="paywall-head"><span class="lock-badge">付費功能預覽</span><span class="plan-chip paid">付費方案</span></div>' +
+        "<h5>完整解決方案（付費）</h5>" +
+        '<ol class="paywall-steps">' +
+        "<li>設定品牌／產品關鍵問句，對真實 ChatGPT 等模型做提及觀測（付費能力）。</li>" +
+        "<li>收集可核對的 mention、citation、source 片段作為證據層。</li>" +
+        "<li>對照網站內容缺口，產出可執行的可見度改善步驟與草稿。</li>" +
+        "<li>修復後再測：重跑同一觀測組，比較提及是否出現或品質提升。</li>" +
+        "</ol>" +
+        '<p class="why"><strong>文案／草稿：</strong>升級後可取得針對你網站的提問組與內容補強草稿（仍需真實模型證據，不會造假）。</p>' +
+        '<p class="why"><strong>修復後再測：</strong>付費方案可重跑 AI 觀測迴圈驗證改善。</p>' +
+        '<button type="button" class="btn ghost" data-demo-unlock="' + aiUnlock + '">收起預覽</button></div>';
       body.innerHTML =
-        '<div class="glass panel"><h3>AI｜AI 提得到你嗎？</h3><div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0">' +
-        '<span class="tier measured">已測量：0</span><span class="tier est">推估：可依內容結構看 readiness（非正式分數）</span><span class="tier unmeasured">尚未測量</span></div>' +
-        "<p><strong>絕對不會</strong>顯示假的 GEO／AEO 分數。</p>" +
-        '<p class="muted">等接上真實 mention／citation／source 後，會出現在「已測量」。</p></div>';
+        '<div class="glass panel"><h3>AI｜AI 提得到你嗎？</h3>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0">' +
+        '<span class="tier unmeasured">尚未測量</span>' +
+        '<span class="plan-chip paid">付費可測</span>' +
+        '<span class="plan-chip free">免費誠實標示</span></div>' +
+        "<p><strong>免費：</strong>清楚告訴你「尚未測量」。我們<strong>不會</strong>用助手自己的回答冒充已測量，也<strong>絕對不會</strong>發明 GEO／AEO 分數。</p>" +
+        '<p class="muted">付費解鎖：接上真實 ChatGPT 提及／引用證據迴圈後，才會標成「已測量」。在那之前即使預覽付費解法，狀態仍是尚未測量。</p>' +
+        (aiUnlocked ? aiPaywallOpen : aiPaywallLocked) +
+        "</div>";
     } else if (pillar === "website") {
       body.innerHTML =
         '<div class="split"><div class="glass panel"><h3>網站｜健不健康？</h3>' +
@@ -541,6 +727,7 @@
         "</div>";
     }
     bindEvidenceToggles(body);
+    bindDemoUnlock(body);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
