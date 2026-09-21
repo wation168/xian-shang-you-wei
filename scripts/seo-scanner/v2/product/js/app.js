@@ -29,6 +29,17 @@
       ],
       paidDraftHint: "升級後可取得：各頁 Meta description 草稿範例、canonical 設定檢查清單、標題對照表。",
       verifyHint: "修復後再測（付費）：重新掃描同一批 URL，比對 meta_bundle 群組是否仍出現。",
+      who: {
+        diySummary: "站長可先補主要頁的 title／description／canonical。",
+        diySteps: [
+        "打開首頁與 2–3 個主要分類頁的編輯畫面或 CMS。",
+        "為每頁填寫一句清楚的 Meta description（約 70–155 字）。",
+        "確認 canonical 指向正式網址，且每頁只有一個。",
+        "標題與 H1 對齊主題後存檔並抽查原始碼。"
+      ],
+        teamHandoff: "請內容／前端依「缺 description／canonical／標題」清單，於本週補齊首頁與轉換頁；完成後回報 URL 清單供再測。",
+        conciergeCta: "由我們代為盤點、撰寫草稿並提交修改建議（付費服務・示範）。",
+      },
     },
     content_similar: {
       freeImpact: "頁面過度相似時，搜尋與使用者較難分辨差異，可能稀釋曝光。",
@@ -42,6 +53,16 @@
       ],
       paidDraftHint: "升級後可取得：差異化大綱草稿、可合併頁建議、獨特段落改寫提示。",
       verifyHint: "修復後再測（付費）：重跑掃描，看 content_similar 群組數量與嚴重度是否下降。",
+      who: {
+        diySummary: "站長可先挑最相似的一組頁面，拉開獨特段落。",
+        diySteps: [
+        "並列開啟相似度最高的兩頁，標出重複段落。",
+        "決定保留／合併／刪除，並為保留頁補獨特案例或 FAQ。",
+        "調整標題與內連，讓每頁意圖更清楚。"
+      ],
+        teamHandoff: "請內容團隊依相似群組清單差異化正文；優先高流量頁，完成後標記可再測。",
+        conciergeCta: "由我們代寫差異化大綱與改寫草稿（付費服務・示範）。",
+      },
     },
     url_uncertain: {
       freeImpact: "連結目標證據不足時，不應直接當 404；但未確認前可能影響體驗與信任。",
@@ -55,6 +76,16 @@
       ],
       paidDraftHint: "升級後可取得：失效連結修補優先序、建議替換目標、重導向對照草稿。",
       verifyHint: "修復後再測（付費）：開啟連線檢查模式重掃，確認證據鏈與狀態。",
+      who: {
+        diySummary: "站長可先匯出連結清單，確認狀態碼再決定修法。",
+        diySteps: [
+        "匯出受影響連結（來源頁 → 目標 URL）。",
+        "用瀏覽器或工具確認 200／301／404。",
+        "404 改連或移除；301 更新為最終網址。"
+      ],
+        teamHandoff: "請工程／維運依連結清單做狀態碼確認與重導向修正；完成後回報修復範圍。",
+        conciergeCta: "由我們代查失效連結並產出修補優先序（付費服務・示範）。",
+      },
     },
     i18n: {
       freeImpact: "若你確實有多語版本，hreflang／語系標示不完整可能讓搜尋選錯語言版本。",
@@ -68,6 +99,16 @@
       ],
       paidDraftHint: "升級後可取得：hreflang 標籤草稿、語言對照表範本、單語／多語決策說明。",
       verifyHint: "修復後再測（付費）：重掃後看 i18n 問題是否降為可略過或消失。",
+      who: {
+        diySummary: "先確認是否真的多語；單語通常不必硬加 hreflang。",
+        diySteps: [
+        "確認站點是單語還是多語。",
+        "多語：列出語言代碼與對應 URL。",
+        "補齊互指 hreflang（含 x-default 若適用）。"
+      ],
+        teamHandoff: "請前端／SEO 依語言對照表補 hreflang；單語則註記略過原因。",
+        conciergeCta: "由我們代建語言對照與標籤草稿（付費服務・示範）。",
+      },
     },
     links_opportunity: {
       freeImpact: "相關頁缺少自然內連不一定是錯誤，但可能錯過主題權重流動的機會。",
@@ -81,6 +122,16 @@
       ],
       paidDraftHint: "升級後可取得：建議內連對照表、錨點文案草稿、優先處理清單。",
       verifyHint: "修復後再測（付費）：重掃後 links_opportunity 是否減少或改為可略過。",
+      who: {
+        diySummary: "站長可在主題相關頁的正文加 1–2 條自然內連。",
+        diySteps: [
+        "挑主題真的相關的頁面對（略過歸檔噪音）。",
+        "在正文自然段落加入說明性內連。",
+        "錨點寫清楚主題，少用「點這裡」。"
+      ],
+        teamHandoff: "請內容依建議內連對照表於正文補連結；優先轉換路徑頁面。",
+        conciergeCta: "由我們代擬內連對照與錨點文案（付費服務・示範）。",
+      },
     },
     other: {
       freeImpact: "其他項目建議先看證據再決定；不一定都要立刻改。",
@@ -94,10 +145,20 @@
       ],
       paidDraftHint: "升級後可取得：依群組客製的修復步驟與文案／設定草稿。",
       verifyHint: "修復後再測（付費）：同一 URL 再掃一次，比對該群組是否改善。",
+      who: {
+        diySummary: "先讀證據，分辨急件與需再確認，再決定誰動手。",
+        diySteps: [
+        "閱讀詳細證據與 disposition。",
+        "依流量／轉換排出優先順序。",
+        "對急件寫出最小可行修復步驟。"
+      ],
+        teamHandoff: "請負責人本週處理 true_issue；needs_review 先補證據再排程。",
+        conciergeCta: "由我們代排優先序並產出修復草案（付費服務・示範）。",
+      },
     },
   };
 
-  const state = { data: null, view: "landing", detail: null, mode: null, demoUnlock: {} };
+  const state = { data: null, view: "landing", detail: null, mode: null, member: false, paid: false, adUnlocks: {}, pendingAnalyze: null };
   const $ = (id) => document.getElementById(id);
 
   function show(view) {
@@ -115,6 +176,146 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
   }
+
+  function planLabel() {
+    if (state.paid) return { chip: "付費（完整解法）", cls: "paid", short: "paid" };
+    if (state.member) return { chip: "會員（免費檢測）", cls: "member", short: "member" };
+    return { chip: "未登入／非會員", cls: "guest", short: "guest" };
+  }
+
+  function planHintLine() {
+    return "會員可免費測；付費看完整解法；看廣告可解鎖一小部份";
+  }
+
+  function renderPlanChipsHtml(opts) {
+    const o = opts || {};
+    const p = planLabel();
+    let html =
+      '<div class="plan-bar" id="' + (o.id || "plan-bar") + '">' +
+      '<span class="plan-chip ' + p.cls + '">' + escapeHtml(p.chip) + "</span>";
+    if (state.member && !state.paid) {
+      html += '<button type="button" class="btn ghost btn-sm" data-demo-upgrade-paid>示範升級付費</button>';
+    } else if (!state.member) {
+      html += '<button type="button" class="btn ghost btn-sm" data-demo-become-member>以會員身分繼續（示範）</button>';
+    } else if (state.paid) {
+      html += '<span class="plan-chip free">本工作階段已付費示範</span>';
+    }
+    html += '<span class="plan-hint muted">' + escapeHtml(planHintLine()) + "</span></div>";
+    return html;
+  }
+
+  function ensurePlanBarLanding() {
+    const panel = document.querySelector("#view-landing .hero-panel");
+    if (!panel) return;
+    let bar = document.getElementById("landing-plan-bar");
+    if (!bar) {
+      bar = document.createElement("div");
+      bar.id = "landing-plan-bar-wrap";
+      panel.insertBefore(bar, panel.firstChild);
+    }
+    const wrap = document.getElementById("landing-plan-bar-wrap");
+    wrap.innerHTML = renderPlanChipsHtml({ id: "landing-plan-bar" });
+    bindPlanActions(wrap);
+  }
+
+  function ensurePlanBarDash() {
+    const topbar = document.querySelector("#view-dash .topbar");
+    if (!topbar) return;
+    let slot = document.getElementById("dash-plan-slot");
+    if (!slot) {
+      slot = document.createElement("div");
+      slot.id = "dash-plan-slot";
+      slot.style.cssText = "flex:1 1 100%; margin-top:8px";
+      topbar.appendChild(slot);
+    }
+    slot.innerHTML = renderPlanChipsHtml({ id: "dash-plan-bar" });
+    bindPlanActions(slot);
+  }
+
+  function refreshPlanBars() {
+    ensurePlanBarLanding();
+    if (state.view === "dash" && state.data) ensurePlanBarDash();
+  }
+
+  function bindPlanActions(root) {
+    root.querySelectorAll("[data-demo-upgrade-paid]").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        state.paid = true;
+        refreshPlanBars();
+        if (state.data) {
+          if (state.detail) openDetail(state.detail);
+          else {
+            renderResultHero();
+            renderPillars();
+            renderTopIssues();
+          }
+        }
+      });
+    });
+    root.querySelectorAll("[data-demo-become-member]").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        state.member = true;
+        refreshPlanBars();
+      });
+    });
+  }
+
+  function ensureGateModal() {
+    let overlay = document.getElementById("gate-modal-overlay");
+    if (overlay) return overlay;
+    overlay = document.createElement("div");
+    overlay.id = "gate-modal-overlay";
+    overlay.className = "gate-modal-overlay hidden";
+    overlay.innerHTML =
+      '<div class="glass gate-modal" role="dialog" aria-modal="true" aria-labelledby="gate-modal-title">' +
+      '<h3 id="gate-modal-title">免費檢測需先成為會員</h3>' +
+      '<p class="muted">本產品示範：成為會員後才能執行免費掃描／檢測。付費可看完整解法；看廣告僅能解鎖一小部份（例如 1 步）。</p>' +
+      '<div class="gate-actions">' +
+      '<button type="button" class="btn" id="gate-become-member">以會員身分繼續（示範）</button>' +
+      '<button type="button" class="btn ghost" id="gate-dismiss">先看看介紹</button>' +
+      "</div>" +
+      '<p class="muted" style="margin-top:12px;font-size:.82rem">示範狀態僅存於本工作階段，無真實登入／金流／廣告網路。</p>' +
+      "</div>";
+    document.body.appendChild(overlay);
+    overlay.addEventListener("click", function (e) {
+      if (e.target === overlay) hideGateModal(false);
+    });
+    document.getElementById("gate-dismiss").addEventListener("click", function () {
+      hideGateModal(false);
+    });
+    document.getElementById("gate-become-member").addEventListener("click", function () {
+      state.member = true;
+      hideGateModal(true);
+      refreshPlanBars();
+      const pending = state.pendingAnalyze;
+      state.pendingAnalyze = null;
+      if (pending) analyze(pending.url, pending.opts);
+    });
+    return overlay;
+  }
+
+  function showGateModal(pending) {
+    state.pendingAnalyze = pending || null;
+    const overlay = ensureGateModal();
+    overlay.classList.remove("hidden");
+  }
+
+  function hideGateModal(proceeded) {
+    const overlay = document.getElementById("gate-modal-overlay");
+    if (overlay) overlay.classList.add("hidden");
+    if (!proceeded) state.pendingAnalyze = null;
+  }
+
+  function requireMemberThen(url, opts) {
+    if (state.member) {
+      analyze(url, opts);
+      return;
+    }
+    showGateModal({ url: url, opts: opts || {} });
+  }
+
 
   function counts(data) {
     const s = data.summary || {};
@@ -409,7 +610,7 @@
       escapeHtml(verdict) +
       "</p>" +
       '<p class="muted">這是網站「可見度健檢」：搜尋看不看得到、AI 提不提得到、網站與內容有沒有明顯問題。你不需要先懂 SEO。</p>' +
-      '<p class="muted freemium-line">免費：看懂問題與影響。付費：完整解法、草稿、AI 真實觀測、修復後再測。</p>' +
+      '<p class="muted freemium-line">會員可免費測；付費看完整解法（怎麼做＋誰來解決）；看廣告可解鎖一小部份（例如 1 步）。AI 真實觀測屬付費。</p>' +
       offlineNote;
   }
 
@@ -423,7 +624,7 @@
     const st = pillarStatus(c, buildGroups(state.data.issues || []));
     return [
       { id: "search", icon: "🔎", kicker: "搜尋", name: "別人搜得到嗎？", blurb: "Google 這類搜尋，能不能正確讀懂你的網站。", metric: st.search.text, metricIcon: st.search.icon, tone: pillarTone(st.search.icon) },
-      { id: "ai", icon: "🤖", kicker: "AI", name: "AI 提得到你嗎？", blurb: "測量 ChatGPT 等是否提到你是付費功能。免費版誠實標「尚未測量」、不造假分數；尚未接上真實證據前不會顯示「已測量」。", metric: st.ai.text, metricIcon: st.ai.icon, tier: "unmeasured", tone: "pending", planBadge: "付費可測" },
+      { id: "ai", icon: "🤖", kicker: "AI", name: "AI 提得到你嗎？", blurb: "AI 真實觀測屬付費；會員免費版不測、不造假分，誠實標「尚未測量」。", metric: st.ai.text, metricIcon: st.ai.icon, tier: "unmeasured", tone: "pending", planBadge: "付費可測" },
       { id: "website", icon: "🌐", kicker: "網站", name: "網站健不健康？", blurb: "結構、連結、技術基礎有沒有明顯問題。", metric: st.website.text, metricIcon: st.website.icon, tone: pillarTone(st.website.icon) },
       { id: "content", icon: "📝", kicker: "內容", name: "內容清不清楚？", blurb: "頁面是不是講清楚、會不會彼此太像。", metric: st.content.text, metricIcon: st.content.icon, tone: pillarTone(st.content.icon) },
     ];
@@ -488,55 +689,205 @@
     return base;
   }
 
-  function paywallHtml(g, unlockId) {
-    const pb = playbookFor(g.key);
-    const unlocked = !!(state.demoUnlock && state.demoUnlock[unlockId]);
-    const steps = pb.paidSteps || [];
-    const preview = steps.slice(0, 2);
-    if (unlocked) {
-      return (
-        '<div class="paywall unlocked" data-paywall-id="' + unlockId + '">' +
-        '<div class="paywall-head"><span class="lock-badge">付費功能預覽</span>' +
-        '<span class="plan-chip paid">付費方案</span></div>' +
-        '<h5>完整解決方案（付費）</h5>' +
-        '<ol class="paywall-steps">' +
-        steps.map(function (s) { return "<li>" + escapeHtml(s) + "</li>"; }).join("") +
-        "</ol>" +
-        '<p class="why"><strong>文案／草稿：</strong>' + escapeHtml(pb.paidDraftHint || "") + "</p>" +
-        '<p class="why"><strong>修復後再測：</strong>' + escapeHtml(pb.verifyHint || "") + "</p>" +
-        '<button type="button" class="btn ghost" data-demo-unlock="' + unlockId + '">收起預覽</button>' +
-        "</div>"
-      );
-    }
+  function whoSummaryHtml(pb) {
+    const who = pb.who || {};
     return (
-      '<div class="paywall" data-paywall-id="' + unlockId + '">' +
-      '<div class="paywall-head"><span class="lock-badge">🔒 鎖定</span>' +
-      '<span class="plan-chip paid">付費功能</span></div>' +
-      "<h5>完整解決方案（付費）</h5>" +
-      '<ol class="paywall-steps locked-preview">' +
-      preview.map(function (s) { return '<li class="blurred">' + escapeHtml(s) + "</li>"; }).join("") +
-      (steps.length > 2 ? '<li class="blurred">……</li>' : "") +
-      "</ol>" +
-      '<p class="paywall-teaser">升級後解鎖：逐步做法、文案草稿、修復後再測</p>' +
-      '<button type="button" class="btn ghost" data-demo-unlock="' + unlockId + '">預覽解法（產品示範）</button>' +
-      '<p class="muted" style="margin-top:8px;font-size:.82rem">示範解鎖僅供產品預覽，非真實付費；不會呼叫外部 AI。</p>' +
+      '<div class="who-section who-summary">' +
+      "<h5>誰來解決</h5>" +
+      '<div class="who-roles">' +
+      '<div class="who-role"><span class="who-label">1. 我自己做（DIY）</span>' +
+      '<p class="muted">' + escapeHtml(who.diySummary || "站長可先從影響最大的頁面動手。") + "</p></div>" +
+      '<div class="who-role"><span class="who-label">2. 交給我的團隊</span>' +
+      '<p class="muted">付費完整版可匯出交接說明給團隊。</p></div>' +
+      '<div class="who-role"><span class="who-label">3. 請你們代做</span>' +
+      '<p class="muted">付費服務：由我們代為處理（示範 CTA）。</p></div>' +
+      "</div></div>"
+    );
+  }
+
+  function whoDetailHtml(pb, unlockId, mode) {
+    // mode: 'paid' | 'ad' | 'locked'
+    const who = pb.who || {};
+    const diySteps = who.diySteps || [];
+    let diyBody = "";
+    if (mode === "paid") {
+      diyBody =
+        '<ol class="paywall-steps">' +
+        diySteps.map(function (s) { return "<li>" + escapeHtml(s) + "</li>"; }).join("") +
+        "</ol>";
+    } else if (mode === "ad" && diySteps.length) {
+      diyBody =
+        '<div class="ad-unlock-partial">' +
+        '<span class="plan-chip ad">廣告解鎖・僅 1 步</span>' +
+        '<ol class="paywall-steps"><li>' + escapeHtml(diySteps[0]) + "</li></ol>" +
+        '<p class="muted" style="font-size:.82rem">其餘 DIY 步驟需付費完整解法。</p></div>';
+    } else {
+      diyBody =
+        '<ol class="paywall-steps locked-preview">' +
+        (diySteps[0] ? '<li class="blurred">' + escapeHtml(diySteps[0]) + "</li>" : "") +
+        '<li class="blurred">……</li></ol>' +
+        '<p class="muted" style="font-size:.82rem">詳細 DIY 清單屬付費；看廣告可解鎖第 1 步。</p>';
+    }
+
+    let teamBody = "";
+    if (mode === "paid") {
+      teamBody =
+        '<div class="who-handoff">' +
+        '<p class="why">' + escapeHtml(who.teamHandoff || "") + "</p>" +
+        '<button type="button" class="btn ghost btn-sm" data-copy-handoff="' + unlockId + '">複製交接說明（示範）</button>' +
+        '<pre class="handoff-export hidden" id="handoff-' + unlockId + '">' + escapeHtml(who.teamHandoff || "") + "</pre>" +
+        "</div>";
+    } else {
+      teamBody = '<p class="muted">升級付費後可匯出可交接的團隊說明。</p>';
+    }
+
+    let conciergeBody = "";
+    if (mode === "paid") {
+      conciergeBody =
+        '<p class="why">' + escapeHtml(who.conciergeCta || "") + "</p>" +
+        '<button type="button" class="btn btn-sm" data-concierge-demo="' + unlockId + '">請你們代做（示範・無金流）</button>' +
+        '<p class="muted concierge-note hidden" id="concierge-note-' + unlockId + '" style="margin-top:8px;font-size:.82rem">已記錄示範意向（本工作階段），無真實下單。</p>';
+    } else {
+      conciergeBody = '<p class="muted">付費服務 CTA：升級後可提出代做意向（示範）。</p>';
+    }
+
+    return (
+      '<div class="who-section who-detail">' +
+      "<h5>誰來解決（詳細）</h5>" +
+      '<div class="who-role paid-block"><span class="who-label">1. 我自己做（DIY）</span>' + diyBody + "</div>" +
+      '<div class="who-role paid-block"><span class="who-label">2. 交給我的團隊</span>' + teamBody + "</div>" +
+      '<div class="who-role paid-block"><span class="who-label">3. 請你們代做</span>' + conciergeBody + "</div>" +
       "</div>"
     );
   }
 
-  function bindDemoUnlock(root) {
-    root.querySelectorAll("[data-demo-unlock]").forEach(function (btn) {
+  function howHtml(pb, unlockId, mode) {
+    const steps = pb.paidSteps || [];
+    if (mode === "paid") {
+      return (
+        "<h5>怎麼做｜完整解決方案</h5>" +
+        '<ol class="paywall-steps">' +
+        steps.map(function (s) { return "<li>" + escapeHtml(s) + "</li>"; }).join("") +
+        "</ol>" +
+        '<p class="why"><strong>文案／草稿：</strong>' + escapeHtml(pb.paidDraftHint || "") + "</p>" +
+        '<p class="why"><strong>修復後再測：</strong>' + escapeHtml(pb.verifyHint || "") + "</p>"
+      );
+    }
+    if (mode === "ad" && steps.length) {
+      return (
+        "<h5>怎麼做｜解法</h5>" +
+        '<div class="ad-unlock-partial">' +
+        '<span class="plan-chip ad">廣告解鎖・僅 1 步</span>' +
+        '<ol class="paywall-steps"><li>' + escapeHtml(steps[0]) + "</li></ol>" +
+        '<p class="muted" style="font-size:.82rem">完整步驟、草稿與再測屬付費。</p></div>'
+      );
+    }
+    const preview = steps.slice(0, 2);
+    return (
+      "<h5>怎麼做｜完整解決方案（付費）</h5>" +
+      '<ol class="paywall-steps locked-preview">' +
+      preview.map(function (s) { return '<li class="blurred">' + escapeHtml(s) + "</li>"; }).join("") +
+      (steps.length > 2 ? '<li class="blurred">……</li>' : "") +
+      "</ol>" +
+      '<p class="paywall-teaser">付費解鎖：逐步做法、文案草稿、修復後再測；看廣告僅解鎖一小部份（1 步）</p>'
+    );
+  }
+
+  function paywallHtml(g, unlockId) {
+    const pb = playbookFor(g.key);
+    const adN = (state.adUnlocks && state.adUnlocks[unlockId]) || 0;
+    const mode = state.paid ? "paid" : adN >= 1 ? "ad" : "locked";
+    const head =
+      state.paid
+        ? '<div class="paywall-head"><span class="lock-badge">已解鎖</span><span class="plan-chip paid">付費（完整解法）</span></div>'
+        : mode === "ad"
+          ? '<div class="paywall-head"><span class="lock-badge">部份解鎖</span><span class="plan-chip ad">廣告・僅 1 步</span></div>'
+          : '<div class="paywall-head"><span class="lock-badge">🔒 鎖定</span><span class="plan-chip paid">付費功能</span></div>';
+
+    let actions = "";
+    if (!state.paid) {
+      actions =
+        '<div class="paywall-actions">' +
+        '<button type="button" class="btn ghost" data-ad-unlock="' + unlockId + '"' +
+        (adN >= 1 ? " disabled" : "") +
+        ">" +
+        (adN >= 1 ? "已用廣告解鎖一小部份" : "看廣告解鎖一小部份（示範）") +
+        "</button>" +
+        '<button type="button" class="btn" data-upgrade-paid="' + unlockId + '">升級付費看完整解法（示範）</button>' +
+        '<p class="muted" style="margin-top:8px;font-size:.82rem">示範狀態僅本工作階段；無真實廣告網路／金流；不會呼叫外部 AI。</p>' +
+        "</div>";
+    }
+
+    return (
+      '<div class="paywall' + (state.paid ? " unlocked" : "") + (mode === "ad" ? " ad-partial" : "") +
+      '" data-paywall-id="' + unlockId + '">' +
+      head +
+      whoSummaryHtml(pb) +
+      howHtml(pb, unlockId, mode) +
+      whoDetailHtml(pb, unlockId, mode) +
+      actions +
+      "</div>"
+    );
+  }
+
+  function reRenderPaywalls() {
+    refreshPlanBars();
+    if (state.detail) openDetail(state.detail);
+    else if (state.data) {
+      renderResultHero();
+      renderPillars();
+      renderTopIssues();
+    }
+  }
+
+  function bindPaywallActions(root) {
+    root.querySelectorAll("[data-ad-unlock]").forEach(function (btn) {
       btn.addEventListener("click", function (e) {
         e.preventDefault();
         e.stopPropagation();
-        const id = btn.getAttribute("data-demo-unlock");
-        if (!id) return;
-        state.demoUnlock[id] = !state.demoUnlock[id];
-        // re-render current view pieces that contain paywalls
-        if (state.detail) openDetail(state.detail);
-        else {
-          renderTopIssues();
+        const id = btn.getAttribute("data-ad-unlock");
+        if (!id || (state.adUnlocks[id] || 0) >= 1) return;
+        btn.disabled = true;
+        btn.textContent = "播放廣告中…";
+        setTimeout(function () {
+          state.adUnlocks[id] = 1;
+          reRenderPaywalls();
+        }, 1200);
+      });
+    });
+    root.querySelectorAll("[data-upgrade-paid]").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        state.paid = true;
+        reRenderPaywalls();
+      });
+    });
+    root.querySelectorAll("[data-copy-handoff]").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = btn.getAttribute("data-copy-handoff");
+        const pre = document.getElementById("handoff-" + id);
+        if (pre) {
+          pre.classList.remove("hidden");
+          const t = pre.textContent || "";
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(t).catch(function () {});
+          }
+          btn.textContent = "已顯示／已複製（示範）";
         }
+      });
+    });
+    root.querySelectorAll("[data-concierge-demo]").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = btn.getAttribute("data-concierge-demo");
+        const note = document.getElementById("concierge-note-" + id);
+        if (note) note.classList.remove("hidden");
+        btn.textContent = "已送出示範意向";
+        btn.disabled = true;
       });
     });
   }
@@ -618,7 +969,7 @@
     const heading = document.querySelector("#overview-extras h3");
     if (heading) heading.textContent = "現在最值得先看的地方";
     const sub = document.querySelector("#overview-extras .muted");
-    if (sub) sub.textContent = "先看群組。專業詞（P1、needs_review、meta、canonical）都藏在「查看詳細證據」。免費：看懂問題與影響。付費：完整解法、草稿、AI 真實觀測、修復後再測。";
+    if (sub) sub.textContent = "先看群組。會員可見問題、影響與「誰來解決」角色摘要；付費解鎖完整怎麼做＋DIY 清單／團隊交接／代做；看廣告僅解鎖一小部份。";
 
     const groups = buildGroups(state.data.issues || [])
       .filter(function (g) { return g.level !== "ok"; })
@@ -629,7 +980,7 @@
     }
     box.innerHTML = groups.map(renderGroupCard).join("");
     bindEvidenceToggles(box);
-    bindDemoUnlock(box);
+    bindPaywallActions(box);
   }
 
   function websiteMapHtml(c) {
@@ -672,40 +1023,67 @@
         "</div>";
     } else if (pillar === "ai") {
       const aiUnlock = "pillar-ai";
-      const aiUnlocked = !!(state.demoUnlock && state.demoUnlock[aiUnlock]);
-      const aiPaywallLocked =
-        '<div class="paywall" data-paywall-id="' + aiUnlock + '">' +
-        '<div class="paywall-head"><span class="lock-badge">🔒 鎖定</span><span class="plan-chip paid">付費功能</span></div>' +
-        "<h5>完整解決方案（付費）</h5>" +
-        '<ol class="paywall-steps locked-preview">' +
-        '<li class="blurred">對真實 ChatGPT（或其他指定模型）跑提及／引用觀測迴圈</li>' +
-        '<li class="blurred">彙整可核對的 mention／citation／source 證據</li>' +
-        '<li class="blurred">……</li></ol>' +
-        '<p class="paywall-teaser">升級後解鎖：逐步做法、文案草稿、修復後再測</p>' +
-        '<button type="button" class="btn ghost" data-demo-unlock="' + aiUnlock + '">預覽解法（產品示範）</button>' +
-        '<p class="muted" style="margin-top:8px;font-size:.82rem">示範解鎖僅供產品預覽，非真實付費；不會呼叫 OpenAI。</p></div>';
-      const aiPaywallOpen =
-        '<div class="paywall unlocked" data-paywall-id="' + aiUnlock + '">' +
-        '<div class="paywall-head"><span class="lock-badge">付費功能預覽</span><span class="plan-chip paid">付費方案</span></div>' +
-        "<h5>完整解決方案（付費）</h5>" +
-        '<ol class="paywall-steps">' +
-        "<li>設定品牌／產品關鍵問句，對真實 ChatGPT 等模型做提及觀測（付費能力）。</li>" +
-        "<li>收集可核對的 mention、citation、source 片段作為證據層。</li>" +
-        "<li>對照網站內容缺口，產出可執行的可見度改善步驟與草稿。</li>" +
-        "<li>修復後再測：重跑同一觀測組，比較提及是否出現或品質提升。</li>" +
-        "</ol>" +
-        '<p class="why"><strong>文案／草稿：</strong>升級後可取得針對你網站的提問組與內容補強草稿（仍需真實模型證據，不會造假）。</p>' +
-        '<p class="why"><strong>修復後再測：</strong>付費方案可重跑 AI 觀測迴圈驗證改善。</p>' +
-        '<button type="button" class="btn ghost" data-demo-unlock="' + aiUnlock + '">收起預覽</button></div>';
+      const adN = (state.adUnlocks && state.adUnlocks[aiUnlock]) || 0;
+      const mode = state.paid ? "paid" : adN >= 1 ? "ad" : "locked";
+      const aiSteps = [
+        "設定品牌／產品關鍵問句，對真實 ChatGPT 等模型做提及觀測（付費能力）。",
+        "收集可核對的 mention、citation、source 片段作為證據層。",
+        "對照網站內容缺口，產出可執行的可見度改善步驟與草稿。",
+        "修復後再測：重跑同一觀測組，比較提及是否出現或品質提升。",
+      ];
+      const aiWho = {
+        diySummary: "站長可先整理品牌問句清單，但真實觀測需付費接線。",
+        diySteps: [
+          "列出 5–10 個顧客會問 AI 的品牌／產品問題。",
+          "記錄目前公開內容中可被引用的來源頁。",
+          "付費方案再跑真實模型觀測與再測。",
+        ],
+        teamHandoff: "請成長／內容團隊準備品牌問句與來源頁清單；付費開通後交觀測組執行。",
+        conciergeCta: "由我們代跑 AI 提及觀測並交付證據摘要（付費服務・示範）。",
+      };
+      const pbAi = {
+        paidSteps: aiSteps,
+        paidDraftHint: "升級後可取得針對你網站的提問組與內容補強草稿（仍需真實模型證據，不會造假）。",
+        verifyHint: "付費方案可重跑 AI 觀測迴圈驗證改善。",
+        who: aiWho,
+      };
+      // reuse helpers with synthetic playbook
+      const head =
+        state.paid
+          ? '<div class="paywall-head"><span class="lock-badge">已解鎖</span><span class="plan-chip paid">付費（完整解法）</span></div>'
+          : mode === "ad"
+            ? '<div class="paywall-head"><span class="lock-badge">部份解鎖</span><span class="plan-chip ad">廣告・僅 1 步</span></div>'
+            : '<div class="paywall-head"><span class="lock-badge">🔒 鎖定</span><span class="plan-chip paid">付費功能</span></div>';
+      let actions = "";
+      if (!state.paid) {
+        actions =
+          '<div class="paywall-actions">' +
+          '<button type="button" class="btn ghost" data-ad-unlock="' + aiUnlock + '"' +
+          (adN >= 1 ? " disabled" : "") +
+          ">" +
+          (adN >= 1 ? "已用廣告解鎖一小部份" : "看廣告解鎖一小部份（示範）") +
+          "</button>" +
+          '<button type="button" class="btn" data-upgrade-paid="' + aiUnlock + '">升級付費看完整解法（示範）</button>' +
+          '<p class="muted" style="margin-top:8px;font-size:.82rem">示範狀態僅本工作階段；不會呼叫 OpenAI。</p></div>';
+      }
+      const aiPaywall =
+        '<div class="paywall' + (state.paid ? " unlocked" : "") + (mode === "ad" ? " ad-partial" : "") +
+        '" data-paywall-id="' + aiUnlock + '">' +
+        head +
+        whoSummaryHtml(pbAi) +
+        howHtml(pbAi, aiUnlock, mode) +
+        whoDetailHtml(pbAi, aiUnlock, mode) +
+        actions +
+        "</div>";
       body.innerHTML =
         '<div class="glass panel"><h3>AI｜AI 提得到你嗎？</h3>' +
         '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0">' +
         '<span class="tier unmeasured">尚未測量</span>' +
         '<span class="plan-chip paid">付費可測</span>' +
-        '<span class="plan-chip free">免費誠實標示</span></div>' +
-        "<p><strong>免費：</strong>清楚告訴你「尚未測量」。我們<strong>不會</strong>用助手自己的回答冒充已測量，也<strong>絕對不會</strong>發明 GEO／AEO 分數。</p>" +
-        '<p class="muted">付費解鎖：接上真實 ChatGPT 提及／引用證據迴圈後，才會標成「已測量」。在那之前即使預覽付費解法，狀態仍是尚未測量。</p>' +
-        (aiUnlocked ? aiPaywallOpen : aiPaywallLocked) +
+        '<span class="plan-chip member">會員免費版不測</span></div>' +
+        "<p><strong>會員免費版：</strong>清楚標示「尚未測量」。AI 真實觀測屬付費；我們<strong>不測、不造假分</strong>，也<strong>絕對不會</strong>發明 GEO／AEO 分數。</p>" +
+        '<p class="muted">付費接上真實提及／引用證據迴圈後，才會標成「已測量」。廣告僅能解鎖解法／DIY 的一小部份，不會讓狀態變成已測量。</p>' +
+        aiPaywall +
         "</div>";
     } else if (pillar === "website") {
       body.innerHTML =
@@ -727,7 +1105,7 @@
         "</div>";
     }
     bindEvidenceToggles(body);
-    bindDemoUnlock(body);
+    bindPaywallActions(body);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -744,6 +1122,7 @@
     const base = state.data.site_label || state.data.sample_url || "";
     const tag = state.mode === "demo" ? "示範資料" : "真實掃描";
     $("dash-site-label").textContent = base + " · " + tag;
+    ensurePlanBarDash();
     renderResultHero();
     renderPillars();
     renderTopIssues();
@@ -800,26 +1179,28 @@
       btn.addEventListener("click", function () {
         const u = btn.getAttribute("data-url");
         $("url-input").value = u;
-        analyze(u, { demo: true, demoKey: btn.getAttribute("data-demo-key") });
+        requireMemberThen(u, { demo: true, demoKey: btn.getAttribute("data-demo-key") });
       });
     });
   }
 
   $("btn-analyze").addEventListener("click", function () {
     const url = ($("url-input").value || "").trim() || "https://example.com";
-    analyze(url);
+    requireMemberThen(url);
   });
   $("url-input").addEventListener("keydown", function (e) {
     if (e.key === "Enter") $("btn-analyze").click();
   });
-  $("btn-home").addEventListener("click", function () { show("landing"); });
+  $("btn-home").addEventListener("click", function () { show("landing"); ensurePlanBarLanding(); });
   $("btn-rescan").addEventListener("click", function () {
-    analyze((state.data && state.data.sample_url) || $("url-input").value);
+    requireMemberThen((state.data && state.data.sample_url) || $("url-input").value, { demo: state.mode === "demo" });
   });
   $("btn-back-pillars").addEventListener("click", closeDetail);
 
   initChips();
   show("landing");
+  ensurePlanBarLanding();
+  ensureGateModal();
   checkLiveHealth().then(function (ok) {
     if (!ok) ensureLiveNote();
   });
