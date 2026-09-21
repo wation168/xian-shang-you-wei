@@ -160,6 +160,7 @@ pre.ev {{ white-space:pre-wrap; word-break:break-word; background:#0d1218; paddi
         <div class="card" id="pillars-website"><div class="n">Website</div><div class="l">網站本身是否健康</div><p class="hint" id="pillars-website-note">Website Intelligence：URL／HTTP／結構／模板…</p></div>
         <div class="card" id="pillars-content"><div class="n">Content</div><div class="l">內容是否清楚、有價值、易被理解</div><p class="hint" id="pillars-content-note">對應內容與頁面品質</p></div>
       </div>
+      <p class="hint" id="http-probe-status">URL／HTTP：載入中…</p>
       <p class="hint" id="ai-evidence-tier">AI 證據分級：已測量／推估／未測量 — 本掃描若無 AI answer 觀測，一律標「未測量」。</p>
     </div>
 
@@ -301,7 +302,25 @@ pre.ev {{ white-space:pre-wrap; word-break:break-word; background:#0d1218; paddi
     }});
   }});
 
-  function esc(s) {{
+  function httpProbeBadge(ev){
+      if (!ev || !ev.url_evidence) return '';
+      const chain = ev.url_evidence_chain || ev.url_evidence_chain_sample || {};
+      const sm = chain.status_map || {};
+      const httpSt = sm.http_response || (ev.http_checked ? 'confirmed' : 'unavailable');
+      if (httpSt === 'unavailable' || ev.http_checked === false) {
+        return '<br/><span class="hint">HTTP：未探測</span>';
+      }
+      const fs = ((chain.stages||[]).find(s=>s.stage==='http_response')||{}).data||{};
+      const code = fs.final_status;
+      if (code === 404 || code === 410) {
+        return '<br/><span class="hint"><strong>HTTP：已確認 ' + code + '</strong></span>';
+      }
+      if (httpSt === 'confirmed') {
+        return '<br/><span class="hint">HTTP：已探測' + (code!=null?(' · '+code):'') + '</span>';
+      }
+      return '<br/><span class="hint">HTTP：' + httpSt + '</span>';
+    }
+    function esc(s) {{
     return String(s ?? '').replace(/[&<>"']/g, c => ({{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}})[c]);
   }}
 
