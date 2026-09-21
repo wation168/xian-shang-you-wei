@@ -42,9 +42,15 @@ def apply_disposition_rules(
 
     for issue in issues:
         ev = _ev(issue)
-        # Preserve URL-evidence prototype classification
-        if ev.get("url_evidence") or ev.get("disposition") == "insufficient_evidence":
-            ev["disposition"] = "insufficient_evidence"
+        # URL Evidence Chain: honor chain judgment (do not force everything to insufficient)
+        if ev.get("url_evidence"):
+            d0 = ev.get("disposition") or "insufficient_evidence"
+            if d0 not in ("true_issue", "needs_review", "likely_exception", "insufficient_evidence"):
+                d0 = "insufficient_evidence"
+            ev["disposition"] = d0
+            ev.setdefault("confidence", "high" if d0 == "true_issue" else "low")
+            continue
+        if ev.get("disposition") == "insufficient_evidence":
             ev.setdefault("confidence", "low")
             continue
         # defaults

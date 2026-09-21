@@ -117,3 +117,8 @@ python run_scan.py --root "D:/xian-shang-you-wei/backend/frontend/patterns" --la
 - **原始偵測 ≠ 必改**：raw priority counts are detections; act on disposition (	rue_issue) first.
 - page_type is a structural heuristic for understanding/disposition — not UI ground truth.
 
+
+
+## Product positioning (2026-09-21)
+
+See `PRODUCT_POSITIONING.md`. Scanner is the **Website Intelligence Engine** under AI Search & Website Intelligence — not five separate SEO/GEO/AEO products.

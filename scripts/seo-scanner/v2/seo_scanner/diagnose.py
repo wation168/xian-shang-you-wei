@@ -19,7 +19,7 @@ from .checks_links import check_links
 from .checks_i18n import check_i18n
 from .understanding import build_site_understanding, estimate_shell_and_unique_for_slugs
 from .disposition import apply_disposition_rules, disposition_counts
-from .url_evidence import check_missing_local_targets
+from .url_evidence import build_url_evidence_issues
 
 
 def _enrich_similarity_shell_metrics(
@@ -56,6 +56,10 @@ def _enrich_similarity_shell_metrics(
 def run_all_checks(
     pages: list[Page],
     gsc_impressions: Optional[dict[str, int]] = None,
+    *,
+    site_root: Optional[str] = None,
+    probe_fixture_path: Optional[str] = None,
+    http_live: bool = False,
 ) -> tuple[list[Issue], list[SimPair], dict[str, Any]]:
     """執行全部檢查，回傳 (issues, sim_pairs, summary)。
 
@@ -70,11 +74,18 @@ def run_all_checks(
     link_opps = build_link_opportunities(link_pair_issues)
 
     issues: list[Issue] = []
+    _url_evidence_summary: dict[str, Any] = {}
     issues.extend(clusters_to_issues(clusters))
     issues.extend(check_meta(pages))
     issues.extend(opportunities_to_issues(link_opps))
     issues.extend(check_i18n(pages))
-    issues.extend(check_missing_local_targets(pages))
+    _url_evidence_issues, _url_evidence_summary = build_url_evidence_issues(
+        pages,
+        site_root=site_root,
+        probe_fixture_path=probe_fixture_path,
+        http_live=http_live,
+    )
+    issues.extend(_url_evidence_issues)
 
     if gsc_impressions:
         zero_slugs = {k for k, v in gsc_impressions.items() if v == 0}
@@ -182,6 +193,7 @@ def run_all_checks(
         "site_understanding": site_understanding,
         "disposition_counts": disp,
         # Product-facing Critical vs Needs Review (conceptual buckets)
+        "url_evidence_summary": _url_evidence_summary,
         "review_buckets": {
             "critical_true_issue": sum(
                 1

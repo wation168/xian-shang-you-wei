@@ -150,6 +150,19 @@ pre.ev {{ white-space:pre-wrap; word-break:break-word; background:#0d1218; paddi
     <p class="hint" style="margin:-0.4rem 0 1rem">原始偵測 ≠ 必改：上方 P0–P3 為 raw detections；請先依 disposition（true_issue）行動，likely_exception／insufficient_evidence 勿當必改清單。</p>
 
     <div class="panel" style="margin-bottom:1rem">
+      
+    <div class="panel pillars" style="margin-bottom:1rem">
+      <h3 style="margin-top:0">AI Search &amp; Website Intelligence</h3>
+      <p class="hint">幫你看懂網站在傳統搜尋與 AI 搜尋時代的整體可見度。以下是小白層；點進詳細才看 SEO／AEO／GEO。</p>
+      <div class="cards" id="product-pillars">
+        <div class="card" id="pillars-search"><div class="n">Search</div><div class="l">你在搜尋裡的表現</div><p class="hint" id="pillars-search-note">對應傳統搜尋可見度（專業層：SEO）</p></div>
+        <div class="card" id="pillars-ai"><div class="n">AI</div><div class="l">AI 是否看得到、理解並提到你</div><p class="hint" id="pillars-ai-note">預設：<strong>未測量</strong>（未接 AI 實測前，不產生假 GEO 分數）</p></div>
+        <div class="card" id="pillars-website"><div class="n">Website</div><div class="l">網站本身是否健康</div><p class="hint" id="pillars-website-note">Website Intelligence：URL／HTTP／結構／模板…</p></div>
+        <div class="card" id="pillars-content"><div class="n">Content</div><div class="l">內容是否清楚、有價值、易被理解</div><p class="hint" id="pillars-content-note">對應內容與頁面品質</p></div>
+      </div>
+      <p class="hint" id="ai-evidence-tier">AI 證據分級：已測量／推估／未測量 — 本掃描若無 AI answer 觀測，一律標「未測量」。</p>
+    </div>
+
       <h3 style="margin-top:0">Website Understanding</h3>
       <p class="hint">站級結構摘要（非 Google spam 判定）。供產品判斷 Critical vs Needs Review。</p>
       <div id="site-understanding" class="understand-grid"></div>

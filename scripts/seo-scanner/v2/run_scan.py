@@ -97,6 +97,8 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="可選：Search Console 匯出 CSV（含 Page 與 Impressions）",
     )
+    parser.add_argument("--probe-fixture", default=None, help="URL Evidence HTTP fixture JSON")
+    parser.add_argument("--http-live", action="store_true", help="Opt-in live HTTP probes")
     args = parser.parse_args(argv)
 
     root = Path(args.root)
@@ -118,7 +120,7 @@ def main(argv: list[str] | None = None) -> int:
         else:
             print("警告：找不到 GSC CSV：%s" % gsc_path, file=sys.stderr)
 
-    issues, sim_pairs, summary = run_all_checks(pages, gsc_impressions=gsc)
+    issues, sim_pairs, summary = run_all_checks(pages, gsc_impressions=gsc, site_root=str(root), probe_fixture_path=args.probe_fixture, http_live=args.http_live)
     html = render_dashboard(pages, issues, sim_pairs, summary, site_name=args.site_name)
 
     out = Path(args.out)
