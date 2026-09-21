@@ -3,9 +3,9 @@
 */
 (function () {
   const DEMOS = [
-    { key: "django", label: "Django Weblog", url: "https://www.djangoproject.com/weblog/" },
-    { key: "tutorial", label: "Python Tutorial", url: "https://docs.python.org/3/tutorial/" },
-    { key: "patterns", label: "Patterns 站樣本", url: "https://example.com/patterns" },
+    { key: "django", label: "示範：部落格網站", url: "https://www.djangoproject.com/weblog/" },
+    { key: "tutorial", label: "示範：教學網站", url: "https://docs.python.org/3/tutorial/" },
+    { key: "patterns", label: "示範：大型內容站", url: "https://example.com/patterns" },
   ];
 
   const SCAN_STEPS = [
@@ -151,44 +151,68 @@
 
   function pillarCards(c) {
     const aiTier = "unmeasured";
-    const searchMetric = c.trueN === 0 ? "偏穩" : c.trueN + " 項優先";
-    const webMetric = c.pages + " 頁";
-    const contentMetric = c.unique != null ? Math.round(c.unique * 100) + "%" : "—";
+    const searchMetric = c.trueN === 0 ? "目前沒有急件" : "有 " + c.trueN + " 件建議先看";
+    const webMetric = "掃了 " + c.pages + " 頁";
+    const contentMetric = c.unique != null ? (c.unique >= 0.5 ? "內容差異還可以" : "很多頁長得很像") : "尚無摘要";
     return [
       {
         id: "search",
-        kicker: "Search Visibility",
-        name: "Search",
-        blurb: "搜尋引擎能不能正確理解你的網站？",
+        kicker: "搜尋",
+        name: "別人搜得到嗎？",
+        blurb: "Google 這類搜尋，能不能正確讀懂你的網站。",
         metric: searchMetric,
-        metricSmall: "優先真問題",
+        metricSmall: "點進去看要不要改",
       },
       {
         id: "ai",
-        kicker: "AI Visibility",
-        name: "AI",
-        blurb: "AI 是否看得到、理解並提到你",
-        metric: "未測量",
-        metricSmall: "禁止假 GEO 分數",
+        kicker: "AI",
+        name: "AI 提得到你嗎？",
+        blurb: "ChatGPT 等會不會提到你——這版還沒實測，所以誠實寫「尚未測量」。",
+        metric: "尚未測量",
+        metricSmall: "不會給假分數",
         tier: aiTier,
       },
       {
         id: "website",
-        kicker: "Website Health",
-        name: "Website",
-        blurb: "網站本身結構與技術是否健康",
+        kicker: "網站",
+        name: "網站健不健康？",
+        blurb: "結構、連結、技術基礎有沒有明顯問題。",
         metric: webMetric,
-        metricSmall: "URL 鏈 " + c.urlChains,
+        metricSmall: "先看地圖與注意事項",
       },
       {
         id: "content",
-        kicker: "Content Intelligence",
-        name: "Content",
-        blurb: "內容是否清楚、有價值、容易被理解",
+        kicker: "內容",
+        name: "內容清不清楚？",
+        blurb: "頁面是不是講清楚、會不會彼此太像。",
         metric: contentMetric,
-        metricSmall: "獨特內容均值（推估）",
+        metricSmall: "點進去看像哪幾頁",
       },
     ];
+  }
+
+  
+  function renderResultHero() {
+    const el = document.getElementById("result-hero");
+    if (!el) return;
+    const c = counts(state.data);
+    const top = topPlainIssues(1)[0];
+    let verdict;
+    if (c.trueN === 0) {
+      verdict = "整體看起來沒有「必須立刻處理」的急件。你可以先逛四個區塊，了解網站現況。";
+    } else {
+      verdict = "目前有 " + c.trueN + " 件比較值得先看的事。先不要被其他數字嚇到——從下面第一件開始即可。";
+    }
+    const next = top
+      ? ("下一步建議：先看「" + top.title + "」。")
+      : "下一步建議：點「網站健不健康？」看結構地圖。";
+    el.className = "glass panel result-hero";
+    el.innerHTML = "<h3>用一句話說明這次結果</h3>" +
+      "<p class="big">" + verdict + "</p>" +
+      "<p class="muted">這份報告在幫你做網站「可見度健檢」：搜尋看不看得到、AI 提不提得到、網站與內容有沒有明顯問題。</p>" +
+      "<div class="next-box"><strong>" + next + "</strong>下面四張卡片用白話分類；點進去才看細節。專業術語都藏在「查看詳細證據」。" +
+      (c.httpMode === "offline" ? "<div class="muted" style="margin-top:8px">補充：這次沒有連線檢查網址是否真的打不開，所以「找不到頁面」先當成「證據還不夠」，不是直接宣判 404。</div>" : "") +
+      "</div>";
   }
 
   function renderPillars() {
@@ -383,6 +407,7 @@
     closeDetail();
     const label = (state.data.site_label || state.data.sample_url || "") + " · 來自 Scanner 真實輸出";
     $("dash-site-label").textContent = label;
+    renderResultHero();
     renderPillars();
     renderTopIssues();
   }
