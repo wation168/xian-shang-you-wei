@@ -86,6 +86,19 @@ def apply_disposition_rules(
 
         # Link opportunities: encyclopedia/page-type mesh on small high-unique mono sites
         if cat == "links" and ev.get("link_opportunity"):
+            # Structural archive/date demotion from opportunity builder
+            if ev.get("archive_date_demoted") or ev.get("kind") == "archive_date_demoted":
+                ev["disposition"] = "likely_exception"
+                ev["confidence"] = "high"
+                ev["high_value"] = False
+                ev["do_not_fix_if"] = (
+                    "Year/year-month archive index shells rarely need mutual related links; "
+                    "prefer topical articles or evergreen hubs."
+                )
+                if issue.priority in ("P0", "P1", "P2"):
+                    ev.setdefault("priority_before_disposition", issue.priority)
+                    issue.priority = "P3"
+                continue
             meshy = any(
                 k in problem
                 for k in ("related 網格", "頁型", "百科", "詞條", "mesh", "網格")

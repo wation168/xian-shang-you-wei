@@ -116,6 +116,17 @@ _MONTH_TOKENS = (
     "september", "oct", "october", "nov", "november", "dec", "december",
 )
 
+# Calendar scaffolding tokens only (structural; no site/brand names).
+_CALENDAR_NOISE = set(_MONTH_TOKENS) | {
+    "page", "p", "archive", "archives", "date", "year", "month", "day",
+}
+
+
+def _path_segments(slug: str) -> list[str]:
+    """POSIX-ish path segments from a slug (supports 2026/09 style)."""
+    s = (slug or "").lower().replace("\\", "/").strip("/")
+    return [p for p in s.split("/") if p]
+
 
 def _norm_slug_tokens(slug: str) -> list[str]:
     """Split leaf on hyphens/underscores for structural checks."""
@@ -124,18 +135,71 @@ def _norm_slug_tokens(slug: str) -> list[str]:
     return [t for t in _re.split(r"[-\s]+", s) if t]
 
 
-def _is_archive_index(slug: str) -> bool:
-    """Year or year-month archive hubs (e.g. 2026, 2026_sep, 2026-08)."""
-    toks = _norm_slug_tokens(slug)
-    if len(toks) == 1 and toks[0].isdigit() and len(toks[0]) == 4:
+def _all_slug_tokens(slug: str) -> list[str]:
+    """Tokens across path segments (leaf + parents like 2026/09)."""
+    import re as _re
+    out: list[str] = []
+    for seg in _path_segments(slug):
+        s = seg.replace("_", "-")
+        out.extend(t for t in _re.split(r"[-\s]+", s) if t)
+    return out
+
+
+def _is_year_token(tok: str) -> bool:
+    return tok.isdigit() and len(tok) == 4 and 1900 <= int(tok) <= 2100
+
+
+def _is_month_token(tok: str) -> bool:
+    if tok in _MONTH_TOKENS:
         return True
-    if len(toks) == 2 and toks[0].isdigit() and len(toks[0]) == 4:
-        m = toks[1]
-        if m in _MONTH_TOKENS:
-            return True
-        if m.isdigit() and 1 <= int(m) <= 12:
-            return True
+    if tok.isdigit() and 1 <= int(tok) <= 12:
+        return True
+    return False
+
+
+def _is_day_token(tok: str) -> bool:
+    return tok.isdigit() and 1 <= int(tok) <= 31
+
+
+def _is_calendar_noise_token(tok: str) -> bool:
+    if tok in _CALENDAR_NOISE:
+        return True
+    if _is_year_token(tok) or _is_month_token(tok) or _is_day_token(tok):
+        return True
+    return False
+
+
+def _non_calendar_tokens(slug: str) -> set[str]:
+    return {t for t in _all_slug_tokens(slug) if not _is_calendar_noise_token(t)}
+
+
+def _token_list_is_archive_index(toks: list[str]) -> bool:
+    """Year / year-month / pagination shell from a token list."""
+    if len(toks) == 1 and _is_year_token(toks[0]):
+        return True
+    if len(toks) == 2 and _is_year_token(toks[0]) and _is_month_token(toks[1]):
+        return True
     if len(toks) == 2 and toks[0] in ("page", "p") and toks[1].isdigit():
+        return True
+    return False
+
+
+def _is_archive_index(slug: str) -> bool:
+    """Year or year-month archive hubs (e.g. 2026, 2026_sep, 2026/09, 2024-01)."""
+    if _token_list_is_archive_index(_norm_slug_tokens(slug)):
+        return True
+    segs = _path_segments(slug)
+    if len(segs) >= 2:
+        parent_toks = _norm_slug_tokens(segs[-2])
+        leaf_toks = _norm_slug_tokens(segs[-1])
+        if (
+            len(parent_toks) == 1
+            and _is_year_token(parent_toks[0])
+            and len(leaf_toks) == 1
+            and _is_month_token(leaf_toks[0])
+        ):
+            return True
+    if _token_list_is_archive_index(_all_slug_tokens(slug)):
         return True
     return False
 
@@ -145,15 +209,37 @@ def _is_dated_article(slug: str) -> bool:
     toks = _norm_slug_tokens(slug)
     if len(toks) < 3:
         return False
-    if not (toks[0].isdigit() and len(toks[0]) == 4):
+    if not _is_year_token(toks[0]):
         return False
-    m = toks[1]
-    month_ok = m in _MONTH_TOKENS or (m.isdigit() and 1 <= int(m) <= 12)
-    if not month_ok:
+    if not _is_month_token(toks[1]):
         return False
-    if toks[2].isdigit() and 1 <= int(toks[2]) <= 31:
+    if _is_day_token(toks[2]):
         return True
     return False
+
+
+def _is_archive_shell_pair(slug_a: str, slug_b: str) -> bool:
+    """True when both sides are date/archive index shells (not topical articles).
+
+    Structural only: year / year-month / pagination hubs.
+    Dated articles with non-calendar slug body are NOT shells.
+    """
+    return _is_archive_index(slug_a) and _is_archive_index(slug_b)
+
+
+def _overlap_is_calendar_only(slug_a: str, slug_b: str) -> bool:
+    """Shared tokens are only year/month/day/pagination noise."""
+    overlap = _tokens(slug_a) & _tokens(slug_b)
+    if not overlap:
+        return False
+    return all(_is_calendar_noise_token(t) for t in overlap)
+
+
+def _group_is_archive_shell_mesh(refs: list) -> bool:
+    """True if every pair is archive-index ↔ archive-index (calendar shells)."""
+    if not refs:
+        return False
+    return all(_is_archive_shell_pair(r.slug_a, r.slug_b) for r in refs)
 
 
 def _is_guide_article(slug: str) -> bool:
@@ -181,7 +267,8 @@ def page_type(slug: str) -> str:
     Not ground truth. No site/brand hardcoding.
     """
     s = _leaf(slug)
-    if _is_archive_index(s):
+    # Prefer full-slug archive check so path forms like 2026/09 classify as index.
+    if _is_archive_index(slug) or _is_archive_index(s):
         return "index"
     if _is_dated_article(s) or _is_guide_article(s):
         return "article"
@@ -372,9 +459,15 @@ def build_link_opportunities(link_issues: list[Issue]) -> list[LinkOpportunity]:
             continue
         if r.link_sim < STRONG_SIM:
             continue
+        # Archive/date URL shells (year ↔ year-month etc.) are not high-value pairs.
+        if _is_archive_shell_pair(r.slug_a, r.slug_b):
+            continue
         # semantic: token overlap OR shared topic OR mirror-ish shared stem
         overlap = _tokens(r.slug_a) & _tokens(r.slug_b)
         topics = _shared_topics(r.slug_a, r.slug_b)
+        # Calendar-only overlap without topical lexicon → not strong_pair
+        if not topics and overlap and _overlap_is_calendar_only(r.slug_a, r.slug_b):
+            continue
         # other↔other（百科網格）必須有 token／主題線索才當強關聯，
         # 否則留给 catalog mesh，避免 patterns／glossary 炸成數百張強關聯卡。
         if not overlap and not topics:
@@ -438,6 +531,45 @@ def build_link_opportunities(link_issues: list[Issue]) -> list[LinkOpportunity]:
             continue
         claimed = claim(group)
         if not claimed:
+            continue
+        # Archive/date index shells → folded low-value (not high_value template mesh)
+        if ptype == "index" or _group_is_archive_shell_mesh(claimed):
+            st = _stats(claimed)
+            title = "日期／Archive 索引內連（已降級摺疊）｜%d 對｜%d 語｜%d 頁" % (
+                st["pair_count"],
+                st["lang_count"],
+                st["page_count"],
+            )
+            opps.append(
+                LinkOpportunity(
+                    id=next_id("linko"),
+                    title=title,
+                    bucket="folded",
+                    folded=True,
+                    priority="P3",
+                    kind="archive_date_demoted",
+                    why=(
+                        "雙方皆為年份／年月／分頁等 Archive 索引殼層（結構啟發式），"
+                        "不是主題文章互推機會；已自 high_value／strong_pair／頁型網格降級。"
+                        "共 %d 對。" % st["pair_count"]
+                    ),
+                    fix="通常不必為年月 Archive 互加 related；優先處理主題文章或常青樞紐頁。",
+                    slugs=st["slugs"],
+                    langs=st["langs"],
+                    pair_count=st["pair_count"],
+                    page_count=st["page_count"],
+                    lang_count=st["lang_count"],
+                    sim_min=st["sim_min"],
+                    sim_max=st["sim_max"],
+                    high_value=False,
+                    pair_refs=st["pair_refs"],
+                    evidence={
+                        "page_type": ptype,
+                        "archive_date_demoted": True,
+                        "demotion_reason": "archive_index_shell_pair",
+                    },
+                )
+            )
             continue
         st = _stats(claimed)
         label = PAGE_TYPE_LABELS.get(ptype, "頁型 %s related 網格" % ptype)
@@ -769,11 +901,18 @@ def opportunity_summary(opps: list[LinkOpportunity]) -> dict[str, Any]:
     bucket_counts = Counter(o.bucket for o in opps)
     high = [o for o in opps if o.high_value and not o.folded]
     folded = [o for o in opps if o.folded]
+    archive_demoted = [
+        o for o in opps
+        if o.kind == "archive_date_demoted"
+        or (o.evidence or {}).get("archive_date_demoted")
+    ]
     pair_total = sum(o.pair_count for o in opps)
     return {
         "opportunity_count": len(opps),
         "high_value_count": len(high),
         "folded_count": len(folded),
+        "archive_date_demoted_count": len(archive_demoted),
+        "archive_date_demoted_pairs": sum(o.pair_count for o in archive_demoted),
         "bucket_counts": {
             "template": bucket_counts.get("template", 0),
             "topic": bucket_counts.get("topic", 0),
