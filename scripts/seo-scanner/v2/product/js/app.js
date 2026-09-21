@@ -15,7 +15,7 @@
     "評估 AI 可見度（未測量則誠實標示）",
   ];
 
-  const state = { data: null, view: "landing", detail: null };
+  const state = { data: null, view: "landing", detail: null, mode: null };
   const $ = (id) => document.getElementById(id);
 
   function show(view) {
@@ -209,6 +209,61 @@
     const res = await fetch("./data/" + key + ".json", { cache: "no-store" });
     if (!res.ok) throw new Error("無法載入 demo：" + key);
     return res.json();
+  }
+
+  async function postLiveScan(url) {
+    let res;
+    try {
+      res = await fetch("/api/scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: url, max_pages: 40 }),
+      });
+    } catch (e) {
+      throw new Error(
+        "連不上即時掃描伺服器。請在 product 目錄執行：python server.py，然後開啟 http://127.0.0.1:8765/"
+      );
+    }
+    let payload = null;
+    try {
+      payload = await res.json();
+    } catch (e) {
+      payload = null;
+    }
+    if (!res.ok) {
+      const msg =
+        (payload && payload.error) ||
+        ("伺服器回應 " + res.status + (res.statusText ? " " + res.statusText : ""));
+      throw new Error(msg);
+    }
+    if (!payload || typeof payload !== "object" || !("pages" in payload)) {
+      throw new Error("伺服器未回傳有效的掃描結果 JSON。");
+    }
+    return payload;
+  }
+
+  async function checkLiveHealth() {
+    try {
+      const res = await fetch("/api/health", { cache: "no-store" });
+      if (!res.ok) return false;
+      const j = await res.json();
+      return !!(j && j.ok);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function ensureLiveNote() {
+    if (document.getElementById("live-server-note")) return;
+    const panel = document.querySelector("#view-landing .hero-panel");
+    if (!panel) return;
+    const note = document.createElement("p");
+    note.id = "live-server-note";
+    note.className = "muted";
+    note.style.margin = "12px 0 0";
+    note.textContent =
+      "即時掃描需要本機伺服器。請在 product 目錄執行 python server.py，再開啟 http://127.0.0.1:8765/（示範按鈕不受影響）。";
+    panel.appendChild(note);
   }
 
   function renderScanSteps(activeIdx) {
@@ -499,17 +554,40 @@
   function renderDash() {
     show("dash");
     closeDetail();
-    $("dash-site-label").textContent = (state.data.site_label || state.data.sample_url || "") + " · Scanner 真實輸出";
+    const base = state.data.site_label || state.data.sample_url || "";
+    const tag = state.mode === "demo" ? "示範資料" : "真實掃描";
+    $("dash-site-label").textContent = base + " · " + tag;
     renderResultHero();
     renderPillars();
     renderTopIssues();
   }
 
-  async function analyze(url) {
-    const key = pickDemoKey(url);
+  async function analyze(url, opts) {
+    const options = opts || {};
+    const asDemo = !!options.demo;
     try {
-      await runScanAnimation(url);
-      state.data = await loadDemo(key);
+      const anim = runScanAnimation(url);
+      let data;
+      if (asDemo) {
+        const key = options.demoKey || pickDemoKey(url);
+        const loaded = await loadDemo(key);
+        await anim;
+        data = loaded;
+        state.mode = "demo";
+      } else {
+        let live;
+        let liveErr = null;
+        try {
+          live = await postLiveScan(url);
+        } catch (e) {
+          liveErr = e;
+        }
+        await anim;
+        if (liveErr) throw liveErr;
+        data = live;
+        state.mode = "live";
+      }
+      state.data = data;
       state.data.sample_url = url;
       renderDash();
     } catch (err) {
@@ -521,12 +599,21 @@
   function initChips() {
     const box = $("demo-chips");
     box.innerHTML = DEMOS.map(function (d) {
-      return '<button type="button" class="chip" data-url="' + d.url + '">Demo：' + d.label + "</button>";
+      return (
+        '<button type="button" class="chip" data-demo-key="' +
+        d.key +
+        '" data-url="' +
+        d.url +
+        '">示範：' +
+        d.label +
+        "</button>"
+      );
     }).join("");
     box.querySelectorAll(".chip").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        $("url-input").value = btn.getAttribute("data-url");
-        analyze(btn.getAttribute("data-url"));
+        const u = btn.getAttribute("data-url");
+        $("url-input").value = u;
+        analyze(u, { demo: true, demoKey: btn.getAttribute("data-demo-key") });
       });
     });
   }
@@ -546,4 +633,7 @@
 
   initChips();
   show("landing");
+  checkLiveHealth().then(function (ok) {
+    if (!ok) ensureLiveNote();
+  });
 })();
