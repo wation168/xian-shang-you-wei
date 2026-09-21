@@ -436,7 +436,7 @@ pre.ev {{ white-space:pre-wrap; word-break:break-word; background:#0d1218; paddi
         if (d0 !== 'true_issue' && d0 !== 'needs_review') return;
       }} else if (disp && d0 !== disp) return;
       if (hideFold && ev.folded) return;
-      const blob = (it.problem + ' ' + it.cause + ' ' + (it.pages||[]).join(' ') + ' ' + (ev.disposition||'') + ' ' + (ev.confidence||'')).toLowerCase();
+      const blob = (it.problem + ' ' + it.cause + ' ' + (it.pages||[]).join(' ') + ' ' + (ev.disposition||'') + ' ' + (ev.confidence||'') + ' ' + (ev.kind||'') + ' ' + (ev.archive_date_demoted ? 'archive_date_demoted' : '') + ' ' + (ev.demotion_reason||'')).toLowerCase();
       if (q && !blob.includes(q)) return;
       const foldMark = ev.folded ? ' <span class="badge fold">folded</span>' : '';
       const d = ev.disposition || 'needs_review';

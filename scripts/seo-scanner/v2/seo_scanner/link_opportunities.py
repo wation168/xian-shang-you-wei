@@ -185,7 +185,12 @@ def _token_list_is_archive_index(toks: list[str]) -> bool:
 
 
 def _is_archive_index(slug: str) -> bool:
-    """Year or year-month archive hubs (e.g. 2026, 2026_sep, 2026/09, 2024-01)."""
+    """Year or year-month archive hubs (e.g. 2026, 2026_sep, 2026/09, 2024-01).
+
+    Also covers trailing pagination under a year/month hub:
+    ``2026/page/2``, ``archive/2026/page/3``, ``2026/09/page/2``.
+    Structural only — no brand hardcoding.
+    """
     if _token_list_is_archive_index(_norm_slug_tokens(slug)):
         return True
     segs = _path_segments(slug)
@@ -198,6 +203,11 @@ def _is_archive_index(slug: str) -> bool:
             and len(leaf_toks) == 1
             and _is_month_token(leaf_toks[0])
         ):
+            return True
+    # Trailing pagination under an archive hub: <hub>/page/<n>
+    if len(segs) >= 3 and segs[-2] in ("page", "p") and segs[-1].isdigit():
+        head = "/".join(segs[:-2])
+        if head and _is_archive_index(head):
             return True
     if _token_list_is_archive_index(_all_slug_tokens(slug)):
         return True

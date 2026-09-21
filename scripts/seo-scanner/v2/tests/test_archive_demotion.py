@@ -30,6 +30,17 @@ def test_archive_index_path_forms():
     assert _is_archive_index("page-2")
     assert page_type("2026/09") == "index"
     assert page_type("2026_sep") == "index"
+    # archive/<year> path form (leaf year) — already covered structurally
+    assert _is_archive_index("archive/2026")
+    assert _is_archive_index("archives/2026")
+    assert _is_archive_index("blog/archive/2026")
+    assert page_type("archive/2026") == "index"
+    # year + pagination under path: 2026/page/2
+    assert _is_archive_index("2026/page/2")
+    assert _is_archive_index("2026/page/3")
+    assert _is_archive_index("archive/2026/page/2")
+    assert _is_archive_index("2026/09/page/2")
+    assert page_type("2026/page/2") == "index"
     # dated article is NOT archive index
     assert not _is_archive_index("2026_sep_15_djangocon-europe-2027-is-heading-to-innsbruck")
     assert page_type("2026_sep_15_djangocon-europe-2027-is-heading-to-innsbruck") == "article"
@@ -39,6 +50,8 @@ def test_archive_shell_pair_positive():
     assert _is_archive_shell_pair("2026", "2026_sep")
     assert _is_archive_shell_pair("2026_aug", "2026_jun")
     assert _is_archive_shell_pair("2026/09", "2026/08")
+    assert _is_archive_shell_pair("archive/2026", "2026/page/2")
+    assert _is_archive_shell_pair("2026/page/2", "2026/page/3")
     assert _overlap_is_calendar_only("2026", "2026_sep")
 
 
