@@ -777,12 +777,18 @@ async function loadInvoices(days){
     }
     const rows = d.invoices || [];
     if(!rows.length){ listEl.innerHTML = '<div class="ops-empty">這段期間沒有發票紀錄</div>'; return; }
+    const prodNow = d.amego_enabled && !d.amego_is_test;
     listEl.innerHTML = rows.map(r=>{
       const ok = r.status === 'issued';
+      const testRec = r.seller_id === '12345678';
+      const envTag = testRec ? '<span class="mem-status status-expired" style="margin-left:6px">測試發票（不是真發票）</span>'
+                   : (!r.seller_id ? '<span class="mem-status" style="margin-left:6px">環境未記錄</span>' : '');
+      const canReissue = prodNow && testRec && ok && !(r.order_id||'').startsWith('TEST');
+      const reBtn = canReissue ? `<button class="inline-btn" style="margin-top:8px" onclick="doReissueInvoice(this, '${(r.order_id||'').replace(/'/g,'')}', ${r.amount||0}, '${(r.member_email||'').replace(/'/g,'')}')">改開正式發票</button>` : '';
       return `<div class="mem-card">
         <div class="mem-head">
           <div class="mem-email">${r.invoice_number || '（沒開成功）'}</div>
-          <span class="mem-status ${ok?'status-active':'status-expired'}">${ok?'已開立':'失敗'}</span>
+          <span><span class="mem-status ${ok?'status-active':'status-expired'}">${ok?'已開立':'失敗'}</span>${envTag}</span>
         </div>
         <div class="mem-meta">
           <span>訂單：${r.order_id||'—'}</span>
@@ -792,6 +798,7 @@ async function loadInvoices(days){
           <span>載具：${r.carrier_type||'無'} ${r.carrier_id||''}</span>
           <span>時間：${r.created_at||'—'}</span>
         </div>
+        ${reBtn}
       </div>`;
     }).join('');
   }catch(e){
@@ -820,6 +827,20 @@ async function doTestInvoice(btn){
     box.textContent = '測試失敗：' + e.message;
   }
   btn.disabled = false;
+}
+
+async function doReissueInvoice(btn, orderId, amount, email){
+  if(!confirm(`這筆當初開成測試發票（不是真發票）。\n要用同樣的資料改開一張「正式發票」嗎？\n\n訂單：${orderId}\n金額：NT$${amount}\n會員：${email||'（未填）'}\n\n發票日期會是今天。開出去不能反悔，只能作廢。`)) return;
+  btn.disabled = true; btn.textContent = '開立中…';
+  try{
+    const r = await fetch(`${API}/admin/reissue-invoice`, {
+      method:'POST', headers:{'Content-Type':'application/json','X-Admin-Key':getAdminKey()},
+      body: JSON.stringify({order_id: orderId})
+    });
+    const d = await r.json();
+    alert(d.ok ? `✅ 已改開正式發票：${d.invoice_number}` : `❌ 改開失敗\n${d.msg||''}\n錯誤代碼：${d.code===undefined?'—':d.code}`);
+  }catch(e){ alert('改開失敗：' + e.message); }
+  loadInvoices();
 }
 
 async function doIssueInvoice(btn){

@@ -3575,6 +3575,9 @@ def _db_init():
         # 2026/09/19（案件009第二批）：漏斗「首次分析」統計用——會員第一次完成
         # analyze事件的日期，只在第一次寫入、之後不再覆蓋
         ("members",         "first_analyze_date", "TEXT DEFAULT NULL"),
+        # 2026/09/24（案件011）：記錄每張發票是用哪個統編開的——測試環境（12345678）開的
+        # 是假發票，換正式金鑰後要能分辨、並對真實付款改開正式發票
+        ("invoices",        "seller_id",       "TEXT DEFAULT NULL"),
     ]
     for table, col, coldef in new_columns:
         try:
@@ -3583,6 +3586,18 @@ def _db_init():
             print(f"   ✅ 資料庫補欄位：{table}.{col}")
         except Exception:
             pass  # 欄位已存在，忽略
+
+    # 2026/09/24（案件011）：seller_id 欄位加上之前開的發票都沒記統編。正式金鑰在這之前從沒用過，
+    # 所以「目前還是測試環境」時，舊紀錄一定是測試環境開的，標成 12345678。
+    # 已經換成正式金鑰才第一次啟動這版程式的話，不猜，舊紀錄維持「未記錄」。
+    try:
+        if os.environ.get("AMEGO_INVOICE_NUMBER", "") in ("", "12345678"):
+            _n = conn.execute("UPDATE invoices SET seller_id='12345678' WHERE seller_id IS NULL").rowcount
+            conn.commit()
+            if _n:
+                print(f"   ✅ 發票紀錄補上統編（測試環境）：{_n} 筆")
+    except Exception as _e:
+        print(f"   ⚠️ 發票紀錄補統編失敗（不影響其他功能）：{_e}")
 
     # 2026/09/15補（文件A決策③後續）：持股健檢改讀watchlist_items之後，舊portfolios表裡
     # 使用者原本存的持股（股票代號＋買入價）不會自動出現在新的持股健檢畫面——等於舊資料
@@ -11734,11 +11749,11 @@ def _amego_issue_invoice(*, order_id: str, buyer_email: str, buyer_name: str,
         with _db() as conn:
             conn.execute(
                 "INSERT OR REPLACE INTO invoices (order_id, member_email, amount, invoice_number, invoice_time, "
-                "random_number, carrier_type, carrier_id, status, raw_response, created_at) "
-                "VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                "random_number, carrier_type, carrier_id, status, raw_response, created_at, seller_id) "
+                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                 (order_id, buyer_email, amount_int, result.get("invoice_number"), result.get("invoice_time"),
                  result.get("random_number"), carrier_type, carrier_id, "issued" if ok else "failed",
-                 _js2.dumps(result, ensure_ascii=False), _taipei_now_str())
+                 _js2.dumps(result, ensure_ascii=False), _taipei_now_str(), AMEGO_INVOICE_NUMBER)
             )
     except Exception as e:
         print(f"[光貿發票] 寫入invoices表失敗（不影響會員權益）：{e}")
@@ -11754,7 +11769,7 @@ def admin_invoices(days: int = 30, key: str = Header(default="", alias="X-Admin-
     with _db() as conn:
         rows = [dict(r) for r in conn.execute(
             "SELECT id, order_id, member_email, amount, invoice_number, invoice_time, random_number, "
-            "carrier_type, carrier_id, status, created_at FROM invoices WHERE created_at>=? ORDER BY created_at DESC",
+            "carrier_type, carrier_id, status, created_at, seller_id FROM invoices WHERE created_at>=? ORDER BY created_at DESC",
             (start,)).fetchall()]
         failed = sum(1 for r in rows if r["status"] != "issued")
     return {"invoices": rows, "total": len(rows), "failed": failed,
@@ -11785,6 +11800,41 @@ def admin_test_invoice(key: str = Header(default="", alias="X-Admin-Key")):
             "code": result.get("code"), "msg": result.get("msg", "")}
 
 
+class ReissueInvoiceReq(BaseModel):
+    order_id: str = ""
+
+
+@app.post("/admin/reissue-invoice")
+def admin_reissue_invoice(req: ReissueInvoiceReq, key: str = Header(default="", alias="X-Admin-Key")):
+    """2026/09/24（案件011）：正式金鑰上線前，真實付款被自動開成「測試環境」的假發票（統編12345678）。
+    換成正式金鑰後，用原本紀錄的會員、金額、載具，以同一個訂單編號改開一張正式發票。
+    只接受：目前是正式環境、原紀錄是測試環境開的、不是測試按鈕產生的 TEST 訂單。"""
+    _check_admin(key)
+    if not AMEGO_ENABLED:
+        return {"ok": False, "msg": "還沒設定 AMEGO_INVOICE_NUMBER / AMEGO_APP_KEY"}
+    if AMEGO_INVOICE_NUMBER == "12345678":
+        return {"ok": False, "msg": "目前還是測試環境，請先到 Zeabur 換成正式統編與 APP Key"}
+    order_id = (req.order_id or "").strip()
+    with _db() as conn:
+        row = conn.execute("SELECT * FROM invoices WHERE order_id=?", (order_id,)).fetchone()
+    if not row:
+        return {"ok": False, "msg": "找不到這筆發票紀錄"}
+    row = dict(row)
+    if row.get("seller_id") != "12345678":
+        return {"ok": False, "msg": "這筆不是測試環境開的發票，不能改開（避免重複開真發票）"}
+    if order_id.startswith("TEST"):
+        return {"ok": False, "msg": "這是測試按鈕產生的測試訂單，沒有真實付款，不用改開"}
+    result = _amego_issue_invoice(
+        order_id=order_id, buyer_email=row.get("member_email") or "", buyer_name="消費者",
+        amount=row.get("amount") or 0, item_name="線上有位訂閱",
+        carrier_type=row.get("carrier_type") or "", carrier_id=row.get("carrier_id") or "",
+        notify_on_fail=False,
+    )
+    ok = result.get("code") == 0
+    return {"ok": ok, "order_id": order_id, "invoice_number": result.get("invoice_number", ""),
+            "code": result.get("code"), "msg": result.get("msg", "")}
+
+
 class ManualInvoiceReq(BaseModel):
     email: str = ""
     amount: int = 0
@@ -11812,8 +11862,11 @@ def admin_issue_invoice(req: ManualInvoiceReq, key: str = Header(default="", ali
     # 同一個訂單編號不能重複開（避免手殘按兩次、同一筆訂單開出兩張發票）
     try:
         with _db() as conn:
-            dup = conn.execute("SELECT invoice_number, status FROM invoices WHERE order_id=?", (order_id,)).fetchone()
-        if dup and dup["status"] == "issued":
+            dup = conn.execute("SELECT invoice_number, status, seller_id FROM invoices WHERE order_id=?",
+                               (order_id,)).fetchone()
+        # 測試環境開的假發票不算數：正式環境可以用同一個訂單編號開正式發票（會取代那筆測試紀錄）
+        if dup and dup["status"] == "issued" and not (
+                dup["seller_id"] == "12345678" and AMEGO_INVOICE_NUMBER != "12345678"):
             return {"ok": False, "msg": f"這個訂單編號已經開過發票了（{dup['invoice_number']}），不要重複開"}
     except Exception:
         pass
