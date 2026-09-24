@@ -455,6 +455,23 @@ async def lifespan(app: FastAPI):
                     _cl.close()
                     print(f"   [補單] ✅ 補開通：{email} {trade_no} → {plan} 到 {new_expire}")
                     plan_label = {"monthly": "月費方案", "quarterly": "季費方案", "yearly": "年費方案", "daily_test": "每日測試方案"}[plan]
+                    # 2026/09/24（案件011）：補單開通原本不會開發票——之後綠界重送的通知也會因為
+                    # 「已處理」被略過，這筆付款就永遠沒有發票。這裡補上，邏輯與 webhook 相同。
+                    try:
+                        _pc = _db_conn()
+                        _pinv = _pc.execute("SELECT invoice_type, invoice_carrier FROM pending_orders "
+                                            "WHERE merchant_trade_no=?", (trade_no,)).fetchone()
+                        _pc.close()
+                        _ct, _cid = "", ""
+                        if _pinv and _pinv["invoice_type"] == "手機條碼載具" and _pinv["invoice_carrier"]:
+                            _ct, _cid = "3J0002", _pinv["invoice_carrier"]
+                        _amego_issue_invoice(
+                            order_id=idem_key, buyer_email=email, buyer_name="消費者",
+                            amount=_resp.get("TradeAmt") or {"monthly": 499, "quarterly": 999, "yearly": 3688, "daily_test": 30}[plan],
+                            item_name=plan_label, carrier_type=_ct, carrier_id=_cid,
+                        )
+                    except Exception as _ie:
+                        print(f"   [補單] 開立發票例外（不影響會員權益，後台可查漏開）：{_ie}")
                     try:
                         _send_email(email, "【線上有位】付款已確認，會員已開通",
                             _render_email(
@@ -11809,6 +11826,55 @@ def admin_test_invoice(key: str = Header(default="", alias="X-Admin-Key")):
     return {"ok": ok, "order_id": order_id,
             "invoice_number": result.get("invoice_number", ""),
             "code": result.get("code"), "msg": result.get("msg", "")}
+
+
+@app.get("/admin/missing-invoices")
+def admin_missing_invoices(since: str = "2026-09-19", key: str = Header(default="", alias="X-Admin-Key")):
+    """2026/09/24（案件011）：找「系統有處理付款、但沒有正式發票」的訂單。
+    來源是 processed_orders（每筆開通／續約成功的付款都會記一筆），對照 invoices。
+    since 預設 2026-09-19：自動開票從那天開始，之前是帥哥鴻手動開。
+    金額是依方案推算的，補開前請對照綠界後台的實收金額。"""
+    _check_admin(key)
+    if not _re.fullmatch(r"\d{4}-\d{2}-\d{2}", since or ""):
+        since = "2026-09-19"
+    price = {"monthly": 499, "quarterly": 999, "yearly": 3688, "daily_test": 30}
+    out = []
+    with _db() as conn:
+        paid = conn.execute("SELECT merchant_trade_no, processed_at FROM processed_orders "
+                            "WHERE processed_at >= ? ORDER BY processed_at", (since,)).fetchall()
+        for p in paid:
+            k = p["merchant_trade_no"] or ""
+            inv = conn.execute("SELECT invoice_number, status, seller_id, member_email, amount, carrier_id "
+                               "FROM invoices WHERE order_id=?", (k,)).fetchone()
+            if inv and inv["status"] == "issued" and inv["seller_id"] not in ("12345678", None):
+                continue                      # 已有正式發票
+            if inv and inv["status"] == "issued" and AMEGO_INVOICE_NUMBER == "12345678":
+                continue                      # 還在測試環境，測試發票就算有開
+            if inv and inv["status"] == "issued" and inv["seller_id"] == "12345678":
+                kind = "測試發票，要改開正式"
+            elif inv and inv["status"] == "issued":
+                kind = "環境未記錄，請到光貿後台確認"
+            elif inv:
+                kind = "開立失敗"
+            else:
+                kind = "沒有發票紀錄"
+            m = _re.match(r"R_([A-Za-z0-9]+)_", k)
+            trade_no = m.group(1) if m else k
+            po = conn.execute("SELECT email, plan, invoice_type, invoice_carrier FROM pending_orders "
+                              "WHERE merchant_trade_no=?", (trade_no,)).fetchone()
+            mem = None if po else conn.execute("SELECT email, plan FROM members WHERE merchant_trade_no=?",
+                                               (trade_no,)).fetchone()
+            plan = (po["plan"] if po else (mem["plan"] if mem else "")) or ""
+            carrier = po["invoice_carrier"] if (po and po["invoice_type"] == "手機條碼載具") else ""
+            email = (po["email"] if po else (mem["email"] if mem else "")) or ""
+            amount = price.get(plan)
+            if inv:   # 發票紀錄裡有當時的資料，優先用（金額是綠界通知的實收金額）
+                email = inv["member_email"] or email
+                amount = inv["amount"] or amount
+                carrier = inv["carrier_id"] or carrier
+            out.append({"order_id": k, "paid_at": p["processed_at"], "kind": kind, "email": email,
+                        "plan": plan, "amount_guess": amount, "carrier_id": carrier or ""})
+    return {"since": since, "count": len(out), "orders": out, "amego_is_test": AMEGO_INVOICE_NUMBER == "12345678"}
 
 
 class ReissueInvoiceReq(BaseModel):

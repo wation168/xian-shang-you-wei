@@ -533,6 +533,14 @@ body{font-family:-apple-system,'Noto Sans TC',system-ui,sans-serif;background:va
       </div>
       <div class="result-box" id="miResult"></div>
 
+      <div style="font-weight:700;font-size:14px;margin:18px 0 4px">查漏開：付款了但沒有正式發票</div>
+      <div class="ops-sub">比對「系統處理過的付款」和「發票紀錄」。自動開票從 09/19 開始，之前的是手動開的，所以預設從 09/19 查。金額是依方案推算，補開前請對照綠界後台的實收金額。</div>
+      <div class="form-row">
+        <div class="field"><label>從哪天開始查</label><input id="mqSince" type="date" value="2026-09-19"/></div>
+        <button class="inline-btn" onclick="loadMissingInvoices(this)">查詢</button>
+      </div>
+      <div id="mqList"></div>
+
       <div id="invList" style="margin-top:12px"><div class="ops-empty">載入中...</div></div>
     </div>
 
@@ -842,6 +850,48 @@ async function doReissueInvoice(btn, orderId, amount, email){
     alert(d.ok ? `✅ 已改開正式發票：${d.invoice_number}` : `❌ 改開失敗\n${d.msg||''}\n錯誤代碼：${d.code===undefined?'—':d.code}`);
   }catch(e){ alert('改開失敗：' + e.message); }
   loadInvoices();
+}
+
+let _mqRows = [];
+async function loadMissingInvoices(btn){
+  const since = document.getElementById('mqSince').value || '2026-09-19';
+  const el = document.getElementById('mqList');
+  el.innerHTML = '<div class="ops-empty">查詢中…</div>';
+  try{
+    const r = await fetch(`${API}/admin/missing-invoices?since=${encodeURIComponent(since)}`, {headers:{'X-Admin-Key':getAdminKey()}});
+    if(!r.ok){ el.innerHTML = '<div class="ops-empty">查詢失敗（管理金鑰或連線問題）</div>'; return; }
+    const d = await r.json();
+    _mqRows = d.orders || [];
+    if(!_mqRows.length){ el.innerHTML = `<div class="ops-empty">✅ ${since} 之後的付款都有正式發票</div>`; return; }
+    el.innerHTML = `<div class="ops-sub" style="margin:8px 0">共 ${_mqRows.length} 筆需要處理</div>` + _mqRows.map((o,i)=>{
+      const act = o.kind.startsWith('測試發票')
+        ? '<div class="ops-sub" style="margin-top:6px">→ 在下方發票列表按「改開正式發票」</div>'
+        : (o.kind.startsWith('環境未記錄') ? '<div class="ops-sub" style="margin-top:6px">→ 先到光貿正式後台確認是否已開過</div>'
+        : `<button class="inline-btn" style="margin-top:8px" onclick="fillMissing(${i})">帶入補開表單</button>`);
+      return `<div class="mem-card">
+        <div class="mem-head"><div class="mem-email">${o.kind}</div></div>
+        <div class="mem-meta">
+          <span>訂單：${o.order_id}</span><span>付款處理時間：${o.paid_at||'—'}</span>
+          <span>會員：${o.email||'（查不到，請看綠界）'}</span><span>金額：${o.amount_guess?('NT$'+o.amount_guess):'（查不到，請看綠界）'}</span>
+          <span>載具：${o.carrier_id||'無'}</span>
+        </div>${act}</div>`;
+    }).join('');
+  }catch(e){ el.innerHTML = '<div class="ops-empty">查詢失敗：' + e.message + '</div>'; }
+}
+
+function fillMissing(i){
+  const o = _mqRows[i]; if(!o) return;
+  document.getElementById('miEmail').value = o.email || '';
+  document.getElementById('miAmount').value = o.amount_guess || '';
+  document.getElementById('miOrder').value = o.order_id || '';
+  const sel = document.getElementById('miCarrier'), cid = document.getElementById('miCarrierId');
+  sel.value = o.carrier_id ? '3J0002' : '';
+  cid.value = o.carrier_id || '';
+  cid.style.display = o.carrier_id ? '' : 'none';
+  const box = document.getElementById('miResult');
+  box.className = 'result-box show';
+  box.textContent = '已帶入補開表單。請先對照綠界後台確認金額，再按「開立發票」。';
+  document.getElementById('miEmail').scrollIntoView({behavior:'smooth', block:'center'});
 }
 
 async function doIssueInvoice(btn){
