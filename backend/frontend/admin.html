@@ -778,6 +778,7 @@ async function loadInvoices(days){
     const rows = d.invoices || [];
     if(!rows.length){ listEl.innerHTML = '<div class="ops-empty">這段期間沒有發票紀錄</div>'; return; }
     const prodNow = d.amego_enabled && !d.amego_is_test;
+    const tb = document.getElementById('invTestBtn'); if(tb) tb.style.display = prodNow ? 'none' : '';
     listEl.innerHTML = rows.map(r=>{
       const ok = r.status === 'issued';
       const testRec = r.seller_id === '12345678';

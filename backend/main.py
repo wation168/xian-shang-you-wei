@@ -3598,6 +3598,17 @@ def _db_init():
                 print(f"   ✅ 發票紀錄補上統編（測試環境）：{_n} 筆")
     except Exception as _e:
         print(f"   ⚠️ 發票紀錄補統編失敗（不影響其他功能）：{_e}")
+    # 2026/09/24補：正式金鑰與這版程式幾乎同時上線，上面那段沒來得及標記。
+    # 光貿正式 APP Key 是 2026/09/24 才拿到，所以 09/24 以前開的發票一定是測試環境開的——
+    # 用日期判斷，不會把正式發票誤標成測試。
+    try:
+        _n = conn.execute("UPDATE invoices SET seller_id='12345678' "
+                          "WHERE seller_id IS NULL AND created_at < '2026-09-24 00:00:00'").rowcount
+        conn.commit()
+        if _n:
+            print(f"   ✅ 09/24 以前的發票紀錄標為測試環境：{_n} 筆")
+    except Exception as _e:
+        print(f"   ⚠️ 發票紀錄依日期補統編失敗（不影響其他功能）：{_e}")
 
     # 2026/09/15補（文件A決策③後續）：持股健檢改讀watchlist_items之後，舊portfolios表裡
     # 使用者原本存的持股（股票代號＋買入價）不會自動出現在新的持股健檢畫面——等於舊資料
