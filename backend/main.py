@@ -11843,7 +11843,10 @@ def admin_missing_invoices(since: str = "2026-09-19", key: str = Header(default=
         paid = conn.execute("SELECT merchant_trade_no, processed_at FROM processed_orders "
                             "WHERE processed_at >= ? ORDER BY processed_at", (since,)).fetchall()
         for p in paid:
-            k = p["merchant_trade_no"] or ""
+            full_key = p["merchant_trade_no"] or ""
+            # 光貿 OrderId 上限 40 字，開票時會截成前 40 字存進 invoices——比對也要用同樣的截法，
+            # 不然 R_XYWR…_2026/09/19 16:48:49 這種 42 字的 key 永遠對不到（09/24 實際踩到）
+            k = full_key[:40]
             inv = conn.execute("SELECT invoice_number, status, seller_id, member_email, amount, carrier_id "
                                "FROM invoices WHERE order_id=?", (k,)).fetchone()
             if inv and inv["status"] == "issued" and inv["seller_id"] not in ("12345678", None):
@@ -11858,8 +11861,10 @@ def admin_missing_invoices(since: str = "2026-09-19", key: str = Header(default=
                 kind = "開立失敗"
             else:
                 kind = "沒有發票紀錄"
-            m = _re.match(r"R_([A-Za-z0-9]+)_", k)
-            trade_no = m.group(1) if m else k
+            m = _re.match(r"R_([A-Za-z0-9]+)_(.*)$", full_key)
+            trade_no = m.group(1) if m else full_key
+            # processed_orders.processed_at 實際存的是 UTC，顯示改用 key 裡綠界給的付款時間（台北時間）
+            paid_show = (m.group(2) if (m and _re.match(r"\d{4}/\d{2}/\d{2}", m.group(2) or "")) else p["processed_at"])
             po = conn.execute("SELECT email, plan, invoice_type, invoice_carrier FROM pending_orders "
                               "WHERE merchant_trade_no=?", (trade_no,)).fetchone()
             mem = None if po else conn.execute("SELECT email, plan FROM members WHERE merchant_trade_no=?",
@@ -11872,7 +11877,7 @@ def admin_missing_invoices(since: str = "2026-09-19", key: str = Header(default=
                 email = inv["member_email"] or email
                 amount = inv["amount"] or amount
                 carrier = inv["carrier_id"] or carrier
-            out.append({"order_id": k, "paid_at": p["processed_at"], "kind": kind, "email": email,
+            out.append({"order_id": k, "paid_at": paid_show, "kind": kind, "email": email,
                         "plan": plan, "amount_guess": amount, "carrier_id": carrier or ""})
     return {"since": since, "count": len(out), "orders": out, "amego_is_test": AMEGO_INVOICE_NUMBER == "12345678"}
 
