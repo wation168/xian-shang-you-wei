@@ -520,6 +520,7 @@ async def lifespan(app: FastAPI):
         _bg_scheduler.add_job(_run_補單_job,            "interval", minutes=10)  # 2026/09/17：原每天08:00，改每10分鐘
         _bg_scheduler.add_job(_ensure_stock_name_cache,  "interval", minutes=10)  # 2026/09/17：股名快取不足時自動重抓
         _bg_scheduler.add_job(_run_daily_stats_job,      "cron",     hour=0, minute=30)  # 2026/09/19：營運數據彙總＋清理過期明細
+        _bg_scheduler.add_job(_market_groups_tick,       "interval", minutes=5, max_instances=1, coalesce=True)  # 2026/09/25：案件016 市場星系盤中快照
         # 2026/08/16取消：帥哥鴻確認當初這支每日批次預產生報告是為了SEO覆蓋率，
         # 但實際上不是所有股票都會有人搜尋，天天跑一輪去硬產生冷門股報告不划算；
         # 加上get_report()已修復成「查詢當下沒有今天的資料就即時分析」，資料正確性
@@ -527,6 +528,11 @@ async def lifespan(app: FastAPI):
         # 只是不再排程自動執行；如果之後想針對特定股票手動預產生，
         # 用既有的 POST /admin/batch-generate-reports 管理端點即可。
         _bg_scheduler.start()
+        try:
+            import threading as _th_mg
+            _th_mg.Thread(target=_market_groups_warmup, daemon=True).start()
+        except Exception as _e_mgw:
+            print(f"   ⚠️ 市場星系暖機排程失敗：{_e_mgw}")
         print("   ✅ APScheduler 排程已啟動（開盤熱門股 09:06、盤中到價提醒每5分鐘、到期通知 09:00、報價快取清除 09:00、補單 08:00、12金叉選股 17:20）")
 
         # 啟動時補跑12金叉選股（2026/09/15新增：平日17:20之後重新部署/重啟時，
@@ -9600,6 +9606,207 @@ def api_market_breadth():
     }
     _market_cache_set("breadth", payload, 900)
     return payload
+
+
+# ══════════════════════════════════════════════════════════
+# 案件016 市場星系（新版首頁，2026/09/25 接入）
+# - 族群計算在 market_groups.py（行情統一抓一次→算一次→存快取／market_snapshots 表，所有人共用）
+# - 盤中每 5 分鐘由排程 _MARKET_GROUPS.tick 更新；API 只讀快取，不現抓現算
+# - 權限：星系總覽／時間軸公開（跟舊首頁大盤資料一樣）；族群成分股要登入（免費會員即可，
+#   比照處置股 require_user）；自選股只讀「目前登入者自己」的清單（email 取自 JWT，不接受任何 id 參數）
+# - 市場摘要沿用舊站 /api/market/overview（加權指數）、/api/market/breadth（漲跌家數）
+# ══════════════════════════════════════════════════════════
+try:
+    from market_groups import MarketGroupsEngine as _MarketGroupsEngine
+    _MARKET_GROUPS = _MarketGroupsEngine(
+        db_path=DB_PATH,
+        theme_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "market_theme_map.json"),
+        fetch_quotes=_mis_batch_quotes,
+        get_industry_info=get_all_stock_info,
+        ssl_context=_TWSE_SSL_CTX,
+    )
+except Exception as _e_mg:
+    _MARKET_GROUPS = None
+    print(f"⚠️ 市場星系模組載入失敗（不影響舊站）：{_e_mg}")
+
+# 色階門檻（前端星球紅綠深淺用，單位＝漲跌百分點），與 09/24 真實盤測試資料相同
+_MARKET_CHANGE_SCALE = {"flat": 0.3, "small": 1.0, "normal": 2.0, "strong": 3.5}
+
+
+def _market_groups_tick():
+    if _MARKET_GROUPS is not None:
+        _MARKET_GROUPS.tick()
+
+
+def _market_groups_warmup():
+    """啟動時：資料庫沒有任何快照（例：第一次部署在週末）就先用盤後資料做一筆總覽。
+    股名／產業別快取可能還在背景載入，最多重試 6 次（每次間隔 30 秒）。"""
+    import time as _t
+    if _MARKET_GROUPS is None:
+        return
+    for _ in range(6):
+        try:
+            if _MARKET_GROUPS._latest is not None or _MARKET_GROUPS._load_last() is not None:
+                return
+            if _MARKET_GROUPS.warmup():
+                print("   ✅ 市場星系：已用最近交易日盤後資料暖機")
+                return
+        except Exception as e:
+            print(f"   ⚠️ 市場星系暖機失敗：{e}")
+        _t.sleep(30)
+
+
+def _market_summary_payload() -> dict:
+    """市場摘要：加權指數（舊站 /api/market/overview）＋上市漲跌家數（舊站 /api/market/breadth）。
+    兩支都有快取。漲跌家數來源是盤後檔，只有跟指數同一個交易日時才放進來，
+    否則留 null（前端顯示「資料準備中」），不把昨天的家數配上今天的時間。"""
+    s = {"index_value": None, "index_change_pct": None, "market_turnover": None,
+         "up_count": None, "down_count": None, "flat_count": None, "data_time": None}
+    idx_date = ""
+    try:
+        ov = api_market_overview()
+        tx = next((x for x in (ov or {}).get("items", []) if x.get("id") == "taiex"), None)
+        if tx and tx.get("value") is not None:
+            s["index_value"] = tx.get("value")
+            s["index_change_pct"] = tx.get("change_pct")
+            raw_t = str(tx.get("time") or "")
+            s["data_time"] = raw_t[:5] if len(raw_t) >= 5 and raw_t[2] == ":" else (str(ov.get("as_of") or "")[11:16] or None)
+            d = str(tx.get("trade_date") or ov.get("trade_date") or "").replace("-", "").replace("/", "")
+            idx_date = d
+    except Exception as e:
+        print(f"[MARKET_GROUPS] 市場摘要（指數）失敗：{e}")
+    try:
+        br = api_market_breadth()
+        bd = str((br or {}).get("trade_date") or "").replace("-", "").replace("/", "")
+        if br and br.get("ok") and bd and idx_date and bd[-8:] == idx_date[-8:]:
+            s["up_count"], s["down_count"], s["flat_count"] = br.get("up"), br.get("down"), br.get("flat")
+    except Exception as e:
+        print(f"[MARKET_GROUPS] 市場摘要（漲跌家數）失敗：{e}")
+    return s
+
+
+def _gzip_json(request: Request, payload, max_age: int = 0):
+    import gzip as _gz
+    body = _json_mod.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    headers = {"Cache-Control": f"public, max-age={max_age}" if max_age else "no-store", "Vary": "Accept-Encoding"}
+    if len(body) > 2048 and "gzip" in (request.headers.get("accept-encoding") or "").lower():
+        body = _gz.compress(body, 6)
+        headers["Content-Encoding"] = "gzip"
+    from fastapi.responses import Response as _Resp
+    return _Resp(content=body, media_type="application/json", headers=headers)
+
+
+@app.get("/api/market/groups")
+def api_market_groups():
+    """市場星系總覽（公開）。只讀快取。"""
+    if _MARKET_GROUPS is None:
+        return {"ok": False, "groups": [], "error": "module_unavailable"}
+    hit = _market_cache_get("mg_overview")
+    if hit is not None:
+        return hit
+    ov = _MARKET_GROUPS.get_overview()
+    if ov.get("ok"):
+        ov["change_scale"] = _MARKET_CHANGE_SCALE
+        ov["market_summary"] = _market_summary_payload()
+    else:
+        ov = {"ok": False, "groups": [], "change_scale": _MARKET_CHANGE_SCALE,
+              "market_summary": _market_summary_payload()}
+    _market_cache_set("mg_overview", ov, 30)
+    return ov
+
+
+@app.get("/api/market/groups/timeline")
+def api_market_groups_timeline(request: Request):
+    """今日（或最近交易日）族群時間軸（公開）。一次回傳整天，前端回放不再請求。"""
+    if _MARKET_GROUPS is None:
+        return {"ok": False, "snapshots": []}
+    # 快取綁「最新快照時間」：有新快照就重算，否則同一份給所有人（只留一份，不會越存越多）
+    lt = _MARKET_GROUPS._latest or {}
+    tag = f"{lt.get('trade_date')}|{lt.get('data_time')}|{lt.get('live')}"
+    hit = _market_cache_get("mg_timeline")
+    if hit is None or hit.get("tag") != tag:
+        hit = {"tag": tag, "data": _MARKET_GROUPS.get_timeline()}
+        _market_cache_set("mg_timeline", hit, 300)
+    return _gzip_json(request, hit["data"])
+
+
+@app.get("/api/market/my-watch")
+def api_market_my_watch(user: dict = Depends(require_user)):
+    """新版首頁「我的自選」：只讀目前登入者自己的自選股（email 來自 JWT）。
+    價格走既有 _mis_batch_quotes（20 秒共用快取），族群對照走市場星系。最多 30 檔。"""
+    conn = _db_conn()
+    try:
+        rows = _ws_list_data(conn, user["email"])
+    finally:
+        conn.close()
+    items = rows[:30]
+    codes = [str(r["id"]).strip().upper() for r in items if r.get("id")]
+    quotes = {}
+    if codes:
+        try:
+            quotes = _mis_batch_quotes(codes) or {}
+        except Exception as e:
+            print(f"[MARKET_GROUPS] 自選報價失敗：{e}")
+    gmap = _MARKET_GROUPS.groups_of(codes) if _MARKET_GROUPS is not None else {}
+    today = _taipei_today()
+    out = []
+    for r, c in zip(items, codes):
+        q = quotes.get(c) or {}
+        price, y = q.get("price"), q.get("y")
+        out.append({"code": c, "name": r.get("name") or q.get("name") or c,
+                    "price": price,
+                    "change_pct": round((price - y) / y * 100, 2) if (price and y) else None,
+                    "group_ids": gmap.get(c, []),
+                    "quote_date": q.get("date") or None})
+    live = _is_trading_session() and any(x.get("quote_date") == today for x in out)
+    return {"ok": True, "watchlist": out, "total": len(rows),
+            "watchlist_data_time": (_taipei_now_str("%H:%M") if live else ("收盤" if out else None))}
+
+
+@app.get("/api/market/groups/{gid}")
+def api_market_group_detail(gid: str, user: dict = Depends(require_user)):
+    """族群成分股（登入即可看，免費會員也可以）。只讀快取。"""
+    import re as _re_g
+    if not _re_g.fullmatch(r"[a-z0-9_]{1,40}", gid or ""):
+        raise HTTPException(status_code=404, detail="找不到此族群")
+    if _MARKET_GROUPS is None:
+        raise HTTPException(status_code=503, detail="市場資料暫時無法使用")
+    d = _MARKET_GROUPS.get_group(gid)
+    if not d.get("ok"):
+        raise HTTPException(status_code=404, detail="此族群目前沒有明細資料")
+    return d
+
+
+# 新版首頁靜態檔（試跑網址 /stock/new/；舊首頁 /stock/ 完全不動）
+_STOCK_NEW_DIR = os.path.join(_FRONTEND_DIR, "stock-new")
+_STOCK_NEW_FILES = {
+    "index.html": "text/html; charset=utf-8",
+    "css/market-v2.css": "text/css; charset=utf-8",
+    "js/app.js": "application/javascript; charset=utf-8",
+    "js/data-adapter.js": "application/javascript; charset=utf-8",
+    "js/market-layout.js": "application/javascript; charset=utf-8",
+    "js/market-scene.js": "application/javascript; charset=utf-8",
+}
+
+
+@app.get("/stock/new", include_in_schema=False)
+async def redirect_stock_new():
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse("/stock/new/", status_code=302)
+
+
+@app.get("/stock/new/", include_in_schema=False)
+@app.get("/stock/new/{sub:path}", include_in_schema=False)
+async def serve_stock_new(sub: str = "index.html"):
+    from fastapi.responses import FileResponse
+    sub = sub or "index.html"
+    ctype = _STOCK_NEW_FILES.get(sub)
+    if not ctype:
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    path = os.path.join(_STOCK_NEW_DIR, *sub.split("/"))
+    if not os.path.isfile(path):
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    return FileResponse(path, media_type=ctype, headers={"Cache-Control": "no-cache"})
 
 
 # ══════════════════════════════════════════════════════════
