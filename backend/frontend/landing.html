@@ -1247,6 +1247,46 @@ document.querySelectorAll('.reveal,.step,.faq-item,.price-card').forEach(el=>obs
 }
 </script>
 
+<!-- 2026/09/25新增：IG／FB／Threads／LINE／TikTok 等 App 內建瀏覽器裡，Google 規定不准登入（disallowed_useragent），
+     按 Google 登入會跳出空白頁。偵測到內建瀏覽器時，在 Google 按鈕上方提示改用 Safari／Chrome 開啟。一般瀏覽器完全不受影響。 -->
+<script>
+(function(){
+  var ua = navigator.userAgent || '';
+  if(!/Instagram|FBAN|FBAV|FB_IAB|FBIOS|Barcelona|Threads|Line\/|MicroMessenger|musical_ly|BytedanceWebview|TikTok/i.test(ua)) return;
+  var isAndroid = /Android/i.test(ua), isLine = /Line\//i.test(ua);
+  function copyUrl(b){
+    var u = location.href;
+    function ok(){ b.textContent = '已複製 ✓ 貼到 Safari / Chrome 開啟'; }
+    try{ navigator.clipboard.writeText(u).then(ok, fb); }catch(e){ fb(); }
+    function fb(){ try{ var t=document.createElement('textarea'); t.value=u; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); ok(); }catch(e){} }
+  }
+  function add(){
+    ['googleSignInBtn','googleSignInBtnReg'].forEach(function(id){
+      var g = document.getElementById(id);
+      if(!g || (g.previousElementSibling && g.previousElementSibling.className === 'iab-warn')) return;
+      var d = document.createElement('div');
+      d.className = 'iab-warn';
+      d.style.cssText = 'max-width:300px;margin:4px auto 8px;padding:10px 12px;border-radius:8px;background:#fff7e6;border:1px solid #f5a623;color:#7a4b00;font-size:12px;line-height:1.6;text-align:left';
+      d.innerHTML = '⚠ 你現在是在 App 內建瀏覽器，Google 不允許在這裡登入（會變空白頁）。<br>請點右上角「⋯」選<b>「在外部瀏覽器開啟」</b>，或複製網址到 Safari / Chrome 再登入。';
+      var row = document.createElement('div'); row.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;margin-top:8px';
+      var bs = 'padding:6px 10px;border:none;border-radius:6px;background:#f5a623;color:#fff;font-size:12px;font-weight:700;cursor:pointer';
+      var c = document.createElement('button'); c.type='button'; c.style.cssText=bs; c.textContent='複製網址';
+      c.onclick = function(){ copyUrl(c); }; row.appendChild(c);
+      if(isAndroid || isLine){
+        var o = document.createElement('button'); o.type='button'; o.style.cssText=bs; o.textContent = isAndroid && !isLine ? '用 Chrome 開啟' : '用外部瀏覽器開啟';
+        o.onclick = function(){
+          if(isLine){ var u = new URL(location.href); u.searchParams.set('openExternalBrowser','1'); location.href = u.toString(); }
+          else { location.href = 'intent://' + location.host + location.pathname + location.search + '#Intent;scheme=https;package=com.android.chrome;end'; }
+        };
+        row.appendChild(o);
+      }
+      d.appendChild(row);
+      g.parentNode.insertBefore(d, g);
+    });
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', add); else add();
+})();
+</script>
 <script src="https://accounts.google.com/gsi/client" async onload="_initGoogleSignInLanding()"></script>
 <script>
 const GOOGLE_CLIENT_ID_LANDING = '584257110691-jtn1tf282q4vsfn7c7vhp9c12m6ino1n.apps.googleusercontent.com';
