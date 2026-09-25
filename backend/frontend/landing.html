@@ -1247,44 +1247,86 @@ document.querySelectorAll('.reveal,.step,.faq-item,.price-card').forEach(el=>obs
 }
 </script>
 
-<!-- 2026/09/25新增：IG／FB／Threads／LINE／TikTok 等 App 內建瀏覽器裡，Google 規定不准登入（disallowed_useragent），
-     按 Google 登入會跳出空白頁。偵測到內建瀏覽器時，在 Google 按鈕上方提示改用 Safari／Chrome 開啟。一般瀏覽器完全不受影響。 -->
+<!-- 2026/09/25：IG／FB／Threads／LINE／TikTok 等 App 內建瀏覽器裡，Google 規定不准登入（disallowed_useragent），按了會空白頁。
+     做法：Google 按鈕照樣顯示，但在內建瀏覽器裡按下去 → 直接跳到 Safari（iPhone）/ Chrome（Android）/ 外部瀏覽器（LINE），
+     並帶 ?login=1 讓跳過去後自動打開登入視窗，客人再按一次 Google 就能登入。跳不過去時才顯示提示＋複製網址。
+     一般瀏覽器完全不受影響。 -->
 <script>
 (function(){
   var ua = navigator.userAgent || '';
-  if(!/Instagram|FBAN|FBAV|FB_IAB|FBIOS|Barcelona|Threads|Line\/|MicroMessenger|musical_ly|BytedanceWebview|TikTok/i.test(ua)) return;
-  var isAndroid = /Android/i.test(ua), isLine = /Line\//i.test(ua);
-  function copyUrl(b){
-    var u = location.href;
-    function ok(){ b.textContent = '已複製 ✓ 貼到 Safari / Chrome 開啟'; }
-    try{ navigator.clipboard.writeText(u).then(ok, fb); }catch(e){ fb(); }
-    function fb(){ try{ var t=document.createElement('textarea'); t.value=u; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); ok(); }catch(e){} }
+  var isIOS = /iPhone|iPad|iPod/i.test(ua), isAndroid = /Android/i.test(ua), isLine = /Line\//i.test(ua);
+  // 除了App名稱，也用「iOS上UA沒有Safari/」「Android UA有; wv)」判斷內建瀏覽器（真正的Safari/Chrome都有Safari/字樣）
+  var inApp = /Instagram|FBAN|FBAV|FB_IAB|FBIOS|Barcelona|Threads|Line\/|MicroMessenger|musical_ly|BytedanceWebview|TikTok/i.test(ua)
+    || (isIOS && !/Safari\//.test(ua)) || (isAndroid && /; wv\)/.test(ua));
+  // 加到主畫面的網頁App（iOS standalone）UA也沒有Safari/，但不是內建瀏覽器，要排除
+  try{ if(navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches) inApp = false; }catch(e){}
+  if(!inApp){
+    try{
+      var qp = new URLSearchParams(location.search);
+      if(qp.has('login') || qp.has('openExternalBrowser')){
+        qp.delete('login'); qp.delete('openExternalBrowser');
+        var qs = qp.toString();
+        history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
+      }
+    }catch(e){}
+    return;
   }
-  function add(){
+
+  function targetUrl(){
+    var u = new URL(location.href);
+    u.searchParams.set('login', '1');
+    if(isLine) u.searchParams.set('openExternalBrowser', '1');
+    return u.toString();
+  }
+  function openExternal(){
+    var u = targetUrl();
+    if(isLine) location.href = u;
+    else if(isIOS) location.href = 'x-safari-' + u;
+    else if(isAndroid) location.href = 'intent://' + u.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end';
+    // 1.5秒後若還在這頁（跳轉失敗），顯示提示讓客人手動開
+    setTimeout(showWarn, 1500);
+  }
+  function copyUrl(b){
+    var u = location.href.split('?')[0] + '?login=1';
+    function ok(){ b.textContent = '已複製 ✓ 貼到 Safari / Chrome 開啟'; }
+    function fb(){ try{ var t=document.createElement('textarea'); t.value=u; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); ok(); }catch(e){} }
+    try{ navigator.clipboard.writeText(u).then(ok, fb); }catch(e){ fb(); }
+  }
+  function showWarn(){
     ['googleSignInBtn','googleSignInBtnReg'].forEach(function(id){
       var g = document.getElementById(id);
-      if(!g || (g.previousElementSibling && g.previousElementSibling.className === 'iab-warn')) return;
+      if(!g) return;
       var d = document.createElement('div');
       d.className = 'iab-warn';
-      d.style.cssText = 'max-width:300px;margin:4px auto 8px;padding:10px 12px;border-radius:8px;background:#fff7e6;border:1px solid #f5a623;color:#7a4b00;font-size:12px;line-height:1.6;text-align:left';
-      d.innerHTML = '⚠ 你現在是在 App 內建瀏覽器，Google 不允許在這裡登入（會變空白頁）。<br>請點右上角「⋯」選<b>「在外部瀏覽器開啟」</b>，或複製網址到 Safari / Chrome 再登入。';
-      var row = document.createElement('div'); row.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;margin-top:8px';
-      var bs = 'padding:6px 10px;border:none;border-radius:6px;background:#f5a623;color:#fff;font-size:12px;font-weight:700;cursor:pointer';
-      var c = document.createElement('button'); c.type='button'; c.style.cssText=bs; c.textContent='複製網址';
-      c.onclick = function(){ copyUrl(c); }; row.appendChild(c);
-      if(isAndroid || isLine){
-        var o = document.createElement('button'); o.type='button'; o.style.cssText=bs; o.textContent = isAndroid && !isLine ? '用 Chrome 開啟' : '用外部瀏覽器開啟';
-        o.onclick = function(){
-          if(isLine){ var u = new URL(location.href); u.searchParams.set('openExternalBrowser','1'); location.href = u.toString(); }
-          else { location.href = 'intent://' + location.host + location.pathname + location.search + '#Intent;scheme=https;package=com.android.chrome;end'; }
-        };
-        row.appendChild(o);
-      }
-      d.appendChild(row);
-      g.parentNode.insertBefore(d, g);
+      d.style.cssText = 'max-width:300px;margin:8px auto;padding:10px 12px;border-radius:8px;background:#fff7e6;border:1px solid #f5a623;color:#7a4b00;font-size:12px;line-height:1.6;text-align:left';
+      d.innerHTML = '沒有自動跳出去的話：請點右上角「⋯」選<b>「在外部瀏覽器開啟」</b>，或複製網址貼到 Safari / Chrome，再用 Google 登入。';
+      var c = document.createElement('button'); c.type='button';
+      c.style.cssText = 'margin-top:8px;padding:6px 10px;border:none;border-radius:6px;background:#f5a623;color:#fff;font-size:12px;font-weight:700;cursor:pointer';
+      c.textContent = '複製網址'; c.onclick = function(){ copyUrl(c); };
+      d.appendChild(c);
+      var host = g.getAttribute('data-iab') === '1' ? g.parentNode : g;
+      if(host.nextElementSibling && host.nextElementSibling.className === 'iab-warn') return;
+      host.parentNode.insertBefore(d, host.nextSibling);
     });
   }
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', add); else add();
+  // 在Google按鈕上蓋一層透明的點擊層：看起來還是原本的Google按鈕，按下去改成跳外部瀏覽器
+  function cover(){
+    ['googleSignInBtn','googleSignInBtnReg'].forEach(function(id){
+      var g = document.getElementById(id);
+      if(!g || g.getAttribute('data-iab') === '1') return;
+      g.setAttribute('data-iab', '1');
+      // 用外層包起來再蓋點擊層（不能直接塞進Google按鈕容器，否則renderButton會以為已經畫過而跳過）
+      var w = document.createElement('div');
+      w.style.cssText = 'position:relative';
+      g.parentNode.insertBefore(w, g);
+      w.appendChild(g);
+      var o = document.createElement('div');
+      o.style.cssText = 'position:absolute;inset:0;z-index:5;cursor:pointer;background:transparent';
+      o.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); openExternal(); });
+      w.appendChild(o);
+    });
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', cover); else cover();
 })();
 </script>
 <script src="https://accounts.google.com/gsi/client" async onload="_initGoogleSignInLanding()"></script>
