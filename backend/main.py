@@ -2979,7 +2979,9 @@ def detect_gann_recross(closes, highs, lows, volumes, ma_period=20, max_bars=2):
         if closes[i - 1] < ma[i - 1] and closes[i] > ma[i]:
             trigger_b1 = i
             break
-    if trigger_b1 is not None and (n - 1 - trigger_b1) <= max_bars:
+    # 2026/09/26：與賣點對稱——觸發後又跌回均線下方，買訊就失效
+    still_above = closes[-1] > curr_ma
+    if trigger_b1 is not None and (n - 1 - trigger_b1) <= max_bars and still_above:
         # T5: 站回均線當天量能過濾
         _avg_vol_20 = float(np.mean(volumes[max(0,trigger_b1-20):trigger_b1])) if trigger_b1 > 0 else 1
         _trigger_vol = float(volumes[trigger_b1])
@@ -3000,7 +3002,7 @@ def detect_gann_recross(closes, highs, lows, volumes, ma_period=20, max_bars=2):
             if not np.isnan(ma[i - 1]) and closes[i - 1] > ma[i - 1]:
                 trigger_b2 = i
                 break
-    if trigger_b2 is not None and (n - 1 - trigger_b2) <= max_bars:
+    if trigger_b2 is not None and (n - 1 - trigger_b2) <= max_bars and still_above:
         return True, round(float(curr_ma), 2), name, stop, "多方2（回測未跌破）"
 
     # ── 買3：連續在均線上方，最近低點接近均線後止跌 ──
@@ -3076,7 +3078,9 @@ def detect_gann_sell(closes, highs, lows, volumes, ma_period=20, max_bars=2):
         if closes[i - 1] > ma[i - 1] and closes[i] < ma[i]:
             trigger_s5 = i
             break
-    if trigger_s5 is not None and (n - 1 - trigger_s5) <= max_bars and ma_slope_down:
+    # 2026/09/26：加「最新收盤仍在均線下方」——觸發後 1~2 根內已站回均線，賣訊就失效（6139 亞翔 09/24 案例）
+    still_below = closes[-1] < curr_ma
+    if trigger_s5 is not None and (n - 1 - trigger_s5) <= max_bars and ma_slope_down and still_below:
         # 跌破當天量能：帶量下跌更需警惕
         _avg_vol_20 = float(np.mean(volumes[max(0,trigger_s5-20):trigger_s5])) if trigger_s5 > 0 else 1
         _trigger_vol = float(volumes[trigger_s5])
@@ -3096,7 +3100,7 @@ def detect_gann_sell(closes, highs, lows, volumes, ma_period=20, max_bars=2):
             if not np.isnan(ma[i - 1]) and closes[i - 1] < ma[i - 1]:
                 trigger_s6 = i
                 break
-    if trigger_s6 is not None and (n - 1 - trigger_s6) <= max_bars:
+    if trigger_s6 is not None and (n - 1 - trigger_s6) <= max_bars and still_below:
         return True, round(float(curr_ma), 2), name, "空方6（反彈觸及均線後回落）", False
 
     # ── 賣7：連續在均線下方，最近高點接近均線後受阻下跌 ──
@@ -4208,7 +4212,10 @@ def get_kline(stock_id: str, tf: str = "D", user: dict | None = Depends(get_curr
     if tf.upper() == "D" and records:
         from zoneinfo import ZoneInfo as _ZI
         _tw_today = datetime.now(_ZI("Asia/Taipei")).strftime("%Y-%m-%d")
-        if records[-1]["date"] != _tw_today:
+        # 2026/09/26：週末／國定休市不補今日K棒——報價來源在休市日回傳的是上一個交易日的數字，
+        # 原本會被標成「今天」再多畫一根一模一樣的K棒（6139 亞翔：09/26 週六多出一根 = 09/24）
+        _is_weekday = datetime.now(_ZI("Asia/Taipei")).weekday() < 5
+        if records[-1]["date"] != _tw_today and _is_weekday:
             _code = stock_id.strip().upper().replace(".TW", "").replace(".TWO", "")
             _q = _get_live_quote_data(_code)
             if _q:
@@ -4217,13 +4224,17 @@ def get_kline(stock_id: str, tf: str = "D", user: dict | None = Depends(get_curr
                 _h = _q.get("high") or _c
                 _l = _q.get("low") or _c
                 _v = _q.get("volume") or 0
-                if _c:
+                _last = records[-1]
+                # 平日休市（颱風假等）或開盤前：報價跟最後一根完全相同 → 是舊資料，不補
+                _same_as_last = (_c == _last.get("close") and _o == _last.get("open")
+                                 and _h == _last.get("high") and _l == _last.get("low"))
+                if _c and not _same_as_last:
                     records.append({
                         "date": _tw_today,
                         "open": _o, "high": _h, "low": _l, "close": _c,
                         "volume": int(_v) if _v else 0,
                     })
-                else:
+                elif not _c:
                     chart_note = "今日K棒資料更新中，稍後重新整理即可看到"
             else:
                 # 2026/07/30：三層報價來源同時暫時失敗時，不再讓圖表悄悄停留在昨天，改為明確告知前端
@@ -7661,6 +7672,36 @@ def detect_kbar_pattern(opens, highs, lows, closes, volumes=None):
         patterns.append("三烏鴉（強勢空頭延續）")
         warnings.append("出現三烏鴉，空頭趨勢強，明天若再收黑持續下跌壓力")
 
+    # ── 均線／整理區的轉強轉弱（2026/09/26 帥哥鴻：連紅站回月線、突破整理區要算「轉強」）──
+    # 只用收盤判斷，跟 K 棒形狀型態並列顯示；月線＝20 日均線，整理區＝前 3～8 根高低差 ≤ 5%
+    _cl = [float(x) for x in closes]
+    if n >= 22:
+        _ma = lambda k: sum(_cl[n - k - 20:n - k]) / 20          # k=0 今天、1 昨天…
+        _m0 = _ma(0)
+        _up_cross = any(_cl[n - 1 - k] > _ma(k) and _cl[n - 2 - k] <= _ma(k + 1) for k in (0, 1))
+        _dn_cross = any(_cl[n - 1 - k] < _ma(k) and _cl[n - 2 - k] >= _ma(k + 1) for k in (0, 1))
+        if _up_cross and c1 > _m0:
+            patterns.append("站回月線（轉強）")
+            warnings.append("收盤站回月線，若接下來收盤都守在月線之上，轉強條件維持")
+        elif _dn_cross and c1 < _m0:
+            patterns.append("跌破月線（轉弱）")
+            warnings.append("收盤跌破月線，若接下來無法站回月線，轉弱條件維持")
+    _box = None
+    for _m in range(8, 2, -1):
+        if n >= _m + 1:
+            _bh = max(float(x) for x in highs[-_m - 1:-1])
+            _bl = min(float(x) for x in lows[-_m - 1:-1])
+            if _bl > 0 and (_bh - _bl) / _bl <= 0.05:
+                _box = (_m, _bh, _bl)
+                break
+    if _box:
+        if c1 > _box[1]:
+            patterns.append(f"突破整理區（轉強，前 {_box[0]} 根整理）")
+            warnings.append(f"收盤突破前 {_box[0]} 根整理區高點 {round(_box[1], 2)}，若回測不跌回整理區，轉強條件維持")
+        elif c1 < _box[2]:
+            patterns.append(f"跌破整理區（轉弱，前 {_box[0]} 根整理）")
+            warnings.append(f"收盤跌破前 {_box[0]} 根整理區低點 {round(_box[2], 2)}，若無法收回整理區，轉弱條件維持")
+
     # 預警：今天+明天可能形成的型態
     if not patterns:
         # 今天是大黑棒，若明天開高收在中段以上 → 穿刺線
@@ -7680,8 +7721,8 @@ def detect_kbar_pattern(opens, highs, lows, closes, volumes=None):
     warning_str = warnings[0] if warnings else ""
 
     # 方向標記（供前端配色用）
-    bullish_keys = ["錘頭","多頭吞噬","早晨之星","三紅兵","穿刺線","大紅棒","頭肩底","W底","漲停","長下影紅K"]
-    bearish_keys = ["射擊之星","空頭吞噬","黃昏之星","三烏鴉","烏雲蓋頂","大黑棒","頭肩頂","M頭","跌停","長上影黑K"]
+    bullish_keys = ["錘頭","多頭吞噬","早晨之星","三紅兵","穿刺線","大紅棒","頭肩底","W底","漲停","長下影紅K","轉強"]
+    bearish_keys = ["射擊之星","空頭吞噬","黃昏之星","三烏鴉","烏雲蓋頂","大黑棒","頭肩頂","M頭","跌停","長上影黑K","轉弱"]
     kbar_dir = "bullish" if any(k in pattern_str for k in bullish_keys) \
                else "bearish" if any(k in pattern_str for k in bearish_keys) \
                else "neutral"
@@ -10031,7 +10072,7 @@ def _inject_report_ads(html: str) -> str:
 # report_generate 靠這個標記判斷 stock_reports 裡的快取是不是舊模板產生的，
 # 是的話強制重新產生，不然光改版面/文案，使用者會一直看到卡住的舊快取（直到當天
 # 收盤基準換了才會被上面的 price_basis_date 檢查順便救回來，不夠即時）。
-_REPORT_TPL_VERSION = "v2026-09-20-names"
+_REPORT_TPL_VERSION = "v2026-09-26-ms"
 # 2026/09/14修正（案件003驗收時發現）：上面這個版本標記在08/07之後就沒再更新過，但
 # 09/14這輪其實已經改了.stat-hint解說文字的CSS（字級/顏色/拿掉斜體，見_build_report_html
 # 內文字說明），忘記同步把版本標記跟著往前推——結果部署後、當天已經被瀏覽過而快取進
@@ -14349,6 +14390,10 @@ VERDICT_TEXT = {
     "head_bull_caution": "{name}偏多條件較多，同時有 {bear} 項偏空條件，其中權重最高的是：{top_problem}。",
     "head_neutral": "{name}偏多條件 {bull} 項、偏空條件 {bear} 項，數量接近；觀察收盤突破壓力區（{resistance}）或跌破支撐區（{support}）。",
     "head_bear": "{name}目前符合 {bear} 項偏空條件、{bull} 項偏多條件，偏空條件較多；止跌類條件尚未出現。",
+    "head_ms": "{name}的12金叉：今天 {today} 項剛轉強、{active} 項持續轉強中（共 12 項）{tail}。",
+    "ms_tail_none": "，目前沒有轉強條件出現",
+    "ms_tail_wait": "，但{wait_reason}",
+    "ms_tail_trend_down": "，整體高低點結構仍屬下降趨勢，轉強條件需收盤守住支撐區（{support}）",
     "ms_part_many": "今天12金叉有{n}項同時轉強，",
     "ms_part_some": "今天12金叉有{n}項轉強，",
     "wait_near_res": "距離壓力區（{resistance}）只剩 {res_pct}%",
@@ -14422,6 +14467,8 @@ VERDICT_TEXT = {
     "sc_neutral_down": "收盤跌破支撐區（{support}） → 偏空條件增加",
     "sc_bear_up": "收盤站回月線以上 → 出現止跌類條件",
     "sc_bear_down": "繼續跌破支撐區（{support}） → 偏空條件延續，下一個支撐需重新確認",
+    "sc_ms_down": "收盤跌破支撐區（{support}） → 這批轉強條件失效",
+    "sc_ms_none_down": "收盤跌破支撐區（{support}） → 目前型態失效，下一個支撐需重新確認",
 
     # 觀察重點（2026/09/17 案件008：原「操作參考」，改成只寫條件與失效位置，不寫買賣動作；key 名稱沿用）
     "act_bull": "偏多條件維持中；觀察支撐區（{support}）是否守住，上方為壓力區（{resistance}）",
@@ -14429,6 +14476,9 @@ VERDICT_TEXT = {
     "act_bull_caution": "偏多條件較多但互相分歧；收盤跌破支撐區（{support}）代表這批轉強條件失效",
     "act_neutral": "方向未明；觀察收盤突破壓力區（{resistance}）或跌破支撐區（{support}）的方向",
     "act_bear": "偏空條件較多；觀察止跌條件是否出現，收盤跌破支撐區（{support}）代表偏空條件延續",
+    "act_ms_today": "觀察收盤能否守住支撐區（{support}），上方為壓力區（{resistance}）；跌破支撐區代表這批轉強條件失效",
+    "act_ms_active": "轉強條件維持中；觀察支撐區（{support}）是否守住，上方為壓力區（{resistance}）",
+    "act_ms_none": "觀察是否出現轉強條件（例如收盤站回月線）；收盤跌破支撐區（{support}）代表目前型態失效",
 }
 
 
@@ -14454,6 +14504,9 @@ VERDICT_EDU = {
     "head_bull_caution": "偏多條件較多，但偏空條件也不少。下面列出的偏空條件，就是目前互相牴觸的部分。",
     "head_neutral": "偏多與偏空條件數量接近，代表不同指標目前給出的訊號不一致。技術分析中，這種情況通常要等收盤突破壓力或跌破支撐，條件才會明確偏向一邊。",
     "head_bear": "偏空條件明顯多於偏多條件。技術分析中，常見的止跌觀察條件是股價重新站回月線、或出現止跌型態的 K 棒。",
+    "head_ms_today": "12金叉是 12 種常見的轉強條件，這裡只統計「今天剛轉強」和「前幾天出現、目前仍維持」各有幾項。項數是對目前資料的整理，不代表之後的漲跌；條件出現後，收盤守不住支撐區，這批條件就失效。",
+    "head_ms_active": "12金叉是 12 種常見的轉強條件。「持續轉強中」是前幾天出現、目前仍維持的條件；今天沒有新增。項數是對目前資料的整理，不代表之後的漲跌。",
+    "head_ms_none": "12金叉是 12 種常見的轉強條件，目前一項都沒有出現。技術分析中，常見的觀察條件是股價重新站回月線、或出現止跌型態的 K 棒。",
     # 觀察重點
     "action": "「觀察重點」整理的是接下來要看的條件，而不是要做的動作。多數條件都以收盤價確認，因為盤中價格常常短暫穿過關鍵價位又回來（假突破、假跌破）。",
     # 現在的狀況
@@ -14863,6 +14916,28 @@ def _build_verdict(r: dict, ms: list | None) -> dict:
         stance, label, level = "neutral", "條件分歧・方向未明", "watch"
         headline = _vt("head_neutral", **kv2)
 
+    # 2026/09/26 帥哥鴻定案：標題、一句話結論、觀察重點統一用「12金釵」的說法
+    # （原本標題寫「偏空條件較多」、同一頁 12 金釵卻寫「轉強」，兩套口徑互相打架）。
+    # 上面的偏多／偏空條件仍保留在下方「理由」清單，只是不再拿來當標題。
+    if ms_s.get("available"):
+        _t = int(ms_s.get("today_count") or 0)
+        _a = int(ms_s.get("active_count") or 0)
+        if _t >= 1:
+            stance, label, level = "ms_today", f"12金叉 {_t}項剛轉強", "low"
+        elif _a >= 1:
+            stance, label, level = "ms_active", f"12金叉 {_a}項轉強中", "medium"
+        else:
+            stance, label, level = "ms_none", "12金叉 尚無轉強", "watch"
+        if stance == "ms_none":
+            _tail = _vt("ms_tail_none", **kv)
+        elif wait_reason:
+            _tail = _vt("ms_tail_wait", wait_reason=wait_reason)
+        elif trend == "下降趨勢":
+            _tail = _vt("ms_tail_trend_down", **kv)
+        else:
+            _tail = ""
+        headline = _vt("head_ms", **kv2, today=_t, active=_a, tail=_tail)
+
     # ── 現在的狀況 ──
     pos = None
     if support and resistance and resistance > support and price:
@@ -14909,7 +14984,11 @@ def _build_verdict(r: dict, ms: list | None) -> dict:
             _LV("lv_neck", ptype=ex.get("type", ""), v=ex["neckline"])
 
     # ── 情境 ──
-    if stance.startswith("bull"):
+    if stance in ("ms_today", "ms_active"):
+        scenarios = [_vt("sc_bull_up", **kv), _vt("sc_ms_down", **kv)]
+    elif stance == "ms_none":
+        scenarios = [_vt("sc_bear_up", **kv) if ma20 else _vt("sc_neutral_up", **kv), _vt("sc_ms_none_down", **kv)]
+    elif stance.startswith("bull"):
         scenarios = [_vt("sc_bull_up", **kv), _vt("sc_bull_down", **kv)]
     elif stance == "bear":
         scenarios = [_vt("sc_bear_up", **kv) if ma20 else _vt("sc_neutral_up", **kv), _vt("sc_bear_down", **kv)]
