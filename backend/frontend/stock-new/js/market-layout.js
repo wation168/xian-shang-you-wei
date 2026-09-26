@@ -44,7 +44,7 @@ function solve({groups,maxScores={},width,mobile=false,clusterShares={},maxHeigh
  let result=bestPack();
  // Mobile order: compact rows, shrink to the 6px minimum, then remove only
  // non-focus clusters as a last resort. Required label room is never discarded; the galaxy stays nonempty.
- if(mobile&&!expanded){while(result.height>budget()){if(scale>.11)scale=Math.max(.1,scale-.05);else {const removable=full.filter(c=>!focusClusters.includes(c.id)).at(-1);if(!removable||full.length===1)break;full=full.filter(c=>c!==removable)}result=bestPack()}}
+ if(mobile&&!expanded){while(result.height>budget()){const removable=full.filter(c=>!focusClusters.includes(c.id)).at(-1);/* 2026/09/26：先縮到約一半（最大球約 16px），還放不下就先把非焦點星團收進下方小列，最後才繼續縮到 6px，避免手機星球全部變成小點 */if(scale>.46)scale=Math.max(.45,scale-.05);else if(removable&&full.length>1)full=full.filter(c=>c!==removable);else if(scale>.11)scale=Math.max(.1,scale-.05);else break;result=bestPack()}}
  if(result.height===Infinity)result=pack(full);
  return {...result,stripColumns,strip:all.filter(c=>!full.includes(c)).map(c=>({clusterId:c.id,name:c.name})),fullClusters:full.map(c=>c.id)};
 }

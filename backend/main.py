@@ -751,9 +751,20 @@ def api_app_version():
 
 @app.get("/stock", include_in_schema=False)
 @app.get("/stock/", include_in_schema=False)
-async def serve_stock_app():
+async def serve_stock_app(request: Request):
+    """2026/09/26 帥哥鴻拍板：首頁直接切到新版「市場星系」（案件016）。
+    - 網址不帶任何參數（/stock/、App 圖示、Email 按鈕）→ 新版首頁
+    - 帶參數（?stock=、?page=、?login=、?line_token=、?pay=、?promo=、?old=1 …）→ 舊版，
+      所有舊功能、登入、付款回跳、LINE 通知連結都照舊
+    - 要整個切回舊版：把 _STOCK_HOME_NEW 改成 False 再部署"""
     from fastapi.responses import FileResponse
+    new_home = os.path.join(_FRONTEND_DIR, "stock-new", "index.html")
+    if _STOCK_HOME_NEW and not request.query_params and os.path.isfile(new_home):
+        return FileResponse(new_home)
     return FileResponse(os.path.join(_FRONTEND_DIR, "index.html"))
+
+
+_STOCK_HOME_NEW = True   # 新版首頁開關（False＝/stock/ 回到舊首頁）
 
 try:
     from quiz.main import app as _quiz_app
