@@ -751,6 +751,7 @@ def api_app_version():
 
 @app.get("/stock", include_in_schema=False)
 @app.get("/stock/", include_in_schema=False)
+@app.get("/index.html", include_in_schema=False)   # 2026/09/26：早期安裝的「線上有位」App 開的是 /index.html
 async def serve_stock_app(request: Request):
     """2026/09/26 帥哥鴻拍板：首頁直接切到新版「市場星系」（案件016）。
     - 網址不帶任何參數（/stock/、App 圖示、Email 按鈕）→ 新版首頁
