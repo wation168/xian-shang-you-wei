@@ -1543,6 +1543,7 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
     </div>
     <div id="topNavLinks" style="display:flex;gap:6px;align-items:center">
       <a href="/" style="font-size:11px;color:var(--text3);text-decoration:none;padding:4px 8px;border-radius:6px;border:.5px solid var(--border2);white-space:nowrap">首頁</a>
+      <a href="/stock/" style="font-size:11px;color:var(--green);text-decoration:none;padding:4px 8px;border-radius:6px;border:.5px solid var(--green);white-space:nowrap">🌌 市場星系</a>
       <a href="/tools/" style="font-size:11px;color:var(--text3);text-decoration:none;padding:4px 8px;border-radius:6px;border:.5px solid var(--border2);white-space:nowrap">工具</a>
       <a href="/blog/" style="font-size:11px;color:var(--text3);text-decoration:none;padding:4px 8px;border-radius:6px;border:.5px solid var(--border2);white-space:nowrap">文章</a>
       <a href="/stock/landing" id="topIntroBtn" style="font-size:11px;color:var(--text3);text-decoration:none;padding:4px 8px;border-radius:6px;border:.5px solid var(--border2);white-space:nowrap">介紹頁</a>
@@ -2410,6 +2411,9 @@ setTimeout(function(){var s=document.createElement('script');s.src='https://page
 
 <!-- 底部導航 -->
 <div class="bottom-nav">
+  <button class="nav-btn" onclick="location.href='/stock/'">
+    <div class="nav-icon">🌌</div>市場
+  </button>
   <button class="nav-btn active" onclick="showPage('home')">
     <div class="nav-icon">📊</div>個股查詢
   </button>
@@ -2725,7 +2729,8 @@ let _curPage = 'home';
 function showPage(page){
   _curPage = page;
   _ev('view_page', {page: page});
-  document.querySelectorAll('.nav-btn').forEach((b,i)=>b.classList.toggle('active',['home','watch','picks','forum','my'][i]===page));
+  // 2026/09/26：底部導覽最前面多了「市場」（回新版星系首頁），改用按鈕自己的 showPage 目標判斷，不再靠位置順序
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',(b.getAttribute('onclick')||'').indexOf("showPage('"+page+"')")>=0));
   const overlay=document.getElementById('pageOverlay');
   if(page==='home'){
     overlay.style.display='none';
